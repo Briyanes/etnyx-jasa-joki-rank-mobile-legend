@@ -10,6 +10,8 @@ import {
   TrustSection,
   FAQSection,
 } from "@/components";
+import Testimonials from "@/components/Testimonials";
+import Portfolio from "@/components/Portfolio";
 
 export default function Home() {
   return (
@@ -20,6 +22,8 @@ export default function Home() {
         <HeroSection />
         <CalculatorSection />
         <PricingSection />
+        <Testimonials />
+        <Portfolio />
         <TrackingSection />
         <HowItWorksSection />
         <TrustSection />

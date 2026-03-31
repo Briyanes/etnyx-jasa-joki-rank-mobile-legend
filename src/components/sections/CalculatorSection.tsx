@@ -10,9 +10,52 @@ export default function CalculatorSection() {
   const [targetRank, setTargetRank] = useState<RankTier>("mythic");
   const [isExpress, setIsExpress] = useState(false);
   const [isPremium, setIsPremium] = useState(false);
+  const [promoCode, setPromoCode] = useState("");
+  const [promoDiscount, setPromoDiscount] = useState(0);
+  const [promoMessage, setPromoMessage] = useState("");
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [promoApplied, setPromoApplied] = useState(false);
 
-  const price = calculatePrice(currentRank, targetRank, isExpress, isPremium);
+  const basePrice = calculatePrice(currentRank, targetRank, isExpress, isPremium);
+  const price = Math.max(0, basePrice - promoDiscount);
   const isValidProgression = isValidRankProgression(currentRank, targetRank);
+
+  const applyPromo = useCallback(async () => {
+    if (!promoCode.trim()) return;
+    
+    setPromoLoading(true);
+    setPromoMessage("");
+    
+    try {
+      const res = await fetch("/api/promo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: promoCode, orderAmount: basePrice }),
+      });
+      const data = await res.json();
+      
+      if (data.valid) {
+        setPromoDiscount(data.calculatedDiscount);
+        setPromoApplied(true);
+        setPromoMessage(`✓ ${data.message} - Hemat ${formatRupiah(data.calculatedDiscount)}`);
+      } else {
+        setPromoDiscount(0);
+        setPromoApplied(false);
+        setPromoMessage(data.message || "Kode promo tidak valid");
+      }
+    } catch {
+      setPromoMessage("Gagal memvalidasi promo");
+    } finally {
+      setPromoLoading(false);
+    }
+  }, [promoCode, basePrice]);
+
+  const removePromo = useCallback(() => {
+    setPromoCode("");
+    setPromoDiscount(0);
+    setPromoApplied(false);
+    setPromoMessage("");
+  }, []);
 
   const handleCurrentRankChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value as RankTier;
@@ -25,9 +68,10 @@ export default function CalculatorSection() {
   }, []);
 
   const handleOrder = useCallback(() => {
-    const packageDetails = `Calculator - ${rankOptions.find(r => r.value === currentRank)?.label} → ${rankOptions.find(r => r.value === targetRank)?.label}${isExpress ? " (Express)" : ""}${isPremium ? " (Premium)" : ""} - ${formatRupiah(price)}`;
+    const promoText = promoApplied ? ` (Promo: ${promoCode} - Diskon ${formatRupiah(promoDiscount)})` : "";
+    const packageDetails = `Calculator - ${rankOptions.find(r => r.value === currentRank)?.label} → ${rankOptions.find(r => r.value === targetRank)?.label}${isExpress ? " (Express)" : ""}${isPremium ? " (Premium)" : ""}${promoText} - ${formatRupiah(price)}`;
     window.open(createWhatsAppUrl(packageDetails), "_blank", "noopener,noreferrer");
-  }, [currentRank, targetRank, isExpress, isPremium, price]);
+  }, [currentRank, targetRank, isExpress, isPremium, price, promoApplied, promoCode, promoDiscount]);
 
   return (
     <section id="calculator" className="py-20 px-4">
@@ -104,7 +148,7 @@ export default function CalculatorSection() {
           </div>
 
           {/* Add-ons */}
-          <div className="flex flex-wrap gap-4 mb-8">
+          <div className="flex flex-wrap gap-4 mb-6">
             <label className="flex items-center gap-3 bg-background/50 px-5 py-4 rounded-xl cursor-pointer hover:bg-background transition-colors border border-transparent hover:border-white/10">
               <input
                 type="checkbox"
@@ -132,13 +176,63 @@ export default function CalculatorSection() {
             </label>
           </div>
 
+          {/* Promo Code */}
+          <div className="mb-8">
+            <label className="block text-sm text-text-muted mb-3 font-medium">
+              Kode Promo
+            </label>
+            <div className="flex gap-3">
+              <input
+                type="text"
+                value={promoCode}
+                onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                placeholder="Masukkan kode promo"
+                disabled={promoApplied}
+                className="flex-1 bg-background border border-white/10 rounded-xl px-4 py-3 text-text focus:border-accent focus:outline-none transition-colors disabled:opacity-50"
+              />
+              {promoApplied ? (
+                <button
+                  onClick={removePromo}
+                  className="px-6 py-3 bg-red-500/20 text-red-400 rounded-xl hover:bg-red-500/30 transition-colors font-medium"
+                >
+                  Hapus
+                </button>
+              ) : (
+                <button
+                  onClick={applyPromo}
+                  disabled={promoLoading || !promoCode.trim()}
+                  className="px-6 py-3 bg-accent/20 text-accent rounded-xl hover:bg-accent/30 transition-colors font-medium disabled:opacity-50"
+                >
+                  {promoLoading ? "..." : "Pakai"}
+                </button>
+              )}
+            </div>
+            {promoMessage && (
+              <p className={`mt-2 text-sm ${promoApplied ? "text-green-400" : "text-red-400"}`}>
+                {promoMessage}
+              </p>
+            )}
+          </div>
+
           {/* Price Result */}
           <div className="bg-background rounded-2xl p-6 sm:p-8 text-center mb-6">
             <p className="text-text-muted mb-3">Estimasi Harga</p>
             {isValidProgression ? (
-              <p className="text-4xl sm:text-5xl font-extrabold gradient-text">
-                {formatRupiah(price)}
-              </p>
+              <>
+                {promoDiscount > 0 && (
+                  <p className="text-lg text-text-muted line-through mb-1">
+                    {formatRupiah(basePrice)}
+                  </p>
+                )}
+                <p className="text-4xl sm:text-5xl font-extrabold gradient-text">
+                  {formatRupiah(price)}
+                </p>
+                {promoDiscount > 0 && (
+                  <p className="text-sm text-green-400 mt-2">
+                    Hemat {formatRupiah(promoDiscount)}!
+                  </p>
+                )}
+              </>
             ) : (
               <p className="text-xl text-warning">
                 Target rank harus lebih tinggi dari rank sekarang
