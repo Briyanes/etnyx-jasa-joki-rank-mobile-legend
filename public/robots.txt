@@ -1,0 +1,15 @@
+# robots.txt for ETNYX
+# https://etnyx.vercel.app
+
+User-agent: *
+Allow: /
+
+# Disallow admin/api routes
+Disallow: /api/
+Disallow: /_next/
+
+# Sitemap
+Sitemap: https://etnyx.vercel.app/sitemap.xml
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1

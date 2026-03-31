@@ -1,36 +1,202 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ETNYX - Jasa Joki Mobile Legends
 
-## Getting Started
+Platform jasa joki Mobile Legends dengan konsep SaaS-style dashboard. Modern, cepat, dan aman.
 
-First, run the development server:
+![ETNYX Preview](public/og-image.jpg)
+
+## ✨ Features
+
+- 🎮 **SaaS-style Dashboard** - UI/UX seperti aplikasi modern
+- 🧮 **Real-time Calculator** - Hitung harga instant
+- 📱 **Mobile First** - Responsive untuk semua device
+- 🔒 **Secure** - Security headers, rate limiting, input sanitization
+- 🚀 **Fast** - Optimized dengan Next.js 15
+- 📊 **SEO Ready** - Meta tags lengkap untuk semua platform
+
+## 🛠️ Tech Stack
+
+- **Framework**: Next.js 15 (App Router)
+- **Styling**: Tailwind CSS 4
+- **Language**: TypeScript
+- **Database**: Supabase (optional)
+- **Deployment**: Vercel
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Node.js 18.17 or later
+- npm or yarn
+
+### Installation
 
 ```bash
+# Clone repository
+git clone https://github.com/yourusername/etnyx.git
+cd etnyx
+
+# Install dependencies
+npm install
+
+# Copy environment variables
+cp .env.example .env.local
+
+# Edit .env.local with your values
+# NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+# NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+# NEXT_PUBLIC_WHATSAPP_NUMBER=6281234567890
+# NEXT_PUBLIC_SITE_URL=https://your-domain.com
+
+# Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📁 Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+etnyx/
+├── public/              # Static assets
+│   ├── icons/          # PWA icons
+│   ├── manifest.json   # PWA manifest
+│   └── robots.txt      # SEO robots
+├── src/
+│   ├── app/            # Next.js App Router
+│   │   ├── api/        # API routes
+│   │   ├── layout.tsx  # Root layout with SEO
+│   │   ├── page.tsx    # Home page
+│   │   └── globals.css # Global styles
+│   ├── components/     # React components
+│   │   ├── layout/     # Navbar, Footer, etc
+│   │   └── sections/   # Page sections
+│   ├── lib/            # Utilities & constants
+│   ├── types/          # TypeScript types
+│   └── middleware.ts   # Security middleware
+├── .env.example        # Environment template
+└── next.config.ts      # Next.js config with security headers
+```
 
-## Learn More
+## 🔒 Security Features
 
-To learn more about Next.js, take a look at the following resources:
+- **CSP Headers** - Content Security Policy
+- **Rate Limiting** - 100 requests/minute per IP
+- **Input Sanitization** - DOMPurify for XSS prevention
+- **Suspicious Pattern Blocking** - SQL injection, path traversal
+- **Security Headers** - HSTS, X-Frame-Options, etc
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📦 Deployment to Vercel
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Option 1: Vercel CLI
 
-## Deploy on Vercel
+```bash
+# Install Vercel CLI
+npm i -g vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Deploy
+vercel
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Option 2: Git Integration (Recommended)
+
+1. Push code to GitHub
+2. Go to [vercel.com](https://vercel.com)
+3. Import your repository
+4. Add environment variables
+5. Deploy!
+
+### Environment Variables for Vercel
+
+Add these in Vercel Dashboard → Settings → Environment Variables:
+
+| Variable | Description |
+|----------|-------------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key |
+| `NEXT_PUBLIC_WHATSAPP_NUMBER` | WhatsApp number (62xxx) |
+| `NEXT_PUBLIC_SITE_URL` | Your production URL |
+
+## 🗃️ Supabase Setup (Optional)
+
+1. Create project at [supabase.com](https://supabase.com)
+2. Get URL and anon key from Settings → API
+3. Add to environment variables
+
+### Database Schema (if needed)
+
+```sql
+-- Orders table
+CREATE TABLE orders (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id TEXT UNIQUE NOT NULL,
+  username TEXT,
+  game_id TEXT,
+  current_rank TEXT NOT NULL,
+  target_rank TEXT NOT NULL,
+  package TEXT NOT NULL,
+  price INTEGER NOT NULL,
+  status TEXT DEFAULT 'pending',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Enable RLS
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+```
+
+## 🎨 Customization
+
+### Colors (in globals.css)
+
+```css
+:root {
+  --primary: #7FA8A3;    /* Main brand color */
+  --accent: #2DD4BF;     /* Accent/highlight */
+  --background: #0F1419; /* Dark background */
+  --surface: #151B22;    /* Card background */
+  --text: #E6F1EF;       /* Main text */
+}
+```
+
+### WhatsApp Number
+
+Edit in `.env.local`:
+```
+NEXT_PUBLIC_WHATSAPP_NUMBER=628123456789
+```
+
+## 📊 SEO Checklist
+
+- [x] Meta title & description
+- [x] Open Graph tags
+- [x] Twitter Card tags
+- [x] Schema.org JSON-LD
+- [x] Sitemap.xml
+- [x] Robots.txt
+- [x] Canonical URLs
+- [x] Mobile viewport
+
+## 🧪 Testing
+
+```bash
+# Run ESLint
+npm run lint
+
+# Type check
+npx tsc --noEmit
+
+# Build production
+npm run build
+```
+
+## 📝 License
+
+MIT License - feel free to use for your own projects!
+
+## 🤝 Support
+
+WhatsApp: +62 812-3456-7890
+
+---
+
+Made with ❤️ by ETNYX Team
