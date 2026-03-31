@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
-/* ETNYX Brand Colors */
-:root {
+/* ETNYX Brand Colors - Dark Theme (default) */
+:root,
+[data-theme="dark"] {
   --primary: #7FA8A3;
   --accent: #2DD4BF;
   --background: #0F1419;
@@ -11,6 +12,19 @@
   --success: #22C55E;
   --warning: #F59E0B;
   --error: #EF4444;
+}
+
+/* Light Theme */
+[data-theme="light"] {
+  --primary: #5B8A85;
+  --accent: #14B8A6;
+  --background: #F8FAFC;
+  --surface: #FFFFFF;
+  --text: #1E293B;
+  --text-muted: #64748B;
+  --success: #16A34A;
+  --warning: #D97706;
+  --error: #DC2626;
 }
 
 @theme inline {
@@ -87,6 +101,27 @@ body {
   background: rgba(21, 27, 34, 0.8);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+}
+
+[data-theme="light"] .glass {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+/* Light theme specific overrides */
+[data-theme="light"] .border-white\/5 {
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .border-white\/10 {
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .bg-white\/5 {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="light"] .hover\:bg-white\/5:hover {
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 /* Animations */

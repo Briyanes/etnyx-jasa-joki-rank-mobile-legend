@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import ThemeToggle from "@/components/ThemeToggle";
+import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+import Script from "next/script";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -9,6 +12,7 @@ const inter = Inter({
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.vercel.app";
+const gaId = process.env.NEXT_PUBLIC_GA_ID || "G-XXXXXXXXXX";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -230,7 +234,23 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen bg-background text-text antialiased">
+        {/* Google Analytics */}
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${gaId}');
+          `}
+        </Script>
+        
         {children}
+        <ThemeToggle />
+        <ServiceWorkerRegister />
       </body>
     </html>
   );

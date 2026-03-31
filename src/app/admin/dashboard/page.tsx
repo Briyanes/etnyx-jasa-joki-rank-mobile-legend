@@ -88,7 +88,18 @@ interface Customer {
   created_at: string;
 }
 
-type TabType = "overview" | "orders" | "testimonials" | "portfolio" | "promo" | "customers" | "settings";
+interface Booster {
+  id: string;
+  name: string;
+  whatsapp: string;
+  rank_specialization: string;
+  is_available: boolean;
+  total_orders: number;
+  rating: number;
+  created_at: string;
+}
+
+type TabType = "overview" | "orders" | "boosters" | "testimonials" | "portfolio" | "promo" | "customers" | "settings";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -99,11 +110,12 @@ export default function AdminDashboard() {
   const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
   const [promoCodes, setPromoCodes] = useState<PromoCode[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [boosters, setBoosters] = useState<Booster[]>([]);
   const [chartData, setChartData] = useState<{ date: string; orders: number; revenue: number }[]>([]);
   const [activeTab, setActiveTab] = useState<TabType>("overview");
   const [statusFilter, setStatusFilter] = useState("all");
   const [showModal, setShowModal] = useState<string | null>(null);
-  const [editItem, setEditItem] = useState<Testimonial | Portfolio | PromoCode | null>(null);
+  const [editItem, setEditItem] = useState<Testimonial | Portfolio | PromoCode | Booster | null>(null);
 
   const checkAuth = useCallback(async () => {
     try {
@@ -189,6 +201,20 @@ export default function AdminDashboard() {
     }
   }, []);
 
+  const fetchBoosters = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/boosters");
+      const data = await res.json();
+      setBoosters(data.boosters || []);
+    } catch (error) {
+      console.error("Failed to fetch boosters:", error);
+    }
+  }, []);
+
+  const handleExport = async (type: string) => {
+    window.open(`/api/admin/export?type=${type}`, "_blank");
+  };
+
   useEffect(() => {
     const init = async () => {
       const isAuth = await checkAuth();
@@ -207,8 +233,9 @@ export default function AdminDashboard() {
       else if (activeTab === "portfolio") fetchPortfolios();
       else if (activeTab === "promo") fetchPromoCodes();
       else if (activeTab === "customers") fetchCustomers();
+      else if (activeTab === "boosters") fetchBoosters();
     }
-  }, [activeTab, statusFilter, loading, fetchOrders, fetchTestimonials, fetchPortfolios, fetchPromoCodes, fetchCustomers]);
+  }, [activeTab, statusFilter, loading, fetchOrders, fetchTestimonials, fetchPortfolios, fetchPromoCodes, fetchCustomers, fetchBoosters]);
 
   const handleLogout = async () => {
     await fetch("/api/admin/auth", { method: "DELETE" });
@@ -323,6 +350,37 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleSaveBooster = async (data: Partial<Booster>) => {
+    try {
+      const method = editItem ? "PUT" : "POST";
+      const body = editItem ? { ...data, id: editItem.id } : data;
+      await fetch("/api/admin/boosters", {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      fetchBoosters();
+      setShowModal(null);
+      setEditItem(null);
+    } catch (error) {
+      console.error("Failed to save booster:", error);
+    }
+  };
+
+  const handleDeleteBooster = async (id: string) => {
+    if (!confirm("Hapus booster ini?")) return;
+    try {
+      await fetch("/api/admin/boosters", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      fetchBoosters();
+    } catch (error) {
+      console.error("Failed to delete booster:", error);
+    }
+  };
+
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
       pending: "bg-yellow-500/20 text-yellow-400",
@@ -383,7 +441,7 @@ export default function AdminDashboard() {
       <div className="bg-surface/50 border-b border-white/5">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex gap-4 overflow-x-auto">
-            {(["overview", "orders", "testimonials", "portfolio", "promo", "customers", "settings"] as const).map((tab) => (
+            {(["overview", "orders", "boosters", "testimonials", "portfolio", "promo", "customers", "settings"] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -619,6 +677,56 @@ export default function AdminDashboard() {
           </div>
         )}
 
+        {/* Boosters Tab */}
+        {activeTab === "boosters" && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-bold text-text">Boosters ({boosters.length})</h2>
+              <button
+                onClick={() => { setEditItem(null); setShowModal("booster"); }}
+                className="gradient-primary px-4 py-2 rounded-xl text-white text-sm font-medium"
+              >
+                + Add Booster
+              </button>
+            </div>
+            <div className="bg-surface rounded-2xl border border-white/5 overflow-hidden">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-white/5">
+                    <th className="text-left text-text-muted text-sm font-medium px-4 py-3">Name</th>
+                    <th className="text-left text-text-muted text-sm font-medium px-4 py-3">WhatsApp</th>
+                    <th className="text-left text-text-muted text-sm font-medium px-4 py-3">Specialization</th>
+                    <th className="text-left text-text-muted text-sm font-medium px-4 py-3">Orders</th>
+                    <th className="text-left text-text-muted text-sm font-medium px-4 py-3">Rating</th>
+                    <th className="text-left text-text-muted text-sm font-medium px-4 py-3">Status</th>
+                    <th className="text-left text-text-muted text-sm font-medium px-4 py-3">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {boosters.map((b) => (
+                    <tr key={b.id} className="border-b border-white/5 hover:bg-white/5">
+                      <td className="px-4 py-3 text-text font-medium">{b.name}</td>
+                      <td className="px-4 py-3 text-text-muted text-sm">{b.whatsapp}</td>
+                      <td className="px-4 py-3 text-accent text-sm">{b.rank_specialization}</td>
+                      <td className="px-4 py-3 text-text font-medium">{b.total_orders}</td>
+                      <td className="px-4 py-3 text-yellow-400">{"⭐".repeat(Math.round(b.rating || 5))}</td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2 py-1 rounded text-xs ${b.is_available ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
+                          {b.is_available ? "Available" : "Busy"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <button onClick={() => { setEditItem(b); setShowModal("booster"); }} className="text-accent text-sm mr-2">Edit</button>
+                        <button onClick={() => handleDeleteBooster(b.id)} className="text-red-400 text-sm">Delete</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
         {/* Settings Tab */}
         {activeTab === "settings" && (
           <div className="max-w-2xl space-y-6">
@@ -653,6 +761,17 @@ export default function AdminDashboard() {
                     className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 text-text focus:border-accent focus:outline-none"
                   />
                 </div>
+              </div>
+            </div>
+
+            <div className="bg-surface rounded-2xl p-6 border border-white/5">
+              <h3 className="font-semibold text-text mb-4">📥 Export Data (CSV)</h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <button onClick={() => handleExport("orders")} className="px-4 py-2 bg-background border border-white/10 rounded-xl text-text text-sm hover:bg-white/5">Export Orders</button>
+                <button onClick={() => handleExport("customers")} className="px-4 py-2 bg-background border border-white/10 rounded-xl text-text text-sm hover:bg-white/5">Export Customers</button>
+                <button onClick={() => handleExport("boosters")} className="px-4 py-2 bg-background border border-white/10 rounded-xl text-text text-sm hover:bg-white/5">Export Boosters</button>
+                <button onClick={() => handleExport("testimonials")} className="px-4 py-2 bg-background border border-white/10 rounded-xl text-text text-sm hover:bg-white/5">Export Testimonials</button>
+                <button onClick={() => handleExport("promo_codes")} className="px-4 py-2 bg-background border border-white/10 rounded-xl text-text text-sm hover:bg-white/5">Export Promo Codes</button>
               </div>
             </div>
 
@@ -857,6 +976,13 @@ export default function AdminDashboard() {
           onClose={() => { setShowModal(null); setEditItem(null); }}
         />
       )}
+      {showModal === "booster" && (
+        <BoosterModal
+          item={editItem as Booster | null}
+          onSave={handleSaveBooster}
+          onClose={() => { setShowModal(null); setEditItem(null); }}
+        />
+      )}
     </div>
   );
 }
@@ -981,6 +1107,46 @@ function PromoModal({ item, onSave, onClose }: { item: PromoCode | null; onSave:
           <label className="flex items-center gap-2 text-text">
             <input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} />
             Active
+          </label>
+        </div>
+        <div className="flex gap-4 mt-6">
+          <button onClick={onClose} className="flex-1 px-4 py-2 border border-white/10 rounded-xl text-text-muted">Cancel</button>
+          <button onClick={() => onSave(form)} className="flex-1 gradient-primary px-4 py-2 rounded-xl text-white font-medium">Save</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BoosterModal({ item, onSave, onClose }: { item: Booster | null; onSave: (data: Partial<Booster>) => void; onClose: () => void }) {
+  const [form, setForm] = useState({
+    name: item?.name || "",
+    whatsapp: item?.whatsapp || "",
+    rank_specialization: item?.rank_specialization || "Mythic",
+    is_available: item?.is_available ?? true,
+    rating: item?.rating || 5,
+  });
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-surface rounded-2xl p-6 w-full max-w-md">
+        <h3 className="text-lg font-bold text-text mb-4">{item ? "Edit" : "Add"} Booster</h3>
+        <div className="space-y-4">
+          <input placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 text-text" />
+          <input placeholder="WhatsApp (628xxx)" value={form.whatsapp} onChange={(e) => setForm({ ...form, whatsapp: e.target.value })} className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 text-text" />
+          <select value={form.rank_specialization} onChange={(e) => setForm({ ...form, rank_specialization: e.target.value })} className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 text-text">
+            <option value="Epic - Legend">Epic - Legend</option>
+            <option value="Legend - Mythic">Legend - Mythic</option>
+            <option value="Mythic">Mythic</option>
+            <option value="Mythic Glory">Mythic Glory</option>
+            <option value="All Ranks">All Ranks</option>
+          </select>
+          <select value={form.rating} onChange={(e) => setForm({ ...form, rating: parseInt(e.target.value) })} className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 text-text">
+            {[5, 4, 3, 2, 1].map((r) => <option key={r} value={r}>{r} ⭐</option>)}
+          </select>
+          <label className="flex items-center gap-2 text-text">
+            <input type="checkbox" checked={form.is_available} onChange={(e) => setForm({ ...form, is_available: e.target.checked })} />
+            Available
           </label>
         </div>
         <div className="flex gap-4 mt-6">
