@@ -15,9 +15,11 @@ export default function CalculatorSection() {
   const [promoMessage, setPromoMessage] = useState("");
   const [promoLoading, setPromoLoading] = useState(false);
   const [promoApplied, setPromoApplied] = useState(false);
+  const [referralDiscount, setReferralDiscount] = useState(0);
 
   const basePrice = calculatePrice(currentRank, targetRank, isExpress, isPremium);
-  const price = Math.max(0, basePrice - promoDiscount);
+  const totalDiscount = promoDiscount + referralDiscount;
+  const price = Math.max(0, basePrice - totalDiscount);
   const isValidProgression = isValidRankProgression(currentRank, targetRank);
 
   const applyPromo = useCallback(async () => {
@@ -27,24 +29,46 @@ export default function CalculatorSection() {
     setPromoMessage("");
     
     try {
-      const res = await fetch("/api/promo", {
+      // Try promo code first
+      const promoRes = await fetch("/api/promo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code: promoCode, orderAmount: basePrice }),
       });
-      const data = await res.json();
+      const promoData = await promoRes.json();
       
-      if (data.valid) {
-        setPromoDiscount(data.calculatedDiscount);
+      if (promoData.valid) {
+        setPromoDiscount(promoData.calculatedDiscount);
+        setReferralDiscount(0);
         setPromoApplied(true);
-        setPromoMessage(`✓ ${data.message} - Hemat ${formatRupiah(data.calculatedDiscount)}`);
-      } else {
-        setPromoDiscount(0);
-        setPromoApplied(false);
-        setPromoMessage(data.message || "Kode promo tidak valid");
+        setPromoMessage(`✓ ${promoData.message} - Hemat ${formatRupiah(promoData.calculatedDiscount)}`);
+        return;
       }
+
+      // Try referral code
+      const refRes = await fetch("/api/referral", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: promoCode }),
+      });
+      const refData = await refRes.json();
+
+      if (refData.valid) {
+        const refDiscount = Math.round(basePrice * refData.discount / 100);
+        setReferralDiscount(refDiscount);
+        setPromoDiscount(0);
+        setPromoApplied(true);
+        setPromoMessage(`✓ ${refData.message} - Hemat ${formatRupiah(refDiscount)}`);
+        return;
+      }
+
+      // Neither valid
+      setPromoDiscount(0);
+      setReferralDiscount(0);
+      setPromoApplied(false);
+      setPromoMessage(promoData.message || "Kode tidak valid");
     } catch {
-      setPromoMessage("Gagal memvalidasi promo");
+      setPromoMessage("Gagal memvalidasi kode");
     } finally {
       setPromoLoading(false);
     }
@@ -53,6 +77,7 @@ export default function CalculatorSection() {
   const removePromo = useCallback(() => {
     setPromoCode("");
     setPromoDiscount(0);
+    setReferralDiscount(0);
     setPromoApplied(false);
     setPromoMessage("");
   }, []);
@@ -179,14 +204,14 @@ export default function CalculatorSection() {
           {/* Promo Code */}
           <div className="mb-8">
             <label className="block text-sm text-text-muted mb-3 font-medium">
-              Kode Promo
+              Kode Promo / Referral
             </label>
             <div className="flex gap-3">
               <input
                 type="text"
                 value={promoCode}
                 onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                placeholder="Masukkan kode promo"
+                placeholder="Masukkan kode promo atau referral"
                 disabled={promoApplied}
                 className="flex-1 bg-background border border-white/10 rounded-xl px-4 py-3 text-text focus:border-accent focus:outline-none transition-colors disabled:opacity-50"
               />
@@ -219,7 +244,7 @@ export default function CalculatorSection() {
             <p className="text-text-muted mb-3">Estimasi Harga</p>
             {isValidProgression ? (
               <>
-                {promoDiscount > 0 && (
+                {totalDiscount > 0 && (
                   <p className="text-lg text-text-muted line-through mb-1">
                     {formatRupiah(basePrice)}
                   </p>
@@ -227,9 +252,9 @@ export default function CalculatorSection() {
                 <p className="text-4xl sm:text-5xl font-extrabold gradient-text">
                   {formatRupiah(price)}
                 </p>
-                {promoDiscount > 0 && (
+                {totalDiscount > 0 && (
                   <p className="text-sm text-green-400 mt-2">
-                    Hemat {formatRupiah(promoDiscount)}!
+                    Hemat {formatRupiah(totalDiscount)}!
                   </p>
                 )}
               </>
