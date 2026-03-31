@@ -83,14 +83,13 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // Block common scanner/bot paths
+  // Block common scanner/bot paths (exclude our /admin routes)
   const blockedPaths = [
     "/wp-admin",
     "/wp-login",
     "/wp-content",
     "/xmlrpc.php",
     "/phpmyadmin",
-    "/admin",
     "/administrator",
     "/.env",
     "/.git",
@@ -104,12 +103,16 @@ export function middleware(request: NextRequest) {
   ];
 
   const lowerPath = pathname.toLowerCase();
-  for (const blocked of blockedPaths) {
-    if (lowerPath.startsWith(blocked)) {
-      return new NextResponse("Not Found", {
-        status: 404,
-        headers: { "Content-Type": "text/plain" },
-      });
+  // Skip blocking for our legitimate admin routes
+  const isLegitAdmin = lowerPath === "/admin" || lowerPath.startsWith("/admin/");
+  if (!isLegitAdmin) {
+    for (const blocked of blockedPaths) {
+      if (lowerPath.startsWith(blocked)) {
+        return new NextResponse("Not Found", {
+          status: 404,
+          headers: { "Content-Type": "text/plain" },
+        });
+      }
     }
   }
 

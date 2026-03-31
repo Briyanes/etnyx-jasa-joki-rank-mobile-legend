@@ -7,7 +7,23 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- =============================================
--- 1. ORDERS TABLE
+-- 1. BOOSTERS TABLE (create first - referenced by orders)
+-- =============================================
+CREATE TABLE IF NOT EXISTS boosters (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name TEXT NOT NULL,
+    whatsapp TEXT,
+    email TEXT,
+    specialization TEXT[], -- ['tank', 'marksman', 'mage', etc]
+    max_rank TEXT DEFAULT 'mythicglory',
+    is_active BOOLEAN DEFAULT TRUE,
+    total_orders INTEGER DEFAULT 0,
+    success_rate DECIMAL(5,2) DEFAULT 100.00,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- =============================================
+-- 2. ORDERS TABLE
 -- =============================================
 CREATE TABLE IF NOT EXISTS orders (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -43,22 +59,6 @@ CREATE TABLE IF NOT EXISTS orders (
     updated_at TIMESTAMPTZ DEFAULT NOW(),
     confirmed_at TIMESTAMPTZ,
     completed_at TIMESTAMPTZ
-);
-
--- =============================================
--- 2. BOOSTERS TABLE
--- =============================================
-CREATE TABLE IF NOT EXISTS boosters (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name TEXT NOT NULL,
-    whatsapp TEXT,
-    email TEXT,
-    specialization TEXT[], -- ['tank', 'marksman', 'mage', etc]
-    max_rank TEXT DEFAULT 'mythicglory',
-    is_active BOOLEAN DEFAULT TRUE,
-    total_orders INTEGER DEFAULT 0,
-    success_rate DECIMAL(5,2) DEFAULT 100.00,
-    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- =============================================
