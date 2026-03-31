@@ -115,6 +115,16 @@ ALTER TABLE customers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE referrals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE promo_usage ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies first (if any)
+DROP POLICY IF EXISTS "Service role full access on testimonials" ON testimonials;
+DROP POLICY IF EXISTS "Service role full access on portfolio" ON portfolio;
+DROP POLICY IF EXISTS "Service role full access on promo_codes" ON promo_codes;
+DROP POLICY IF EXISTS "Service role full access on customers" ON customers;
+DROP POLICY IF EXISTS "Service role full access on referrals" ON referrals;
+DROP POLICY IF EXISTS "Service role full access on promo_usage" ON promo_usage;
+DROP POLICY IF EXISTS "Anon can read visible testimonials" ON testimonials;
+DROP POLICY IF EXISTS "Anon can read visible portfolio" ON portfolio;
+
 -- Service role full access
 CREATE POLICY "Service role full access on testimonials" ON testimonials FOR ALL USING (auth.role() = 'service_role');
 CREATE POLICY "Service role full access on portfolio" ON portfolio FOR ALL USING (auth.role() = 'service_role');
@@ -166,6 +176,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS customers_auto_referral ON customers;
 CREATE TRIGGER customers_auto_referral
     BEFORE INSERT ON customers
     FOR EACH ROW
