@@ -1616,6 +1616,12 @@ function OrderPageContent() {
                         <span className="text-text font-medium">{form.heroRequest}</span>
                       </>
                     )}
+                    {form.notes && (
+                      <>
+                        <span className="text-text-muted">Catatan</span>
+                        <span className="text-text font-medium">{form.notes}</span>
+                      </>
+                    )}
                   </div>
                 </div>
 
@@ -1648,12 +1654,8 @@ function OrderPageContent() {
                   <div className="grid grid-cols-2 gap-y-2 text-sm">
                     <span className="text-text-muted">WhatsApp</span>
                     <span className="text-text font-medium">+62{form.whatsapp}</span>
-                    {form.email && (
-                      <>
-                        <span className="text-text-muted">Email</span>
-                        <span className="text-text font-medium">{form.email}</span>
-                      </>
-                    )}
+                    <span className="text-text-muted">Email</span>
+                    <span className="text-text font-medium">{form.email || "-"}</span>
                   </div>
                 </div>
 
