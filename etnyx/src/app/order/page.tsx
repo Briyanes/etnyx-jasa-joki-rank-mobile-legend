@@ -24,6 +24,10 @@ import {
   Phone,
   User,
   Gamepad2,
+  Star,
+  Package,
+  Minus,
+  Plus,
 } from "lucide-react";
 
 type LoginMethod = "userid" | "moonton";
@@ -78,20 +82,6 @@ const DEFAULT_CATALOG: PackageCategory[] = [
       { id: "rush9-mythic", title: "Rush 9 Star Mythic + Bonus 1", price: 171000, originalPrice: 211000, discountPercent: 19, rankKey: "mythic", currentRank: "mythic", targetRank: "mythic" },
       { id: "rush9-honor", title: "Rush 9 Star Honor + Bonus 1", price: 189000, originalPrice: 230000, discountPercent: 18, rankKey: "mythicglory", currentRank: "mythic", targetRank: "mythicglory" },
       { id: "rush9-glory", title: "Rush 9 Star Glory + Bonus 1", price: 234000, originalPrice: 275000, discountPercent: 15, rankKey: "mythicglory", currentRank: "mythicglory", targetRank: "mythicglory" },
-    ],
-  },
-  {
-    id: "per-star",
-    title: "Joki Rank / Star",
-    packages: [
-      { id: "star-master", title: "Master / Star", price: 3999, rankKey: "master", currentRank: "master", targetRank: "master" },
-      { id: "star-gm", title: "GM / Star", price: 4999, rankKey: "grandmaster", currentRank: "grandmaster", targetRank: "grandmaster" },
-      { id: "star-epic", title: "Epic / Star", price: 7089, rankKey: "epic", currentRank: "epic", targetRank: "epic" },
-      { id: "star-legend", title: "Legend / Star", price: 8089, rankKey: "legend", currentRank: "legend", targetRank: "legend" },
-      { id: "star-mythic", title: "Mythic / Star", price: 21089, rankKey: "mythic", currentRank: "mythic", targetRank: "mythic" },
-      { id: "star-honor", title: "Mythic Honor / Star", price: 23089, rankKey: "mythicglory", currentRank: "mythic", targetRank: "mythicglory" },
-      { id: "star-glory", title: "Mythic Glory / Star", price: 27589, rankKey: "mythicglory", currentRank: "mythicglory", targetRank: "mythicglory" },
-      { id: "star-immortal", title: "Mythic Immortal / Star", price: 30089, rankKey: "mythicglory", currentRank: "mythicglory", targetRank: "mythicglory" },
     ],
   },
   {
@@ -156,6 +146,27 @@ const DEFAULT_CATALOG: PackageCategory[] = [
   },
 ];
 
+// Per-star pricing (based on screenshot)
+interface PerStarRank {
+  id: string;
+  name: string;
+  price: number;
+  originalPrice?: number;
+  discountPercent?: number;
+  icon: string;
+}
+
+const PER_STAR_RANKS: PerStarRank[] = [
+  { id: "grandmaster", name: "Grand Master", price: 5000, originalPrice: 6000, discountPercent: 17, icon: "/icons-tier/Grandmaster.webp" },
+  { id: "epic", name: "Epic", price: 7000, icon: "/icons-tier/Epic.webp" },
+  { id: "legend", name: "Legend", price: 8000, icon: "/icons-tier/Legend.webp" },
+  { id: "mythic", name: "Mythic", price: 18000, originalPrice: 20000, discountPercent: 10, icon: "/icons-tier/Mythic.webp" },
+  { id: "grading", name: "Mythic Grading", price: 20000, originalPrice: 22000, discountPercent: 9, icon: "/icons-tier/Mythic.webp" },
+  { id: "honor", name: "Mythic Honor", price: 21000, originalPrice: 22000, discountPercent: 5, icon: "/icons-tier/Mythical_Glory.webp" },
+  { id: "glory", name: "Mythic Glory", price: 26000, originalPrice: 28000, discountPercent: 7, icon: "/icons-tier/Mythical_Glory.webp" },
+  { id: "immortal", name: "Mythic Immortal", price: 31000, originalPrice: 33000, discountPercent: 6, icon: "/icons-tier/Mythical_Glory.webp" },
+];
+
 // Rank tier icon images
 const rankIcons: Record<string, string> = {
   warrior: "/icons-tier/Warrior.webp",
@@ -187,6 +198,14 @@ const translations = {
     selectPackageDesc: "Pilih paket yang sesuai dengan kebutuhanmu",
     perStar: "/ Star",
     discount: "HEMAT",
+    // Order mode
+    modePackage: "Joki Paket",
+    modePerStar: "Joki Per Bintang",
+    selectRank: "Pilih Rank",
+    starQuantity: "Jumlah Bintang",
+    minStars: "Minimal 3 bintang",
+    totalPrice: "Total Harga",
+    perStarPrice: "Harga per bintang",
     // Step 2
     accountData: "Data Akun Game",
     loginMethod: "Metode Login",
@@ -268,6 +287,14 @@ const translations = {
     selectPackageDesc: "Choose a package that fits your needs",
     perStar: "/ Star",
     discount: "SAVE",
+    // Order mode
+    modePackage: "Package Boost",
+    modePerStar: "Per Star Boost",
+    selectRank: "Select Rank",
+    starQuantity: "Star Quantity",
+    minStars: "Minimum 3 stars",
+    totalPrice: "Total Price",
+    perStarPrice: "Price per star",
     // Step 2
     accountData: "Game Account Data",
     loginMethod: "Login Method",
@@ -368,6 +395,11 @@ function OrderPageContent() {
   const [currentStep, setCurrentStep] = useState(1);
   const [slideDirection, setSlideDirection] = useState<"left" | "right">("right");
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  
+  // Order mode: "paket" or "perstar"
+  const [orderMode, setOrderMode] = useState<"paket" | "perstar">("paket");
+  const [selectedStarRank, setSelectedStarRank] = useState<PerStarRank | null>(null);
+  const [starQuantity, setStarQuantity] = useState(3); // minimum 3 stars
 
   const markTouched = useCallback((field: string) => {
     setTouched((prev) => ({ ...prev, [field]: true }));
@@ -475,19 +507,49 @@ function OrderPageContent() {
     }
   }, [searchParams, catalog]);
 
-  const basePrice = selectedPackage
-    ? (() => {
-        let price = selectedPackage.price;
-        if (form.isExpress) price *= 1.2;
-        if (form.isPremium) price *= 1.3;
-        return Math.round(price);
-      })()
-    : 0;
+  // Calculate base price based on order mode
+  const basePrice = (() => {
+    let price = 0;
+    if (orderMode === "paket" && selectedPackage) {
+      price = selectedPackage.price;
+    } else if (orderMode === "perstar" && selectedStarRank) {
+      price = selectedStarRank.price * starQuantity;
+    }
+    if (form.isExpress) price *= 1.2;
+    if (form.isPremium) price *= 1.3;
+    return Math.round(price);
+  })();
   const finalPrice = Math.max(0, basePrice - promoDiscount);
 
   const updateForm = useCallback((updates: Partial<OrderForm>) => {
     setForm((prev) => ({ ...prev, ...updates }));
   }, []);
+
+  // Handle per-star rank selection
+  const handleSelectStarRank = useCallback((rank: PerStarRank) => {
+    setSelectedStarRank(rank);
+    setStarQuantity(3); // Reset to minimum
+  }, []);
+
+  // Proceed from per-star selection
+  const handleProceedPerStar = useCallback(() => {
+    if (selectedStarRank && starQuantity >= 3) {
+      // Create a virtual package for the order flow
+      setSelectedPackage({
+        id: `perstar-${selectedStarRank.id}-${starQuantity}`,
+        title: `${selectedStarRank.name} × ${starQuantity} Star`,
+        price: selectedStarRank.price * starQuantity,
+        rankKey: selectedStarRank.id,
+        currentRank: selectedStarRank.id,
+        targetRank: selectedStarRank.id,
+      });
+      setTimeout(() => {
+        setSlideDirection("right");
+        setCurrentStep(2);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }, 400);
+    }
+  }, [selectedStarRank, starQuantity]);
 
   const handleSelectPackage = useCallback(
     (pkg: ProductPackage) => {
@@ -510,7 +572,13 @@ function OrderPageContent() {
     (step: number): boolean => {
       switch (step) {
         case 1:
-          return !!selectedPackage;
+          // For paket mode, need selected package
+          // For perstar mode, need selected rank AND quantity >= 3
+          if (orderMode === "paket") {
+            return !!selectedPackage;
+          } else {
+            return !!(selectedStarRank && starQuantity >= 3);
+          }
         case 2:
           return !!(
             form.nickname &&
@@ -530,7 +598,7 @@ function OrderPageContent() {
           return true;
       }
     },
-    [selectedPackage, form]
+    [selectedPackage, selectedStarRank, starQuantity, orderMode, form]
   );
 
   const goToStep = useCallback(
@@ -545,11 +613,22 @@ function OrderPageContent() {
 
   const nextStep = useCallback(() => {
     if (canProceedStep(currentStep) && currentStep < 5) {
+      // For per-star mode on step 1, create virtual package first
+      if (currentStep === 1 && orderMode === "perstar" && selectedStarRank) {
+        setSelectedPackage({
+          id: `perstar-${selectedStarRank.id}-${starQuantity}`,
+          title: `${selectedStarRank.name} × ${starQuantity} Star`,
+          price: selectedStarRank.price * starQuantity,
+          rankKey: selectedStarRank.id,
+          currentRank: selectedStarRank.id,
+          targetRank: selectedStarRank.id,
+        });
+      }
       setSlideDirection("right");
       setCurrentStep((s) => s + 1);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
-  }, [currentStep, canProceedStep]);
+  }, [currentStep, canProceedStep, orderMode, selectedStarRank, starQuantity]);
 
   const prevStep = useCallback(() => {
     if (currentStep > 1) {
@@ -834,77 +913,203 @@ function OrderPageContent() {
               <h2 className="font-bold text-text">{t.selectPackage}</h2>
             </div>
             <div className="p-5">
-              {/* Category Tabs */}
-              <div className="flex flex-wrap gap-2 mb-5">
-                {catalog.map((cat) => (
-                  <button
-                    key={cat.id}
-                    onClick={() => setActiveCategory(cat.id)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                      activeCategory === cat.id
-                        ? "gradient-primary text-white shadow-lg"
-                        : "bg-background border border-white/10 text-text-muted hover:border-white/20"
-                    }`}
-                  >
-                    {cat.title}
-                  </button>
-                ))}
+              {/* Mode Switcher (Paket / Per Bintang) */}
+              <div className="flex gap-2 mb-5 p-1 bg-background rounded-xl">
+                <button
+                  onClick={() => {
+                    setOrderMode("paket");
+                    setSelectedStarRank(null);
+                    setStarQuantity(3);
+                  }}
+                  className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all ${
+                    orderMode === "paket"
+                      ? "gradient-primary text-white shadow-lg"
+                      : "text-text-muted hover:text-text"
+                  }`}
+                >
+                  <Package className="w-4 h-4 inline-block mr-2" />
+                  {t.modePackage}
+                </button>
+                <button
+                  onClick={() => {
+                    setOrderMode("perstar");
+                    setSelectedPackage(null);
+                  }}
+                  className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all ${
+                    orderMode === "perstar"
+                      ? "gradient-primary text-white shadow-lg"
+                      : "text-text-muted hover:text-text"
+                  }`}
+                >
+                  <Star className="w-4 h-4 inline-block mr-2" />
+                  {t.modePerStar}
+                </button>
               </div>
 
-              {/* Package Cards */}
-              {catalog.filter((cat) => cat.id === activeCategory).map(
-                (cat) => (
-                  <div key={cat.id}>
-                    <h3 className="text-text font-bold text-base mb-4">
-                      {cat.title}
-                    </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                      {cat.packages.map((pkg) => {
-                        const isSelected = selectedPackage?.id === pkg.id;
+              {/* PAKET MODE */}
+              {orderMode === "paket" && (
+                <>
+                  {/* Category Tabs */}
+                  <div className="flex flex-wrap gap-2 mb-5">
+                    {catalog.map((cat) => (
+                      <button
+                        key={cat.id}
+                        onClick={() => setActiveCategory(cat.id)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                          activeCategory === cat.id
+                            ? "gradient-primary text-white shadow-lg"
+                            : "bg-background border border-white/10 text-text-muted hover:border-white/20"
+                        }`}
+                      >
+                        {cat.title}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Package Cards */}
+                  {catalog.filter((cat) => cat.id === activeCategory).map(
+                    (cat) => (
+                      <div key={cat.id}>
+                        <h3 className="text-text font-bold text-base mb-4">
+                          {cat.title}
+                        </h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                          {cat.packages.map((pkg) => {
+                            const isSelected = selectedPackage?.id === pkg.id;
+                            return (
+                              <button
+                                key={pkg.id}
+                                onClick={() => handleSelectPackage(pkg)}
+                                className={`relative text-left rounded-xl border-2 transition-all duration-200 hover:scale-[1.02] overflow-hidden flex flex-col ${
+                                  isSelected
+                                    ? "border-yellow-400 shadow-lg shadow-yellow-400/20"
+                                    : "border-white/5 hover:border-white/15"
+                                }`}
+                              >
+                                <div className="p-4 bg-gradient-to-br from-slate-700/80 to-slate-800/80 flex-1">
+                                  <p className="text-white text-sm font-semibold mb-2">
+                                    {pkg.title}
+                                  </p>
+                                  <div className="flex items-center gap-3">
+                                    <Image
+                                      src={rankIcons[pkg.rankKey]}
+                                      alt={pkg.rankKey}
+                                      width={40}
+                                      height={40}
+                                      className="w-10 h-10 object-contain flex-shrink-0 drop-shadow-lg"
+                                    />
+                                    <div>
+                                      <p className="text-yellow-400 font-bold text-lg leading-tight">
+                                        {formatRupiah(pkg.price)}
+                                      </p>
+                                      {pkg.originalPrice && (
+                                        <p className="text-red-400/70 text-xs line-through">
+                                          {formatRupiah(pkg.originalPrice)}
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="px-4 py-2.5 bg-slate-800/60 flex items-center justify-end gap-2">
+                                  {pkg.discountPercent && (
+                                    <span className="bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded text-[10px] font-bold">
+                                      Disc {pkg.discountPercent}%
+                                    </span>
+                                  )}
+                                  <span className="bg-teal-600/30 text-teal-300 px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1">
+                                    <Zap className="w-2.5 h-2.5" />
+                                    Pengiriman INSTAN
+                                  </span>
+                                </div>
+                                {isSelected && (
+                                  <div className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-yellow-400 flex items-center justify-center">
+                                    <Check className="w-3 h-3 text-black" />
+                                  </div>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )
+                  )}
+
+                  {/* Selected summary */}
+                  {selectedPackage && (
+                    <div className="mt-5 p-4 bg-background rounded-xl border border-accent/30 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Image
+                          src={rankIcons[selectedPackage.rankKey]}
+                          alt={selectedPackage.rankKey}
+                          width={32}
+                          height={32}
+                          className="w-8 h-8 object-contain drop-shadow-lg"
+                        />
+                        <div>
+                          <p className="text-text font-semibold text-sm">
+                            {selectedPackage.title}
+                          </p>
+                          <p className="text-yellow-400 font-bold">
+                            {formatRupiah(selectedPackage.price)}
+                          </p>
+                        </div>
+                      </div>
+                      <Check className="w-5 h-5 text-green-400" />
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* PER STAR MODE */}
+              {orderMode === "perstar" && (
+                <>
+                  {/* Rank Selection Grid */}
+                  <div className="mb-5">
+                    <h3 className="text-text font-bold text-base mb-4">{t.selectRank}</h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                      {PER_STAR_RANKS.map((rank) => {
+                        const isSelected = selectedStarRank?.id === rank.id;
                         return (
                           <button
-                            key={pkg.id}
-                            onClick={() => handleSelectPackage(pkg)}
-                            className={`relative text-left rounded-xl border-2 transition-all duration-200 hover:scale-[1.02] overflow-hidden flex flex-col ${
+                            key={rank.id}
+                            onClick={() => setSelectedStarRank(rank)}
+                            className={`relative text-left rounded-xl border-2 transition-all duration-200 hover:scale-[1.02] overflow-hidden ${
                               isSelected
                                 ? "border-yellow-400 shadow-lg shadow-yellow-400/20"
                                 : "border-white/5 hover:border-white/15"
                             }`}
                           >
-                            <div className="p-4 bg-gradient-to-br from-slate-700/80 to-slate-800/80 flex-1">
-                              <p className="text-white text-sm font-semibold mb-2">
-                                {pkg.title}
-                              </p>
-                              <div className="flex items-center gap-3">
+                            <div className="p-4 bg-gradient-to-br from-slate-700/80 to-slate-800/80">
+                              <div className="flex items-center gap-3 mb-2">
                                 <Image
-                                  src={rankIcons[pkg.rankKey]}
-                                  alt={pkg.rankKey}
+                                  src={rank.icon}
+                                  alt={rank.name}
                                   width={40}
                                   height={40}
-                                  className="w-10 h-10 object-contain flex-shrink-0 drop-shadow-lg"
+                                  className="w-10 h-10 object-contain drop-shadow-lg"
                                 />
-                                <div>
-                                  <p className="text-yellow-400 font-bold text-lg leading-tight">
-                                    {formatRupiah(pkg.price)}
-                                  </p>
-                                  {pkg.originalPrice && (
-                                    <p className="text-red-400/70 text-xs line-through">
-                                      {formatRupiah(pkg.originalPrice)}
-                                    </p>
-                                  )}
-                                </div>
+                                <p className="text-white text-sm font-semibold">
+                                  {rank.name}
+                                </p>
                               </div>
-                            </div>
-                            <div className="px-4 py-2.5 bg-slate-800/60 flex items-center justify-end gap-2">
-                              {pkg.discountPercent && (
-                                <span className="bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded text-[10px] font-bold">
-                                  Disc {pkg.discountPercent}%
-                                </span>
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <p className="text-yellow-400 font-bold text-lg">
+                                    {formatRupiah(rank.price)}
+                                  </p>
+                                  <p className="text-text-muted text-xs">{t.perStar}</p>
+                                </div>
+                                {rank.discountPercent && (
+                                  <span className="bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded text-[10px] font-bold">
+                                    -{rank.discountPercent}%
+                                  </span>
+                                )}
+                              </div>
+                              {rank.originalPrice && (
+                                <p className="text-red-400/70 text-xs line-through mt-1">
+                                  {formatRupiah(rank.originalPrice)} {t.perStar}
+                                </p>
                               )}
-                              <span className="bg-teal-600/30 text-teal-300 px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1">
-                                <Zap className="w-2.5 h-2.5" />
-                                Pengiriman INSTAN
-                              </span>
                             </div>
                             {isSelected && (
                               <div className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-yellow-400 flex items-center justify-center">
@@ -916,31 +1121,71 @@ function OrderPageContent() {
                       })}
                     </div>
                   </div>
-                )
-              )}
 
-              {/* Selected summary */}
-              {selectedPackage && (
-                <div className="mt-5 p-4 bg-background rounded-xl border border-accent/30 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Image
-                      src={rankIcons[selectedPackage.rankKey]}
-                      alt={selectedPackage.rankKey}
-                      width={32}
-                      height={32}
-                      className="w-8 h-8 object-contain drop-shadow-lg"
-                    />
-                    <div>
-                      <p className="text-text font-semibold text-sm">
-                        {selectedPackage.title}
-                      </p>
-                      <p className="text-yellow-400 font-bold">
-                        {formatRupiah(selectedPackage.price)}
-                      </p>
+                  {/* Star Quantity Input */}
+                  {selectedStarRank && (
+                    <div className="p-4 bg-background rounded-xl border border-accent/30">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                          <Image
+                            src={selectedStarRank.icon}
+                            alt={selectedStarRank.name}
+                            width={40}
+                            height={40}
+                            className="w-10 h-10 object-contain drop-shadow-lg"
+                          />
+                          <div>
+                            <p className="text-text font-semibold">{selectedStarRank.name}</p>
+                            <p className="text-text-muted text-sm">
+                              {formatRupiah(selectedStarRank.price)} {t.perStar}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-4">
+                          <div>
+                            <p className="text-text-muted text-xs mb-1">{t.starQuantity}</p>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => setStarQuantity(q => Math.max(3, q - 1))}
+                                disabled={starQuantity <= 3}
+                                className="w-8 h-8 rounded-lg bg-slate-700 text-white flex items-center justify-center hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                <Minus className="w-4 h-4" />
+                              </button>
+                              <input
+                                type="number"
+                                value={starQuantity}
+                                onChange={(e) => {
+                                  const val = parseInt(e.target.value) || 3;
+                                  setStarQuantity(Math.max(3, Math.min(100, val)));
+                                }}
+                                min={3}
+                                max={100}
+                                className="w-16 h-8 text-center bg-slate-800 text-white rounded-lg border border-white/10 focus:outline-none focus:border-accent"
+                              />
+                              <button
+                                onClick={() => setStarQuantity(q => Math.min(100, q + 1))}
+                                disabled={starQuantity >= 100}
+                                className="w-8 h-8 rounded-lg bg-slate-700 text-white flex items-center justify-center hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                <Plus className="w-4 h-4" />
+                              </button>
+                            </div>
+                            <p className="text-text-muted text-[10px] mt-1">{t.minStars}</p>
+                          </div>
+                          
+                          <div className="text-right">
+                            <p className="text-text-muted text-xs">{t.totalPrice}</p>
+                            <p className="text-yellow-400 font-bold text-xl">
+                              {formatRupiah(selectedStarRank.price * starQuantity)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <Check className="w-5 h-5 text-green-400" />
-                </div>
+                  )}
+                </>
               )}
             </div>
           </section>
