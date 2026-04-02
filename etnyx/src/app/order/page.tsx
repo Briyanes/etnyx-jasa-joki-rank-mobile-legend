@@ -158,8 +158,8 @@ interface PerStarRank {
 
 const PER_STAR_RANKS: PerStarRank[] = [
   { id: "grandmaster", name: "Grand Master", price: 5000, originalPrice: 6000, discountPercent: 17, icon: "/icons-tier/Grandmaster.webp" },
-  { id: "epic", name: "Epic", price: 7000, icon: "/icons-tier/Epic.webp" },
-  { id: "legend", name: "Legend", price: 8000, icon: "/icons-tier/Legend.webp" },
+  { id: "epic", name: "Epic", price: 7000, originalPrice: 8000, discountPercent: 13, icon: "/icons-tier/Epic.webp" },
+  { id: "legend", name: "Legend", price: 8000, originalPrice: 9000, discountPercent: 11, icon: "/icons-tier/Legend.webp" },
   { id: "mythic", name: "Mythic", price: 18000, originalPrice: 20000, discountPercent: 10, icon: "/icons-tier/Mythic.webp" },
   { id: "grading", name: "Mythic Grading", price: 20000, originalPrice: 22000, discountPercent: 9, icon: "/icons-tier/Mythic.webp" },
   { id: "honor", name: "Mythic Honor", price: 21000, originalPrice: 22000, discountPercent: 5, icon: "/icons-tier/Mythical_Glory.webp" },
