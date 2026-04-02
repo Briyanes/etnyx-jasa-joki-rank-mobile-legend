@@ -89,10 +89,10 @@ const DEFAULT_CATALOG: PackageCategory[] = [
       { id: "rush9-epic", title: "Rush 9 Star Epic + Bonus 1", price: 58000, originalPrice: 70000, discountPercent: 17, rankKey: "epic", currentRank: "epic", targetRank: "epic" },
       { id: "rush9-legend", title: "Rush 9 Star Legend + Bonus 1", price: 68000, originalPrice: 80000, discountPercent: 15, rankKey: "legend", currentRank: "legend", targetRank: "legend" },
       { id: "rush5-mythic", title: "Rush 5 Star Mythic", price: 95000, originalPrice: 105000, discountPercent: 10, rankKey: "mythic", currentRank: "mythic", targetRank: "mythic" },
-      { id: "rush5-honor", title: "Rush 5 Star Honor", price: 105000, originalPrice: 115000, discountPercent: 9, rankKey: "mythicglory", currentRank: "mythic", targetRank: "mythicglory" },
+      { id: "rush5-honor", title: "Rush 5 Star Honor", price: 105000, originalPrice: 115000, discountPercent: 9, rankKey: "mythichonor", currentRank: "mythic", targetRank: "mythichonor" },
       { id: "rush5-glory", title: "Rush 5 Star Glory", price: 130000, originalPrice: 137000, discountPercent: 5, rankKey: "mythicglory", currentRank: "mythicglory", targetRank: "mythicglory" },
       { id: "rush9-mythic", title: "Rush 9 Star Mythic + Bonus 1", price: 171000, originalPrice: 211000, discountPercent: 19, rankKey: "mythic", currentRank: "mythic", targetRank: "mythic" },
-      { id: "rush9-honor", title: "Rush 9 Star Honor + Bonus 1", price: 189000, originalPrice: 230000, discountPercent: 18, rankKey: "mythicglory", currentRank: "mythic", targetRank: "mythicglory" },
+      { id: "rush9-honor", title: "Rush 9 Star Honor + Bonus 1", price: 189000, originalPrice: 230000, discountPercent: 18, rankKey: "mythichonor", currentRank: "mythic", targetRank: "mythichonor" },
       { id: "rush9-glory", title: "Rush 9 Star Glory + Bonus 1", price: 234000, originalPrice: 275000, discountPercent: 15, rankKey: "mythicglory", currentRank: "mythicglory", targetRank: "mythicglory" },
     ],
   },
@@ -126,9 +126,9 @@ const DEFAULT_CATALOG: PackageCategory[] = [
     title: "Paket Legend",
     packages: [
       { id: "legend5-mythic", title: "Legend V - Mythic", price: 200089, rankKey: "legend", currentRank: "legend", targetRank: "mythic" },
-      { id: "legend5-honor", title: "Legend V - Mythic Honor", price: 620089, rankKey: "legend", currentRank: "legend", targetRank: "mythicglory" },
-      { id: "legend5-glory", title: "Legend V - Mythic Glory", price: 1195089, rankKey: "legend", currentRank: "legend", targetRank: "mythicglory" },
-      { id: "legend5-immortal", title: "Legend V - Mythic Immortal", price: 2570089, rankKey: "legend", currentRank: "legend", targetRank: "mythicglory" },
+      { id: "legend5-honor", title: "Legend V - Mythic Honor", price: 620089, rankKey: "mythichonor", currentRank: "legend", targetRank: "mythichonor" },
+      { id: "legend5-glory", title: "Legend V - Mythic Glory", price: 1195089, rankKey: "mythicglory", currentRank: "legend", targetRank: "mythicglory" },
+      { id: "legend5-immortal", title: "Legend V - Mythic Immortal", price: 2570089, rankKey: "mythicimmortal", currentRank: "legend", targetRank: "mythicimmortal" },
     ],
   },
   {
@@ -136,24 +136,24 @@ const DEFAULT_CATALOG: PackageCategory[] = [
     title: "Paket Mythic",
     packages: [
       { id: "mythic-grading", title: "Open Grading (Auto Star 15)", price: 210089, rankKey: "mythic", currentRank: "mythic", targetRank: "mythic" },
-      { id: "mythic-honor", title: "Mythic Grading - Mythic Honor (25)", price: 420089, rankKey: "mythic", currentRank: "mythic", targetRank: "mythicglory" },
-      { id: "mythic-glory", title: "Mythic Grading - Mythic Glory (50)", price: 995089, rankKey: "mythic", currentRank: "mythic", targetRank: "mythicglory" },
-      { id: "mythic-immortal", title: "Mythic Grading - Mythic Immortal (100)", price: 2370089, rankKey: "mythic", currentRank: "mythic", targetRank: "mythicglory" },
+      { id: "mythic-honor", title: "Mythic Grading - Mythic Honor (25)", price: 420089, rankKey: "mythichonor", currentRank: "mythic", targetRank: "mythichonor" },
+      { id: "mythic-glory", title: "Mythic Grading - Mythic Glory (50)", price: 995089, rankKey: "mythicglory", currentRank: "mythic", targetRank: "mythicglory" },
+      { id: "mythic-immortal", title: "Mythic Grading - Mythic Immortal (100)", price: 2370089, rankKey: "mythicimmortal", currentRank: "mythic", targetRank: "mythicimmortal" },
     ],
   },
   {
     id: "paket-honor",
     title: "Paket Mythic Honor",
     packages: [
-      { id: "honor-glory", title: "Mythic Honor (25) - Mythic Glory (50)", price: 575089, rankKey: "mythicglory", currentRank: "mythicglory", targetRank: "mythicglory" },
-      { id: "honor-immortal", title: "Mythic Honor (25) - Mythic Immortal (100)", price: 1950089, rankKey: "mythicglory", currentRank: "mythicglory", targetRank: "mythicglory" },
+      { id: "honor-glory", title: "Mythic Honor (25) - Mythic Glory (50)", price: 575089, rankKey: "mythicglory", currentRank: "mythichonor", targetRank: "mythicglory" },
+      { id: "honor-immortal", title: "Mythic Honor (25) - Mythic Immortal (100)", price: 1950089, rankKey: "mythicimmortal", currentRank: "mythichonor", targetRank: "mythicimmortal" },
     ],
   },
   {
     id: "paket-glory",
     title: "Paket Mythic Glory",
     packages: [
-      { id: "glory-immortal", title: "Mythic Glory (50) - Mythic Immortal (100)", price: 1375089, rankKey: "mythicglory", currentRank: "mythicglory", targetRank: "mythicglory" },
+      { id: "glory-immortal", title: "Mythic Glory (50) - Mythic Immortal (100)", price: 1375089, rankKey: "mythicimmortal", currentRank: "mythicglory", targetRank: "mythicimmortal" },
     ],
   },
 ];
@@ -188,7 +188,9 @@ const rankIcons: Record<string, string> = {
   epic: "/icons-tier/Epic.webp",
   legend: "/icons-tier/Legend.webp",
   mythic: "/icons-tier/Mythic.webp",
+  mythichonor: "/icons-tier/Mythical_Honor.webp",
   mythicglory: "/icons-tier/Mythical_Glory.webp",
+  mythicimmortal: "/icons-tier/Mythical_Immortal.webp",
 };
 
 // Translations
