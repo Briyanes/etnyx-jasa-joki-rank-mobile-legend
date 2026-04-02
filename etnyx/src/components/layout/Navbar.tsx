@@ -7,12 +7,27 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Search, MapPin } from "lucide-react";
 
-export default function Navbar() {
+// Map section hash to visibility key
+const SECTION_VIS_MAP: Record<string, string> = {
+  "#how-it-works": "howItWorks",
+  "#pricing": "pricing",
+  "#team": "teamShowcase",
+  "#testimonials": "testimonials",
+  "#portfolio": "portfolio",
+  "#tracking": "tracking",
+  "#faq": "faq",
+};
+
+interface NavbarProps {
+  hiddenSections?: Record<string, boolean>;
+}
+
+export default function Navbar({ hiddenSections }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("");
   const { locale } = useLanguage();
 
-  const navLinks = locale === "id" ? [
+  const allNavLinks = locale === "id" ? [
     { href: "#how-it-works", label: "Cara Kerja" },
     { href: "#pricing", label: "Paket" },
     { href: "#team", label: "Tim" },
@@ -29,6 +44,14 @@ export default function Navbar() {
     { href: "#tracking", label: "Tracking" },
     { href: "#faq", label: "FAQ" },
   ];
+
+  // Filter out hidden sections
+  const navLinks = hiddenSections
+    ? allNavLinks.filter((link) => {
+        const visKey = SECTION_VIS_MAP[link.href];
+        return !visKey || hiddenSections[visKey] !== false;
+      })
+    : allNavLinks;
 
   const mobileExtraLinks = locale === "id" ? [
     { href: "/order", label: "Order Joki" },

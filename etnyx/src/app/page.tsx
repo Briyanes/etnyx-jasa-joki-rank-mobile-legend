@@ -22,6 +22,8 @@ import CTASection from "@/components/sections/CTASection";
 import BackToTop from "@/components/BackToTop";
 import { createAdminClient } from "@/lib/supabase-server";
 
+export const dynamic = 'force-dynamic';
+
 interface SectionVisibility {
   hero: boolean;
   liveCounter: boolean;
@@ -67,7 +69,7 @@ export default async function Home() {
       {/* Fixed header container */}
       <div className="fixed top-0 left-0 right-0 z-50">
         <PromoBanner />
-        <Navbar />
+        <Navbar hiddenSections={vis} />
       </div>
       
       <main>
