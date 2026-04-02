@@ -1080,28 +1080,28 @@ function OrderPageContent() {
                             }`}
                           >
                             <div className="p-4 bg-gradient-to-br from-slate-700/80 to-slate-800/80 flex-1">
-                              <div className="flex items-center gap-3 mb-3">
+                              <p className="text-white text-sm font-semibold mb-2">
+                                {rank.name}
+                              </p>
+                              <div className="flex items-center gap-3">
                                 <Image
                                   src={rank.icon}
                                   alt={rank.name}
                                   width={40}
                                   height={40}
-                                  className="w-10 h-10 object-contain drop-shadow-lg"
+                                  className="w-10 h-10 object-contain flex-shrink-0 drop-shadow-lg"
                                 />
-                                <p className="text-white text-sm font-semibold">
-                                  {rank.name}
-                                </p>
-                              </div>
-                              <div>
-                                <p className="text-yellow-400 font-bold text-lg">
-                                  {formatRupiah(rank.price)}
-                                </p>
-                                <p className="text-text-muted text-xs">{t.perStar}</p>
-                                {rank.originalPrice && (
-                                  <p className="text-red-400/70 text-xs line-through mt-1">
-                                    {formatRupiah(rank.originalPrice)}
+                                <div>
+                                  <p className="text-yellow-400 font-bold text-lg leading-tight">
+                                    {formatRupiah(rank.price)}
+                                    <span className="text-text-muted text-xs font-normal ml-1">{t.perStar}</span>
                                   </p>
-                                )}
+                                  {rank.originalPrice && (
+                                    <p className="text-red-400/70 text-xs line-through">
+                                      {formatRupiah(rank.originalPrice)}
+                                    </p>
+                                  )}
+                                </div>
                               </div>
                             </div>
                             <div className="px-4 py-2.5 bg-slate-800/60 flex items-center justify-end gap-2">
@@ -1112,7 +1112,7 @@ function OrderPageContent() {
                               )}
                               <span className="bg-teal-600/30 text-teal-300 px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1">
                                 <Zap className="w-2.5 h-2.5" />
-                                INSTAN
+                                Pengiriman INSTAN
                               </span>
                             </div>
                             {isSelected && (
