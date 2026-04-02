@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
@@ -42,13 +43,14 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center font-bold text-white text-xl">
-              E
-            </div>
-            <span className="font-bold text-2xl text-text">
-              ETN<span className="text-accent">YX</span>
-            </span>
+          <div className="inline-flex items-center justify-center mb-4">
+            <Image
+              src="/logo/circle-landscape.webp"
+              alt="ETNYX Logo"
+              width={180}
+              height={50}
+              priority
+            />
           </div>
           <h1 className="text-xl font-semibold text-text">Admin Dashboard</h1>
           <p className="text-text-muted text-sm mt-1">Login untuk mengakses panel admin</p>
