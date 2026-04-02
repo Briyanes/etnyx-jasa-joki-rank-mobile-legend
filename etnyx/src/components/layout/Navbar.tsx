@@ -18,8 +18,14 @@ const SECTION_VIS_MAP: Record<string, string> = {
   "#faq": "faq",
 };
 
+interface SectionVisibility {
+  hero: boolean; liveCounter: boolean; howItWorks: boolean; pricing: boolean;
+  whyChooseUs: boolean; teamShowcase: boolean; testimonials: boolean;
+  portfolio: boolean; tracking: boolean; trust: boolean; faq: boolean; cta: boolean;
+}
+
 interface NavbarProps {
-  hiddenSections?: Record<string, boolean>;
+  hiddenSections?: SectionVisibility;
 }
 
 export default function Navbar({ hiddenSections }: NavbarProps) {
@@ -48,7 +54,7 @@ export default function Navbar({ hiddenSections }: NavbarProps) {
   // Filter out hidden sections
   const navLinks = hiddenSections
     ? allNavLinks.filter((link) => {
-        const visKey = SECTION_VIS_MAP[link.href];
+        const visKey = SECTION_VIS_MAP[link.href] as keyof SectionVisibility | undefined;
         return !visKey || hiddenSections[visKey] !== false;
       })
     : allNavLinks;
