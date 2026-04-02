@@ -62,16 +62,28 @@ export default function TermsPopup() {
 
   useEffect(() => {
     const content = contentRef.current;
-    if (!content) return;
+    if (!content || !isOpen) return;
 
-    const handleScroll = () => {
+    const checkScrollable = () => {
       const { scrollTop, scrollHeight, clientHeight } = content;
+      // If content doesn't need scrolling, or already at bottom
+      const needsScroll = scrollHeight > clientHeight + 10;
       const isAtBottom = scrollTop + clientHeight >= scrollHeight - 20;
-      setCanClose(isAtBottom);
+      setCanClose(!needsScroll || isAtBottom);
     };
 
-    content.addEventListener("scroll", handleScroll);
-    return () => content.removeEventListener("scroll", handleScroll);
+    // Check on mount
+    setTimeout(checkScrollable, 100);
+
+    // Check on scroll
+    content.addEventListener("scroll", checkScrollable);
+    // Also listen for touch events as backup
+    content.addEventListener("touchmove", checkScrollable);
+    
+    return () => {
+      content.removeEventListener("scroll", checkScrollable);
+      content.removeEventListener("touchmove", checkScrollable);
+    };
   }, [isOpen]);
 
   const handleClose = () => {
