@@ -17,6 +17,7 @@ const ALLOWED_KEYS = [
   "express_multiplier",
   "whatsapp_number",
   "site_name",
+  "integrations",
 ];
 
 // GET /api/admin/settings?key=hero or GET all
