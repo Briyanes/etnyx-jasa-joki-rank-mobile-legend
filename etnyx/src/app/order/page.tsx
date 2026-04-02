@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -181,7 +181,7 @@ function LangToggle() {
   );
 }
 
-export default function OrderPage() {
+function OrderPageContent() {
   const searchParams = useSearchParams();
   const [catalog, setCatalog] = useState<PackageCategory[]>(DEFAULT_CATALOG);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -1351,5 +1351,13 @@ export default function OrderPage() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function OrderPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-b from-[#0D0D1A] via-[#1A1A2E] to-[#0D0D1A] flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-purple-500" /></div>}>
+      <OrderPageContent />
+    </Suspense>
   );
 }

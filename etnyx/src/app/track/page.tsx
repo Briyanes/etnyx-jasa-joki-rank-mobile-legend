@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Clock, CheckCircle, Rocket, XCircle, Check, ChevronLeft, Shield, Zap, MessageCircle } from "lucide-react";
+import { Clock, CheckCircle, Rocket, XCircle, Check, ChevronLeft, Shield, Zap, MessageCircle, Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { ReactNode } from "react";
 
@@ -53,7 +53,7 @@ function LangToggle() {
   );
 }
 
-export default function TrackOrderPage() {
+function TrackOrderContent() {
   const searchParams = useSearchParams();
   const [orderId, setOrderId] = useState("");
   const [order, setOrder] = useState<OrderData | null>(null);
@@ -314,5 +314,13 @@ export default function TrackOrderPage() {
         )}
       </div>
     </main>
+  );
+}
+
+export default function TrackOrderPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-b from-[#0D0D1A] via-[#1A1A2E] to-[#0D0D1A] flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-purple-500" /></div>}>
+      <TrackOrderContent />
+    </Suspense>
   );
 }
