@@ -150,6 +150,9 @@ interface IntegrationSettings {
   resendFromEmail: string;
   fonnteApiToken: string;
   fonnteDeviceId: string;
+  telegramBotToken: string;
+  telegramAdminGroupId: string;
+  telegramWorkerGroupId: string;
 }
 
 type SettingsSubTab = "cms-sections" | "hero" | "banner" | "faq" | "team" | "social" | "site" | "pixels" | "integrations" | "general";
@@ -220,7 +223,8 @@ export default function AdminDashboard() {
   const [integrations, setIntegrations] = useState<IntegrationSettings>({ 
     midtransClientKey: "", midtransServerKey: "", midtransMerchantId: "", midtransIsProduction: false,
     resendApiKey: "", resendFromEmail: "noreply@etnyx.com",
-    fonnteApiToken: "", fonnteDeviceId: ""
+    fonnteApiToken: "", fonnteDeviceId: "",
+    telegramBotToken: "", telegramAdminGroupId: "", telegramWorkerGroupId: ""
   });
 
   // Auth
@@ -1574,6 +1578,41 @@ export default function AdminDashboard() {
                     <p className="text-text-muted text-xs">
                       📖 Dapatkan Token di <a href="https://md.fonnte.com/api" target="_blank" rel="noopener" className="text-accent hover:underline">md.fonnte.com</a> → API → Token
                     </p>
+                  </div>
+
+                  {/* Telegram */}
+                  <div className="bg-surface rounded-xl border border-white/5 p-6 space-y-4">
+                    <div>
+                      <h3 className="text-text font-bold text-sm">📢 Telegram Bot</h3>
+                      <p className="text-text-muted text-xs mt-0.5">Notifikasi order ke grup Admin & Worker</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm text-text-muted mb-1.5">Bot Token</label>
+                      <input type="password" value={integrations.telegramBotToken} onChange={(e) => setIntegrations({ ...integrations, telegramBotToken: e.target.value })}
+                        placeholder="123456789:ABCdefGHIjklMNOpqrsTUVwxyz" className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-text-muted mb-1.5">Admin Group Chat ID</label>
+                      <input type="text" value={integrations.telegramAdminGroupId} onChange={(e) => setIntegrations({ ...integrations, telegramAdminGroupId: e.target.value })}
+                        placeholder="-1001234567890" className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
+                      <p className="text-text-muted text-xs mt-1">Notifikasi order baru untuk konfirmasi admin</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm text-text-muted mb-1.5">Worker Group Chat ID</label>
+                      <input type="text" value={integrations.telegramWorkerGroupId} onChange={(e) => setIntegrations({ ...integrations, telegramWorkerGroupId: e.target.value })}
+                        placeholder="-1001234567890" className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
+                      <p className="text-text-muted text-xs mt-1">Notifikasi order yang sudah dikonfirmasi untuk dikerjakan</p>
+                    </div>
+                    <div className="bg-background/50 rounded-lg p-3 text-xs text-text-muted space-y-1">
+                      <p>📖 <strong>Cara mendapatkan Bot Token:</strong></p>
+                      <p>1. Chat @BotFather di Telegram → /newbot → ikuti instruksi</p>
+                      <p>2. Copy token yang diberikan</p>
+                      <p className="mt-2">📖 <strong>Cara mendapatkan Group Chat ID:</strong></p>
+                      <p>1. Tambahkan bot ke grup</p>
+                      <p>2. Kirim pesan di grup</p>
+                      <p>3. Buka: api.telegram.org/bot&lt;TOKEN&gt;/getUpdates</p>
+                      <p>4. Cari &quot;chat&quot;:{`{`}&quot;id&quot;: -100xxx...{`}`}</p>
+                    </div>
                   </div>
                 </div>
               )}
