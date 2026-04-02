@@ -1,14 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import crypto from "crypto";
+import { sendNewOrderNotifications } from "@/lib/notifications";
 
-const MIDTRANS_SERVER_KEY = process.env.MIDTRANS_SERVER_KEY || "";
+// Get Midtrans server key from settings or env
+async function getMidtransServerKey(): Promise<string> {
+  try {
+    const supabase = await createAdminClient();
+    const { data } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "integrations")
+      .single();
+    
+    return data?.value?.midtransServerKey || process.env.MIDTRANS_SERVER_KEY || "";
+  } catch {
+    return process.env.MIDTRANS_SERVER_KEY || "";
+  }
+}
 
 // Verify Midtrans signature
-function verifySignature(orderId: string, statusCode: string, grossAmount: string, signatureKey: string): boolean {
+function verifySignature(orderId: string, statusCode: string, grossAmount: string, signatureKey: string, serverKey: string): boolean {
   const hash = crypto
     .createHash("sha512")
-    .update(`${orderId}${statusCode}${grossAmount}${MIDTRANS_SERVER_KEY}`)
+    .update(`${orderId}${statusCode}${grossAmount}${serverKey}`)
     .digest("hex");
   return hash === signatureKey;
 }
@@ -26,8 +41,10 @@ export async function POST(request: NextRequest) {
       payment_type,
     } = body;
 
+    const serverKey = await getMidtransServerKey();
+
     // Verify signature
-    if (!verifySignature(order_id, status_code, gross_amount, signature_key)) {
+    if (!verifySignature(order_id, status_code, gross_amount, signature_key, serverKey)) {
       console.error("Invalid signature for order:", order_id);
       return NextResponse.json({ error: "Invalid signature" }, { status: 403 });
     }
@@ -37,7 +54,7 @@ export async function POST(request: NextRequest) {
     // Find order by Midtrans order ID
     const { data: order, error } = await supabase
       .from("orders")
-      .select("id, order_id, status")
+      .select("*")
       .eq("midtrans_order_id", order_id)
       .single();
 
@@ -77,6 +94,27 @@ export async function POST(request: NextRequest) {
       .eq("id", order.id);
 
     console.log(`Payment notification: Order ${order.order_id} - ${transaction_status} - ${paymentStatus}`);
+
+    // Send notifications when payment is confirmed
+    if (paymentStatus === "paid" && order.status !== "confirmed") {
+      const orderData = {
+        order_id: order.order_id,
+        username: order.username,
+        current_rank: order.current_rank,
+        target_rank: order.target_rank,
+        package: order.package,
+        price: order.price || order.total_price,
+        whatsapp: order.whatsapp,
+        email: order.email,
+        status: orderStatus,
+        is_express: order.is_express,
+        is_premium: order.is_premium,
+        notes: order.notes,
+      };
+      
+      // Send all notifications (Telegram admin, WA, Email)
+      sendNewOrderNotifications(orderData).catch(console.error);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

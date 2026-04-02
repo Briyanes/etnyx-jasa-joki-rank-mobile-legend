@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import { verifyAdmin } from "@/lib/admin-auth";
 import { sanitizeInput, isValidRank } from "@/lib/validation";
+import { sendNewOrderNotifications, sendOrderConfirmedNotifications, sendOrderCompletedNotifications } from "@/lib/notifications";
 
 export async function GET(request: Request) {
   const auth = await verifyAdmin();
@@ -130,6 +131,15 @@ export async function PATCH(request: Request) {
 
     const supabase = await createAdminClient();
 
+    // Get current order state before update
+    const { data: currentOrder } = await supabase
+      .from("orders")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    const previousStatus = currentOrder?.status;
+
     const { data, error } = await supabase
       .from("orders")
       .update(updates)
@@ -138,6 +148,34 @@ export async function PATCH(request: Request) {
       .single();
 
     if (error) throw error;
+
+    // Send notifications based on status change
+    if (updates.status && updates.status !== previousStatus) {
+      const orderData = {
+        order_id: data.order_id,
+        username: data.username,
+        current_rank: data.current_rank,
+        target_rank: data.target_rank,
+        package: data.package,
+        price: data.price,
+        whatsapp: data.whatsapp,
+        email: data.email,
+        status: data.status,
+        is_express: data.is_express,
+        is_premium: data.is_premium,
+        notes: data.notes,
+      };
+
+      // Status: confirmed/in_progress -> notify worker + customer
+      if (updates.status === "confirmed" || updates.status === "in_progress") {
+        sendOrderConfirmedNotifications(orderData).catch(console.error);
+      }
+      
+      // Status: completed -> notify customer
+      if (updates.status === "completed") {
+        sendOrderCompletedNotifications(orderData).catch(console.error);
+      }
+    }
 
     return NextResponse.json(data);
   } catch (error) {

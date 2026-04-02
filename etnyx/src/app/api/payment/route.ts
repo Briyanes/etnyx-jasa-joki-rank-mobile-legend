@@ -1,11 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
+import { sendNewOrderNotifications } from "@/lib/notifications";
 
-const MIDTRANS_SERVER_KEY = process.env.MIDTRANS_SERVER_KEY || "";
-const MIDTRANS_IS_PRODUCTION = process.env.MIDTRANS_IS_PRODUCTION === "true";
-const MIDTRANS_API_URL = MIDTRANS_IS_PRODUCTION
-  ? "https://app.midtrans.com/snap/v1/transactions"
-  : "https://app.sandbox.midtrans.com/snap/v1/transactions";
+// Get Midtrans settings from database or env
+async function getMidtransSettings() {
+  try {
+    const supabase = await createAdminClient();
+    const { data } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "integrations")
+      .single();
+    
+    const settings = data?.value || {};
+    return {
+      serverKey: settings.midtransServerKey || process.env.MIDTRANS_SERVER_KEY || "",
+      isProduction: settings.midtransIsProduction ?? (process.env.MIDTRANS_IS_PRODUCTION === "true"),
+    };
+  } catch {
+    return {
+      serverKey: process.env.MIDTRANS_SERVER_KEY || "",
+      isProduction: process.env.MIDTRANS_IS_PRODUCTION === "true",
+    };
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,7 +38,7 @@ export async function POST(request: NextRequest) {
     // Check if order exists
     const { data: order, error: orderError } = await supabase
       .from("orders")
-      .select("id, order_id, total_price, status")
+      .select("*")
       .eq("order_id", orderId)
       .single();
 
@@ -31,6 +49,12 @@ export async function POST(request: NextRequest) {
     if (order.status !== "pending") {
       return NextResponse.json({ error: "Order already processed" }, { status: 400 });
     }
+
+    // Get Midtrans settings
+    const midtrans = await getMidtransSettings();
+    const MIDTRANS_API_URL = midtrans.isProduction
+      ? "https://app.midtrans.com/snap/v1/transactions"
+      : "https://app.sandbox.midtrans.com/snap/v1/transactions";
 
     // Use verified price from database, not client-supplied amount
     const verifiedAmount = order.total_price || amount;
@@ -66,7 +90,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Create Midtrans transaction
-    const auth = Buffer.from(`${MIDTRANS_SERVER_KEY}:`).toString("base64");
+    const auth = Buffer.from(`${midtrans.serverKey}:`).toString("base64");
 
     const response = await fetch(MIDTRANS_API_URL, {
       method: "POST",
