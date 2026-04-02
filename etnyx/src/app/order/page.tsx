@@ -1076,7 +1076,7 @@ function OrderPageContent() {
                   {/* Rank Selection Grid */}
                   <div className="mb-5">
                     <h3 className="text-text font-bold text-base mb-4">{t.selectRank}</h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                       {PER_STAR_RANKS.map((rank) => {
                         const isSelected = selectedStarRank?.id === rank.id;
                         return (
