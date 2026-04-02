@@ -81,7 +81,7 @@ export default function PricingSection() {
   const [packageHighlights, setPackageHighlights] = useState(defaultHighlights);
 
   useEffect(() => {
-    fetch("/api/settings?keys=pricing_catalog")
+    fetch("/api/settings?keys=pricing_catalog,perstar_pricing")
       .then((res) => res.json())
       .then((data) => {
         if (data.pricing_catalog && Array.isArray(data.pricing_catalog)) {
@@ -90,11 +90,15 @@ export default function PricingSection() {
           const paketGm = catalog.find((c) => c.id === "paket-gm");
           const promo = catalog.find((c) => c.id === "promo");
 
+          // Use perstar_pricing for more accurate per-star min price
+          const perStarMin = data.perstar_pricing && Array.isArray(data.perstar_pricing) && data.perstar_pricing.length > 0
+            ? Math.min(...data.perstar_pricing.map((t: { price: number }) => t.price))
+            : perStar?.packages?.length ? Math.min(...perStar.packages.map((p) => p.price)) : null;
+
           setPackageHighlights((prev) =>
             prev.map((h) => {
-              if (h.id === "per-star" && perStar?.packages?.length) {
-                const minPrice = Math.min(...perStar.packages.map((p) => p.price));
-                return { ...h, priceLabel: formatPriceLabel(minPrice) };
+              if (h.id === "per-star" && perStarMin) {
+                return { ...h, priceLabel: formatPriceLabel(perStarMin) };
               }
               if (h.id === "paket-rank" && paketGm?.packages?.length) {
                 const minPrice = Math.min(...paketGm.packages.map((p) => p.price));

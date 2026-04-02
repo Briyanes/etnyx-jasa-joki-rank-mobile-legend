@@ -412,6 +412,7 @@ function OrderPageContent() {
   const [orderMode, setOrderMode] = useState<"paket" | "perstar">("paket");
   const [selectedStarRank, setSelectedStarRank] = useState<PerStarRank | null>(null);
   const [starQuantity, setStarQuantity] = useState(3); // minimum 3 stars
+  const [perStarRanks, setPerStarRanks] = useState<PerStarRank[]>(PER_STAR_RANKS);
 
   const markTouched = useCallback((field: string) => {
     setTouched((prev) => ({ ...prev, [field]: true }));
@@ -465,6 +466,18 @@ function OrderPageContent() {
         }
       })
       .catch(() => {/* keep default catalog */});
+  }, []);
+
+  // Fetch per-star pricing from CMS
+  useEffect(() => {
+    fetch("/api/settings?keys=perstar_pricing")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.perstar_pricing && Array.isArray(data.perstar_pricing) && data.perstar_pricing.length > 0) {
+          setPerStarRanks(data.perstar_pricing);
+        }
+      })
+      .catch(() => {/* keep default per-star ranks */});
   }, []);
 
   // Pre-fill from query params
@@ -1097,7 +1110,7 @@ function OrderPageContent() {
                   <div className="mb-5">
                     <h3 className="text-text font-bold text-base mb-4">{t.selectRank}</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                      {PER_STAR_RANKS.map((rank) => {
+                      {perStarRanks.map((rank) => {
                         const isSelected = selectedStarRank?.id === rank.id;
                         return (
                           <button
