@@ -1,4 +1,5 @@
 "use client";
+// Force rebuild v2 - tier icons fix
 
 import { useState, useCallback, useEffect, Suspense } from "react";
 import Image from "next/image";
