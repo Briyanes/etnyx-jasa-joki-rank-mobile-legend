@@ -12,11 +12,21 @@ interface HeroSettings {
   ctaPrimary?: string;
   ctaSecondary?: string;
   isVisible?: boolean;
+  backgroundImages?: string[];
 }
 
 export default function HeroSection() {
   const { locale } = useLanguage();
   const [cms, setCms] = useState<HeroSettings | null>(null);
+  const [currentBgIndex, setCurrentBgIndex] = useState(0);
+
+  // Default background images
+  const defaultBackgrounds = [
+    "/gloo-patrick-star.webp",
+    "/cyclops-spongebob.webp",
+  ];
+
+  const backgroundImages = cms?.backgroundImages?.length ? cms.backgroundImages : defaultBackgrounds;
 
   useEffect(() => {
     fetch("/api/settings?keys=hero")
@@ -24,6 +34,15 @@ export default function HeroSection() {
       .then((data) => { if (data.hero) setCms(data.hero); })
       .catch(() => {});
   }, []);
+
+  // Background slideshow effect
+  useEffect(() => {
+    if (backgroundImages.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentBgIndex((prev) => (prev + 1) % backgroundImages.length);
+    }, 5000); // Change every 5 seconds
+    return () => clearInterval(interval);
+  }, [backgroundImages.length]);
   
   const content = {
     id: {
@@ -64,14 +83,24 @@ export default function HeroSection() {
 
   return (
     <section className="pt-36 sm:pt-32 pb-4 sm:pb-8 px-4 sm:px-6 lg:px-8 sm:min-h-[85vh] lg:h-screen flex items-start sm:items-center relative overflow-hidden">
-      {/* Background Image with Overlay */}
+      {/* Background Images with Slideshow */}
       <div className="absolute inset-0 z-0">
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: `url('/hero-bg.jpg')`,
-          }}
-        />
+        {backgroundImages.map((img, index) => (
+          <div
+            key={img}
+            className={`absolute inset-0 transition-opacity duration-1000 ${
+              index === currentBgIndex ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            <Image
+              src={img}
+              alt="Hero Background"
+              fill
+              className="object-cover object-center"
+              priority={index === 0}
+            />
+          </div>
+        ))}
         {/* Dark Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/95 to-background/80" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/50" />
