@@ -30,7 +30,7 @@ import {
   Plus,
 } from "lucide-react";
 
-type LoginMethod = "userid" | "moonton";
+type LoginMethod = "moonton" | "facebook" | "google" | "tiktok" | "vk" | "apple";
 
 interface OrderForm {
   loginMethod: LoginMethod;
@@ -48,6 +48,16 @@ interface OrderForm {
   whatsapp: string;
   email: string;
 }
+
+// Login method options
+const LOGIN_METHODS: { id: LoginMethod; name: string; icon: string }[] = [
+  { id: "moonton", name: "Moonton", icon: "🎮" },
+  { id: "facebook", name: "Facebook", icon: "📘" },
+  { id: "google", name: "Google/Gmail", icon: "📧" },
+  { id: "tiktok", name: "TikTok", icon: "🎵" },
+  { id: "vk", name: "VK", icon: "💬" },
+  { id: "apple", name: "Apple ID", icon: "🍎" },
+];
 
 // Product catalog types
 interface ProductPackage {
@@ -209,21 +219,20 @@ const translations = {
     // Step 2
     accountData: "Data Akun Game",
     loginMethod: "Metode Login",
-    loginUserId: "Login via User ID + Zone",
-    loginMoonton: "Login via Moonton",
-    labelUserId: "User ID + Zone ID",
-    placeholderUserId: "Contoh: 123456789 (1234)",
-    labelNickname: "Nickname Akun",
-    placeholderNickname: "Nama karakter di game",
-    labelAccountLogin: "Akun Moonton (Email/No. HP)",
-    placeholderAccountLogin: "Email atau nomor HP yang terdaftar",
-    labelPassword: "Password Moonton",
-    placeholderPassword: "Password akun Moonton",
-    labelHero: "Hero Request (Opsional)",
-    placeholderHero: "Contoh: Chou, Ling, Fanny",
+    selectLoginMethod: "Pilih metode login akun ML kamu",
+    labelUserId: "User ID Game",
+    placeholderUserId: "Contoh: 123456789(1234)",
+    labelNickname: "Nickname / IGN",
+    placeholderNickname: "Nickname dalam game",
+    labelAccountLogin: "Email / No. HP",
+    placeholderAccountLogin: "Email atau No HP terdaftar",
+    labelPassword: "Password",
+    placeholderPassword: "Password akun ML",
+    labelHero: "Request Hero (Min. 3 Hero)",
+    placeholderHero: "Contoh: Lancelot, Fanny, Ling",
     heroDesc: "Jika tidak diisi, pilot akan bermain hero terbaik mereka",
-    labelNotes: "Catatan (Opsional)",
-    placeholderNotes: "Informasi tambahan untuk pilot",
+    labelNotes: "Catatan Untuk Penjoki",
+    placeholderNotes: "Catatan khusus (opsional)",
     // Step 3
     optionsPromo: "Opsi & Promo",
     addons: "Add-ons",
@@ -298,21 +307,20 @@ const translations = {
     // Step 2
     accountData: "Game Account Data",
     loginMethod: "Login Method",
-    loginUserId: "Login via User ID + Zone",
-    loginMoonton: "Login via Moonton",
-    labelUserId: "User ID + Zone ID",
-    placeholderUserId: "Example: 123456789 (1234)",
-    labelNickname: "Account Nickname",
-    placeholderNickname: "In-game character name",
-    labelAccountLogin: "Moonton Account (Email/Phone)",
-    placeholderAccountLogin: "Registered email or phone number",
-    labelPassword: "Moonton Password",
-    placeholderPassword: "Moonton account password",
-    labelHero: "Hero Request (Optional)",
-    placeholderHero: "Example: Chou, Ling, Fanny",
+    selectLoginMethod: "Select your ML account login method",
+    labelUserId: "Game User ID",
+    placeholderUserId: "Example: 123456789(1234)",
+    labelNickname: "Nickname / IGN",
+    placeholderNickname: "In-game nickname",
+    labelAccountLogin: "Email / Phone",
+    placeholderAccountLogin: "Registered email or phone",
+    labelPassword: "Password",
+    placeholderPassword: "ML account password",
+    labelHero: "Hero Request (Min. 3 Heroes)",
+    placeholderHero: "Example: Lancelot, Fanny, Ling",
     heroDesc: "If empty, pilot will play their best heroes",
-    labelNotes: "Notes (Optional)",
-    placeholderNotes: "Additional info for pilot",
+    labelNotes: "Notes for Booster",
+    placeholderNotes: "Special notes (optional)",
     // Step 3
     optionsPromo: "Options & Promo",
     addons: "Add-ons",
@@ -411,7 +419,7 @@ function OrderPageContent() {
   const STEPS = t.steps;
 
   const [form, setForm] = useState<OrderForm>({
-    loginMethod: "userid",
+    loginMethod: "moonton",
     userId: "",
     nickname: "",
     accountLogin: "",
@@ -581,10 +589,10 @@ function OrderPageContent() {
           }
         case 2:
           return !!(
+            form.userId &&
             form.nickname &&
             form.accountLogin &&
-            form.accountPassword &&
-            (form.loginMethod !== "userid" || form.userId)
+            form.accountPassword
           );
         case 3:
           return true; // optional step
@@ -696,10 +704,10 @@ function OrderPageContent() {
 
   const canSubmit =
     selectedPackage &&
+    form.userId &&
     form.nickname &&
     form.accountLogin &&
     form.accountPassword &&
-    (form.loginMethod !== "userid" || form.userId) &&
     form.whatsapp &&
     form.whatsapp.length >= 10 &&
     isValidEmail(form.email);
@@ -1205,82 +1213,73 @@ function OrderPageContent() {
               <h2 className="font-bold text-text">{t.accountData}</h2>
             </div>
             <div className="p-5 space-y-4">
+              {/* Login Method Dropdown */}
               <div>
                 <label className="block text-sm text-text-muted mb-2 font-medium">
                   {t.loginMethod}
                 </label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    onClick={() => updateForm({ loginMethod: "userid" })}
-                    className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                      form.loginMethod === "userid"
-                        ? "gradient-primary text-white"
-                        : "bg-background border border-white/10 text-text-muted hover:border-white/20"
-                    }`}
-                  >
-                    <User className="w-4 h-4 inline mr-1.5" />
-                    User ID & Nickname
-                  </button>
-                  <button
-                    onClick={() => updateForm({ loginMethod: "moonton" })}
-                    className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                      form.loginMethod === "moonton"
-                        ? "gradient-primary text-white"
-                        : "bg-background border border-white/10 text-text-muted hover:border-white/20"
-                    }`}
-                  >
-                    <Gamepad2 className="w-4 h-4 inline mr-1.5" />
-                    Email / Moonton ID
-                  </button>
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                  {LOGIN_METHODS.map((method) => (
+                    <button
+                      key={method.id}
+                      onClick={() => updateForm({ loginMethod: method.id })}
+                      className={`px-3 py-2.5 rounded-xl text-xs font-medium transition-all flex flex-col items-center gap-1 ${
+                        form.loginMethod === method.id
+                          ? "gradient-primary text-white"
+                          : "bg-background border border-white/10 text-text-muted hover:border-white/20"
+                      }`}
+                    >
+                      <span className="text-lg">{method.icon}</span>
+                      <span>{method.name}</span>
+                    </button>
+                  ))}
                 </div>
               </div>
 
-              {form.loginMethod === "userid" && (
-                <div>
-                  <label className="block text-sm text-text-muted mb-1.5">
-                    User ID Game
-                  </label>
-                  <input
-                    type="text"
-                    value={form.userId}
-                    onChange={(e) => updateForm({ userId: e.target.value })}
-                    onBlur={() => markTouched("userId")}
-                    placeholder="Contoh: 123456789"
-                    className={`w-full bg-background border rounded-xl px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none transition-colors ${
-                      touched.userId && !form.userId ? "border-red-500" : "border-white/10"
-                    }`}
-                  />
-                  {touched.userId && !form.userId && (
-                    <p className="text-red-400 text-xs mt-1">User ID wajib diisi</p>
-                  )}
-                </div>
-              )}
+              {/* User ID Game */}
+              <div>
+                <label className="block text-sm text-text-muted mb-1.5">
+                  {t.labelUserId} <span className="text-error">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={form.userId}
+                  onChange={(e) => updateForm({ userId: e.target.value })}
+                  onBlur={() => markTouched("userId")}
+                  placeholder={t.placeholderUserId}
+                  className={`w-full bg-background border rounded-xl px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none transition-colors ${
+                    touched.userId && !form.userId ? "border-red-500" : "border-white/10"
+                  }`}
+                />
+                {touched.userId && !form.userId && (
+                  <p className="text-red-400 text-xs mt-1">{t.required}</p>
+                )}
+              </div>
 
               <div className="grid sm:grid-cols-2 gap-4">
+                {/* Nickname */}
                 <div>
                   <label className="block text-sm text-text-muted mb-1.5">
-                    Nickname / IGN <span className="text-error">*</span>
+                    {t.labelNickname} <span className="text-error">*</span>
                   </label>
                   <input
                     type="text"
                     value={form.nickname}
                     onChange={(e) => updateForm({ nickname: e.target.value })}
                     onBlur={() => markTouched("nickname")}
-                    placeholder="Nickname dalam game"
+                    placeholder={t.placeholderNickname}
                     className={`w-full bg-background border rounded-xl px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none transition-colors ${
                       touched.nickname && !form.nickname ? "border-red-500" : "border-white/10"
                     }`}
                   />
                   {touched.nickname && !form.nickname && (
-                    <p className="text-red-400 text-xs mt-1">Nickname wajib diisi</p>
+                    <p className="text-red-400 text-xs mt-1">{t.required}</p>
                   )}
                 </div>
+                {/* Email / No HP */}
                 <div>
                   <label className="block text-sm text-text-muted mb-1.5">
-                    {form.loginMethod === "moonton"
-                      ? "Email / Moonton ID"
-                      : "Email / No. HP"}{" "}
-                    <span className="text-error">*</span>
+                    {t.labelAccountLogin} <span className="text-error">*</span>
                   </label>
                   <input
                     type="text"
@@ -1289,24 +1288,21 @@ function OrderPageContent() {
                       updateForm({ accountLogin: e.target.value })
                     }
                     onBlur={() => markTouched("accountLogin")}
-                    placeholder={
-                      form.loginMethod === "moonton"
-                        ? "Email atau Moonton ID"
-                        : "Email atau No HP terdaftar"
-                    }
+                    placeholder={t.placeholderAccountLogin}
                     className={`w-full bg-background border rounded-xl px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none transition-colors ${
                       touched.accountLogin && !form.accountLogin ? "border-red-500" : "border-white/10"
                     }`}
                   />
                   {touched.accountLogin && !form.accountLogin && (
-                    <p className="text-red-400 text-xs mt-1">Login wajib diisi</p>
+                    <p className="text-red-400 text-xs mt-1">{t.required}</p>
                   )}
                 </div>
               </div>
 
+              {/* Password */}
               <div>
                 <label className="block text-sm text-text-muted mb-1.5">
-                  Password <span className="text-error">*</span>
+                  {t.labelPassword} <span className="text-error">*</span>
                 </label>
                 <input
                   type="password"
@@ -1315,19 +1311,20 @@ function OrderPageContent() {
                     updateForm({ accountPassword: e.target.value })
                   }
                   onBlur={() => markTouched("accountPassword")}
-                  placeholder="Password akun ML"
+                  placeholder={t.placeholderPassword}
                   className={`w-full bg-background border rounded-xl px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none transition-colors ${
                     touched.accountPassword && !form.accountPassword ? "border-red-500" : "border-white/10"
                   }`}
                 />
                 {touched.accountPassword && !form.accountPassword && (
-                  <p className="text-red-400 text-xs mt-1">Password wajib diisi</p>
+                  <p className="text-red-400 text-xs mt-1">{t.required}</p>
                 )}
               </div>
 
+              {/* Hero Request */}
               <div>
                 <label className="block text-sm text-text-muted mb-1.5">
-                  Request Hero (Min. 3 Hero)
+                  {t.labelHero}
                 </label>
                 <input
                   type="text"
@@ -1335,19 +1332,20 @@ function OrderPageContent() {
                   onChange={(e) =>
                     updateForm({ heroRequest: e.target.value })
                   }
-                  placeholder="Contoh: Lancelot, Fanny, Ling"
+                  placeholder={t.placeholderHero}
                   className="w-full bg-background border border-white/10 rounded-xl px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none transition-colors"
                 />
               </div>
 
+              {/* Notes */}
               <div>
                 <label className="block text-sm text-text-muted mb-1.5">
-                  Catatan Untuk Penjoki
+                  {t.labelNotes}
                 </label>
                 <textarea
                   value={form.notes}
                   onChange={(e) => updateForm({ notes: e.target.value })}
-                  placeholder="Catatan khusus (opsional)"
+                  placeholder={t.placeholderNotes}
                   rows={2}
                   className="w-full bg-background border border-white/10 rounded-xl px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none transition-colors resize-none"
                 />
@@ -1597,9 +1595,11 @@ function OrderPageContent() {
                   <div className="grid grid-cols-2 gap-y-2 text-sm">
                     <span className="text-text-muted">Nickname</span>
                     <span className="text-text font-medium">{form.nickname || "-"}</span>
+                    <span className="text-text-muted">User ID</span>
+                    <span className="text-text font-medium">{form.userId || "-"}</span>
                     <span className="text-text-muted">Login Via</span>
                     <span className="text-text font-medium">
-                      {form.loginMethod === "moonton" ? "Moonton" : "User ID"}
+                      {LOGIN_METHODS.find(m => m.id === form.loginMethod)?.name || form.loginMethod}
                     </span>
                     {form.heroRequest && (
                       <>
