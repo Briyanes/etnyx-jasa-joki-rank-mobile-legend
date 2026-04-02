@@ -440,13 +440,29 @@ function OrderPageContent() {
     email: "",
   });
 
-  // Fetch pricing catalog from CMS
+  // Fetch pricing catalog from CMS, merge rankKey from defaults
   useEffect(() => {
+    // Build lookup: package id -> rankKey from DEFAULT_CATALOG
+    const defaultRankKeys: Record<string, string> = {};
+    for (const cat of DEFAULT_CATALOG) {
+      for (const pkg of cat.packages) {
+        defaultRankKeys[pkg.id] = pkg.rankKey;
+      }
+    }
+
     fetch("/api/settings?keys=pricing_catalog")
       .then((res) => res.json())
       .then((data) => {
         if (data.pricing_catalog && Array.isArray(data.pricing_catalog) && data.pricing_catalog.length > 0) {
-          setCatalog(data.pricing_catalog);
+          // Ensure rankKey is always from DEFAULT_CATALOG (code is source of truth for icons)
+          const merged = data.pricing_catalog.map((cat: PackageCategory) => ({
+            ...cat,
+            packages: cat.packages.map((pkg: ProductPackage) => ({
+              ...pkg,
+              rankKey: defaultRankKeys[pkg.id] || pkg.rankKey,
+            })),
+          }));
+          setCatalog(merged);
         }
       })
       .catch(() => {/* keep default catalog */});
