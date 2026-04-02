@@ -141,8 +141,18 @@ interface SectionVisibility { hero: boolean; liveCounter: boolean; howItWorks: b
 interface TrackingPixels { metaPixelId: string; metaAccessToken: string; googleAdsId: string; googleAdsConversionLabel: string; googleAnalyticsId: string; tiktokPixelId: string; isMetaEnabled: boolean; isGoogleAdsEnabled: boolean; isGoogleAnalyticsEnabled: boolean; isTiktokEnabled: boolean; }
 interface SocialLinks { instagram: string; facebook: string; tiktok: string; youtube: string; whatsapp: string; }
 interface SiteInfo { siteName: string; taglineId: string; taglineEn: string; supportEmail: string; companyName: string; }
+interface IntegrationSettings { 
+  midtransClientKey: string; 
+  midtransServerKey: string; 
+  midtransMerchantId: string; 
+  midtransIsProduction: boolean;
+  resendApiKey: string;
+  resendFromEmail: string;
+  fonnteApiToken: string;
+  fonnteDeviceId: string;
+}
 
-type SettingsSubTab = "cms-sections" | "hero" | "banner" | "faq" | "team" | "social" | "site" | "pixels" | "general";
+type SettingsSubTab = "cms-sections" | "hero" | "banner" | "faq" | "team" | "social" | "site" | "pixels" | "integrations" | "general";
 
 type TabType = "overview" | "orders" | "boosters" | "testimonials" | "portfolio" | "promo" | "customers" | "pricing" | "settings";
 
@@ -207,6 +217,11 @@ export default function AdminDashboard() {
   const [trackingPixels, setTrackingPixels] = useState<TrackingPixels>({ metaPixelId: "", metaAccessToken: "", googleAdsId: "", googleAdsConversionLabel: "", googleAnalyticsId: "", tiktokPixelId: "", isMetaEnabled: false, isGoogleAdsEnabled: false, isGoogleAnalyticsEnabled: false, isTiktokEnabled: false });
   const [socialLinks, setSocialLinks] = useState<SocialLinks>({ instagram: "", facebook: "", tiktok: "", youtube: "", whatsapp: "" });
   const [siteInfo, setSiteInfo] = useState<SiteInfo>({ siteName: "", taglineId: "", taglineEn: "", supportEmail: "", companyName: "" });
+  const [integrations, setIntegrations] = useState<IntegrationSettings>({ 
+    midtransClientKey: "", midtransServerKey: "", midtransMerchantId: "", midtransIsProduction: false,
+    resendApiKey: "", resendFromEmail: "noreply@etnyx.com",
+    fonnteApiToken: "", fonnteDeviceId: ""
+  });
 
   // Auth
   const checkAuth = useCallback(async () => {
@@ -266,6 +281,7 @@ export default function AdminDashboard() {
       if (settings.tracking_pixels) setTrackingPixels(settings.tracking_pixels);
       if (settings.social_links) setSocialLinks(settings.social_links);
       if (settings.site_info) setSiteInfo(settings.site_info);
+      if (settings.integrations) setIntegrations(settings.integrations);
     } catch (err) { console.error("Failed to fetch CMS settings:", err); }
   }, []);
 
@@ -442,6 +458,7 @@ export default function AdminDashboard() {
     { id: "social", label: "Sosial", icon: Share2 },
     { id: "site", label: "Info Situs", icon: Building },
     { id: "pixels", label: "Pixels", icon: BarChart3 },
+    { id: "integrations", label: "Integrasi", icon: Zap },
     { id: "general", label: "General", icon: Settings2 },
   ];
 
@@ -1470,6 +1487,93 @@ export default function AdminDashboard() {
                       <input type="text" value={trackingPixels.tiktokPixelId} onChange={(e) => setTrackingPixels({ ...trackingPixels, tiktokPixelId: e.target.value })}
                         placeholder="CXXXXXXXXXXXXXXX" className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Integrations (Payment, Email, WhatsApp) */}
+              {settingsSubTab === "integrations" && (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-lg font-bold text-text">Integrasi API</h2>
+                      <p className="text-text-muted text-xs mt-1">Setup Payment Gateway, Email, dan WhatsApp API</p>
+                    </div>
+                    <CmsSaveButton settingKey="integrations" value={integrations} />
+                  </div>
+
+                  {/* Midtrans */}
+                  <div className="bg-surface rounded-xl border border-white/5 p-6 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-text font-bold text-sm">💳 Midtrans Payment Gateway</h3>
+                        <p className="text-text-muted text-xs mt-0.5">Terima pembayaran via QRIS, VA, E-Wallet, dll</p>
+                      </div>
+                      <button onClick={() => setIntegrations({ ...integrations, midtransIsProduction: !integrations.midtransIsProduction })}
+                        className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${integrations.midtransIsProduction ? "bg-green-500/20 text-green-400" : "bg-yellow-500/20 text-yellow-400"}`}>
+                        {integrations.midtransIsProduction ? "PRODUCTION" : "SANDBOX"}
+                      </button>
+                    </div>
+                    <div>
+                      <label className="block text-sm text-text-muted mb-1.5">Client Key</label>
+                      <input type="text" value={integrations.midtransClientKey} onChange={(e) => setIntegrations({ ...integrations, midtransClientKey: e.target.value })}
+                        placeholder="SB-Mid-client-xxx atau Mid-client-xxx" className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-text-muted mb-1.5">Server Key</label>
+                      <input type="password" value={integrations.midtransServerKey} onChange={(e) => setIntegrations({ ...integrations, midtransServerKey: e.target.value })}
+                        placeholder="SB-Mid-server-xxx atau Mid-server-xxx" className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-text-muted mb-1.5">Merchant ID</label>
+                      <input type="text" value={integrations.midtransMerchantId} onChange={(e) => setIntegrations({ ...integrations, midtransMerchantId: e.target.value })}
+                        placeholder="G123456789" className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
+                    </div>
+                    <p className="text-text-muted text-xs">
+                      📖 Dapatkan credentials di <a href="https://dashboard.midtrans.com" target="_blank" rel="noopener" className="text-accent hover:underline">dashboard.midtrans.com</a> → Settings → Access Keys
+                    </p>
+                  </div>
+
+                  {/* Resend Email */}
+                  <div className="bg-surface rounded-xl border border-white/5 p-6 space-y-4">
+                    <div>
+                      <h3 className="text-text font-bold text-sm">📧 Resend (Email API)</h3>
+                      <p className="text-text-muted text-xs mt-0.5">Kirim email konfirmasi order ke customer</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm text-text-muted mb-1.5">API Key</label>
+                      <input type="password" value={integrations.resendApiKey} onChange={(e) => setIntegrations({ ...integrations, resendApiKey: e.target.value })}
+                        placeholder="re_xxxxxxxx" className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-text-muted mb-1.5">From Email</label>
+                      <input type="email" value={integrations.resendFromEmail} onChange={(e) => setIntegrations({ ...integrations, resendFromEmail: e.target.value })}
+                        placeholder="noreply@etnyx.com" className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none" />
+                    </div>
+                    <p className="text-text-muted text-xs">
+                      📖 Dapatkan API Key di <a href="https://resend.com/api-keys" target="_blank" rel="noopener" className="text-accent hover:underline">resend.com/api-keys</a>
+                    </p>
+                  </div>
+
+                  {/* Fonnte WhatsApp */}
+                  <div className="bg-surface rounded-xl border border-white/5 p-6 space-y-4">
+                    <div>
+                      <h3 className="text-text font-bold text-sm">💬 Fonnte (WhatsApp API)</h3>
+                      <p className="text-text-muted text-xs mt-0.5">Kirim notifikasi order via WhatsApp</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm text-text-muted mb-1.5">API Token</label>
+                      <input type="password" value={integrations.fonnteApiToken} onChange={(e) => setIntegrations({ ...integrations, fonnteApiToken: e.target.value })}
+                        placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-text-muted mb-1.5">Device ID (opsional)</label>
+                      <input type="text" value={integrations.fonnteDeviceId} onChange={(e) => setIntegrations({ ...integrations, fonnteDeviceId: e.target.value })}
+                        placeholder="628xxxxxxxxxx" className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
+                    </div>
+                    <p className="text-text-muted text-xs">
+                      📖 Dapatkan Token di <a href="https://md.fonnte.com/api" target="_blank" rel="noopener" className="text-accent hover:underline">md.fonnte.com</a> → API → Token
+                    </p>
                   </div>
                 </div>
               )}
