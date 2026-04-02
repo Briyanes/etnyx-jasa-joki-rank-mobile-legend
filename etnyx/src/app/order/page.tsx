@@ -28,6 +28,12 @@ import {
   Package,
   Minus,
   Plus,
+  Smartphone,
+  Mail,
+  Music,
+  MessageSquare,
+  Apple,
+  Globe,
 } from "lucide-react";
 
 type LoginMethod = "moonton" | "facebook" | "google" | "tiktok" | "vk" | "apple";
@@ -49,14 +55,14 @@ interface OrderForm {
   email: string;
 }
 
-// Login method options
-const LOGIN_METHODS: { id: LoginMethod; name: string; icon: string }[] = [
-  { id: "moonton", name: "Moonton", icon: "🎮" },
-  { id: "facebook", name: "Facebook", icon: "📘" },
-  { id: "google", name: "Google/Gmail", icon: "📧" },
-  { id: "tiktok", name: "TikTok", icon: "🎵" },
-  { id: "vk", name: "VK", icon: "💬" },
-  { id: "apple", name: "Apple ID", icon: "🍎" },
+// Login method options with Lucide icons
+const LOGIN_METHODS: { id: LoginMethod; name: string; Icon: typeof Gamepad2 }[] = [
+  { id: "moonton", name: "Moonton", Icon: Smartphone },
+  { id: "facebook", name: "Facebook", Icon: Globe },
+  { id: "google", name: "Google", Icon: Mail },
+  { id: "tiktok", name: "TikTok", Icon: Music },
+  { id: "vk", name: "VK", Icon: MessageSquare },
+  { id: "apple", name: "Apple ID", Icon: Apple },
 ];
 
 // Product catalog types
@@ -1219,20 +1225,23 @@ function OrderPageContent() {
                   {t.loginMethod}
                 </label>
                 <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                  {LOGIN_METHODS.map((method) => (
-                    <button
-                      key={method.id}
-                      onClick={() => updateForm({ loginMethod: method.id })}
-                      className={`px-3 py-2.5 rounded-xl text-xs font-medium transition-all flex flex-col items-center gap-1 ${
-                        form.loginMethod === method.id
-                          ? "gradient-primary text-white"
-                          : "bg-background border border-white/10 text-text-muted hover:border-white/20"
-                      }`}
-                    >
-                      <span className="text-lg">{method.icon}</span>
-                      <span>{method.name}</span>
-                    </button>
-                  ))}
+                  {LOGIN_METHODS.map((method) => {
+                    const IconComponent = method.Icon;
+                    return (
+                      <button
+                        key={method.id}
+                        onClick={() => updateForm({ loginMethod: method.id })}
+                        className={`px-3 py-2.5 rounded-xl text-xs font-medium transition-all flex flex-col items-center gap-1 ${
+                          form.loginMethod === method.id
+                            ? "gradient-primary text-white"
+                            : "bg-background border border-white/10 text-text-muted hover:border-white/20"
+                        }`}
+                      >
+                        <IconComponent className="w-5 h-5" />
+                        <span>{method.name}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
