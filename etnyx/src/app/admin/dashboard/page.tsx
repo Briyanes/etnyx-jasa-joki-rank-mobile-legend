@@ -11,6 +11,7 @@ import {
   ShoppingCart, DollarSign, Clock, Activity, ChevronRight, Loader2,
   Plus, Pencil, Trash2, Save, Search, Filter, RefreshCw, LogOut,
   EyeOff, GripVertical, Globe, HelpCircle, Layout, Megaphone, Share2, Building,
+  CreditCard, Mail, MessageCircle, Send, BookOpen,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 
@@ -1510,7 +1511,7 @@ export default function AdminDashboard() {
                   <div className="bg-surface rounded-xl border border-white/5 p-6 space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="text-text font-bold text-sm">💳 Midtrans Payment Gateway</h3>
+                        <h3 className="text-text font-bold text-sm flex items-center gap-2"><CreditCard className="w-4 h-4 text-accent" /> Midtrans Payment Gateway</h3>
                         <p className="text-text-muted text-xs mt-0.5">Terima pembayaran via QRIS, VA, E-Wallet, dll</p>
                       </div>
                       <button onClick={() => setIntegrations({ ...integrations, midtransIsProduction: !integrations.midtransIsProduction })}
@@ -1534,14 +1535,14 @@ export default function AdminDashboard() {
                         placeholder="G123456789" className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
                     </div>
                     <p className="text-text-muted text-xs">
-                      📖 Dapatkan credentials di <a href="https://dashboard.midtrans.com" target="_blank" rel="noopener" className="text-accent hover:underline">dashboard.midtrans.com</a> → Settings → Access Keys
+                      <BookOpen className="w-3 h-3 inline mr-1" /> Dapatkan credentials di <a href="https://dashboard.midtrans.com" target="_blank" rel="noopener" className="text-accent hover:underline">dashboard.midtrans.com</a> → Settings → Access Keys
                     </p>
                   </div>
 
                   {/* Resend Email */}
                   <div className="bg-surface rounded-xl border border-white/5 p-6 space-y-4">
                     <div>
-                      <h3 className="text-text font-bold text-sm">📧 Resend (Email API)</h3>
+                      <h3 className="text-text font-bold text-sm flex items-center gap-2"><Mail className="w-4 h-4 text-accent" /> Resend (Email API)</h3>
                       <p className="text-text-muted text-xs mt-0.5">Kirim email konfirmasi order ke customer</p>
                     </div>
                     <div>
@@ -1555,14 +1556,14 @@ export default function AdminDashboard() {
                         placeholder="noreply@etnyx.com" className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none" />
                     </div>
                     <p className="text-text-muted text-xs">
-                      📖 Dapatkan API Key di <a href="https://resend.com/api-keys" target="_blank" rel="noopener" className="text-accent hover:underline">resend.com/api-keys</a>
+                      <BookOpen className="w-3 h-3 inline mr-1" /> Dapatkan API Key di <a href="https://resend.com/api-keys" target="_blank" rel="noopener" className="text-accent hover:underline">resend.com/api-keys</a>
                     </p>
                   </div>
 
                   {/* Fonnte WhatsApp */}
                   <div className="bg-surface rounded-xl border border-white/5 p-6 space-y-4">
                     <div>
-                      <h3 className="text-text font-bold text-sm">💬 Fonnte (WhatsApp API)</h3>
+                      <h3 className="text-text font-bold text-sm flex items-center gap-2"><MessageCircle className="w-4 h-4 text-accent" /> Fonnte (WhatsApp API)</h3>
                       <p className="text-text-muted text-xs mt-0.5">Kirim notifikasi order via WhatsApp</p>
                     </div>
                     <div>
@@ -1576,14 +1577,14 @@ export default function AdminDashboard() {
                         placeholder="628xxxxxxxxxx" className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
                     </div>
                     <p className="text-text-muted text-xs">
-                      📖 Dapatkan Token di <a href="https://md.fonnte.com/api" target="_blank" rel="noopener" className="text-accent hover:underline">md.fonnte.com</a> → API → Token
+                      <BookOpen className="w-3 h-3 inline mr-1" /> Dapatkan Token di <a href="https://md.fonnte.com/api" target="_blank" rel="noopener" className="text-accent hover:underline">md.fonnte.com</a> → API → Token
                     </p>
                   </div>
 
                   {/* Telegram */}
                   <div className="bg-surface rounded-xl border border-white/5 p-6 space-y-4">
                     <div>
-                      <h3 className="text-text font-bold text-sm">📢 Telegram Bot</h3>
+                      <h3 className="text-text font-bold text-sm flex items-center gap-2"><Send className="w-4 h-4 text-accent" /> Telegram Bot</h3>
                       <p className="text-text-muted text-xs mt-0.5">Notifikasi order ke grup Admin & Worker</p>
                     </div>
                     <div>
@@ -1604,10 +1605,10 @@ export default function AdminDashboard() {
                       <p className="text-text-muted text-xs mt-1">Notifikasi order yang sudah dikonfirmasi untuk dikerjakan</p>
                     </div>
                     <div className="bg-background/50 rounded-lg p-3 text-xs text-text-muted space-y-1">
-                      <p>📖 <strong>Cara mendapatkan Bot Token:</strong></p>
+                      <p><BookOpen className="w-3 h-3 inline mr-1" /> <strong>Cara mendapatkan Bot Token:</strong></p>
                       <p>1. Chat @BotFather di Telegram → /newbot → ikuti instruksi</p>
                       <p>2. Copy token yang diberikan</p>
-                      <p className="mt-2">📖 <strong>Cara mendapatkan Group Chat ID:</strong></p>
+                      <p className="mt-2"><BookOpen className="w-3 h-3 inline mr-1" /> <strong>Cara mendapatkan Group Chat ID:</strong></p>
                       <p>1. Tambahkan bot ke grup</p>
                       <p>2. Kirim pesan di grup</p>
                       <p>3. Buka: api.telegram.org/bot&lt;TOKEN&gt;/getUpdates</p>
