@@ -722,8 +722,8 @@ function OrderPageContent() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          currentRank: form.currentRank,
-          targetRank: form.targetRank,
+          currentRank: selectedPackage?.currentRank || form.currentRank,
+          targetRank: selectedPackage?.targetRank || form.targetRank,
           packageTitle: selectedPackage?.title,
           loginMethod: form.loginMethod,
           userId: form.userId,
