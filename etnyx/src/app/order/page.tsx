@@ -1073,14 +1073,14 @@ function OrderPageContent() {
                           <button
                             key={rank.id}
                             onClick={() => setSelectedStarRank(rank)}
-                            className={`relative text-left rounded-xl border-2 transition-all duration-200 hover:scale-[1.02] overflow-hidden ${
+                            className={`relative text-left rounded-xl border-2 transition-all duration-200 hover:scale-[1.02] overflow-hidden flex flex-col ${
                               isSelected
                                 ? "border-yellow-400 shadow-lg shadow-yellow-400/20"
                                 : "border-white/5 hover:border-white/15"
                             }`}
                           >
-                            <div className="p-4 bg-gradient-to-br from-slate-700/80 to-slate-800/80">
-                              <div className="flex items-center gap-3 mb-2">
+                            <div className="p-4 bg-gradient-to-br from-slate-700/80 to-slate-800/80 flex-1">
+                              <div className="flex items-center gap-3 mb-3">
                                 <Image
                                   src={rank.icon}
                                   alt={rank.name}
@@ -1092,24 +1092,28 @@ function OrderPageContent() {
                                   {rank.name}
                                 </p>
                               </div>
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <p className="text-yellow-400 font-bold text-lg">
-                                    {formatRupiah(rank.price)}
+                              <div>
+                                <p className="text-yellow-400 font-bold text-lg">
+                                  {formatRupiah(rank.price)}
+                                </p>
+                                <p className="text-text-muted text-xs">{t.perStar}</p>
+                                {rank.originalPrice && (
+                                  <p className="text-red-400/70 text-xs line-through mt-1">
+                                    {formatRupiah(rank.originalPrice)}
                                   </p>
-                                  <p className="text-text-muted text-xs">{t.perStar}</p>
-                                </div>
-                                {rank.discountPercent && (
-                                  <span className="bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded text-[10px] font-bold">
-                                    -{rank.discountPercent}%
-                                  </span>
                                 )}
                               </div>
-                              {rank.originalPrice && (
-                                <p className="text-red-400/70 text-xs line-through mt-1">
-                                  {formatRupiah(rank.originalPrice)} {t.perStar}
-                                </p>
+                            </div>
+                            <div className="px-4 py-2.5 bg-slate-800/60 flex items-center justify-end gap-2">
+                              {rank.discountPercent && (
+                                <span className="bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded text-[10px] font-bold">
+                                  Disc {rank.discountPercent}%
+                                </span>
                               )}
+                              <span className="bg-teal-600/30 text-teal-300 px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1">
+                                <Zap className="w-2.5 h-2.5" />
+                                INSTAN
+                              </span>
                             </div>
                             {isSelected && (
                               <div className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-yellow-400 flex items-center justify-center">
