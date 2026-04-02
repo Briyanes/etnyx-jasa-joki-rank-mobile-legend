@@ -111,6 +111,7 @@ interface Booster {
   name: string;
   whatsapp: string;
   rank_specialization: string;
+  specialization: string[] | null;
   is_available: boolean;
   total_orders: number;
   rating: number;
@@ -1457,52 +1458,21 @@ export default function AdminDashboard() {
                 </div>
               )}
 
-              {/* Team Manager */}
+              {/* Team Manager - redirects to Boosters tab */}
               {settingsSubTab === "team" && (
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <h2 className="text-lg font-bold text-text">Tim Booster</h2>
-                      <p className="text-text-muted text-xs mt-1">Kelola anggota tim yang tampil di homepage</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <button onClick={() => setTeamMembers([...teamMembers, { name: "", role: "", specialization: "", rank: "mythicglory", isVisible: true }])}
-                        className="flex items-center gap-1.5 px-3 py-2 bg-surface border border-white/10 rounded-lg text-text text-sm hover:border-white/20 transition-colors">
-                        <Plus className="w-4 h-4" /> Tambah Anggota
-                      </button>
-                      <CmsSaveButton settingKey="team_members" value={teamMembers} />
+                      <p className="text-text-muted text-xs mt-1">Data tim booster sekarang dikelola dari tab Boosters</p>
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {teamMembers.map((member, i) => (
-                      <div key={i} className="bg-surface rounded-xl border border-white/5 p-4 space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-text-muted">Anggota #{i + 1}</span>
-                          <div className="flex items-center gap-2">
-                            <button onClick={() => { const next = [...teamMembers]; next[i] = { ...next[i], isVisible: !next[i].isVisible }; setTeamMembers(next); }}
-                              className={`p-1 rounded ${member.isVisible ? "text-accent" : "text-text-muted"}`}>
-                              {member.isVisible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                            </button>
-                            <button onClick={() => setTeamMembers(teamMembers.filter((_, idx) => idx !== i))}
-                              className="text-text-muted hover:text-red-400 transition-colors">
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                        <input type="text" value={member.name} onChange={(e) => { const next = [...teamMembers]; next[i] = { ...next[i], name: e.target.value }; setTeamMembers(next); }}
-                          placeholder="Nama" className="w-full bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-sm focus:border-accent focus:outline-none" />
-                        <input type="text" value={member.role} onChange={(e) => { const next = [...teamMembers]; next[i] = { ...next[i], role: e.target.value }; setTeamMembers(next); }}
-                          placeholder="Role (e.g. Mythic Glory Booster)" className="w-full bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-sm focus:border-accent focus:outline-none" />
-                        <div className="grid grid-cols-2 gap-3">
-                          <input type="text" value={member.specialization} onChange={(e) => { const next = [...teamMembers]; next[i] = { ...next[i], specialization: e.target.value }; setTeamMembers(next); }}
-                            placeholder="Spesialisasi" className="w-full bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-sm focus:border-accent focus:outline-none" />
-                          <select value={member.rank} onChange={(e) => { const next = [...teamMembers]; next[i] = { ...next[i], rank: e.target.value }; setTeamMembers(next); }}
-                            className="w-full bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-sm focus:border-accent focus:outline-none">
-                            {CMS_RANK_OPTIONS.map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-                          </select>
-                        </div>
-                      </div>
-                    ))}
+                  <div className="bg-surface rounded-xl border border-white/5 p-6 text-center">
+                    <Users className="w-10 h-10 text-text-muted mx-auto mb-3" />
+                    <p className="text-text-muted text-sm mb-4">Kelola data booster yang tampil di homepage melalui tab <strong className="text-accent">Boosters</strong>.</p>
+                    <button onClick={() => { setActiveTab("boosters"); }} className="gradient-primary px-4 py-2 rounded-lg text-white text-sm font-medium hover:opacity-90 transition-opacity">
+                      Buka Tab Boosters
+                    </button>
                   </div>
                 </div>
               )}
@@ -2029,10 +1999,19 @@ function PromoModal({ item, onSave, onClose }: { item: PromoCode | null; onSave:
 }
 
 function BoosterModal({ item, onSave, onClose }: { item: Booster | null; onSave: (data: Partial<Booster>) => void; onClose: () => void }) {
+  const specOptions = ["tank", "fighter", "assassin", "mage", "marksman", "support"];
   const [form, setForm] = useState({
     name: item?.name || "", whatsapp: item?.whatsapp || "", rank_specialization: item?.rank_specialization || "Mythic",
     is_available: item?.is_available ?? true, rating: item?.rating || 5,
+    specialization: (item?.specialization as string[] | null) || [],
+    total_orders: item?.total_orders || 0,
   });
+  const toggleSpec = (s: string) => {
+    setForm((prev) => ({
+      ...prev,
+      specialization: prev.specialization.includes(s) ? prev.specialization.filter((x) => x !== s) : [...prev.specialization, s],
+    }));
+  };
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div className="bg-surface rounded-xl p-5 w-full max-w-md border border-white/10" onClick={(e) => e.stopPropagation()}>
@@ -2047,8 +2026,20 @@ function BoosterModal({ item, onSave, onClose }: { item: Booster | null; onSave:
             <option value="Mythic Glory">Mythic Glory</option>
             <option value="All Ranks">All Ranks</option>
           </select>
-          <select value={form.rating} onChange={(e) => setForm({ ...form, rating: parseInt(e.target.value) })} className="w-full bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-sm">
-            {[5, 4, 3, 2, 1].map((r) => <option key={r} value={r}>{r} Star</option>)}
+          <div>
+            <label className="text-text text-xs mb-1 block">Spesialisasi Hero</label>
+            <div className="flex flex-wrap gap-2">
+              {specOptions.map((s) => (
+                <button key={s} type="button" onClick={() => toggleSpec(s)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${form.specialization.includes(s) ? "bg-accent/20 border-accent/40 text-accent" : "bg-background border-white/10 text-text-muted hover:border-white/20"}`}>
+                  {s.charAt(0).toUpperCase() + s.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+          <input type="number" placeholder="Total Orders" value={form.total_orders} onChange={(e) => setForm({ ...form, total_orders: parseInt(e.target.value) || 0 })} className="w-full bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-sm" />
+          <select value={form.rating} onChange={(e) => setForm({ ...form, rating: parseFloat(e.target.value) })} className="w-full bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-sm">
+            {[5, 4.9, 4.8, 4.7, 4.5, 4, 3].map((r) => <option key={r} value={r}>{r} Star</option>)}
           </select>
           <label className="flex items-center gap-2 text-text text-sm"><input type="checkbox" checked={form.is_available} onChange={(e) => setForm({ ...form, is_available: e.target.checked })} /> Available</label>
         </div>

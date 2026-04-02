@@ -16,16 +16,20 @@ interface Booster {
   isOnline: boolean;
 }
 
-interface CmsTeamMember {
+interface DbBooster {
+  id: string;
   name: string;
-  role?: string;
-  specialization: string;
-  rank: string;
-  isVisible?: boolean;
-  winrate?: string;
-  totalOrders?: number;
-  isOnline?: boolean;
+  rank_specialization: string;
+  specialization: string[] | null;
+  is_available: boolean;
+  total_orders: number;
+  rating: number;
 }
+
+const specLabels: Record<string, string> = {
+  tank: "Tank", fighter: "Fighter", assassin: "Assassin", mage: "Mage",
+  marksman: "Marksman", support: "Support",
+};
 
 const defaultIcons: ReactNode[] = [
   <Cat key="cat" className="w-10 h-10" />,
@@ -50,24 +54,24 @@ export default function TeamShowcaseSection() {
   const [boosters, setBoosters] = useState<Booster[]>(defaultBoosters);
 
   useEffect(() => {
-    fetch("/api/settings?keys=team_members")
+    fetch("/api/boosters")
       .then((res) => res.json())
       .then((data) => {
-        if (data.team_members && Array.isArray(data.team_members) && data.team_members.length > 0) {
-          const members: CmsTeamMember[] = data.team_members;
+        if (data.boosters && Array.isArray(data.boosters) && data.boosters.length > 0) {
+          const dbBoosters: DbBooster[] = data.boosters;
           setBoosters(
-            members
-              .filter((m) => m.isVisible !== false)
-              .map((m, i) => ({
-                id: i + 1,
-                name: m.name,
-                icon: defaultIcons[i % defaultIcons.length],
-                rank: m.role || m.rank || "Mythical Glory",
-                winrate: m.winrate || defaultBoosters[i]?.winrate || "80%",
-                totalOrders: m.totalOrders || defaultBoosters[i]?.totalOrders || 500,
-                specialization: m.specialization,
-                isOnline: m.isOnline ?? (defaultBoosters[i]?.isOnline ?? true),
-              }))
+            dbBoosters.map((b, i) => ({
+              id: i + 1,
+              name: b.name,
+              icon: defaultIcons[i % defaultIcons.length],
+              rank: b.rank_specialization || "Mythic",
+              winrate: `${Math.round(b.rating * 20)}%`,
+              totalOrders: b.total_orders,
+              specialization: b.specialization
+                ? b.specialization.map((s) => specLabels[s] || s).join("/")
+                : "All Roles",
+              isOnline: b.is_available,
+            }))
           );
         }
       })
