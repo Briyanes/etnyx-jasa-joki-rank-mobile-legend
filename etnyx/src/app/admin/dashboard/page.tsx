@@ -134,6 +134,15 @@ interface PricingCategory {
   packages: PricingPackage[];
 }
 
+interface PerStarTier {
+  id: string;
+  name: string;
+  price: number;
+  originalPrice?: number;
+  discountPercent?: number;
+  icon: string;
+}
+
 interface HeroSettings { headline: string; subheadline: string; ctaPrimary: string; ctaSecondary: string; isVisible: boolean; }
 interface PromoBannerSettings { text: string; link: string; isVisible: boolean; }
 interface FAQItem { question: string; answer: string; }
@@ -202,12 +211,14 @@ export default function AdminDashboard() {
 
   // Pricing state
   const [pricingCatalog, setPricingCatalog] = useState<PricingCategory[]>([]);
+  const [perStarPricing, setPerStarPricing] = useState<PerStarTier[]>([]);
   const [pricingSaving, setPricingSaving] = useState(false);
   const [pricingSaved, setPricingSaved] = useState(false);
   const [editingPriceId, setEditingPriceId] = useState<string | null>(null);
   const [editPriceValue, setEditPriceValue] = useState("");
   const [editOriginalPrice, setEditOriginalPrice] = useState("");
   const [activePricingCat, setActivePricingCat] = useState("");
+  const [pricingMode, setPricingMode] = useState<"paket" | "perstar">("paket");
 
   // CMS state
   const [settingsSubTab, setSettingsSubTab] = useState<SettingsSubTab>("cms-sections");
@@ -264,11 +275,30 @@ export default function AdminDashboard() {
   }, []);
   const fetchPricing = useCallback(async () => {
     try {
+      // Fetch package pricing
       const res = await fetch("/api/admin/settings?key=pricing_catalog");
       const d = await res.json();
       if (d.value && Array.isArray(d.value)) {
         setPricingCatalog(d.value);
         if (d.value.length > 0 && !activePricingCat) setActivePricingCat(d.value[0].id);
+      }
+      // Fetch per star pricing
+      const res2 = await fetch("/api/admin/settings?key=perstar_pricing");
+      const d2 = await res2.json();
+      if (d2.value && Array.isArray(d2.value)) {
+        setPerStarPricing(d2.value);
+      } else {
+        // Set default if not in DB
+        setPerStarPricing([
+          { id: "grandmaster", name: "Grand Master", price: 5000, originalPrice: 6000, discountPercent: 17, icon: "/icons-tier/Grandmaster.webp" },
+          { id: "epic", name: "Epic", price: 7000, originalPrice: 8000, discountPercent: 13, icon: "/icons-tier/Epic.webp" },
+          { id: "legend", name: "Legend", price: 8000, originalPrice: 9000, discountPercent: 11, icon: "/icons-tier/Legend.webp" },
+          { id: "mythic", name: "Mythic", price: 18000, originalPrice: 20000, discountPercent: 10, icon: "/icons-tier/Mythic.webp" },
+          { id: "grading", name: "Mythic Grading", price: 20000, originalPrice: 22000, discountPercent: 9, icon: "/icons-tier/Mythic.webp" },
+          { id: "honor", name: "Mythic Honor", price: 21000, originalPrice: 22000, discountPercent: 5, icon: "/icons-tier/Mythical_Glory.webp" },
+          { id: "glory", name: "Mythic Glory", price: 26000, originalPrice: 28000, discountPercent: 7, icon: "/icons-tier/Mythical_Glory.webp" },
+          { id: "immortal", name: "Mythic Immortal", price: 31000, originalPrice: 33000, discountPercent: 6, icon: "/icons-tier/Mythical_Glory.webp" },
+        ]);
       }
     } catch (e) { console.error(e); }
   }, [activePricingCat]);
@@ -387,6 +417,40 @@ export default function AdminDashboard() {
       else alert("Gagal menyimpan pricing.");
     } catch { alert("Gagal menyimpan pricing."); }
     finally { setPricingSaving(false); }
+  };
+
+  const savePerStarPricing = async (tiers: PerStarTier[]) => {
+    setPricingSaving(true);
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "PUT", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: "perstar_pricing", value: tiers }),
+      });
+      if (res.ok) { setPricingSaved(true); setTimeout(() => setPricingSaved(false), 2000); }
+      else alert("Gagal menyimpan per star pricing.");
+    } catch { alert("Gagal menyimpan per star pricing."); }
+    finally { setPricingSaving(false); }
+  };
+
+  const startEditPerStar = (tier: PerStarTier) => {
+    setEditingPriceId(tier.id);
+    setEditPriceValue(String(tier.price));
+    setEditOriginalPrice(String(tier.originalPrice || ""));
+  };
+
+  const saveEditPerStar = (tierId: string) => {
+    const newTiers = perStarPricing.map(tier => {
+      if (tier.id !== tierId) return tier;
+      const price = parseInt(editPriceValue) || tier.price;
+      const originalPrice = editOriginalPrice ? parseInt(editOriginalPrice) : undefined;
+      const discountPercent = originalPrice && originalPrice > price
+        ? Math.round(((originalPrice - price) / originalPrice) * 100)
+        : undefined;
+      return { ...tier, price, originalPrice, discountPercent };
+    });
+    setPerStarPricing(newTiers);
+    setEditingPriceId(null);
+    savePerStarPricing(newTiers);
   };
 
   const saveCmsSetting = async (key: string, value: unknown) => {
@@ -784,10 +848,10 @@ export default function AdminDashboard() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-text-muted">Edit harga paket yang tampil di halaman order</p>
+                  <p className="text-sm text-text-muted">Edit harga paket dan per bintang yang tampil di halaman order</p>
                 </div>
                 <button
-                  onClick={() => savePricingCatalog(pricingCatalog)}
+                  onClick={() => pricingMode === "paket" ? savePricingCatalog(pricingCatalog) : savePerStarPricing(perStarPricing)}
                   disabled={pricingSaving}
                   className="flex items-center gap-2 px-4 py-2 gradient-primary rounded-lg text-white text-sm font-medium hover:opacity-90 transition disabled:opacity-50"
                 >
@@ -796,125 +860,236 @@ export default function AdminDashboard() {
                 </button>
               </div>
 
-              {pricingCatalog.length === 0 ? (
-                <div className="bg-surface rounded-xl border border-white/5 p-12 text-center">
-                  <Package className="w-10 h-10 text-text-muted mx-auto mb-3" />
-                  <p className="text-text-muted text-sm mb-3">Belum ada data pricing di database.</p>
-                  <p className="text-text-muted text-xs mb-4">Klik tombol di bawah untuk mengimpor pricing dari order page ke database agar bisa diedit via dashboard.</p>
-                  <button
-                    onClick={async () => {
-                      const res = await fetch("/api/admin/settings?key=pricing_catalog");
-                      const d = await res.json();
-                      if (!d.value) {
-                        alert("Jalankan supabase-schema-v7.sql yang berisi default pricing_catalog terlebih dahulu, atau klik 'Import Default' di bawah.");
-                      }
-                    }}
-                    className="px-4 py-2 bg-accent/10 text-accent rounded-lg text-sm hover:bg-accent/20 transition"
-                  >
-                    Refresh Data
-                  </button>
-                </div>
-              ) : (
-                <>
-                  {/* Category tabs */}
-                  <div className="flex gap-2 overflow-x-auto pb-1">
-                    {pricingCatalog.map((cat) => (
-                      <button
-                        key={cat.id}
-                        onClick={() => setActivePricingCat(cat.id)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
-                          activePricingCat === cat.id
-                            ? "gradient-primary text-white shadow-lg shadow-accent/20"
-                            : "bg-surface border border-white/5 text-text-muted hover:text-text"
-                        }`}
-                      >
-                        {cat.title}
-                        <span className="ml-1.5 opacity-60">({cat.packages.length})</span>
-                      </button>
-                    ))}
-                  </div>
+              {/* Mode Switcher */}
+              <div className="flex gap-2 p-1 bg-surface rounded-xl border border-white/5">
+                <button
+                  onClick={() => setPricingMode("paket")}
+                  className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
+                    pricingMode === "paket"
+                      ? "gradient-primary text-white shadow-lg"
+                      : "text-text-muted hover:text-text"
+                  }`}
+                >
+                  <Package className="w-4 h-4 inline-block mr-2" />
+                  Joki Paket
+                </button>
+                <button
+                  onClick={() => setPricingMode("perstar")}
+                  className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
+                    pricingMode === "perstar"
+                      ? "gradient-primary text-white shadow-lg"
+                      : "text-text-muted hover:text-text"
+                  }`}
+                >
+                  <Star className="w-4 h-4 inline-block mr-2" />
+                  Joki Per Bintang
+                </button>
+              </div>
 
-                  {/* Package list */}
-                  {pricingCatalog.filter(c => c.id === activePricingCat).map((cat) => (
-                    <div key={cat.id} className="bg-surface rounded-xl border border-white/5 overflow-hidden">
-                      <div className="px-4 py-3 bg-white/[0.02] border-b border-white/5 flex items-center justify-between">
-                        <h3 className="text-sm font-semibold text-text">{cat.title}</h3>
-                        <span className="text-xs text-text-muted">{cat.packages.length} paket</span>
-                      </div>
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="border-b border-white/5">
-                            <th className="text-left text-text-muted text-xs font-medium px-4 py-2.5">Paket</th>
-                            <th className="text-left text-text-muted text-xs font-medium px-4 py-2.5">Rank</th>
-                            <th className="text-right text-text-muted text-xs font-medium px-4 py-2.5">Harga</th>
-                            <th className="text-right text-text-muted text-xs font-medium px-4 py-2.5">Harga Coret</th>
-                            <th className="text-right text-text-muted text-xs font-medium px-4 py-2.5">Diskon</th>
-                            <th className="text-center text-text-muted text-xs font-medium px-4 py-2.5">Aksi</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {cat.packages.map((pkg) => (
-                            <tr key={pkg.id} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
-                              <td className="px-4 py-2.5">
-                                <span className="text-text text-xs font-medium">{pkg.title}</span>
-                              </td>
-                              <td className="px-4 py-2.5">
-                                <span className="text-accent text-xs">{rankLabel(pkg.currentRank)} → {rankLabel(pkg.targetRank)}</span>
-                              </td>
-                              <td className="px-4 py-2.5 text-right">
-                                {editingPriceId === pkg.id ? (
-                                  <input
-                                    type="number"
-                                    value={editPriceValue}
-                                    onChange={(e) => setEditPriceValue(e.target.value)}
-                                    className="w-28 bg-background border border-accent/50 rounded px-2 py-1 text-xs text-text text-right focus:outline-none"
-                                    autoFocus
-                                  />
-                                ) : (
-                                  <span className="text-text text-xs font-medium font-mono">{formatRupiah(pkg.price)}</span>
-                                )}
-                              </td>
-                              <td className="px-4 py-2.5 text-right">
-                                {editingPriceId === pkg.id ? (
-                                  <input
-                                    type="number"
-                                    value={editOriginalPrice}
-                                    onChange={(e) => setEditOriginalPrice(e.target.value)}
-                                    placeholder="Opsional"
-                                    className="w-28 bg-background border border-white/10 rounded px-2 py-1 text-xs text-text text-right focus:outline-none"
-                                  />
-                                ) : (
-                                  <span className="text-text-muted text-xs line-through font-mono">{pkg.originalPrice ? formatRupiah(pkg.originalPrice) : "-"}</span>
-                                )}
-                              </td>
-                              <td className="px-4 py-2.5 text-right">
-                                {pkg.discountPercent ? (
-                                  <span className="text-green-400 text-xs font-medium">-{pkg.discountPercent}%</span>
-                                ) : <span className="text-text-muted text-xs">-</span>}
-                              </td>
-                              <td className="px-4 py-2.5 text-center">
-                                {editingPriceId === pkg.id ? (
-                                  <div className="flex items-center justify-center gap-1">
-                                    <button onClick={() => saveEditPrice(cat.id, pkg.id)} className="p-1 rounded bg-green-500/20 text-green-400 hover:bg-green-500/30">
-                                      <CheckCircle className="w-3.5 h-3.5" />
-                                    </button>
-                                    <button onClick={() => setEditingPriceId(null)} className="p-1 rounded bg-red-500/20 text-red-400 hover:bg-red-500/30">
-                                      <XCircle className="w-3.5 h-3.5" />
-                                    </button>
-                                  </div>
-                                ) : (
-                                  <button onClick={() => startEditPrice(pkg)} className="p-1 rounded bg-accent/10 text-accent hover:bg-accent/20 transition">
-                                    <Pencil className="w-3.5 h-3.5" />
-                                  </button>
-                                )}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+              {/* PAKET MODE */}
+              {pricingMode === "paket" && (
+                <>
+                  {pricingCatalog.length === 0 ? (
+                    <div className="bg-surface rounded-xl border border-white/5 p-12 text-center">
+                      <Package className="w-10 h-10 text-text-muted mx-auto mb-3" />
+                      <p className="text-text-muted text-sm mb-3">Belum ada data pricing di database.</p>
+                      <p className="text-text-muted text-xs mb-4">Klik tombol di bawah untuk mengimpor pricing dari order page ke database agar bisa diedit via dashboard.</p>
+                      <button
+                        onClick={async () => {
+                          const res = await fetch("/api/admin/settings?key=pricing_catalog");
+                          const d = await res.json();
+                          if (!d.value) {
+                            alert("Jalankan supabase-schema-v7.sql yang berisi default pricing_catalog terlebih dahulu, atau klik 'Import Default' di bawah.");
+                          }
+                        }}
+                        className="px-4 py-2 bg-accent/10 text-accent rounded-lg text-sm hover:bg-accent/20 transition"
+                      >
+                        Refresh Data
+                      </button>
                     </div>
-                  ))}
+                  ) : (
+                    <>
+                      {/* Category tabs */}
+                      <div className="flex gap-2 overflow-x-auto pb-1">
+                        {pricingCatalog.map((cat) => (
+                          <button
+                            key={cat.id}
+                            onClick={() => setActivePricingCat(cat.id)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
+                              activePricingCat === cat.id
+                                ? "gradient-primary text-white shadow-lg shadow-accent/20"
+                                : "bg-surface border border-white/5 text-text-muted hover:text-text"
+                            }`}
+                          >
+                            {cat.title}
+                            <span className="ml-1.5 opacity-60">({cat.packages.length})</span>
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Package list */}
+                      {pricingCatalog.filter(c => c.id === activePricingCat).map((cat) => (
+                        <div key={cat.id} className="bg-surface rounded-xl border border-white/5 overflow-hidden">
+                          <div className="px-4 py-3 bg-white/[0.02] border-b border-white/5 flex items-center justify-between">
+                            <h3 className="text-sm font-semibold text-text">{cat.title}</h3>
+                            <span className="text-xs text-text-muted">{cat.packages.length} paket</span>
+                          </div>
+                          <table className="w-full text-sm">
+                            <thead>
+                              <tr className="border-b border-white/5">
+                                <th className="text-left text-text-muted text-xs font-medium px-4 py-2.5">Paket</th>
+                                <th className="text-left text-text-muted text-xs font-medium px-4 py-2.5">Rank</th>
+                                <th className="text-right text-text-muted text-xs font-medium px-4 py-2.5">Harga</th>
+                                <th className="text-right text-text-muted text-xs font-medium px-4 py-2.5">Harga Coret</th>
+                                <th className="text-right text-text-muted text-xs font-medium px-4 py-2.5">Diskon</th>
+                                <th className="text-center text-text-muted text-xs font-medium px-4 py-2.5">Aksi</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {cat.packages.map((pkg) => (
+                                <tr key={pkg.id} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                                  <td className="px-4 py-2.5">
+                                    <span className="text-text text-xs font-medium">{pkg.title}</span>
+                                  </td>
+                                  <td className="px-4 py-2.5">
+                                    <span className="text-accent text-xs">{rankLabel(pkg.currentRank)} → {rankLabel(pkg.targetRank)}</span>
+                                  </td>
+                                  <td className="px-4 py-2.5 text-right">
+                                    {editingPriceId === pkg.id ? (
+                                      <input
+                                        type="number"
+                                        value={editPriceValue}
+                                        onChange={(e) => setEditPriceValue(e.target.value)}
+                                        className="w-28 bg-background border border-accent/50 rounded px-2 py-1 text-xs text-text text-right focus:outline-none"
+                                        autoFocus
+                                      />
+                                    ) : (
+                                      <span className="text-text text-xs font-medium font-mono">{formatRupiah(pkg.price)}</span>
+                                    )}
+                                  </td>
+                                  <td className="px-4 py-2.5 text-right">
+                                    {editingPriceId === pkg.id ? (
+                                      <input
+                                        type="number"
+                                        value={editOriginalPrice}
+                                        onChange={(e) => setEditOriginalPrice(e.target.value)}
+                                        placeholder="Opsional"
+                                        className="w-28 bg-background border border-white/10 rounded px-2 py-1 text-xs text-text text-right focus:outline-none"
+                                      />
+                                    ) : (
+                                      <span className="text-text-muted text-xs line-through font-mono">{pkg.originalPrice ? formatRupiah(pkg.originalPrice) : "-"}</span>
+                                    )}
+                                  </td>
+                                  <td className="px-4 py-2.5 text-right">
+                                    {pkg.discountPercent ? (
+                                      <span className="text-green-400 text-xs font-medium">-{pkg.discountPercent}%</span>
+                                    ) : <span className="text-text-muted text-xs">-</span>}
+                                  </td>
+                                  <td className="px-4 py-2.5 text-center">
+                                    {editingPriceId === pkg.id ? (
+                                      <div className="flex items-center justify-center gap-1">
+                                        <button onClick={() => saveEditPrice(cat.id, pkg.id)} className="p-1 rounded bg-green-500/20 text-green-400 hover:bg-green-500/30">
+                                          <CheckCircle className="w-3.5 h-3.5" />
+                                        </button>
+                                        <button onClick={() => setEditingPriceId(null)} className="p-1 rounded bg-red-500/20 text-red-400 hover:bg-red-500/30">
+                                          <XCircle className="w-3.5 h-3.5" />
+                                        </button>
+                                      </div>
+                                    ) : (
+                                      <button onClick={() => startEditPrice(pkg)} className="p-1 rounded bg-accent/10 text-accent hover:bg-accent/20 transition">
+                                        <Pencil className="w-3.5 h-3.5" />
+                                      </button>
+                                    )}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      ))}
+                    </>
+                  )}
                 </>
+              )}
+
+              {/* PER STAR MODE */}
+              {pricingMode === "perstar" && (
+                <div className="bg-surface rounded-xl border border-white/5 overflow-hidden">
+                  <div className="px-4 py-3 bg-white/[0.02] border-b border-white/5 flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-text">Harga Per Bintang</h3>
+                    <span className="text-xs text-text-muted">{perStarPricing.length} tier</span>
+                  </div>
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-white/5">
+                        <th className="text-left text-text-muted text-xs font-medium px-4 py-2.5">Tier Rank</th>
+                        <th className="text-right text-text-muted text-xs font-medium px-4 py-2.5">Harga/Star</th>
+                        <th className="text-right text-text-muted text-xs font-medium px-4 py-2.5">Harga Coret</th>
+                        <th className="text-right text-text-muted text-xs font-medium px-4 py-2.5">Diskon</th>
+                        <th className="text-center text-text-muted text-xs font-medium px-4 py-2.5">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {perStarPricing.map((tier) => (
+                        <tr key={tier.id} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                          <td className="px-4 py-2.5">
+                            <div className="flex items-center gap-2">
+                              <Image src={tier.icon} alt={tier.name} width={24} height={24} className="w-6 h-6 object-contain" />
+                              <span className="text-text text-xs font-medium">{tier.name}</span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-2.5 text-right">
+                            {editingPriceId === tier.id ? (
+                              <input
+                                type="number"
+                                value={editPriceValue}
+                                onChange={(e) => setEditPriceValue(e.target.value)}
+                                className="w-28 bg-background border border-accent/50 rounded px-2 py-1 text-xs text-text text-right focus:outline-none"
+                                autoFocus
+                              />
+                            ) : (
+                              <span className="text-text text-xs font-medium font-mono">{formatRupiah(tier.price)}</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-2.5 text-right">
+                            {editingPriceId === tier.id ? (
+                              <input
+                                type="number"
+                                value={editOriginalPrice}
+                                onChange={(e) => setEditOriginalPrice(e.target.value)}
+                                placeholder="Opsional"
+                                className="w-28 bg-background border border-white/10 rounded px-2 py-1 text-xs text-text text-right focus:outline-none"
+                              />
+                            ) : (
+                              <span className="text-text-muted text-xs line-through font-mono">{tier.originalPrice ? formatRupiah(tier.originalPrice) : "-"}</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-2.5 text-right">
+                            {tier.discountPercent ? (
+                              <span className="text-green-400 text-xs font-medium">-{tier.discountPercent}%</span>
+                            ) : <span className="text-text-muted text-xs">-</span>}
+                          </td>
+                          <td className="px-4 py-2.5 text-center">
+                            {editingPriceId === tier.id ? (
+                              <div className="flex items-center justify-center gap-1">
+                                <button onClick={() => saveEditPerStar(tier.id)} className="p-1 rounded bg-green-500/20 text-green-400 hover:bg-green-500/30">
+                                  <CheckCircle className="w-3.5 h-3.5" />
+                                </button>
+                                <button onClick={() => setEditingPriceId(null)} className="p-1 rounded bg-red-500/20 text-red-400 hover:bg-red-500/30">
+                                  <XCircle className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            ) : (
+                              <button onClick={() => startEditPerStar(tier)} className="p-1 rounded bg-accent/10 text-accent hover:bg-accent/20 transition">
+                                <Pencil className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </div>
           )}
