@@ -1,5 +1,4 @@
 "use client";
-// Force rebuild v2 - tier icons fix
 
 import { useState, useCallback, useEffect, Suspense } from "react";
 import Image from "next/image";
@@ -620,7 +619,8 @@ function OrderPageContent() {
         case 4:
           return !!(
             form.whatsapp &&
-            form.whatsapp.length >= 10 &&
+            form.whatsapp.length >= 9 &&
+            form.whatsapp.startsWith("8") &&
             isValidEmail(form.email)
           );
         default:
@@ -730,7 +730,8 @@ function OrderPageContent() {
     form.accountLogin &&
     form.accountPassword &&
     form.whatsapp &&
-    form.whatsapp.length >= 10 &&
+    form.whatsapp.length >= 9 &&
+    form.whatsapp.startsWith("8") &&
     isValidEmail(form.email);
 
   const handleSubmitOrder = useCallback(async () => {
@@ -1514,20 +1515,23 @@ function OrderPageContent() {
                     <input
                       type="tel"
                       value={form.whatsapp}
-                      onChange={(e) =>
-                        updateForm({
-                          whatsapp: e.target.value.replace(/\D/g, ""),
-                        })
-                      }
+                      onChange={(e) => {
+                        let val = e.target.value.replace(/\D/g, "");
+                        if (val.startsWith("62")) val = val.slice(2);
+                        if (val.startsWith("0")) val = val.slice(1);
+                        updateForm({ whatsapp: val });
+                      }}
                       onBlur={() => markTouched("whatsapp")}
                       placeholder="8123456789"
                       className={`flex-1 bg-background border rounded-r-xl px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none transition-colors ${
-                        touched.whatsapp && (!form.whatsapp || form.whatsapp.length < 10) ? "border-red-500" : "border-white/10"
+                        touched.whatsapp && (!form.whatsapp || form.whatsapp.length < 9 || !form.whatsapp.startsWith("8")) ? "border-red-500" : "border-white/10"
                       }`}
                     />
                   </div>
-                  {touched.whatsapp && (!form.whatsapp || form.whatsapp.length < 10) && (
-                    <p className="text-red-400 text-xs mt-1">{t.required}</p>
+                  {touched.whatsapp && (!form.whatsapp || form.whatsapp.length < 9 || !form.whatsapp.startsWith("8")) && (
+                    <p className="text-red-400 text-xs mt-1">
+                      {form.whatsapp && !form.whatsapp.startsWith("8") ? "Nomor harus diawali 8 (contoh: 812xxx)" : t.required}
+                    </p>
                   )}
                 </div>
 
@@ -1732,21 +1736,28 @@ function OrderPageContent() {
                 </div>
 
                 {/* Price Breakdown */}
-                {selectedPackage && (
+                {(selectedPackage || (orderMode === "perstar" && selectedStarRank)) && (
                   <div className="bg-background rounded-xl p-4">
                     <p className="text-text-muted text-xs mb-3 uppercase tracking-wider">
                       Rincian Harga
                     </p>
                     <div className="space-y-2 text-sm">
-                      <div className="flex justify-between text-text-muted">
-                        <span>Harga Dasar</span>
-                        <span>{formatRupiah(selectedPackage.price)}</span>
-                      </div>
+                      {orderMode === "perstar" && selectedStarRank ? (
+                        <div className="flex justify-between text-text-muted">
+                          <span>{selectedStarRank.name} × {starQuantity} Bintang</span>
+                          <span>{formatRupiah(selectedStarRank.price * starQuantity)}</span>
+                        </div>
+                      ) : selectedPackage ? (
+                        <div className="flex justify-between text-text-muted">
+                          <span>Harga Dasar</span>
+                          <span>{formatRupiah(selectedPackage.price)}</span>
+                        </div>
+                      ) : null}
                       {form.isExpress && (
                         <div className="flex justify-between text-text-muted">
                           <span>Express (+20%)</span>
                           <span>
-                            +{formatRupiah(Math.round(selectedPackage.price * 0.2))}
+                            +{formatRupiah(Math.round(basePrice * 0.2))}
                           </span>
                         </div>
                       )}
@@ -1755,11 +1766,7 @@ function OrderPageContent() {
                           <span>Premium (+30%)</span>
                           <span>
                             +{formatRupiah(
-                              Math.round(
-                                selectedPackage.price *
-                                  (form.isExpress ? 1.2 : 1) *
-                                  0.3
-                              )
+                              Math.round(basePrice * (form.isExpress ? 1.2 : 1) * 0.3)
                             )}
                           </span>
                         </div>

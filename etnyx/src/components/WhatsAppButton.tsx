@@ -20,7 +20,7 @@ export default function WhatsAppButton() {
   };
 
   const txt = t[locale];
-  const whatsappNumber = "6281414131321";
+  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "6281414131321";
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(txt.message)}`;
 
   useEffect(() => {

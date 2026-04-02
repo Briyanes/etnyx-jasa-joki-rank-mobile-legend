@@ -197,7 +197,7 @@ export default function RootLayout({
               description: "Jasa Joki Mobile Legends Terpercaya",
               contactPoint: {
                 "@type": "ContactPoint",
-                telephone: "+62-812-3456-7890",
+                telephone: "+62-814-1413-1321",
                 contactType: "customer service",
                 availableLanguage: ["Indonesian", "English"],
               },

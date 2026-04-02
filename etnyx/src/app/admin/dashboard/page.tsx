@@ -441,8 +441,8 @@ export default function AdminDashboard() {
   const saveEditPerStar = (tierId: string) => {
     const newTiers = perStarPricing.map(tier => {
       if (tier.id !== tierId) return tier;
-      const price = parseInt(editPriceValue) || tier.price;
-      const originalPrice = editOriginalPrice ? parseInt(editOriginalPrice) : undefined;
+      const price = Math.max(0, parseInt(editPriceValue) || tier.price);
+      const originalPrice = editOriginalPrice ? Math.max(0, parseInt(editOriginalPrice)) : undefined;
       const discountPercent = originalPrice && originalPrice > price
         ? Math.round(((originalPrice - price) / originalPrice) * 100)
         : undefined;
@@ -479,8 +479,8 @@ export default function AdminDashboard() {
         ...cat,
         packages: cat.packages.map(pkg => {
           if (pkg.id !== pkgId) return pkg;
-          const price = parseInt(editPriceValue) || pkg.price;
-          const originalPrice = editOriginalPrice ? parseInt(editOriginalPrice) : undefined;
+          const price = Math.max(0, parseInt(editPriceValue) || pkg.price);
+          const originalPrice = editOriginalPrice ? Math.max(0, parseInt(editOriginalPrice)) : undefined;
           const discountPercent = originalPrice && originalPrice > price
             ? Math.round(((originalPrice - price) / originalPrice) * 100)
             : undefined;
@@ -687,14 +687,14 @@ export default function AdminDashboard() {
                 </h3>
                 <div className="grid grid-cols-5 gap-3">
                   {[
-                    { label: "Pending", count: stats.pending_orders, color: "yellow" },
-                    { label: "Confirmed", count: stats.confirmed_orders, color: "blue" },
-                    { label: "In Progress", count: stats.in_progress_orders, color: "purple" },
-                    { label: "Completed", count: stats.completed_orders, color: "green" },
-                    { label: "Cancelled", count: stats.cancelled_orders, color: "red" },
-                  ].map(({ label, count, color }) => (
-                    <div key={label} className={`text-center p-3 rounded-lg bg-${color}-500/10 border border-${color}-500/20`}>
-                      <p className={`text-xl font-bold text-${color}-400`}>{count}</p>
+                    { label: "Pending", count: stats.pending_orders, bg: "bg-yellow-500/10", border: "border-yellow-500/20", text: "text-yellow-400" },
+                    { label: "Confirmed", count: stats.confirmed_orders, bg: "bg-blue-500/10", border: "border-blue-500/20", text: "text-blue-400" },
+                    { label: "In Progress", count: stats.in_progress_orders, bg: "bg-purple-500/10", border: "border-purple-500/20", text: "text-purple-400" },
+                    { label: "Completed", count: stats.completed_orders, bg: "bg-green-500/10", border: "border-green-500/20", text: "text-green-400" },
+                    { label: "Cancelled", count: stats.cancelled_orders, bg: "bg-red-500/10", border: "border-red-500/20", text: "text-red-400" },
+                  ].map(({ label, count, bg, border, text }) => (
+                    <div key={label} className={`text-center p-3 rounded-lg ${bg} border ${border}`}>
+                      <p className={`text-xl font-bold ${text}`}>{count}</p>
                       <p className="text-[10px] text-text-muted mt-0.5">{label}</p>
                     </div>
                   ))}

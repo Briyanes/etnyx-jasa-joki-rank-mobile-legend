@@ -302,7 +302,7 @@ export default function Portfolio() {
 
               {/* CTA */}
               <a
-                href={`https://wa.me/6281414131321?text=${encodeURIComponent(`Halo kak, saya mau order joki ${selectedItem.rank_from} ke ${selectedItem.rank_to}`)}`}
+                href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "6281414131321"}?text=${encodeURIComponent(`Halo kak, saya mau order joki ${selectedItem.rank_from} ke ${selectedItem.rank_to}`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block w-full py-3 bg-primary hover:bg-primary/90 text-background font-semibold rounded-xl text-center transition-all"

@@ -8,6 +8,20 @@ function PaymentSuccessContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("order_id");
 
+  if (!orderId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="bg-surface rounded-2xl p-8 max-w-md w-full text-center border border-white/5">
+          <h1 className="text-xl font-bold text-text mb-4">Halaman Tidak Valid</h1>
+          <p className="text-text-muted mb-6">Order ID tidak ditemukan.</p>
+          <Link href="/" className="block w-full px-6 py-3 rounded-xl border border-white/10 text-text font-medium hover:bg-white/5 transition-colors">
+            Kembali ke Home
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="bg-surface rounded-2xl p-8 max-w-md w-full text-center border border-white/5">

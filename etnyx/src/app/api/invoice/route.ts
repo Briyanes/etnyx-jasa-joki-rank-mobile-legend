@@ -174,7 +174,7 @@ export async function GET(request: NextRequest) {
     
     <div class="footer">
       <p>Terima kasih telah menggunakan layanan <strong>ETNYX</strong></p>
-      <p>Pertanyaan? Hubungi kami di <a href="https://wa.me/6281414131321">WhatsApp</a></p>
+      <p>Pertanyaan? Hubungi kami di <a href="https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "6281414131321"}">WhatsApp</a></p>
     </div>
   </div>
   
