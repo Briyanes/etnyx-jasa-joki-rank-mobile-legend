@@ -28,13 +28,9 @@ import {
   Package,
   Minus,
   Plus,
-  Smartphone,
-  Mail,
-  Music,
-  MessageSquare,
-  Apple,
-  Globe,
 } from "lucide-react";
+import { FaFacebook, FaGoogle, FaTiktok, FaVk, FaApple, FaGamepad } from "react-icons/fa";
+import type { IconType } from "react-icons";
 
 type LoginMethod = "moonton" | "facebook" | "google" | "tiktok" | "vk" | "apple";
 
@@ -55,14 +51,14 @@ interface OrderForm {
   email: string;
 }
 
-// Login method options with Lucide icons
-const LOGIN_METHODS: { id: LoginMethod; name: string; Icon: typeof Gamepad2 }[] = [
-  { id: "moonton", name: "Moonton", Icon: Smartphone },
-  { id: "facebook", name: "Facebook", Icon: Globe },
-  { id: "google", name: "Google", Icon: Mail },
-  { id: "tiktok", name: "TikTok", Icon: Music },
-  { id: "vk", name: "VK", Icon: MessageSquare },
-  { id: "apple", name: "Apple ID", Icon: Apple },
+// Login method options with brand icons
+const LOGIN_METHODS: { id: LoginMethod; name: string; Icon: IconType; color: string }[] = [
+  { id: "moonton", name: "Moonton", Icon: FaGamepad, color: "#FF6B35" },
+  { id: "facebook", name: "Facebook", Icon: FaFacebook, color: "#1877F2" },
+  { id: "google", name: "Google", Icon: FaGoogle, color: "#EA4335" },
+  { id: "tiktok", name: "TikTok", Icon: FaTiktok, color: "#000000" },
+  { id: "vk", name: "VK", Icon: FaVk, color: "#4A76A8" },
+  { id: "apple", name: "Apple ID", Icon: FaApple, color: "#A2AAAD" },
 ];
 
 // Product catalog types
@@ -1227,17 +1223,21 @@ function OrderPageContent() {
                 <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                   {LOGIN_METHODS.map((method) => {
                     const IconComponent = method.Icon;
+                    const isSelected = form.loginMethod === method.id;
                     return (
                       <button
                         key={method.id}
                         onClick={() => updateForm({ loginMethod: method.id })}
-                        className={`px-3 py-2.5 rounded-xl text-xs font-medium transition-all flex flex-col items-center gap-1 ${
-                          form.loginMethod === method.id
+                        className={`px-3 py-2.5 rounded-xl text-xs font-medium transition-all flex flex-col items-center gap-1.5 ${
+                          isSelected
                             ? "gradient-primary text-white"
                             : "bg-background border border-white/10 text-text-muted hover:border-white/20"
                         }`}
                       >
-                        <IconComponent className="w-5 h-5" />
+                        <IconComponent 
+                          className="w-5 h-5" 
+                          style={{ color: isSelected ? 'white' : method.color }}
+                        />
                         <span>{method.name}</span>
                       </button>
                     );
