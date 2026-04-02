@@ -18,6 +18,7 @@ const ALLOWED_KEYS = [
   "whatsapp_number",
   "site_name",
   "integrations",
+  "perstar_pricing",
 ];
 
 // GET /api/admin/settings?key=hero or GET all

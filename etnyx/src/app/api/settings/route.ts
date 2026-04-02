@@ -12,6 +12,7 @@ const PUBLIC_KEYS = [
   "social_links",
   "site_info",
   "pricing_catalog",
+  "perstar_pricing",
 ];
 
 // GET /api/settings?keys=hero,faq_items or GET all public

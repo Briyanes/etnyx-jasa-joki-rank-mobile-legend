@@ -20,8 +20,45 @@ import ScrollAnimation from "@/components/ScrollAnimation";
 import TermsPopup from "@/components/TermsPopup";
 import CTASection from "@/components/sections/CTASection";
 import BackToTop from "@/components/BackToTop";
+import { createAdminClient } from "@/lib/supabase-server";
 
-export default function Home() {
+interface SectionVisibility {
+  hero: boolean;
+  liveCounter: boolean;
+  howItWorks: boolean;
+  pricing: boolean;
+  whyChooseUs: boolean;
+  teamShowcase: boolean;
+  testimonials: boolean;
+  portfolio: boolean;
+  tracking: boolean;
+  trust: boolean;
+  faq: boolean;
+  cta: boolean;
+}
+
+const DEFAULT_VISIBILITY: SectionVisibility = {
+  hero: true, liveCounter: true, howItWorks: true, pricing: true,
+  whyChooseUs: true, teamShowcase: true, testimonials: true,
+  portfolio: true, tracking: true, trust: true, faq: true, cta: true,
+};
+
+async function getSectionVisibility(): Promise<SectionVisibility> {
+  try {
+    const supabase = await createAdminClient();
+    const { data } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "section_visibility")
+      .single();
+    if (data?.value) return { ...DEFAULT_VISIBILITY, ...data.value };
+  } catch {}
+  return DEFAULT_VISIBILITY;
+}
+
+export default async function Home() {
+  const vis = await getSectionVisibility();
+
   return (
     <>
       <LoadingScreen />
@@ -34,51 +71,73 @@ export default function Home() {
       </div>
       
       <main>
-        <HeroSection />
+        {vis.hero && <HeroSection />}
         
-        <ScrollAnimation animation="fadeUp">
-          <LiveCounter />
-        </ScrollAnimation>
+        {vis.liveCounter && (
+          <ScrollAnimation animation="fadeUp">
+            <LiveCounter />
+          </ScrollAnimation>
+        )}
         
-        <ScrollAnimation animation="fadeUp" delay={100}>
-          <HowItWorksSection />
-        </ScrollAnimation>
+        {vis.howItWorks && (
+          <ScrollAnimation animation="fadeUp" delay={100}>
+            <HowItWorksSection />
+          </ScrollAnimation>
+        )}
         
-        <ScrollAnimation animation="fadeUp" delay={100}>
-          <PricingSection />
-        </ScrollAnimation>
+        {vis.pricing && (
+          <ScrollAnimation animation="fadeUp" delay={100}>
+            <PricingSection />
+          </ScrollAnimation>
+        )}
         
-        <ScrollAnimation animation="fadeUp" delay={100}>
-          <WhyChooseUsSection />
-        </ScrollAnimation>
+        {vis.whyChooseUs && (
+          <ScrollAnimation animation="fadeUp" delay={100}>
+            <WhyChooseUsSection />
+          </ScrollAnimation>
+        )}
         
-        <ScrollAnimation animation="fadeUp" delay={100}>
-          <TeamShowcaseSection />
-        </ScrollAnimation>
+        {vis.teamShowcase && (
+          <ScrollAnimation animation="fadeUp" delay={100}>
+            <TeamShowcaseSection />
+          </ScrollAnimation>
+        )}
         
-        <ScrollAnimation animation="fadeUp" delay={100}>
-          <Testimonials />
-        </ScrollAnimation>
+        {vis.testimonials && (
+          <ScrollAnimation animation="fadeUp" delay={100}>
+            <Testimonials />
+          </ScrollAnimation>
+        )}
         
-        <ScrollAnimation animation="fadeUp" delay={100}>
-          <Portfolio />
-        </ScrollAnimation>
+        {vis.portfolio && (
+          <ScrollAnimation animation="fadeUp" delay={100}>
+            <Portfolio />
+          </ScrollAnimation>
+        )}
         
-        <ScrollAnimation animation="fadeUp" delay={100}>
-          <TrackingSection />
-        </ScrollAnimation>
+        {vis.tracking && (
+          <ScrollAnimation animation="fadeUp" delay={100}>
+            <TrackingSection />
+          </ScrollAnimation>
+        )}
         
-        <ScrollAnimation animation="fadeUp" delay={100}>
-          <TrustSection />
-        </ScrollAnimation>
+        {vis.trust && (
+          <ScrollAnimation animation="fadeUp" delay={100}>
+            <TrustSection />
+          </ScrollAnimation>
+        )}
         
-        <ScrollAnimation animation="fadeUp" delay={100}>
-          <FAQSection />
-        </ScrollAnimation>
+        {vis.faq && (
+          <ScrollAnimation animation="fadeUp" delay={100}>
+            <FAQSection />
+          </ScrollAnimation>
+        )}
         
-        <ScrollAnimation animation="fadeUp" delay={100}>
-          <CTASection />
-        </ScrollAnimation>
+        {vis.cta && (
+          <ScrollAnimation animation="fadeUp" delay={100}>
+            <CTASection />
+          </ScrollAnimation>
+        )}
       </main>
 
       <Footer />
