@@ -25,7 +25,7 @@ export default function TermsPopup() {
       subtitle: "Baca sebelum melakukan pemesanan",
       sections: [
         { icon: "clock", title: "Waktu Proses", items: ["Order diproses setiap hari 07.00 - 22.00 WIB", "Order di luar jam operasional diproses keesokan hari"] },
-        { icon: "clipboard", title: "Syarat Order", items: ["Isi data akun dengan benar (ID, Server, Password)", "Siapkan minimal 3 hero untuk setiap role", "Nonaktifkan verifikasi 2 langkah sementara", "Gunakan akun utama, bukan akun GB/beli"] },
+        { icon: "clipboard", title: "Syarat Order", items: ["Isi data akun dengan benar (ID, Server, Password)", "Siapkan minimal 3 hero request pada role yang dipilih (contoh EXP LANE: Lapu-Lapu, Uranus, Yuzhong)", "Nonaktifkan verifikasi 2 langkah sementara", "Gunakan akun utama, bukan akun GB/beli"] },
         { icon: "alert", title: "Penting", items: ["Jangan login selama proses joki berlangsung", "Login tanpa izin = pembatalan tanpa refund", "Tunggu sesuai estimasi, jangan spam chat", "Hubungi admin jika >3 jam belum diproses"] },
         { icon: "check", title: "Setelah Selesai", items: ["Tunggu konfirmasi dari admin sebelum login", "Cek hasil di menu Tracking / WhatsApp", "Tanggung jawab akun berakhir setelah selesai"] },
       ],
