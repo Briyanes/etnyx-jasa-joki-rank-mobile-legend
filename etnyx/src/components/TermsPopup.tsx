@@ -93,7 +93,11 @@ export default function TermsPopup() {
           <p className="text-sm text-accent mt-1 italic">{txt.subtitle}</p>
         </div>
 
-        <div ref={contentRef} className="flex-1 overflow-y-auto p-5 space-y-5">
+        <div 
+          ref={contentRef} 
+          className="flex-1 overflow-y-auto overscroll-contain p-5 space-y-5"
+          style={{ WebkitOverflowScrolling: 'touch' }}
+        >
           {txt.sections.map((section, idx) => (
             <div key={idx}>
               <h3 className="font-bold text-primary mb-2 flex items-center">
