@@ -168,6 +168,172 @@ const rankIcons: Record<string, string> = {
   mythicglory: "/icons-tier/Mythical_Glory.webp",
 };
 
+// Translations
+const translations = {
+  id: {
+    // Header
+    safe: "Aman",
+    fast: "Cepat",
+    // Steps
+    steps: [
+      { num: 1, title: "Pilih Paket" },
+      { num: 2, title: "Data Akun" },
+      { num: 3, title: "Opsi & Promo" },
+      { num: 4, title: "Kontak & Bayar" },
+      { num: 5, title: "Konfirmasi" },
+    ],
+    // Step 1
+    selectPackage: "Pilih Paket Joki",
+    selectPackageDesc: "Pilih paket yang sesuai dengan kebutuhanmu",
+    perStar: "/ Star",
+    discount: "HEMAT",
+    // Step 2
+    accountData: "Data Akun Game",
+    loginMethod: "Metode Login",
+    loginUserId: "Login via User ID + Zone",
+    loginMoonton: "Login via Moonton",
+    labelUserId: "User ID + Zone ID",
+    placeholderUserId: "Contoh: 123456789 (1234)",
+    labelNickname: "Nickname Akun",
+    placeholderNickname: "Nama karakter di game",
+    labelAccountLogin: "Akun Moonton (Email/No. HP)",
+    placeholderAccountLogin: "Email atau nomor HP yang terdaftar",
+    labelPassword: "Password Moonton",
+    placeholderPassword: "Password akun Moonton",
+    labelHero: "Hero Request (Opsional)",
+    placeholderHero: "Contoh: Chou, Ling, Fanny",
+    heroDesc: "Jika tidak diisi, pilot akan bermain hero terbaik mereka",
+    labelNotes: "Catatan (Opsional)",
+    placeholderNotes: "Informasi tambahan untuk pilot",
+    // Step 3
+    optionsPromo: "Opsi & Promo",
+    addons: "Add-ons",
+    express: "Express (1-2 Hari)",
+    expressDesc: "Prioritas pengerjaan dengan tim senior",
+    premium: "Premium Pilot",
+    premiumDesc: "Pilot MG dengan winrate 75%+",
+    promoCode: "Kode Promo",
+    promoPlaceholder: "Masukkan kode promo",
+    applyPromo: "Terapkan",
+    promoApplied: "Promo berhasil diterapkan",
+    // Step 4
+    contactPay: "Kontak & Pembayaran",
+    labelWhatsapp: "Nomor WhatsApp",
+    placeholderWhatsapp: "08xxxxxxxxxx",
+    labelEmail: "Email (Opsional)",
+    placeholderEmail: "email@contoh.com",
+    emailDesc: "Untuk menerima invoice & notifikasi",
+    // Step 5
+    confirmOrder: "Konfirmasi Order",
+    reviewOrder: "Review pesanan kamu sebelum melanjutkan",
+    selectedPackage: "Paket Dipilih",
+    accountInfo: "Info Akun",
+    addonsLabel: "Add-ons",
+    paymentDetails: "Detail Pembayaran",
+    basePrice: "Harga Paket",
+    expressAddon: "Express (+20%)",
+    premiumAddon: "Premium (+30%)",
+    promoDiscount: "Diskon Promo",
+    total: "Total Bayar",
+    contact: "Kontak",
+    // Buttons
+    next: "Lanjut",
+    back: "Kembali",
+    processing: "Memproses...",
+    payNow: "Bayar Sekarang",
+    // Success
+    orderSuccess: "Order Berhasil!",
+    orderId: "Order ID",
+    saveOrderId: "Simpan Order ID ini untuk tracking",
+    continuePayment: "Lanjut ke Pembayaran",
+    backToHome: "Kembali ke Beranda",
+    // Validation
+    required: "Wajib diisi",
+    invalidEmail: "Format email tidak valid",
+  },
+  en: {
+    // Header
+    safe: "Safe",
+    fast: "Fast",
+    // Steps
+    steps: [
+      { num: 1, title: "Select Package" },
+      { num: 2, title: "Account Data" },
+      { num: 3, title: "Options & Promo" },
+      { num: 4, title: "Contact & Pay" },
+      { num: 5, title: "Confirm" },
+    ],
+    // Step 1
+    selectPackage: "Select Boosting Package",
+    selectPackageDesc: "Choose a package that fits your needs",
+    perStar: "/ Star",
+    discount: "SAVE",
+    // Step 2
+    accountData: "Game Account Data",
+    loginMethod: "Login Method",
+    loginUserId: "Login via User ID + Zone",
+    loginMoonton: "Login via Moonton",
+    labelUserId: "User ID + Zone ID",
+    placeholderUserId: "Example: 123456789 (1234)",
+    labelNickname: "Account Nickname",
+    placeholderNickname: "In-game character name",
+    labelAccountLogin: "Moonton Account (Email/Phone)",
+    placeholderAccountLogin: "Registered email or phone number",
+    labelPassword: "Moonton Password",
+    placeholderPassword: "Moonton account password",
+    labelHero: "Hero Request (Optional)",
+    placeholderHero: "Example: Chou, Ling, Fanny",
+    heroDesc: "If empty, pilot will play their best heroes",
+    labelNotes: "Notes (Optional)",
+    placeholderNotes: "Additional info for pilot",
+    // Step 3
+    optionsPromo: "Options & Promo",
+    addons: "Add-ons",
+    express: "Express (1-2 Days)",
+    expressDesc: "Priority processing with senior team",
+    premium: "Premium Pilot",
+    premiumDesc: "MG Pilot with 75%+ winrate",
+    promoCode: "Promo Code",
+    promoPlaceholder: "Enter promo code",
+    applyPromo: "Apply",
+    promoApplied: "Promo successfully applied",
+    // Step 4
+    contactPay: "Contact & Payment",
+    labelWhatsapp: "WhatsApp Number",
+    placeholderWhatsapp: "08xxxxxxxxxx",
+    labelEmail: "Email (Optional)",
+    placeholderEmail: "email@example.com",
+    emailDesc: "To receive invoice & notifications",
+    // Step 5
+    confirmOrder: "Confirm Order",
+    reviewOrder: "Review your order before proceeding",
+    selectedPackage: "Selected Package",
+    accountInfo: "Account Info",
+    addonsLabel: "Add-ons",
+    paymentDetails: "Payment Details",
+    basePrice: "Package Price",
+    expressAddon: "Express (+20%)",
+    premiumAddon: "Premium (+30%)",
+    promoDiscount: "Promo Discount",
+    total: "Total",
+    contact: "Contact",
+    // Buttons
+    next: "Next",
+    back: "Back",
+    processing: "Processing...",
+    payNow: "Pay Now",
+    // Success
+    orderSuccess: "Order Successful!",
+    orderId: "Order ID",
+    saveOrderId: "Save this Order ID for tracking",
+    continuePayment: "Continue to Payment",
+    backToHome: "Back to Home",
+    // Validation
+    required: "Required",
+    invalidEmail: "Invalid email format",
+  },
+};
+
 function LangToggle() {
   const { locale, setLocale } = useLanguage();
   return (
@@ -183,6 +349,8 @@ function LangToggle() {
 
 function OrderPageContent() {
   const searchParams = useSearchParams();
+  const { locale } = useLanguage();
+  const t = translations[locale as keyof typeof translations] || translations.id;
   const [catalog, setCatalog] = useState<PackageCategory[]>(DEFAULT_CATALOG);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderResult, setOrderResult] = useState<{
@@ -208,13 +376,7 @@ function OrderPageContent() {
   const isValidEmail = (email: string) =>
     !email || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-  const STEPS = [
-    { num: 1, title: "Pilih Paket" },
-    { num: 2, title: "Data Akun" },
-    { num: 3, title: "Opsi & Promo" },
-    { num: 4, title: "Kontak & Bayar" },
-    { num: 5, title: "Konfirmasi" },
-  ];
+  const STEPS = t.steps;
 
   const [form, setForm] = useState<OrderForm>({
     loginMethod: "userid",
@@ -518,14 +680,13 @@ function OrderPageContent() {
             <Check className="w-10 h-10 text-success" />
           </div>
           <h1 className="text-2xl font-bold text-text mb-2">
-            Order Berhasil Dibuat! 🎉
+            {t.orderSuccess} 🎉
           </h1>
           <p className="text-text-muted mb-6">
-            Order kamu sudah masuk. Silakan lakukan pembayaran untuk memulai
-            proses joki.
+            {t.saveOrderId}
           </p>
           <div className="bg-background rounded-xl p-4 mb-6">
-            <p className="text-text-muted text-sm">Order ID</p>
+            <p className="text-text-muted text-sm">{t.orderId}</p>
             <p className="font-mono text-accent font-bold text-lg">
               {orderResult.orderId}
             </p>
@@ -538,7 +699,7 @@ function OrderPageContent() {
                 rel="noopener noreferrer"
                 className="block w-full gradient-primary px-6 py-3.5 rounded-xl text-white font-semibold hover:opacity-90 transition-opacity"
               >
-                Bayar Sekarang
+                {t.continuePayment}
               </a>
             )}
             <Link
@@ -551,7 +712,7 @@ function OrderPageContent() {
               href="/"
               className="block text-text-muted text-sm hover:text-text transition-colors"
             >
-              Kembali ke Home
+              {t.backToHome}
             </Link>
           </div>
         </div>
@@ -581,10 +742,10 @@ function OrderPageContent() {
             </Link>
             <div className="flex items-center gap-3 sm:gap-4 text-xs text-text-muted">
               <span className="flex items-center gap-1.5 hidden sm:flex">
-                <Shield className="w-3.5 h-3.5 text-success" /> Aman
+                <Shield className="w-3.5 h-3.5 text-success" /> {t.safe}
               </span>
               <span className="flex items-center gap-1.5 hidden sm:flex">
-                <Zap className="w-3.5 h-3.5 text-yellow-400" /> Cepat
+                <Zap className="w-3.5 h-3.5 text-yellow-400" /> {t.fast}
               </span>
               <span className="flex items-center gap-1.5 hidden sm:flex">
                 <MessageCircle className="w-3.5 h-3.5 text-accent" /> 24/7
@@ -670,7 +831,7 @@ function OrderPageContent() {
               <span className="w-7 h-7 rounded-full gradient-primary flex items-center justify-center text-white text-sm font-bold">
                 1
               </span>
-              <h2 className="font-bold text-text">Pilih Paket Joki</h2>
+              <h2 className="font-bold text-text">{t.selectPackage}</h2>
             </div>
             <div className="p-5">
               {/* Category Tabs */}
@@ -792,12 +953,12 @@ function OrderPageContent() {
               <span className="w-7 h-7 rounded-full gradient-primary flex items-center justify-center text-white text-sm font-bold">
                 2
               </span>
-              <h2 className="font-bold text-text">Masukkan Data Akun</h2>
+              <h2 className="font-bold text-text">{t.accountData}</h2>
             </div>
             <div className="p-5 space-y-4">
               <div>
                 <label className="block text-sm text-text-muted mb-2 font-medium">
-                  Login Via
+                  {t.loginMethod}
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
@@ -954,7 +1115,7 @@ function OrderPageContent() {
                 <span className="w-7 h-7 rounded-full gradient-primary flex items-center justify-center text-white text-sm font-bold">
                   3
                 </span>
-                <h2 className="font-bold text-text">Opsi Tambahan</h2>
+                <h2 className="font-bold text-text">{t.addons}</h2>
               </div>
               <div className="p-5 space-y-3">
                 <label className="flex items-center gap-3 bg-background px-4 py-3.5 rounded-xl cursor-pointer hover:bg-background/80 transition-colors border border-white/5 hover:border-white/10">
@@ -968,10 +1129,10 @@ function OrderPageContent() {
                   />
                   <div className="flex-1">
                     <span className="text-text flex items-center gap-2 font-medium text-sm">
-                      <Zap className="w-4 h-4 text-yellow-400" /> Express Mode
+                      <Zap className="w-4 h-4 text-yellow-400" /> {t.express}
                     </span>
                     <p className="text-text-muted text-xs mt-0.5">
-                      2x lebih cepat, prioritas booster
+                      {t.expressDesc}
                     </p>
                   </div>
                   <span className="text-accent font-semibold text-sm">
@@ -990,11 +1151,10 @@ function OrderPageContent() {
                   />
                   <div className="flex-1">
                     <span className="text-text flex items-center gap-2 font-medium text-sm">
-                      <Crown className="w-4 h-4 text-yellow-400" /> Premium
-                      Service
+                      <Crown className="w-4 h-4 text-yellow-400" /> {t.premium}
                     </span>
                     <p className="text-text-muted text-xs mt-0.5">
-                      Pilih hero bebas, dedicated booster
+                      {t.premiumDesc}
                     </p>
                   </div>
                   <span className="text-accent font-semibold text-sm">
@@ -1007,7 +1167,7 @@ function OrderPageContent() {
             <section className="bg-surface rounded-2xl border border-white/5 overflow-hidden">
               <div className="flex items-center gap-3 px-5 py-4 border-b border-white/5">
                 <Tag className="w-5 h-5 text-accent" />
-                <h2 className="font-bold text-text">Kode Promo</h2>
+                <h2 className="font-bold text-text">{t.promoCode}</h2>
               </div>
               <div className="p-5">
                 <div className="flex gap-3">
@@ -1021,7 +1181,7 @@ function OrderPageContent() {
                           promoCode: e.target.value.toUpperCase(),
                         })
                       }
-                      placeholder="Masukkan kode promo/referral"
+                      placeholder={t.promoPlaceholder}
                       disabled={promoApplied}
                       className="w-full bg-background border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none transition-colors disabled:opacity-50"
                     />
@@ -1031,7 +1191,7 @@ function OrderPageContent() {
                       onClick={removePromo}
                       className="px-5 py-2.5 bg-red-500/20 text-red-400 rounded-xl hover:bg-red-500/30 transition-colors font-medium text-sm"
                     >
-                      Hapus
+                      {locale === "id" ? "Hapus" : "Remove"}
                     </button>
                   ) : (
                     <button
@@ -1065,12 +1225,12 @@ function OrderPageContent() {
                 <span className="w-7 h-7 rounded-full gradient-primary flex items-center justify-center text-white text-sm font-bold">
                   4
                 </span>
-                <h2 className="font-bold text-text">Detail Kontak</h2>
+                <h2 className="font-bold text-text">{t.contactPay}</h2>
               </div>
               <div className="p-5 space-y-4">
                 <div>
                   <label className="block text-sm text-text-muted mb-1.5">
-                    No. WhatsApp <span className="text-error">*</span>
+                    {t.labelWhatsapp} <span className="text-error">*</span>
                   </label>
                   <div className="flex">
                     <span className="bg-background border border-white/10 border-r-0 rounded-l-xl px-3 py-2.5 text-text-muted text-sm flex items-center gap-1.5">
@@ -1092,30 +1252,28 @@ function OrderPageContent() {
                     />
                   </div>
                   {touched.whatsapp && (!form.whatsapp || form.whatsapp.length < 10) && (
-                    <p className="text-red-400 text-xs mt-1">Nomor WhatsApp minimal 10 digit</p>
+                    <p className="text-red-400 text-xs mt-1">{t.required}</p>
                   )}
-                  <p className="text-text-muted text-xs mt-1.5">
-                    Nomor ini akan dihubungi jika terjadi masalah
-                  </p>
                 </div>
 
                 <div>
                   <label className="block text-sm text-text-muted mb-1.5">
-                    Email (opsional)
+                    {t.labelEmail}
                   </label>
                   <input
                     type="email"
                     value={form.email}
                     onChange={(e) => updateForm({ email: e.target.value })}
                     onBlur={() => markTouched("email")}
-                    placeholder="email@example.com"
+                    placeholder={t.placeholderEmail}
                     className={`w-full bg-background border rounded-xl px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none transition-colors ${
                       touched.email && form.email && !isValidEmail(form.email) ? "border-red-500" : "border-white/10"
                     }`}
                   />
                   {touched.email && form.email && !isValidEmail(form.email) && (
-                    <p className="text-red-400 text-xs mt-1">Format email tidak valid</p>
+                    <p className="text-red-400 text-xs mt-1">{t.invalidEmail}</p>
                   )}
+                  <p className="text-text-muted text-xs mt-1.5">{t.emailDesc}</p>
                 </div>
               </div>
             </section>
@@ -1123,7 +1281,7 @@ function OrderPageContent() {
             <section className="bg-surface rounded-2xl border border-white/5 overflow-hidden">
               <div className="flex items-center gap-3 px-5 py-4 border-b border-white/5">
                 <CreditCard className="w-5 h-5 text-accent" />
-                <h2 className="font-bold text-text">Metode Pembayaran</h2>
+                <h2 className="font-bold text-text">{locale === "id" ? "Metode Pembayaran" : "Payment Method"}</h2>
               </div>
               <div className="p-5">
                 <div className="flex items-center gap-3 bg-background px-4 py-3.5 rounded-xl border-2 border-accent/50">
@@ -1133,7 +1291,7 @@ function OrderPageContent() {
                       Midtrans Payment Gateway
                     </p>
                     <p className="text-text-muted text-xs">
-                      QRIS, Bank Transfer, E-wallet, Kartu Kredit
+                      QRIS, Bank Transfer, E-wallet, {locale === "id" ? "Kartu Kredit" : "Credit Card"}
                     </p>
                   </div>
                   <div className="w-5 h-5 rounded-full border-2 border-accent flex items-center justify-center">
@@ -1153,7 +1311,7 @@ function OrderPageContent() {
                 <span className="w-7 h-7 rounded-full gradient-primary flex items-center justify-center text-white text-sm font-bold">
                   5
                 </span>
-                <h2 className="font-bold text-text">Konfirmasi Order</h2>
+                <h2 className="font-bold text-text">{t.confirmOrder}</h2>
               </div>
               <div className="p-5 space-y-4">
                 {/* Package Summary */}
@@ -1312,7 +1470,7 @@ function OrderPageContent() {
               className="flex items-center gap-2 px-5 py-3 rounded-xl border border-white/10 text-text-muted hover:text-text hover:border-white/20 transition-colors font-medium text-sm"
             >
               <ChevronLeft className="w-4 h-4" />
-              Kembali
+              {t.back}
             </button>
           ) : (
             <div />
@@ -1324,7 +1482,7 @@ function OrderPageContent() {
               disabled={!canProceedStep(currentStep)}
               className="flex items-center gap-2 px-6 py-3 gradient-primary rounded-xl text-white font-bold hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed text-sm"
             >
-              Lanjutkan
+              {t.next}
               <ChevronRight className="w-4 h-4" />
             </button>
           ) : (
@@ -1336,11 +1494,11 @@ function OrderPageContent() {
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Memproses...
+                  {t.processing}
                 </>
               ) : (
                 <>
-                  Pesan Sekarang!
+                  {t.payNow}
                   <Check className="w-5 h-5" />
                 </>
               )}
