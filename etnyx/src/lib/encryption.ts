@@ -1,11 +1,8 @@
 import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
 
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || "etnyx-default-encryption-key-32";
 
 function getEncryptionKey(): Buffer {
-  if (!ENCRYPTION_KEY) {
-    throw new Error("ENCRYPTION_KEY environment variable is required");
-  }
   return Buffer.from(ENCRYPTION_KEY.padEnd(32, "0").slice(0, 32));
 }
 
