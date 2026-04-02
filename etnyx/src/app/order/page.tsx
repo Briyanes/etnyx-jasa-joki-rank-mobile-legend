@@ -1570,8 +1570,29 @@ function OrderPageContent() {
                 <h2 className="font-bold text-text">{t.confirmOrder}</h2>
               </div>
               <div className="p-5 space-y-4">
-                {/* Package Summary */}
-                {selectedPackage && (
+                {/* Order Type Badge */}
+                <div className="flex items-center gap-2">
+                  <span className={`px-3 py-1.5 rounded-lg text-xs font-bold ${
+                    orderMode === "paket" 
+                      ? "bg-primary/20 text-primary" 
+                      : "bg-yellow-500/20 text-yellow-400"
+                  }`}>
+                    {orderMode === "paket" ? (
+                      <span className="flex items-center gap-1.5">
+                        <Package className="w-3.5 h-3.5" />
+                        JOKI PAKET
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1.5">
+                        <Star className="w-3.5 h-3.5" />
+                        JOKI PER BINTANG
+                      </span>
+                    )}
+                  </span>
+                </div>
+
+                {/* Package Summary - For Paket Mode */}
+                {orderMode === "paket" && selectedPackage && (
                   <div className="bg-background rounded-xl p-4">
                     <p className="text-text-muted text-xs mb-2 uppercase tracking-wider">
                       Paket Dipilih
@@ -1588,8 +1609,40 @@ function OrderPageContent() {
                         <p className="text-text font-semibold">
                           {selectedPackage.title}
                         </p>
+                        <p className="text-text-muted text-xs">
+                          {selectedPackage.currentRank} → {selectedPackage.targetRank}
+                        </p>
                         <p className="text-yellow-400 font-bold text-lg">
                           {formatRupiah(selectedPackage.price)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Per Star Summary - For Per Bintang Mode */}
+                {orderMode === "perstar" && selectedStarRank && (
+                  <div className="bg-background rounded-xl p-4">
+                    <p className="text-text-muted text-xs mb-2 uppercase tracking-wider">
+                      Tier & Jumlah Bintang
+                    </p>
+                    <div className="flex items-center gap-3">
+                      <Image
+                        src={selectedStarRank.icon}
+                        alt={selectedStarRank.name}
+                        width={40}
+                        height={40}
+                        className="w-10 h-10 object-contain flex-shrink-0 drop-shadow-lg"
+                      />
+                      <div className="flex-1">
+                        <p className="text-text font-semibold">
+                          {selectedStarRank.name}
+                        </p>
+                        <p className="text-text-muted text-xs">
+                          {starQuantity} Bintang × {formatRupiah(selectedStarRank.price)}/star
+                        </p>
+                        <p className="text-yellow-400 font-bold text-lg">
+                          {formatRupiah(selectedStarRank.price * starQuantity)}
                         </p>
                       </div>
                     </div>
