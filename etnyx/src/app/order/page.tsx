@@ -30,6 +30,7 @@ import {
   Minus,
   Plus,
   Users,
+  ArrowRight,
 } from "lucide-react";
 import { FaFacebook, FaGoogle, FaTiktok, FaVk, FaApple, FaGamepad } from "react-icons/fa";
 import type { IconType } from "react-icons";
@@ -203,6 +204,21 @@ const rankIcons: Record<string, string> = {
   mythicglory: "/icons-tier/Mythical_Glory.webp",
   mythicimmortal: "/icons-tier/Mythical_Immortal.webp",
 };
+
+// Ordered rank list for selector
+const RANK_LIST = [
+  { id: "warrior", label: "Warrior" },
+  { id: "elite", label: "Elite" },
+  { id: "master", label: "Master" },
+  { id: "grandmaster", label: "Grand Master" },
+  { id: "epic", label: "Epic" },
+  { id: "legend", label: "Legend" },
+  { id: "mythic", label: "Mythic" },
+  { id: "mythichonor", label: "Mythic Honor" },
+  { id: "mythicglory", label: "Mythic Glory" },
+  { id: "mythicimmortal", label: "Mythic Immortal" },
+];
+const RANK_ORDER = RANK_LIST.map((r) => r.id);
 
 // Translations
 const translations = {
@@ -1035,32 +1051,138 @@ function OrderPageContent() {
               {/* PAKET MODE */}
               {orderMode === "paket" && (
                 <>
-                  {/* Category Tabs */}
-                  <div className="flex flex-wrap gap-2 mb-5">
-                    {catalog.map((cat) => (
-                      <button
-                        key={cat.id}
-                        onClick={() => setActiveCategory(cat.id)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                          activeCategory === cat.id
-                            ? "gradient-primary text-white shadow-lg"
-                            : "bg-background border border-white/10 text-text-muted hover:border-white/20"
-                        }`}
-                      >
-                        {cat.title}
-                      </button>
-                    ))}
+                  {/* Rank Awal → Rank Tujuan Selector */}
+                  <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-3 sm:gap-4 items-start mb-5">
+                    {/* Rank Awal */}
+                    <div>
+                      <label className="block text-xs text-text-muted font-medium mb-2 uppercase tracking-wider">
+                        {locale === "id" ? "Rank Awal" : "Current Rank"}
+                      </label>
+                      <div className="grid grid-cols-5 gap-1.5">
+                        {RANK_LIST.map((rank) => {
+                          const isSelected = form.currentRank === rank.id;
+                          const isDisabled = false;
+                          return (
+                            <button
+                              key={rank.id}
+                              onClick={() => {
+                                updateForm({ currentRank: rank.id as RankTier });
+                                setSelectedPackage(null);
+                                // Auto-reset target if current >= target
+                                const ci = RANK_ORDER.indexOf(rank.id);
+                                const ti = RANK_ORDER.indexOf(form.targetRank);
+                                if (ci >= ti) {
+                                  const nextRank = RANK_ORDER[ci + 1];
+                                  if (nextRank) updateForm({ currentRank: rank.id as RankTier, targetRank: nextRank as RankTier });
+                                }
+                              }}
+                              disabled={isDisabled}
+                              className={`flex flex-col items-center gap-1 p-1.5 rounded-lg transition-all ${
+                                isSelected
+                                  ? "bg-accent/20 border-2 border-accent shadow-lg shadow-accent/10"
+                                  : "bg-background border border-white/5 hover:border-white/15"
+                              } ${isDisabled ? "opacity-30 cursor-not-allowed" : ""}`}
+                            >
+                              <Image src={rankIcons[rank.id]} alt={rank.label} width={28} height={28} className="w-7 h-7 object-contain" />
+                              <span className={`text-[9px] leading-tight font-medium text-center ${isSelected ? "text-accent" : "text-text-muted"}`}>
+                                {rank.label}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Arrow */}
+                    <div className="hidden sm:flex items-center justify-center pt-7">
+                      <ArrowRight className="w-6 h-6 text-accent" />
+                    </div>
+                    <div className="flex sm:hidden items-center justify-center">
+                      <ArrowRight className="w-5 h-5 text-accent rotate-90" />
+                    </div>
+
+                    {/* Rank Tujuan */}
+                    <div>
+                      <label className="block text-xs text-text-muted font-medium mb-2 uppercase tracking-wider">
+                        {locale === "id" ? "Rank Tujuan" : "Target Rank"}
+                      </label>
+                      <div className="grid grid-cols-5 gap-1.5">
+                        {RANK_LIST.map((rank) => {
+                          const isSelected = form.targetRank === rank.id;
+                          const isDisabled = RANK_ORDER.indexOf(rank.id) <= RANK_ORDER.indexOf(form.currentRank);
+                          return (
+                            <button
+                              key={rank.id}
+                              onClick={() => {
+                                updateForm({ targetRank: rank.id as RankTier });
+                                setSelectedPackage(null);
+                              }}
+                              disabled={isDisabled}
+                              className={`flex flex-col items-center gap-1 p-1.5 rounded-lg transition-all ${
+                                isSelected
+                                  ? "bg-yellow-400/20 border-2 border-yellow-400 shadow-lg shadow-yellow-400/10"
+                                  : isDisabled
+                                    ? "bg-background/50 border border-white/5 opacity-30 cursor-not-allowed"
+                                    : "bg-background border border-white/5 hover:border-white/15"
+                              }`}
+                            >
+                              <Image src={rankIcons[rank.id]} alt={rank.label} width={28} height={28} className="w-7 h-7 object-contain" />
+                              <span className={`text-[9px] leading-tight font-medium text-center ${isSelected ? "text-yellow-400" : "text-text-muted"}`}>
+                                {rank.label}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Package Cards */}
-                  {catalog.filter((cat) => cat.id === activeCategory).map(
-                    (cat) => (
-                      <div key={cat.id}>
-                        <h3 className="text-text font-bold text-base mb-4">
-                          {cat.title}
-                        </h3>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                          {cat.packages.map((pkg) => {
+                  {/* Selected Rank Flow Display */}
+                  <div className="flex items-center justify-center gap-3 mb-5 p-3 bg-background rounded-xl border border-white/5">
+                    <div className="flex items-center gap-2">
+                      <Image src={rankIcons[form.currentRank]} alt="from" width={28} height={28} className="w-7 h-7 object-contain" />
+                      <span className="text-text text-sm font-medium">{RANK_LIST.find(r => r.id === form.currentRank)?.label}</span>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-accent flex-shrink-0" />
+                    <div className="flex items-center gap-2">
+                      <Image src={rankIcons[form.targetRank]} alt="to" width={28} height={28} className="w-7 h-7 object-contain" />
+                      <span className="text-yellow-400 text-sm font-bold">{RANK_LIST.find(r => r.id === form.targetRank)?.label}</span>
+                    </div>
+                  </div>
+
+                  {/* Matching Packages */}
+                  {(() => {
+                    const matchingPkgs = catalog.flatMap(cat => cat.packages).filter(pkg =>
+                      pkg.currentRank === form.currentRank && pkg.targetRank === form.targetRank
+                    );
+                    const nearbyPkgs = matchingPkgs.length === 0
+                      ? catalog.flatMap(cat => cat.packages).filter(pkg => pkg.currentRank === form.currentRank)
+                      : [];
+                    const pkgsToShow = matchingPkgs.length > 0 ? matchingPkgs : nearbyPkgs;
+
+                    if (pkgsToShow.length === 0) {
+                      return (
+                        <div className="text-center py-8 bg-background rounded-xl border border-white/5">
+                          <Package className="w-8 h-8 text-text-muted mx-auto mb-2" />
+                          <p className="text-text-muted text-sm">
+                            {locale === "id" ? "Tidak ada paket untuk rank yang dipilih." : "No packages for selected ranks."}
+                          </p>
+                          <p className="text-text-muted text-xs mt-1">
+                            {locale === "id" ? "Coba pilih rank lain atau gunakan mode Per Bintang" : "Try other ranks or use Per Star mode"}
+                          </p>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <>
+                        {matchingPkgs.length === 0 && nearbyPkgs.length > 0 && (
+                          <p className="text-text-muted text-xs mb-3">
+                            {locale === "id" ? "Paket exact tidak ditemukan. Menampilkan paket dari rank awal yang sama:" : "Exact match not found. Showing packages from same starting rank:"}
+                          </p>
+                        )}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                          {pkgsToShow.map((pkg) => {
                             const isSelected = selectedPackage?.id === pkg.id;
                             return (
                               <button
@@ -1073,39 +1195,25 @@ function OrderPageContent() {
                                 }`}
                               >
                                 <div className="p-4 bg-gradient-to-br from-slate-700/80 to-slate-800/80 flex-1">
-                                  <p className="text-white text-sm font-semibold mb-2">
-                                    {pkg.title}
-                                  </p>
-                                  <div className="flex items-center gap-3">
-                                    <Image
-                                      src={rankIcons[pkg.rankKey]}
-                                      alt={pkg.rankKey}
-                                      width={40}
-                                      height={40}
-                                      className="w-10 h-10 object-contain flex-shrink-0 drop-shadow-lg"
-                                    />
-                                    <div>
-                                      <p className="text-yellow-400 font-bold text-lg leading-tight">
-                                        {formatRupiah(pkg.price)}
-                                      </p>
-                                      {pkg.originalPrice && (
-                                        <p className="text-red-400/70 text-xs line-through">
-                                          {formatRupiah(pkg.originalPrice)}
-                                        </p>
-                                      )}
-                                    </div>
+                                  <p className="text-white text-sm font-semibold mb-2">{pkg.title}</p>
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <Image src={rankIcons[pkg.currentRank] || rankIcons[pkg.rankKey]} alt="" width={20} height={20} className="w-5 h-5 object-contain" />
+                                    <ArrowRight className="w-3 h-3 text-text-muted" />
+                                    <Image src={rankIcons[pkg.targetRank] || rankIcons[pkg.rankKey]} alt="" width={20} height={20} className="w-5 h-5 object-contain" />
+                                  </div>
+                                  <div>
+                                    <p className="text-yellow-400 font-bold text-lg leading-tight">{formatRupiah(pkg.price)}</p>
+                                    {pkg.originalPrice && (
+                                      <p className="text-red-400/70 text-xs line-through">{formatRupiah(pkg.originalPrice)}</p>
+                                    )}
                                   </div>
                                 </div>
-                                <div className="px-4 py-2.5 bg-slate-800/60 flex items-center justify-end gap-2">
+                                <div className="px-4 py-2 bg-slate-800/60 flex items-center justify-end gap-2">
                                   {pkg.discountPercent && (
                                     <span className="bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded text-[10px] font-bold">
                                       Disc {pkg.discountPercent}%
                                     </span>
                                   )}
-                                  <span className="bg-teal-600/30 text-teal-300 px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1">
-                                    <Zap className="w-2.5 h-2.5" />
-                                    Pengiriman INSTAN
-                                  </span>
                                 </div>
                                 {isSelected && (
                                   <div className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-yellow-400 flex items-center justify-center">
@@ -1116,28 +1224,22 @@ function OrderPageContent() {
                             );
                           })}
                         </div>
-                      </div>
-                    )
-                  )}
+                      </>
+                    );
+                  })()}
 
                   {/* Selected summary */}
                   {selectedPackage && (
                     <div className="mt-5 p-4 bg-background rounded-xl border border-accent/30 flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <Image
-                          src={rankIcons[selectedPackage.rankKey]}
-                          alt={selectedPackage.rankKey}
-                          width={32}
-                          height={32}
-                          className="w-8 h-8 object-contain drop-shadow-lg"
-                        />
+                        <div className="flex items-center gap-1.5">
+                          <Image src={rankIcons[selectedPackage.currentRank] || rankIcons[selectedPackage.rankKey]} alt="" width={28} height={28} className="w-7 h-7 object-contain" />
+                          <ArrowRight className="w-3.5 h-3.5 text-accent" />
+                          <Image src={rankIcons[selectedPackage.targetRank] || rankIcons[selectedPackage.rankKey]} alt="" width={28} height={28} className="w-7 h-7 object-contain" />
+                        </div>
                         <div>
-                          <p className="text-text font-semibold text-sm">
-                            {selectedPackage.title}
-                          </p>
-                          <p className="text-yellow-400 font-bold">
-                            {formatRupiah(selectedPackage.price)}
-                          </p>
+                          <p className="text-text font-semibold text-sm">{selectedPackage.title}</p>
+                          <p className="text-yellow-400 font-bold">{formatRupiah(selectedPackage.price)}</p>
                         </div>
                       </div>
                       <Check className="w-5 h-5 text-green-400" />
@@ -1678,19 +1780,17 @@ function OrderPageContent() {
                       Paket Dipilih
                     </p>
                     <div className="flex items-center gap-3">
-                      <Image
-                        src={rankIcons[selectedPackage.rankKey]}
-                        alt={selectedPackage.rankKey}
-                        width={40}
-                        height={40}
-                        className="w-10 h-10 object-contain flex-shrink-0 drop-shadow-lg"
-                      />
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                        <Image src={rankIcons[selectedPackage.currentRank] || rankIcons[selectedPackage.rankKey]} alt="" width={36} height={36} className="w-9 h-9 object-contain drop-shadow-lg" />
+                        <ArrowRight className="w-4 h-4 text-accent" />
+                        <Image src={rankIcons[selectedPackage.targetRank] || rankIcons[selectedPackage.rankKey]} alt="" width={36} height={36} className="w-9 h-9 object-contain drop-shadow-lg" />
+                      </div>
                       <div className="flex-1">
                         <p className="text-text font-semibold">
                           {selectedPackage.title}
                         </p>
                         <p className="text-text-muted text-xs">
-                          {selectedPackage.currentRank} → {selectedPackage.targetRank}
+                          {RANK_LIST.find(r => r.id === selectedPackage.currentRank)?.label || selectedPackage.currentRank} → {RANK_LIST.find(r => r.id === selectedPackage.targetRank)?.label || selectedPackage.targetRank}
                         </p>
                         <p className="text-yellow-400 font-bold text-lg">
                           {formatRupiah(selectedPackage.price)}

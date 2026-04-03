@@ -7,7 +7,9 @@ export type RankTier =
   | "epic"
   | "legend"
   | "mythic"
-  | "mythicglory";
+  | "mythichonor"
+  | "mythicglory"
+  | "mythicimmortal";
 
 export interface RankOption {
   value: RankTier;
