@@ -213,10 +213,8 @@ const translations = {
     // Steps
     steps: [
       { num: 1, title: "Pilih Paket" },
-      { num: 2, title: "Data Akun" },
-      { num: 3, title: "Opsi & Promo" },
-      { num: 4, title: "Kontak & Bayar" },
-      { num: 5, title: "Konfirmasi" },
+      { num: 2, title: "Data Akun & Kontak" },
+      { num: 3, title: "Konfirmasi" },
     ],
     // Step 1
     selectPackage: "Pilih Paket Joki",
@@ -302,10 +300,8 @@ const translations = {
     // Steps
     steps: [
       { num: 1, title: "Select Package" },
-      { num: 2, title: "Account Data" },
-      { num: 3, title: "Options & Promo" },
-      { num: 4, title: "Contact & Pay" },
-      { num: 5, title: "Confirm" },
+      { num: 2, title: "Account & Contact" },
+      { num: 3, title: "Confirm" },
     ],
     // Step 1
     selectPackage: "Select Boosting Package",
@@ -649,12 +645,7 @@ function OrderPageContent() {
             form.userId &&
             form.nickname &&
             form.accountLogin &&
-            form.accountPassword
-          );
-        case 3:
-          return true; // optional step
-        case 4:
-          return !!(
+            form.accountPassword &&
             form.whatsapp &&
             form.whatsapp.length >= 9 &&
             form.whatsapp.startsWith("8") &&
@@ -678,7 +669,7 @@ function OrderPageContent() {
   );
 
   const nextStep = useCallback(() => {
-    if (canProceedStep(currentStep) && currentStep < 5) {
+    if (canProceedStep(currentStep) && currentStep < 3) {
       // For per-star mode on step 1, create virtual package first
       if (currentStep === 1 && orderMode === "perstar" && selectedStarRank) {
         setSelectedPackage({
@@ -1576,216 +1567,78 @@ function OrderPageContent() {
                   className="w-full bg-background border border-white/10 rounded-xl px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none transition-colors resize-none"
                 />
               </div>
+
+              {/* Divider */}
+              <div className="border-t border-white/10 pt-4 mt-2">
+                <h3 className="text-text font-bold text-sm mb-3 flex items-center gap-2">
+                  <Phone className="w-4 h-4 text-accent" />
+                  {t.contactPay}
+                </h3>
+              </div>
+
+              {/* WhatsApp */}
+              <div>
+                <label className="block text-sm text-text-muted mb-1.5">
+                  {t.labelWhatsapp} <span className="text-error">*</span>
+                </label>
+                <div className="flex">
+                  <span className="bg-background border border-white/10 border-r-0 rounded-l-xl px-3 py-2.5 text-text-muted text-sm flex items-center gap-1.5">
+                    <Phone className="w-3.5 h-3.5" /> +62
+                  </span>
+                  <input
+                    type="tel"
+                    value={form.whatsapp}
+                    onChange={(e) => {
+                      let val = e.target.value.replace(/\D/g, "");
+                      if (val.startsWith("62")) val = val.slice(2);
+                      if (val.startsWith("0")) val = val.slice(1);
+                      updateForm({ whatsapp: val });
+                    }}
+                    onBlur={() => markTouched("whatsapp")}
+                    placeholder="8123456789"
+                    className={`flex-1 bg-background border rounded-r-xl px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none transition-colors ${
+                      touched.whatsapp && (!form.whatsapp || form.whatsapp.length < 9 || !form.whatsapp.startsWith("8")) ? "border-red-500" : "border-white/10"
+                    }`}
+                  />
+                </div>
+                {touched.whatsapp && (!form.whatsapp || form.whatsapp.length < 9 || !form.whatsapp.startsWith("8")) && (
+                  <p className="text-red-400 text-xs mt-1">
+                    {form.whatsapp && !form.whatsapp.startsWith("8") ? "Nomor harus diawali 8 (contoh: 812xxx)" : t.required}
+                  </p>
+                )}
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className="block text-sm text-text-muted mb-1.5">
+                  {t.labelEmail}
+                </label>
+                <input
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => updateForm({ email: e.target.value })}
+                  onBlur={() => markTouched("email")}
+                  placeholder={t.placeholderEmail}
+                  className={`w-full bg-background border rounded-xl px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none transition-colors ${
+                    touched.email && form.email && !isValidEmail(form.email) ? "border-red-500" : "border-white/10"
+                  }`}
+                />
+                {touched.email && form.email && !isValidEmail(form.email) && (
+                  <p className="text-red-400 text-xs mt-1">{t.invalidEmail}</p>
+                )}
+                <p className="text-text-muted text-xs mt-1.5">{t.emailDesc}</p>
+              </div>
             </div>
           </section>
         )}
 
-        {/* ===== STEP 3: OPSI & PROMO ===== */}
+        {/* ===== STEP 3: KONFIRMASI ===== */}
         {currentStep === 3 && (
           <div className="max-w-4xl mx-auto space-y-6">
             <section className="bg-surface rounded-2xl border border-white/5 overflow-hidden">
               <div className="flex items-center gap-3 px-5 py-4 border-b border-white/5">
                 <span className="w-7 h-7 rounded-full gradient-primary flex items-center justify-center text-white text-sm font-bold">
                   3
-                </span>
-                <h2 className="font-bold text-text">{t.addons}</h2>
-              </div>
-              <div className="p-5 space-y-3">
-                <label className="flex items-center gap-3 bg-background px-4 py-3.5 rounded-xl cursor-pointer hover:bg-background/80 transition-colors border border-white/5 hover:border-white/10">
-                  <input
-                    type="checkbox"
-                    checked={form.isExpress}
-                    onChange={(e) =>
-                      updateForm({ isExpress: e.target.checked })
-                    }
-                    className="w-5 h-5 rounded accent-accent cursor-pointer"
-                  />
-                  <div className="flex-1">
-                    <span className="text-text flex items-center gap-2 font-medium text-sm">
-                      <Zap className="w-4 h-4 text-yellow-400" /> {t.express}
-                    </span>
-                    <p className="text-text-muted text-xs mt-0.5">
-                      {t.expressDesc}
-                    </p>
-                  </div>
-                  <span className="text-accent font-semibold text-sm">
-                    +20%
-                  </span>
-                </label>
-
-                <label className="flex items-center gap-3 bg-background px-4 py-3.5 rounded-xl cursor-pointer hover:bg-background/80 transition-colors border border-white/5 hover:border-white/10">
-                  <input
-                    type="checkbox"
-                    checked={form.isPremium}
-                    onChange={(e) =>
-                      updateForm({ isPremium: e.target.checked })
-                    }
-                    className="w-5 h-5 rounded accent-accent cursor-pointer"
-                  />
-                  <div className="flex-1">
-                    <span className="text-text flex items-center gap-2 font-medium text-sm">
-                      <Crown className="w-4 h-4 text-yellow-400" /> {t.premium}
-                    </span>
-                    <p className="text-text-muted text-xs mt-0.5">
-                      {t.premiumDesc}
-                    </p>
-                  </div>
-                  <span className="text-accent font-semibold text-sm">
-                    +30%
-                  </span>
-                </label>
-              </div>
-            </section>
-
-            <section className="bg-surface rounded-2xl border border-white/5 overflow-hidden">
-              <div className="flex items-center gap-3 px-5 py-4 border-b border-white/5">
-                <Tag className="w-5 h-5 text-accent" />
-                <h2 className="font-bold text-text">{t.promoCode}</h2>
-              </div>
-              <div className="p-5">
-                <div className="flex gap-3">
-                  <div className="flex-1 relative">
-                    <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-                    <input
-                      type="text"
-                      value={form.promoCode}
-                      onChange={(e) =>
-                        updateForm({
-                          promoCode: e.target.value.toUpperCase(),
-                        })
-                      }
-                      placeholder={t.promoPlaceholder}
-                      disabled={promoApplied}
-                      className="w-full bg-background border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none transition-colors disabled:opacity-50"
-                    />
-                  </div>
-                  {promoApplied ? (
-                    <button
-                      onClick={removePromo}
-                      className="px-5 py-2.5 bg-red-500/20 text-red-400 rounded-xl hover:bg-red-500/30 transition-colors font-medium text-sm"
-                    >
-                      {locale === "id" ? "Hapus" : "Remove"}
-                    </button>
-                  ) : (
-                    <button
-                      onClick={applyPromo}
-                      disabled={promoLoading || !form.promoCode.trim()}
-                      className="px-5 py-2.5 gradient-primary text-white rounded-xl hover:opacity-90 transition-opacity font-medium disabled:opacity-50 text-sm"
-                    >
-                      {promoLoading ? "..." : "Gunakan"}
-                    </button>
-                  )}
-                </div>
-                {promoMessage && (
-                  <p
-                    className={`mt-2 text-sm ${
-                      promoApplied ? "text-green-400" : "text-red-400"
-                    }`}
-                  >
-                    {promoMessage}
-                  </p>
-                )}
-              </div>
-            </section>
-          </div>
-        )}
-
-        {/* ===== STEP 4: KONTAK & PEMBAYARAN ===== */}
-        {currentStep === 4 && (
-          <div className="max-w-4xl mx-auto space-y-6">
-            <section className="bg-surface rounded-2xl border border-white/5 overflow-hidden">
-              <div className="flex items-center gap-3 px-5 py-4 border-b border-white/5">
-                <span className="w-7 h-7 rounded-full gradient-primary flex items-center justify-center text-white text-sm font-bold">
-                  4
-                </span>
-                <h2 className="font-bold text-text">{t.contactPay}</h2>
-              </div>
-              <div className="p-5 space-y-4">
-                <div>
-                  <label className="block text-sm text-text-muted mb-1.5">
-                    {t.labelWhatsapp} <span className="text-error">*</span>
-                  </label>
-                  <div className="flex">
-                    <span className="bg-background border border-white/10 border-r-0 rounded-l-xl px-3 py-2.5 text-text-muted text-sm flex items-center gap-1.5">
-                      <Phone className="w-3.5 h-3.5" /> +62
-                    </span>
-                    <input
-                      type="tel"
-                      value={form.whatsapp}
-                      onChange={(e) => {
-                        let val = e.target.value.replace(/\D/g, "");
-                        if (val.startsWith("62")) val = val.slice(2);
-                        if (val.startsWith("0")) val = val.slice(1);
-                        updateForm({ whatsapp: val });
-                      }}
-                      onBlur={() => markTouched("whatsapp")}
-                      placeholder="8123456789"
-                      className={`flex-1 bg-background border rounded-r-xl px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none transition-colors ${
-                        touched.whatsapp && (!form.whatsapp || form.whatsapp.length < 9 || !form.whatsapp.startsWith("8")) ? "border-red-500" : "border-white/10"
-                      }`}
-                    />
-                  </div>
-                  {touched.whatsapp && (!form.whatsapp || form.whatsapp.length < 9 || !form.whatsapp.startsWith("8")) && (
-                    <p className="text-red-400 text-xs mt-1">
-                      {form.whatsapp && !form.whatsapp.startsWith("8") ? "Nomor harus diawali 8 (contoh: 812xxx)" : t.required}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm text-text-muted mb-1.5">
-                    {t.labelEmail}
-                  </label>
-                  <input
-                    type="email"
-                    value={form.email}
-                    onChange={(e) => updateForm({ email: e.target.value })}
-                    onBlur={() => markTouched("email")}
-                    placeholder={t.placeholderEmail}
-                    className={`w-full bg-background border rounded-xl px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none transition-colors ${
-                      touched.email && form.email && !isValidEmail(form.email) ? "border-red-500" : "border-white/10"
-                    }`}
-                  />
-                  {touched.email && form.email && !isValidEmail(form.email) && (
-                    <p className="text-red-400 text-xs mt-1">{t.invalidEmail}</p>
-                  )}
-                  <p className="text-text-muted text-xs mt-1.5">{t.emailDesc}</p>
-                </div>
-              </div>
-            </section>
-
-            <section className="bg-surface rounded-2xl border border-white/5 overflow-hidden">
-              <div className="flex items-center gap-3 px-5 py-4 border-b border-white/5">
-                <CreditCard className="w-5 h-5 text-accent" />
-                <h2 className="font-bold text-text">{locale === "id" ? "Metode Pembayaran" : "Payment Method"}</h2>
-              </div>
-              <div className="p-5">
-                <div className="flex items-center gap-3 bg-background px-4 py-3.5 rounded-xl border-2 border-accent/50">
-                  <CreditCard className="w-5 h-5 text-accent" />
-                  <div className="flex-1">
-                    <p className="text-text font-medium text-sm">
-                      Midtrans Payment Gateway
-                    </p>
-                    <p className="text-text-muted text-xs">
-                      QRIS, Bank Transfer, E-wallet, {locale === "id" ? "Kartu Kredit" : "Credit Card"}
-                    </p>
-                  </div>
-                  <div className="w-5 h-5 rounded-full border-2 border-accent flex items-center justify-center">
-                    <div className="w-2.5 h-2.5 rounded-full bg-accent" />
-                  </div>
-                </div>
-              </div>
-            </section>
-          </div>
-        )}
-
-        {/* ===== STEP 5: KONFIRMASI ===== */}
-        {currentStep === 5 && (
-          <div className="max-w-4xl mx-auto space-y-6">
-            <section className="bg-surface rounded-2xl border border-white/5 overflow-hidden">
-              <div className="flex items-center gap-3 px-5 py-4 border-b border-white/5">
-                <span className="w-7 h-7 rounded-full gradient-primary flex items-center justify-center text-white text-sm font-bold">
-                  5
                 </span>
                 <h2 className="font-bold text-text">{t.confirmOrder}</h2>
               </div>
@@ -1795,12 +1648,19 @@ function OrderPageContent() {
                   <span className={`px-3 py-1.5 rounded-lg text-xs font-bold ${
                     orderMode === "paket" 
                       ? "bg-primary/20 text-primary" 
-                      : "bg-yellow-500/20 text-yellow-400"
+                      : orderMode === "gendong"
+                        ? "bg-purple-500/20 text-purple-400"
+                        : "bg-yellow-500/20 text-yellow-400"
                   }`}>
                     {orderMode === "paket" ? (
                       <span className="flex items-center gap-1.5">
                         <Package className="w-3.5 h-3.5" />
                         JOKI PAKET
+                      </span>
+                    ) : orderMode === "gendong" ? (
+                      <span className="flex items-center gap-1.5">
+                        <Users className="w-3.5 h-3.5" />
+                        JOKI GENDONG
                       </span>
                     ) : (
                       <span className="flex items-center gap-1.5">
@@ -2046,7 +1906,7 @@ function OrderPageContent() {
             <div />
           )}
 
-          {currentStep < 5 ? (
+          {currentStep < 3 ? (
             <button
               onClick={nextStep}
               disabled={!canProceedStep(currentStep)}
