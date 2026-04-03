@@ -4,7 +4,6 @@ import {
   HeroSection,
   PricingSection,
   TrackingSection,
-  HowItWorksSection,
   TrustSection,
   FAQSection,
 } from "@/components";
@@ -73,12 +72,6 @@ export default async function Home() {
       
       <main>
         {vis.hero && <HeroSection />}
-        
-        {vis.howItWorks && (
-          <ScrollAnimation animation="fadeUp" delay={100}>
-            <HowItWorksSection />
-          </ScrollAnimation>
-        )}
         
         {vis.pricing && (
           <ScrollAnimation animation="fadeUp" delay={100}>
