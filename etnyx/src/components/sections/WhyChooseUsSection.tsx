@@ -3,6 +3,7 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Zap, Shield, Coins, BarChart3, Gamepad2, MessageCircle } from "lucide-react";
 import { ReactNode } from "react";
+import CardCarousel from "@/components/CardCarousel";
 
 const iconMap: Record<string, ReactNode> = {
   zap: <Zap className="w-7 h-7" />,
@@ -50,9 +51,9 @@ export default function WhyChooseUsSection() {
           <p className="text-text-muted max-w-2xl mx-auto text-sm sm:text-base">{txt.subtitle}</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <CardCarousel desktopCols={3} tabletCols={2}>
           {features.map((feature, index) => (
-            <div key={index} className="group bg-white/[0.03] rounded-xl p-4 sm:p-5 border border-white/5 hover:border-accent/20 hover:bg-white/[0.05] transition-all duration-300 hover:-translate-y-1">
+            <div key={index} className="group bg-white/[0.03] rounded-xl p-4 sm:p-5 border border-white/5 hover:border-accent/20 hover:bg-white/[0.05] transition-all duration-300 hover:-translate-y-1 h-full">
               <div className="w-11 h-11 rounded-xl bg-accent/10 flex items-center justify-center text-accent mb-3 group-hover:scale-110 transition-transform">
                 {iconMap[feature.icon]}
               </div>
@@ -64,7 +65,7 @@ export default function WhyChooseUsSection() {
               </p>
             </div>
           ))}
-        </div>
+        </CardCarousel>
       </div>
     </section>
   );
