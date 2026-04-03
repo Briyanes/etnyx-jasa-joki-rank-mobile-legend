@@ -309,11 +309,14 @@ export default function AdminDashboard() {
         setGendongPricing(d3.value);
       } else {
         setGendongPricing([
-          { id: "epic", name: "Epic", price: 50000, icon: "/icons-tier/Epic.webp" },
-          { id: "legend", name: "Legend", price: 60000, icon: "/icons-tier/Legend.webp" },
-          { id: "mythic", name: "Mythic", price: 80000, icon: "/icons-tier/Mythic.webp" },
-          { id: "honor", name: "Mythic Honor", price: 100000, icon: "/icons-tier/Mythical_Honor.webp" },
-          { id: "glory", name: "Mythic Glory", price: 130000, icon: "/icons-tier/Mythical_Glory.webp" },
+          { id: "grandmaster", name: "Grand Master", price: 9000, icon: "/icons-tier/Grandmaster.webp" },
+          { id: "epic", name: "Epic", price: 10000, icon: "/icons-tier/Epic.webp" },
+          { id: "legend", name: "Legend", price: 11000, icon: "/icons-tier/Legend.webp" },
+          { id: "mythic", name: "Mythic", price: 21000, icon: "/icons-tier/Mythic.webp" },
+          { id: "grading", name: "Mythic Grading", price: 23000, icon: "/icons-tier/Mythic.webp" },
+          { id: "honor", name: "Mythic Honor", price: 25000, icon: "/icons-tier/Mythical_Honor.webp" },
+          { id: "glory", name: "Mythic Glory", price: 30000, icon: "/icons-tier/Mythical_Glory.webp" },
+          { id: "immortal", name: "Mythic Immortal", price: 35000, icon: "/icons-tier/Mythical_Immortal.webp" },
         ]);
       }
     } catch (e) { console.error(e); }
