@@ -38,7 +38,7 @@ const defaultHighlights = [
       "Support chat 24/7",
     ],
     highlighted: false,
-    cta: "/order",
+    cta: "/order?mode=perstar",
     icon: "star",
   },
   {
@@ -56,7 +56,7 @@ const defaultHighlights = [
     ],
     highlighted: true,
     badge: "BEST VALUE",
-    cta: "/order",
+    cta: "/order?mode=paket",
     icon: "trophy",
   },
   {
@@ -72,7 +72,7 @@ const defaultHighlights = [
       "Pengiriman INSTAN",
     ],
     highlighted: false,
-    cta: "/order",
+    cta: "/order?mode=paket",
     icon: "zap",
   },
   {
@@ -89,7 +89,7 @@ const defaultHighlights = [
       "Akun 100% aman di tangan kamu",
     ],
     highlighted: false,
-    cta: "/order",
+    cta: "/order?mode=gendong",
     icon: "users",
   },
 ];

@@ -448,7 +448,12 @@ function OrderPageContent() {
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   
   // Order mode: "paket", "perstar", or "gendong"
-  const [orderMode, setOrderMode] = useState<"paket" | "perstar" | "gendong">("paket");
+  const [orderMode, setOrderMode] = useState<"paket" | "perstar" | "gendong">(() => {
+    const modeParam = (typeof window !== "undefined" ? (new URLSearchParams(window.location.search).get("mode")) : null) || searchParams.get("mode");
+    if (modeParam === "perstar") return "perstar";
+    if (modeParam === "gendong") return "gendong";
+    return "paket";
+  });
   const [selectedStarRank, setSelectedStarRank] = useState<PerStarRank | null>(null);
   const [starQuantity, setStarQuantity] = useState(3); // minimum 3 stars
   const [perStarRanks, setPerStarRanks] = useState<PerStarRank[]>(PER_STAR_RANKS);
