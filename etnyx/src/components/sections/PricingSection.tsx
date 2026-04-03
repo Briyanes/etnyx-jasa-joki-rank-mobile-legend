@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useRouter } from "next/navigation";
 import { Zap, Crown, Shield, Star, Trophy, Flame, Check } from "lucide-react";
+import CardCarousel from "@/components/CardCarousel";
 
 interface CatalogPackage {
   id: string;
@@ -159,13 +160,13 @@ export default function PricingSection() {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-4 lg:gap-6">
+        <CardCarousel desktopCols={3} tabletCols={2}>
           {packageHighlights.map((tier) => (
             <div
               key={tier.id}
-              className={`rounded-2xl p-5 lg:p-6 border transition-all duration-300 hover:-translate-y-1 relative ${
+              className={`rounded-2xl p-5 lg:p-6 border transition-all duration-300 hover:-translate-y-1 relative h-full ${
                 tier.highlighted
-                  ? "bg-white/[0.06] border-accent/30 shadow-[0_0_30px_rgba(var(--color-accent-rgb,0,255,200),0.08)] md:scale-105"
+                  ? "bg-white/[0.06] border-accent/30 shadow-[0_0_30px_rgba(var(--color-accent-rgb,0,255,200),0.08)]"
                   : "bg-white/[0.03] border-white/5 hover:border-white/10 hover:bg-white/[0.05]"
               }`}
             >
@@ -232,7 +233,7 @@ export default function PricingSection() {
               </button>
             </div>
           ))}
-        </div>
+        </CardCarousel>
 
         {/* Trust badges */}
         <div className="mt-6 flex flex-wrap justify-center gap-4 text-xs sm:text-sm text-text-muted">
