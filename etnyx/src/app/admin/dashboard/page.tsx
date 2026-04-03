@@ -148,7 +148,7 @@ interface HeroSettings { headline: string; subheadline: string; ctaPrimary: stri
 interface PromoBannerSettings { text: string; link: string; isVisible: boolean; }
 interface FAQItem { question: string; answer: string; }
 interface TeamMember { name: string; role: string; specialization: string; rank: string; isVisible: boolean; }
-interface SectionVisibility { hero: boolean; liveCounter: boolean; howItWorks: boolean; pricing: boolean; whyChooseUs: boolean; teamShowcase: boolean; testimonials: boolean; portfolio: boolean; tracking: boolean; trust: boolean; faq: boolean; cta: boolean; }
+interface SectionVisibility { hero: boolean; pricing: boolean; whyChooseUs: boolean; teamShowcase: boolean; testimonials: boolean; portfolio: boolean; tracking: boolean; faq: boolean; cta: boolean; }
 interface TrackingPixels { metaPixelId: string; metaAccessToken: string; googleAdsId: string; googleAdsConversionLabel: string; googleAnalyticsId: string; tiktokPixelId: string; isMetaEnabled: boolean; isGoogleAdsEnabled: boolean; isGoogleAnalyticsEnabled: boolean; isTiktokEnabled: boolean; }
 interface SocialLinks { instagram: string; facebook: string; tiktok: string; youtube: string; whatsapp: string; }
 interface SiteInfo { siteName: string; taglineId: string; taglineEn: string; supportEmail: string; companyName: string; }
@@ -229,7 +229,7 @@ export default function AdminDashboard() {
   const [promoBanner, setPromoBanner] = useState<PromoBannerSettings>({ text: "", link: "/order", isVisible: true });
   const [faqItems, setFaqItems] = useState<FAQItem[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
-  const [sectionVisibility, setSectionVisibility] = useState<SectionVisibility>({ hero: true, liveCounter: true, howItWorks: true, pricing: true, whyChooseUs: true, teamShowcase: true, testimonials: true, portfolio: true, tracking: true, trust: true, faq: true, cta: true });
+  const [sectionVisibility, setSectionVisibility] = useState<SectionVisibility>({ hero: true, pricing: true, whyChooseUs: true, teamShowcase: true, testimonials: true, portfolio: true, tracking: true, faq: true, cta: true });
   const [trackingPixels, setTrackingPixels] = useState<TrackingPixels>({ metaPixelId: "", metaAccessToken: "", googleAdsId: "", googleAdsConversionLabel: "", googleAnalyticsId: "", tiktokPixelId: "", isMetaEnabled: false, isGoogleAdsEnabled: false, isGoogleAnalyticsEnabled: false, isTiktokEnabled: false });
   const [socialLinks, setSocialLinks] = useState<SocialLinks>({ instagram: "", facebook: "", tiktok: "", youtube: "", whatsapp: "" });
   const [siteInfo, setSiteInfo] = useState<SiteInfo>({ siteName: "", taglineId: "", taglineEn: "", supportEmail: "", companyName: "" });
@@ -533,9 +533,9 @@ export default function AdminDashboard() {
   ];
 
   const SECTION_LABELS: Record<string, string> = {
-    hero: "Hero Section", liveCounter: "Live Counter", howItWorks: "Cara Kerja", pricing: "Paket Harga",
+    hero: "Hero Section", pricing: "Paket Harga",
     whyChooseUs: "Kenapa Pilih Kami", teamShowcase: "Tim Booster", testimonials: "Testimoni",
-    portfolio: "Portfolio", tracking: "Tracking", trust: "Trust & Keamanan", faq: "FAQ", cta: "Call to Action",
+    portfolio: "Portfolio", tracking: "Tracking", faq: "FAQ", cta: "Call to Action",
   };
 
   const CMS_RANK_OPTIONS = [

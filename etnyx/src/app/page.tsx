@@ -22,23 +22,20 @@ export const dynamic = 'force-dynamic';
 
 interface SectionVisibility {
   hero: boolean;
-  liveCounter: boolean;
-  howItWorks: boolean;
   pricing: boolean;
   whyChooseUs: boolean;
   teamShowcase: boolean;
   testimonials: boolean;
   portfolio: boolean;
   tracking: boolean;
-  trust: boolean;
   faq: boolean;
   cta: boolean;
 }
 
 const DEFAULT_VISIBILITY: SectionVisibility = {
-  hero: true, liveCounter: true, howItWorks: true, pricing: true,
+  hero: true, pricing: true,
   whyChooseUs: true, teamShowcase: true, testimonials: true,
-  portfolio: true, tracking: true, trust: true, faq: true, cta: true,
+  portfolio: true, tracking: true, faq: true, cta: true,
 };
 
 async function getSectionVisibility(): Promise<SectionVisibility> {

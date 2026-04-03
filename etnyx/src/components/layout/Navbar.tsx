@@ -9,8 +9,8 @@ import { Search, MapPin } from "lucide-react";
 
 // Map section hash to visibility key
 const SECTION_VIS_MAP: Record<string, string> = {
-  "#how-it-works": "howItWorks",
   "#pricing": "pricing",
+  "#why-us": "whyChooseUs",
   "#team": "teamShowcase",
   "#testimonials": "testimonials",
   "#portfolio": "portfolio",
@@ -19,9 +19,9 @@ const SECTION_VIS_MAP: Record<string, string> = {
 };
 
 interface SectionVisibility {
-  hero: boolean; liveCounter: boolean; howItWorks: boolean; pricing: boolean;
+  hero: boolean; pricing: boolean;
   whyChooseUs: boolean; teamShowcase: boolean; testimonials: boolean;
-  portfolio: boolean; tracking: boolean; trust: boolean; faq: boolean; cta: boolean;
+  portfolio: boolean; tracking: boolean; faq: boolean; cta: boolean;
 }
 
 interface NavbarProps {
@@ -34,16 +34,16 @@ export default function Navbar({ hiddenSections }: NavbarProps) {
   const { locale } = useLanguage();
 
   const allNavLinks = locale === "id" ? [
-    { href: "#how-it-works", label: "Cara Kerja" },
     { href: "#pricing", label: "Paket" },
+    { href: "#why-us", label: "Keunggulan" },
     { href: "#team", label: "Tim" },
     { href: "#testimonials", label: "Testimoni" },
     { href: "#portfolio", label: "Portfolio" },
     { href: "#tracking", label: "Tracking" },
     { href: "#faq", label: "FAQ" },
   ] : [
-    { href: "#how-it-works", label: "How It Works" },
     { href: "#pricing", label: "Packages" },
+    { href: "#why-us", label: "Advantages" },
     { href: "#team", label: "Team" },
     { href: "#testimonials", label: "Testimonials" },
     { href: "#portfolio", label: "Portfolio" },
