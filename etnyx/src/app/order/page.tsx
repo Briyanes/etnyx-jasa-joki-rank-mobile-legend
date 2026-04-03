@@ -9,6 +9,7 @@ import {
   formatRupiah,
 } from "@/utils/helpers";
 import Footer from "@/components/layout/Footer";
+import TermsPopup from "@/components/TermsPopup";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
   ChevronLeft,
@@ -1867,6 +1868,7 @@ function OrderPageContent() {
 export default function OrderPage() {
   return (
     <Suspense fallback={<div className="min-h-screen bg-gradient-to-b from-[#0D0D1A] via-[#1A1A2E] to-[#0D0D1A] flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-purple-500" /></div>}>
+      <TermsPopup />
       <OrderPageContent />
     </Suspense>
   );

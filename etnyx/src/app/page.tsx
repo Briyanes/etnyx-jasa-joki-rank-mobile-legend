@@ -14,7 +14,6 @@ import PromoBanner from "@/components/PromoBanner";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import LoadingScreen from "@/components/LoadingScreen";
 import ScrollAnimation from "@/components/ScrollAnimation";
-import TermsPopup from "@/components/TermsPopup";
 import CTASection from "@/components/sections/CTASection";
 import BackToTop from "@/components/BackToTop";
 import { createAdminClient } from "@/lib/supabase-server";
@@ -61,7 +60,6 @@ export default async function Home() {
   return (
     <>
       <LoadingScreen />
-      <TermsPopup />
       
       {/* Fixed header container */}
       <div className="fixed top-0 left-0 right-0 z-50">
