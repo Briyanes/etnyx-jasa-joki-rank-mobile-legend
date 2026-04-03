@@ -4,7 +4,7 @@ import { createAdminClient } from "@/lib/supabase-server";
 // Validate referral code
 export async function POST(request: Request) {
   try {
-    const { code } = await request.json();
+    const { code, customerEmail, customerWhatsapp } = await request.json();
 
     if (!code) {
       return NextResponse.json({ valid: false, message: "Kode referral diperlukan" });
@@ -16,12 +16,39 @@ export async function POST(request: Request) {
     
     const { data: referrer, error } = await supabase
       .from("customers")
-      .select("id, name, referral_code")
+      .select("id, name, email, whatsapp, referral_code")
       .eq("referral_code", sanitizedCode)
       .single();
 
     if (error || !referrer) {
       return NextResponse.json({ valid: false, message: "Kode referral tidak valid" });
+    }
+
+    // Self-referral check: compare email or whatsapp
+    if (customerEmail && referrer.email && customerEmail.toLowerCase() === referrer.email.toLowerCase()) {
+      return NextResponse.json({ valid: false, message: "Tidak bisa menggunakan kode referral sendiri" });
+    }
+    if (customerWhatsapp && referrer.whatsapp) {
+      const cleanInput = customerWhatsapp.replace(/\D/g, "");
+      const cleanReferrer = referrer.whatsapp.replace(/\D/g, "");
+      if (cleanInput === cleanReferrer || `62${cleanInput}` === cleanReferrer || cleanInput === `62${cleanReferrer}`) {
+        return NextResponse.json({ valid: false, message: "Tidak bisa menggunakan kode referral sendiri" });
+      }
+    }
+
+    // Check duplicate: has this whatsapp/email already used this referral?
+    if (customerWhatsapp) {
+      const cleanWa = customerWhatsapp.replace(/\D/g, "");
+      const { data: existing } = await supabase
+        .from("referrals")
+        .select("id")
+        .eq("referrer_id", referrer.id)
+        .eq("referred_whatsapp", `+62${cleanWa}`)
+        .limit(1);
+
+      if (existing && existing.length > 0) {
+        return NextResponse.json({ valid: false, message: "Kamu sudah pernah menggunakan kode referral ini" });
+      }
     }
 
     return NextResponse.json({

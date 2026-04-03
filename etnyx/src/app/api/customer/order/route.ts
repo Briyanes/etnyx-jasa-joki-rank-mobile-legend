@@ -127,6 +127,62 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createAdminClient();
 
+    // ===== SERVER-SIDE PROMO/REFERRAL RE-VALIDATION =====
+    let verifiedDiscount = 0;
+    let verifiedPromoCode: string | null = null;
+    let promoId: string | null = null;
+    let referrerId: string | null = null;
+
+    if (body.promoCode) {
+      const sanitizedPromoCode = String(body.promoCode).replace(/[^a-zA-Z0-9-]/g, "").toUpperCase();
+
+      // Try promo code first
+      const { data: promoResult } = await supabase.rpc("validate_promo_code", {
+        p_code: sanitizedPromoCode,
+        p_order_amount: totalPrice,
+      });
+
+      if (promoResult && promoResult.length > 0 && promoResult[0].valid) {
+        verifiedDiscount = promoResult[0].calculated_discount;
+        verifiedPromoCode = sanitizedPromoCode;
+        promoId = promoResult[0].promo_id;
+      } else {
+        // Try referral code
+        const { data: referrer } = await supabase
+          .from("customers")
+          .select("id, referral_code")
+          .eq("referral_code", sanitizedPromoCode)
+          .single();
+
+        if (referrer) {
+          // Self-referral check: compare by email or whatsapp
+          const isSelfReferral =
+            (sanitizedEmail && sanitizedEmail === referrer.referral_code) ||
+            false;
+
+          if (!isSelfReferral) {
+            // Check duplicate: has this whatsapp already used this referral?
+            const { data: existingReferral } = await supabase
+              .from("referrals")
+              .select("id")
+              .eq("referrer_id", referrer.id)
+              .eq("referred_whatsapp", `+62${cleanWhatsapp}`)
+              .limit(1);
+
+            if (!existingReferral || existingReferral.length === 0) {
+              verifiedDiscount = Math.round(totalPrice * 0.1); // 10% referral discount
+              verifiedPromoCode = sanitizedPromoCode;
+              referrerId = referrer.id;
+            }
+          }
+        }
+      }
+    }
+
+    // Recalculate final price server-side (never trust client totalPrice with discount)
+    const verifiedTotalPrice = Math.max(0, totalPrice - verifiedDiscount);
+    const verifiedBasePrice = totalPrice;
+
     // Insert order
     const { data: order, error: orderError } = await supabase
       .from("orders")
@@ -141,8 +197,8 @@ export async function POST(request: NextRequest) {
         package_title: sanitizedPackageTitle,
         is_express: !!isExpress,
         is_premium: !!isPremium,
-        base_price: body.promoDiscount ? totalPrice + body.promoDiscount : totalPrice,
-        total_price: totalPrice,
+        base_price: verifiedBasePrice,
+        total_price: verifiedTotalPrice,
         status: "pending",
         account_login: encryptedLogin,
         account_password: encryptedPassword,
@@ -150,8 +206,8 @@ export async function POST(request: NextRequest) {
         notes: sanitizedNotes,
         login_method: body.loginMethod || "userid",
         customer_email: sanitizedEmail,
-        promo_code: body.promoCode || null,
-        promo_discount: body.promoDiscount || 0,
+        promo_code: verifiedPromoCode,
+        promo_discount: verifiedDiscount,
       })
       .select("id, order_id, total_price")
       .single();
@@ -164,6 +220,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Increment promo used_count if promo was applied
+    if (promoId) {
+      const { error: rpcErr } = await supabase.rpc("increment_promo_used_count", { p_promo_id: promoId });
+      if (rpcErr) {
+        // Fallback: manual increment if RPC doesn't exist
+        const { data: promo } = await supabase
+          .from("promo_codes")
+          .select("used_count")
+          .eq("id", promoId)
+          .single();
+        if (promo) {
+          await supabase
+            .from("promo_codes")
+            .update({ used_count: (promo.used_count || 0) + 1 })
+            .eq("id", promoId);
+        }
+      }
+    }
+
+    // Create referral record if referral was used
+    if (referrerId) {
+      const { error: refErr } = await supabase.from("referrals").insert({
+        referrer_id: referrerId,
+        referred_whatsapp: `+62${cleanWhatsapp}`,
+        referred_order_id: order.id,
+        reward_value: verifiedDiscount,
+        reward_given: false,
+      });
+      if (refErr) console.error("Referral insert error:", refErr);
+    }
+
     // Create Midtrans payment
     let paymentUrl: string | undefined;
 
@@ -174,7 +261,7 @@ export async function POST(request: NextRequest) {
         const payload = {
           transaction_details: {
             order_id: midtransOrderId,
-            gross_amount: totalPrice,
+            gross_amount: verifiedTotalPrice,
           },
           customer_details: {
             first_name: sanitizedNickname,
@@ -184,7 +271,7 @@ export async function POST(request: NextRequest) {
           item_details: [
             {
               id: orderId,
-              price: totalPrice,
+              price: verifiedTotalPrice,
               quantity: 1,
               name: `Joki ML: ${currentRank} → ${targetRank}`,
             },
@@ -238,6 +325,8 @@ export async function POST(request: NextRequest) {
       {
         success: true,
         orderId: order.order_id,
+        totalPrice: verifiedTotalPrice,
+        discount: verifiedDiscount,
         paymentUrl,
       },
       { status: 201 }

@@ -705,7 +705,7 @@ function OrderPageContent() {
       const refRes = await fetch("/api/referral", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: form.promoCode }),
+        body: JSON.stringify({ code: form.promoCode, customerEmail: form.email, customerWhatsapp: form.whatsapp }),
       });
       const refData = await refRes.json();
 
