@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useLanguage } from "@/contexts/LanguageContext";
+import CardCarousel from "@/components/CardCarousel";
 
 interface PortfolioItem {
   id: string;
@@ -161,13 +162,13 @@ export default function Portfolio() {
           </p>
         </div>
 
-        {/* Portfolio Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* Portfolio Carousel */}
+        <CardCarousel desktopCols={3} tabletCols={2}>
           {portfolio.map((item) => (
             <div
               key={item.id}
               onClick={() => setSelectedItem(item)}
-              className="group bg-surface rounded-2xl overflow-hidden border border-surface/50 hover:border-primary/30 transition-all cursor-pointer"
+              className="group bg-surface rounded-2xl overflow-hidden border border-surface/50 hover:border-primary/30 transition-all cursor-pointer h-full"
             >
               {/* Image or Placeholder */}
               <div className="relative aspect-video bg-gradient-to-br from-primary/20 to-accent/20">
@@ -232,7 +233,7 @@ export default function Portfolio() {
               </div>
             </div>
           ))}
-        </div>
+        </CardCarousel>
 
         {/* Modal */}
         {selectedItem && (

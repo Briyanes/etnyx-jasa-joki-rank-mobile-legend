@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Cat, Crown, Bird, Flame } from "lucide-react";
 import { ReactNode } from "react";
+import CardCarousel from "@/components/CardCarousel";
 
 interface Booster {
   id: number;
@@ -101,9 +102,9 @@ export default function TeamShowcaseSection() {
           <p className="text-text-muted max-w-lg mx-auto text-xs sm:text-sm">{txt.subtitle}</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <CardCarousel desktopCols={4} tabletCols={2}>
           {boosters.map((booster) => (
-            <div key={booster.id} className="group bg-white/[0.03] rounded-xl p-4 sm:p-5 border border-white/5 hover:border-accent/20 hover:bg-white/[0.05] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
+            <div key={booster.id} className="group bg-white/[0.03] rounded-xl p-4 sm:p-5 border border-white/5 hover:border-accent/20 hover:bg-white/[0.05] transition-all duration-300 hover:-translate-y-1 relative overflow-hidden h-full">
               <div className={`absolute top-4 right-4 flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${booster.isOnline ? "bg-success/20 text-success" : "bg-gray-500/20 text-gray-400"}`}>
                 <span className={`w-2 h-2 rounded-full ${booster.isOnline ? "bg-success animate-pulse" : "bg-gray-400"}`} />
                 {booster.isOnline ? txt.online : txt.offline}
@@ -138,7 +139,7 @@ export default function TeamShowcaseSection() {
               <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-accent via-accent/50 to-accent opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
           ))}
-        </div>
+        </CardCarousel>
       </div>
     </section>
   );

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import CardCarousel from "@/components/CardCarousel";
 
 interface Testimonial {
   id: string;
@@ -181,12 +182,12 @@ export default function Testimonials() {
           </p>
         </div>
 
-        {/* Testimonials Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-          {displayedTestimonials.map((testimonial) => (
+        {/* Testimonials Carousel */}
+        <CardCarousel desktopCols={3} tabletCols={2}>
+          {testimonials.map((testimonial) => (
             <div
               key={testimonial.id}
-              className="bg-surface rounded-2xl p-6 border border-surface/50 hover:border-primary/30 transition-all"
+              className="bg-surface rounded-2xl p-6 border border-surface/50 hover:border-primary/30 transition-all h-full"
             >
               {/* Header */}
               <div className="flex items-center gap-4 mb-4">
@@ -229,19 +230,7 @@ export default function Testimonials() {
               )}
             </div>
           ))}
-        </div>
-
-        {/* Show More Button */}
-        {testimonials.length > 3 && (
-          <div className="text-center">
-            <button
-              onClick={() => setShowAll(!showAll)}
-              className="px-6 py-3 text-primary border border-primary/30 rounded-xl hover:bg-primary/10 transition-all"
-            >
-              {showAll ? txt.showLess : `${testimonials.length - 3} ${txt.showMore}`}
-            </button>
-          </div>
-        )}
+        </CardCarousel>
 
         {/* Stats */}
         <div className="mt-12 grid grid-cols-3 gap-4 max-w-2xl mx-auto">
