@@ -219,7 +219,8 @@ export default function AdminDashboard() {
   const [editPriceValue, setEditPriceValue] = useState("");
   const [editOriginalPrice, setEditOriginalPrice] = useState("");
   const [activePricingCat, setActivePricingCat] = useState("");
-  const [pricingMode, setPricingMode] = useState<"paket" | "perstar">("paket");
+  const [pricingMode, setPricingMode] = useState<"paket" | "perstar" | "gendong">("paket");
+  const [gendongPricing, setGendongPricing] = useState<PerStarTier[]>([]);
 
   // CMS state
   const [settingsSubTab, setSettingsSubTab] = useState<SettingsSubTab>("cms-sections");
@@ -299,6 +300,20 @@ export default function AdminDashboard() {
           { id: "honor", name: "Mythic Honor", price: 21000, originalPrice: 22000, discountPercent: 5, icon: "/icons-tier/Mythical_Honor.webp" },
           { id: "glory", name: "Mythic Glory", price: 26000, originalPrice: 28000, discountPercent: 7, icon: "/icons-tier/Mythical_Glory.webp" },
           { id: "immortal", name: "Mythic Immortal", price: 31000, originalPrice: 33000, discountPercent: 6, icon: "/icons-tier/Mythical_Immortal.webp" },
+        ]);
+      }
+      // Fetch gendong (duo boost) pricing
+      const res3 = await fetch("/api/admin/settings?key=gendong_pricing");
+      const d3 = await res3.json();
+      if (d3.value && Array.isArray(d3.value)) {
+        setGendongPricing(d3.value);
+      } else {
+        setGendongPricing([
+          { id: "epic", name: "Epic", price: 50000, icon: "/icons-tier/Epic.webp" },
+          { id: "legend", name: "Legend", price: 60000, icon: "/icons-tier/Legend.webp" },
+          { id: "mythic", name: "Mythic", price: 80000, icon: "/icons-tier/Mythic.webp" },
+          { id: "honor", name: "Mythic Honor", price: 100000, icon: "/icons-tier/Mythical_Honor.webp" },
+          { id: "glory", name: "Mythic Glory", price: 130000, icon: "/icons-tier/Mythical_Glory.webp" },
         ]);
       }
     } catch (e) { console.error(e); }
@@ -452,6 +467,34 @@ export default function AdminDashboard() {
     setPerStarPricing(newTiers);
     setEditingPriceId(null);
     savePerStarPricing(newTiers);
+  };
+
+  const saveGendongPricing = async (tiers: PerStarTier[]) => {
+    setPricingSaving(true);
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "PUT", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: "gendong_pricing", value: tiers }),
+      });
+      if (res.ok) { setPricingSaved(true); setTimeout(() => setPricingSaved(false), 2000); }
+      else alert("Gagal menyimpan gendong pricing.");
+    } catch { alert("Gagal menyimpan gendong pricing."); }
+    finally { setPricingSaving(false); }
+  };
+
+  const saveEditGendong = (tierId: string) => {
+    const newTiers = gendongPricing.map(tier => {
+      if (tier.id !== tierId) return tier;
+      const price = Math.max(0, parseInt(editPriceValue) || tier.price);
+      const originalPrice = editOriginalPrice ? Math.max(0, parseInt(editOriginalPrice)) : undefined;
+      const discountPercent = originalPrice && originalPrice > price
+        ? Math.round(((originalPrice - price) / originalPrice) * 100)
+        : undefined;
+      return { ...tier, price, originalPrice, discountPercent };
+    });
+    setGendongPricing(newTiers);
+    setEditingPriceId(null);
+    saveGendongPricing(newTiers);
   };
 
   const saveCmsSetting = async (key: string, value: unknown) => {
@@ -852,7 +895,7 @@ export default function AdminDashboard() {
                   <p className="text-sm text-text-muted">Edit harga paket dan per bintang yang tampil di halaman order</p>
                 </div>
                 <button
-                  onClick={() => pricingMode === "paket" ? savePricingCatalog(pricingCatalog) : savePerStarPricing(perStarPricing)}
+                  onClick={() => pricingMode === "paket" ? savePricingCatalog(pricingCatalog) : pricingMode === "perstar" ? savePerStarPricing(perStarPricing) : saveGendongPricing(gendongPricing)}
                   disabled={pricingSaving}
                   className="flex items-center gap-2 px-4 py-2 gradient-primary rounded-lg text-white text-sm font-medium hover:opacity-90 transition disabled:opacity-50"
                 >
@@ -884,6 +927,17 @@ export default function AdminDashboard() {
                 >
                   <Star className="w-4 h-4 inline-block mr-2" />
                   Joki Per Bintang
+                </button>
+                <button
+                  onClick={() => setPricingMode("gendong")}
+                  className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
+                    pricingMode === "gendong"
+                      ? "gradient-primary text-white shadow-lg"
+                      : "text-text-muted hover:text-text"
+                  }`}
+                >
+                  <Users className="w-4 h-4 inline-block mr-2" />
+                  Joki Gendong
                 </button>
               </div>
 
@@ -1082,6 +1136,86 @@ export default function AdminDashboard() {
                               </div>
                             ) : (
                               <button onClick={() => startEditPerStar(tier)} className="p-1 rounded bg-accent/10 text-accent hover:bg-accent/20 transition">
+                                <Pencil className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* GENDONG (DUO BOOST) MODE */}
+              {pricingMode === "gendong" && (
+                <div className="bg-surface rounded-xl border border-white/5 overflow-hidden">
+                  <div className="px-4 py-3 bg-white/[0.02] border-b border-white/5 flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-text">Harga Joki Gendong (Duo Boost)</h3>
+                    <span className="text-xs text-text-muted">{gendongPricing.length} tier</span>
+                  </div>
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-white/5">
+                        <th className="text-left text-text-muted text-xs font-medium px-4 py-2.5">Tier Rank</th>
+                        <th className="text-right text-text-muted text-xs font-medium px-4 py-2.5">Harga/Star</th>
+                        <th className="text-right text-text-muted text-xs font-medium px-4 py-2.5">Harga Coret</th>
+                        <th className="text-right text-text-muted text-xs font-medium px-4 py-2.5">Diskon</th>
+                        <th className="text-center text-text-muted text-xs font-medium px-4 py-2.5">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {gendongPricing.map((tier) => (
+                        <tr key={tier.id} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                          <td className="px-4 py-2.5">
+                            <div className="flex items-center gap-2">
+                              <Image src={tier.icon} alt={tier.name} width={24} height={24} className="w-6 h-6 object-contain" />
+                              <span className="text-text text-xs font-medium">{tier.name}</span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-2.5 text-right">
+                            {editingPriceId === `gendong-${tier.id}` ? (
+                              <input
+                                type="number"
+                                value={editPriceValue}
+                                onChange={(e) => setEditPriceValue(e.target.value)}
+                                className="w-28 bg-background border border-accent/50 rounded px-2 py-1 text-xs text-text text-right focus:outline-none"
+                                autoFocus
+                              />
+                            ) : (
+                              <span className="text-text text-xs font-medium font-mono">{formatRupiah(tier.price)}</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-2.5 text-right">
+                            {editingPriceId === `gendong-${tier.id}` ? (
+                              <input
+                                type="number"
+                                value={editOriginalPrice}
+                                onChange={(e) => setEditOriginalPrice(e.target.value)}
+                                placeholder="Opsional"
+                                className="w-28 bg-background border border-white/10 rounded px-2 py-1 text-xs text-text text-right focus:outline-none"
+                              />
+                            ) : (
+                              <span className="text-text-muted text-xs line-through font-mono">{tier.originalPrice ? formatRupiah(tier.originalPrice) : "-"}</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-2.5 text-right">
+                            {tier.discountPercent ? (
+                              <span className="text-green-400 text-xs font-medium">-{tier.discountPercent}%</span>
+                            ) : <span className="text-text-muted text-xs">-</span>}
+                          </td>
+                          <td className="px-4 py-2.5 text-center">
+                            {editingPriceId === `gendong-${tier.id}` ? (
+                              <div className="flex items-center justify-center gap-1">
+                                <button onClick={() => saveEditGendong(tier.id)} className="p-1 rounded bg-green-500/20 text-green-400 hover:bg-green-500/30">
+                                  <CheckCircle className="w-3.5 h-3.5" />
+                                </button>
+                                <button onClick={() => setEditingPriceId(null)} className="p-1 rounded bg-red-500/20 text-red-400 hover:bg-red-500/30">
+                                  <XCircle className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            ) : (
+                              <button onClick={() => { setEditingPriceId(`gendong-${tier.id}`); setEditPriceValue(String(tier.price)); setEditOriginalPrice(String(tier.originalPrice || "")); }} className="p-1 rounded bg-accent/10 text-accent hover:bg-accent/20 transition">
                                 <Pencil className="w-3.5 h-3.5" />
                               </button>
                             )}

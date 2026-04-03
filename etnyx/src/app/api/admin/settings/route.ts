@@ -19,6 +19,7 @@ const ALLOWED_KEYS = [
   "site_name",
   "integrations",
   "perstar_pricing",
+  "gendong_pricing",
 ];
 
 // GET /api/admin/settings?key=hero or GET all

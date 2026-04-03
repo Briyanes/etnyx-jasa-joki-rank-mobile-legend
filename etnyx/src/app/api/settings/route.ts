@@ -13,6 +13,7 @@ const PUBLIC_KEYS = [
   "site_info",
   "pricing_catalog",
   "perstar_pricing",
+  "gendong_pricing",
 ];
 
 // GET /api/settings?keys=hero,faq_items or GET all public

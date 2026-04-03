@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useRouter } from "next/navigation";
-import { Zap, Crown, Shield, Star, Trophy, Flame, Check } from "lucide-react";
+import { Zap, Crown, Shield, Star, Trophy, Flame, Check, Users } from "lucide-react";
 import CardCarousel from "@/components/CardCarousel";
 
 interface CatalogPackage {
@@ -75,6 +75,23 @@ const defaultHighlights = [
     cta: "/order",
     icon: "zap",
   },
+  {
+    id: "gendong",
+    name: "Joki Gendong",
+    priceLabel: "50K",
+    priceUnit: "/star",
+    description: "Main bareng booster pro, rank naik bersama!",
+    features: [
+      "Duo queue dengan booster Mythic Glory",
+      "Kamu tetap main, booster carry",
+      "Belajar strategi dari pro player",
+      "Winrate lebih tinggi",
+      "Akun 100% aman di tangan kamu",
+    ],
+    highlighted: false,
+    cta: "/order",
+    icon: "users",
+  },
 ];
 
 export default function PricingSection() {
@@ -82,37 +99,41 @@ export default function PricingSection() {
   const [packageHighlights, setPackageHighlights] = useState(defaultHighlights);
 
   useEffect(() => {
-    fetch("/api/settings?keys=pricing_catalog,perstar_pricing")
+    fetch("/api/settings?keys=pricing_catalog,perstar_pricing,gendong_pricing")
       .then((res) => res.json())
       .then((data) => {
-        if (data.pricing_catalog && Array.isArray(data.pricing_catalog)) {
-          const catalog: CatalogCategory[] = data.pricing_catalog;
-          const perStar = catalog.find((c) => c.id === "per-star");
-          const paketGm = catalog.find((c) => c.id === "paket-gm");
-          const promo = catalog.find((c) => c.id === "promo");
+        const catalog: CatalogCategory[] = data.pricing_catalog && Array.isArray(data.pricing_catalog) ? data.pricing_catalog : [];
+        const perStar = catalog.find((c) => c.id === "per-star");
+        const paketGm = catalog.find((c) => c.id === "paket-gm");
+        const promo = catalog.find((c) => c.id === "promo");
 
-          // Use perstar_pricing for more accurate per-star min price
-          const perStarMin = data.perstar_pricing && Array.isArray(data.perstar_pricing) && data.perstar_pricing.length > 0
-            ? Math.min(...data.perstar_pricing.map((t: { price: number }) => t.price))
-            : perStar?.packages?.length ? Math.min(...perStar.packages.map((p) => p.price)) : null;
+        const perStarMin = data.perstar_pricing && Array.isArray(data.perstar_pricing) && data.perstar_pricing.length > 0
+          ? Math.min(...data.perstar_pricing.map((t: { price: number }) => t.price))
+          : perStar?.packages?.length ? Math.min(...perStar.packages.map((p) => p.price)) : null;
 
-          setPackageHighlights((prev) =>
-            prev.map((h) => {
-              if (h.id === "per-star" && perStarMin) {
-                return { ...h, priceLabel: formatPriceLabel(perStarMin) };
-              }
-              if (h.id === "paket-rank" && paketGm?.packages?.length) {
-                const minPrice = Math.min(...paketGm.packages.map((p) => p.price));
-                return { ...h, priceLabel: formatPriceLabel(minPrice) };
-              }
-              if (h.id === "promo" && promo?.packages?.length) {
-                const minPrice = Math.min(...promo.packages.map((p) => p.price));
-                return { ...h, priceLabel: formatPriceLabel(minPrice) };
-              }
-              return h;
-            })
-          );
-        }
+        const gendongMin = data.gendong_pricing && Array.isArray(data.gendong_pricing) && data.gendong_pricing.length > 0
+          ? Math.min(...data.gendong_pricing.map((t: { price: number }) => t.price))
+          : null;
+
+        setPackageHighlights((prev) =>
+          prev.map((h) => {
+            if (h.id === "per-star" && perStarMin) {
+              return { ...h, priceLabel: formatPriceLabel(perStarMin) };
+            }
+            if (h.id === "paket-rank" && paketGm?.packages?.length) {
+              const minPrice = Math.min(...paketGm.packages.map((p) => p.price));
+              return { ...h, priceLabel: formatPriceLabel(minPrice) };
+            }
+            if (h.id === "promo" && promo?.packages?.length) {
+              const minPrice = Math.min(...promo.packages.map((p) => p.price));
+              return { ...h, priceLabel: formatPriceLabel(minPrice) };
+            }
+            if (h.id === "gendong" && gendongMin) {
+              return { ...h, priceLabel: formatPriceLabel(gendongMin) };
+            }
+            return h;
+          })
+        );
       })
       .catch(() => {});
   }, []);
@@ -186,6 +207,7 @@ export default function PricingSection() {
                     {tier.icon === "star" && <Star className="w-7 h-7" />}
                     {tier.icon === "trophy" && <Trophy className="w-7 h-7" />}
                     {tier.icon === "zap" && <Zap className="w-7 h-7" />}
+                    {tier.icon === "users" && <Users className="w-7 h-7" />}
                   </span>
                   <h3 className="text-lg font-bold text-text">{tier.name}</h3>
                 </div>

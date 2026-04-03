@@ -29,6 +29,7 @@ import {
   Package,
   Minus,
   Plus,
+  Users,
 } from "lucide-react";
 import { FaFacebook, FaGoogle, FaTiktok, FaVk, FaApple, FaGamepad } from "react-icons/fa";
 import type { IconType } from "react-icons";
@@ -180,6 +181,15 @@ const PER_STAR_RANKS: PerStarRank[] = [
   { id: "immortal", name: "Mythic Immortal", price: 31000, originalPrice: 33000, discountPercent: 6, icon: "/icons-tier/Mythical_Immortal.webp" },
 ];
 
+// Gendong (duo boost) per-star pricing - more expensive
+const GENDONG_RANKS: PerStarRank[] = [
+  { id: "epic", name: "Epic", price: 50000, originalPrice: 60000, discountPercent: 17, icon: "/icons-tier/Epic.webp" },
+  { id: "legend", name: "Legend", price: 60000, originalPrice: 70000, discountPercent: 14, icon: "/icons-tier/Legend.webp" },
+  { id: "mythic", name: "Mythic", price: 80000, originalPrice: 95000, discountPercent: 16, icon: "/icons-tier/Mythic.webp" },
+  { id: "honor", name: "Mythic Honor", price: 100000, originalPrice: 115000, discountPercent: 13, icon: "/icons-tier/Mythical_Honor.webp" },
+  { id: "glory", name: "Mythic Glory", price: 130000, originalPrice: 150000, discountPercent: 13, icon: "/icons-tier/Mythical_Glory.webp" },
+];
+
 // Rank tier icon images
 const rankIcons: Record<string, string> = {
   warrior: "/icons-tier/Warrior.webp",
@@ -216,6 +226,7 @@ const translations = {
     // Order mode
     modePackage: "Joki Paket",
     modePerStar: "Joki Per Bintang",
+    modeGendong: "Joki Gendong",
     selectRank: "Pilih Rank",
     starQuantity: "Jumlah Bintang",
     minStars: "Minimal 3 bintang",
@@ -304,6 +315,7 @@ const translations = {
     // Order mode
     modePackage: "Package Boost",
     modePerStar: "Per Star Boost",
+    modeGendong: "Duo Boost",
     selectRank: "Select Rank",
     starQuantity: "Star Quantity",
     minStars: "Minimum 3 stars",
@@ -409,11 +421,14 @@ function OrderPageContent() {
   const [slideDirection, setSlideDirection] = useState<"left" | "right">("right");
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   
-  // Order mode: "paket" or "perstar"
-  const [orderMode, setOrderMode] = useState<"paket" | "perstar">("paket");
+  // Order mode: "paket", "perstar", or "gendong"
+  const [orderMode, setOrderMode] = useState<"paket" | "perstar" | "gendong">("paket");
   const [selectedStarRank, setSelectedStarRank] = useState<PerStarRank | null>(null);
   const [starQuantity, setStarQuantity] = useState(3); // minimum 3 stars
   const [perStarRanks, setPerStarRanks] = useState<PerStarRank[]>(PER_STAR_RANKS);
+  const [gendongRanks, setGendongRanks] = useState<PerStarRank[]>(GENDONG_RANKS);
+  const [selectedGendongRank, setSelectedGendongRank] = useState<PerStarRank | null>(null);
+  const [gendongQuantity, setGendongQuantity] = useState(3);
 
   const markTouched = useCallback((field: string) => {
     setTouched((prev) => ({ ...prev, [field]: true }));
@@ -471,14 +486,17 @@ function OrderPageContent() {
 
   // Fetch per-star pricing from CMS
   useEffect(() => {
-    fetch("/api/settings?keys=perstar_pricing")
+    fetch("/api/settings?keys=perstar_pricing,gendong_pricing")
       .then((res) => res.json())
       .then((data) => {
         if (data.perstar_pricing && Array.isArray(data.perstar_pricing) && data.perstar_pricing.length > 0) {
           setPerStarRanks(data.perstar_pricing);
         }
+        if (data.gendong_pricing && Array.isArray(data.gendong_pricing) && data.gendong_pricing.length > 0) {
+          setGendongRanks(data.gendong_pricing);
+        }
       })
-      .catch(() => {/* keep default per-star ranks */});
+      .catch(() => {/* keep defaults */});
   }, []);
 
   // Pre-fill from query params
@@ -556,6 +574,8 @@ function OrderPageContent() {
       price = selectedPackage.price;
     } else if (orderMode === "perstar" && selectedStarRank) {
       price = selectedStarRank.price * starQuantity;
+    } else if (orderMode === "gendong" && selectedGendongRank) {
+      price = selectedGendongRank.price * gendongQuantity;
     }
     if (form.isExpress) price *= 1.2;
     if (form.isPremium) price *= 1.3;
@@ -616,8 +636,11 @@ function OrderPageContent() {
         case 1:
           // For paket mode, need selected package
           // For perstar mode, need selected rank AND quantity >= 3
+          // For gendong mode, need selected gendong rank AND quantity >= 3
           if (orderMode === "paket") {
             return !!selectedPackage;
+          } else if (orderMode === "gendong") {
+            return !!(selectedGendongRank && gendongQuantity >= 3);
           } else {
             return !!(selectedStarRank && starQuantity >= 3);
           }
@@ -641,7 +664,7 @@ function OrderPageContent() {
           return true;
       }
     },
-    [selectedPackage, selectedStarRank, starQuantity, orderMode, form]
+    [selectedPackage, selectedStarRank, starQuantity, selectedGendongRank, gendongQuantity, orderMode, form]
   );
 
   const goToStep = useCallback(
@@ -667,11 +690,22 @@ function OrderPageContent() {
           targetRank: selectedStarRank.id,
         });
       }
+      // For gendong mode on step 1, create virtual package first
+      if (currentStep === 1 && orderMode === "gendong" && selectedGendongRank) {
+        setSelectedPackage({
+          id: `gendong-${selectedGendongRank.id}-${gendongQuantity}`,
+          title: `Duo Boost ${selectedGendongRank.name} × ${gendongQuantity} Star`,
+          price: selectedGendongRank.price * gendongQuantity,
+          rankKey: selectedGendongRank.id,
+          currentRank: selectedGendongRank.id,
+          targetRank: selectedGendongRank.id,
+        });
+      }
       setSlideDirection("right");
       setCurrentStep((s) => s + 1);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
-  }, [currentStep, canProceedStep, orderMode, selectedStarRank, starQuantity]);
+  }, [currentStep, canProceedStep, orderMode, selectedStarRank, starQuantity, selectedGendongRank, gendongQuantity]);
 
   const prevStep = useCallback(() => {
     if (currentStep > 1) {
@@ -738,7 +772,7 @@ function OrderPageContent() {
   }, [updateForm]);
 
   const canSubmit =
-    selectedPackage &&
+    (selectedPackage || (orderMode === "perstar" && selectedStarRank) || (orderMode === "gendong" && selectedGendongRank)) &&
     form.userId &&
     form.nickname &&
     form.accountLogin &&
@@ -758,7 +792,8 @@ function OrderPageContent() {
         body: JSON.stringify({
           currentRank: selectedPackage?.currentRank || form.currentRank,
           targetRank: selectedPackage?.targetRank || form.targetRank,
-          packageTitle: selectedPackage?.title,
+          packageTitle: selectedPackage?.title || (orderMode === "gendong" ? `Gendong ${selectedGendongRank?.name} x${gendongQuantity} star` : undefined),
+          orderType: orderMode,
           loginMethod: form.loginMethod,
           userId: form.userId,
           nickname: form.nickname,
@@ -987,6 +1022,22 @@ function OrderPageContent() {
                 >
                   <Star className="w-4 h-4 inline-block mr-2" />
                   {t.modePerStar}
+                </button>
+                <button
+                  onClick={() => {
+                    setOrderMode("gendong");
+                    setSelectedPackage(null);
+                    setSelectedStarRank(null);
+                    setStarQuantity(3);
+                  }}
+                  className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all ${
+                    orderMode === "gendong"
+                      ? "gradient-primary text-white shadow-lg"
+                      : "text-text-muted hover:text-text"
+                  }`}
+                >
+                  <Users className="w-4 h-4 inline-block mr-2" />
+                  {t.modeGendong}
                 </button>
               </div>
 
@@ -1227,6 +1278,138 @@ function OrderPageContent() {
                             <p className="text-text-muted text-xs">{t.totalPrice}</p>
                             <p className="text-yellow-400 font-bold text-xl">
                               {formatRupiah(selectedStarRank.price * starQuantity)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* GENDONG (DUO BOOST) MODE */}
+              {orderMode === "gendong" && (
+                <>
+                  {/* Rank Selection Grid */}
+                  <div className="mb-5">
+                    <h3 className="text-text font-bold text-base mb-4">{t.selectRank}</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                      {gendongRanks.map((rank) => {
+                        const isSelected = selectedGendongRank?.id === rank.id;
+                        return (
+                          <button
+                            key={rank.id}
+                            onClick={() => setSelectedGendongRank(rank)}
+                            className={`relative text-left rounded-xl border-2 transition-all duration-200 hover:scale-[1.02] overflow-hidden flex flex-col ${
+                              isSelected
+                                ? "border-yellow-400 shadow-lg shadow-yellow-400/20"
+                                : "border-white/5 hover:border-white/15"
+                            }`}
+                          >
+                            <div className="p-4 bg-gradient-to-br from-slate-700/80 to-slate-800/80 flex-1">
+                              <p className="text-white text-sm font-semibold mb-2">
+                                {rank.name}
+                              </p>
+                              <div className="flex items-center gap-3">
+                                <Image
+                                  src={rank.icon}
+                                  alt={rank.name}
+                                  width={40}
+                                  height={40}
+                                  className="w-10 h-10 object-contain flex-shrink-0 drop-shadow-lg"
+                                />
+                                <div>
+                                  <p className="text-yellow-400 font-bold text-lg leading-tight">
+                                    {formatRupiah(rank.price)}
+                                    <span className="text-text-muted text-xs font-normal ml-1">{t.perStar}</span>
+                                  </p>
+                                  {rank.originalPrice && (
+                                    <p className="text-red-400/70 text-xs line-through">
+                                      {formatRupiah(rank.originalPrice)}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="px-4 py-2.5 bg-slate-800/60 flex items-center justify-end gap-2">
+                              {rank.discountPercent && (
+                                <span className="bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded text-[10px] font-bold">
+                                  Disc {rank.discountPercent}%
+                                </span>
+                              )}
+                              <span className="bg-purple-600/30 text-purple-300 px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1">
+                                <Users className="w-2.5 h-2.5" />
+                                Duo Boost
+                              </span>
+                            </div>
+                            {isSelected && (
+                              <div className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-yellow-400 flex items-center justify-center">
+                                <Check className="w-3 h-3 text-black" />
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Star Quantity Input */}
+                  {selectedGendongRank && (
+                    <div className="p-4 bg-background rounded-xl border border-accent/30">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                          <Image
+                            src={selectedGendongRank.icon}
+                            alt={selectedGendongRank.name}
+                            width={40}
+                            height={40}
+                            className="w-10 h-10 object-contain drop-shadow-lg"
+                          />
+                          <div>
+                            <p className="text-text font-semibold">{selectedGendongRank.name}</p>
+                            <p className="text-text-muted text-sm">
+                              {formatRupiah(selectedGendongRank.price)} {t.perStar}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-4">
+                          <div>
+                            <p className="text-text-muted text-xs mb-1">{t.starQuantity}</p>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => setGendongQuantity(q => Math.max(3, q - 1))}
+                                disabled={gendongQuantity <= 3}
+                                className="w-8 h-8 rounded-lg bg-slate-700 text-white flex items-center justify-center hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                <Minus className="w-4 h-4" />
+                              </button>
+                              <input
+                                type="number"
+                                value={gendongQuantity}
+                                onChange={(e) => {
+                                  const val = parseInt(e.target.value) || 3;
+                                  setGendongQuantity(Math.max(3, Math.min(100, val)));
+                                }}
+                                min={3}
+                                max={100}
+                                className="w-16 h-8 text-center bg-slate-800 text-white rounded-lg border border-white/10 focus:outline-none focus:border-accent"
+                              />
+                              <button
+                                onClick={() => setGendongQuantity(q => Math.min(100, q + 1))}
+                                disabled={gendongQuantity >= 100}
+                                className="w-8 h-8 rounded-lg bg-slate-700 text-white flex items-center justify-center hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                <Plus className="w-4 h-4" />
+                              </button>
+                            </div>
+                            <p className="text-text-muted text-[10px] mt-1">{t.minStars}</p>
+                          </div>
+                          
+                          <div className="text-right">
+                            <p className="text-text-muted text-xs">{t.totalPrice}</p>
+                            <p className="text-yellow-400 font-bold text-xl">
+                              {formatRupiah(selectedGendongRank.price * gendongQuantity)}
                             </p>
                           </div>
                         </div>
@@ -1686,6 +1869,35 @@ function OrderPageContent() {
                   </div>
                 )}
 
+                {/* Gendong (Duo Boost) Summary */}
+                {orderMode === "gendong" && selectedGendongRank && (
+                  <div className="bg-background rounded-xl p-4">
+                    <p className="text-text-muted text-xs mb-2 uppercase tracking-wider">
+                      Duo Boost &mdash; Tier & Jumlah Bintang
+                    </p>
+                    <div className="flex items-center gap-3">
+                      <Image
+                        src={selectedGendongRank.icon}
+                        alt={selectedGendongRank.name}
+                        width={40}
+                        height={40}
+                        className="w-10 h-10 object-contain flex-shrink-0 drop-shadow-lg"
+                      />
+                      <div className="flex-1">
+                        <p className="text-text font-semibold">
+                          {selectedGendongRank.name}
+                        </p>
+                        <p className="text-text-muted text-xs">
+                          {gendongQuantity} Bintang × {formatRupiah(selectedGendongRank.price)}/star
+                        </p>
+                        <p className="text-yellow-400 font-bold text-lg">
+                          {formatRupiah(selectedGendongRank.price * gendongQuantity)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Account Info */}
                 <div className="bg-background rounded-xl p-4">
                   <p className="text-text-muted text-xs mb-3 uppercase tracking-wider">
@@ -1750,13 +1962,18 @@ function OrderPageContent() {
                 </div>
 
                 {/* Price Breakdown */}
-                {(selectedPackage || (orderMode === "perstar" && selectedStarRank)) && (
+                {(selectedPackage || (orderMode === "perstar" && selectedStarRank) || (orderMode === "gendong" && selectedGendongRank)) && (
                   <div className="bg-background rounded-xl p-4">
                     <p className="text-text-muted text-xs mb-3 uppercase tracking-wider">
                       Rincian Harga
                     </p>
                     <div className="space-y-2 text-sm">
-                      {orderMode === "perstar" && selectedStarRank ? (
+                      {orderMode === "gendong" && selectedGendongRank ? (
+                        <div className="flex justify-between text-text-muted">
+                          <span>Duo Boost {selectedGendongRank.name} × {gendongQuantity} Bintang</span>
+                          <span>{formatRupiah(selectedGendongRank.price * gendongQuantity)}</span>
+                        </div>
+                      ) : orderMode === "perstar" && selectedStarRank ? (
                         <div className="flex justify-between text-text-muted">
                           <span>{selectedStarRank.name} × {starQuantity} Bintang</span>
                           <span>{formatRupiah(selectedStarRank.price * starQuantity)}</span>
