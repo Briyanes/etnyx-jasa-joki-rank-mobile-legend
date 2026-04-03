@@ -219,6 +219,15 @@ const RANK_LIST = [
   { id: "mythicimmortal", label: "Mythic Immortal" },
 ];
 const RANK_ORDER = RANK_LIST.map((r) => r.id);
+// Ranks that have subdivisions (V, IV, III, II, I)
+const RANKS_WITH_STARS = ["warrior", "elite", "master", "grandmaster", "epic", "legend"];
+const STAR_OPTIONS = [
+  { value: 5, label: "V" },
+  { value: 4, label: "IV" },
+  { value: 3, label: "III" },
+  { value: 2, label: "II" },
+  { value: 1, label: "I" },
+];
 
 // Translations
 const translations = {
@@ -441,6 +450,10 @@ function OrderPageContent() {
   const [gendongRanks, setGendongRanks] = useState<PerStarRank[]>(GENDONG_RANKS);
   const [selectedGendongRank, setSelectedGendongRank] = useState<PerStarRank | null>(null);
   const [gendongQuantity, setGendongQuantity] = useState(3);
+  // Rank selector for paket mode
+  const [currentStar, setCurrentStar] = useState(5); // V=5, IV=4, III=3, II=2, I=1
+  const [targetStar, setTargetStar] = useState(5);
+  const [showPackages, setShowPackages] = useState(false);
 
   const markTouched = useCallback((field: string) => {
     setTouched((prev) => ({ ...prev, [field]: true }));
@@ -1051,107 +1064,150 @@ function OrderPageContent() {
               {/* PAKET MODE */}
               {orderMode === "paket" && (
                 <>
-                  {/* Rank Awal → Rank Tujuan Selector */}
-                  <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] gap-3 sm:gap-4 items-start mb-5">
-                    {/* Rank Awal */}
-                    <div>
-                      <label className="block text-xs text-text-muted font-medium mb-2 uppercase tracking-wider">
-                        {locale === "id" ? "Rank Awal" : "Current Rank"}
-                      </label>
-                      <div className="grid grid-cols-5 gap-1.5">
-                        {RANK_LIST.map((rank) => {
-                          const isSelected = form.currentRank === rank.id;
-                          const isDisabled = false;
-                          return (
-                            <button
-                              key={rank.id}
-                              onClick={() => {
-                                updateForm({ currentRank: rank.id as RankTier });
-                                setSelectedPackage(null);
-                                // Auto-reset target if current >= target
-                                const ci = RANK_ORDER.indexOf(rank.id);
-                                const ti = RANK_ORDER.indexOf(form.targetRank);
-                                if (ci >= ti) {
-                                  const nextRank = RANK_ORDER[ci + 1];
-                                  if (nextRank) updateForm({ currentRank: rank.id as RankTier, targetRank: nextRank as RankTier });
-                                }
-                              }}
-                              disabled={isDisabled}
-                              className={`flex flex-col items-center gap-1 p-1.5 rounded-lg transition-all ${
-                                isSelected
-                                  ? "bg-accent/20 border-2 border-accent shadow-lg shadow-accent/10"
-                                  : "bg-background border border-white/5 hover:border-white/15"
-                              } ${isDisabled ? "opacity-30 cursor-not-allowed" : ""}`}
-                            >
-                              <Image src={rankIcons[rank.id]} alt={rank.label} width={28} height={28} className="w-7 h-7 object-contain" />
-                              <span className={`text-[9px] leading-tight font-medium text-center ${isSelected ? "text-accent" : "text-text-muted"}`}>
-                                {rank.label}
-                              </span>
-                            </button>
-                          );
-                        })}
+                  {/* Rank Awalmu */}
+                  <div className="mb-4">
+                    <label className="block text-sm text-text font-bold mb-2">
+                      {locale === "id" ? "Rank Awalmu" : "Your Current Rank"}
+                    </label>
+                    <div className="flex gap-2">
+                      {/* Tier Dropdown */}
+                      <div className="flex-1 relative">
+                        <select
+                          value={form.currentRank}
+                          onChange={(e) => {
+                            const val = e.target.value as RankTier;
+                            updateForm({ currentRank: val });
+                            setSelectedPackage(null);
+                            setShowPackages(false);
+                            // Auto-reset target if current >= target
+                            const ci = RANK_ORDER.indexOf(val);
+                            const ti = RANK_ORDER.indexOf(form.targetRank);
+                            if (ci >= ti) {
+                              const nextRank = RANK_ORDER[ci + 1];
+                              if (nextRank) updateForm({ currentRank: val, targetRank: nextRank as RankTier });
+                            }
+                            // Reset star to V if rank doesn't have stars
+                            if (!RANKS_WITH_STARS.includes(val)) setCurrentStar(5);
+                          }}
+                          className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 text-text text-sm font-medium appearance-none cursor-pointer focus:border-accent focus:outline-none transition-colors pr-10"
+                        >
+                          {RANK_LIST.map((rank) => (
+                            <option key={rank.id} value={rank.id}>{rank.label}</option>
+                          ))}
+                        </select>
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                          <Image src={rankIcons[form.currentRank]} alt="" width={24} height={24} className="w-6 h-6 object-contain" />
+                        </div>
                       </div>
-                    </div>
-
-                    {/* Arrow */}
-                    <div className="hidden sm:flex items-center justify-center pt-7">
-                      <ArrowRight className="w-6 h-6 text-accent" />
-                    </div>
-                    <div className="flex sm:hidden items-center justify-center">
-                      <ArrowRight className="w-5 h-5 text-accent rotate-90" />
-                    </div>
-
-                    {/* Rank Tujuan */}
-                    <div>
-                      <label className="block text-xs text-text-muted font-medium mb-2 uppercase tracking-wider">
-                        {locale === "id" ? "Rank Tujuan" : "Target Rank"}
-                      </label>
-                      <div className="grid grid-cols-5 gap-1.5">
-                        {RANK_LIST.map((rank) => {
-                          const isSelected = form.targetRank === rank.id;
-                          const isDisabled = RANK_ORDER.indexOf(rank.id) <= RANK_ORDER.indexOf(form.currentRank);
-                          return (
+                      {/* Star Selector */}
+                      <div className="flex gap-1">
+                        {RANKS_WITH_STARS.includes(form.currentRank) ? (
+                          STAR_OPTIONS.map((s) => (
                             <button
-                              key={rank.id}
-                              onClick={() => {
-                                updateForm({ targetRank: rank.id as RankTier });
-                                setSelectedPackage(null);
-                              }}
-                              disabled={isDisabled}
-                              className={`flex flex-col items-center gap-1 p-1.5 rounded-lg transition-all ${
-                                isSelected
-                                  ? "bg-yellow-400/20 border-2 border-yellow-400 shadow-lg shadow-yellow-400/10"
-                                  : isDisabled
-                                    ? "bg-background/50 border border-white/5 opacity-30 cursor-not-allowed"
-                                    : "bg-background border border-white/5 hover:border-white/15"
+                              key={s.value}
+                              onClick={() => { setCurrentStar(s.value); setSelectedPackage(null); setShowPackages(false); }}
+                              className={`w-10 h-12 rounded-lg text-xs font-bold transition-all flex flex-col items-center justify-center gap-0.5 ${
+                                currentStar === s.value
+                                  ? "gradient-primary text-white shadow-lg"
+                                  : "bg-background border border-white/10 text-text-muted hover:border-white/20"
                               }`}
                             >
-                              <Image src={rankIcons[rank.id]} alt={rank.label} width={28} height={28} className="w-7 h-7 object-contain" />
-                              <span className={`text-[9px] leading-tight font-medium text-center ${isSelected ? "text-yellow-400" : "text-text-muted"}`}>
-                                {rank.label}
-                              </span>
+                              <Star className="w-3 h-3" />
+                              <span>{s.label}</span>
                             </button>
-                          );
-                        })}
+                          ))
+                        ) : (
+                          <div className="flex items-center px-3 bg-background/50 rounded-lg border border-white/5 text-text-muted text-xs">
+                            —
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Rank Tujuanmu */}
+                  <div className="mb-5">
+                    <label className="block text-sm text-text font-bold mb-2">
+                      {locale === "id" ? "Rank Tujuanmu" : "Your Target Rank"}
+                    </label>
+                    <div className="flex gap-2">
+                      {/* Tier Dropdown */}
+                      <div className="flex-1 relative">
+                        <select
+                          value={form.targetRank}
+                          onChange={(e) => {
+                            const val = e.target.value as RankTier;
+                            updateForm({ targetRank: val });
+                            setSelectedPackage(null);
+                            setShowPackages(false);
+                            if (!RANKS_WITH_STARS.includes(val)) setTargetStar(5);
+                          }}
+                          className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 text-text text-sm font-medium appearance-none cursor-pointer focus:border-accent focus:outline-none transition-colors pr-10"
+                        >
+                          {RANK_LIST.filter((rank) => RANK_ORDER.indexOf(rank.id) > RANK_ORDER.indexOf(form.currentRank)).map((rank) => (
+                            <option key={rank.id} value={rank.id}>{rank.label}</option>
+                          ))}
+                        </select>
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                          <Image src={rankIcons[form.targetRank]} alt="" width={24} height={24} className="w-6 h-6 object-contain" />
+                        </div>
+                      </div>
+                      {/* Star Selector */}
+                      <div className="flex gap-1">
+                        {RANKS_WITH_STARS.includes(form.targetRank) ? (
+                          STAR_OPTIONS.map((s) => (
+                            <button
+                              key={s.value}
+                              onClick={() => { setTargetStar(s.value); setSelectedPackage(null); setShowPackages(false); }}
+                              className={`w-10 h-12 rounded-lg text-xs font-bold transition-all flex flex-col items-center justify-center gap-0.5 ${
+                                targetStar === s.value
+                                  ? "bg-yellow-400/20 border-2 border-yellow-400 text-yellow-400 shadow-lg"
+                                  : "bg-background border border-white/10 text-text-muted hover:border-white/20"
+                              }`}
+                            >
+                              <Star className="w-3 h-3" />
+                              <span>{s.label}</span>
+                            </button>
+                          ))
+                        ) : (
+                          <div className="flex items-center px-3 bg-background/50 rounded-lg border border-white/5 text-text-muted text-xs">
+                            —
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
 
                   {/* Selected Rank Flow Display */}
-                  <div className="flex items-center justify-center gap-3 mb-5 p-3 bg-background rounded-xl border border-white/5">
+                  <div className="flex items-center justify-center gap-3 mb-4 p-3 bg-background rounded-xl border border-white/5">
                     <div className="flex items-center gap-2">
-                      <Image src={rankIcons[form.currentRank]} alt="from" width={28} height={28} className="w-7 h-7 object-contain" />
-                      <span className="text-text text-sm font-medium">{RANK_LIST.find(r => r.id === form.currentRank)?.label}</span>
+                      <Image src={rankIcons[form.currentRank]} alt="" width={28} height={28} className="w-7 h-7 object-contain" />
+                      <span className="text-text text-sm font-medium">
+                        {RANK_LIST.find(r => r.id === form.currentRank)?.label}
+                        {RANKS_WITH_STARS.includes(form.currentRank) && <span className="text-text-muted ml-1">{STAR_OPTIONS.find(s => s.value === currentStar)?.label}</span>}
+                      </span>
                     </div>
                     <ArrowRight className="w-4 h-4 text-accent flex-shrink-0" />
                     <div className="flex items-center gap-2">
-                      <Image src={rankIcons[form.targetRank]} alt="to" width={28} height={28} className="w-7 h-7 object-contain" />
-                      <span className="text-yellow-400 text-sm font-bold">{RANK_LIST.find(r => r.id === form.targetRank)?.label}</span>
+                      <Image src={rankIcons[form.targetRank]} alt="" width={28} height={28} className="w-7 h-7 object-contain" />
+                      <span className="text-yellow-400 text-sm font-bold">
+                        {RANK_LIST.find(r => r.id === form.targetRank)?.label}
+                        {RANKS_WITH_STARS.includes(form.targetRank) && <span className="text-yellow-300 ml-1">{STAR_OPTIONS.find(s => s.value === targetStar)?.label}</span>}
+                      </span>
                     </div>
                   </div>
 
-                  {/* Matching Packages */}
-                  {(() => {
+                  {/* Hitung Harga Button */}
+                  <button
+                    onClick={() => { setShowPackages(true); setSelectedPackage(null); }}
+                    className="w-full py-3.5 gradient-primary rounded-xl text-white font-bold text-sm hover:opacity-90 transition-opacity mb-5 flex items-center justify-center gap-2"
+                  >
+                    <CreditCard className="w-4 h-4" />
+                    {locale === "id" ? "Hitung Harga" : "Calculate Price"}
+                  </button>
+
+                  {/* Matching Packages (shown after Hitung Harga) */}
+                  {showPackages && (() => {
                     const matchingPkgs = catalog.flatMap(cat => cat.packages).filter(pkg =>
                       pkg.currentRank === form.currentRank && pkg.targetRank === form.targetRank
                     );
