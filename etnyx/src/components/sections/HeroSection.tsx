@@ -51,7 +51,7 @@ export default function HeroSection() {
       headline2: cms?.headline?.split(",").slice(1).join(",")?.trim() || "Tanpa Main.",
       subtitle: cms?.subheadline || "Platform joki ML tercepat. Pilih rank, order, selesai. Semua dalam hitungan detik.",
       cta1: cms?.ctaPrimary || "Order Sekarang",
-      cta2: cms?.ctaSecondary || "Lihat Paket",
+      cta2: cms?.ctaSecondary || "Lacak Order",
       rankStart: "Rank Awal",
       rankTarget: "Target",
       progress: "Progress",
@@ -63,7 +63,7 @@ export default function HeroSection() {
       headline2: "Without Playing.",
       subtitle: "Fastest ML boosting platform. Pick rank, order, done. All in seconds.",
       cta1: "Order Now",
-      cta2: "View Packages",
+      cta2: "Track Order",
       rankStart: "Starting Rank",
       rankTarget: "Target",
       progress: "Progress",
@@ -136,7 +136,7 @@ export default function HeroSection() {
                 {t.cta1}
               </Link>
               <Link
-                href="#pricing"
+                href="#tracking"
                 className="border border-white/10 px-5 sm:px-7 py-2.5 sm:py-3 rounded-xl font-semibold text-sm sm:text-base text-center text-text hover:bg-white/5 transition-colors">
                 {t.cta2}
               </Link>
