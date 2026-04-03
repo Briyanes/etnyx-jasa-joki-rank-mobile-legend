@@ -52,9 +52,6 @@ export default function HeroSection() {
       subtitle: cms?.subheadline || "Platform joki ML tercepat. Pilih rank, order, selesai. Semua dalam hitungan detik.",
       cta1: cms?.ctaPrimary || "Order Sekarang",
       cta2: cms?.ctaSecondary || "Lihat Paket",
-      stat1: "Order Selesai",
-      stat2: "Sukses Rate",
-      stat3: "Support",
       rankStart: "Rank Awal",
       rankTarget: "Target",
       progress: "Progress",
@@ -67,9 +64,6 @@ export default function HeroSection() {
       subtitle: "Fastest ML boosting platform. Pick rank, order, done. All in seconds.",
       cta1: "Order Now",
       cta2: "View Packages",
-      stat1: "Orders Done",
-      stat2: "Success Rate",
-      stat3: "Support",
       rankStart: "Starting Rank",
       rankTarget: "Target",
       progress: "Progress",
@@ -146,22 +140,6 @@ export default function HeroSection() {
                 className="border border-white/10 px-5 sm:px-7 py-2.5 sm:py-3 rounded-xl font-semibold text-sm sm:text-base text-center text-text hover:bg-white/5 transition-colors">
                 {t.cta2}
               </Link>
-            </div>
-
-            {/* Quick Stats */}
-            <div className="flex gap-5 sm:gap-6 pt-1 sm:pt-2">
-              <div>
-                <p className="text-lg sm:text-xl font-bold text-text">3K+</p>
-                <p className="text-text-muted text-xs">{t.stat1}</p>
-              </div>
-              <div>
-                <p className="text-lg sm:text-xl font-bold text-text">99%</p>
-                <p className="text-text-muted text-xs">{t.stat2}</p>
-              </div>
-              <div>
-                <p className="text-lg sm:text-xl font-bold text-text">24/7</p>
-                <p className="text-text-muted text-xs">{t.stat3}</p>
-              </div>
             </div>
           </div>
 

@@ -10,7 +10,6 @@ import {
 } from "@/components";
 import Testimonials from "@/components/Testimonials";
 import Portfolio from "@/components/Portfolio";
-import LiveCounter from "@/components/LiveCounter";
 import WhyChooseUsSection from "@/components/sections/WhyChooseUsSection";
 import TeamShowcaseSection from "@/components/sections/TeamShowcaseSection";
 import PromoBanner from "@/components/PromoBanner";
@@ -74,12 +73,6 @@ export default async function Home() {
       
       <main>
         {vis.hero && <HeroSection />}
-        
-        {vis.liveCounter && (
-          <ScrollAnimation animation="fadeUp">
-            <LiveCounter />
-          </ScrollAnimation>
-        )}
         
         {vis.howItWorks && (
           <ScrollAnimation animation="fadeUp" delay={100}>
