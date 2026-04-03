@@ -23,7 +23,10 @@ const rankLabels: Record<string, string> = {
   epic: "Epic",
   legend: "Legend",
   mythic: "Mythic",
+  mythicgrading: "Mythic Grading",
+  mythichonor: "Mythic Honor",
   mythicglory: "Mythic Glory",
+  mythicimmortal: "Mythic Immortal",
 };
 
 const rankIcons: Record<string, string> = {
@@ -34,6 +37,7 @@ const rankIcons: Record<string, string> = {
   epic: "/icons-tier/Epic.webp",
   legend: "/icons-tier/Legend.webp",
   mythic: "/icons-tier/Mythic.webp",
+  mythicgrading: "/icons-tier/Mythic.webp",
   mythicglory: "/icons-tier/Mythical_Glory.webp",
   mythichonor: "/icons-tier/Mythical_Honor.webp",
   mythicimmortal: "/icons-tier/Mythical_Immortal.webp",

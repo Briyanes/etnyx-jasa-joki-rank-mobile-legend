@@ -7,6 +7,7 @@ export type RankTier =
   | "epic"
   | "legend"
   | "mythic"
+  | "mythicgrading"
   | "mythichonor"
   | "mythicglory"
   | "mythicimmortal";

@@ -28,11 +28,11 @@ const defaultHighlights = [
   {
     id: "per-star",
     name: "Per Star",
-    priceLabel: "3.9K",
+    priceLabel: "5K",
     priceUnit: "/star",
     description: "Joki per bintang, fleksibel sesuai budget",
     features: [
-      "Mulai dari Master - Mythic Immortal",
+      "Mulai dari Grand Master - Mythic Immortal",
       "Harga per star transparan",
       "Report progress harian",
       "Support chat 24/7",
@@ -78,7 +78,7 @@ const defaultHighlights = [
   {
     id: "gendong",
     name: "Joki Gendong",
-    priceLabel: "50K",
+    priceLabel: "9K",
     priceUnit: "/star",
     description: "Main bareng booster pro, rank naik bersama!",
     features: [

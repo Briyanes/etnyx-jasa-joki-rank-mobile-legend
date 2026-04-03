@@ -41,9 +41,10 @@ const rankOrder: Record<RankTier, number> = {
   epic: 5,
   legend: 6,
   mythic: 7,
-  mythichonor: 8,
-  mythicglory: 9,
-  mythicimmortal: 10,
+  mythicgrading: 8,
+  mythichonor: 9,
+  mythicglory: 10,
+  mythicimmortal: 11,
 };
 
 export function calculatePrice(

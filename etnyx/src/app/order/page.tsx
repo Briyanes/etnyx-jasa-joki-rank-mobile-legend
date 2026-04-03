@@ -173,22 +173,25 @@ interface PerStarRank {
 
 const PER_STAR_RANKS: PerStarRank[] = [
   { id: "grandmaster", name: "Grand Master", price: 5000, originalPrice: 6000, discountPercent: 17, icon: "/icons-tier/Grandmaster.webp" },
-  { id: "epic", name: "Epic", price: 7000, originalPrice: 8000, discountPercent: 13, icon: "/icons-tier/Epic.webp" },
-  { id: "legend", name: "Legend", price: 8000, originalPrice: 9000, discountPercent: 11, icon: "/icons-tier/Legend.webp" },
+  { id: "epic", name: "Epic", price: 6500, originalPrice: 8000, discountPercent: 19, icon: "/icons-tier/Epic.webp" },
+  { id: "legend", name: "Legend", price: 7500, originalPrice: 9000, discountPercent: 17, icon: "/icons-tier/Legend.webp" },
   { id: "mythic", name: "Mythic", price: 18000, originalPrice: 20000, discountPercent: 10, icon: "/icons-tier/Mythic.webp" },
   { id: "grading", name: "Mythic Grading", price: 20000, originalPrice: 22000, discountPercent: 9, icon: "/icons-tier/Mythic.webp" },
-  { id: "honor", name: "Mythic Honor", price: 21000, originalPrice: 22000, discountPercent: 5, icon: "/icons-tier/Mythical_Honor.webp" },
+  { id: "honor", name: "Mythic Honor", price: 21000, originalPrice: 23000, discountPercent: 9, icon: "/icons-tier/Mythical_Honor.webp" },
   { id: "glory", name: "Mythic Glory", price: 26000, originalPrice: 28000, discountPercent: 7, icon: "/icons-tier/Mythical_Glory.webp" },
   { id: "immortal", name: "Mythic Immortal", price: 31000, originalPrice: 33000, discountPercent: 6, icon: "/icons-tier/Mythical_Immortal.webp" },
 ];
 
-// Gendong (duo boost) per-star pricing - more expensive
+// Gendong (duo boost) per-star pricing
 const GENDONG_RANKS: PerStarRank[] = [
-  { id: "epic", name: "Epic", price: 50000, originalPrice: 60000, discountPercent: 17, icon: "/icons-tier/Epic.webp" },
-  { id: "legend", name: "Legend", price: 60000, originalPrice: 70000, discountPercent: 14, icon: "/icons-tier/Legend.webp" },
-  { id: "mythic", name: "Mythic", price: 80000, originalPrice: 95000, discountPercent: 16, icon: "/icons-tier/Mythic.webp" },
-  { id: "honor", name: "Mythic Honor", price: 100000, originalPrice: 115000, discountPercent: 13, icon: "/icons-tier/Mythical_Honor.webp" },
-  { id: "glory", name: "Mythic Glory", price: 130000, originalPrice: 150000, discountPercent: 13, icon: "/icons-tier/Mythical_Glory.webp" },
+  { id: "grandmaster", name: "Grand Master", price: 9000, originalPrice: 11000, discountPercent: 18, icon: "/icons-tier/Grandmaster.webp" },
+  { id: "epic", name: "Epic", price: 10000, originalPrice: 12000, discountPercent: 17, icon: "/icons-tier/Epic.webp" },
+  { id: "legend", name: "Legend", price: 11000, originalPrice: 13000, discountPercent: 15, icon: "/icons-tier/Legend.webp" },
+  { id: "mythic", name: "Mythic", price: 21000, originalPrice: 24000, discountPercent: 13, icon: "/icons-tier/Mythic.webp" },
+  { id: "grading", name: "Mythic Grading", price: 23000, originalPrice: 26000, discountPercent: 12, icon: "/icons-tier/Mythic.webp" },
+  { id: "honor", name: "Mythic Honor", price: 25000, originalPrice: 28000, discountPercent: 11, icon: "/icons-tier/Mythical_Honor.webp" },
+  { id: "glory", name: "Mythic Glory", price: 30000, originalPrice: 34000, discountPercent: 12, icon: "/icons-tier/Mythical_Glory.webp" },
+  { id: "immortal", name: "Mythic Immortal", price: 35000, originalPrice: 40000, discountPercent: 13, icon: "/icons-tier/Mythical_Immortal.webp" },
 ];
 
 // Rank tier icon images
@@ -200,6 +203,7 @@ const rankIcons: Record<string, string> = {
   epic: "/icons-tier/Epic.webp",
   legend: "/icons-tier/Legend.webp",
   mythic: "/icons-tier/Mythic.webp",
+  mythicgrading: "/icons-tier/Mythic.webp",
   mythichonor: "/icons-tier/Mythical_Honor.webp",
   mythicglory: "/icons-tier/Mythical_Glory.webp",
   mythicimmortal: "/icons-tier/Mythical_Immortal.webp",
@@ -214,6 +218,7 @@ const RANK_LIST = [
   { id: "epic", label: "Epic" },
   { id: "legend", label: "Legend" },
   { id: "mythic", label: "Mythic" },
+  { id: "mythicgrading", label: "Mythic Grading" },
   { id: "mythichonor", label: "Mythic Honor" },
   { id: "mythicglory", label: "Mythic Glory" },
   { id: "mythicimmortal", label: "Mythic Immortal" },

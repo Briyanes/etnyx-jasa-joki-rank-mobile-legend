@@ -8,7 +8,10 @@ export const rankOptions: RankOption[] = [
   { value: "epic", label: "Epic", order: 5 },
   { value: "legend", label: "Legend", order: 6 },
   { value: "mythic", label: "Mythic", order: 7 },
-  { value: "mythicglory", label: "Mythic Glory", order: 8 },
+  { value: "mythicgrading", label: "Mythic Grading", order: 8 },
+  { value: "mythichonor", label: "Mythic Honor", order: 9 },
+  { value: "mythicglory", label: "Mythic Glory", order: 10 },
+  { value: "mythicimmortal", label: "Mythic Immortal", order: 11 },
 ];
 
 export const faqItems: FAQItem[] = [

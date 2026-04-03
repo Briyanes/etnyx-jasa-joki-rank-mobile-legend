@@ -61,7 +61,10 @@ function formatRank(rank: string): string {
     epic: "Epic",
     legend: "Legend",
     mythic: "Mythic",
+    mythicgrading: "Mythic Grading",
+    mythichonor: "Mythic Honor",
     mythicglory: "Mythic Glory",
+    mythicimmortal: "Mythic Immortal",
   };
   return labels[rank?.toLowerCase()] || rank;
 }
