@@ -1018,20 +1018,21 @@ function OrderPageContent() {
             </div>
             <div className="p-5">
               {/* Mode Switcher (Paket / Per Bintang) */}
-              <div className="flex gap-2 mb-5 p-1 bg-background rounded-xl">
+              <div className="flex flex-col sm:flex-row gap-2 mb-5 p-1 bg-background rounded-xl w-full">
                 <button
                   onClick={() => {
                     setOrderMode("paket");
                     setSelectedStarRank(null);
                     setStarQuantity(3);
                   }}
-                  className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all ${
+                  className={`w-full sm:w-auto py-3 px-4 rounded-lg text-base font-semibold transition-all ${
                     orderMode === "paket"
                       ? "gradient-primary text-white shadow-lg"
                       : "text-text-muted hover:text-text"
                   }`}
+                  style={{ minWidth: 0 }}
                 >
-                  <Package className="w-4 h-4 inline-block mr-2" />
+                  <Package className="w-5 h-5 inline-block mr-2 align-middle" />
                   {t.modePackage}
                 </button>
                 <button
@@ -1039,13 +1040,14 @@ function OrderPageContent() {
                     setOrderMode("perstar");
                     setSelectedPackage(null);
                   }}
-                  className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all ${
+                  className={`w-full sm:w-auto py-3 px-4 rounded-lg text-base font-semibold transition-all ${
                     orderMode === "perstar"
                       ? "gradient-primary text-white shadow-lg"
                       : "text-text-muted hover:text-text"
                   }`}
+                  style={{ minWidth: 0 }}
                 >
-                  <Star className="w-4 h-4 inline-block mr-2" />
+                  <Star className="w-5 h-5 inline-block mr-2 align-middle" />
                   {t.modePerStar}
                 </button>
                 <button
@@ -1055,13 +1057,14 @@ function OrderPageContent() {
                     setSelectedStarRank(null);
                     setStarQuantity(3);
                   }}
-                  className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all ${
+                  className={`w-full sm:w-auto py-3 px-4 rounded-lg text-base font-semibold transition-all ${
                     orderMode === "gendong"
                       ? "gradient-primary text-white shadow-lg"
                       : "text-text-muted hover:text-text"
                   }`}
+                  style={{ minWidth: 0 }}
                 >
-                  <Users className="w-4 h-4 inline-block mr-2" />
+                  <Users className="w-5 h-5 inline-block mr-2 align-middle" />
                   {t.modeGendong}
                 </button>
               </div>
