@@ -172,13 +172,15 @@ export default function PricingSection() {
             >
               {/* Badge */}
               {tier.badge && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent/20 border border-accent/30 px-4 py-1.5 rounded-full text-xs font-bold text-accent whitespace-nowrap flex items-center gap-1">
-                  <Flame className="w-3.5 h-3.5" /> {tier.badge}
+                <div className="flex justify-center mb-3">
+                  <span className="bg-accent/20 border border-accent/30 px-4 py-1.5 rounded-full text-xs font-bold text-accent whitespace-nowrap inline-flex items-center gap-1">
+                    <Flame className="w-3.5 h-3.5" /> {tier.badge}
+                  </span>
                 </div>
               )}
 
               {/* Tier Info */}
-              <div className={`mb-4 ${tier.badge ? "pt-2" : ""}`}>
+              <div className="mb-4">
                 <div className="flex items-center gap-2 mb-1.5">
                   <span className="text-xl text-accent">
                     {tier.icon === "star" && <Star className="w-7 h-7" />}
