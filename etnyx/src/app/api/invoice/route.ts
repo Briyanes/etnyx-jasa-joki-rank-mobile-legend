@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import { verifyAdmin } from "@/lib/admin-auth";
+import { WHATSAPP_NUMBER } from "@/lib/constants";
 
 // GET - Generate invoice HTML/PDF for an order
 export async function GET(request: NextRequest) {
@@ -174,7 +175,7 @@ export async function GET(request: NextRequest) {
     
     <div class="footer">
       <p>Terima kasih telah menggunakan layanan <strong>ETNYX</strong></p>
-      <p>Pertanyaan? Hubungi kami di <a href="https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "6281414131321"}">WhatsApp</a></p>
+      <p>Pertanyaan? Hubungi kami di <a href="https://wa.me/${WHATSAPP_NUMBER}">WhatsApp</a></p>
     </div>
   </div>
   

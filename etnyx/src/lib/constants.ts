@@ -57,3 +57,5 @@ export const siteConfig = {
     "etnyx",
   ],
 };
+
+export const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "6281414131321";

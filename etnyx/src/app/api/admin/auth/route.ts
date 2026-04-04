@@ -18,7 +18,6 @@ export async function POST(request: Request) {
     // Validate credentials
     const adminEmail = process.env.ADMIN_EMAIL;
     const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH;
-    const adminPasswordPlain = process.env.ADMIN_PASSWORD;
 
     if (!adminEmail) {
       console.error("ADMIN_EMAIL environment variable not set");
@@ -39,17 +38,8 @@ export async function POST(request: Request) {
           { status: 401 }
         );
       }
-    } else if (adminPasswordPlain) {
-      // Legacy plaintext — log warning
-      console.warn("⚠️  ADMIN_PASSWORD is plaintext. Set ADMIN_PASSWORD_HASH with bcrypt hash for security.");
-      if (email !== adminEmail || password !== adminPasswordPlain) {
-        return NextResponse.json(
-          { error: "Invalid credentials" },
-          { status: 401 }
-        );
-      }
     } else {
-      console.error("ADMIN_PASSWORD_HASH or ADMIN_PASSWORD must be set");
+      console.error("ADMIN_PASSWORD_HASH must be set with a bcrypt hash");
       return NextResponse.json(
         { error: "Server configuration error" },
         { status: 500 }

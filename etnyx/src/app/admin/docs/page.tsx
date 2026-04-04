@@ -387,6 +387,11 @@ function buildSections(): DocSection[] {
               ["/api/staff/orders", "PUT", "Update status/progress", "All staff"],
               ["/api/staff/submissions", "GET", "List hasil kerja", "All staff"],
               ["/api/staff/submissions", "POST", "Submit match results", <RoleBadge key="w" role="worker" />],
+              ["/api/staff/submissions", "PUT", "Edit submission (30 min window)", <RoleBadge key="w2" role="worker" />],
+              ["/api/staff/submissions", "DELETE", "Delete submission (30 min window)", <RoleBadge key="w3" role="worker" />],
+              ["/api/staff/credentials", "GET", "View encrypted credentials (assigned only)", <RoleBadge key="w4" role="worker" />],
+              ["/api/staff/notes", "GET/POST", "Order notes & internal comments", "All staff"],
+              ["/api/staff/reset-password", "POST/PUT", "Request & execute password reset", <RoleBadge key="p2" role="public" />],
               ["/api/staff/upload", "POST", "Upload screenshot", "All staff"],
             ]} />
           </div>
@@ -408,6 +413,7 @@ function buildSections(): DocSection[] {
               ["/api/admin/customers", "GET", "List customers"],
               ["/api/admin/upload", "POST", "Upload file ke Supabase Storage"],
               ["/api/admin/export", "GET", "Export data orders (CSV/JSON)"],
+              ["/api/admin/orders/follow-up", "POST", "Smart follow-up WA templates (6 jenis)"],
               ["/api/admin/test-notifications", "POST", "Test channel notifikasi"],
             ]} />
           </div>
@@ -512,8 +518,11 @@ function buildSections(): DocSection[] {
             ["NEXT_PUBLIC_SUPABASE_URL", "✅", "URL project Supabase"],
             ["NEXT_PUBLIC_SUPABASE_ANON_KEY", "✅", "Anon key (safe for frontend)"],
             ["SUPABASE_SERVICE_ROLE_KEY", "✅", "Admin key (JANGAN expose ke frontend)"],
-            ["ADMIN_JWT_SECRET", "✅", "Secret untuk sign JWT token (min 32 char)"],
-            ["ENCRYPTION_KEY", "✅", "AES-256 key untuk encrypt credentials (min 32 char)"],
+            ["JWT_SECRET", "✅", "Secret untuk customer JWT token (min 32 char)"],
+            ["ADMIN_JWT_SECRET", "✅", "Secret untuk admin/staff JWT token (fallback ke SERVICE_ROLE_KEY)"],
+            ["ADMIN_EMAIL", "✅", "Email login admin"],
+            ["ADMIN_PASSWORD_HASH", "✅", "Bcrypt hash password admin"],
+            ["ENCRYPTION_KEY", "✅", "AES-256 key untuk encrypt credentials (exactly 32 char)"],
             ["NEXT_PUBLIC_SITE_URL", "✅", "URL production (https://etnyx.vercel.app)"],
             ["MIDTRANS_SERVER_KEY", "⚠️", "Bisa set dari Dashboard → Integrations juga"],
             ["RESEND_API_KEY", "⚠️", "API key Resend untuk email"],
@@ -583,7 +592,7 @@ function buildSections(): DocSection[] {
           <div className="space-y-2">
             {[
               { tab: "Overview", desc: "KPI metrics: total orders, revenue, pending, completed. Chart trend 7 hari. Refresh otomatis 30 detik." },
-              { tab: "Orders", desc: "List semua order. Filter by status. Update status (pending → confirmed → in_progress → completed). Lihat credentials akun customer." },
+              { tab: "Orders", desc: "List semua order with search & pagination. Filter by status. Smart action buttons per status: Follow-up Payment, Request Credentials, Notify Completed, Request Review, dll. Copy order info. WhatsApp follow-up templates (6 jenis)." },
               { tab: "Pricing", desc: "Kelola 3 mode pricing: Paket (bundle), Per Star (per bintang), Gendong (duo). Edit harga, diskon, original price." },
               { tab: "Boosters", desc: "Legacy booster profiles. Tambah/edit booster, set specialization, rating, availability." },
               { tab: "Testi", desc: "Kelola review customer. Toggle featured & visibility. Tampil di homepage." },
@@ -616,11 +625,13 @@ function buildSections(): DocSection[] {
             {[
               { step: "1. Login", desc: "Buka /admin → masukkan email & password yang diberikan Lead/Admin. Otomatis redirect ke Worker Dashboard." },
               { step: "2. Lihat Order", desc: "Dashboard menampilkan order yang sudah di-assign ke kamu. Ada 3 kategori: Menunggu, Aktif, Selesai." },
-              { step: "3. Mulai Order", desc: "Di bagian 'Order Menunggu', klik tombol 'Mulai'. Status order berubah jadi in_progress." },
-              { step: "4. Update Progress", desc: "Klik order → 'Update Progress'. Geser slider 0-100%, pilih rank yang sudah dicapai. Klik 'Simpan'." },
-              { step: "5. Submit Hasil", desc: "Klik 'Submit Hasil'. Isi: stars gained, MVP count, savage, maniac, matches played, wins, durasi (menit). Upload screenshot." },
-              { step: "6. Upload Screenshot", desc: "Klik 'Upload Screenshot' → pilih file (JPG/PNG/WebP, max 5MB). File disimpan di Supabase Storage." },
-              { step: "7. Selesai", desc: "Klik 'Selesai' jika rank target sudah tercapai. Admin Group akan dapat notifikasi Telegram." },
+              { step: "3. Lihat Credentials", desc: "Klik 'Credentials' di order aktif untuk melihat akun ML customer (username/password). Data terenkripsi AES-256-GCM, hanya bisa dilihat untuk order yang di-assign ke kamu." },
+              { step: "4. Mulai Order", desc: "Di bagian 'Order Menunggu', klik tombol 'Mulai'. Status order berubah jadi in_progress." },
+              { step: "5. Update Progress", desc: "Klik order → 'Update Progress'. Geser slider 0-100%, pilih rank yang sudah dicapai. Klik 'Simpan'." },
+              { step: "6. Submit Hasil", desc: "Klik 'Submit Hasil'. Isi: stars gained, MVP count, savage, maniac, matches played, wins, durasi (menit). Upload screenshot. Bisa edit/hapus submission dalam 30 menit setelah submit." },
+              { step: "7. Order Notes", desc: "Tambahkan catatan di order untuk komunikasi dengan Lead/Admin. Catatan terlihat oleh semua staff." },
+              { step: "8. Upload Screenshot", desc: "Klik 'Upload Screenshot' → pilih file (JPG/PNG/WebP, max 5MB). File disimpan di Supabase Storage." },
+              { step: "9. Selesai", desc: "Klik 'Selesai' jika rank target sudah tercapai. Admin Group akan dapat notifikasi Telegram." },
             ].map((item, i) => (
               <div key={i} className="bg-background rounded-lg p-3 border border-green-500/10">
                 <h4 className="text-green-400 font-medium text-sm">{item.step}</h4>
@@ -634,8 +645,7 @@ function buildSections(): DocSection[] {
             <ul className="mt-1 space-y-0.5">
               <li>• Hanya bisa lihat order yang di-assign ke kamu</li>
               <li>• Tidak bisa edit/hapus data apapun selain progress & submission</li>
-              <li>• Submit screenshot sebagai bukti setiap sesi bermain</li>
-              <li>• Jangan share credentials customer ke siapapun</li>
+              <li>• Submit screenshot sebagai bukti setiap sesi bermain</li>                <li>• Edit/hapus submission hanya bisa dalam 30 menit setelah submit</li>              <li>• Jangan share credentials customer ke siapapun</li>
             </ul>
           </InfoBox>
         </div>
@@ -654,10 +664,12 @@ function buildSections(): DocSection[] {
           <div className="space-y-3">
             {[
               { step: "1. Login", desc: "Buka /admin → login. Otomatis redirect ke Lead Dashboard." },
-              { step: "2. Cek Order Masuk", desc: "Lihat stats: Total Orders, Belum Assign (kuning), In Progress, Completed. Prioritaskan yang belum assign." },
+              { step: "2. Cek Order Masuk", desc: "Lihat stats: Total Orders, Belum Assign (kuning), In Progress, Completed. Gunakan search bar untuk cari order by ID, username, atau game ID." },
               { step: "3. Lihat Worker", desc: "Panel 'Tim Worker' menampilkan semua worker aktif + jumlah order aktif masing-masing. Distribusi merata." },
-              { step: "4. Assign Order", desc: "Klik order yang belum assign → 'Assign Worker' → pilih worker dari dropdown → tulis catatan (opsional) → Assign." },
-              { step: "5. Monitor", desc: "Filter order by status. Pantau progress setiap worker. Koordinasi via Telegram/WhatsApp jika perlu." },
+              { step: "4. Assign Order", desc: "Klik order yang belum assign → 'Assign Worker' → pilih worker dari dropdown → tulis catatan (opsional) → Assign. Bisa juga reassign ke worker lain jika perlu." },
+              { step: "5. Bulk Assign", desc: "Centang beberapa order sekaligus → pilih worker → klik 'Assign Selected'. Efisien untuk assign banyak order baru." },
+              { step: "6. Order Notes", desc: "Tambahkan catatan internal di setiap order. Catatan terlihat oleh semua staff. Berguna untuk koordinasi." },
+              { step: "7. Update Status", desc: "Ubah status order langsung dari dropdown. Filter & pantau progress setiap worker." },
             ].map((item, i) => (
               <div key={i} className="bg-background rounded-lg p-3 border border-blue-500/10">
                 <h4 className="text-blue-400 font-medium text-sm">{item.step}</h4>
@@ -719,13 +731,17 @@ function buildSections(): DocSection[] {
 │       │   ├── upload/         # File upload
 │       │   ├── export/         # Data export
 │       │   ├── notify/         # Manual notify
-│       │   └── test-notifications/  # Test channels
+│       │   ├── test-notifications/  # Test channels
+│       │   └── orders/follow-up/    # Smart WA follow-up
 │       │
 │       ├── staff/              # Multi-role staff API
 │       │   ├── auth/           # Staff login/logout
 │       │   ├── users/          # CRUD staff users
 │       │   ├── orders/         # Role-filtered orders
-│       │   ├── submissions/    # Worker results
+│       │   ├── submissions/    # Worker results (CRUD)
+│       │   ├── credentials/    # View encrypted credentials
+│       │   ├── notes/          # Order notes/comments
+│       │   ├── reset-password/ # Staff password reset
 │       │   └── upload/         # Screenshot upload
 │       │
 │       ├── customer/           # Customer endpoints

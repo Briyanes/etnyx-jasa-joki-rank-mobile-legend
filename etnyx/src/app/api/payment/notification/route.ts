@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
 
     // Handle Midtrans test notification (no order_id or signature)
     if (!order_id || !signature_key) {
-      console.log("Midtrans test notification received:", JSON.stringify(body));
+      // Test notification received
       return NextResponse.json({ success: true, message: "Test notification received" });
     }
 
@@ -103,8 +103,6 @@ export async function POST(request: NextRequest) {
         paid_at: paymentStatus === "paid" ? new Date().toISOString() : null,
       })
       .eq("id", order.id);
-
-    console.log(`Payment notification: Order ${order.order_id} - ${transaction_status} - ${paymentStatus}`);
 
     // Send notifications when payment is confirmed
     if (paymentStatus === "paid" && order.status !== "confirmed") {

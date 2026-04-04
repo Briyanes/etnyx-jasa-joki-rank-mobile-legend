@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { WHATSAPP_NUMBER } from "@/lib/constants";
 
 export default function WhatsAppButton() {
   const { locale } = useLanguage();
@@ -20,7 +21,7 @@ export default function WhatsAppButton() {
   };
 
   const txt = t[locale];
-  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "6281414131321";
+  const whatsappNumber = WHATSAPP_NUMBER;
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(txt.message)}`;
 
   useEffect(() => {

@@ -314,7 +314,6 @@ export async function POST(request: NextRequest) {
         });
 
         const midtransData = await midtransRes.json();
-        console.log("Midtrans response:", midtransRes.status, JSON.stringify(midtransData));
 
         if (midtransRes.ok && midtransData.redirect_url) {
           paymentUrl = midtransData.redirect_url;

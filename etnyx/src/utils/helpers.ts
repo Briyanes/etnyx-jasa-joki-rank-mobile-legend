@@ -1,4 +1,5 @@
 import { RankTier } from "@/types";
+import { WHATSAPP_NUMBER } from "@/lib/constants";
 
 // Price calculation map (aligned with PACKAGE_CATALOG)
 const priceMap: Record<string, number> = {
@@ -101,7 +102,7 @@ export function isValidWhatsAppNumber(number: string): boolean {
 
 // Create WhatsApp URL with sanitized message
 export function createWhatsAppUrl(packageName: string): string {
-  const phone = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "6281234567890";
+  const phone = WHATSAPP_NUMBER;
   const sanitizedPackage = packageName.replace(/[<>"'&]/g, "");
 
   const message = `Halo kak, saya mau order jasa joki ML 🎮

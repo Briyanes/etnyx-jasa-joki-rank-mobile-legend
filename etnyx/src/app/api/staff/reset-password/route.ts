@@ -70,8 +70,7 @@ export async function POST(request: NextRequest) {
         console.error("Failed to send reset email:", emailErr);
       }
     } else {
-      // If no email service, log the token (dev only)
-      console.log(`🔑 Reset token for ${user.email}: ${token}`);
+      // No email service configured — token stays server-side only
     }
 
     return NextResponse.json({ success: true, message: "Jika email terdaftar, link reset akan dikirim." });

@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Clock, CheckCircle, Rocket, XCircle, Check, ChevronLeft, Shield, Zap, MessageCircle, Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { WHATSAPP_NUMBER } from "@/lib/constants";
 import { ReactNode } from "react";
 
 interface OrderData {
@@ -366,7 +367,7 @@ function TrackOrderContent() {
               <div className="mt-6 text-center">
                 <p className="text-muted text-sm mb-3">{txt.question}</p>
                 <a
-                  href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "6281414131321"}?text=${encodeURIComponent(`${txt.waMessage} ${order.order_id}`)}`}
+                  href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`${txt.waMessage} ${order.order_id}`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-xl transition-all"
