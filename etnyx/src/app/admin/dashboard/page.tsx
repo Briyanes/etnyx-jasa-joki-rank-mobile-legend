@@ -169,7 +169,7 @@ interface IntegrationSettings {
 
 type SettingsSubTab = "cms-sections" | "hero" | "banner" | "faq" | "team" | "social" | "site" | "pixels" | "integrations" | "general";
 
-type TabType = "overview" | "orders" | "boosters" | "testimonials" | "portfolio" | "promo" | "customers" | "pricing" | "settings";
+type TabType = "overview" | "orders" | "boosters" | "testimonials" | "portfolio" | "promo" | "customers" | "pricing" | "staff" | "settings";
 
 // ---- Tab Config ----
 const TAB_CONFIG: { id: TabType; label: string; icon: typeof BarChart3 }[] = [
@@ -181,6 +181,7 @@ const TAB_CONFIG: { id: TabType; label: string; icon: typeof BarChart3 }[] = [
   { id: "portfolio", label: "Portfolio", icon: Trophy },
   { id: "promo", label: "Promo", icon: Tag },
   { id: "customers", label: "Customers", icon: Users },
+  { id: "staff", label: "Staff", icon: Shield },
   { id: "settings", label: "Settings", icon: Settings2 },
 ];
 
@@ -242,6 +243,14 @@ export default function AdminDashboard() {
     fonnteApiToken: "", fonnteDeviceId: "",
     telegramBotToken: "", telegramAdminGroupId: "", telegramWorkerGroupId: ""
   });
+
+  // Staff state
+  interface StaffUser { id: string; email: string; name: string; role: string; phone: string | null; is_active: boolean; last_login_at: string | null; created_at: string }
+  const [staffUsers, setStaffUsers] = useState<StaffUser[]>([]);
+  const [staffModal, setStaffModal] = useState(false);
+  const [editStaff, setEditStaff] = useState<StaffUser | null>(null);
+  const [staffForm, setStaffForm] = useState({ email: "", name: "", password: "", role: "worker", phone: "" });
+  const [staffSaving, setStaffSaving] = useState(false);
 
   // Auth
   const checkAuth = useCallback(async () => {
@@ -341,7 +350,32 @@ export default function AdminDashboard() {
     } catch (err) { console.error("Failed to fetch CMS settings:", err); }
   }, []);
 
+  const fetchStaffUsers = useCallback(async () => {
+    try { const res = await fetch("/api/staff/users"); const d = await res.json(); setStaffUsers(d.users || []); } catch (e) { console.error(e); }
+  }, []);
+
   const handleExport = (type: string) => window.open(`/api/admin/export?type=${type}`, "_blank");
+
+  // Staff handlers
+  const handleSaveStaff = async () => {
+    setStaffSaving(true);
+    try {
+      const method = editStaff ? "PUT" : "POST";
+      const body = editStaff
+        ? { id: editStaff.id, name: staffForm.name, role: staffForm.role, phone: staffForm.phone || undefined, password: staffForm.password || undefined }
+        : { email: staffForm.email, name: staffForm.name, password: staffForm.password, role: staffForm.role, phone: staffForm.phone || undefined };
+      const res = await fetch("/api/staff/users", { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      if (!res.ok) { const d = await res.json(); alert(d.error || "Gagal simpan staff"); return; }
+      setStaffModal(false); setEditStaff(null); setStaffForm({ email: "", name: "", password: "", role: "worker", phone: "" });
+      fetchStaffUsers();
+    } catch { alert("Network error"); }
+    setStaffSaving(false);
+  };
+  const handleDeactivateStaff = async (id: string) => {
+    if (!confirm("Nonaktifkan staff ini?")) return;
+    await fetch("/api/staff/users", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+    fetchStaffUsers();
+  };
 
   useEffect(() => {
     (async () => {
@@ -360,8 +394,9 @@ export default function AdminDashboard() {
     else if (activeTab === "customers") fetchCustomers();
     else if (activeTab === "boosters") fetchBoosters();
     else if (activeTab === "pricing") fetchPricing();
+    else if (activeTab === "staff") fetchStaffUsers();
     else if (activeTab === "settings") fetchCmsSettings();
-  }, [activeTab, statusFilter, loading, fetchOrders, fetchTestimonials, fetchPortfolios, fetchPromoCodes, fetchCustomers, fetchBoosters, fetchPricing, fetchCmsSettings]);
+  }, [activeTab, statusFilter, loading, fetchOrders, fetchTestimonials, fetchPortfolios, fetchPromoCodes, fetchCustomers, fetchBoosters, fetchPricing, fetchStaffUsers, fetchCmsSettings]);
 
   const handleLogout = async () => { await fetch("/api/admin/auth", { method: "DELETE" }); router.push("/admin"); };
 
@@ -1477,6 +1512,101 @@ export default function AdminDashboard() {
                   </tbody>
                 </table>
               </div>
+            </div>
+          )}
+
+          {/* ===== STAFF TAB ===== */}
+          {activeTab === "staff" && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-bold text-text">Staff Management</h2>
+                <button onClick={() => { setEditStaff(null); setStaffForm({ email: "", name: "", password: "", role: "worker", phone: "" }); setStaffModal(true); }}
+                  className="flex items-center gap-2 gradient-primary px-4 py-2 rounded-xl text-white text-sm font-medium">
+                  <Plus className="w-4 h-4" /> Tambah Staff
+                </button>
+              </div>
+
+              <div className="bg-surface rounded-xl border border-white/5 overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-background/50">
+                    <tr className="text-text-muted text-xs">
+                      <th className="px-4 py-3 text-left">Nama</th>
+                      <th className="px-4 py-3 text-left">Email</th>
+                      <th className="px-4 py-3 text-center">Role</th>
+                      <th className="px-4 py-3 text-center">Status</th>
+                      <th className="px-4 py-3 text-center">Last Login</th>
+                      <th className="px-4 py-3 text-center">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {staffUsers.map(u => (
+                      <tr key={u.id} className={`hover:bg-white/[0.02] ${!u.is_active ? "opacity-50" : ""}`}>
+                        <td className="px-4 py-3 text-text font-medium">{u.name}</td>
+                        <td className="px-4 py-3 text-text-muted">{u.email}</td>
+                        <td className="px-4 py-3 text-center">
+                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                            u.role === "admin" ? "bg-red-500/10 text-red-400" :
+                            u.role === "lead" ? "bg-blue-500/10 text-blue-400" :
+                            "bg-green-500/10 text-green-400"
+                          }`}>{u.role}</span>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <span className={`px-2 py-0.5 rounded text-xs ${u.is_active ? "bg-green-500/10 text-green-400" : "bg-red-500/10 text-red-400"}`}>
+                            {u.is_active ? "Active" : "Inactive"}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-center text-text-muted text-xs">
+                          {u.last_login_at ? new Date(u.last_login_at).toLocaleDateString("id-ID", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : "-"}
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            <button onClick={() => { setEditStaff(u); setStaffForm({ email: u.email, name: u.name, password: "", role: u.role, phone: u.phone || "" }); setStaffModal(true); }}
+                              className="p-1.5 text-text-muted hover:text-accent transition-colors"><Pencil className="w-3.5 h-3.5" /></button>
+                            {u.is_active && u.role !== "admin" && (
+                              <button onClick={() => handleDeactivateStaff(u.id)}
+                                className="p-1.5 text-text-muted hover:text-red-400 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {staffUsers.length === 0 && (
+                      <tr><td colSpan={6} className="px-4 py-8 text-center text-text-muted">Belum ada staff</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Staff Modal */}
+              {staffModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setStaffModal(false)}>
+                  <div className="bg-surface rounded-2xl p-6 w-full max-w-md border border-white/10 space-y-4" onClick={e => e.stopPropagation()}>
+                    <h3 className="text-text font-semibold">{editStaff ? "Edit Staff" : "Tambah Staff Baru"}</h3>
+                    {!editStaff && (
+                      <input placeholder="Email" type="email" value={staffForm.email} onChange={e => setStaffForm(p => ({ ...p, email: e.target.value }))}
+                        className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 text-text text-sm focus:border-accent focus:outline-none" />
+                    )}
+                    <input placeholder="Nama" value={staffForm.name} onChange={e => setStaffForm(p => ({ ...p, name: e.target.value }))}
+                      className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 text-text text-sm focus:border-accent focus:outline-none" />
+                    <input placeholder={editStaff ? "Password baru (kosongkan jika tidak diubah)" : "Password"} type="password" value={staffForm.password} onChange={e => setStaffForm(p => ({ ...p, password: e.target.value }))}
+                      className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 text-text text-sm focus:border-accent focus:outline-none" />
+                    <select value={staffForm.role} onChange={e => setStaffForm(p => ({ ...p, role: e.target.value }))}
+                      className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 text-text text-sm focus:border-accent focus:outline-none">
+                      <option value="worker">Worker</option>
+                      <option value="lead">Lead</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                    <input placeholder="Phone / WhatsApp (opsional)" value={staffForm.phone} onChange={e => setStaffForm(p => ({ ...p, phone: e.target.value }))}
+                      className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 text-text text-sm focus:border-accent focus:outline-none" />
+                    <div className="flex gap-3">
+                      <button onClick={() => setStaffModal(false)} className="flex-1 px-3 py-2.5 border border-white/10 rounded-xl text-text-muted text-sm">Batal</button>
+                      <button onClick={handleSaveStaff} disabled={staffSaving} className="flex-1 gradient-primary px-3 py-2.5 rounded-xl text-white text-sm font-medium disabled:opacity-50">
+                        {staffSaving ? "Menyimpan..." : "Simpan"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

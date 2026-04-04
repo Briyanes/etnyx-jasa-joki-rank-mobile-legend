@@ -12,7 +12,7 @@ const STRICT_RATE_LIMIT = 10; // max 10 attempts per window
 const STRICT_RATE_LIMIT_WINDOW = 300_000; // 5 minutes
 const strictRateLimitStore = new Map<string, number[]>();
 
-const STRICT_PATHS = ["/api/admin/auth", "/api/customer/auth"];
+const STRICT_PATHS = ["/api/admin/auth", "/api/customer/auth", "/api/staff/auth"];
 
 function getRateLimitKey(request: NextRequest): string {
   const forwarded = request.headers.get("x-forwarded-for");
