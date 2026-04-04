@@ -256,6 +256,7 @@ export async function POST(request: NextRequest) {
 
     // Get Midtrans key: prefer database (admin dashboard) over env
     let midtransKey = MIDTRANS_SERVER_KEY;
+    let midtransIsProduction = MIDTRANS_IS_PRODUCTION;
     try {
       const { data: intSettings } = await supabase
         .from("settings")
@@ -265,10 +266,12 @@ export async function POST(request: NextRequest) {
       if (intSettings?.value?.midtransServerKey) {
         midtransKey = intSettings.value.midtransServerKey;
       }
+      if (intSettings?.value?.midtransIsProduction !== undefined) {
+        midtransIsProduction = intSettings.value.midtransIsProduction;
+      }
     } catch { /* fallback to env */ }
 
-    // Auto-detect environment from key prefix
-    const midtransIsProduction = midtransKey ? !midtransKey.startsWith("SB-") : MIDTRANS_IS_PRODUCTION;
+    // Use dashboard setting; fallback to key prefix detection
     const midtransApiUrl = midtransIsProduction
       ? "https://app.midtrans.com/snap/v1/transactions"
       : "https://app.sandbox.midtrans.com/snap/v1/transactions";
