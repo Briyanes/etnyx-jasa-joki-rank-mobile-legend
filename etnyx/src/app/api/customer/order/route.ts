@@ -281,6 +281,14 @@ export async function POST(request: NextRequest) {
 
     if (ipaymuApiKey && ipaymuVa) {
       try {
+        // Detect server outbound IP for debugging
+        let serverIp = "unknown";
+        try {
+          const ipRes = await fetch("https://api.ipify.org?format=json");
+          const ipData = await ipRes.json();
+          serverIp = ipData.ip;
+        } catch { /* ignore */ }
+
         // Determine site URL from request origin or env
         const origin = request.headers.get("origin") || "";
         const siteUrl = (origin || process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.com").replace(/\/$/, "");
@@ -296,9 +304,6 @@ export async function POST(request: NextRequest) {
         ipaymuBody["buyerName"] = sanitizedNickname;
         ipaymuBody["buyerPhone"] = "62" + cleanWhatsapp;
         ipaymuBody["buyerEmail"] = sanitizedEmail || "customer@etnyx.com";
-
-        console.log("iPaymu siteUrl:", siteUrl);
-        console.log("iPaymu returnUrl:", ipaymuBody["returnUrl"]);
 
         const bodyStr = JSON.stringify(ipaymuBody);
         const bodyHash = crypto.createHash("sha256").update(bodyStr).digest("hex");
@@ -319,7 +324,7 @@ export async function POST(request: NextRequest) {
         });
 
         const ipaymuData = await ipaymuRes.json();
-        console.log("iPaymu response:", JSON.stringify(ipaymuData));
+        console.log("iPaymu response:", JSON.stringify(ipaymuData), "serverIp:", serverIp);
 
         if (ipaymuData.Status === 200 && ipaymuData.Data?.Url) {
           paymentUrl = ipaymuData.Data.Url;
@@ -334,7 +339,7 @@ export async function POST(request: NextRequest) {
             })
             .eq("id", order.id);
         } else {
-          paymentDebug = `iPaymu Status: ${ipaymuData.Status}, Message: ${ipaymuData.Message || JSON.stringify(ipaymuData)}, returnUrl: ${ipaymuBody["returnUrl"]}`;
+          paymentDebug = `iPaymu: ${ipaymuData.Message || JSON.stringify(ipaymuData)} | serverIP: ${serverIp} | Tambahkan IP ini di iPaymu dashboard`;
           console.error("iPaymu error:", JSON.stringify(ipaymuData));
         }
       } catch (e) {
