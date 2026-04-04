@@ -6,7 +6,7 @@ import Image from "next/image";
 import {
   LogOut, RefreshCw, CheckCircle, Clock, Play, Upload, Send,
   Star, Trophy, Swords, Target, Timer, Camera, ChevronDown, ChevronUp,
-  TrendingUp, Package, Loader2,
+  TrendingUp, Package, Loader2, Key, Edit3, Trash2, MessageSquare,
 } from "lucide-react";
 
 interface Order {
@@ -25,6 +25,8 @@ interface Order {
   current_progress_rank: string | null;
   created_at: string;
   whatsapp: string | null;
+  hero_request: string | null;
+  login_method: string | null;
 }
 
 interface Submission {
@@ -40,6 +42,22 @@ interface Submission {
   screenshots: string[];
   notes: string | null;
   submitted_at: string;
+}
+
+interface Credentials {
+  order_id: string;
+  login_method: string | null;
+  account_login: string | null;
+  account_password: string | null;
+}
+
+interface Note {
+  id: string;
+  action: string;
+  new_value: string;
+  notes: string;
+  created_by: string;
+  created_at: string;
 }
 
 interface StaffUser {
@@ -82,6 +100,26 @@ export default function WorkerDashboard() {
   const [progressValue, setProgressValue] = useState(0);
   const [progressRank, setProgressRank] = useState("");
 
+  // Credentials
+  const [credentials, setCredentials] = useState<Record<string, Credentials>>({});
+  const [showCredentials, setShowCredentials] = useState<string | null>(null);
+  const [loadingCreds, setLoadingCreds] = useState(false);
+
+  // Notes
+  const [notesOrder, setNotesOrder] = useState<string | null>(null);
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [newNote, setNewNote] = useState("");
+  const [noteSending, setNoteSending] = useState(false);
+
+  // Edit submission
+  const [editingSubmission, setEditingSubmission] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({
+    starsGained: 0, mvpCount: 0, savageCount: 0, maniacCount: 0,
+    matchesPlayed: 0, winCount: 0, durationMinutes: 0, notes: "",
+  });
+  const [editLoading, setEditLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
+
   const checkAuth = useCallback(async () => {
     try {
       const res = await fetch("/api/staff/auth");
@@ -120,6 +158,98 @@ export default function WorkerDashboard() {
       setLoading(false);
     })();
   }, [checkAuth, fetchOrders]);
+
+  const fetchCredentials = async (orderId: string) => {
+    if (credentials[orderId]) { setShowCredentials(orderId); return; }
+    setLoadingCreds(true);
+    try {
+      const res = await fetch(`/api/staff/credentials?orderId=${orderId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setCredentials(prev => ({ ...prev, [orderId]: data }));
+        setShowCredentials(orderId);
+      } else {
+        alert("Gagal load credentials");
+      }
+    } catch { alert("Network error"); }
+    setLoadingCreds(false);
+  };
+
+  const fetchNotes = async (orderId: string) => {
+    try {
+      const res = await fetch(`/api/staff/notes?orderId=${orderId}`);
+      const data = await res.json();
+      setNotes(data.notes || []);
+    } catch { setNotes([]); }
+  };
+
+  const handleAddNote = async (orderId: string) => {
+    if (!newNote.trim()) return;
+    setNoteSending(true);
+    try {
+      const res = await fetch("/api/staff/notes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, message: newNote }),
+      });
+      if (res.ok) {
+        setNewNote("");
+        await fetchNotes(orderId);
+      }
+    } catch { alert("Gagal kirim catatan"); }
+    setNoteSending(false);
+  };
+
+  const handleEditSubmission = async (submissionId: string) => {
+    setEditLoading(true);
+    try {
+      const res = await fetch("/api/staff/submissions", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          submissionId,
+          starsGained: editForm.starsGained,
+          mvpCount: editForm.mvpCount,
+          savageCount: editForm.savageCount,
+          maniacCount: editForm.maniacCount,
+          matchesPlayed: editForm.matchesPlayed,
+          winCount: editForm.winCount,
+          durationMinutes: editForm.durationMinutes,
+          notes: editForm.notes || undefined,
+        }),
+      });
+      if (res.ok) {
+        setEditingSubmission(null);
+        // Fetch submissions for the order that had this submission
+        for (const oid of Object.keys(submissions)) await fetchSubmissions(oid);
+        await fetchOrders();
+      } else {
+        const data = await res.json();
+        alert(data.error || "Gagal edit submission");
+      }
+    } catch { alert("Network error"); }
+    setEditLoading(false);
+  };
+
+  const handleDeleteSubmission = async (submissionId: string, orderId: string) => {
+    if (!confirm("Yakin hapus submission ini?")) return;
+    setDeleteLoading(submissionId);
+    try {
+      const res = await fetch(`/api/staff/submissions?submissionId=${submissionId}`, { method: "DELETE" });
+      if (res.ok) {
+        await fetchSubmissions(orderId);
+        await fetchOrders();
+      } else {
+        const data = await res.json();
+        alert(data.error || "Gagal hapus submission");
+      }
+    } catch { alert("Network error"); }
+    setDeleteLoading(null);
+  };
+
+  const isWithin30Min = (date: string) => {
+    return (Date.now() - new Date(date).getTime()) < 30 * 60 * 1000;
+  };
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -330,6 +460,35 @@ export default function WorkerDashboard() {
                   setProgressRank={setProgressRank}
                   onUpdateProgress={() => handleUpdateProgress(order.id)}
                   active
+                  credentials={credentials[order.id] || null}
+                  showCredentials={showCredentials === order.id}
+                  loadingCreds={loadingCreds}
+                  onFetchCredentials={() => fetchCredentials(order.id)}
+                  onHideCredentials={() => setShowCredentials(null)}
+                  notesOrder={notesOrder === order.id}
+                  notes={notes}
+                  newNote={newNote}
+                  setNewNote={setNewNote}
+                  noteSending={noteSending}
+                  onToggleNotes={() => { setNotesOrder(notesOrder === order.id ? null : order.id); if (notesOrder !== order.id) fetchNotes(order.id); }}
+                  onAddNote={() => handleAddNote(order.id)}
+                  editingSubmission={editingSubmission}
+                  editForm={editForm}
+                  setEditForm={setEditForm}
+                  editLoading={editLoading}
+                  onStartEdit={(s: Submission) => {
+                    setEditingSubmission(s.id);
+                    setEditForm({
+                      starsGained: s.stars_gained, mvpCount: s.mvp_count, savageCount: s.savage_count,
+                      maniacCount: s.maniac_count, matchesPlayed: s.matches_played, winCount: s.win_count,
+                      durationMinutes: s.duration_minutes, notes: s.notes || "",
+                    });
+                  }}
+                  onCancelEdit={() => setEditingSubmission(null)}
+                  onSaveEdit={(id: string) => handleEditSubmission(id)}
+                  onDeleteSubmission={(id: string) => handleDeleteSubmission(id, order.id)}
+                  deleteLoading={deleteLoading}
+                  isWithin30Min={isWithin30Min}
                 />
               ))}
             </div>
@@ -354,14 +513,44 @@ export default function WorkerDashboard() {
                       <p className="text-text-muted text-xs mt-1">
                         {RANK_LABELS[order.current_rank] || order.current_rank} → {RANK_LABELS[order.target_rank] || order.target_rank}
                       </p>
+                      {order.hero_request && <p className="text-text-muted text-xs">Hero: {order.hero_request}</p>}
                     </div>
-                    <button
-                      onClick={() => handleStartOrder(order.id)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 gradient-primary rounded-lg text-white text-sm font-medium hover:opacity-90 transition-opacity"
-                    >
-                      <Play className="w-3.5 h-3.5" /> Mulai
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => fetchCredentials(order.id)}
+                        disabled={loadingCreds}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-500/10 text-yellow-400 rounded-lg text-xs hover:bg-yellow-500/20 transition-colors disabled:opacity-50"
+                      >
+                        {loadingCreds ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Key className="w-3.5 h-3.5" />} Credentials
+                      </button>
+                      <button
+                        onClick={() => handleStartOrder(order.id)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 gradient-primary rounded-lg text-white text-sm font-medium hover:opacity-90 transition-opacity"
+                      >
+                        <Play className="w-3.5 h-3.5" /> Mulai
+                      </button>
+                    </div>
                   </div>
+                  {/* Show credentials if expanded */}
+                  {showCredentials === order.id && credentials[order.id] && (
+                    <div className="mt-3 pt-3 border-t border-white/5 bg-background rounded-lg p-3 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-text font-medium text-xs flex items-center gap-1"><Key className="w-3 h-3 text-yellow-400" /> Login Credentials</h4>
+                        <button onClick={() => setShowCredentials(null)} className="text-text-muted text-xs hover:text-text">Tutup</button>
+                      </div>
+                      {credentials[order.id].login_method && (
+                        <div><span className="text-text-muted text-xs">Method:</span><span className="text-text text-xs ml-2 capitalize">{credentials[order.id].login_method}</span></div>
+                      )}
+                      <div>
+                        <span className="text-text-muted text-xs">Login:</span>
+                        <p className="bg-surface rounded px-2 py-1 font-mono text-xs text-text break-all mt-0.5">{credentials[order.id].account_login || <span className="text-text-muted italic">N/A</span>}</p>
+                      </div>
+                      <div>
+                        <span className="text-text-muted text-xs">Password:</span>
+                        <p className="bg-surface rounded px-2 py-1 font-mono text-xs text-text break-all mt-0.5">{credentials[order.id].account_password || <span className="text-text-muted italic">N/A</span>}</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -428,6 +617,31 @@ interface OrderCardProps {
   setProgressRank: (s: string) => void;
   onUpdateProgress: () => void;
   active: boolean;
+  // Credentials
+  credentials: Credentials | null;
+  showCredentials: boolean;
+  loadingCreds: boolean;
+  onFetchCredentials: () => void;
+  onHideCredentials: () => void;
+  // Notes
+  notesOrder: boolean;
+  notes: Note[];
+  newNote: string;
+  setNewNote: (s: string) => void;
+  noteSending: boolean;
+  onToggleNotes: () => void;
+  onAddNote: () => void;
+  // Edit/Delete submission
+  editingSubmission: string | null;
+  editForm: { starsGained: number; mvpCount: number; savageCount: number; maniacCount: number; matchesPlayed: number; winCount: number; durationMinutes: number; notes: string };
+  setEditForm: (f: OrderCardProps["editForm"] | ((prev: OrderCardProps["editForm"]) => OrderCardProps["editForm"])) => void;
+  editLoading: boolean;
+  onStartEdit: (s: Submission) => void;
+  onCancelEdit: () => void;
+  onSaveEdit: (id: string) => void;
+  onDeleteSubmission: (id: string) => void;
+  deleteLoading: string | null;
+  isWithin30Min: (date: string) => boolean;
 }
 
 function OrderCard({
@@ -437,6 +651,10 @@ function OrderCard({
   onUpload, onRemoveScreenshot, onSubmitResult, onComplete,
   updatingProgress, onToggleProgress, progressValue, setProgressValue,
   progressRank, setProgressRank, onUpdateProgress,
+  credentials, showCredentials, loadingCreds, onFetchCredentials, onHideCredentials,
+  notesOrder, notes, newNote, setNewNote, noteSending, onToggleNotes, onAddNote,
+  editingSubmission, editForm, setEditForm, editLoading, onStartEdit, onCancelEdit, onSaveEdit,
+  onDeleteSubmission, deleteLoading, isWithin30Min,
 }: OrderCardProps) {
   return (
     <div className="bg-surface rounded-xl border border-accent/20 overflow-hidden">
@@ -476,20 +694,50 @@ function OrderCard({
             {order.current_progress_rank && (
               <div><span className="text-text-muted text-xs">Rank Saat Ini</span><p className="text-text">{RANK_LABELS[order.current_progress_rank] || order.current_progress_rank}</p></div>
             )}
+            {order.hero_request && (
+              <div><span className="text-text-muted text-xs">Hero Request</span><p className="text-text">{order.hero_request}</p></div>
+            )}
           </div>
 
           {/* Action Buttons */}
           <div className="flex flex-wrap gap-2">
+            <button onClick={onFetchCredentials} disabled={loadingCreds} className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-500/10 text-yellow-400 rounded-lg text-sm hover:bg-yellow-500/20 transition-colors disabled:opacity-50">
+              {loadingCreds ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Key className="w-3.5 h-3.5" />} Credentials
+            </button>
             <button onClick={onToggleProgress} className="flex items-center gap-1.5 px-3 py-1.5 bg-accent/10 text-accent rounded-lg text-sm hover:bg-accent/20 transition-colors">
               <TrendingUp className="w-3.5 h-3.5" /> Update Progress
             </button>
             <button onClick={onStartSubmission} className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 text-blue-400 rounded-lg text-sm hover:bg-blue-500/20 transition-colors">
               <Send className="w-3.5 h-3.5" /> Submit Hasil
             </button>
+            <button onClick={onToggleNotes} className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-500/10 text-purple-400 rounded-lg text-sm hover:bg-purple-500/20 transition-colors">
+              <MessageSquare className="w-3.5 h-3.5" /> Catatan
+            </button>
             <button onClick={onComplete} className="flex items-center gap-1.5 px-3 py-1.5 bg-green-500/10 text-green-400 rounded-lg text-sm hover:bg-green-500/20 transition-colors">
               <CheckCircle className="w-3.5 h-3.5" /> Selesai
             </button>
           </div>
+
+          {/* Credentials Panel */}
+          {showCredentials && credentials && (
+            <div className="bg-background rounded-lg p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <h4 className="text-text font-medium text-xs flex items-center gap-1"><Key className="w-3 h-3 text-yellow-400" /> Login Credentials</h4>
+                <button onClick={onHideCredentials} className="text-text-muted text-xs hover:text-text">Tutup</button>
+              </div>
+              {credentials.login_method && (
+                <div><span className="text-text-muted text-xs">Method:</span><span className="text-text text-xs ml-2 capitalize">{credentials.login_method}</span></div>
+              )}
+              <div>
+                <span className="text-text-muted text-xs">Login:</span>
+                <p className="bg-surface rounded px-2 py-1 font-mono text-xs text-text break-all mt-0.5">{credentials.account_login || <span className="text-text-muted italic">N/A</span>}</p>
+              </div>
+              <div>
+                <span className="text-text-muted text-xs">Password:</span>
+                <p className="bg-surface rounded px-2 py-1 font-mono text-xs text-text break-all mt-0.5">{credentials.account_password || <span className="text-text-muted italic">N/A</span>}</p>
+              </div>
+            </div>
+          )}
 
           {/* Update Progress Form */}
           {updatingProgress && (
@@ -623,25 +871,106 @@ function OrderCard({
               <div className="space-y-2">
                 {submissions.map(s => (
                   <div key={s.id} className="bg-background rounded-lg p-3 text-xs">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-text-muted">{new Date(s.submitted_at).toLocaleDateString("id-ID", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
-                      <span className="text-accent font-medium">+{s.stars_gained} ★</span>
-                    </div>
-                    <div className="flex gap-3 text-text-muted">
-                      <span>{s.matches_played} match</span>
-                      <span>{s.win_count}W</span>
-                      {s.mvp_count > 0 && <span>{s.mvp_count} MVP</span>}
-                      {s.savage_count > 0 && <span>{s.savage_count} Savage</span>}
-                    </div>
-                    {s.screenshots.length > 0 && (
-                      <div className="flex gap-1 mt-2">
-                        {s.screenshots.map((url, i) => (
-                          <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded overflow-hidden border border-white/10">
-                            <img src={url} alt="" className="w-full h-full object-cover" />
-                          </a>
-                        ))}
+                    {editingSubmission === s.id ? (
+                      /* Edit Submission Form */
+                      <div className="space-y-3">
+                        <h5 className="text-text font-medium text-xs">Edit Submission</h5>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                          <div>
+                            <label className="text-text-muted text-[10px]">Stars</label>
+                            <input type="number" min={0} value={editForm.starsGained} onChange={(e) => setEditForm(p => ({ ...p, starsGained: Number(e.target.value) }))}
+                              className="w-full bg-surface border border-white/10 rounded px-2 py-1 text-text text-xs focus:border-accent focus:outline-none" />
+                          </div>
+                          <div>
+                            <label className="text-text-muted text-[10px]">Matches</label>
+                            <input type="number" min={0} value={editForm.matchesPlayed} onChange={(e) => setEditForm(p => ({ ...p, matchesPlayed: Number(e.target.value) }))}
+                              className="w-full bg-surface border border-white/10 rounded px-2 py-1 text-text text-xs focus:border-accent focus:outline-none" />
+                          </div>
+                          <div>
+                            <label className="text-text-muted text-[10px]">Wins</label>
+                            <input type="number" min={0} value={editForm.winCount} onChange={(e) => setEditForm(p => ({ ...p, winCount: Number(e.target.value) }))}
+                              className="w-full bg-surface border border-white/10 rounded px-2 py-1 text-text text-xs focus:border-accent focus:outline-none" />
+                          </div>
+                          <div>
+                            <label className="text-text-muted text-[10px]">MVP</label>
+                            <input type="number" min={0} value={editForm.mvpCount} onChange={(e) => setEditForm(p => ({ ...p, mvpCount: Number(e.target.value) }))}
+                              className="w-full bg-surface border border-white/10 rounded px-2 py-1 text-text text-xs focus:border-accent focus:outline-none" />
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button onClick={() => onSaveEdit(s.id)} disabled={editLoading}
+                            className="px-3 py-1 gradient-primary rounded text-white text-xs font-medium disabled:opacity-50 flex items-center gap-1">
+                            {editLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />} Simpan
+                          </button>
+                          <button onClick={onCancelEdit} className="px-3 py-1 bg-surface border border-white/10 rounded text-text-muted text-xs">Batal</button>
+                        </div>
                       </div>
+                    ) : (
+                      /* View Submission */
+                      <>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-text-muted">{new Date(s.submitted_at).toLocaleDateString("id-ID", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-accent font-medium">+{s.stars_gained} ★</span>
+                            {isWithin30Min(s.submitted_at) && (
+                              <>
+                                <button onClick={() => onStartEdit(s)} className="text-blue-400 hover:text-blue-300 transition-colors" title="Edit">
+                                  <Edit3 className="w-3.5 h-3.5" />
+                                </button>
+                                <button onClick={() => onDeleteSubmission(s.id)} disabled={deleteLoading === s.id} className="text-red-400 hover:text-red-300 transition-colors" title="Hapus">
+                                  {deleteLoading === s.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex gap-3 text-text-muted">
+                          <span>{s.matches_played} match</span>
+                          <span>{s.win_count}W</span>
+                          {s.mvp_count > 0 && <span>{s.mvp_count} MVP</span>}
+                          {s.savage_count > 0 && <span>{s.savage_count} Savage</span>}
+                        </div>
+                        {s.screenshots.length > 0 && (
+                          <div className="flex gap-1 mt-2">
+                            {s.screenshots.map((url, i) => (
+                              <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded overflow-hidden border border-white/10">
+                                <img src={url} alt="" className="w-full h-full object-cover" />
+                              </a>
+                            ))}
+                          </div>
+                        )}
+                      </>
                     )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Notes Panel */}
+          {notesOrder && (
+            <div className="bg-background rounded-lg p-4 space-y-3">
+              <h4 className="text-text font-medium text-sm flex items-center gap-2">
+                <MessageSquare className="w-4 h-4 text-purple-400" /> Catatan Order
+              </h4>
+              <div className="flex gap-2">
+                <input type="text" placeholder="Tulis catatan..." value={newNote} onChange={(e) => setNewNote(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") onAddNote(); }}
+                  className="flex-1 bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm focus:border-accent focus:outline-none" />
+                <button onClick={onAddNote} disabled={noteSending || !newNote.trim()}
+                  className="px-3 py-2 gradient-primary rounded-lg text-white text-sm disabled:opacity-50 flex items-center gap-1">
+                  {noteSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                </button>
+              </div>
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {notes.length === 0 && <p className="text-text-muted text-xs text-center py-2">Belum ada catatan</p>}
+                {notes.map(n => (
+                  <div key={n.id} className="bg-surface rounded-lg p-2.5 text-xs">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-text font-medium">{n.created_by}</span>
+                      <span className="text-text-muted">{new Date(n.created_at).toLocaleDateString("id-ID", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                    </div>
+                    <p className="text-text-muted">{n.action === "note" ? n.new_value : `[${n.action}] ${n.new_value}`}</p>
                   </div>
                 ))}
               </div>

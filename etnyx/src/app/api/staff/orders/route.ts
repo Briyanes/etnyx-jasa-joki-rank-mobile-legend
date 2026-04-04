@@ -13,58 +13,72 @@ async function getSettings() {
   } catch (_e) { return {}; }
 }
 
-// GET /api/staff/orders — Get orders based on role
+// GET /api/staff/orders — Get orders based on role (with search, pagination)
 export async function GET(request: NextRequest) {
   const { authenticated, user, error } = await verifyStaff();
   if (!authenticated || !user) return error;
 
   const supabase = await createAdminClient();
   const status = request.nextUrl.searchParams.get("status");
+  const search = request.nextUrl.searchParams.get("search");
+  const page = parseInt(request.nextUrl.searchParams.get("page") || "1");
+  const limit = parseInt(request.nextUrl.searchParams.get("limit") || "50");
+  const offset = (page - 1) * limit;
+  const includeCompleted = request.nextUrl.searchParams.get("includeCompleted") === "true";
 
   if (user.role === "admin" || user.role === "lead") {
     // Admin & Lead see all orders
     let query = supabase
       .from("orders")
-      .select("*, order_assignments(id, assigned_to, status, assigned_at, staff_users:assigned_to(id, name, role))")
+      .select("*, order_assignments(id, assigned_to, status, assigned_at, notes, staff_users:assigned_to(id, name, role))", { count: "exact" })
       .order("created_at", { ascending: false })
-      .limit(100);
+      .range(offset, offset + limit - 1);
 
     if (status && status !== "all") {
       query = query.eq("status", status);
     }
 
-    const { data, error: dbError } = await query;
+    if (search) {
+      query = query.or(`order_id.ilike.%${search}%,username.ilike.%${search}%,game_id.ilike.%${search}%,whatsapp.ilike.%${search}%`);
+    }
+
+    const { data, error: dbError, count } = await query;
     if (dbError) {
       console.error("Fetch orders error:", dbError);
       return NextResponse.json({ error: "Gagal memuat orders" }, { status: 500 });
     }
 
-    return NextResponse.json({ orders: data || [] });
+    return NextResponse.json({ orders: data || [], total: count || 0, page, limit });
   }
 
   if (user.role === "worker") {
-    // Worker only sees assigned orders
+    // Worker sees assigned orders (active + optionally completed)
+    const statusFilter = includeCompleted 
+      ? ["assigned", "in_progress", "completed"]
+      : ["assigned", "in_progress"];
+    
     const { data: assignments } = await supabase
       .from("order_assignments")
       .select("order_id")
       .eq("assigned_to", user.id)
-      .in("status", ["assigned", "in_progress"]);
+      .in("status", statusFilter);
 
     const orderIds = (assignments || []).map((a) => a.order_id);
     if (orderIds.length === 0) {
-      return NextResponse.json({ orders: [] });
+      return NextResponse.json({ orders: [], total: 0, page, limit });
     }
 
-    const { data } = await supabase
+    const { data, count } = await supabase
       .from("orders")
-      .select("*")
+      .select("*", { count: "exact" })
       .in("id", orderIds)
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .range(offset, offset + limit - 1);
 
-    return NextResponse.json({ orders: data || [] });
+    return NextResponse.json({ orders: data || [], total: count || 0, page, limit });
   }
 
-  return NextResponse.json({ orders: [] });
+  return NextResponse.json({ orders: [], total: 0, page, limit });
 }
 
 // POST /api/staff/orders — Assign order to worker (admin/lead only)
@@ -139,7 +153,7 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ success: true });
 }
 
-// PUT /api/staff/orders — Update order status (worker updates progress)
+// PUT /api/staff/orders — Update order status (role-based)
 export async function PUT(request: NextRequest) {
   const { authenticated, user, error } = await verifyStaff();
   if (!authenticated || !user) return error;
@@ -167,15 +181,39 @@ export async function PUT(request: NextRequest) {
     }
   }
 
+  // Lead can update status for assigned orders but not pricing/admin stuff
+  if (user.role === "lead") {
+    const allowedStatuses = ["confirmed", "in_progress", "completed", "cancelled"];
+    if (newStatus && !allowedStatuses.includes(newStatus)) {
+      return NextResponse.json({ error: "Lead tidak bisa set status ini" }, { status: 403 });
+    }
+  }
+
   const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
   if (newStatus) updates.status = newStatus;
-  if (progress !== undefined) updates.progress = progress;
+  if (progress !== undefined) updates.progress = Math.min(100, Math.max(0, progress));
   if (currentProgressRank) updates.current_progress_rank = currentProgressRank;
+
+  // Reopen order: admin/lead can revert completed back to in_progress
+  if (newStatus === "in_progress") {
+    const { data: currentOrder } = await supabase.from("orders").select("status, progress").eq("id", orderId).single();
+    if (currentOrder?.status === "completed") {
+      // Reopen - clear completion
+      updates.completed_at = null;
+      updates.progress = progress ?? currentOrder.progress ?? 0;
+      // Reactivate assignment
+      await supabase
+        .from("order_assignments")
+        .update({ status: "in_progress", completed_at: null })
+        .eq("order_id", orderId)
+        .eq("status", "completed");
+    }
+  }
 
   await supabase.from("orders").update(updates).eq("id", orderId);
 
   // Update assignment status
-  if (newStatus === "in_progress") {
+  if (newStatus === "in_progress" && user.role === "worker") {
     await supabase
       .from("order_assignments")
       .update({ status: "in_progress", started_at: new Date().toISOString() })
@@ -183,12 +221,20 @@ export async function PUT(request: NextRequest) {
       .eq("assigned_to", user.id);
   }
   if (newStatus === "completed") {
-    await supabase
-      .from("order_assignments")
-      .update({ status: "completed", completed_at: new Date().toISOString() })
-      .eq("order_id", orderId)
-      .eq("assigned_to", user.id);
-
+    if (user.role === "worker") {
+      await supabase
+        .from("order_assignments")
+        .update({ status: "completed", completed_at: new Date().toISOString() })
+        .eq("order_id", orderId)
+        .eq("assigned_to", user.id);
+    } else {
+      // Admin/Lead completing - mark the latest active assignment
+      await supabase
+        .from("order_assignments")
+        .update({ status: "completed", completed_at: new Date().toISOString() })
+        .eq("order_id", orderId)
+        .in("status", ["assigned", "in_progress"]);
+    }
     await supabase.from("orders").update({ completed_at: new Date().toISOString() }).eq("id", orderId);
   }
 
@@ -197,12 +243,12 @@ export async function PUT(request: NextRequest) {
     order_id: orderId,
     action: newStatus ? `status_${newStatus}` : "progress_update",
     new_value: newStatus || `${progress}%`,
-    notes: notes || `Updated by ${user.name}`,
+    notes: notes || `Updated by ${user.name} (${user.role})`,
     created_by: user.name,
   });
 
   // Notify admin when worker completes
-  if (newStatus === "completed") {
+  if (newStatus === "completed" && user.role === "worker") {
     const settings = await getSettings();
     if (settings.telegramBotToken && settings.telegramAdminGroupId) {
       const { data: order } = await supabase.from("orders").select("order_id, username").eq("id", orderId).single();

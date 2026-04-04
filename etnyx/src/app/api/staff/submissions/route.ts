@@ -103,3 +103,121 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({ success: true, submission }, { status: 201 });
 }
+
+// PUT /api/staff/submissions — Edit a submission (worker only, within 30 min)
+export async function PUT(request: NextRequest) {
+  const { authenticated, user, error } = await verifyStaff(["worker"]);
+  if (!authenticated || !user) return error;
+
+  const body = await request.json();
+  const { id, starsGained, mvpCount, savageCount, maniacCount, matchesPlayed, winCount, durationMinutes, notes } = body;
+
+  if (!id) {
+    return NextResponse.json({ error: "Submission ID wajib" }, { status: 400 });
+  }
+
+  const supabase = await createAdminClient();
+
+  // Verify ownership and time limit (30 minutes)
+  const { data: sub } = await supabase
+    .from("worker_submissions")
+    .select("id, worker_id, submitted_at, stars_gained, order_id")
+    .eq("id", id)
+    .eq("worker_id", user.id)
+    .single();
+
+  if (!sub) {
+    return NextResponse.json({ error: "Submission tidak ditemukan" }, { status: 404 });
+  }
+
+  const minutesSinceSubmit = (Date.now() - new Date(sub.submitted_at).getTime()) / (1000 * 60);
+  if (minutesSinceSubmit > 30) {
+    return NextResponse.json({ error: "Submission hanya bisa diedit dalam 30 menit setelah submit" }, { status: 403 });
+  }
+
+  const updates: Record<string, unknown> = {};
+  if (starsGained !== undefined) updates.stars_gained = starsGained;
+  if (mvpCount !== undefined) updates.mvp_count = mvpCount;
+  if (savageCount !== undefined) updates.savage_count = savageCount;
+  if (maniacCount !== undefined) updates.maniac_count = maniacCount;
+  if (matchesPlayed !== undefined) updates.matches_played = matchesPlayed;
+  if (winCount !== undefined) updates.win_count = winCount;
+  if (durationMinutes !== undefined) updates.duration_minutes = durationMinutes;
+  if (notes !== undefined) updates.notes = notes;
+
+  const { error: updateError } = await supabase
+    .from("worker_submissions")
+    .update(updates)
+    .eq("id", id);
+
+  if (updateError) {
+    return NextResponse.json({ error: "Gagal update submission" }, { status: 500 });
+  }
+
+  // Recalculate order progress if stars changed
+  if (starsGained !== undefined && starsGained !== sub.stars_gained) {
+    const { data: allSubs } = await supabase
+      .from("worker_submissions")
+      .select("stars_gained")
+      .eq("order_id", sub.order_id);
+    const totalStars = (allSubs || []).reduce((sum, s) => sum + (s.stars_gained || 0), 0);
+    const newProgress = Math.min(100, totalStars * 5);
+    await supabase.from("orders").update({ progress: newProgress, updated_at: new Date().toISOString() }).eq("id", sub.order_id);
+  }
+
+  return NextResponse.json({ success: true });
+}
+
+// DELETE /api/staff/submissions — Delete a submission (worker within 30 min, or admin)
+export async function DELETE(request: NextRequest) {
+  const { authenticated, user, error } = await verifyStaff(["worker", "admin"]);
+  if (!authenticated || !user) return error;
+
+  const { id } = await request.json();
+  if (!id) {
+    return NextResponse.json({ error: "Submission ID wajib" }, { status: 400 });
+  }
+
+  const supabase = await createAdminClient();
+
+  const { data: sub } = await supabase
+    .from("worker_submissions")
+    .select("id, worker_id, submitted_at, stars_gained, order_id")
+    .eq("id", id)
+    .single();
+
+  if (!sub) {
+    return NextResponse.json({ error: "Submission tidak ditemukan" }, { status: 404 });
+  }
+
+  // Workers can only delete their own within 30 min
+  if (user.role === "worker") {
+    if (sub.worker_id !== user.id) {
+      return NextResponse.json({ error: "Bukan submission kamu" }, { status: 403 });
+    }
+    const minutesSinceSubmit = (Date.now() - new Date(sub.submitted_at).getTime()) / (1000 * 60);
+    if (minutesSinceSubmit > 30) {
+      return NextResponse.json({ error: "Submission hanya bisa dihapus dalam 30 menit" }, { status: 403 });
+    }
+  }
+
+  const { error: deleteError } = await supabase
+    .from("worker_submissions")
+    .delete()
+    .eq("id", id);
+
+  if (deleteError) {
+    return NextResponse.json({ error: "Gagal hapus submission" }, { status: 500 });
+  }
+
+  // Recalculate order progress
+  const { data: allSubs } = await supabase
+    .from("worker_submissions")
+    .select("stars_gained")
+    .eq("order_id", sub.order_id);
+  const totalStars = (allSubs || []).reduce((sum, s) => sum + (s.stars_gained || 0), 0);
+  const newProgress = Math.min(100, totalStars * 5);
+  await supabase.from("orders").update({ progress: newProgress, updated_at: new Date().toISOString() }).eq("id", sub.order_id);
+
+  return NextResponse.json({ success: true });
+}

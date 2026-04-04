@@ -183,6 +183,42 @@ function buildSections(): DocSection[] {
           <InfoBox type="info">
             <strong>Default Admin:</strong> admin@etnyx.com / etnyx_admin_2026 — Segera ganti password setelah pertama kali login.
           </InfoBox>
+
+          <div className="bg-background rounded-lg p-4 border border-accent/20">
+            <h4 className="text-accent font-semibold text-sm mb-3">🔗 Link Login per Role</h4>
+            <p className="text-text-muted text-xs mb-3">Semua role login melalui halaman yang sama, lalu diredirect otomatis. Bisa juga akses langsung:</p>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between px-3 py-2 rounded-md bg-red-500/5 border border-red-500/10">
+                <div className="flex items-center gap-2">
+                  <RoleBadge role="admin" />
+                  <span className="text-xs text-text-muted">Admin Dashboard</span>
+                </div>
+                <Code>/admin/dashboard</Code>
+              </div>
+              <div className="flex items-center justify-between px-3 py-2 rounded-md bg-blue-500/5 border border-blue-500/10">
+                <div className="flex items-center gap-2">
+                  <RoleBadge role="lead" />
+                  <span className="text-xs text-text-muted">Lead Dashboard</span>
+                </div>
+                <Code>/admin/lead</Code>
+              </div>
+              <div className="flex items-center justify-between px-3 py-2 rounded-md bg-green-500/5 border border-green-500/10">
+                <div className="flex items-center gap-2">
+                  <RoleBadge role="worker" />
+                  <span className="text-xs text-text-muted">Worker Dashboard</span>
+                </div>
+                <Code>/admin/worker</Code>
+              </div>
+              <div className="flex items-center justify-between px-3 py-2 rounded-md bg-purple-500/5 border border-purple-500/10">
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-400">DOCS</span>
+                  <span className="text-xs text-text-muted">Dokumentasi (halaman ini)</span>
+                </div>
+                <Code>/admin/docs</Code>
+              </div>
+            </div>
+            <p className="text-text-muted text-[10px] mt-2">* Semua halaman di atas memerlukan login. Jika belum login, buka <Code>/admin</Code> terlebih dahulu.</p>
+          </div>
         </div>
       ),
     },

@@ -207,6 +207,10 @@ export default function AdminDashboard() {
   const [chartData, setChartData] = useState<{ date: string; orders: number; revenue: number }[]>([]);
   const [activeTab, setActiveTab] = useState<TabType>("overview");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [ordersPage, setOrdersPage] = useState(1);
+  const [ordersTotal, setOrdersTotal] = useState(0);
+  const ORDERS_PER_PAGE = 25;
   const [showModal, setShowModal] = useState<string | null>(null);
   const [editItem, setEditItem] = useState<Testimonial | Portfolio | PromoCode | Booster | null>(null);
   const [credentials, setCredentials] = useState<{ order_id: string; account_login: string | null; account_password: string | null } | null>(null);
@@ -266,8 +270,15 @@ export default function AdminDashboard() {
     try { const res = await fetch("/api/admin/stats"); setStats(await res.json()); } catch (e) { console.error(e); }
   }, []);
   const fetchOrders = useCallback(async () => {
-    try { const res = await fetch(`/api/admin/orders?status=${statusFilter}`); const d = await res.json(); setOrders(d.orders || []); } catch (e) { console.error(e); }
-  }, [statusFilter]);
+    try {
+      const params = new URLSearchParams({ status: statusFilter, page: String(ordersPage), limit: String(ORDERS_PER_PAGE) });
+      if (searchQuery.trim()) params.set("search", searchQuery.trim());
+      const res = await fetch(`/api/admin/orders?${params}`);
+      const d = await res.json();
+      setOrders(d.orders || []);
+      if (d.total !== undefined) setOrdersTotal(d.total);
+    } catch (e) { console.error(e); }
+  }, [statusFilter, searchQuery, ordersPage]);
   const fetchChartData = useCallback(async () => {
     try { const res = await fetch("/api/admin/chart-data"); const d = await res.json(); setChartData(d.chartData || []); } catch (e) { console.error(e); }
   }, []);
@@ -495,10 +506,12 @@ export default function AdminDashboard() {
   };
 
   const saveEditPerStar = (tierId: string) => {
+    const price = Math.max(1, parseInt(editPriceValue) || 0);
+    const originalPrice = editOriginalPrice ? Math.max(0, parseInt(editOriginalPrice)) : undefined;
+    if (price <= 0) { alert("Harga harus lebih dari 0"); return; }
+    if (originalPrice && originalPrice < price) { alert("Harga asli harus lebih besar dari harga diskon"); return; }
     const newTiers = perStarPricing.map(tier => {
       if (tier.id !== tierId) return tier;
-      const price = Math.max(0, parseInt(editPriceValue) || tier.price);
-      const originalPrice = editOriginalPrice ? Math.max(0, parseInt(editOriginalPrice)) : undefined;
       const discountPercent = originalPrice && originalPrice > price
         ? Math.round(((originalPrice - price) / originalPrice) * 100)
         : undefined;
@@ -879,13 +892,26 @@ export default function AdminDashboard() {
           {/* ===== ORDERS TAB ===== */}
           {activeTab === "orders" && (
             <div className="space-y-4">
-              <div className="flex flex-wrap gap-2">
-                {["all", "pending", "confirmed", "in_progress", "completed", "cancelled"].map((s) => (
-                  <button key={s} onClick={() => setStatusFilter(s)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${statusFilter === s ? "gradient-primary text-white shadow-lg shadow-accent/20" : "bg-surface border border-white/5 text-text-muted hover:text-text"}`}>
-                    {s === "all" ? "All" : getStatusLabel(s)}
-                  </button>
-                ))}
+              {/* Search + Filter */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                  <input
+                    type="text"
+                    placeholder="Cari order ID, username, game ID, WhatsApp..."
+                    value={searchQuery}
+                    onChange={(e) => { setSearchQuery(e.target.value); setOrdersPage(1); }}
+                    className="w-full bg-surface border border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none"
+                  />
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {["all", "pending", "confirmed", "in_progress", "completed", "cancelled"].map((s) => (
+                    <button key={s} onClick={() => { setStatusFilter(s); setOrdersPage(1); }}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${statusFilter === s ? "gradient-primary text-white shadow-lg shadow-accent/20" : "bg-surface border border-white/5 text-text-muted hover:text-text"}`}>
+                      {s === "all" ? "All" : getStatusLabel(s)}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="bg-surface rounded-xl border border-white/5 overflow-hidden">
@@ -961,6 +987,34 @@ export default function AdminDashboard() {
                   </table>
                 </div>
               </div>
+
+              {/* Pagination */}
+              {ordersTotal > ORDERS_PER_PAGE && (
+                <div className="flex items-center justify-between bg-surface rounded-xl border border-white/5 px-4 py-3">
+                  <p className="text-text-muted text-xs">
+                    Menampilkan {(ordersPage - 1) * ORDERS_PER_PAGE + 1}–{Math.min(ordersPage * ORDERS_PER_PAGE, ordersTotal)} dari {ordersTotal} orders
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setOrdersPage(p => Math.max(1, p - 1))}
+                      disabled={ordersPage === 1}
+                      className="px-3 py-1.5 rounded-lg text-xs bg-background border border-white/10 text-text-muted hover:text-text disabled:opacity-30 transition-colors"
+                    >
+                      ← Prev
+                    </button>
+                    <span className="text-text text-xs font-medium">
+                      {ordersPage} / {Math.ceil(ordersTotal / ORDERS_PER_PAGE)}
+                    </span>
+                    <button
+                      onClick={() => setOrdersPage(p => p + 1)}
+                      disabled={ordersPage >= Math.ceil(ordersTotal / ORDERS_PER_PAGE)}
+                      className="px-3 py-1.5 rounded-lg text-xs bg-background border border-white/10 text-text-muted hover:text-text disabled:opacity-30 transition-colors"
+                    >
+                      Next →
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

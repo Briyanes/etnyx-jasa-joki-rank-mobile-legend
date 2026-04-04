@@ -4,9 +4,10 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
-  ShoppingCart, Users, LogOut, RefreshCw, Filter, 
-  ChevronDown, ChevronUp, UserPlus, Clock, CheckCircle,
-  AlertCircle, Loader2, Package, TrendingUp, Eye,
+  ShoppingCart, Users, LogOut, RefreshCw, Filter, Search,
+  ChevronDown, ChevronUp, UserPlus, Clock, CheckCircle, XCircle,
+  AlertCircle, Loader2, Package, TrendingUp, Eye, MessageSquare,
+  Send, RotateCcw, CheckSquare, Square,
 } from "lucide-react";
 
 interface Order {
@@ -27,11 +28,15 @@ interface Order {
   assigned_worker_id: string | null;
   assigned_lead_id: string | null;
   whatsapp: string | null;
+  customer_email: string | null;
+  hero_request: string | null;
+  login_method: string | null;
   order_assignments?: {
     id: string;
     assigned_to: string;
     status: string;
     assigned_at: string;
+    notes: string | null;
     staff_users: { id: string; name: string; role: string } | null;
   }[];
 }
@@ -50,6 +55,15 @@ interface StaffUser {
   email: string;
   name: string;
   role: string;
+}
+
+interface Note {
+  id: string;
+  action: string;
+  new_value: string;
+  notes: string;
+  created_by: string;
+  created_at: string;
 }
 
 const RANK_LABELS: Record<string, string> = {
@@ -73,11 +87,29 @@ export default function LeadDashboard() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [statusFilter, setStatusFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [assigningOrder, setAssigningOrder] = useState<string | null>(null);
   const [selectedWorker, setSelectedWorker] = useState<string>("");
   const [assignNotes, setAssignNotes] = useState("");
+  const [assignLoading, setAssignLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Status update
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+
+  // Bulk assign
+  const [selectedOrders, setSelectedOrders] = useState<Set<string>>(new Set());
+  const [bulkAssigning, setBulkAssigning] = useState(false);
+  const [bulkWorker, setBulkWorker] = useState("");
+  const [bulkNotes, setBulkNotes] = useState("");
+  const [bulkLoading, setBulkLoading] = useState(false);
+
+  // Notes
+  const [notesOrder, setNotesOrder] = useState<string | null>(null);
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [newNote, setNewNote] = useState("");
+  const [noteSending, setNoteSending] = useState(false);
 
   const checkAuth = useCallback(async () => {
     try {
@@ -93,12 +125,15 @@ export default function LeadDashboard() {
 
   const fetchOrders = useCallback(async () => {
     try {
-      const url = statusFilter === "all" ? "/api/staff/orders" : `/api/staff/orders?status=${statusFilter}`;
+      const params = new URLSearchParams();
+      if (statusFilter !== "all") params.set("status", statusFilter);
+      if (searchQuery.trim()) params.set("search", searchQuery.trim());
+      const url = `/api/staff/orders${params.toString() ? `?${params}` : ""}`;
       const res = await fetch(url);
       const data = await res.json();
       setOrders(data.orders || []);
     } catch (e) { console.error(e); }
-  }, [statusFilter]);
+  }, [statusFilter, searchQuery]);
 
   const fetchWorkers = useCallback(async () => {
     try {
@@ -106,6 +141,14 @@ export default function LeadDashboard() {
       const data = await res.json();
       setWorkers((data.users || []).filter((u: Worker) => u.is_active));
     } catch (e) { console.error(e); }
+  }, []);
+
+  const fetchNotes = useCallback(async (orderId: string) => {
+    try {
+      const res = await fetch(`/api/staff/notes?orderId=${orderId}`);
+      const data = await res.json();
+      setNotes(data.notes || []);
+    } catch { setNotes([]); }
   }, []);
 
   useEffect(() => {
@@ -136,6 +179,7 @@ export default function LeadDashboard() {
 
   const handleAssign = async (orderId: string) => {
     if (!selectedWorker) return;
+    setAssignLoading(true);
     try {
       const res = await fetch("/api/staff/orders", {
         method: "POST",
@@ -152,6 +196,72 @@ export default function LeadDashboard() {
         alert(data.error || "Gagal assign order");
       }
     } catch { alert("Network error"); }
+    setAssignLoading(false);
+  };
+
+  const handleUpdateStatus = async (orderId: string, newStatus: string) => {
+    setUpdatingStatus(orderId);
+    try {
+      const res = await fetch("/api/staff/orders", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, status: newStatus }),
+      });
+      if (res.ok) await fetchOrders();
+      else {
+        const data = await res.json();
+        alert(data.error || "Gagal update status");
+      }
+    } catch { alert("Network error"); }
+    setUpdatingStatus(null);
+  };
+
+  const handleBulkAssign = async () => {
+    if (!bulkWorker || selectedOrders.size === 0) return;
+    setBulkLoading(true);
+    let success = 0;
+    for (const orderId of selectedOrders) {
+      try {
+        const res = await fetch("/api/staff/orders", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ orderId, workerId: bulkWorker, notes: bulkNotes }),
+        });
+        if (res.ok) success++;
+      } catch { /* continue */ }
+    }
+    alert(`${success}/${selectedOrders.size} order berhasil di-assign`);
+    setSelectedOrders(new Set());
+    setBulkAssigning(false);
+    setBulkWorker("");
+    setBulkNotes("");
+    setBulkLoading(false);
+    await fetchOrders();
+  };
+
+  const handleAddNote = async (orderId: string) => {
+    if (!newNote.trim()) return;
+    setNoteSending(true);
+    try {
+      const res = await fetch("/api/staff/notes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, message: newNote }),
+      });
+      if (res.ok) {
+        setNewNote("");
+        await fetchNotes(orderId);
+      }
+    } catch { alert("Gagal kirim catatan"); }
+    setNoteSending(false);
+  };
+
+  const toggleSelectOrder = (id: string) => {
+    setSelectedOrders(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
   };
 
   const formatPrice = (n: number) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(n);
@@ -223,14 +333,18 @@ export default function LeadDashboard() {
           <h2 className="text-text font-semibold mb-3 flex items-center gap-2"><Users className="w-4 h-4 text-blue-400" /> Tim Worker ({workers.length})</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
             {workers.map(w => {
-              const workerOrders = orders.filter(o => o.assigned_worker_id === w.id && o.status === "in_progress");
+              const workerActive = orders.filter(o => o.assigned_worker_id === w.id && o.status === "in_progress").length;
+              const workerCompleted = orders.filter(o => o.assigned_worker_id === w.id && o.status === "completed").length;
               return (
                 <div key={w.id} className="bg-background rounded-lg p-3 border border-white/5 text-center">
                   <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center mx-auto mb-2">
                     <span className="text-accent font-bold text-sm">{w.name.charAt(0).toUpperCase()}</span>
                   </div>
                   <p className="text-text text-sm font-medium truncate">{w.name}</p>
-                  <p className="text-text-muted text-xs mt-1">{workerOrders.length} aktif</p>
+                  <p className="text-text-muted text-[10px] mt-1">{workerActive} aktif · {workerCompleted} selesai</p>
+                  {w.last_login_at && (
+                    <p className="text-text-muted text-[10px]">Login: {new Date(w.last_login_at).toLocaleDateString("id-ID", { day: "2-digit", month: "short" })}</p>
+                  )}
                 </div>
               );
             })}
@@ -238,24 +352,67 @@ export default function LeadDashboard() {
           </div>
         </div>
 
+        {/* Bulk Assign Bar */}
+        {selectedOrders.size > 0 && (
+          <div className="bg-accent/10 border border-accent/30 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            <p className="text-accent text-sm font-medium">{selectedOrders.size} order dipilih</p>
+            {!bulkAssigning ? (
+              <div className="flex gap-2">
+                <button onClick={() => setBulkAssigning(true)} className="px-4 py-2 gradient-primary rounded-lg text-white text-sm font-medium hover:opacity-90">
+                  <UserPlus className="w-4 h-4 inline mr-1" /> Bulk Assign
+                </button>
+                <button onClick={() => setSelectedOrders(new Set())} className="px-3 py-2 bg-surface border border-white/10 rounded-lg text-text-muted text-sm hover:text-text">
+                  Batal
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-wrap items-center gap-2 flex-1">
+                <select value={bulkWorker} onChange={(e) => setBulkWorker(e.target.value)}
+                  className="bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-sm focus:border-accent focus:outline-none">
+                  <option value="">Pilih Worker...</option>
+                  {workers.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+                </select>
+                <input type="text" placeholder="Catatan..." value={bulkNotes} onChange={(e) => setBulkNotes(e.target.value)}
+                  className="bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-sm focus:border-accent focus:outline-none flex-1 min-w-[150px]" />
+                <button onClick={handleBulkAssign} disabled={!bulkWorker || bulkLoading}
+                  className="px-4 py-2 gradient-primary rounded-lg text-white text-sm font-medium hover:opacity-90 disabled:opacity-50 flex items-center gap-1">
+                  {bulkLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} Assign
+                </button>
+                <button onClick={() => { setBulkAssigning(false); setBulkWorker(""); setBulkNotes(""); }}
+                  className="px-3 py-2 bg-surface border border-white/10 rounded-lg text-text-muted text-sm">Batal</button>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Orders */}
         <div className="bg-surface rounded-xl border border-white/5">
-          <div className="p-4 border-b border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <h2 className="text-text font-semibold flex items-center gap-2"><Package className="w-4 h-4 text-accent" /> Daftar Order</h2>
-            <div className="flex items-center gap-2">
-              <Filter className="w-4 h-4 text-text-muted" />
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="bg-background border border-white/10 rounded-lg px-3 py-1.5 text-text text-sm focus:border-accent focus:outline-none"
-              >
-                <option value="all">Semua Status</option>
-                <option value="pending">Pending</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="in_progress">In Progress</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
+          <div className="p-4 border-b border-white/5 flex flex-col gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <h2 className="text-text font-semibold flex items-center gap-2"><Package className="w-4 h-4 text-accent" /> Daftar Order</h2>
+              <div className="flex items-center gap-2">
+                <Filter className="w-4 h-4 text-text-muted" />
+                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
+                  className="bg-background border border-white/10 rounded-lg px-3 py-1.5 text-text text-sm focus:border-accent focus:outline-none">
+                  <option value="all">Semua Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
+            </div>
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+              <input
+                type="text"
+                placeholder="Cari order ID, username, game ID..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-background border border-white/10 rounded-lg pl-10 pr-4 py-2 text-text text-sm focus:border-accent focus:outline-none"
+              />
             </div>
           </div>
 
@@ -268,12 +425,21 @@ export default function LeadDashboard() {
               const isExpanded = expandedOrder === order.id;
               const isAssigning = assigningOrder === order.id;
               const assignedWorker = order.order_assignments?.[0]?.staff_users;
+              const canSelect = !order.assigned_worker_id && order.status !== "cancelled" && order.status !== "completed";
 
               return (
                 <div key={order.id} className="p-4 hover:bg-white/[0.02] transition-colors">
                   {/* Order Row */}
-                  <div className="flex items-center gap-3 cursor-pointer" onClick={() => setExpandedOrder(isExpanded ? null : order.id)}>
-                    <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-3">
+                    {/* Checkbox for bulk select */}
+                    {canSelect && (
+                      <button onClick={(e) => { e.stopPropagation(); toggleSelectOrder(order.id); }} className="shrink-0">
+                        {selectedOrders.has(order.id)
+                          ? <CheckSquare className="w-5 h-5 text-accent" />
+                          : <Square className="w-5 h-5 text-text-muted hover:text-text" />}
+                      </button>
+                    )}
+                    <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setExpandedOrder(isExpanded ? null : order.id)}>
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-text font-mono text-sm font-medium">{order.order_id}</span>
                         <span className={`px-2 py-0.5 rounded-md text-xs ${sc.bg} ${sc.color}`}>{sc.label}</span>
@@ -301,20 +467,31 @@ export default function LeadDashboard() {
                         </div>
                       )}
                     </div>
-                    {isExpanded ? <ChevronUp className="w-4 h-4 text-text-muted" /> : <ChevronDown className="w-4 h-4 text-text-muted" />}
+                    <button onClick={() => setExpandedOrder(isExpanded ? null : order.id)} className="shrink-0">
+                      {isExpanded ? <ChevronUp className="w-4 h-4 text-text-muted" /> : <ChevronDown className="w-4 h-4 text-text-muted" />}
+                    </button>
                   </div>
 
                   {/* Expanded Detail */}
                   {isExpanded && (
-                    <div className="mt-4 pt-4 border-t border-white/5 space-y-3">
+                    <div className="mt-4 pt-4 border-t border-white/5 space-y-4">
+                      {/* Full Order Details */}
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
                         <div>
                           <span className="text-text-muted text-xs">Game ID</span>
-                          <p className="text-text">{order.game_id}</p>
+                          <p className="text-text font-mono">{order.game_id}</p>
+                        </div>
+                        <div>
+                          <span className="text-text-muted text-xs">Username</span>
+                          <p className="text-text">{order.username}</p>
                         </div>
                         <div>
                           <span className="text-text-muted text-xs">Package</span>
                           <p className="text-text capitalize">{order.package}</p>
+                        </div>
+                        <div>
+                          <span className="text-text-muted text-xs">Login Method</span>
+                          <p className="text-text capitalize">{order.login_method || "-"}</p>
                         </div>
                         <div>
                           <span className="text-text-muted text-xs">Progress</span>
@@ -329,67 +506,139 @@ export default function LeadDashboard() {
                           <span className="text-text-muted text-xs">Worker</span>
                           <p className="text-text">{assignedWorker?.name || <span className="text-yellow-400">Belum assign</span>}</p>
                         </div>
+                        {order.hero_request && (
+                          <div>
+                            <span className="text-text-muted text-xs">Hero Request</span>
+                            <p className="text-text">{order.hero_request}</p>
+                          </div>
+                        )}
+                        {order.current_progress_rank && (
+                          <div>
+                            <span className="text-text-muted text-xs">Rank Sekarang</span>
+                            <p className="text-text">{RANK_LABELS[order.current_progress_rank] || order.current_progress_rank}</p>
+                          </div>
+                        )}
                       </div>
 
-                      {/* Assign Button */}
-                      {!assignedWorker && order.status !== "cancelled" && (
+                      {/* Action Buttons Row */}
+                      <div className="flex flex-wrap gap-2">
+                        {/* Status Update */}
+                        <select
+                          value={order.status}
+                          onChange={(e) => handleUpdateStatus(order.id, e.target.value)}
+                          disabled={updatingStatus === order.id}
+                          className="bg-background border border-white/10 rounded-lg px-3 py-1.5 text-text text-xs focus:border-accent focus:outline-none disabled:opacity-50"
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="confirmed">Confirmed</option>
+                          <option value="in_progress">In Progress</option>
+                          <option value="completed">Completed</option>
+                          <option value="cancelled">Cancelled</option>
+                        </select>
+
+                        {/* Reopen completed order */}
+                        {order.status === "completed" && (
+                          <button
+                            onClick={() => handleUpdateStatus(order.id, "in_progress")}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-yellow-500/10 text-yellow-400 rounded-lg text-xs hover:bg-yellow-500/20 transition-colors"
+                          >
+                            <RotateCcw className="w-3.5 h-3.5" /> Reopen
+                          </button>
+                        )}
+
+                        {/* Notes */}
+                        <button
+                          onClick={() => { setNotesOrder(notesOrder === order.id ? null : order.id); if (notesOrder !== order.id) fetchNotes(order.id); }}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-blue-500/10 text-blue-400 rounded-lg text-xs hover:bg-blue-500/20 transition-colors"
+                        >
+                          <MessageSquare className="w-3.5 h-3.5" /> Catatan
+                        </button>
+
+                        {/* WhatsApp */}
+                        {order.whatsapp && (
+                          <a href={`https://wa.me/${order.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer"
+                            className="flex items-center gap-1 px-3 py-1.5 bg-green-500/10 text-green-400 rounded-lg text-xs hover:bg-green-500/20 transition-colors">
+                            <Eye className="w-3.5 h-3.5" /> WhatsApp
+                          </a>
+                        )}
+                      </div>
+
+                      {/* Assign / Reassign */}
+                      {((!assignedWorker && order.status !== "cancelled") || assignedWorker) && (
                         <div>
                           {!isAssigning ? (
                             <button
-                              onClick={(e) => { e.stopPropagation(); setAssigningOrder(order.id); }}
+                              onClick={(e) => { e.stopPropagation(); setAssigningOrder(order.id); setSelectedWorker(order.assigned_worker_id || ""); }}
                               className="flex items-center gap-2 px-4 py-2 gradient-primary rounded-lg text-white text-sm font-medium hover:opacity-90 transition-opacity"
                             >
-                              <UserPlus className="w-4 h-4" /> Assign Worker
+                              <UserPlus className="w-4 h-4" /> {assignedWorker ? "Reassign Worker" : "Assign Worker"}
                             </button>
                           ) : (
                             <div className="bg-background rounded-lg p-3 space-y-3" onClick={(e) => e.stopPropagation()}>
-                              <select
-                                value={selectedWorker}
-                                onChange={(e) => setSelectedWorker(e.target.value)}
-                                className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm focus:border-accent focus:outline-none"
-                              >
+                              <select value={selectedWorker} onChange={(e) => setSelectedWorker(e.target.value)}
+                                className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm focus:border-accent focus:outline-none">
                                 <option value="">Pilih Worker...</option>
-                                {workers.map(w => (
-                                  <option key={w.id} value={w.id}>{w.name}</option>
-                                ))}
+                                {workers.map(w => <option key={w.id} value={w.id}>{w.name} ({orders.filter(o => o.assigned_worker_id === w.id && o.status === "in_progress").length} aktif)</option>)}
                               </select>
-                              <input
-                                type="text"
-                                placeholder="Catatan (opsional)..."
-                                value={assignNotes}
-                                onChange={(e) => setAssignNotes(e.target.value)}
-                                className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm focus:border-accent focus:outline-none"
-                              />
+                              <input type="text" placeholder="Catatan (opsional)..." value={assignNotes} onChange={(e) => setAssignNotes(e.target.value)}
+                                className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm focus:border-accent focus:outline-none" />
                               <div className="flex gap-2">
-                                <button
-                                  onClick={() => handleAssign(order.id)}
-                                  disabled={!selectedWorker}
-                                  className="px-4 py-2 gradient-primary rounded-lg text-white text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
-                                >
-                                  Assign
+                                <button onClick={() => handleAssign(order.id)} disabled={!selectedWorker || assignLoading}
+                                  className="px-4 py-2 gradient-primary rounded-lg text-white text-sm font-medium hover:opacity-90 disabled:opacity-50 flex items-center gap-1">
+                                  {assignLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />} Assign
                                 </button>
-                                <button
-                                  onClick={() => { setAssigningOrder(null); setSelectedWorker(""); setAssignNotes(""); }}
-                                  className="px-4 py-2 bg-surface border border-white/10 rounded-lg text-text-muted text-sm hover:text-text transition-colors"
-                                >
-                                  Batal
-                                </button>
+                                <button onClick={() => { setAssigningOrder(null); setSelectedWorker(""); setAssignNotes(""); }}
+                                  className="px-4 py-2 bg-surface border border-white/10 rounded-lg text-text-muted text-sm hover:text-text transition-colors">Batal</button>
                               </div>
                             </div>
                           )}
                         </div>
                       )}
 
-                      {/* View order details link */}
-                      {order.whatsapp && (
-                        <a
-                          href={`https://wa.me/${order.whatsapp.replace(/\D/g, "")}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 text-green-400 text-sm hover:underline"
-                        >
-                          <Eye className="w-3.5 h-3.5" /> WhatsApp Customer
-                        </a>
+                      {/* Notes Panel */}
+                      {notesOrder === order.id && (
+                        <div className="bg-background rounded-lg p-4 space-y-3">
+                          <h4 className="text-text font-medium text-sm flex items-center gap-2">
+                            <MessageSquare className="w-4 h-4 text-blue-400" /> Catatan & Log Order
+                          </h4>
+                          {/* Add Note */}
+                          <div className="flex gap-2">
+                            <input type="text" placeholder="Tulis catatan..." value={newNote} onChange={(e) => setNewNote(e.target.value)}
+                              onKeyDown={(e) => { if (e.key === "Enter") handleAddNote(order.id); }}
+                              className="flex-1 bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm focus:border-accent focus:outline-none" />
+                            <button onClick={() => handleAddNote(order.id)} disabled={noteSending || !newNote.trim()}
+                              className="px-3 py-2 gradient-primary rounded-lg text-white text-sm disabled:opacity-50 flex items-center gap-1">
+                              {noteSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                            </button>
+                          </div>
+                          {/* Notes List */}
+                          <div className="space-y-2 max-h-60 overflow-y-auto">
+                            {notes.length === 0 && <p className="text-text-muted text-xs text-center py-2">Belum ada catatan</p>}
+                            {notes.map(n => (
+                              <div key={n.id} className="bg-surface rounded-lg p-2.5 text-xs">
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className="text-text font-medium">{n.created_by}</span>
+                                  <span className="text-text-muted">{new Date(n.created_at).toLocaleDateString("id-ID", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                                </div>
+                                <p className="text-text-muted">{n.action === "note" ? n.new_value : `[${n.action}] ${n.new_value}`}</p>
+                                {n.notes && n.action !== "note" && <p className="text-text-muted text-[10px] mt-0.5">{n.notes}</p>}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Assignment Info */}
+                      {order.order_assignments && order.order_assignments.length > 0 && (
+                        <div className="text-xs text-text-muted">
+                          {order.order_assignments.map((a, i) => (
+                            <span key={i}>
+                              Assigned ke <span className="text-text">{a.staff_users?.name || "?"}</span>
+                              {" "}pada {formatDate(a.assigned_at)}
+                              {a.notes && <> — <span className="italic">{a.notes}</span></>}
+                            </span>
+                          ))}
+                        </div>
                       )}
                     </div>
                   )}
