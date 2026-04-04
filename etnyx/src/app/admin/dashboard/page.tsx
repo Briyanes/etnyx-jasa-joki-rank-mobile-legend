@@ -153,9 +153,11 @@ interface TrackingPixels { metaPixelId: string; metaAccessToken: string; googleA
 interface SocialLinks { instagram: string; facebook: string; tiktok: string; youtube: string; whatsapp: string; }
 interface SiteInfo { siteName: string; taglineId: string; taglineEn: string; supportEmail: string; companyName: string; }
 interface IntegrationSettings { 
-  ipaymuApiKey: string; 
-  ipaymuVa: string; 
-  ipaymuIsProduction: boolean;
+  midtransClientKey: string; 
+  midtransServerKey: string; 
+  midtransMerchantId: string; 
+  midtransIsProduction: boolean;
+  midtransPaymentChannels: Record<string, boolean>;
   resendApiKey: string;
   resendFromEmail: string;
   fonnteApiToken: string;
@@ -234,7 +236,8 @@ export default function AdminDashboard() {
   const [socialLinks, setSocialLinks] = useState<SocialLinks>({ instagram: "", facebook: "", tiktok: "", youtube: "", whatsapp: "" });
   const [siteInfo, setSiteInfo] = useState<SiteInfo>({ siteName: "", taglineId: "", taglineEn: "", supportEmail: "", companyName: "" });
   const [integrations, setIntegrations] = useState<IntegrationSettings>({ 
-    ipaymuApiKey: "", ipaymuVa: "", ipaymuIsProduction: false,
+    midtransClientKey: "", midtransServerKey: "", midtransMerchantId: "", midtransIsProduction: false,
+    midtransPaymentChannels: { bca: true, bni: true, mandiri: true, permata: false, gopay: true, shopeepay: true, dana: false, ovo: false, credit_card: true, qris: true, alfamart_indomaret: true },
     resendApiKey: "", resendFromEmail: "noreply@etnyx.com",
     fonnteApiToken: "", fonnteDeviceId: "",
     telegramBotToken: "", telegramAdminGroupId: "", telegramWorkerGroupId: ""
@@ -551,34 +554,14 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 z-[100] bg-background flex flex-col items-center justify-center">
-        <div className="mb-8">
-          <Image
-            src="/logo/circle-landscape.webp"
-            alt="ETNYX"
-            width={200}
-            height={50}
-            className="h-12 w-auto animate-pulse"
-            priority
-          />
-        </div>
-        <div className="relative w-48 h-1 bg-surface rounded-full overflow-hidden mb-4">
-          <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary to-accent rounded-full animate-loading-bar" />
-        </div>
-        <p className="text-text-muted text-sm animate-pulse">Loading Command Center...</p>
-        <style jsx>{`
-          @keyframes loading-bar {
-            0% { width: 0%; }
-            50% { width: 70%; }
-            100% { width: 100%; }
-          }
-          .animate-loading-bar {
-            animation: loading-bar 1.5s ease-in-out infinite;
-          }
-        `}</style>
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-accent/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "0.5s" }} />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="relative w-16 h-16 mx-auto mb-4">
+            <div className="absolute inset-0 rounded-full border-2 border-accent/20"></div>
+            <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-accent animate-spin"></div>
+            <Gamepad2 className="absolute inset-0 m-auto w-6 h-6 text-accent" />
+          </div>
+          <p className="text-text-muted text-sm">Loading Command Center...</p>
         </div>
       </div>
     );
@@ -1808,12 +1791,12 @@ export default function AdminDashboard() {
                     <CmsSaveButton settingKey="integrations" value={integrations} />
                   </div>
 
-                  {/* iPaymu */}
+                  {/* Midtrans */}
                   <div className="bg-surface rounded-xl border border-white/5 p-6 space-y-5">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="text-text font-bold text-sm flex items-center gap-2"><CreditCard className="w-4 h-4 text-accent" /> iPaymu Payment Gateway</h3>
-                        <p className="text-text-muted text-xs mt-0.5">Konfigurasi payment gateway iPaymu</p>
+                        <h3 className="text-text font-bold text-sm flex items-center gap-2"><CreditCard className="w-4 h-4 text-accent" /> Midtrans Payment Gateway</h3>
+                        <p className="text-text-muted text-xs mt-0.5">Konfigurasi dan monitoring payment gateway</p>
                       </div>
                     </div>
 
@@ -1821,16 +1804,16 @@ export default function AdminDashboard() {
                     <div className="bg-background rounded-lg p-4 border border-white/5">
                       <p className="text-text-muted text-xs font-semibold mb-2 uppercase tracking-wider">Environment</p>
                       <div className="flex gap-2">
-                        <button onClick={() => setIntegrations({ ...integrations, ipaymuIsProduction: false })}
-                          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${!integrations.ipaymuIsProduction ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30" : "bg-background border border-white/10 text-text-muted hover:text-text"}`}>
+                        <button onClick={() => setIntegrations({ ...integrations, midtransIsProduction: false })}
+                          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${!integrations.midtransIsProduction ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30" : "bg-background border border-white/10 text-text-muted hover:text-text"}`}>
                           Sandbox
                         </button>
-                        <button onClick={() => setIntegrations({ ...integrations, ipaymuIsProduction: true })}
-                          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${integrations.ipaymuIsProduction ? "bg-green-500/20 text-green-400 border border-green-500/30" : "bg-background border border-white/10 text-text-muted hover:text-text"}`}>
+                        <button onClick={() => setIntegrations({ ...integrations, midtransIsProduction: true })}
+                          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${integrations.midtransIsProduction ? "bg-green-500/20 text-green-400 border border-green-500/30" : "bg-background border border-white/10 text-text-muted hover:text-text"}`}>
                           Production
                         </button>
                       </div>
-                      {integrations.ipaymuIsProduction && (
+                      {integrations.midtransIsProduction && (
                         <p className="text-yellow-400 text-xs mt-2 flex items-center gap-1">
                           <AlertTriangle className="w-3.5 h-3.5" /> Mode Production — transaksi menggunakan uang asli
                         </p>
@@ -1841,21 +1824,71 @@ export default function AdminDashboard() {
                     <div className="bg-background rounded-lg p-4 border border-white/5 space-y-3">
                       <p className="text-text-muted text-xs font-semibold uppercase tracking-wider">API Keys</p>
                       <div>
-                        <label className="block text-sm text-text-muted mb-1.5">Virtual Account (VA)</label>
-                        <input type="text" value={integrations.ipaymuVa} onChange={(e) => setIntegrations({ ...integrations, ipaymuVa: e.target.value })}
-                          placeholder="1179000899" className="w-full bg-surface border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
+                        <label className="block text-sm text-text-muted mb-1.5">Merchant ID</label>
+                        <input type="text" value={integrations.midtransMerchantId} onChange={(e) => setIntegrations({ ...integrations, midtransMerchantId: e.target.value })}
+                          placeholder="G123456789" className="w-full bg-surface border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
                       </div>
                       <div>
-                        <label className="block text-sm text-text-muted mb-1.5">API Key</label>
-                        <input type="password" value={integrations.ipaymuApiKey} onChange={(e) => setIntegrations({ ...integrations, ipaymuApiKey: e.target.value })}
-                          placeholder="QbGcoO0Qds9sQFDmY0MWg1Tq.xtuh1" className="w-full bg-surface border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
+                        <label className="block text-sm text-text-muted mb-1.5">Server Key</label>
+                        <input type="password" value={integrations.midtransServerKey} onChange={(e) => {
+                          const key = e.target.value;
+                          const isSandbox = key.startsWith("SB-");
+                          setIntegrations({ ...integrations, midtransServerKey: key, midtransIsProduction: !isSandbox && key.length > 0 });
+                        }}
+                          placeholder={integrations.midtransIsProduction ? "Mid-server-xxx" : "SB-Mid-server-xxx"} className="w-full bg-surface border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
+                        {integrations.midtransServerKey && (
+                          <p className={`text-xs mt-1 ${integrations.midtransServerKey.startsWith("SB-") ? "text-yellow-400" : "text-green-400"}`}>
+                            Key terdeteksi: {integrations.midtransServerKey.startsWith("SB-") ? "Sandbox" : "Production"}
+                          </p>
+                        )}
                       </div>
+                      <div>
+                        <label className="block text-sm text-text-muted mb-1.5">Client Key</label>
+                        <input type="text" value={integrations.midtransClientKey} onChange={(e) => setIntegrations({ ...integrations, midtransClientKey: e.target.value })}
+                          placeholder={integrations.midtransIsProduction ? "Mid-client-xxx" : "SB-Mid-client-xxx"} className="w-full bg-surface border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
+                      </div>
+                    </div>
+
+                    {/* Payment Channels */}
+                    <div className="bg-background rounded-lg p-4 border border-white/5 space-y-3">
+                      <p className="text-text-muted text-xs font-semibold uppercase tracking-wider">Payment Channels</p>
+                      {[
+                        { label: "Bank Transfer", channels: [
+                          { id: "bca", name: "BCA" }, { id: "bni", name: "BNI" }, { id: "mandiri", name: "MANDIRI" }, { id: "permata", name: "PERMATA" }
+                        ]},
+                        { label: "E-Wallet", channels: [
+                          { id: "gopay", name: "GoPay" }, { id: "shopeepay", name: "ShopeePay" }, { id: "dana", name: "DANA" }, { id: "ovo", name: "OVO" }
+                        ]},
+                        { label: "Lainnya", channels: [
+                          { id: "credit_card", name: "Credit Card" }, { id: "qris", name: "QRIS" }, { id: "alfamart_indomaret", name: "Alfamart / Indomaret" }
+                        ]},
+                      ].map((group) => (
+                        <div key={group.label}>
+                          <p className="text-text-muted text-xs mb-2">{group.label}</p>
+                          <div className="flex flex-wrap gap-x-6 gap-y-2">
+                            {group.channels.map((ch) => (
+                              <label key={ch.id} className="flex items-center gap-2 cursor-pointer select-none">
+                                <input
+                                  type="checkbox"
+                                  checked={integrations.midtransPaymentChannels?.[ch.id] ?? false}
+                                  onChange={(e) => setIntegrations({
+                                    ...integrations,
+                                    midtransPaymentChannels: { ...integrations.midtransPaymentChannels, [ch.id]: e.target.checked }
+                                  })}
+                                  className="w-4 h-4 rounded border-white/20 bg-surface text-accent focus:ring-accent cursor-pointer"
+                                />
+                                <span className="text-text text-sm">{ch.name}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
                     </div>
 
                     {/* Notification URL (Webhook) */}
                     <div className="bg-background rounded-lg p-4 border border-white/5 space-y-2">
-                      <p className="text-text-muted text-xs font-semibold uppercase tracking-wider">Notification URL (Callback)</p>
-                      <p className="text-text-muted text-xs">URL ini otomatis digunakan saat membuat transaksi. Tidak perlu diset manual di dashboard iPaymu.</p>
+                      <p className="text-text-muted text-xs font-semibold uppercase tracking-wider">Notification URL (Webhook)</p>
+                      <p className="text-text-muted text-xs">Daftarkan URL ini di Midtrans Dashboard → Settings → Configuration → Notification URL</p>
                       <div className="flex gap-2">
                         <input type="text" readOnly
                           value={`${typeof window !== "undefined" ? window.location.origin : ""}/api/payment/notification`}
@@ -1869,28 +1902,31 @@ export default function AdminDashboard() {
                           <Copy className="w-4 h-4" /> Salin
                         </button>
                       </div>
+                      <p className="text-yellow-400/80 text-xs mt-1">
+                        <AlertTriangle className="w-3.5 h-3.5 inline shrink-0" /> <strong>Penting:</strong> Setelah deploy ke production, copy URL di atas dan paste ke Midtrans Dashboard agar status pembayaran otomatis terupdate.
+                        Juga aktifkan notifikasi untuk event: payment, settlement, cancel, deny, expire.
+                      </p>
                     </div>
 
                     {/* Test Connection & Info */}
                     <div className="flex items-center gap-3">
                       <button
                         onClick={async () => {
-                          if (!integrations.ipaymuApiKey || !integrations.ipaymuVa) { alert("API Key dan VA belum diisi!"); return; }
+                          if (!integrations.midtransServerKey) { alert("Server Key belum diisi!"); return; }
                           try {
                             const res = await fetch("/api/payment/test-connection", {
                               method: "POST",
                               headers: { "Content-Type": "application/json" },
                               body: JSON.stringify({
-                                apiKey: integrations.ipaymuApiKey,
-                                va: integrations.ipaymuVa,
-                                isProduction: integrations.ipaymuIsProduction,
+                                serverKey: integrations.midtransServerKey,
+                                isProduction: integrations.midtransIsProduction,
                               }),
                             });
                             const data = await res.json();
                             if (data.success) {
-                              alert("✅ Koneksi berhasil! iPaymu aktif dan siap menerima pembayaran.");
+                              alert("✅ Koneksi berhasil! Midtrans aktif dan siap menerima pembayaran.");
                             } else {
-                              alert(`❌ Gagal: ${data.error}\n\nPastikan API Key dan VA benar serta environment sesuai.`);
+                              alert(`❌ Gagal: ${data.error}\n\nPastikan Server Key benar dan environment sesuai.`);
                             }
                           } catch (e) {
                             alert(`❌ Error koneksi: ${e instanceof Error ? e.message : "Network error"}`);
@@ -1900,7 +1936,7 @@ export default function AdminDashboard() {
                         <Plug className="w-4 h-4" /> Test Connection
                       </button>
                       <p className="text-text-muted text-xs">
-                        <BookOpen className="w-3 h-3 inline mr-1" /> Dapatkan credentials di <a href="https://my.ipaymu.com" target="_blank" rel="noopener" className="text-accent hover:underline">my.ipaymu.com</a> → Integrasi
+                        <BookOpen className="w-3 h-3 inline mr-1" /> Dapatkan credentials di <a href="https://dashboard.midtrans.com" target="_blank" rel="noopener" className="text-accent hover:underline">dashboard.midtrans.com</a> → Settings → Access Keys
                       </p>
                     </div>
                   </div>
@@ -1991,7 +2027,7 @@ export default function AdminDashboard() {
                     <h3 className="text-sm font-semibold text-text mb-1">Site Configuration</h3>
                     <p className="text-text-muted text-xs mb-4">Dikelola via environment variables.</p>
                     <div className="space-y-2">
-                      {["NEXT_PUBLIC_WHATSAPP_NUMBER", "ADMIN_EMAIL", "ENCRYPTION_KEY", "IPAYMU_API_KEY", "IPAYMU_VA"].map((key) => (
+                      {["NEXT_PUBLIC_WHATSAPP_NUMBER", "ADMIN_EMAIL", "ENCRYPTION_KEY", "MIDTRANS_SERVER_KEY"].map((key) => (
                         <div key={key} className="flex justify-between items-center py-2 border-b border-white/5 last:border-0">
                           <span className="text-xs text-text-muted font-mono">{key}</span>
                           <CheckCircle className="w-3.5 h-3.5 text-green-400" />

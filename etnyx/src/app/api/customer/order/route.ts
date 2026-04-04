@@ -2,14 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import { sanitizeInput, isValidRank, isValidPhone } from "@/lib/validation";
 import { encryptField, decryptField } from "@/lib/encryption";
-import crypto from "crypto";
 
 // Re-export for backward compatibility
 export { decryptField } from "@/lib/encryption";
 
-const IPAYMU_API_KEY = process.env.IPAYMU_API_KEY || "";
-const IPAYMU_VA = process.env.IPAYMU_VA || "";
-const IPAYMU_IS_PRODUCTION = process.env.IPAYMU_IS_PRODUCTION === "true";
+const MIDTRANS_SERVER_KEY = process.env.MIDTRANS_SERVER_KEY || "";
+const MIDTRANS_IS_PRODUCTION = process.env.MIDTRANS_IS_PRODUCTION === "true";
+const MIDTRANS_API_URL = MIDTRANS_IS_PRODUCTION
+  ? "https://app.midtrans.com/snap/v1/transactions"
+  : "https://app.sandbox.midtrans.com/snap/v1/transactions";
 
 // Simple in-memory rate limiter
 const orderRateLimit = new Map<string, number[]>();
@@ -250,117 +251,84 @@ export async function POST(request: NextRequest) {
       if (refErr) console.error("Referral insert error:", refErr);
     }
 
-    // Create iPaymu payment
+    // Create Midtrans payment
     let paymentUrl: string | undefined;
-    let paymentDebug: string | undefined;
 
-    // Get iPaymu keys: prefer database (admin dashboard) over env
-    let ipaymuApiKey = IPAYMU_API_KEY;
-    let ipaymuVa = IPAYMU_VA;
-    let ipaymuIsProduction = IPAYMU_IS_PRODUCTION;
+    // Get Midtrans key: prefer database (admin dashboard) over env
+    let midtransKey = MIDTRANS_SERVER_KEY;
     try {
       const { data: intSettings } = await supabase
         .from("settings")
         .select("value")
         .eq("key", "integrations")
         .single();
-      if (intSettings?.value?.ipaymuApiKey) {
-        ipaymuApiKey = intSettings.value.ipaymuApiKey;
-      }
-      if (intSettings?.value?.ipaymuVa) {
-        ipaymuVa = intSettings.value.ipaymuVa;
-      }
-      if (intSettings?.value?.ipaymuIsProduction !== undefined) {
-        ipaymuIsProduction = intSettings.value.ipaymuIsProduction;
+      if (intSettings?.value?.midtransServerKey) {
+        midtransKey = intSettings.value.midtransServerKey;
       }
     } catch { /* fallback to env */ }
 
-    const ipaymuBaseUrl = ipaymuIsProduction
-      ? "https://my.ipaymu.com"
-      : "https://sandbox.ipaymu.com";
+    // Auto-detect environment from key prefix
+    const midtransIsProduction = midtransKey ? !midtransKey.startsWith("SB-") : MIDTRANS_IS_PRODUCTION;
+    const midtransApiUrl = midtransIsProduction
+      ? "https://app.midtrans.com/snap/v1/transactions"
+      : "https://app.sandbox.midtrans.com/snap/v1/transactions";
 
-    if (ipaymuApiKey && ipaymuVa) {
-      // Determine site URL from request origin or env
-      const origin = request.headers.get("origin") || "";
-      const siteUrl = (origin || process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.com").replace(/\/$/, "");
-      const ipaymuBody: Record<string, unknown> = {};
-      ipaymuBody["product"] = ["Joki ML Service"];
-      ipaymuBody["qty"] = ["1"];
-      ipaymuBody["price"] = [String(verifiedTotalPrice)];
-      ipaymuBody["amount"] = String(verifiedTotalPrice);
-      ipaymuBody["returnUrl"] = siteUrl + "/payment/success";
-      ipaymuBody["cancelUrl"] = siteUrl + "/payment/success";
-      ipaymuBody["notifyUrl"] = siteUrl + "/api/payment/notification";
-      ipaymuBody["referenceId"] = orderId;
-      ipaymuBody["buyerName"] = sanitizedNickname;
-      ipaymuBody["buyerPhone"] = "62" + cleanWhatsapp;
-      ipaymuBody["buyerEmail"] = sanitizedEmail || "customer@etnyx.com";
+    if (midtransKey) {
+      try {
+        const midtransOrderId = `ETN-${orderId}-${Date.now()}`;
 
-      // Retry up to 3 times (Vercel uses rotating IPs, some may not be whitelisted)
-      const MAX_RETRIES = 3;
-      for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-        try {
-          const bodyStr = JSON.stringify(ipaymuBody);
-          const bodyHash = crypto.createHash("sha256").update(bodyStr).digest("hex");
-          const stringToSign = `POST:${ipaymuVa}:${bodyHash}:${ipaymuApiKey}`;
-          const signature = crypto.createHmac("sha256", ipaymuApiKey).update(stringToSign).digest("hex");
-          const timestamp = new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
-
-          const ipaymuRes = await fetch(`${ipaymuBaseUrl}/api/v2/payment`, {
-            method: "POST",
-            headers: {
-              "Accept": "application/json",
-              "Content-Type": "application/json",
-              "va": ipaymuVa,
-              "signature": signature,
-              "timestamp": timestamp,
+        const payload = {
+          transaction_details: {
+            order_id: midtransOrderId,
+            gross_amount: verifiedTotalPrice,
+          },
+          customer_details: {
+            first_name: sanitizedNickname,
+            email: sanitizedEmail || "customer@etnyx.com",
+            phone: `+62${cleanWhatsapp}`,
+          },
+          item_details: [
+            {
+              id: orderId,
+              price: verifiedTotalPrice,
+              quantity: 1,
+              name: `Joki ML: ${currentRank} → ${targetRank}`,
             },
-            body: bodyStr,
-          });
+          ],
+          callbacks: {
+            finish: `${process.env.NEXT_PUBLIC_SITE_URL || ""}/payment/success?order_id=${orderId}`,
+          },
+        };
 
-          const ipaymuData = await ipaymuRes.json();
-          console.log(`iPaymu attempt ${attempt}:`, JSON.stringify(ipaymuData));
+        const auth = Buffer.from(`${midtransKey}:`).toString("base64");
+        const midtransRes = await fetch(midtransApiUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Basic ${auth}`,
+          },
+          body: JSON.stringify(payload),
+        });
 
-          if (ipaymuData.Status === 200 && ipaymuData.Data?.Url) {
-            paymentUrl = ipaymuData.Data.Url;
+        const midtransData = await midtransRes.json();
 
-            // Save payment info to order
-            await supabase
-              .from("orders")
-              .update({
-                payment_url: ipaymuData.Data.Url,
-                payment_token: String(ipaymuData.Data.SessionId || ""),
-                midtrans_order_id: orderId,
-              })
-              .eq("id", order.id);
-            break; // Success — exit retry loop
-          }
+        if (midtransRes.ok && midtransData.redirect_url) {
+          paymentUrl = midtransData.redirect_url;
 
-          // If not "Invalid IP", no point retrying
-          const msg = ipaymuData.Message || "";
-          if (!String(msg).includes("Invalid IP")) {
-            paymentDebug = `iPaymu: ${msg || JSON.stringify(ipaymuData)}`;
-            break;
-          }
-
-          // Last attempt failed
-          if (attempt === MAX_RETRIES) {
-            let serverIp = "unknown";
-            try {
-              const ipRes = await fetch("https://api.ipify.org?format=json");
-              serverIp = (await ipRes.json()).ip;
-            } catch { /* ignore */ }
-            paymentDebug = `iPaymu: Invalid IP setelah ${MAX_RETRIES}x retry | serverIP: ${serverIp} | Hubungi support iPaymu untuk disable IP whitelist (Vercel serverless)`;
-          }
-        } catch (e) {
-          if (attempt === MAX_RETRIES) {
-            paymentDebug = `iPaymu exception: ${e instanceof Error ? e.message : String(e)}`;
-          }
-          console.error(`iPaymu attempt ${attempt} error:`, e);
+          // Save payment info to order
+          await supabase
+            .from("orders")
+            .update({
+              payment_token: midtransData.token,
+              payment_url: midtransData.redirect_url,
+              midtrans_order_id: midtransOrderId,
+            })
+            .eq("id", order.id);
         }
+      } catch (e) {
+        console.error("Midtrans payment creation error:", e);
+        // Order still created, payment can be retried
       }
-    } else {
-      paymentDebug = `iPaymu not configured: apiKey=${!!ipaymuApiKey}, va=${!!ipaymuVa}`;
     }
 
     // Log order creation
@@ -379,7 +347,6 @@ export async function POST(request: NextRequest) {
         totalPrice: verifiedTotalPrice,
         discount: verifiedDiscount,
         paymentUrl,
-        paymentDebug: !paymentUrl ? paymentDebug : undefined,
       },
       { status: 201 }
     );

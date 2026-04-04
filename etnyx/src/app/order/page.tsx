@@ -850,18 +850,12 @@ function OrderPageContent() {
         return;
       }
 
-      // Debug: show iPaymu error if payment URL not generated
-      if (!data.paymentUrl && data.paymentDebug) {
-        console.error("Payment debug:", data.paymentDebug);
-        alert(`Order berhasil, tapi payment gagal:\n${data.paymentDebug}`);
-      }
-
       setOrderResult({
         orderId: data.orderId,
         paymentUrl: data.paymentUrl,
       });
 
-      // Auto-redirect to iPaymu payment page
+      // Auto-redirect to Midtrans payment page
       if (data.paymentUrl) {
         window.location.href = data.paymentUrl;
         return;
@@ -900,7 +894,7 @@ function OrderPageContent() {
       );
     }
 
-    // No payment URL (iPaymu not configured) — show order success
+    // No payment URL (Midtrans not configured) — show order success
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="bg-surface rounded-3xl p-8 max-w-md w-full text-center border border-white/5">
@@ -1978,7 +1972,7 @@ function OrderPageContent() {
                 <div className="flex items-start gap-2 bg-accent/5 border border-accent/20 rounded-xl px-4 py-3">
                   <CreditCard className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
                   <p className="text-xs text-text-muted">
-                    Pembayaran dilakukan setelah konfirmasi order. Kami mendukung QRIS, Bank Transfer (BCA, BNI, Mandiri), GoPay, ShopeePay, dan lainnya melalui iPaymu.
+                    Pembayaran dilakukan setelah konfirmasi order. Kami mendukung QRIS, Bank Transfer (BCA, BNI, Mandiri), GoPay, ShopeePay, dan lainnya melalui Midtrans.
                   </p>
                 </div>
               </div>
@@ -2296,7 +2290,7 @@ function OrderPageContent() {
 
 export default function OrderPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-accent" /></div>}>
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-b from-[#0D0D1A] via-[#1A1A2E] to-[#0D0D1A] flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-purple-500" /></div>}>
       <TermsPopup />
       <OrderPageContent />
     </Suspense>
