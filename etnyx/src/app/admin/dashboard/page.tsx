@@ -215,6 +215,7 @@ export default function AdminDashboard() {
   const [editItem, setEditItem] = useState<Testimonial | Portfolio | PromoCode | Booster | null>(null);
   const [credentials, setCredentials] = useState<{ order_id: string; account_login: string | null; account_password: string | null } | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [followUpLoading, setFollowUpLoading] = useState<string | null>(null);
 
   // Pricing state
   const [pricingCatalog, setPricingCatalog] = useState<PricingCategory[]>([]);
@@ -424,6 +425,35 @@ export default function AdminDashboard() {
       if (!res.ok) throw new Error("Failed");
       setCredentials(await res.json());
     } catch { alert("Gagal memuat credentials."); }
+  };
+
+  const sendFollowUp = async (orderId: string, action: string) => {
+    setFollowUpLoading(`${orderId}-${action}`);
+    try {
+      const res = await fetch("/api/admin/orders/follow-up", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, action }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        alert("✅ " + data.message);
+      } else {
+        alert("⚠️ " + (data.message || data.error || "Gagal mengirim"));
+      }
+    } catch { alert("Network error"); }
+    setFollowUpLoading(null);
+  };
+
+  const openWhatsApp = (phone: string, message: string) => {
+    const normalized = phone.replace(/\D/g, "").replace(/^0/, "62");
+    window.open(`https://wa.me/${normalized}?text=${encodeURIComponent(message)}`, "_blank");
+  };
+
+  const copyOrderInfo = (o: Order) => {
+    const text = `Order: ${o.order_id}\nCustomer: ${o.username}\nGame ID: ${o.game_id}\nRank: ${o.current_rank} → ${o.target_rank}\nStatus: ${o.status}\nProgress: ${o.progress}%\nWA: ${o.whatsapp || "-"}\nHarga: ${formatRupiah(o.total_price)}`;
+    navigator.clipboard.writeText(text);
+    alert("📋 Info order disalin!");
   };
 
   // CRUD handlers
@@ -969,16 +999,112 @@ export default function AdminDashboard() {
                             </div>
                           </td>
                           <td className="px-4 py-3">
-                            <div className="flex flex-col gap-1">
-                              <select value={o.status} onChange={(e) => updateOrderStatus(o.id, e.target.value)}
-                                className="bg-background border border-white/10 rounded-md px-2 py-1 text-[10px] text-text focus:outline-none focus:border-accent">
-                                <option value="pending">Pending</option>
-                                <option value="confirmed">Confirmed</option>
-                                <option value="in_progress">In Progress</option>
-                                <option value="completed">Completed</option>
-                                <option value="cancelled">Cancelled</option>
-                              </select>
-                              <button onClick={() => viewCredentials(o.id)} className="text-[10px] text-accent hover:underline text-left">🔑 Credentials</button>
+                            <div className="flex flex-col gap-1.5 min-w-[160px]">
+                              {/* === PENDING: Konfirmasi + Follow Up Bayar === */}
+                              {o.status === "pending" && (<>
+                                <button onClick={() => updateOrderStatus(o.id, "confirmed")}
+                                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors w-full">
+                                  <CheckCircle className="w-3 h-3" /> Konfirmasi Bayar
+                                </button>
+                                {o.whatsapp && (
+                                  <button onClick={() => sendFollowUp(o.id, "follow_up_payment")}
+                                    disabled={followUpLoading === `${o.id}-follow_up_payment`}
+                                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors w-full disabled:opacity-50">
+                                    {followUpLoading === `${o.id}-follow_up_payment` ? <Loader2 className="w-3 h-3 animate-spin" /> : <MessageCircle className="w-3 h-3" />} Follow Up Bayar
+                                  </button>
+                                )}
+                                <button onClick={() => updateOrderStatus(o.id, "cancelled")}
+                                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors w-full">
+                                  <XCircle className="w-3 h-3" /> Cancel
+                                </button>
+                              </>)}
+
+                              {/* === CONFIRMED: Mulai Kerjakan + Follow Up Creds === */}
+                              {o.status === "confirmed" && (<>
+                                <button onClick={() => updateOrderStatus(o.id, "in_progress")}
+                                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-accent/10 text-accent hover:bg-accent/20 transition-colors w-full">
+                                  <TrendingUp className="w-3 h-3" /> Mulai Kerjakan
+                                </button>
+                                <button onClick={() => viewCredentials(o.id)}
+                                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 transition-colors w-full">
+                                  🔑 Credentials
+                                </button>
+                                {o.whatsapp && (
+                                  <button onClick={() => sendFollowUp(o.id, "follow_up_credentials")}
+                                    disabled={followUpLoading === `${o.id}-follow_up_credentials`}
+                                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors w-full disabled:opacity-50">
+                                    {followUpLoading === `${o.id}-follow_up_credentials` ? <Loader2 className="w-3 h-3 animate-spin" /> : <MessageCircle className="w-3 h-3" />} Minta Credentials
+                                  </button>
+                                )}
+                              </>)}
+
+                              {/* === IN PROGRESS: Selesaikan + Update Progress + Follow Up === */}
+                              {o.status === "in_progress" && (<>
+                                <button onClick={() => updateOrderStatus(o.id, "completed")}
+                                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors w-full">
+                                  <CheckCircle className="w-3 h-3" /> Selesaikan
+                                </button>
+                                <button onClick={() => viewCredentials(o.id)}
+                                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 transition-colors w-full">
+                                  🔑 Credentials
+                                </button>
+                                {o.whatsapp && (
+                                  <button onClick={() => sendFollowUp(o.id, "follow_up_progress")}
+                                    disabled={followUpLoading === `${o.id}-follow_up_progress`}
+                                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors w-full disabled:opacity-50">
+                                    {followUpLoading === `${o.id}-follow_up_progress` ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />} Update Progress WA
+                                  </button>
+                                )}
+                              </>)}
+
+                              {/* === COMPLETED: Review + Reopen + Notif Ulang === */}
+                              {o.status === "completed" && (<>
+                                {o.whatsapp && (<>
+                                  <button onClick={() => sendFollowUp(o.id, "request_review")}
+                                    disabled={followUpLoading === `${o.id}-request_review`}
+                                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 transition-colors w-full disabled:opacity-50">
+                                    {followUpLoading === `${o.id}-request_review` ? <Loader2 className="w-3 h-3 animate-spin" /> : <Star className="w-3 h-3" />} Minta Review
+                                  </button>
+                                  <button onClick={() => sendFollowUp(o.id, "notify_completed")}
+                                    disabled={followUpLoading === `${o.id}-notify_completed`}
+                                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors w-full disabled:opacity-50">
+                                    {followUpLoading === `${o.id}-notify_completed` ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />} Kirim Notif Selesai
+                                  </button>
+                                </>)}
+                                <button onClick={() => updateOrderStatus(o.id, "in_progress")}
+                                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 transition-colors w-full">
+                                  <RefreshCw className="w-3 h-3" /> Reopen Order
+                                </button>
+                              </>)}
+
+                              {/* === CANCELLED: Reaktivasi === */}
+                              {o.status === "cancelled" && (<>
+                                <button onClick={() => updateOrderStatus(o.id, "pending")}
+                                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-accent/10 text-accent hover:bg-accent/20 transition-colors w-full">
+                                  <RefreshCw className="w-3 h-3" /> Reaktivasi
+                                </button>
+                                {o.whatsapp && (
+                                  <button onClick={() => sendFollowUp(o.id, "reactivation")}
+                                    disabled={followUpLoading === `${o.id}-reactivation`}
+                                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors w-full disabled:opacity-50">
+                                    {followUpLoading === `${o.id}-reactivation` ? <Loader2 className="w-3 h-3 animate-spin" /> : <MessageCircle className="w-3 h-3" />} Follow Up WA
+                                  </button>
+                                )}
+                              </>)}
+
+                              {/* === Universal actions === */}
+                              <div className="flex gap-1 pt-1 border-t border-white/5">
+                                {o.whatsapp && (
+                                  <button onClick={() => openWhatsApp(o.whatsapp!, `Halo kak, ini dari ETNYX terkait order ${o.order_id}. `)}
+                                    className="flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded text-[9px] bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors" title="Chat WA Manual">
+                                    <MessageCircle className="w-2.5 h-2.5" /> WA
+                                  </button>
+                                )}
+                                <button onClick={() => copyOrderInfo(o)}
+                                  className="flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded text-[9px] bg-surface text-text-muted hover:text-text transition-colors" title="Copy Info">
+                                  <Copy className="w-2.5 h-2.5" /> Copy
+                                </button>
+                              </div>
                             </div>
                           </td>
                         </tr>
