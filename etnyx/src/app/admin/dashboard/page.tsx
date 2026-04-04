@@ -1831,16 +1831,9 @@ export default function AdminDashboard() {
                       <div>
                         <label className="block text-sm text-text-muted mb-1.5">Server Key</label>
                         <input type="password" value={integrations.midtransServerKey} onChange={(e) => {
-                          const key = e.target.value;
-                          const isSandbox = key.startsWith("SB-");
-                          setIntegrations({ ...integrations, midtransServerKey: key, midtransIsProduction: !isSandbox && key.length > 0 });
+                          setIntegrations({ ...integrations, midtransServerKey: e.target.value });
                         }}
-                          placeholder={integrations.midtransIsProduction ? "Mid-server-xxx" : "SB-Mid-server-xxx"} className="w-full bg-surface border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
-                        {integrations.midtransServerKey && (
-                          <p className={`text-xs mt-1 ${integrations.midtransServerKey.startsWith("SB-") ? "text-yellow-400" : "text-green-400"}`}>
-                            Key terdeteksi: {integrations.midtransServerKey.startsWith("SB-") ? "Sandbox" : "Production"}
-                          </p>
-                        )}
+                          placeholder="Mid-server-xxx" className="w-full bg-surface border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
                       </div>
                       <div>
                         <label className="block text-sm text-text-muted mb-1.5">Client Key</label>
