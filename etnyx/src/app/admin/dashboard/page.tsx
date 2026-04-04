@@ -554,15 +554,45 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="relative w-16 h-16 mx-auto mb-4">
-            <div className="absolute inset-0 rounded-full border-2 border-accent/20"></div>
-            <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-accent animate-spin"></div>
-            <Gamepad2 className="absolute inset-0 m-auto w-6 h-6 text-accent" />
-          </div>
-          <p className="text-text-muted text-sm">Loading Command Center...</p>
+      <div className="fixed inset-0 z-[100] bg-background flex flex-col items-center justify-center">
+        {/* Logo */}
+        <div className="mb-8">
+          <Image
+            src="/logo/circle-landscape.webp"
+            alt="ETNYX"
+            width={200}
+            height={50}
+            className="h-12 w-auto animate-pulse"
+            priority
+          />
         </div>
+
+        {/* Loading bar */}
+        <div className="relative w-48 h-1 bg-surface rounded-full overflow-hidden mb-4">
+          <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary to-accent rounded-full animate-loading-bar" />
+        </div>
+
+        {/* Loading text */}
+        <p className="text-text-muted text-sm animate-pulse">
+          Loading Command Center...
+        </p>
+
+        {/* Decorative elements */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-accent/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "0.5s" }} />
+        </div>
+
+        <style jsx>{`
+          @keyframes loading-bar {
+            0% { width: 0%; }
+            50% { width: 70%; }
+            100% { width: 100%; }
+          }
+          .animate-loading-bar {
+            animation: loading-bar 1.5s ease-in-out infinite;
+          }
+        `}</style>
       </div>
     );
   }
