@@ -15,10 +15,10 @@ export const en: Translations = {
   
   // Hero Section
   hero: {
-    badge: "#1 ML Boosting Platform in Indonesia",
+    badge: "Trusted ML Boosting Service",
     title: "Push Rank ML",
     titleHighlight: "Fast & Safe",
-    subtitle: "Professional boosters ready to help push your rank to Mythic Glory. Fast process, safe account, maintained winrate.",
+    subtitle: "Experienced boosters ready to push your rank. Just order, sit back, track progress.",
     cta: "Calculate Price Now",
     ctaSecondary: "Track Order",
     stats: {

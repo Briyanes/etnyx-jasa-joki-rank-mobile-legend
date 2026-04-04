@@ -13,16 +13,16 @@ type TrustItem = {
 const iconClass = "w-8 h-8";
 
 const trustItemsId: TrustItem[] = [
-  { icon: <ShieldCheck className={iconClass} />, title: "100% Aman", description: "Akun dijamin tidak banned" },
-  { icon: <Zap className={iconClass} />, title: "Proses Cepat", description: "Selesai tepat waktu" },
-  { icon: <Crown className={iconClass} />, title: "Booster Pro", description: "Tim berpengalaman" },
+  { icon: <ShieldCheck className={iconClass} />, title: "Akun Aman", description: "Dijaga selama proses joki" },
+  { icon: <Zap className={iconClass} />, title: "Proses Cepat", description: "Selesai sesuai estimasi" },
+  { icon: <Crown className={iconClass} />, title: "Booster Handal", description: "Tim berpengalaman" },
   { icon: <MessageCircle className={iconClass} />, title: "Support 24/7", description: "CS siap membantu" },
 ];
 
 const trustItemsEn: TrustItem[] = [
-  { icon: <ShieldCheck className={iconClass} />, title: "100% Safe", description: "Account guaranteed no ban" },
-  { icon: <Zap className={iconClass} />, title: "Fast Process", description: "Completed on time" },
-  { icon: <Crown className={iconClass} />, title: "Pro Boosters", description: "Experienced team" },
+  { icon: <ShieldCheck className={iconClass} />, title: "Account Safe", description: "Protected during boosting" },
+  { icon: <Zap className={iconClass} />, title: "Fast Process", description: "Completed on schedule" },
+  { icon: <Crown className={iconClass} />, title: "Skilled Boosters", description: "Experienced team" },
   { icon: <MessageCircle className={iconClass} />, title: "24/7 Support", description: "CS ready to help" },
 ];
 

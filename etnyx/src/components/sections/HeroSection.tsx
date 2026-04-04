@@ -46,10 +46,10 @@ export default function HeroSection() {
   
   const content = {
     id: {
-      badge: "100+ Order Minggu Ini",
+      badge: "Booster Online 24/7",
       headline1: cms?.headline?.split(",")[0]?.trim() || "Push Rank,",
       headline2: cms?.headline?.split(",").slice(1).join(",")?.trim() || "Tanpa Main.",
-      subtitle: cms?.subheadline || "Platform joki ML tercepat. Pilih rank, order, selesai. Semua dalam hitungan detik.",
+      subtitle: cms?.subheadline || "Layanan joki ML terpercaya. Pilih rank, order, duduk santai — booster kami yang kerja.",
       cta1: cms?.ctaPrimary || "Order Sekarang",
       cta2: cms?.ctaSecondary || "Lacak Order",
       rankStart: "Rank Awal",
@@ -58,10 +58,10 @@ export default function HeroSection() {
       status: "Sedang push di Legend II... Win streak 5",
     },
     en: {
-      badge: "100+ Orders This Week",
+      badge: "Boosters Online 24/7",
       headline1: "Push Rank,",
       headline2: "Without Playing.",
-      subtitle: "Fastest ML boosting platform. Pick rank, order, done. All in seconds.",
+      subtitle: "Trusted ML boosting service. Pick your rank, order, sit back — our boosters do the work.",
       cta1: "Order Now",
       cta2: "Track Order",
       rankStart: "Starting Rank",

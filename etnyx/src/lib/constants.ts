@@ -18,7 +18,7 @@ export const faqItems: FAQItem[] = [
   {
     question: "Apakah aman dan tidak akan di-banned?",
     answer:
-      "Ya, 100% aman. Tim kami menggunakan metode push rank yang natural dan sudah berpengalaman. Tidak pernah ada kasus banned selama 3+ tahun beroperasi. Kami juga memberikan garansi keamanan akun.",
+      "Kami pakai metode push rank yang natural, bukan cheat. Sejauh ini belum ada customer yang kena banned. Tapi untuk jaga-jaga, kami sarankan ganti password setelah selesai.",
   },
   {
     question: "Berapa lama proses joki?",

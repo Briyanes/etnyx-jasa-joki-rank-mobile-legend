@@ -36,9 +36,9 @@ export default function LiveCounter() {
     setMounted(true);
     
     const targetCounts = {
-      ordersThisMonth: 1234,
-      activeNow: 47,
-      successRate: 99,
+      ordersThisMonth: 38,
+      activeNow: 3,
+      successRate: 96,
     };
 
     const duration = 2000;

@@ -43,13 +43,13 @@ export default function Footer() {
 
   const t = {
     id: {
-      tagline: "Platform jasa joki Mobile Legends terpercaya. Push rank impianmu dengan cepat, aman, dan tanpa ribet.",
+      tagline: "Jasa joki Mobile Legends terpercaya. Tinggal order, booster kami yang push rank kamu.",
       nav: "Navigasi",
       legal: "Legal",
       social: "Ikuti Kami",
     },
     en: {
-      tagline: "Trusted Mobile Legends boosting platform. Push your dream rank fast, safe, and hassle-free.",
+      tagline: "Trusted Mobile Legends boosting service. Just order, our boosters push your rank.",
       nav: "Navigation",
       legal: "Legal",
       social: "Follow Us",

@@ -235,7 +235,7 @@ export default function Testimonials() {
         {/* Stats */}
         <div className="mt-12 grid grid-cols-3 gap-4 max-w-2xl mx-auto">
           <div className="text-center p-4 bg-surface rounded-xl">
-            <p className="text-2xl md:text-3xl font-bold text-accent">500+</p>
+            <p className="text-2xl md:text-3xl font-bold text-accent">-</p>
             <p className="text-xs text-muted">{txt.ordersCompleted}</p>
           </div>
           <div className="text-center p-4 bg-surface rounded-xl">
@@ -243,7 +243,7 @@ export default function Testimonials() {
             <p className="text-xs text-muted">{txt.rating}</p>
           </div>
           <div className="text-center p-4 bg-surface rounded-xl">
-            <p className="text-2xl md:text-3xl font-bold text-accent">100%</p>
+            <p className="text-2xl md:text-3xl font-bold text-accent">-</p>
             <p className="text-xs text-muted">{txt.safe}</p>
           </div>
         </div>

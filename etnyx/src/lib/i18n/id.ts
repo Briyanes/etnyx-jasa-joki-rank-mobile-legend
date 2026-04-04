@@ -13,10 +13,10 @@ export const id = {
   
   // Hero Section
   hero: {
-    badge: "Platform Joki ML #1 Indonesia",
+    badge: "Jasa Joki ML Terpercaya",
     title: "Push Rank ML",
     titleHighlight: "Cepat & Aman",
-    subtitle: "Booster profesional siap membantu push rank kamu ke Mythic Glory. Proses cepat, akun aman, winrate terjaga.",
+    subtitle: "Booster berpengalaman siap push rank kamu. Tinggal order, duduk santai, pantau progress.",
     cta: "Hitung Harga Sekarang",
     ctaSecondary: "Lacak Order",
     stats: {

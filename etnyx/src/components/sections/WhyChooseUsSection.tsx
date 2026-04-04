@@ -19,16 +19,16 @@ export default function WhyChooseUsSection() {
 
   const features = [
     { icon: "zap", titleId: "Proses Kilat", titleEn: "Lightning Fast", descId: "Order langsung diproses dalam 5 menit. Tim booster stand-by 24/7 siap push rank Anda.", descEn: "Orders processed instantly within 5 minutes. Booster team on stand-by 24/7." },
-    { icon: "shield", titleId: "100% Aman", titleEn: "100% Safe", descId: "Metode boosting aman tanpa cheat. Akun Anda dijamin tidak akan terkena banned.", descEn: "Safe boosting methods without cheats. Your account is guaranteed ban-free." },
-    { icon: "coins", titleId: "Harga Terbaik", titleEn: "Best Price", descId: "Harga kompetitif dengan kualitas premium. Diskon hingga 20% untuk member setia.", descEn: "Competitive prices with premium quality. Up to 20% discount for loyal members." },
+    { icon: "shield", titleId: "Aman & Terpercaya", titleEn: "Safe & Trusted", descId: "Metode boosting aman tanpa cheat. Kami jaga akun kamu selama proses pengerjaan.", descEn: "Safe boosting methods without cheats. We keep your account secure during the process." },
+    { icon: "coins", titleId: "Harga Bersaing", titleEn: "Fair Price", descId: "Harga wajar untuk kualitas kerja yang bagus. Ada promo untuk pelanggan setia.", descEn: "Fair prices for quality work. Promos available for loyal customers." },
     { icon: "chart", titleId: "Live Tracking", titleEn: "Live Tracking", descId: "Pantau progress push rank real-time. Update status setiap match selesai.", descEn: "Monitor rank push progress real-time. Status updates after every match." },
-    { icon: "gamepad", titleId: "Booster Pro", titleEn: "Pro Boosters", descId: "Tim booster Mythical Glory dengan winrate 80%+. Pengalaman 3+ tahun di ML.", descEn: "Mythical Glory boosters with 80%+ winrate. 3+ years ML experience." },
+    { icon: "gamepad", titleId: "Booster Berpengalaman", titleEn: "Experienced Boosters", descId: "Tim booster rank Mythical Glory. Sudah terbiasa handle berbagai tier.", descEn: "Mythical Glory boosters. Experienced handling various tiers." },
     { icon: "message", titleId: "Support 24/7", titleEn: "24/7 Support", descId: "Tim support siap membantu kapan saja via WhatsApp. Respons < 5 menit.", descEn: "Support team ready to help anytime via WhatsApp. Response < 5 minutes." },
   ];
 
   const t = {
-    id: { badge: "MENGAPA ETNYX?", title: "Keunggulan", titleHighlight: "Layanan", titleEnd: "Kami", subtitle: "Berbeda dari jasa joki lain, ETNYX memberikan pengalaman premium dengan standar profesional" },
-    en: { badge: "WHY ETNYX?", title: "Our", titleHighlight: "Service", titleEnd: "Advantages", subtitle: "Different from other boosting services, ETNYX provides premium experience with professional standards" },
+    id: { badge: "MENGAPA ETNYX?", title: "Keunggulan", titleHighlight: "Layanan", titleEnd: "Kami", subtitle: "Yang bikin beda dari jasa joki lain" },
+    en: { badge: "WHY ETNYX?", title: "Our", titleHighlight: "Service", titleEnd: "Advantages", subtitle: "What makes us different from other boosting services" },
   };
 
   const txt = t[locale];

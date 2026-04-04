@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     template: "%s | ETNYX",
   },
   description:
-    "Platform jasa joki Mobile Legends terpercaya di Indonesia. Push rank cepat, aman, tanpa banned. Hitung harga instant, order langsung via WhatsApp. 3000+ order sukses.",
+    "Platform jasa joki Mobile Legends terpercaya di Indonesia. Push rank cepat, aman, tanpa banned. Hitung harga instant, order langsung via WhatsApp.",
   keywords: [
     "joki ml",
     "jasa joki mobile legends",
@@ -87,7 +87,7 @@ export const metadata: Metadata = {
     siteName: "ETNYX",
     title: "ETNYX - Jasa Joki Mobile Legends Terpercaya",
     description:
-      "Push rank ML cepat & aman. Hitung harga instant, order via WhatsApp. 3000+ order sukses, 99% success rate. Platform joki ML #1 Indonesia.",
+      "Push rank ML cepat & aman. Hitung harga instant, order via WhatsApp. Booster berpengalaman, akun dijaga.",
     images: [
       {
         url: `${siteUrl}/og-image.jpg`,
@@ -104,7 +104,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "ETNYX - Jasa Joki Mobile Legends Terpercaya",
     description:
-      "Push rank ML cepat & aman. Hitung harga instant, order via WhatsApp. Platform joki ML #1 Indonesia.",
+      "Push rank ML cepat & aman. Hitung harga instant, order via WhatsApp. Booster berpengalaman, akun dijaga.",
     images: [`${siteUrl}/og-image.jpg`],
     creator: "@etnyx_ml",
     site: "@etnyx_ml",

@@ -10,17 +10,17 @@ export default function CTASection() {
   const t = {
     id: {
       title: "Siap Push Rank?",
-      subtitle: "Gabung 3000+ gamer yang sudah naik rank bersama ETNYX. Proses cepat, akun aman, hasil terjamin.",
+      subtitle: "Langsung order, pilih rank tujuan, dan biarkan booster kami yang handle. Gak perlu ribet.",
       cta: "Order Sekarang",
       trust1: "Garansi Aman",
-      trust2: "Proses Instan",
+      trust2: "Proses Cepat",
     },
     en: {
       title: "Ready to Push Rank?",
-      subtitle: "Join 3000+ gamers who've leveled up with ETNYX. Fast process, safe accounts, guaranteed results.",
+      subtitle: "Just order, pick your target rank, and let our boosters handle it. No hassle.",
       cta: "Order Now",
       trust1: "Safe Guarantee",
-      trust2: "Instant Process",
+      trust2: "Fast Process",
     },
   };
 
