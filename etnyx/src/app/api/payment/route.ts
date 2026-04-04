@@ -64,9 +64,9 @@ export async function POST(request: NextRequest) {
 
     const ipaymuBody = {
       product: [itemName || "Joki ML Service"],
-      qty: [1],
-      price: [verifiedAmount],
-      amount: verifiedAmount,
+      qty: ["1"],
+      price: [String(verifiedAmount)],
+      amount: String(verifiedAmount),
       returnUrl: `${siteUrl}/payment/success?order_id=${orderId}`,
       cancelUrl: `${siteUrl}/payment/success?order_id=${orderId}&transaction_status=cancel`,
       notifyUrl: `${siteUrl}/api/payment/notification`,
@@ -78,17 +78,17 @@ export async function POST(request: NextRequest) {
 
     const bodyStr = JSON.stringify(ipaymuBody);
     const bodyHash = crypto.createHash("sha256").update(bodyStr).digest("hex");
-    const timestamp = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 14);
     const stringToSign = `POST:${ipaymu.va}:${bodyHash}:${ipaymu.apiKey}`;
     const signature = crypto.createHmac("sha256", ipaymu.apiKey).update(stringToSign).digest("hex");
 
     const response = await fetch(`${baseUrl}/api/v2/payment`, {
       method: "POST",
       headers: {
+        "Accept": "application/json",
         "Content-Type": "application/json",
-        va: ipaymu.va,
-        signature: signature,
-        timestamp: timestamp,
+        "va": ipaymu.va,
+        "signature": signature,
+        "timestamp": new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14),
       },
       body: bodyStr,
     });

@@ -282,39 +282,40 @@ export async function POST(request: NextRequest) {
       try {
         const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
         const ipaymuBody = {
-          product: [`Joki ML: ${currentRank} → ${targetRank}`],
-          qty: [1],
-          price: [verifiedTotalPrice],
-          amount: verifiedTotalPrice,
+          product: [`Joki ML: ${currentRank} to ${targetRank}`],
+          qty: ["1"],
+          price: [String(verifiedTotalPrice)],
+          amount: String(verifiedTotalPrice),
           returnUrl: `${siteUrl}/payment/success?order_id=${orderId}`,
           cancelUrl: `${siteUrl}/payment/success?order_id=${orderId}&transaction_status=cancel`,
           notifyUrl: `${siteUrl}/api/payment/notification`,
           referenceId: orderId,
           buyerName: sanitizedNickname,
-          buyerPhone: `+62${cleanWhatsapp}`,
+          buyerPhone: `62${cleanWhatsapp}`,
           buyerEmail: sanitizedEmail || "customer@etnyx.com",
         };
 
         const bodyStr = JSON.stringify(ipaymuBody);
         const bodyHash = crypto.createHash("sha256").update(bodyStr).digest("hex");
-        const timestamp = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 14);
         const stringToSign = `POST:${ipaymuVa}:${bodyHash}:${ipaymuApiKey}`;
         const signature = crypto.createHmac("sha256", ipaymuApiKey).update(stringToSign).digest("hex");
 
         const ipaymuRes = await fetch(`${ipaymuBaseUrl}/api/v2/payment`, {
           method: "POST",
           headers: {
+            "Accept": "application/json",
             "Content-Type": "application/json",
-            va: ipaymuVa,
-            signature: signature,
-            timestamp: timestamp,
+            "va": ipaymuVa,
+            "signature": signature,
+            "timestamp": new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14),
           },
           body: bodyStr,
         });
 
         const ipaymuData = await ipaymuRes.json();
+        console.log("iPaymu response:", JSON.stringify(ipaymuData));
 
-        if (ipaymuRes.ok && ipaymuData.Status === 200 && ipaymuData.Data?.Url) {
+        if (ipaymuData.Status === 200 && ipaymuData.Data?.Url) {
           paymentUrl = ipaymuData.Data.Url;
 
           // Save payment info to order
@@ -327,7 +328,7 @@ export async function POST(request: NextRequest) {
             })
             .eq("id", order.id);
         } else {
-          console.error("iPaymu error:", ipaymuData);
+          console.error("iPaymu error:", JSON.stringify(ipaymuData));
         }
       } catch (e) {
         console.error("iPaymu payment creation error:", e);

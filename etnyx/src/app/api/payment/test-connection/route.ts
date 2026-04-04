@@ -16,17 +16,17 @@ export async function POST(req: NextRequest) {
     // Use iPaymu balance check API to verify credentials
     const body = JSON.stringify({ account: va });
     const bodyHash = crypto.createHash("sha256").update(body).digest("hex");
-    const timestamp = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 14);
     const stringToSign = `POST:${va}:${bodyHash}:${apiKey}`;
     const signature = crypto.createHmac("sha256", apiKey).update(stringToSign).digest("hex");
 
     const res = await fetch(`${baseUrl}/api/v2/balance`, {
       method: "POST",
       headers: {
+        "Accept": "application/json",
         "Content-Type": "application/json",
-        va: va,
-        signature: signature,
-        timestamp: timestamp,
+        "va": va,
+        "signature": signature,
+        "timestamp": new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14),
       },
       body: body,
     });
