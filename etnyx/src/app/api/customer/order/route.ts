@@ -252,6 +252,7 @@ export async function POST(request: NextRequest) {
 
     // Create iPaymu payment
     let paymentUrl: string | undefined;
+    let paymentDebug: string | undefined;
 
     // Get iPaymu keys: prefer database (admin dashboard) over env
     let ipaymuApiKey = IPAYMU_API_KEY;
@@ -328,12 +329,16 @@ export async function POST(request: NextRequest) {
             })
             .eq("id", order.id);
         } else {
+          paymentDebug = `iPaymu Status: ${ipaymuData.Status}, Message: ${ipaymuData.Message || JSON.stringify(ipaymuData)}`;
           console.error("iPaymu error:", JSON.stringify(ipaymuData));
         }
       } catch (e) {
+        paymentDebug = `iPaymu exception: ${e instanceof Error ? e.message : String(e)}`;
         console.error("iPaymu payment creation error:", e);
         // Order still created, payment can be retried
       }
+    } else {
+      paymentDebug = `iPaymu not configured: apiKey=${!!ipaymuApiKey}, va=${!!ipaymuVa}`;
     }
 
     // Log order creation
@@ -352,6 +357,7 @@ export async function POST(request: NextRequest) {
         totalPrice: verifiedTotalPrice,
         discount: verifiedDiscount,
         paymentUrl,
+        paymentDebug: !paymentUrl ? paymentDebug : undefined,
       },
       { status: 201 }
     );

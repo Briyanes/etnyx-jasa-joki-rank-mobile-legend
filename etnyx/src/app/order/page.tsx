@@ -850,6 +850,12 @@ function OrderPageContent() {
         return;
       }
 
+      // Debug: show iPaymu error if payment URL not generated
+      if (!data.paymentUrl && data.paymentDebug) {
+        console.error("Payment debug:", data.paymentDebug);
+        alert(`Order berhasil, tapi payment gagal:\n${data.paymentDebug}`);
+      }
+
       setOrderResult({
         orderId: data.orderId,
         paymentUrl: data.paymentUrl,
