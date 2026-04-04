@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
-    const { serverKey } = await req.json();
+    const { serverKey, isProduction: isProd } = await req.json();
 
     if (!serverKey) {
       return NextResponse.json({ success: false, error: "Server Key belum diisi" }, { status: 400 });
     }
 
-    const isProduction = !serverKey.startsWith("SB-");
+    // Use explicit isProduction from dashboard; fallback to key prefix detection
+    const isProduction = isProd ?? !serverKey.startsWith("SB-");
     const auth = Buffer.from(`${serverKey}:`).toString("base64");
     const url = isProduction
       ? "https://app.midtrans.com/snap/v1/transactions"
