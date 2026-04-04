@@ -8,11 +8,11 @@ import { Check, Loader2, Package, ArrowRight, XCircle, Clock } from "lucide-reac
 function PaymentSuccessContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("order_id");
-  const transactionStatus = searchParams.get("transaction_status");
+  const transactionStatus = searchParams.get("transaction_status") || searchParams.get("status");
   const statusCode = searchParams.get("status_code");
 
   const isPending = transactionStatus === "pending";
-  const isFailed = transactionStatus === "deny" || transactionStatus === "cancel" || transactionStatus === "expire" || statusCode === "202";
+  const isFailed = transactionStatus === "deny" || transactionStatus === "cancel" || transactionStatus === "expire" || transactionStatus === "gagal" || statusCode === "202" || statusCode === "0";
 
   if (!orderId) {
     return (

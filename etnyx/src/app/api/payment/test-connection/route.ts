@@ -1,41 +1,45 @@
 import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
 
 export async function POST(req: NextRequest) {
   try {
-    const { serverKey } = await req.json();
+    const { apiKey, va, isProduction } = await req.json();
 
-    if (!serverKey) {
-      return NextResponse.json({ success: false, error: "Server Key belum diisi" }, { status: 400 });
+    if (!apiKey || !va) {
+      return NextResponse.json({ success: false, error: "API Key dan VA belum diisi" }, { status: 400 });
     }
 
-    const isProduction = !serverKey.startsWith("SB-");
-    const auth = Buffer.from(`${serverKey}:`).toString("base64");
-    const url = isProduction
-      ? "https://app.midtrans.com/snap/v1/transactions"
-      : "https://app.sandbox.midtrans.com/snap/v1/transactions";
+    const baseUrl = isProduction
+      ? "https://my.ipaymu.com"
+      : "https://sandbox.ipaymu.com";
 
-    const res = await fetch(url, {
+    // Use iPaymu balance check API to verify credentials
+    const body = JSON.stringify({ account: va });
+    const bodyHash = crypto.createHash("sha256").update(body).digest("hex");
+    const timestamp = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 14);
+    const stringToSign = `POST:${va}:${bodyHash}:${apiKey}`;
+    const signature = crypto.createHmac("sha256", apiKey).update(stringToSign).digest("hex");
+
+    const res = await fetch(`${baseUrl}/api/v2/balance`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Basic ${auth}`,
+        va: va,
+        signature: signature,
+        timestamp: timestamp,
       },
-      body: JSON.stringify({
-        transaction_details: { order_id: `TEST-${Date.now()}`, gross_amount: 10000 },
-        customer_details: { first_name: "Test", email: "test@test.com", phone: "+6281234567890" },
-        item_details: [{ id: "test", price: 10000, quantity: 1, name: "Test Connection" }],
-      }),
+      body: body,
     });
 
     const data = await res.json();
 
-    if (res.ok && data.redirect_url) {
+    if (res.ok && data.Status === 200) {
       return NextResponse.json({ success: true });
     }
 
     return NextResponse.json({
       success: false,
-      error: data.error_messages?.join(", ") || `HTTP ${res.status}`,
+      error: data.Message || `HTTP ${res.status}`,
     });
   } catch (e) {
     return NextResponse.json({

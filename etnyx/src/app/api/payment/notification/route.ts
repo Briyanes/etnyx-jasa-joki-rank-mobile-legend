@@ -1,124 +1,113 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
-import crypto from "crypto";
 import { sendNewOrderNotifications } from "@/lib/notifications";
-
-// Get Midtrans server key from settings or env
-async function getMidtransServerKey(): Promise<string> {
-  try {
-    const supabase = await createAdminClient();
-    const { data } = await supabase
-      .from("settings")
-      .select("value")
-      .eq("key", "integrations")
-      .single();
-    
-    return data?.value?.midtransServerKey || process.env.MIDTRANS_SERVER_KEY || "";
-  } catch {
-    return process.env.MIDTRANS_SERVER_KEY || "";
-  }
-}
-
-// Verify Midtrans signature
-function verifySignature(orderId: string, statusCode: string, grossAmount: string, signatureKey: string, serverKey: string): boolean {
-  const hash = crypto
-    .createHash("sha512")
-    .update(`${orderId}${statusCode}${grossAmount}${serverKey}`)
-    .digest("hex");
-  return hash === signatureKey;
-}
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    // iPaymu callback fields: trx_id, reference_id, status, status_code, sid, via, channel
     const {
-      order_id,
+      reference_id,
+      status,
       status_code,
-      gross_amount,
-      signature_key,
-      transaction_status,
-      fraud_status,
-      payment_type,
+      via,
+      channel,
+      trx_id,
     } = body;
 
-    const serverKey = await getMidtransServerKey();
-
-    // Verify signature
-    if (!verifySignature(order_id, status_code, gross_amount, signature_key, serverKey)) {
-      console.error("Invalid signature for order:", order_id);
-      return NextResponse.json({ error: "Invalid signature" }, { status: 403 });
+    if (!reference_id) {
+      return NextResponse.json({ error: "Missing reference_id" }, { status: 400 });
     }
 
     const supabase = await createAdminClient();
 
-    // Find order by Midtrans order ID
+    // Find order by our order_id (stored as referenceId in iPaymu)
     const { data: order, error } = await supabase
       .from("orders")
       .select("*")
-      .eq("midtrans_order_id", order_id)
+      .eq("order_id", reference_id)
       .single();
 
     if (error || !order) {
-      console.error("Order not found for Midtrans ID:", order_id);
-      return NextResponse.json({ error: "Order not found" }, { status: 404 });
-    }
+      // Fallback: try midtrans_order_id DB column (legacy column name)
+      const { data: orderAlt } = await supabase
+        .from("orders")
+        .select("*")
+        .eq("midtrans_order_id", reference_id)
+        .single();
 
-    // Determine payment status
-    let paymentStatus = "pending";
-    let orderStatus = order.status;
-
-    if (transaction_status === "capture" || transaction_status === "settlement") {
-      if (fraud_status === "accept" || !fraud_status) {
-        paymentStatus = "paid";
-        orderStatus = "confirmed"; // Auto-confirm when paid
-      } else {
-        paymentStatus = "challenge";
+      if (!orderAlt) {
+        console.error("Order not found for iPaymu reference:", reference_id);
+        return NextResponse.json({ error: "Order not found" }, { status: 404 });
       }
-    } else if (transaction_status === "pending") {
-      paymentStatus = "pending";
-    } else if (transaction_status === "deny" || transaction_status === "cancel" || transaction_status === "expire") {
-      paymentStatus = "failed";
-    } else if (transaction_status === "refund") {
-      paymentStatus = "refunded";
+      // Use alt order
+      return processPayment(supabase, orderAlt, { status, status_code, via, channel, trx_id });
     }
 
-    // Update order
-    await supabase
-      .from("orders")
-      .update({
-        payment_status: paymentStatus,
-        payment_type: payment_type,
-        status: orderStatus,
-        paid_at: paymentStatus === "paid" ? new Date().toISOString() : null,
-      })
-      .eq("id", order.id);
-
-    console.log(`Payment notification: Order ${order.order_id} - ${transaction_status} - ${paymentStatus}`);
-
-    // Send notifications when payment is confirmed
-    if (paymentStatus === "paid" && order.status !== "confirmed") {
-      const orderData = {
-        order_id: order.order_id,
-        username: order.username,
-        current_rank: order.current_rank,
-        target_rank: order.target_rank,
-        package: order.package,
-        price: order.price || order.total_price,
-        whatsapp: order.whatsapp,
-        email: order.email,
-        status: orderStatus,
-        is_express: order.is_express,
-        is_premium: order.is_premium,
-        notes: order.notes,
-      };
-      
-      // Send all notifications (Telegram admin, WA, Email)
-      sendNewOrderNotifications(orderData).catch(console.error);
-    }
-
-    return NextResponse.json({ success: true });
+    return processPayment(supabase, order, { status, status_code, via, channel, trx_id });
   } catch (error) {
     console.error("Payment notification error:", error);
     return NextResponse.json({ error: "Notification processing failed" }, { status: 500 });
   }
+}
+
+async function processPayment(
+  supabase: Awaited<ReturnType<typeof createAdminClient>>,
+  order: Record<string, unknown>,
+  payment: { status: string; status_code: string; via: string; channel: string; trx_id: string }
+) {
+  // iPaymu status codes: 1 = pending, 0 = failed/expired, 6 = refunded, positive status_code with status=1 = success
+  // iPaymu status field: "berhasil" (success), "pending", "expired", "gagal" (failed)
+  let paymentStatus = "pending";
+  let orderStatus = order.status as string;
+
+  const normalizedStatus = String(payment.status).toLowerCase();
+
+  if (normalizedStatus === "berhasil" || String(payment.status_code) === "1") {
+    paymentStatus = "paid";
+    orderStatus = "confirmed";
+  } else if (normalizedStatus === "pending") {
+    paymentStatus = "pending";
+  } else if (normalizedStatus === "expired" || normalizedStatus === "gagal" || String(payment.status_code) === "0") {
+    paymentStatus = "failed";
+  } else if (normalizedStatus === "refund") {
+    paymentStatus = "refunded";
+  }
+
+  const paymentType = [payment.via, payment.channel].filter(Boolean).join(" - ");
+
+  // Update order
+  await supabase
+    .from("orders")
+    .update({
+      payment_status: paymentStatus,
+      payment_type: paymentType || null,
+      status: orderStatus,
+      paid_at: paymentStatus === "paid" ? new Date().toISOString() : null,
+    })
+    .eq("id", order.id);
+
+  console.log(`iPaymu notification: Order ${order.order_id} - status=${payment.status} - ${paymentStatus}`);
+
+  // Send notifications when payment is confirmed
+  if (paymentStatus === "paid" && order.status !== "confirmed") {
+    const orderData = {
+      order_id: order.order_id as string,
+      username: order.username as string,
+      current_rank: order.current_rank as string,
+      target_rank: order.target_rank as string,
+      package: order.package as string,
+      price: (order.price || order.total_price) as number,
+      whatsapp: order.whatsapp as string,
+      email: order.email as string,
+      status: orderStatus,
+      is_express: order.is_express as boolean,
+      is_premium: order.is_premium as boolean,
+      notes: order.notes as string,
+    };
+
+    sendNewOrderNotifications(orderData).catch(console.error);
+  }
+
+  return NextResponse.json({ success: true });
 }

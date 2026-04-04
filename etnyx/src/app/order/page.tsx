@@ -855,7 +855,7 @@ function OrderPageContent() {
         paymentUrl: data.paymentUrl,
       });
 
-      // Auto-redirect to Midtrans payment page
+      // Auto-redirect to iPaymu payment page
       if (data.paymentUrl) {
         window.location.href = data.paymentUrl;
         return;
@@ -894,7 +894,7 @@ function OrderPageContent() {
       );
     }
 
-    // No payment URL (Midtrans not configured) — show order success
+    // No payment URL (iPaymu not configured) — show order success
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="bg-surface rounded-3xl p-8 max-w-md w-full text-center border border-white/5">
@@ -1972,7 +1972,7 @@ function OrderPageContent() {
                 <div className="flex items-start gap-2 bg-accent/5 border border-accent/20 rounded-xl px-4 py-3">
                   <CreditCard className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
                   <p className="text-xs text-text-muted">
-                    Pembayaran dilakukan setelah konfirmasi order. Kami mendukung QRIS, Bank Transfer (BCA, BNI, Mandiri), GoPay, ShopeePay, dan lainnya melalui Midtrans.
+                    Pembayaran dilakukan setelah konfirmasi order. Kami mendukung QRIS, Bank Transfer (BCA, BNI, Mandiri), GoPay, ShopeePay, dan lainnya melalui iPaymu.
                   </p>
                 </div>
               </div>
