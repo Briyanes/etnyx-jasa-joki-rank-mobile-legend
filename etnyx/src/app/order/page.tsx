@@ -244,7 +244,8 @@ const translations = {
     steps: [
       { num: 1, title: "Pilih Paket" },
       { num: 2, title: "Data Akun & Kontak" },
-      { num: 3, title: "Konfirmasi" },
+      { num: 3, title: "Opsi & Pembayaran" },
+      { num: 4, title: "Konfirmasi" },
     ],
     // Step 1
     selectPackage: "Pilih Paket Joki",
@@ -331,7 +332,8 @@ const translations = {
     steps: [
       { num: 1, title: "Select Package" },
       { num: 2, title: "Account & Contact" },
-      { num: 3, title: "Confirm" },
+      { num: 3, title: "Options & Payment" },
+      { num: 4, title: "Confirm" },
     ],
     // Step 1
     selectPackage: "Select Boosting Package",
@@ -708,7 +710,7 @@ function OrderPageContent() {
   );
 
   const nextStep = useCallback(() => {
-    if (canProceedStep(currentStep) && currentStep < 3) {
+    if (canProceedStep(currentStep) && currentStep < 4) {
       // For per-star mode on step 1, create virtual package first
       if (currentStep === 1 && orderMode === "perstar" && selectedStarRank) {
         setSelectedPackage({
@@ -1803,13 +1805,166 @@ function OrderPageContent() {
           </section>
         )}
 
-        {/* ===== STEP 3: KONFIRMASI ===== */}
+        {/* ===== STEP 3: OPSI & PEMBAYARAN ===== */}
         {currentStep === 3 && (
           <div className="max-w-4xl mx-auto space-y-6">
             <section className="bg-surface rounded-2xl border border-white/5 overflow-hidden">
               <div className="flex items-center gap-3 px-5 py-4 border-b border-white/5">
                 <span className="w-7 h-7 rounded-full gradient-primary flex items-center justify-center text-white text-sm font-bold">
                   3
+                </span>
+                <h2 className="font-bold text-text">{t.optionsPromo}</h2>
+              </div>
+              <div className="p-5 space-y-5">
+                {/* Add-ons */}
+                <div>
+                  <p className="text-text-muted text-xs font-semibold mb-3 uppercase tracking-wider">{t.addons}</p>
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    <button
+                      onClick={() => updateForm({ isExpress: !form.isExpress })}
+                      className={`flex items-start gap-3 p-4 rounded-xl border transition-all text-left ${
+                        form.isExpress
+                          ? "border-yellow-500/50 bg-yellow-500/10"
+                          : "border-white/10 bg-background hover:border-white/20"
+                      }`}
+                    >
+                      <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center mt-0.5 flex-shrink-0 transition-colors ${
+                        form.isExpress ? "border-yellow-400 bg-yellow-400" : "border-white/30"
+                      }`}>
+                        {form.isExpress && <Check className="w-3 h-3 text-background" />}
+                      </div>
+                      <div>
+                        <p className="text-text font-semibold text-sm flex items-center gap-1.5">
+                          <Zap className="w-3.5 h-3.5 text-yellow-400" />
+                          {t.express}
+                        </p>
+                        <p className="text-text-muted text-xs mt-0.5">{t.expressDesc}</p>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => updateForm({ isPremium: !form.isPremium })}
+                      className={`flex items-start gap-3 p-4 rounded-xl border transition-all text-left ${
+                        form.isPremium
+                          ? "border-yellow-500/50 bg-yellow-500/10"
+                          : "border-white/10 bg-background hover:border-white/20"
+                      }`}
+                    >
+                      <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center mt-0.5 flex-shrink-0 transition-colors ${
+                        form.isPremium ? "border-yellow-400 bg-yellow-400" : "border-white/30"
+                      }`}>
+                        {form.isPremium && <Check className="w-3 h-3 text-background" />}
+                      </div>
+                      <div>
+                        <p className="text-text font-semibold text-sm flex items-center gap-1.5">
+                          <Crown className="w-3.5 h-3.5 text-yellow-400" />
+                          {t.premium}
+                        </p>
+                        <p className="text-text-muted text-xs mt-0.5">{t.premiumDesc}</p>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Promo Code */}
+                <div>
+                  <p className="text-text-muted text-xs font-semibold mb-2 uppercase tracking-wider">{t.promoCode}</p>
+                  <div className="flex gap-2">
+                    <div className="flex-1 relative">
+                      <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                      <input
+                        type="text"
+                        value={form.promoCode}
+                        onChange={(e) => {
+                          updateForm({ promoCode: e.target.value.toUpperCase() });
+                          setPromoApplied(false);
+                          setPromoMessage("");
+                        }}
+                        placeholder={t.promoPlaceholder}
+                        className="w-full bg-background border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none transition-colors font-mono uppercase"
+                      />
+                    </div>
+                    <button
+                      onClick={applyPromo}
+                      disabled={promoLoading || !form.promoCode.trim()}
+                      className="px-5 py-2.5 gradient-primary rounded-xl text-white text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-40"
+                    >
+                      {promoLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : t.applyPromo}
+                    </button>
+                  </div>
+                  {promoMessage && (
+                    <p className={`text-xs mt-2 ${promoApplied ? "text-green-400" : "text-red-400"}`}>
+                      {promoMessage}
+                    </p>
+                  )}
+                </div>
+
+                {/* Price Breakdown */}
+                <div className="bg-background rounded-xl p-4 border border-white/5">
+                  <p className="text-text-muted text-xs font-semibold mb-3 uppercase tracking-wider flex items-center gap-1.5">
+                    <CreditCard className="w-3.5 h-3.5" />
+                    {t.paymentDetails}
+                  </p>
+                  <div className="space-y-2 text-sm">
+                    {orderMode === "gendong" && selectedGendongRank ? (
+                      <div className="flex justify-between text-text-muted">
+                        <span>Duo Boost {selectedGendongRank.name} × {gendongQuantity} Bintang</span>
+                        <span>{formatRupiah(selectedGendongRank.price * gendongQuantity)}</span>
+                      </div>
+                    ) : orderMode === "perstar" && selectedStarRank ? (
+                      <div className="flex justify-between text-text-muted">
+                        <span>{selectedStarRank.name} × {starQuantity} Bintang</span>
+                        <span>{formatRupiah(selectedStarRank.price * starQuantity)}</span>
+                      </div>
+                    ) : selectedPackage ? (
+                      <div className="flex justify-between text-text-muted">
+                        <span>{t.basePrice}</span>
+                        <span>{formatRupiah(selectedPackage.price)}</span>
+                      </div>
+                    ) : null}
+                    {form.isExpress && (
+                      <div className="flex justify-between text-yellow-400/80">
+                        <span>{t.expressAddon}</span>
+                        <span>+{formatRupiah(Math.round(basePrice * 0.2))}</span>
+                      </div>
+                    )}
+                    {form.isPremium && (
+                      <div className="flex justify-between text-yellow-400/80">
+                        <span>{t.premiumAddon}</span>
+                        <span>+{formatRupiah(Math.round(basePrice * (form.isExpress ? 1.2 : 1) * 0.3))}</span>
+                      </div>
+                    )}
+                    {promoDiscount > 0 && (
+                      <div className="flex justify-between text-green-400">
+                        <span>{t.promoDiscount}</span>
+                        <span>-{formatRupiah(promoDiscount)}</span>
+                      </div>
+                    )}
+                    <div className="border-t border-white/10 pt-3 flex justify-between font-bold text-text">
+                      <span className="text-lg">{t.total}</span>
+                      <span className="gradient-text text-xl">{formatRupiah(finalPrice)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Payment info */}
+                <div className="flex items-start gap-2 bg-accent/5 border border-accent/20 rounded-xl px-4 py-3">
+                  <CreditCard className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
+                  <p className="text-xs text-text-muted">
+                    Pembayaran dilakukan setelah konfirmasi order. Kami mendukung QRIS, Bank Transfer (BCA, BNI, Mandiri), GoPay, ShopeePay, dan lainnya melalui Midtrans.
+                  </p>
+                </div>
+              </div>
+            </section>
+          </div>
+        )}
+
+        {/* ===== STEP 4: KONFIRMASI ===== */}
+        {currentStep === 4 && (
+          <div className="max-w-4xl mx-auto space-y-6">
+            <section className="bg-surface rounded-2xl border border-white/5 overflow-hidden">
+              <div className="flex items-center gap-3 px-5 py-4 border-b border-white/5">
+                <span className="w-7 h-7 rounded-full gradient-primary flex items-center justify-center text-white text-sm font-bold">
+                  4
                 </span>
                 <h2 className="font-bold text-text">{t.confirmOrder}</h2>
               </div>
@@ -2075,7 +2230,7 @@ function OrderPageContent() {
             <div />
           )}
 
-          {currentStep < 3 ? (
+          {currentStep < 4 ? (
             <button
               onClick={nextStep}
               disabled={!canProceedStep(currentStep)}
