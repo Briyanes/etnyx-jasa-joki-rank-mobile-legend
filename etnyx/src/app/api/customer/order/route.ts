@@ -280,72 +280,84 @@ export async function POST(request: NextRequest) {
       : "https://sandbox.ipaymu.com";
 
     if (ipaymuApiKey && ipaymuVa) {
-      try {
-        // Detect server outbound IP for debugging
-        let serverIp = "unknown";
+      // Determine site URL from request origin or env
+      const origin = request.headers.get("origin") || "";
+      const siteUrl = (origin || process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.com").replace(/\/$/, "");
+      const ipaymuBody: Record<string, unknown> = {};
+      ipaymuBody["product"] = ["Joki ML Service"];
+      ipaymuBody["qty"] = ["1"];
+      ipaymuBody["price"] = [String(verifiedTotalPrice)];
+      ipaymuBody["amount"] = String(verifiedTotalPrice);
+      ipaymuBody["returnUrl"] = siteUrl + "/payment/success";
+      ipaymuBody["cancelUrl"] = siteUrl + "/payment/success";
+      ipaymuBody["notifyUrl"] = siteUrl + "/api/payment/notification";
+      ipaymuBody["referenceId"] = orderId;
+      ipaymuBody["buyerName"] = sanitizedNickname;
+      ipaymuBody["buyerPhone"] = "62" + cleanWhatsapp;
+      ipaymuBody["buyerEmail"] = sanitizedEmail || "customer@etnyx.com";
+
+      // Retry up to 3 times (Vercel uses rotating IPs, some may not be whitelisted)
+      const MAX_RETRIES = 3;
+      for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
         try {
-          const ipRes = await fetch("https://api.ipify.org?format=json");
-          const ipData = await ipRes.json();
-          serverIp = ipData.ip;
-        } catch { /* ignore */ }
+          const bodyStr = JSON.stringify(ipaymuBody);
+          const bodyHash = crypto.createHash("sha256").update(bodyStr).digest("hex");
+          const stringToSign = `POST:${ipaymuVa}:${bodyHash}:${ipaymuApiKey}`;
+          const signature = crypto.createHmac("sha256", ipaymuApiKey).update(stringToSign).digest("hex");
+          const timestamp = new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
 
-        // Determine site URL from request origin or env
-        const origin = request.headers.get("origin") || "";
-        const siteUrl = (origin || process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.com").replace(/\/$/, "");
-        const ipaymuBody: Record<string, unknown> = {};
-        ipaymuBody["product"] = ["Joki ML Service"];
-        ipaymuBody["qty"] = ["1"];
-        ipaymuBody["price"] = [String(verifiedTotalPrice)];
-        ipaymuBody["amount"] = String(verifiedTotalPrice);
-        ipaymuBody["returnUrl"] = siteUrl + "/payment/success";
-        ipaymuBody["cancelUrl"] = siteUrl + "/payment/success";
-        ipaymuBody["notifyUrl"] = siteUrl + "/api/payment/notification";
-        ipaymuBody["referenceId"] = orderId;
-        ipaymuBody["buyerName"] = sanitizedNickname;
-        ipaymuBody["buyerPhone"] = "62" + cleanWhatsapp;
-        ipaymuBody["buyerEmail"] = sanitizedEmail || "customer@etnyx.com";
+          const ipaymuRes = await fetch(`${ipaymuBaseUrl}/api/v2/payment`, {
+            method: "POST",
+            headers: {
+              "Accept": "application/json",
+              "Content-Type": "application/json",
+              "va": ipaymuVa,
+              "signature": signature,
+              "timestamp": timestamp,
+            },
+            body: bodyStr,
+          });
 
-        const bodyStr = JSON.stringify(ipaymuBody);
-        const bodyHash = crypto.createHash("sha256").update(bodyStr).digest("hex");
-        const stringToSign = `POST:${ipaymuVa}:${bodyHash}:${ipaymuApiKey}`;
-        const signature = crypto.createHmac("sha256", ipaymuApiKey).update(stringToSign).digest("hex");
-        const timestamp = new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
+          const ipaymuData = await ipaymuRes.json();
+          console.log(`iPaymu attempt ${attempt}:`, JSON.stringify(ipaymuData));
 
-        const ipaymuRes = await fetch(`${ipaymuBaseUrl}/api/v2/payment`, {
-          method: "POST",
-          headers: {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            "va": ipaymuVa,
-            "signature": signature,
-            "timestamp": timestamp,
-          },
-          body: bodyStr,
-        });
+          if (ipaymuData.Status === 200 && ipaymuData.Data?.Url) {
+            paymentUrl = ipaymuData.Data.Url;
 
-        const ipaymuData = await ipaymuRes.json();
-        console.log("iPaymu response:", JSON.stringify(ipaymuData), "serverIp:", serverIp);
+            // Save payment info to order
+            await supabase
+              .from("orders")
+              .update({
+                payment_url: ipaymuData.Data.Url,
+                payment_token: String(ipaymuData.Data.SessionId || ""),
+                midtrans_order_id: orderId,
+              })
+              .eq("id", order.id);
+            break; // Success — exit retry loop
+          }
 
-        if (ipaymuData.Status === 200 && ipaymuData.Data?.Url) {
-          paymentUrl = ipaymuData.Data.Url;
+          // If not "Invalid IP", no point retrying
+          const msg = ipaymuData.Message || "";
+          if (!String(msg).includes("Invalid IP")) {
+            paymentDebug = `iPaymu: ${msg || JSON.stringify(ipaymuData)}`;
+            break;
+          }
 
-          // Save payment info to order
-          await supabase
-            .from("orders")
-            .update({
-              payment_url: ipaymuData.Data.Url,
-              payment_token: String(ipaymuData.Data.SessionId || ""),
-              midtrans_order_id: orderId,
-            })
-            .eq("id", order.id);
-        } else {
-          paymentDebug = `iPaymu: ${ipaymuData.Message || JSON.stringify(ipaymuData)} | serverIP: ${serverIp} | Tambahkan IP ini di iPaymu dashboard`;
-          console.error("iPaymu error:", JSON.stringify(ipaymuData));
+          // Last attempt failed
+          if (attempt === MAX_RETRIES) {
+            let serverIp = "unknown";
+            try {
+              const ipRes = await fetch("https://api.ipify.org?format=json");
+              serverIp = (await ipRes.json()).ip;
+            } catch { /* ignore */ }
+            paymentDebug = `iPaymu: Invalid IP setelah ${MAX_RETRIES}x retry | serverIP: ${serverIp} | Hubungi support iPaymu untuk disable IP whitelist (Vercel serverless)`;
+          }
+        } catch (e) {
+          if (attempt === MAX_RETRIES) {
+            paymentDebug = `iPaymu exception: ${e instanceof Error ? e.message : String(e)}`;
+          }
+          console.error(`iPaymu attempt ${attempt} error:`, e);
         }
-      } catch (e) {
-        paymentDebug = `iPaymu exception: ${e instanceof Error ? e.message : String(e)}`;
-        console.error("iPaymu payment creation error:", e);
-        // Order still created, payment can be retried
       }
     } else {
       paymentDebug = `iPaymu not configured: apiKey=${!!ipaymuApiKey}, va=${!!ipaymuVa}`;
