@@ -227,22 +227,13 @@ function AdminLoginContent() {
           )}
         </div>
 
-        {/* Role info with dashboard links */}
+        {/* Role info */}
         <div className="mt-6 bg-surface/50 rounded-xl p-4 border border-white/5">
           <p className="text-text-muted text-xs text-center mb-3">Akses berdasarkan role:</p>
-          <div className="space-y-2">
-            <a href="/admin/dashboard" className="flex items-center justify-between px-3 py-2 rounded-lg bg-red-500/5 hover:bg-red-500/10 border border-red-500/10 transition-colors group">
-              <span className="text-xs font-medium text-red-400">Admin</span>
-              <span className="text-[10px] text-text-muted group-hover:text-red-400 transition-colors">/admin/dashboard →</span>
-            </a>
-            <a href="/admin/lead" className="flex items-center justify-between px-3 py-2 rounded-lg bg-blue-500/5 hover:bg-blue-500/10 border border-blue-500/10 transition-colors group">
-              <span className="text-xs font-medium text-blue-400">Lead</span>
-              <span className="text-[10px] text-text-muted group-hover:text-blue-400 transition-colors">/admin/lead →</span>
-            </a>
-            <a href="/admin/worker" className="flex items-center justify-between px-3 py-2 rounded-lg bg-green-500/5 hover:bg-green-500/10 border border-green-500/10 transition-colors group">
-              <span className="text-xs font-medium text-green-400">Worker</span>
-              <span className="text-[10px] text-text-muted group-hover:text-green-400 transition-colors">/admin/worker →</span>
-            </a>
+          <div className="flex items-center justify-center gap-3">
+            <span className="px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/10 text-xs font-medium text-red-400">Admin</span>
+            <span className="px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-500/10 text-xs font-medium text-blue-400">Lead</span>
+            <span className="px-3 py-1.5 rounded-lg bg-green-500/10 border border-green-500/10 text-xs font-medium text-green-400">Worker</span>
           </div>
           <p className="text-text-muted text-[10px] text-center mt-2">Login dulu, lalu redirect otomatis sesuai role</p>
         </div>
