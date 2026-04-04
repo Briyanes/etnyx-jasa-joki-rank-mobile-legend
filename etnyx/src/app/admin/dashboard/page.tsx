@@ -11,7 +11,7 @@ import {
   ShoppingCart, DollarSign, Clock, Activity, ChevronRight, Loader2,
   Plus, Pencil, Trash2, Save, Search, Filter, RefreshCw, LogOut,
   EyeOff, GripVertical, Globe, HelpCircle, Layout, Megaphone, Share2, Building,
-  CreditCard, Mail, MessageCircle, Send, BookOpen,
+  CreditCard, Mail, MessageCircle, Send, BookOpen, AlertTriangle, Copy, Plug, Link2,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 
@@ -1815,7 +1815,7 @@ export default function AdminDashboard() {
                       </div>
                       {integrations.midtransIsProduction && (
                         <p className="text-yellow-400 text-xs mt-2 flex items-center gap-1">
-                          ⚠️ Mode Production — transaksi menggunakan uang asli
+                          <AlertTriangle className="w-3.5 h-3.5" /> Mode Production — transaksi menggunakan uang asli
                         </p>
                       )}
                     </div>
@@ -1899,11 +1899,11 @@ export default function AdminDashboard() {
                             alert("URL berhasil disalin!");
                           }}
                           className="px-4 py-2.5 rounded-lg bg-accent/20 text-accent text-sm font-semibold hover:bg-accent/30 transition-colors whitespace-nowrap flex items-center gap-1.5">
-                          📋 Salin
+                          <Copy className="w-4 h-4" /> Salin
                         </button>
                       </div>
                       <p className="text-yellow-400/80 text-xs mt-1">
-                        ⚠️ <strong>Penting:</strong> Setelah deploy ke production, copy URL di atas dan paste ke Midtrans Dashboard agar status pembayaran otomatis terupdate.
+                        <AlertTriangle className="w-3.5 h-3.5 inline shrink-0" /> <strong>Penting:</strong> Setelah deploy ke production, copy URL di atas dan paste ke Midtrans Dashboard agar status pembayaran otomatis terupdate.
                         Juga aktifkan notifikasi untuk event: payment, settlement, cancel, deny, expire.
                       </p>
                     </div>
@@ -1933,7 +1933,7 @@ export default function AdminDashboard() {
                           }
                         }}
                         className="px-4 py-2.5 rounded-lg border border-white/10 text-text text-sm font-medium hover:bg-white/5 transition-colors flex items-center gap-2">
-                        🔌 Test Connection
+                        <Plug className="w-4 h-4" /> Test Connection
                       </button>
                       <p className="text-text-muted text-xs">
                         <BookOpen className="w-3 h-3 inline mr-1" /> Dapatkan credentials di <a href="https://dashboard.midtrans.com" target="_blank" rel="noopener" className="text-accent hover:underline">dashboard.midtrans.com</a> → Settings → Access Keys
