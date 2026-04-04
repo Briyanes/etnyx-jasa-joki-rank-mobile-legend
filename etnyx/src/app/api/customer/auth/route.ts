@@ -4,9 +4,12 @@ import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET
-);
+function getJwtSecret() {
+  if (!process.env.JWT_SECRET) {
+    throw new Error("JWT_SECRET environment variable is required.");
+  }
+  return new TextEncoder().encode(process.env.JWT_SECRET);
+}
 
 async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 12);
@@ -82,7 +85,7 @@ export async function POST(request: Request) {
       })
         .setProtectedHeader({ alg: "HS256" })
         .setExpirationTime("7d")
-        .sign(JWT_SECRET);
+        .sign(getJwtSecret());
 
       // Set cookie
       const cookieStore = await cookies();
@@ -135,7 +138,7 @@ export async function POST(request: Request) {
       })
         .setProtectedHeader({ alg: "HS256" })
         .setExpirationTime("7d")
-        .sign(JWT_SECRET);
+        .sign(getJwtSecret());
 
       // Set cookie
       const cookieStore = await cookies();
@@ -175,7 +178,7 @@ export async function GET() {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const { payload } = await jwtVerify(token, getJwtSecret());
     
     const supabase = await createAdminClient();
     const { data: customer } = await supabase

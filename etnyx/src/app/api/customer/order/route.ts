@@ -220,22 +220,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Increment promo used_count if promo was applied
+    // Increment promo used_count if promo was applied (atomic via RPC)
     if (promoId) {
       const { error: rpcErr } = await supabase.rpc("increment_promo_used_count", { p_promo_id: promoId });
       if (rpcErr) {
-        // Fallback: manual increment if RPC doesn't exist
-        const { data: promo } = await supabase
-          .from("promo_codes")
-          .select("used_count")
-          .eq("id", promoId)
-          .single();
-        if (promo) {
-          await supabase
-            .from("promo_codes")
-            .update({ used_count: (promo.used_count || 0) + 1 })
-            .eq("id", promoId);
-        }
+        console.error("Failed to increment promo used_count:", rpcErr);
       }
     }
 

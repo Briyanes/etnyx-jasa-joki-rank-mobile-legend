@@ -73,6 +73,12 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Customer ID diperlukan" }, { status: 400 });
     }
 
+    // Sanitize customerId to prevent injection
+    const sanitizedId = customerId.replace(/[^a-zA-Z0-9-]/g, "");
+    if (!sanitizedId) {
+      return NextResponse.json({ error: "Invalid customer ID" }, { status: 400 });
+    }
+
     const supabase = await createAdminClient();
 
     // Get referral stats
@@ -85,7 +91,7 @@ export async function GET(request: Request) {
         created_at,
         referred:referred_id (name, email)
       `)
-      .eq("referrer_id", customerId)
+      .eq("referrer_id", sanitizedId)
       .order("created_at", { ascending: false });
 
     if (error) {

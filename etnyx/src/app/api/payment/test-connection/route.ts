@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { verifyAdmin } from "@/lib/admin-auth";
 
 export async function POST(req: NextRequest) {
+  const admin = await verifyAdmin();
+  if (!admin.authenticated) {
+    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+  }
   try {
     const { serverKey, isProduction: isProd } = await req.json();
 

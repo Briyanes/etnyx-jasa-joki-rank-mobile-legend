@@ -39,7 +39,10 @@ export async function GET(request: NextRequest) {
     }
 
     if (search) {
-      query = query.or(`order_id.ilike.%${search}%,username.ilike.%${search}%,game_id.ilike.%${search}%,whatsapp.ilike.%${search}%`);
+      const sanitized = search.replace(/[^a-zA-Z0-9\s\-_@+.]/g, "");
+      if (sanitized) {
+        query = query.or(`order_id.ilike.%${sanitized}%,username.ilike.%${sanitized}%,game_id.ilike.%${sanitized}%,whatsapp.ilike.%${sanitized}%`);
+      }
     }
 
     const { data, error: dbError, count } = await query;

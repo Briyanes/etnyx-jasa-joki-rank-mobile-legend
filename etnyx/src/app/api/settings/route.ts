@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase-server";
+import { createServerSupabase } from "@/lib/supabase-server";
 
 // Public CMS keys (safe for frontend consumption)
 const PUBLIC_KEYS = [
@@ -19,7 +19,7 @@ const PUBLIC_KEYS = [
 // GET /api/settings?keys=hero,faq_items or GET all public
 export async function GET(request: NextRequest) {
   const keysParam = request.nextUrl.searchParams.get("keys");
-  const supabase = await createAdminClient();
+  const supabase = await createServerSupabase();
 
   let keys = PUBLIC_KEYS;
   if (keysParam) {

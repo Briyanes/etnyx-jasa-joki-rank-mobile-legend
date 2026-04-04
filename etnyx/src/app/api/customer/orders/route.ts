@@ -3,15 +3,15 @@ import { createAdminClient } from "@/lib/supabase-server";
 import { jwtVerify } from "jose";
 import { cookies } from "next/headers";
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET
-);
+function getJwtSecret() {
+  if (!process.env.JWT_SECRET) {
+    throw new Error("JWT_SECRET environment variable is required.");
+  }
+  return new TextEncoder().encode(process.env.JWT_SECRET);
+}
 
 export async function GET() {
   try {
-    if (!process.env.JWT_SECRET) {
-      return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
-    }
 
     const cookieStore = await cookies();
     const token = cookieStore.get("customer_token")?.value;
@@ -20,7 +20,7 @@ export async function GET() {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const { payload } = await jwtVerify(token, getJwtSecret());
     
     const supabase = await createAdminClient();
     
@@ -36,11 +36,18 @@ export async function GET() {
     }
 
     // Get orders linked to customer_id or matching whatsapp
-    const { data: orders, error } = await supabase
+    let ordersQuery = supabase
       .from("orders")
       .select("*")
-      .or(`customer_id.eq.${customer.id}${customer.whatsapp ? `,whatsapp.eq.${customer.whatsapp}` : ""}`)
       .order("created_at", { ascending: false });
+
+    if (customer.whatsapp) {
+      ordersQuery = ordersQuery.or(`customer_id.eq.${customer.id},whatsapp.eq.${customer.whatsapp.replace(/[^0-9+]/g, "")}`);
+    } else {
+      ordersQuery = ordersQuery.eq("customer_id", customer.id);
+    }
+
+    const { data: orders, error } = await ordersQuery;
 
     if (error) {
       console.error("Orders fetch error:", error);

@@ -46,10 +46,9 @@ export async function POST(request: NextRequest) {
       payment_type,
     } = body;
 
-    // Handle Midtrans test notification (no order_id or signature)
+    // Reject requests missing required fields
     if (!order_id || !signature_key) {
-      // Test notification received
-      return NextResponse.json({ success: true, message: "Test notification received" });
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
     const serverKey = await getMidtransServerKey();

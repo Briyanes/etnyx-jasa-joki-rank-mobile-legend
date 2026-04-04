@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase-server";
+import { createServerSupabase } from "@/lib/supabase-server";
 
 export async function GET() {
   try {
-    const supabase = await createAdminClient();
+    const supabase = await createServerSupabase();
     const { data, error } = await supabase
       .from("boosters")
       .select("id, name, rank_specialization, specialization, is_available, total_orders, rating")

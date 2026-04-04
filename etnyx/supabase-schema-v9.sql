@@ -92,8 +92,8 @@ TO public
 USING (bucket_id = 'worker-screenshots');
 
 -- ============ SEED DEFAULT ADMIN ============
--- Password: etnyx_admin_2026 (bcrypt hash)
--- You can change this after first login
+-- IMPORTANT: Change the default password immediately after first login!
+-- Generate a new hash: npx bcryptjs hash "your-secure-password"
 INSERT INTO staff_users (email, name, password_hash, role)
 VALUES (
   'admin@etnyx.com',
@@ -101,3 +101,52 @@ VALUES (
   '$2b$12$0kOgw1esyXmc1vtS89pVd.NoY4YYJcJrRPRK2V/i2dVm.ampUDuLe',
   'admin'
 ) ON CONFLICT (email) DO NOTHING;
+
+-- ============ INDEXES ============
+CREATE INDEX IF NOT EXISTS idx_orders_order_id ON orders(order_id);
+CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
+CREATE INDEX IF NOT EXISTS idx_orders_customer_id ON orders(customer_id);
+CREATE INDEX IF NOT EXISTS idx_orders_whatsapp ON orders(whatsapp);
+CREATE INDEX IF NOT EXISTS idx_orders_midtrans_order_id ON orders(midtrans_order_id);
+CREATE INDEX IF NOT EXISTS idx_customers_email ON customers(email);
+CREATE INDEX IF NOT EXISTS idx_customers_referral_code ON customers(referral_code);
+CREATE INDEX IF NOT EXISTS idx_order_assignments_order_id ON order_assignments(order_id);
+CREATE INDEX IF NOT EXISTS idx_order_assignments_assigned_to ON order_assignments(assigned_to);
+CREATE INDEX IF NOT EXISTS idx_worker_submissions_order_id ON worker_submissions(order_id);
+CREATE INDEX IF NOT EXISTS idx_order_logs_order_id ON order_logs(order_id);
+
+-- ============ RPC FUNCTIONS ============
+-- Atomic promo code counter (prevents race condition)
+CREATE OR REPLACE FUNCTION increment_promo_used_count(p_promo_id UUID)
+RETURNS VOID AS $$
+BEGIN
+  UPDATE promo_codes SET used_count = used_count + 1 WHERE id = p_promo_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ============ RLS ON CORE TABLES ============
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE customers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE testimonials ENABLE ROW LEVEL SECURITY;
+ALTER TABLE boosters ENABLE ROW LEVEL SECURITY;
+ALTER TABLE promo_codes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE order_logs ENABLE ROW LEVEL SECURITY;
+
+-- Allow service_role to bypass RLS (API routes use service_role)
+CREATE POLICY "Service role full access" ON orders FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON customers FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON settings FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON testimonials FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON boosters FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON promo_codes FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Service role full access" ON order_logs FOR ALL USING (true) WITH CHECK (true);
+
+-- Public read access for public-facing data
+CREATE POLICY "Public read testimonials" ON testimonials FOR SELECT USING (true);
+CREATE POLICY "Public read boosters" ON boosters FOR SELECT USING (true);
+CREATE POLICY "Public read settings" ON settings FOR SELECT USING (key = ANY(ARRAY[
+  'hero', 'promo_banner', 'faq_items', 'team_members', 'section_visibility', 
+  'tracking_pixels', 'social_links', 'site_info', 'pricing_catalog', 
+  'perstar_pricing', 'gendong_pricing'
+]));
