@@ -28,6 +28,11 @@ function verifySignature(orderId: string, statusCode: string, grossAmount: strin
   return hash === signatureKey;
 }
 
+// GET handler for URL verification
+export async function GET() {
+  return NextResponse.json({ status: "ok", endpoint: "payment-notification" });
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -40,6 +45,12 @@ export async function POST(request: NextRequest) {
       fraud_status,
       payment_type,
     } = body;
+
+    // Handle Midtrans test notification (no order_id or signature)
+    if (!order_id || !signature_key) {
+      console.log("Midtrans test notification received:", JSON.stringify(body));
+      return NextResponse.json({ success: true, message: "Test notification received" });
+    }
 
     const serverKey = await getMidtransServerKey();
 
