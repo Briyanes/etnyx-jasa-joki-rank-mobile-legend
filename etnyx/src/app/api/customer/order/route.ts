@@ -311,6 +311,7 @@ export async function POST(request: NextRequest) {
         });
 
         const midtransData = await midtransRes.json();
+        console.log("Midtrans response:", midtransRes.status, JSON.stringify(midtransData));
 
         if (midtransRes.ok && midtransData.redirect_url) {
           paymentUrl = midtransData.redirect_url;
@@ -324,6 +325,8 @@ export async function POST(request: NextRequest) {
               midtrans_order_id: midtransOrderId,
             })
             .eq("id", order.id);
+        } else {
+          console.error("Midtrans error:", midtransRes.status, JSON.stringify(midtransData));
         }
       } catch (e) {
         console.error("Midtrans payment creation error:", e);
