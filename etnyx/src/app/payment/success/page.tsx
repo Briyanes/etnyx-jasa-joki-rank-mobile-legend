@@ -7,19 +7,21 @@ import { Check, Loader2, Package, ArrowRight, XCircle, Clock } from "lucide-reac
 
 function PaymentSuccessContent() {
   const searchParams = useSearchParams();
-  const orderId = searchParams.get("order_id");
+  // iPaymu redirects with: trx_id, reference_id, status (berhasil/pending/gagal)
+  const orderId = searchParams.get("order_id") || searchParams.get("reference_id");
   const transactionStatus = searchParams.get("transaction_status") || searchParams.get("status");
   const statusCode = searchParams.get("status_code");
 
-  const isPending = transactionStatus === "pending";
+  const isSuccess = transactionStatus === "berhasil" || transactionStatus === "settlement" || transactionStatus === "capture";
+  const isPending = !transactionStatus || transactionStatus === "pending";
   const isFailed = transactionStatus === "deny" || transactionStatus === "cancel" || transactionStatus === "expire" || transactionStatus === "gagal" || statusCode === "202" || statusCode === "0";
 
   if (!orderId) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="bg-surface rounded-3xl p-8 max-w-md w-full text-center border border-white/5">
-          <h1 className="text-xl font-bold text-text mb-4">Halaman Tidak Valid</h1>
-          <p className="text-text-muted mb-6">Order ID tidak ditemukan.</p>
+          <h1 className="text-xl font-bold text-text mb-4">Menunggu Pembayaran</h1>
+          <p className="text-text-muted mb-6">Silakan selesaikan pembayaran. Status akan terupdate otomatis.</p>
           <Link href="/" className="block w-full px-6 py-3 rounded-xl border border-white/10 text-text font-medium hover:bg-white/5 transition-colors">
             Kembali ke Home
           </Link>

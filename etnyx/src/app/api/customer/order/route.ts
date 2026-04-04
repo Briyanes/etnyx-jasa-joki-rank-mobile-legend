@@ -287,8 +287,8 @@ export async function POST(request: NextRequest) {
           qty: ["1"],
           price: [String(verifiedTotalPrice)],
           amount: String(verifiedTotalPrice),
-          returnUrl: `${siteUrl}/payment/success?order_id=${orderId}`,
-          cancelUrl: `${siteUrl}/payment/success?order_id=${orderId}&transaction_status=cancel`,
+          returnUrl: `${siteUrl}/payment/success`,
+          cancelUrl: `${siteUrl}/payment/success`,
           notifyUrl: `${siteUrl}/api/payment/notification`,
           referenceId: orderId,
           buyerName: sanitizedNickname,
@@ -300,6 +300,7 @@ export async function POST(request: NextRequest) {
         const bodyHash = crypto.createHash("sha256").update(bodyStr).digest("hex");
         const stringToSign = `POST:${ipaymuVa}:${bodyHash}:${ipaymuApiKey}`;
         const signature = crypto.createHmac("sha256", ipaymuApiKey).update(stringToSign).digest("hex");
+        const timestamp = new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
 
         const ipaymuRes = await fetch(`${ipaymuBaseUrl}/api/v2/payment`, {
           method: "POST",
@@ -308,7 +309,7 @@ export async function POST(request: NextRequest) {
             "Content-Type": "application/json",
             "va": ipaymuVa,
             "signature": signature,
-            "timestamp": new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14),
+            "timestamp": timestamp,
           },
           body: bodyStr,
         });
