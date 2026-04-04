@@ -1905,24 +1905,19 @@ export default function AdminDashboard() {
                         onClick={async () => {
                           if (!integrations.midtransServerKey) { alert("Server Key belum diisi!"); return; }
                           try {
-                            const auth = btoa(`${integrations.midtransServerKey}:`);
-                            const url = integrations.midtransIsProduction
-                              ? "https://app.midtrans.com/snap/v1/transactions"
-                              : "https://app.sandbox.midtrans.com/snap/v1/transactions";
-                            const res = await fetch(url, {
+                            const res = await fetch("/api/payment/test-connection", {
                               method: "POST",
-                              headers: { "Content-Type": "application/json", "Authorization": `Basic ${auth}` },
+                              headers: { "Content-Type": "application/json" },
                               body: JSON.stringify({
-                                transaction_details: { order_id: `TEST-${Date.now()}`, gross_amount: 10000 },
-                                customer_details: { first_name: "Test", email: "test@test.com", phone: "+6281234567890" },
-                                item_details: [{ id: "test", price: 10000, quantity: 1, name: "Test Connection" }],
+                                serverKey: integrations.midtransServerKey,
+                                isProduction: integrations.midtransIsProduction,
                               }),
                             });
                             const data = await res.json();
-                            if (res.ok && data.redirect_url) {
+                            if (data.success) {
                               alert("✅ Koneksi berhasil! Midtrans aktif dan siap menerima pembayaran.");
                             } else {
-                              alert(`❌ Gagal: ${data.error_messages?.join(", ") || "Unknown error"}\n\nPastikan Server Key benar dan environment sesuai.`);
+                              alert(`❌ Gagal: ${data.error}\n\nPastikan Server Key benar dan environment sesuai.`);
                             }
                           } catch (e) {
                             alert(`❌ Error koneksi: ${e instanceof Error ? e.message : "Network error"}`);
