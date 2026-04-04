@@ -854,6 +854,12 @@ function OrderPageContent() {
         orderId: data.orderId,
         paymentUrl: data.paymentUrl,
       });
+
+      // Auto-redirect to Midtrans payment page
+      if (data.paymentUrl) {
+        window.location.href = data.paymentUrl;
+        return;
+      }
     } catch {
       alert("Terjadi kesalahan, coba lagi.");
     } finally {
@@ -861,8 +867,34 @@ function OrderPageContent() {
     }
   }, [form, selectedPackage, canSubmit, promoApplied, promoDiscount, finalPrice]);
 
-  // === SUCCESS PAGE ===
+  // === REDIRECTING TO PAYMENT / FALLBACK SUCCESS ===
   if (orderResult) {
+    // If payment URL exists, user is being redirected — show loading
+    if (orderResult.paymentUrl) {
+      return (
+        <div className="min-h-screen bg-background flex items-center justify-center p-4">
+          <div className="bg-surface rounded-3xl p-8 max-w-md w-full text-center border border-white/5">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-accent/20 flex items-center justify-center">
+              <Loader2 className="w-10 h-10 text-accent animate-spin" />
+            </div>
+            <h1 className="text-xl font-bold text-text mb-2">
+              Mengalihkan ke Pembayaran...
+            </h1>
+            <p className="text-text-muted text-sm mb-6">
+              Order <span className="font-mono text-accent font-bold">{orderResult.orderId}</span> berhasil dibuat. Kamu akan diarahkan ke halaman pembayaran.
+            </p>
+            <a
+              href={orderResult.paymentUrl}
+              className="block w-full gradient-primary px-6 py-3.5 rounded-xl text-white font-semibold hover:opacity-90 transition-opacity"
+            >
+              Klik di sini jika tidak otomatis redirect
+            </a>
+          </div>
+        </div>
+      );
+    }
+
+    // No payment URL (Midtrans not configured) — show order success
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="bg-surface rounded-3xl p-8 max-w-md w-full text-center border border-white/5">
@@ -882,19 +914,9 @@ function OrderPageContent() {
             </p>
           </div>
           <div className="space-y-3">
-            {orderResult.paymentUrl && (
-              <a
-                href={orderResult.paymentUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block w-full gradient-primary px-6 py-3.5 rounded-xl text-white font-semibold hover:opacity-90 transition-opacity"
-              >
-                {t.continuePayment}
-              </a>
-            )}
             <Link
               href={`/track?order_id=${orderResult.orderId}`}
-              className="block w-full px-6 py-3.5 rounded-xl border border-white/10 text-text font-medium hover:bg-white/5 transition-colors"
+              className="block w-full gradient-primary px-6 py-3.5 rounded-xl text-white font-semibold hover:opacity-90 transition-opacity"
             >
               Track Order
             </Link>
