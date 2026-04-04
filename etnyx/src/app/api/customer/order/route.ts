@@ -254,7 +254,26 @@ export async function POST(request: NextRequest) {
     // Create Midtrans payment
     let paymentUrl: string | undefined;
 
-    if (MIDTRANS_SERVER_KEY) {
+    // Get Midtrans key: prefer database (admin dashboard) over env
+    let midtransKey = MIDTRANS_SERVER_KEY;
+    let midtransIsProduction = MIDTRANS_IS_PRODUCTION;
+    try {
+      const { data: intSettings } = await supabase
+        .from("settings")
+        .select("value")
+        .eq("key", "integrations")
+        .single();
+      if (intSettings?.value?.midtransServerKey) {
+        midtransKey = intSettings.value.midtransServerKey;
+        midtransIsProduction = intSettings.value.midtransIsProduction ?? MIDTRANS_IS_PRODUCTION;
+      }
+    } catch { /* fallback to env */ }
+
+    const midtransApiUrl = midtransIsProduction
+      ? "https://app.midtrans.com/snap/v1/transactions"
+      : "https://app.sandbox.midtrans.com/snap/v1/transactions";
+
+    if (midtransKey) {
       try {
         const midtransOrderId = `ETN-${orderId}-${Date.now()}`;
 
@@ -281,8 +300,8 @@ export async function POST(request: NextRequest) {
           },
         };
 
-        const auth = Buffer.from(`${MIDTRANS_SERVER_KEY}:`).toString("base64");
-        const midtransRes = await fetch(MIDTRANS_API_URL, {
+        const auth = Buffer.from(`${midtransKey}:`).toString("base64");
+        const midtransRes = await fetch(midtransApiUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

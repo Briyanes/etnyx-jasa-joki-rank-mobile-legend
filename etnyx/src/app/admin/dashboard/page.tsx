@@ -157,6 +157,7 @@ interface IntegrationSettings {
   midtransServerKey: string; 
   midtransMerchantId: string; 
   midtransIsProduction: boolean;
+  midtransPaymentChannels: Record<string, boolean>;
   resendApiKey: string;
   resendFromEmail: string;
   fonnteApiToken: string;
@@ -236,6 +237,7 @@ export default function AdminDashboard() {
   const [siteInfo, setSiteInfo] = useState<SiteInfo>({ siteName: "", taglineId: "", taglineEn: "", supportEmail: "", companyName: "" });
   const [integrations, setIntegrations] = useState<IntegrationSettings>({ 
     midtransClientKey: "", midtransServerKey: "", midtransMerchantId: "", midtransIsProduction: false,
+    midtransPaymentChannels: { bca: true, bni: true, mandiri: true, permata: false, gopay: true, shopeepay: true, dana: false, ovo: false, credit_card: true, qris: true, alfamart_indomaret: true },
     resendApiKey: "", resendFromEmail: "noreply@etnyx.com",
     fonnteApiToken: "", fonnteDeviceId: "",
     telegramBotToken: "", telegramAdminGroupId: "", telegramWorkerGroupId: ""
@@ -1790,35 +1792,149 @@ export default function AdminDashboard() {
                   </div>
 
                   {/* Midtrans */}
-                  <div className="bg-surface rounded-xl border border-white/5 p-6 space-y-4">
+                  <div className="bg-surface rounded-xl border border-white/5 p-6 space-y-5">
                     <div className="flex items-center justify-between">
                       <div>
                         <h3 className="text-text font-bold text-sm flex items-center gap-2"><CreditCard className="w-4 h-4 text-accent" /> Midtrans Payment Gateway</h3>
-                        <p className="text-text-muted text-xs mt-0.5">Terima pembayaran via QRIS, VA, E-Wallet, dll</p>
+                        <p className="text-text-muted text-xs mt-0.5">Konfigurasi dan monitoring payment gateway</p>
                       </div>
-                      <button onClick={() => setIntegrations({ ...integrations, midtransIsProduction: !integrations.midtransIsProduction })}
-                        className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${integrations.midtransIsProduction ? "bg-green-500/20 text-green-400" : "bg-yellow-500/20 text-yellow-400"}`}>
-                        {integrations.midtransIsProduction ? "PRODUCTION" : "SANDBOX"}
+                    </div>
+
+                    {/* Environment Toggle */}
+                    <div className="bg-background rounded-lg p-4 border border-white/5">
+                      <p className="text-text-muted text-xs font-semibold mb-2 uppercase tracking-wider">Environment</p>
+                      <div className="flex gap-2">
+                        <button onClick={() => setIntegrations({ ...integrations, midtransIsProduction: false })}
+                          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${!integrations.midtransIsProduction ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30" : "bg-background border border-white/10 text-text-muted hover:text-text"}`}>
+                          Sandbox
+                        </button>
+                        <button onClick={() => setIntegrations({ ...integrations, midtransIsProduction: true })}
+                          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${integrations.midtransIsProduction ? "bg-green-500/20 text-green-400 border border-green-500/30" : "bg-background border border-white/10 text-text-muted hover:text-text"}`}>
+                          Production
+                        </button>
+                      </div>
+                      {integrations.midtransIsProduction && (
+                        <p className="text-yellow-400 text-xs mt-2 flex items-center gap-1">
+                          ⚠️ Mode Production — transaksi menggunakan uang asli
+                        </p>
+                      )}
+                    </div>
+
+                    {/* API Keys */}
+                    <div className="bg-background rounded-lg p-4 border border-white/5 space-y-3">
+                      <p className="text-text-muted text-xs font-semibold uppercase tracking-wider">API Keys</p>
+                      <div>
+                        <label className="block text-sm text-text-muted mb-1.5">Merchant ID</label>
+                        <input type="text" value={integrations.midtransMerchantId} onChange={(e) => setIntegrations({ ...integrations, midtransMerchantId: e.target.value })}
+                          placeholder="G123456789" className="w-full bg-surface border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-text-muted mb-1.5">Server Key</label>
+                        <input type="password" value={integrations.midtransServerKey} onChange={(e) => setIntegrations({ ...integrations, midtransServerKey: e.target.value })}
+                          placeholder={integrations.midtransIsProduction ? "Mid-server-xxx" : "SB-Mid-server-xxx"} className="w-full bg-surface border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-text-muted mb-1.5">Client Key</label>
+                        <input type="text" value={integrations.midtransClientKey} onChange={(e) => setIntegrations({ ...integrations, midtransClientKey: e.target.value })}
+                          placeholder={integrations.midtransIsProduction ? "Mid-client-xxx" : "SB-Mid-client-xxx"} className="w-full bg-surface border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
+                      </div>
+                    </div>
+
+                    {/* Payment Channels */}
+                    <div className="bg-background rounded-lg p-4 border border-white/5 space-y-3">
+                      <p className="text-text-muted text-xs font-semibold uppercase tracking-wider">Payment Channels</p>
+                      {[
+                        { label: "Bank Transfer", channels: [
+                          { id: "bca", name: "BCA" }, { id: "bni", name: "BNI" }, { id: "mandiri", name: "MANDIRI" }, { id: "permata", name: "PERMATA" }
+                        ]},
+                        { label: "E-Wallet", channels: [
+                          { id: "gopay", name: "GoPay" }, { id: "shopeepay", name: "ShopeePay" }, { id: "dana", name: "DANA" }, { id: "ovo", name: "OVO" }
+                        ]},
+                        { label: "Lainnya", channels: [
+                          { id: "credit_card", name: "Credit Card" }, { id: "qris", name: "QRIS" }, { id: "alfamart_indomaret", name: "Alfamart / Indomaret" }
+                        ]},
+                      ].map((group) => (
+                        <div key={group.label}>
+                          <p className="text-text-muted text-xs mb-2">{group.label}</p>
+                          <div className="flex flex-wrap gap-x-6 gap-y-2">
+                            {group.channels.map((ch) => (
+                              <label key={ch.id} className="flex items-center gap-2 cursor-pointer select-none">
+                                <input
+                                  type="checkbox"
+                                  checked={integrations.midtransPaymentChannels?.[ch.id] ?? false}
+                                  onChange={(e) => setIntegrations({
+                                    ...integrations,
+                                    midtransPaymentChannels: { ...integrations.midtransPaymentChannels, [ch.id]: e.target.checked }
+                                  })}
+                                  className="w-4 h-4 rounded border-white/20 bg-surface text-accent focus:ring-accent cursor-pointer"
+                                />
+                                <span className="text-text text-sm">{ch.name}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Notification URL (Webhook) */}
+                    <div className="bg-background rounded-lg p-4 border border-white/5 space-y-2">
+                      <p className="text-text-muted text-xs font-semibold uppercase tracking-wider">Notification URL (Webhook)</p>
+                      <p className="text-text-muted text-xs">Daftarkan URL ini di Midtrans Dashboard → Settings → Configuration → Notification URL</p>
+                      <div className="flex gap-2">
+                        <input type="text" readOnly
+                          value={`${typeof window !== "undefined" ? window.location.origin : ""}/api/payment/notification`}
+                          className="flex-1 bg-surface border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm font-mono focus:outline-none" />
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(`${window.location.origin}/api/payment/notification`);
+                            alert("URL berhasil disalin!");
+                          }}
+                          className="px-4 py-2.5 rounded-lg bg-accent/20 text-accent text-sm font-semibold hover:bg-accent/30 transition-colors whitespace-nowrap flex items-center gap-1.5">
+                          📋 Salin
+                        </button>
+                      </div>
+                      <p className="text-yellow-400/80 text-xs mt-1">
+                        ⚠️ <strong>Penting:</strong> Setelah deploy ke production, copy URL di atas dan paste ke Midtrans Dashboard agar status pembayaran otomatis terupdate.
+                        Juga aktifkan notifikasi untuk event: payment, settlement, cancel, deny, expire.
+                      </p>
+                    </div>
+
+                    {/* Test Connection & Info */}
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={async () => {
+                          if (!integrations.midtransServerKey) { alert("Server Key belum diisi!"); return; }
+                          try {
+                            const auth = btoa(`${integrations.midtransServerKey}:`);
+                            const url = integrations.midtransIsProduction
+                              ? "https://app.midtrans.com/snap/v1/transactions"
+                              : "https://app.sandbox.midtrans.com/snap/v1/transactions";
+                            const res = await fetch(url, {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json", "Authorization": `Basic ${auth}` },
+                              body: JSON.stringify({
+                                transaction_details: { order_id: `TEST-${Date.now()}`, gross_amount: 10000 },
+                                customer_details: { first_name: "Test", email: "test@test.com", phone: "+6281234567890" },
+                                item_details: [{ id: "test", price: 10000, quantity: 1, name: "Test Connection" }],
+                              }),
+                            });
+                            const data = await res.json();
+                            if (res.ok && data.redirect_url) {
+                              alert("✅ Koneksi berhasil! Midtrans aktif dan siap menerima pembayaran.");
+                            } else {
+                              alert(`❌ Gagal: ${data.error_messages?.join(", ") || "Unknown error"}\n\nPastikan Server Key benar dan environment sesuai.`);
+                            }
+                          } catch (e) {
+                            alert(`❌ Error koneksi: ${e instanceof Error ? e.message : "Network error"}`);
+                          }
+                        }}
+                        className="px-4 py-2.5 rounded-lg border border-white/10 text-text text-sm font-medium hover:bg-white/5 transition-colors flex items-center gap-2">
+                        🔌 Test Connection
                       </button>
+                      <p className="text-text-muted text-xs">
+                        <BookOpen className="w-3 h-3 inline mr-1" /> Dapatkan credentials di <a href="https://dashboard.midtrans.com" target="_blank" rel="noopener" className="text-accent hover:underline">dashboard.midtrans.com</a> → Settings → Access Keys
+                      </p>
                     </div>
-                    <div>
-                      <label className="block text-sm text-text-muted mb-1.5">Client Key</label>
-                      <input type="text" value={integrations.midtransClientKey} onChange={(e) => setIntegrations({ ...integrations, midtransClientKey: e.target.value })}
-                        placeholder="SB-Mid-client-xxx atau Mid-client-xxx" className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
-                    </div>
-                    <div>
-                      <label className="block text-sm text-text-muted mb-1.5">Server Key</label>
-                      <input type="password" value={integrations.midtransServerKey} onChange={(e) => setIntegrations({ ...integrations, midtransServerKey: e.target.value })}
-                        placeholder="SB-Mid-server-xxx atau Mid-server-xxx" className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
-                    </div>
-                    <div>
-                      <label className="block text-sm text-text-muted mb-1.5">Merchant ID</label>
-                      <input type="text" value={integrations.midtransMerchantId} onChange={(e) => setIntegrations({ ...integrations, midtransMerchantId: e.target.value })}
-                        placeholder="G123456789" className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
-                    </div>
-                    <p className="text-text-muted text-xs">
-                      <BookOpen className="w-3 h-3 inline mr-1" /> Dapatkan credentials di <a href="https://dashboard.midtrans.com" target="_blank" rel="noopener" className="text-accent hover:underline">dashboard.midtrans.com</a> → Settings → Access Keys
-                    </p>
                   </div>
 
                   {/* Resend Email */}
