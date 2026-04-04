@@ -281,20 +281,24 @@ export async function POST(request: NextRequest) {
 
     if (ipaymuApiKey && ipaymuVa) {
       try {
-        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
-        const ipaymuBody = {
-          product: [`Joki ML: ${currentRank} to ${targetRank}`],
-          qty: ["1"],
-          price: [String(verifiedTotalPrice)],
-          amount: String(verifiedTotalPrice),
-          returnUrl: `${siteUrl}/payment/success`,
-          cancelUrl: `${siteUrl}/payment/success`,
-          notifyUrl: `${siteUrl}/api/payment/notification`,
-          referenceId: orderId,
-          buyerName: sanitizedNickname,
-          buyerPhone: `62${cleanWhatsapp}`,
-          buyerEmail: sanitizedEmail || "customer@etnyx.com",
-        };
+        // Determine site URL from request origin or env
+        const origin = request.headers.get("origin") || "";
+        const siteUrl = (origin || process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.com").replace(/\/$/, "");
+        const ipaymuBody: Record<string, unknown> = {};
+        ipaymuBody["product"] = ["Joki ML Service"];
+        ipaymuBody["qty"] = ["1"];
+        ipaymuBody["price"] = [String(verifiedTotalPrice)];
+        ipaymuBody["amount"] = String(verifiedTotalPrice);
+        ipaymuBody["returnUrl"] = siteUrl + "/payment/success";
+        ipaymuBody["cancelUrl"] = siteUrl + "/payment/success";
+        ipaymuBody["notifyUrl"] = siteUrl + "/api/payment/notification";
+        ipaymuBody["referenceId"] = orderId;
+        ipaymuBody["buyerName"] = sanitizedNickname;
+        ipaymuBody["buyerPhone"] = "62" + cleanWhatsapp;
+        ipaymuBody["buyerEmail"] = sanitizedEmail || "customer@etnyx.com";
+
+        console.log("iPaymu siteUrl:", siteUrl);
+        console.log("iPaymu returnUrl:", ipaymuBody["returnUrl"]);
 
         const bodyStr = JSON.stringify(ipaymuBody);
         const bodyHash = crypto.createHash("sha256").update(bodyStr).digest("hex");
@@ -330,7 +334,7 @@ export async function POST(request: NextRequest) {
             })
             .eq("id", order.id);
         } else {
-          paymentDebug = `iPaymu Status: ${ipaymuData.Status}, Message: ${ipaymuData.Message || JSON.stringify(ipaymuData)}`;
+          paymentDebug = `iPaymu Status: ${ipaymuData.Status}, Message: ${ipaymuData.Message || JSON.stringify(ipaymuData)}, returnUrl: ${ipaymuBody["returnUrl"]}`;
           console.error("iPaymu error:", JSON.stringify(ipaymuData));
         }
       } catch (e) {
