@@ -164,6 +164,78 @@ ${order.is_express ? "⚡ EXPRESS - PRIORITAS!" : ""}${order.is_premium ? " 👑
 }
 
 // ============ WHATSAPP (Fonnte) ============
+
+// ============ TELEGRAM: Reviews & Worker Reports ============
+export async function notifyNewReview(review: {
+  order_id: string;
+  service_rating: number;
+  service_comment?: string | null;
+  worker_rating?: number | null;
+  customer_name?: string | null;
+  rank_from?: string | null;
+  rank_to?: string | null;
+}): Promise<boolean> {
+  const settings = await getIntegrationSettings();
+  const chatId = settings.telegramAdminGroupId;
+  if (!chatId) return false;
+
+  const stars = "⭐".repeat(review.service_rating);
+  const message = `
+⭐ <b>REVIEW BARU!</b>
+
+📋 <b>Order:</b> ${review.order_id}
+👤 <b>Customer:</b> ${review.customer_name || "-"}
+🎮 <b>Rank:</b> ${review.rank_from ? formatRank(review.rank_from) : "-"} → ${review.rank_to ? formatRank(review.rank_to) : "-"}
+
+<b>Rating Layanan:</b> ${stars} (${review.service_rating}/5)
+${review.worker_rating ? `<b>Rating Worker:</b> ${"⭐".repeat(review.worker_rating)} (${review.worker_rating}/5)` : ""}
+${review.service_comment ? `\n💬 "${review.service_comment}"` : ""}
+
+🔗 Cek di Dashboard Admin → Reviews
+`.trim();
+
+  return sendTelegramMessage(chatId, message);
+}
+
+export async function notifyWorkerReport(report: {
+  order_id: string;
+  report_type: string;
+  report_detail?: string | null;
+  customer_name?: string | null;
+  customer_whatsapp?: string | null;
+  worker_rating?: number | null;
+}): Promise<boolean> {
+  const settings = await getIntegrationSettings();
+  const chatId = settings.telegramAdminGroupId;
+  if (!chatId) return false;
+
+  const typeLabels: Record<string, string> = {
+    cheating: "🎮 Bermain curang / cheat",
+    offering_services: "🚫 Menawarkan jasa di luar ETNYX",
+    rude: "😤 Kasar / tidak sopan",
+    account_issue: "🔐 Masalah akun",
+    other: "❓ Lainnya",
+  };
+
+  const message = `
+🚨🚨🚨 <b>WORKER REPORT!</b> 🚨🚨🚨
+
+📋 <b>Order:</b> ${report.order_id}
+👤 <b>Pelapor:</b> ${report.customer_name || "-"}
+📱 <b>WA:</b> ${report.customer_whatsapp || "-"}
+${report.worker_rating ? `⭐ <b>Rating Worker:</b> ${report.worker_rating}/5` : ""}
+
+⚠️ <b>Jenis Laporan:</b> ${typeLabels[report.report_type] || report.report_type}
+${report.report_detail ? `\n📝 <b>Detail:</b> ${report.report_detail}` : ""}
+
+⚡ <b>SEGERA DITINDAKLANJUTI!</b>
+🔗 Dashboard Admin → Reviews → Reports
+`.trim();
+
+  return sendTelegramMessage(chatId, message);
+}
+
+// ============ WHATSAPP (Fonnte) ============
 export async function sendWhatsAppMessage(
   phone: string,
   message: string

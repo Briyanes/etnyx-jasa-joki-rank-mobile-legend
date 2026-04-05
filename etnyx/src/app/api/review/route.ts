@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import { sanitizeInput } from "@/lib/validation";
+import { notifyNewReview, notifyWorkerReport } from "@/lib/notifications";
 
 // GET: Fetch order info for review form
 export async function GET(request: NextRequest) {
@@ -176,6 +177,28 @@ export async function POST(request: NextRequest) {
         comment: sanitizeInput(serviceComment).slice(0, 500),
         is_featured: false,
         is_visible: false, // Admin must approve
+      });
+    }
+
+    // Send Telegram notifications
+    await notifyNewReview({
+      order_id: orderId,
+      service_rating: serviceRating,
+      service_comment: serviceComment?.trim() || null,
+      worker_rating: workerRating || null,
+      customer_name: customerName?.trim() || null,
+      rank_from: order.current_rank,
+      rank_to: order.target_rank,
+    });
+
+    if (hasWorkerReport && reportType) {
+      await notifyWorkerReport({
+        order_id: orderId,
+        report_type: reportType,
+        report_detail: reportDetail?.trim() || null,
+        customer_name: customerName?.trim() || null,
+        customer_whatsapp: customerWhatsapp?.trim() || null,
+        worker_rating: workerRating || null,
       });
     }
 

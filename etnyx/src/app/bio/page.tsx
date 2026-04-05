@@ -6,7 +6,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { 
   ShoppingCart, Search, MessageCircle,
   ExternalLink, Gift, User,
-  MapPin, Clock, Star, Shield, Zap
+  MapPin, Clock, Star, Shield, Zap, BookOpen, Pencil
 } from "lucide-react";
 
 const translations = {
@@ -25,6 +25,10 @@ const translations = {
     dashboardDesc: "Kelola pesanan & akun kamu",
     websiteTitle: "Website Utama",
     websiteDesc: "etnyx.com",
+    reviewsTitle: "Lihat Review",
+    reviewsDesc: "Baca review dari customer lain",
+    writeReviewTitle: "Tulis Review",
+    writeReviewDesc: "Berikan review & dapatkan skin gratis",
     followUs: "Follow Us",
     startFrom: "Mulai dari",
     rating: "Rating",
@@ -46,6 +50,10 @@ const translations = {
     dashboardDesc: "Manage orders & account",
     websiteTitle: "Main Website",
     websiteDesc: "etnyx.com",
+    reviewsTitle: "See Reviews",
+    reviewsDesc: "Read reviews from other customers",
+    writeReviewTitle: "Write Review",
+    writeReviewDesc: "Leave a review & get a free skin",
     followUs: "Follow Us",
     startFrom: "Start from",
     rating: "Rating",
@@ -124,6 +132,8 @@ export default function BioPage() {
     },
     { href: "/dashboard", icon: Gift, title: t.rewardsTitle, desc: t.rewardsDesc },
     { href: "/dashboard", icon: User, title: t.dashboardTitle, desc: t.dashboardDesc },
+    { href: "/#testimonials", icon: BookOpen, title: t.reviewsTitle, desc: t.reviewsDesc },
+    { href: "/review", icon: Pencil, title: t.writeReviewTitle, desc: t.writeReviewDesc },
     { href: "/", icon: ExternalLink, title: t.websiteTitle, desc: t.websiteDesc },
   ];
 
