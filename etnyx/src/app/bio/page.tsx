@@ -2,40 +2,57 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { 
   ShoppingCart, Search, MessageCircle,
-  ExternalLink,
-  MapPin, Clock
+  ExternalLink, Gift, User,
+  MapPin, Clock, Star, Shield, Zap
 } from "lucide-react";
 
-const links = [
-  {
-    href: "/order",
-    icon: ShoppingCart,
-    title: "Order Joki",
-    desc: "Langsung order push rank",
-    accent: true,
+const translations = {
+  id: {
+    subtitle: "Jasa Joki Mobile Legends",
+    online: "Online 24/7",
+    orderTitle: "Order Joki",
+    orderDesc: "Langsung order push rank",
+    trackTitle: "Lacak Order",
+    trackDesc: "Cek progress order kamu",
+    chatTitle: "Chat WhatsApp",
+    chatDesc: "Tanya langsung ke CS kami",
+    rewardsTitle: "Member Rewards",
+    rewardsDesc: "Cek poin & tukar hadiah",
+    dashboardTitle: "Dashboard",
+    dashboardDesc: "Kelola pesanan & akun kamu",
+    websiteTitle: "Website Utama",
+    websiteDesc: "etnyx.com",
+    followUs: "Follow Us",
+    startFrom: "Mulai dari",
+    rating: "Rating",
+    safe: "Aman 100%",
+    footer: "Jasa joki rank ML terpercaya #1 di Indonesia",
   },
-  {
-    href: "/track",
-    icon: Search,
-    title: "Lacak Order",
-    desc: "Cek progress order kamu",
+  en: {
+    subtitle: "Mobile Legends Boosting Service",
+    online: "Online 24/7",
+    orderTitle: "Order Boost",
+    orderDesc: "Order rank push instantly",
+    trackTitle: "Track Order",
+    trackDesc: "Check your order progress",
+    chatTitle: "Chat WhatsApp",
+    chatDesc: "Ask our CS directly",
+    rewardsTitle: "Member Rewards",
+    rewardsDesc: "Check points & redeem prizes",
+    dashboardTitle: "Dashboard",
+    dashboardDesc: "Manage orders & account",
+    websiteTitle: "Main Website",
+    websiteDesc: "etnyx.com",
+    followUs: "Follow Us",
+    startFrom: "Start from",
+    rating: "Rating",
+    safe: "100% Safe",
+    footer: "#1 Trusted ML rank boosting service in Indonesia",
   },
-  {
-    href: `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "6281414131321"}?text=${encodeURIComponent("Halo kak, mau tanya soal joki ML")}`,
-    icon: MessageCircle,
-    title: "Chat WhatsApp",
-    desc: "Tanya langsung ke CS kami",
-    external: true,
-  },
-  {
-    href: "/",
-    icon: ExternalLink,
-    title: "Website Utama",
-    desc: "etnyx.com",
-  },
-];
+};
 
 const defaultSocials = [
   { href: "https://instagram.com/etnyx_ml", label: "Instagram", icon: InstagramIcon },
@@ -77,6 +94,8 @@ function YoutubeIcon({ className }: { className?: string }) {
 }
 
 export default function BioPage() {
+  const { locale, setLocale } = useLanguage();
+  const t = translations[locale as keyof typeof translations] || translations.id;
   const [socials, setSocials] = useState(defaultSocials);
 
   useEffect(() => {
@@ -96,6 +115,18 @@ export default function BioPage() {
       .catch(() => {});
   }, []);
 
+  const links = [
+    { href: "/order", icon: ShoppingCart, title: t.orderTitle, desc: t.orderDesc, accent: true },
+    { href: "/track", icon: Search, title: t.trackTitle, desc: t.trackDesc },
+    {
+      href: `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "6281414131321"}?text=${encodeURIComponent(locale === "id" ? "Halo kak, mau tanya soal joki ML" : "Hi, I want to ask about ML boosting")}`,
+      icon: MessageCircle, title: t.chatTitle, desc: t.chatDesc, external: true,
+    },
+    { href: "/dashboard", icon: Gift, title: t.rewardsTitle, desc: t.rewardsDesc },
+    { href: "/dashboard", icon: User, title: t.dashboardTitle, desc: t.dashboardDesc },
+    { href: "/", icon: ExternalLink, title: t.websiteTitle, desc: t.websiteDesc },
+  ];
+
   return (
     <div className="min-h-screen bg-background flex flex-col items-center relative overflow-hidden">
       {/* Background effects */}
@@ -105,8 +136,19 @@ export default function BioPage() {
       </div>
 
       <div className="relative z-10 w-full max-w-md mx-auto px-4 py-10">
+        {/* Language toggle */}
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={() => setLocale(locale === "id" ? "en" : "id")}
+            className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-text text-xs hover:bg-white/10 transition-colors"
+          >
+            <span>{locale === "id" ? "🇮🇩" : "🇺🇸"}</span>
+            <span className="font-medium">{locale.toUpperCase()}</span>
+          </button>
+        </div>
+
         {/* Profile Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <div className="relative inline-block mb-4">
             <div className="w-24 h-24 rounded-full border-2 border-accent/30 p-1 mx-auto">
               <Image
@@ -123,12 +165,12 @@ export default function BioPage() {
           </div>
 
           <h1 className="text-xl font-bold text-text tracking-wide">ETNYX</h1>
-          <p className="text-text-muted text-sm mt-1">Jasa Joki Mobile Legends</p>
+          <p className="text-text-muted text-sm mt-1">{t.subtitle}</p>
           
           <div className="flex items-center justify-center gap-3 mt-3 text-text-muted text-xs">
             <span className="flex items-center gap-1">
               <Clock className="w-3 h-3 text-accent" />
-              Online 24/7
+              {t.online}
             </span>
             <span className="w-1 h-1 rounded-full bg-white/20" />
             <span className="flex items-center gap-1">
@@ -138,43 +180,56 @@ export default function BioPage() {
           </div>
         </div>
 
+        {/* Trust badges */}
+        <div className="flex items-center justify-center gap-2 mb-6">
+          <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-[10px] font-semibold">
+            <Zap className="w-3 h-3" />
+            {t.startFrom} Rp 5K
+          </div>
+          <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-[10px] font-semibold">
+            <Star className="w-3 h-3" />
+            {t.rating} 4.9/5
+          </div>
+          <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 text-[10px] font-semibold">
+            <Shield className="w-3 h-3" />
+            {t.safe}
+          </div>
+        </div>
+
         {/* Links */}
         <div className="flex flex-col gap-3 mb-8">
-          {links.map((link) => {
-            const Tag = link.external ? "a" : "a";
-            return (
-              <Tag
-                key={link.title}
-                href={link.href}
-                {...(link.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                className={`group relative flex items-center gap-4 rounded-xl border p-4 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] ${
-                  link.accent
-                    ? "bg-accent/10 border-accent/30 hover:bg-accent/20 hover:border-accent/50 hover:shadow-[0_0_30px_rgba(var(--color-accent-rgb,0,255,200),0.15)]"
-                    : "bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/20"
-                }`}
-              >
-                <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${
-                  link.accent ? "bg-accent/20 text-accent" : "bg-white/5 text-text-muted group-hover:text-accent"
-                } transition-colors`}>
-                  <link.icon className="w-5 h-5" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className={`font-semibold text-sm ${link.accent ? "text-accent" : "text-text"}`}>
-                    {link.title}
-                  </p>
-                  <p className="text-text-muted text-xs truncate">{link.desc}</p>
-                </div>
-                {link.external && (
-                  <ExternalLink className="w-4 h-4 text-text-muted flex-shrink-0" />
-                )}
-              </Tag>
-            );
-          })}
+          {links.map((link) => (
+            <a
+              key={link.title}
+              href={link.href}
+              {...(link.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+              className={`group relative flex items-center gap-4 rounded-xl border p-4 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] ${
+                link.accent
+                  ? "bg-accent/10 border-accent/30 hover:bg-accent/20 hover:border-accent/50 hover:shadow-[0_0_30px_rgba(var(--color-accent-rgb,0,255,200),0.15)]"
+                  : "bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/20"
+              }`}
+            >
+              <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${
+                link.accent ? "bg-accent/20 text-accent" : "bg-white/5 text-text-muted group-hover:text-accent"
+              } transition-colors`}>
+                <link.icon className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className={`font-semibold text-sm ${link.accent ? "text-accent" : "text-text"}`}>
+                  {link.title}
+                </p>
+                <p className="text-text-muted text-xs truncate">{link.desc}</p>
+              </div>
+              {link.external && (
+                <ExternalLink className="w-4 h-4 text-text-muted flex-shrink-0" />
+              )}
+            </a>
+          ))}
         </div>
 
         {/* Social Links */}
         <div className="text-center mb-8">
-          <p className="text-text-muted text-xs font-medium uppercase tracking-widest mb-4">Follow Us</p>
+          <p className="text-text-muted text-xs font-medium uppercase tracking-widest mb-4">{t.followUs}</p>
           <div className="flex justify-center gap-3">
             {socials.map((s) => (
               <a
