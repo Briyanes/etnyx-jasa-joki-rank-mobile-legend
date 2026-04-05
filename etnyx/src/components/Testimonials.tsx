@@ -231,22 +231,6 @@ export default function Testimonials() {
             </div>
           ))}
         </CardCarousel>
-
-        {/* Stats */}
-        <div className="mt-12 grid grid-cols-3 gap-4 max-w-2xl mx-auto">
-          <div className="text-center p-4 bg-surface rounded-xl">
-            <p className="text-2xl md:text-3xl font-bold text-accent">-</p>
-            <p className="text-xs text-muted">{txt.ordersCompleted}</p>
-          </div>
-          <div className="text-center p-4 bg-surface rounded-xl">
-            <p className="text-2xl md:text-3xl font-bold text-primary">4.9</p>
-            <p className="text-xs text-muted">{txt.rating}</p>
-          </div>
-          <div className="text-center p-4 bg-surface rounded-xl">
-            <p className="text-2xl md:text-3xl font-bold text-accent">-</p>
-            <p className="text-xs text-muted">{txt.safe}</p>
-          </div>
-        </div>
       </div>
     </section>
   );
