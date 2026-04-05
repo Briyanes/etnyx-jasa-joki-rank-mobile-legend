@@ -264,6 +264,9 @@ _ETNYX - Push Rank, Tanpa Main_ ⚡
 export async function sendOrderCompletedWA(order: OrderData): Promise<boolean> {
   if (!order.whatsapp) return false;
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.vercel.app";
+  const reviewLink = `${siteUrl}/review?id=${order.order_id}`;
+
   const message = `
 🎉 *Order Selesai!*
 
@@ -274,8 +277,11 @@ Yeay! Order kamu sudah selesai dikerjakan.
 
 Silakan cek akun kamu dan ganti password untuk keamanan.
 
+⭐ *Bantu kami dengan review yuk!*
+Sebagai terima kasih, kamu akan mendapat *skin gratis*! 🎁
+👉 ${reviewLink}
+
 Terima kasih sudah menggunakan ETNYX! ⭐
-Jangan lupa kasih testimoni ya 😊
 
 _ETNYX - Push Rank, Tanpa Main_ ⚡
 `.trim();

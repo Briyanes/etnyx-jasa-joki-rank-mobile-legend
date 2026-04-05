@@ -147,7 +147,7 @@ interface PerStarTier {
   icon: string;
 }
 
-type TabType = "overview" | "orders" | "boosters" | "testimonials" | "portfolio" | "promo" | "customers" | "rewards" | "pricing" | "staff" | "settings";
+type TabType = "overview" | "orders" | "boosters" | "testimonials" | "portfolio" | "promo" | "customers" | "rewards" | "pricing" | "staff" | "reviews" | "settings";
 
 // ---- Tab Config ----
 const TAB_CONFIG: { id: TabType; label: string; icon: typeof BarChart3 }[] = [
@@ -161,6 +161,7 @@ const TAB_CONFIG: { id: TabType; label: string; icon: typeof BarChart3 }[] = [
   { id: "customers", label: "Customers", icon: Users },
   { id: "rewards", label: "Rewards", icon: Gift },
   { id: "staff", label: "Staff", icon: Shield },
+  { id: "reviews", label: "Reviews", icon: MessageCircle },
   { id: "settings", label: "Settings", icon: Settings2 },
 ];
 
@@ -225,6 +226,11 @@ export default function AdminDashboard() {
   const [catalogForm, setCatalogForm] = useState({ name: "", description: "", category: "skin", pointsCost: 500, stock: "" as string, imageUrl: "" });
   const [staffForm, setStaffForm] = useState({ email: "", name: "", password: "", role: "worker", phone: "" });
   const [staffSaving, setStaffSaving] = useState(false);
+
+  // Reviews state
+  interface Review { id: string; order_id: string; service_rating: number; service_comment: string | null; worker_id: string | null; worker_rating: number | null; worker_comment: string | null; has_worker_report: boolean; report_type: string | null; report_detail: string | null; report_status: string | null; customer_name: string | null; customer_whatsapp: string | null; rank_from: string | null; rank_to: string | null; is_visible: boolean; is_featured: boolean; google_reviewed: boolean; admin_notes: string | null; created_at: string }
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewsSubTab, setReviewsSubTab] = useState<"all" | "reports">("all");
 
   // Auth
   const checkAuth = useCallback(async () => {
@@ -324,6 +330,10 @@ export default function AdminDashboard() {
     try { const res = await fetch("/api/staff/users"); const d = await res.json(); setStaffUsers(d.users || []); } catch (e) { console.error(e); }
   }, []);
 
+  const fetchReviews = useCallback(async () => {
+    try { const res = await fetch("/api/admin/reviews"); const d = await res.json(); setReviews(d.reviews || []); } catch (e) { console.error(e); }
+  }, []);
+
 
   // Staff handlers
   const handleSaveStaff = async () => {
@@ -365,7 +375,8 @@ export default function AdminDashboard() {
     else if (activeTab === "boosters") fetchBoosters();
     else if (activeTab === "pricing") fetchPricing();
     else if (activeTab === "staff") fetchStaffUsers();
-  }, [activeTab, statusFilter, loading, fetchOrders, fetchTestimonials, fetchPortfolios, fetchPromoCodes, fetchCustomers, fetchBoosters, fetchPricing, fetchStaffUsers, fetchRewardsCatalog, fetchRedemptions]);
+    else if (activeTab === "reviews") fetchReviews();
+  }, [activeTab, statusFilter, loading, fetchOrders, fetchTestimonials, fetchPortfolios, fetchPromoCodes, fetchCustomers, fetchBoosters, fetchPricing, fetchStaffUsers, fetchRewardsCatalog, fetchRedemptions, fetchReviews]);
 
   const handleLogout = async () => { await fetch("/api/admin/auth", { method: "DELETE" }); router.push("/admin"); };
 
@@ -1883,6 +1894,138 @@ export default function AdminDashboard() {
                       </button>
                     </div>
                   </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ===== REVIEWS TAB ===== */}
+          {activeTab === "reviews" && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex gap-2">
+                  <button onClick={() => setReviewsSubTab("all")} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${reviewsSubTab === "all" ? "bg-accent/20 text-accent" : "bg-white/5 text-text-muted hover:bg-white/10"}`}>
+                    Semua ({reviews.length})
+                  </button>
+                  <button onClick={() => setReviewsSubTab("reports")} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${reviewsSubTab === "reports" ? "bg-red-500/20 text-red-400" : "bg-white/5 text-text-muted hover:bg-white/10"}`}>
+                    ⚠️ Reports ({reviews.filter(r => r.has_worker_report).length})
+                  </button>
+                </div>
+                <button onClick={fetchReviews} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 text-text-muted text-xs hover:bg-white/10">
+                  <RefreshCw className="w-3.5 h-3.5" /> Refresh
+                </button>
+              </div>
+
+              {/* Stats cards */}
+              <div className="grid grid-cols-4 gap-3">
+                <div className="bg-surface rounded-xl border border-white/5 p-4 text-center">
+                  <p className="text-2xl font-bold text-text">{reviews.length}</p>
+                  <p className="text-xs text-text-muted mt-1">Total Reviews</p>
+                </div>
+                <div className="bg-surface rounded-xl border border-white/5 p-4 text-center">
+                  <p className="text-2xl font-bold text-yellow-400">{reviews.length > 0 ? (reviews.reduce((s, r) => s + r.service_rating, 0) / reviews.length).toFixed(1) : "0"}</p>
+                  <p className="text-xs text-text-muted mt-1">Avg Rating</p>
+                </div>
+                <div className="bg-surface rounded-xl border border-white/5 p-4 text-center">
+                  <p className="text-2xl font-bold text-red-400">{reviews.filter(r => r.has_worker_report).length}</p>
+                  <p className="text-xs text-text-muted mt-1">Worker Reports</p>
+                </div>
+                <div className="bg-surface rounded-xl border border-white/5 p-4 text-center">
+                  <p className="text-2xl font-bold text-accent">{reviews.filter(r => r.service_rating >= 4).length}</p>
+                  <p className="text-xs text-text-muted mt-1">Rating 4-5</p>
+                </div>
+              </div>
+
+              {/* Table */}
+              <div className="bg-surface rounded-xl border border-white/5 overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-white/5 bg-white/[0.02]">
+                      <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Order</th>
+                      <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Customer</th>
+                      <th className="text-center text-text-muted text-xs font-medium px-4 py-3">Service</th>
+                      <th className="text-center text-text-muted text-xs font-medium px-4 py-3">Worker</th>
+                      <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Comment</th>
+                      <th className="text-center text-text-muted text-xs font-medium px-4 py-3">Report</th>
+                      <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Date</th>
+                      <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(reviewsSubTab === "reports" ? reviews.filter(r => r.has_worker_report) : reviews).map((r) => (
+                      <tr key={r.id} className={`border-b border-white/5 hover:bg-white/[0.02] ${r.has_worker_report ? "bg-red-500/[0.03]" : ""}`}>
+                        <td className="px-4 py-3 font-mono text-xs text-accent">{r.order_id}</td>
+                        <td className="px-4 py-3">
+                          <p className="text-text text-xs">{r.customer_name || "-"}</p>
+                          {r.customer_whatsapp && <p className="text-text-muted text-[10px]">{r.customer_whatsapp}</p>}
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <span className="text-yellow-400 font-bold">{r.service_rating}</span>
+                          <Star className="w-3 h-3 inline ml-0.5 text-yellow-400 fill-yellow-400" />
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          {r.worker_rating ? (
+                            <><span className="text-yellow-400 font-bold">{r.worker_rating}</span><Star className="w-3 h-3 inline ml-0.5 text-yellow-400 fill-yellow-400" /></>
+                          ) : <span className="text-text-muted text-xs">-</span>}
+                        </td>
+                        <td className="px-4 py-3 max-w-[200px]">
+                          <p className="text-text text-xs truncate">{r.service_comment || "-"}</p>
+                          {r.worker_comment && <p className="text-text-muted text-[10px] truncate mt-0.5">Worker: {r.worker_comment}</p>}
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          {r.has_worker_report ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-red-500/10 text-red-400 border border-red-500/20">
+                              ⚠️ {r.report_type?.replace(/_/g, " ")}
+                            </span>
+                          ) : <span className="text-text-muted text-xs">-</span>}
+                        </td>
+                        <td className="px-4 py-3 text-text-muted text-xs">{new Date(r.created_at).toLocaleDateString("id-ID")}</td>
+                        <td className="px-4 py-3">
+                          <div className="flex gap-1">
+                            <button
+                              onClick={async () => {
+                                await fetch("/api/admin/reviews", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: r.id, is_visible: !r.is_visible }) });
+                                fetchReviews();
+                              }}
+                              className={`text-xs px-2 py-1 rounded ${r.is_visible ? "text-accent" : "text-text-muted"} hover:underline`}
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                            </button>
+                            {r.has_worker_report && r.report_status === "pending" && (
+                              <button
+                                onClick={async () => {
+                                  await fetch("/api/admin/reviews", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: r.id, report_status: "reviewed" }) });
+                                  fetchReviews();
+                                }}
+                                className="text-xs px-2 py-1 rounded text-yellow-400 hover:underline"
+                              >
+                                Reviewed
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {(reviewsSubTab === "reports" ? reviews.filter(r => r.has_worker_report) : reviews).length === 0 && (
+                      <tr><td colSpan={8} className="px-4 py-8 text-center text-text-muted text-sm">Belum ada review</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Report detail modal - shown via click */}
+              {reviewsSubTab === "reports" && reviews.filter(r => r.has_worker_report && r.report_detail).length > 0 && (
+                <div className="bg-red-500/5 border border-red-500/10 rounded-xl p-4 space-y-3">
+                  <h4 className="text-sm font-semibold text-red-400">📋 Report Details</h4>
+                  {reviews.filter(r => r.has_worker_report && r.report_detail).map(r => (
+                    <div key={r.id} className="border-b border-red-500/10 pb-3 last:border-0">
+                      <p className="text-xs text-text-muted">
+                        <span className="font-mono text-accent">{r.order_id}</span> — <span className="text-red-400">{r.report_type?.replace(/_/g, " ")}</span>
+                        {r.report_status && <span className={`ml-2 px-1.5 py-0.5 rounded text-[10px] ${r.report_status === "pending" ? "bg-yellow-500/10 text-yellow-400" : r.report_status === "reviewed" ? "bg-blue-500/10 text-blue-400" : r.report_status === "resolved" ? "bg-green-500/10 text-green-400" : "bg-white/5 text-text-muted"}`}>{r.report_status}</span>}
+                      </p>
+                      <p className="text-sm text-text mt-1">{r.report_detail}</p>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
