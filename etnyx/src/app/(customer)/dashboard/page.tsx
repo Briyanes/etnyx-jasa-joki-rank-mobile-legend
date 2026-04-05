@@ -28,6 +28,27 @@ interface RewardTransaction {
   created_at: string;
 }
 
+interface CatalogItem {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  points_cost: number;
+  image_url: string | null;
+  stock: number | null;
+}
+
+interface Redemption {
+  id: string;
+  catalog_item_id: string;
+  points_spent: number;
+  status: string;
+  admin_notes: string | null;
+  created_at: string;
+  completed_at: string | null;
+  reward_catalog: { name: string; category: string; image_url: string | null };
+}
+
 interface Order {
   id: string;
   order_id: string;
@@ -70,6 +91,9 @@ export default function CustomerDashboard() {
   const [copied, setCopied] = useState(false);
   const [rewardTransactions, setRewardTransactions] = useState<RewardTransaction[]>([]);
   const [rewardLoading, setRewardLoading] = useState(false);
+  const [catalogItems, setCatalogItems] = useState<CatalogItem[]>([]);
+  const [redemptions, setRedemptions] = useState<Redemption[]>([]);
+  const [redeemingId, setRedeemingId] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -115,10 +139,18 @@ export default function CustomerDashboard() {
   const fetchRewards = useCallback(async () => {
     setRewardLoading(true);
     try {
-      const res = await fetch("/api/customer/rewards");
-      if (res.ok) {
-        const data = await res.json();
+      const [txRes, catalogRes] = await Promise.all([
+        fetch("/api/customer/rewards"),
+        fetch("/api/customer/rewards/catalog"),
+      ]);
+      if (txRes.ok) {
+        const data = await txRes.json();
         setRewardTransactions(data.transactions || []);
+      }
+      if (catalogRes.ok) {
+        const data = await catalogRes.json();
+        setCatalogItems(data.items || []);
+        setRedemptions(data.redemptions || []);
       }
     } catch {
       // ignore
@@ -364,6 +396,108 @@ export default function CustomerDashboard() {
                 </div>
               </div>
             </div>
+
+            {/* Reward Shop */}
+            <div className="bg-surface rounded-xl p-6 border border-surface/50">
+              <h3 className="font-bold text-text mb-1">Tukar Poin</h3>
+              <p className="text-muted text-xs mb-4">Kumpulkan poin, tukar dengan hadiah!</p>
+
+              {catalogItems.length === 0 ? (
+                <p className="text-muted text-sm text-center py-4">Belum ada hadiah tersedia</p>
+              ) : (
+                <div className="grid grid-cols-1 gap-3">
+                  {catalogItems.map((item) => {
+                    const canAfford = (customer?.reward_points || 0) >= item.points_cost;
+                    const outOfStock = item.stock !== null && item.stock <= 0;
+                    const categoryEmoji = item.category === "skin" ? "🎨" : item.category === "starlight" ? "⭐" : item.category === "diamond" ? "💎" : item.category === "discount" ? "🏷️" : "🎁";
+
+                    return (
+                      <div key={item.id} className={`rounded-xl border p-4 transition-all ${
+                        outOfStock ? "opacity-50 border-white/5 bg-white/[0.01]" :
+                        canAfford ? "border-primary/30 bg-primary/5" : "border-white/10 bg-white/[0.02]"
+                      }`}>
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-lg">{categoryEmoji}</span>
+                              <p className="font-semibold text-sm text-text truncate">{item.name}</p>
+                            </div>
+                            {item.description && <p className="text-xs text-muted mb-2">{item.description}</p>}
+                            <div className="flex items-center gap-2">
+                              <span className="text-primary font-bold text-sm">{item.points_cost.toLocaleString("id-ID")} poin</span>
+                              {item.stock !== null && (
+                                <span className="text-xs text-muted">· Stok: {item.stock}</span>
+                              )}
+                            </div>
+                          </div>
+                          <button
+                            disabled={!canAfford || outOfStock || redeemingId === item.id}
+                            onClick={async () => {
+                              const gameId = prompt("Masukkan Game ID / User ID kamu:");
+                              if (!gameId) return;
+                              if (!confirm(`Tukar ${item.points_cost} poin untuk "${item.name}"?`)) return;
+                              setRedeemingId(item.id);
+                              try {
+                                const res = await fetch("/api/customer/rewards/catalog", {
+                                  method: "POST",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({ itemId: item.id, gameId }),
+                                });
+                                const data = await res.json();
+                                if (data.success) {
+                                  alert(data.message);
+                                  fetchData();
+                                  fetchRewards();
+                                } else {
+                                  alert(data.error || "Gagal redeem");
+                                }
+                              } catch {
+                                alert("Gagal redeem");
+                              } finally {
+                                setRedeemingId(null);
+                              }
+                            }}
+                            className={`flex-shrink-0 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                              outOfStock ? "bg-white/5 text-muted cursor-not-allowed" :
+                              canAfford ? "bg-primary text-background hover:opacity-90" :
+                              "bg-white/5 text-muted cursor-not-allowed"
+                            }`}
+                          >
+                            {redeemingId === item.id ? "..." : outOfStock ? "Habis" : canAfford ? "Tukar" : "Kurang poin"}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* My Redemptions */}
+            {redemptions && redemptions.length > 0 && (
+              <div className="bg-surface rounded-xl p-6 border border-surface/50">
+                <h3 className="font-bold text-text mb-4">Penukaran Saya</h3>
+                <div className="space-y-3">
+                  {redemptions.map((r) => (
+                    <div key={r.id} className="flex items-center justify-between py-2 border-b border-surface/30 last:border-0">
+                      <div>
+                        <p className="text-sm text-text">{r.reward_catalog?.name || "Item"}</p>
+                        <p className="text-xs text-muted">{new Date(r.created_at).toLocaleDateString("id-ID")}</p>
+                        {r.admin_notes && <p className="text-xs text-accent mt-1">{r.admin_notes}</p>}
+                      </div>
+                      <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                        r.status === "completed" ? "bg-green-500/20 text-green-400" :
+                        r.status === "processing" ? "bg-blue-500/20 text-blue-400" :
+                        r.status === "rejected" ? "bg-red-500/20 text-red-400" :
+                        "bg-yellow-500/20 text-yellow-400"
+                      }`}>
+                        {r.status === "completed" ? "Selesai" : r.status === "processing" ? "Diproses" : r.status === "rejected" ? "Ditolak" : "Menunggu"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Transaction History */}
             <div className="bg-surface rounded-xl p-6 border border-surface/50">

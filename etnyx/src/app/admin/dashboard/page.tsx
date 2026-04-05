@@ -172,7 +172,7 @@ interface IntegrationSettings {
 
 type SettingsSubTab = "cms-sections" | "hero" | "banner" | "faq" | "team" | "social" | "site" | "pixels" | "integrations" | "general";
 
-type TabType = "overview" | "orders" | "boosters" | "testimonials" | "portfolio" | "promo" | "customers" | "pricing" | "staff" | "settings";
+type TabType = "overview" | "orders" | "boosters" | "testimonials" | "portfolio" | "promo" | "customers" | "rewards" | "pricing" | "staff" | "settings";
 
 // ---- Tab Config ----
 const TAB_CONFIG: { id: TabType; label: string; icon: typeof BarChart3 }[] = [
@@ -184,6 +184,7 @@ const TAB_CONFIG: { id: TabType; label: string; icon: typeof BarChart3 }[] = [
   { id: "portfolio", label: "Portfolio", icon: Trophy },
   { id: "promo", label: "Promo", icon: Tag },
   { id: "customers", label: "Customers", icon: Users },
+  { id: "rewards", label: "Rewards", icon: Gift },
   { id: "staff", label: "Staff", icon: Shield },
   { id: "settings", label: "Settings", icon: Settings2 },
 ];
@@ -257,6 +258,16 @@ export default function AdminDashboard() {
   const [staffUsers, setStaffUsers] = useState<StaffUser[]>([]);
   const [staffModal, setStaffModal] = useState(false);
   const [editStaff, setEditStaff] = useState<StaffUser | null>(null);
+
+  // Rewards catalog state
+  interface CatalogItem { id: string; name: string; description: string | null; category: string; points_cost: number; image_url: string | null; stock: number | null; is_active: boolean; sort_order: number }
+  interface RewardRedemption { id: string; points_spent: number; status: string; admin_notes: string | null; game_id: string | null; created_at: string; completed_at: string | null; customers: { name: string; email: string; whatsapp: string } | null; reward_catalog: { name: string; category: string } | null }
+  const [catalogItems, setCatalogItems] = useState<CatalogItem[]>([]);
+  const [rewardRedemptions, setRewardRedemptions] = useState<RewardRedemption[]>([]);
+  const [rewardsSubTab, setRewardsSubTab] = useState<"catalog" | "redemptions">("catalog");
+  const [catalogModal, setCatalogModal] = useState(false);
+  const [editCatalogItem, setEditCatalogItem] = useState<CatalogItem | null>(null);
+  const [catalogForm, setCatalogForm] = useState({ name: "", description: "", category: "skin", pointsCost: 500, stock: "" as string, imageUrl: "" });
   const [staffForm, setStaffForm] = useState({ email: "", name: "", password: "", role: "worker", phone: "" });
   const [staffSaving, setStaffSaving] = useState(false);
 
@@ -297,6 +308,12 @@ export default function AdminDashboard() {
   }, []);
   const fetchCustomers = useCallback(async () => {
     try { const res = await fetch("/api/admin/customers"); const d = await res.json(); setCustomers(d.customers || []); } catch (e) { console.error(e); }
+  }, []);
+  const fetchRewardsCatalog = useCallback(async () => {
+    try { const res = await fetch("/api/admin/rewards/catalog"); const d = await res.json(); setCatalogItems(d.items || []); } catch (e) { console.error(e); }
+  }, []);
+  const fetchRedemptions = useCallback(async () => {
+    try { const res = await fetch("/api/admin/rewards/catalog?view=redemptions"); const d = await res.json(); setRewardRedemptions(d.redemptions || []); } catch (e) { console.error(e); }
   }, []);
   const fetchBoosters = useCallback(async () => {
     try { const res = await fetch("/api/admin/boosters"); const d = await res.json(); setBoosters(d.boosters || []); } catch (e) { console.error(e); }
@@ -407,11 +424,12 @@ export default function AdminDashboard() {
     else if (activeTab === "portfolio") fetchPortfolios();
     else if (activeTab === "promo") fetchPromoCodes();
     else if (activeTab === "customers") fetchCustomers();
+    else if (activeTab === "rewards") { fetchRewardsCatalog(); fetchRedemptions(); }
     else if (activeTab === "boosters") fetchBoosters();
     else if (activeTab === "pricing") fetchPricing();
     else if (activeTab === "staff") fetchStaffUsers();
     else if (activeTab === "settings") fetchCmsSettings();
-  }, [activeTab, statusFilter, loading, fetchOrders, fetchTestimonials, fetchPortfolios, fetchPromoCodes, fetchCustomers, fetchBoosters, fetchPricing, fetchStaffUsers, fetchCmsSettings]);
+  }, [activeTab, statusFilter, loading, fetchOrders, fetchTestimonials, fetchPortfolios, fetchPromoCodes, fetchCustomers, fetchBoosters, fetchPricing, fetchStaffUsers, fetchCmsSettings, fetchRewardsCatalog, fetchRedemptions]);
 
   const handleLogout = async () => { await fetch("/api/admin/auth", { method: "DELETE" }); router.push("/admin"); };
 
@@ -1742,6 +1760,149 @@ export default function AdminDashboard() {
             </div>
           )}
 
+          {/* ===== REWARDS TAB ===== */}
+          {activeTab === "rewards" && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 mb-4">
+                <button onClick={() => setRewardsSubTab("catalog")} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${rewardsSubTab === "catalog" ? "gradient-primary text-white" : "text-text-muted hover:text-text"}`}>Katalog Hadiah</button>
+                <button onClick={() => setRewardsSubTab("redemptions")} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${rewardsSubTab === "redemptions" ? "gradient-primary text-white" : "text-text-muted hover:text-text"}`}>
+                  Penukaran {rewardRedemptions.filter(r => r.status === "pending").length > 0 && <span className="ml-1 px-1.5 py-0.5 bg-red-500 text-white text-xs rounded-full">{rewardRedemptions.filter(r => r.status === "pending").length}</span>}
+                </button>
+              </div>
+
+              {rewardsSubTab === "catalog" && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-text-muted">{catalogItems.length} items</p>
+                    <button onClick={() => { setEditCatalogItem(null); setCatalogForm({ name: "", description: "", category: "skin", pointsCost: 500, stock: "", imageUrl: "" }); setCatalogModal(true); }}
+                      className="flex items-center gap-2 gradient-primary px-4 py-2 rounded-xl text-white text-sm font-medium">
+                      <Plus className="w-4 h-4" /> Tambah Hadiah
+                    </button>
+                  </div>
+                  <div className="bg-surface rounded-xl border border-white/5 overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-white/5 bg-white/[0.02]">
+                          <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Nama</th>
+                          <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Kategori</th>
+                          <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Poin</th>
+                          <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Stok</th>
+                          <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Status</th>
+                          <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Aksi</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {catalogItems.map((item) => (
+                          <tr key={item.id} className={`border-b border-white/5 hover:bg-white/[0.02] ${!item.is_active ? "opacity-50" : ""}`}>
+                            <td className="px-4 py-3 text-text text-xs font-medium">{item.name}</td>
+                            <td className="px-4 py-3 text-xs">
+                              <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                                item.category === "skin" ? "bg-purple-500/10 text-purple-400" :
+                                item.category === "diamond" ? "bg-cyan-500/10 text-cyan-400" :
+                                item.category === "starlight" ? "bg-yellow-500/10 text-yellow-400" :
+                                item.category === "discount" ? "bg-green-500/10 text-green-400" :
+                                "bg-pink-500/10 text-pink-400"
+                              }`}>{item.category}</span>
+                            </td>
+                            <td className="px-4 py-3 text-accent text-xs font-bold">{item.points_cost.toLocaleString("id-ID")}</td>
+                            <td className="px-4 py-3 text-text-muted text-xs">{item.stock ?? "∞"}</td>
+                            <td className="px-4 py-3">
+                              <span className={`px-2 py-0.5 rounded text-xs ${item.is_active ? "bg-green-500/10 text-green-400" : "bg-red-500/10 text-red-400"}`}>
+                                {item.is_active ? "Active" : "Hidden"}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-2">
+                                <button onClick={() => {
+                                  setEditCatalogItem(item);
+                                  setCatalogForm({ name: item.name, description: item.description || "", category: item.category, pointsCost: item.points_cost, stock: item.stock?.toString() || "", imageUrl: item.image_url || "" });
+                                  setCatalogModal(true);
+                                }} className="p-1.5 rounded-lg hover:bg-white/5 text-text-muted hover:text-accent"><Pencil className="w-3.5 h-3.5" /></button>
+                                <button onClick={async () => {
+                                  if (!confirm(`Hapus "${item.name}"?`)) return;
+                                  await fetch("/api/admin/rewards/catalog", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: item.id }) });
+                                  fetchRewardsCatalog();
+                                }} className="p-1.5 rounded-lg hover:bg-white/5 text-text-muted hover:text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {rewardsSubTab === "redemptions" && (
+                <div className="bg-surface rounded-xl border border-white/5 overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-white/5 bg-white/[0.02]">
+                        <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Customer</th>
+                        <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Item</th>
+                        <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Game ID</th>
+                        <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Poin</th>
+                        <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Status</th>
+                        <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Tanggal</th>
+                        <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rewardRedemptions.map((r) => (
+                        <tr key={r.id} className="border-b border-white/5 hover:bg-white/[0.02]">
+                          <td className="px-4 py-3">
+                            <p className="text-text text-xs font-medium">{r.customers?.name || "-"}</p>
+                            <p className="text-text-muted text-[10px]">{r.customers?.whatsapp || ""}</p>
+                          </td>
+                          <td className="px-4 py-3 text-text text-xs">{r.reward_catalog?.name || "-"}</td>
+                          <td className="px-4 py-3 text-accent text-xs font-mono">{r.game_id || "-"}</td>
+                          <td className="px-4 py-3 text-text text-xs font-bold">{r.points_spent}</td>
+                          <td className="px-4 py-3">
+                            <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                              r.status === "completed" ? "bg-green-500/10 text-green-400" :
+                              r.status === "processing" ? "bg-blue-500/10 text-blue-400" :
+                              r.status === "rejected" ? "bg-red-500/10 text-red-400" :
+                              "bg-yellow-500/10 text-yellow-400"
+                            }`}>{r.status}</span>
+                          </td>
+                          <td className="px-4 py-3 text-text-muted text-xs">{new Date(r.created_at).toLocaleDateString("id-ID")}</td>
+                          <td className="px-4 py-3">
+                            {r.status === "pending" && (
+                              <div className="flex items-center gap-1">
+                                <button onClick={async () => {
+                                  await fetch("/api/admin/rewards/catalog", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ redemptionId: r.id, status: "processing" }) });
+                                  fetchRedemptions();
+                                }} className="px-2 py-1 rounded text-xs bg-blue-500/10 text-blue-400 hover:bg-blue-500/20">Proses</button>
+                                <button onClick={async () => {
+                                  if (!confirm("Tolak dan refund poin?")) return;
+                                  await fetch("/api/admin/rewards/catalog", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ redemptionId: r.id, status: "rejected", adminNotes: "Ditolak oleh admin" }) });
+                                  fetchRedemptions();
+                                }} className="px-2 py-1 rounded text-xs bg-red-500/10 text-red-400 hover:bg-red-500/20">Tolak</button>
+                              </div>
+                            )}
+                            {r.status === "processing" && (
+                              <button onClick={async () => {
+                                const notes = prompt("Catatan (opsional, contoh: Skin sudah dikirim):");
+                                await fetch("/api/admin/rewards/catalog", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ redemptionId: r.id, status: "completed", adminNotes: notes || "Hadiah sudah dikirim" }) });
+                                fetchRedemptions();
+                              }} className="px-2 py-1 rounded text-xs bg-green-500/10 text-green-400 hover:bg-green-500/20">Selesai</button>
+                            )}
+                            {(r.status === "completed" || r.status === "rejected") && (
+                              <span className="text-text-muted text-xs">{r.admin_notes || "-"}</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                      {rewardRedemptions.length === 0 && (
+                        <tr><td colSpan={7} className="px-4 py-8 text-center text-text-muted text-sm">Belum ada penukaran</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* ===== STAFF TAB ===== */}
           {activeTab === "staff" && (
             <div className="space-y-4">
@@ -2477,6 +2638,68 @@ export default function AdminDashboard() {
       )}
       {showModal === "booster" && (
         <BoosterModal item={editItem as Booster | null} onSave={handleSaveBooster} onClose={() => { setShowModal(null); setEditItem(null); }} />
+      )}
+
+      {/* Catalog Item Modal */}
+      {catalogModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setCatalogModal(false)}>
+          <div className="bg-surface rounded-xl p-5 w-full max-w-md max-h-[90vh] overflow-y-auto border border-white/10" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-sm font-bold text-text mb-4">{editCatalogItem ? "Edit" : "Tambah"} Hadiah</h3>
+            <div className="space-y-3">
+              <input placeholder="Nama hadiah" value={catalogForm.name} onChange={(e) => setCatalogForm({ ...catalogForm, name: e.target.value })}
+                className="w-full bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-sm" />
+              <textarea placeholder="Deskripsi (opsional)" value={catalogForm.description} onChange={(e) => setCatalogForm({ ...catalogForm, description: e.target.value })}
+                className="w-full bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-sm resize-none" rows={2} />
+              <div>
+                <label className="text-text text-xs mb-1 block">Kategori</label>
+                <select value={catalogForm.category} onChange={(e) => setCatalogForm({ ...catalogForm, category: e.target.value })}
+                  className="w-full bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-sm">
+                  <option value="skin">Skin</option>
+                  <option value="starlight">Starlight</option>
+                  <option value="diamond">Diamond</option>
+                  <option value="discount">Diskon</option>
+                  <option value="merchandise">Merchandise</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-text text-xs mb-1 block">Poin Diperlukan</label>
+                <input type="number" min={1} value={catalogForm.pointsCost} onChange={(e) => setCatalogForm({ ...catalogForm, pointsCost: parseInt(e.target.value) || 0 })}
+                  className="w-full bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-sm" />
+              </div>
+              <div>
+                <label className="text-text text-xs mb-1 block">Stok (kosongkan untuk unlimited)</label>
+                <input type="number" min={0} placeholder="∞" value={catalogForm.stock} onChange={(e) => setCatalogForm({ ...catalogForm, stock: e.target.value })}
+                  className="w-full bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-sm" />
+              </div>
+              <div>
+                <label className="text-text text-xs mb-1 block">URL Gambar (opsional)</label>
+                <input placeholder="https://..." value={catalogForm.imageUrl} onChange={(e) => setCatalogForm({ ...catalogForm, imageUrl: e.target.value })}
+                  className="w-full bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-sm" />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-5">
+              <button onClick={() => setCatalogModal(false)} className="flex-1 px-3 py-2 border border-white/10 rounded-lg text-text-muted text-sm">Batal</button>
+              <button onClick={async () => {
+                if (!catalogForm.name.trim()) return alert("Nama hadiah wajib diisi");
+                if (catalogForm.pointsCost < 1) return alert("Poin harus minimal 1");
+                const body = {
+                  name: catalogForm.name.trim(),
+                  description: catalogForm.description.trim() || null,
+                  category: catalogForm.category,
+                  points_cost: catalogForm.pointsCost,
+                  stock: catalogForm.stock ? parseInt(catalogForm.stock) : null,
+                  image_url: catalogForm.imageUrl.trim() || null,
+                  ...(editCatalogItem ? { id: editCatalogItem.id } : {}),
+                };
+                const method = editCatalogItem ? "PUT" : "POST";
+                const res = await fetch("/api/admin/rewards/catalog", { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+                if (res.ok) { fetchRewardsCatalog(); setCatalogModal(false); } else { const d = await res.json(); alert(d.error || "Gagal menyimpan"); }
+              }} className="flex-1 gradient-primary px-3 py-2 rounded-lg text-white text-sm font-medium">
+                <Save className="w-4 h-4 inline mr-1" /> Simpan
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

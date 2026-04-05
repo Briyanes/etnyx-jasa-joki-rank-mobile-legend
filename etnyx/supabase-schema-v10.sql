@@ -224,7 +224,132 @@ CREATE POLICY "Service role full access on reward_transactions"
   USING (true)
   WITH CHECK (true);
 
--- 8. Initialize existing customers (backfill based on completed orders)
+-- 8. Reward Catalog (items that can be redeemed)
+CREATE TABLE IF NOT EXISTS reward_catalog (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,                        -- "Skin Epic Gusion - Cyber Ops"
+  description TEXT,                          -- Detail item
+  category TEXT NOT NULL DEFAULT 'skin' CHECK (category IN ('skin', 'starlight', 'diamond', 'discount', 'merchandise')),
+  points_cost INTEGER NOT NULL,              -- Harga dalam poin
+  image_url TEXT,                            -- Gambar item
+  stock INTEGER DEFAULT NULL,                -- NULL = unlimited
+  is_active BOOLEAN DEFAULT TRUE,
+  sort_order INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 9. Reward Redemptions (customer claims)
+CREATE TABLE IF NOT EXISTS reward_redemptions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  customer_id UUID NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+  catalog_item_id UUID NOT NULL REFERENCES reward_catalog(id) ON DELETE CASCADE,
+  points_spent INTEGER NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'completed', 'rejected')),
+  admin_notes TEXT,                          -- Admin notes (e.g. "Skin sudah dikirim")
+  game_id TEXT,                              -- Customer's game ID for delivery
+  completed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_reward_catalog_active ON reward_catalog(is_active, sort_order);
+CREATE INDEX IF NOT EXISTS idx_reward_redemptions_customer ON reward_redemptions(customer_id);
+CREATE INDEX IF NOT EXISTS idx_reward_redemptions_status ON reward_redemptions(status);
+
+-- 10. RPC: Redeem catalog item
+CREATE OR REPLACE FUNCTION redeem_catalog_item(
+  p_customer_id UUID,
+  p_item_id UUID,
+  p_game_id TEXT DEFAULT NULL
+)
+RETURNS TABLE (
+  success BOOLEAN,
+  redemption_id UUID,
+  message TEXT
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_item RECORD;
+  v_current_points INTEGER;
+  v_new_balance INTEGER;
+  v_redemption_id UUID;
+BEGIN
+  -- Get item
+  SELECT * INTO v_item FROM reward_catalog WHERE id = p_item_id AND is_active = TRUE;
+  IF v_item IS NULL THEN
+    RETURN QUERY SELECT FALSE, NULL::UUID, 'Item tidak ditemukan atau sudah tidak tersedia'::TEXT;
+    RETURN;
+  END IF;
+
+  -- Check stock
+  IF v_item.stock IS NOT NULL AND v_item.stock <= 0 THEN
+    RETURN QUERY SELECT FALSE, NULL::UUID, 'Stok item habis'::TEXT;
+    RETURN;
+  END IF;
+
+  -- Get customer points with lock
+  SELECT reward_points INTO v_current_points
+  FROM customers WHERE id = p_customer_id FOR UPDATE;
+
+  IF v_current_points IS NULL THEN
+    RETURN QUERY SELECT FALSE, NULL::UUID, 'Customer tidak ditemukan'::TEXT;
+    RETURN;
+  END IF;
+
+  IF v_current_points < v_item.points_cost THEN
+    RETURN QUERY SELECT FALSE, NULL::UUID, ('Poin tidak cukup. Butuh ' || v_item.points_cost || ', kamu punya ' || v_current_points)::TEXT;
+    RETURN;
+  END IF;
+
+  -- Deduct points
+  UPDATE customers
+  SET reward_points = reward_points - v_item.points_cost,
+      updated_at = NOW()
+  WHERE id = p_customer_id
+  RETURNING reward_points INTO v_new_balance;
+
+  -- Decrease stock if limited
+  IF v_item.stock IS NOT NULL THEN
+    UPDATE reward_catalog SET stock = stock - 1 WHERE id = p_item_id;
+  END IF;
+
+  -- Create redemption record
+  INSERT INTO reward_redemptions (customer_id, catalog_item_id, points_spent, game_id)
+  VALUES (p_customer_id, p_item_id, v_item.points_cost, p_game_id)
+  RETURNING id INTO v_redemption_id;
+
+  -- Log transaction
+  INSERT INTO reward_transactions (customer_id, type, points, balance_after, description, created_by)
+  VALUES (p_customer_id, 'redeem', -v_item.points_cost, v_new_balance, 'Tukar: ' || v_item.name, 'system');
+
+  RETURN QUERY SELECT TRUE, v_redemption_id, ('Berhasil tukar ' || v_item.name || '! Sisa poin: ' || v_new_balance)::TEXT;
+END;
+$$;
+
+-- RLS for new tables
+ALTER TABLE reward_catalog ENABLE ROW LEVEL SECURITY;
+ALTER TABLE reward_redemptions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Service role full access on reward_catalog"
+  ON reward_catalog FOR ALL USING (true) WITH CHECK (true);
+
+CREATE POLICY "Service role full access on reward_redemptions"
+  ON reward_redemptions FOR ALL USING (true) WITH CHECK (true);
+
+-- 11. Seed some example catalog items
+INSERT INTO reward_catalog (name, description, category, points_cost, sort_order) VALUES
+  ('Skin Elite pilihan', 'Pilih 1 skin Elite permanen untuk hero favoritmu', 'skin', 300, 1),
+  ('Skin Special pilihan', 'Pilih 1 skin Special permanen untuk hero favoritmu', 'skin', 500, 2),
+  ('Skin Epic pilihan', 'Pilih 1 skin Epic permanen untuk hero favoritmu', 'skin', 1000, 3),
+  ('Starlight Member 1 Bulan', 'Dapatkan Starlight Member + skin eksklusif', 'starlight', 800, 4),
+  ('100 Diamonds', '100 Diamond Mobile Legends', 'diamond', 200, 5),
+  ('250 Diamonds', '250 Diamond Mobile Legends', 'diamond', 450, 6),
+  ('500 Diamonds', '500 Diamond Mobile Legends', 'diamond', 850, 7),
+  ('Diskon 50rb untuk order', 'Potongan Rp 50.000 untuk order berikutnya', 'discount', 500, 8);
+
+-- 12. Initialize existing customers (backfill based on completed orders)
 -- Run this ONCE after creating the schema
 DO $$
 DECLARE
