@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import { 
-  ShoppingCart, Search, MessageCircle, Star, 
-  Calculator, HelpCircle, Users, ExternalLink,
+  ShoppingCart, Search, MessageCircle,
+  ExternalLink,
   MapPin, Clock
 } from "lucide-react";
 
@@ -22,35 +22,11 @@ const links = [
     desc: "Cek progress order kamu",
   },
   {
-    href: "/#pricing",
-    icon: Calculator,
-    title: "Daftar Harga",
-    desc: "Lihat harga semua paket",
-  },
-  {
     href: `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "6281414131321"}?text=${encodeURIComponent("Halo kak, mau tanya soal joki ML")}`,
     icon: MessageCircle,
     title: "Chat WhatsApp",
     desc: "Tanya langsung ke CS kami",
     external: true,
-  },
-  {
-    href: "/#testimonials",
-    icon: Star,
-    title: "Review Customer",
-    desc: "Lihat ulasan pelanggan",
-  },
-  {
-    href: "/#faq",
-    icon: HelpCircle,
-    title: "FAQ",
-    desc: "Pertanyaan yang sering ditanya",
-  },
-  {
-    href: "/#team",
-    icon: Users,
-    title: "Tim Kami",
-    desc: "Kenalan sama booster kami",
   },
   {
     href: "/",
