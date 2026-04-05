@@ -59,3 +59,20 @@ export const siteConfig = {
 };
 
 export const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "6281414131321";
+
+// Reward system tiers
+export const REWARD_TIERS = {
+  bronze:   { name: "Bronze",   minPoints: 0,    discount: 0,  color: "#CD7F32" },
+  silver:   { name: "Silver",   minPoints: 500,  discount: 3,  color: "#C0C0C0" },
+  gold:     { name: "Gold",     minPoints: 1000, discount: 5,  color: "#FFD700" },
+  platinum: { name: "Platinum", minPoints: 2500, discount: 8,  color: "#E5E4E2" },
+} as const;
+
+export type RewardTier = keyof typeof REWARD_TIERS;
+
+// Points config
+export const REWARD_CONFIG = {
+  pointsPerRupiah: 10000,    // 1 point per Rp 10,000
+  redeemRate: 100,           // 1 point = Rp 100
+  minRedeem: 100,            // Minimum 100 points to redeem
+} as const;

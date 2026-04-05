@@ -13,6 +13,18 @@ interface Customer {
   referral_code: string;
   total_orders: number;
   total_spent: number;
+  reward_points: number;
+  reward_tier: string;
+  lifetime_points: number;
+  created_at: string;
+}
+
+interface RewardTransaction {
+  id: string;
+  type: "earn" | "redeem" | "bonus" | "adjust";
+  points: number;
+  balance_after: number;
+  description: string;
   created_at: string;
 }
 
@@ -54,8 +66,10 @@ export default function CustomerDashboard() {
   const [loading, setLoading] = useState(true);
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
-  const [activeTab, setActiveTab] = useState<"orders" | "referral" | "profile">("orders");
+  const [activeTab, setActiveTab] = useState<"orders" | "rewards" | "referral" | "profile">("orders");
   const [copied, setCopied] = useState(false);
+  const [rewardTransactions, setRewardTransactions] = useState<RewardTransaction[]>([]);
+  const [rewardLoading, setRewardLoading] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
@@ -97,6 +111,21 @@ export default function CustomerDashboard() {
       setTimeout(() => setCopied(false), 2000);
     }
   };
+
+  const fetchRewards = useCallback(async () => {
+    setRewardLoading(true);
+    try {
+      const res = await fetch("/api/customer/rewards");
+      if (res.ok) {
+        const data = await res.json();
+        setRewardTransactions(data.transactions || []);
+      }
+    } catch {
+      // ignore
+    } finally {
+      setRewardLoading(false);
+    }
+  }, []);
 
   if (loading) {
     return (
@@ -159,12 +188,16 @@ export default function CustomerDashboard() {
         <div className="flex gap-2 mb-6 border-b border-surface/50">
           {[
             { id: "orders", label: "Order Saya" },
+            { id: "rewards", label: "Rewards" },
             { id: "referral", label: "Referral" },
             { id: "profile", label: "Profile" },
           ].map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as typeof activeTab)}
+              onClick={() => {
+                setActiveTab(tab.id as typeof activeTab);
+                if (tab.id === "rewards" && rewardTransactions.length === 0) fetchRewards();
+              }}
               className={`px-4 py-3 text-sm font-medium transition-colors relative ${
                 activeTab === tab.id ? "text-primary" : "text-muted hover:text-text"
               }`}
@@ -241,6 +274,122 @@ export default function CustomerDashboard() {
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {/* Rewards Tab */}
+        {activeTab === "rewards" && (
+          <div className="max-w-lg mx-auto space-y-6">
+            {/* Tier & Points Card */}
+            <div className="bg-surface rounded-xl p-6 border border-surface/50 text-center">
+              <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold mb-4 ${
+                customer?.reward_tier === "platinum" ? "bg-gray-200/20 text-gray-200" :
+                customer?.reward_tier === "gold" ? "bg-yellow-500/20 text-yellow-400" :
+                customer?.reward_tier === "silver" ? "bg-gray-400/20 text-gray-300" :
+                "bg-amber-700/20 text-amber-600"
+              }`}>
+                <span className="text-lg">
+                  {customer?.reward_tier === "platinum" ? "💎" :
+                   customer?.reward_tier === "gold" ? "🥇" :
+                   customer?.reward_tier === "silver" ? "🥈" : "🥉"}
+                </span>
+                {(customer?.reward_tier || "bronze").charAt(0).toUpperCase() + (customer?.reward_tier || "bronze").slice(1)} Member
+              </div>
+
+              <p className="text-4xl font-bold text-primary mb-1">{(customer?.reward_points || 0).toLocaleString("id-ID")}</p>
+              <p className="text-muted text-sm mb-4">Poin tersedia</p>
+
+              <div className="grid grid-cols-2 gap-4 text-center">
+                <div className="bg-background rounded-lg p-3">
+                  <p className="text-lg font-bold text-text">{(customer?.lifetime_points || 0).toLocaleString("id-ID")}</p>
+                  <p className="text-muted text-xs">Total poin</p>
+                </div>
+                <div className="bg-background rounded-lg p-3">
+                  <p className="text-lg font-bold text-text">{formatRupiah((customer?.reward_points || 0) * 100)}</p>
+                  <p className="text-muted text-xs">Nilai diskon</p>
+                </div>
+              </div>
+
+              {/* Tier Progress */}
+              {customer?.reward_tier !== "platinum" && (
+                <div className="mt-4 text-left">
+                  <div className="flex justify-between text-xs text-muted mb-1">
+                    <span>Progress tier berikutnya</span>
+                    <span>
+                      {customer?.reward_tier === "gold" ? `${customer?.lifetime_points || 0}/2500 (Platinum)` :
+                       customer?.reward_tier === "silver" ? `${customer?.lifetime_points || 0}/1000 (Gold)` :
+                       `${customer?.lifetime_points || 0}/500 (Silver)`}
+                    </span>
+                  </div>
+                  <div className="h-2 bg-background rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-primary rounded-full transition-all"
+                      style={{
+                        width: `${Math.min(100, ((customer?.lifetime_points || 0) / (
+                          customer?.reward_tier === "gold" ? 2500 :
+                          customer?.reward_tier === "silver" ? 1000 : 500
+                        )) * 100)}%`
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* How it works */}
+            <div className="bg-surface rounded-xl p-6 border border-surface/50">
+              <h3 className="font-bold text-text mb-3">Cara Kerja</h3>
+              <div className="space-y-3 text-sm text-muted">
+                <div className="flex items-start gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary text-xs font-bold flex items-center justify-center">1</span>
+                  <p>Setiap order selesai, kamu dapat <span className="text-text font-medium">1 poin per Rp 10.000</span></p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary text-xs font-bold flex items-center justify-center">2</span>
+                  <p>Kumpulkan poin untuk naik tier dan dapat <span className="text-text font-medium">diskon otomatis</span></p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary text-xs font-bold flex items-center justify-center">3</span>
+                  <p>Tukar <span className="text-text font-medium">100 poin = Rp 10.000</span> diskon di order berikutnya</p>
+                </div>
+              </div>
+
+              <div className="mt-4 pt-4 border-t border-surface/50">
+                <p className="text-xs text-muted mb-2">Tier Benefits</p>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="flex items-center gap-2"><span>🥉</span> Bronze — 0%</div>
+                  <div className="flex items-center gap-2"><span>🥈</span> Silver — 3%</div>
+                  <div className="flex items-center gap-2"><span>🥇</span> Gold — 5%</div>
+                  <div className="flex items-center gap-2"><span>💎</span> Platinum — 8%</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Transaction History */}
+            <div className="bg-surface rounded-xl p-6 border border-surface/50">
+              <h3 className="font-bold text-text mb-4">Riwayat Poin</h3>
+              {rewardLoading ? (
+                <div className="flex justify-center py-8">
+                  <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
+                </div>
+              ) : rewardTransactions.length === 0 ? (
+                <p className="text-muted text-sm text-center py-4">Belum ada riwayat poin</p>
+              ) : (
+                <div className="space-y-3">
+                  {rewardTransactions.map((tx) => (
+                    <div key={tx.id} className="flex items-center justify-between py-2 border-b border-surface/30 last:border-0">
+                      <div>
+                        <p className="text-sm text-text">{tx.description}</p>
+                        <p className="text-xs text-muted">{new Date(tx.created_at).toLocaleDateString("id-ID")}</p>
+                      </div>
+                      <span className={`font-bold text-sm ${tx.points > 0 ? "text-green-400" : "text-red-400"}`}>
+                        {tx.points > 0 ? "+" : ""}{tx.points}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
 

@@ -11,7 +11,7 @@ import {
   ShoppingCart, DollarSign, Clock, Activity, ChevronRight, Loader2,
   Plus, Pencil, Trash2, Save, Search, Filter, RefreshCw, LogOut,
   EyeOff, GripVertical, Globe, HelpCircle, Layout, Megaphone, Share2, Building,
-  CreditCard, Mail, MessageCircle, Send, BookOpen, AlertTriangle, Copy, Plug, Link2,
+  CreditCard, Mail, MessageCircle, Send, BookOpen, AlertTriangle, Copy, Plug, Link2, Gift,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 
@@ -103,6 +103,9 @@ interface Customer {
   total_orders: number;
   total_spent: number;
   referral_code: string;
+  reward_points: number;
+  reward_tier: string;
+  lifetime_points: number;
   created_at: string;
 }
 
@@ -1671,7 +1674,7 @@ export default function AdminDashboard() {
           {activeTab === "customers" && (
             <div className="space-y-4">
               <p className="text-sm text-text-muted">{customers.length} customers</p>
-              <div className="bg-surface rounded-xl border border-white/5 overflow-hidden">
+              <div className="bg-surface rounded-xl border border-white/5 overflow-hidden overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-white/5 bg-white/[0.02]">
@@ -1680,8 +1683,10 @@ export default function AdminDashboard() {
                       <th className="text-left text-text-muted text-xs font-medium px-4 py-3">WA</th>
                       <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Orders</th>
                       <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Spent</th>
+                      <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Tier</th>
+                      <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Points</th>
                       <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Referral</th>
-                      <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Joined</th>
+                      <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1692,8 +1697,43 @@ export default function AdminDashboard() {
                         <td className="px-4 py-3 text-text-muted text-xs">{c.whatsapp || "-"}</td>
                         <td className="px-4 py-3 text-accent text-xs font-medium">{c.total_orders}</td>
                         <td className="px-4 py-3 text-text text-xs">{formatRupiah(c.total_spent)}</td>
+                        <td className="px-4 py-3">
+                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                            c.reward_tier === "platinum" ? "bg-gray-200/10 text-gray-200" :
+                            c.reward_tier === "gold" ? "bg-yellow-500/10 text-yellow-400" :
+                            c.reward_tier === "silver" ? "bg-gray-400/10 text-gray-300" :
+                            "bg-amber-700/10 text-amber-600"
+                          }`}>
+                            {c.reward_tier === "platinum" ? "💎" : c.reward_tier === "gold" ? "🥇" : c.reward_tier === "silver" ? "🥈" : "🥉"} {(c.reward_tier || "bronze").charAt(0).toUpperCase() + (c.reward_tier || "bronze").slice(1)}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-text text-xs font-medium">{c.reward_points?.toLocaleString("id-ID") || 0}</td>
                         <td className="px-4 py-3 font-mono text-purple-400 text-xs">{c.referral_code}</td>
-                        <td className="px-4 py-3 text-text-muted text-xs">{new Date(c.created_at).toLocaleDateString("id-ID")}</td>
+                        <td className="px-4 py-3">
+                          <button
+                            onClick={() => {
+                              const input = prompt(`Adjust poin untuk ${c.name}\nCurrent: ${c.reward_points} pts\n\nMasukkan jumlah (positif = tambah, negatif = kurangi):`);
+                              if (!input) return;
+                              const pts = parseInt(input);
+                              if (isNaN(pts) || pts === 0) return;
+                              const desc = prompt("Alasan:") || (pts > 0 ? "Bonus dari admin" : "Pengurangan oleh admin");
+                              fetch("/api/admin/rewards", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ customerId: c.id, points: pts, description: desc }),
+                              }).then(r => r.json()).then(d => {
+                                if (d.success) {
+                                  setCustomers(prev => prev.map(x => x.id === c.id ? { ...x, reward_points: d.newBalance, reward_tier: d.newTier } : x));
+                                  alert(`Berhasil! Saldo baru: ${d.newBalance} poin (${d.newTier})`);
+                                } else alert("Gagal: " + (d.error || "Unknown error"));
+                              }).catch(() => alert("Gagal adjust poin"));
+                            }}
+                            className="p-1.5 rounded-lg hover:bg-white/5 text-text-muted hover:text-accent transition-colors"
+                            title="Adjust Points"
+                          >
+                            <Gift className="w-4 h-4" />
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>

@@ -239,6 +239,34 @@ export async function PUT(request: NextRequest) {
         .in("status", ["assigned", "in_progress"]);
     }
     await supabase.from("orders").update({ completed_at: new Date().toISOString() }).eq("id", orderId);
+
+    // Award reward points to customer (if linked)
+    try {
+      const { data: completedOrder } = await supabase
+        .from("orders")
+        .select("whatsapp, total_price")
+        .eq("id", orderId)
+        .single();
+
+      if (completedOrder?.whatsapp) {
+        const { data: customer } = await supabase
+          .from("customers")
+          .select("id")
+          .eq("whatsapp", completedOrder.whatsapp)
+          .single();
+
+        if (customer) {
+          await supabase.rpc("award_reward_points", {
+            p_customer_id: customer.id,
+            p_order_id: orderId,
+            p_order_amount: completedOrder.total_price,
+            p_description: "Poin dari order selesai",
+          });
+        }
+      }
+    } catch {
+      // Non-blocking: reward point failure should not fail order completion
+    }
   }
 
   // Log

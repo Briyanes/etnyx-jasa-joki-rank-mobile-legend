@@ -171,9 +171,31 @@ export async function PATCH(request: Request) {
         sendOrderConfirmedNotifications(orderData).catch(console.error);
       }
       
-      // Status: completed -> notify customer
+      // Status: completed -> notify customer + award reward points
       if (updates.status === "completed") {
         sendOrderCompletedNotifications(orderData).catch(console.error);
+
+        // Award reward points to linked customer
+        try {
+          if (data.whatsapp) {
+            const { data: customer } = await supabase
+              .from("customers")
+              .select("id")
+              .eq("whatsapp", data.whatsapp)
+              .single();
+
+            if (customer) {
+              await supabase.rpc("award_reward_points", {
+                p_customer_id: customer.id,
+                p_order_id: data.id,
+                p_order_amount: data.total_price,
+                p_description: "Poin dari order selesai",
+              });
+            }
+          }
+        } catch {
+          // Non-blocking
+        }
       }
     }
 

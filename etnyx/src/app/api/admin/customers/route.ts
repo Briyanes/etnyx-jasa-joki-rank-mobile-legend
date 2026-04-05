@@ -9,7 +9,7 @@ export async function GET() {
     const supabase = await createAdminClient();
     const { data, error } = await supabase
       .from("customers")
-      .select("id, email, name, whatsapp, total_orders, total_spent, referral_code, created_at")
+      .select("id, email, name, whatsapp, total_orders, total_spent, referral_code, reward_points, reward_tier, lifetime_points, created_at")
       .order("created_at", { ascending: false });
 
     if (error) throw error;

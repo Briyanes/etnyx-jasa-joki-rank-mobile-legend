@@ -183,7 +183,7 @@ export async function GET() {
     const supabase = await createAdminClient();
     const { data: customer } = await supabase
       .from("customers")
-      .select("id, email, name, whatsapp, referral_code, total_orders, total_spent, created_at")
+      .select("id, email, name, whatsapp, referral_code, total_orders, total_spent, reward_points, reward_tier, lifetime_points, created_at")
       .eq("id", payload.id)
       .single();
 
