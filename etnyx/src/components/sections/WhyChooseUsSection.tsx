@@ -1,7 +1,7 @@
 "use client";
 
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Zap, Shield, Coins, BarChart3, Gamepad2, MessageCircle } from "lucide-react";
+import { Zap, Shield, Coins, BarChart3, Gamepad2, MessageCircle, Gift } from "lucide-react";
 import { ReactNode } from "react";
 import CardCarousel from "@/components/CardCarousel";
 
@@ -12,6 +12,7 @@ const iconMap: Record<string, ReactNode> = {
   chart: <BarChart3 className="w-7 h-7" />,
   gamepad: <Gamepad2 className="w-7 h-7" />,
   message: <MessageCircle className="w-7 h-7" />,
+  gift: <Gift className="w-7 h-7" />,
 };
 
 export default function WhyChooseUsSection() {
@@ -24,6 +25,7 @@ export default function WhyChooseUsSection() {
     { icon: "chart", titleId: "Live Tracking", titleEn: "Live Tracking", descId: "Pantau progress push rank real-time. Update status setiap match selesai.", descEn: "Monitor rank push progress real-time. Status updates after every match." },
     { icon: "gamepad", titleId: "Booster Berpengalaman", titleEn: "Experienced Boosters", descId: "Tim booster rank Mythical Glory. Sudah terbiasa handle berbagai tier.", descEn: "Mythical Glory boosters. Experienced handling various tiers." },
     { icon: "message", titleId: "Support 24/7", titleEn: "24/7 Support", descId: "Tim support siap membantu kapan saja via WhatsApp. Respons < 5 menit.", descEn: "Support team ready to help anytime via WhatsApp. Response < 5 minutes." },
+    { icon: "gift", titleId: "Member Rewards", titleEn: "Member Rewards", descId: "Kumpulkan poin setiap order dan naik tier Bronze → Platinum. Tukar poin dengan skin, diamond, atau diskon hingga 8%.", descEn: "Earn points on every order and level up from Bronze → Platinum. Redeem points for skins, diamonds, or up to 8% discount." },
   ];
 
   const t = {
