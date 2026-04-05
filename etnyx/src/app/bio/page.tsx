@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { 
   ShoppingCart, Search, MessageCircle,
@@ -36,7 +37,7 @@ const links = [
   },
 ];
 
-const socials = [
+const defaultSocials = [
   { href: "https://instagram.com/etnyx_ml", label: "Instagram", icon: InstagramIcon },
   { href: "https://tiktok.com/@etnyx_ml", label: "TikTok", icon: TikTokIcon },
   { href: "https://facebook.com/etnyx_ml", label: "Facebook", icon: FacebookIcon },
@@ -76,6 +77,25 @@ function YoutubeIcon({ className }: { className?: string }) {
 }
 
 export default function BioPage() {
+  const [socials, setSocials] = useState(defaultSocials);
+
+  useEffect(() => {
+    fetch("/api/settings?keys=social_links")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.social_links) {
+          const sl = d.social_links;
+          setSocials([
+            { href: sl.instagram || "https://instagram.com/etnyx_ml", label: "Instagram", icon: InstagramIcon },
+            { href: sl.tiktok || "https://tiktok.com/@etnyx_ml", label: "TikTok", icon: TikTokIcon },
+            { href: sl.facebook || "https://facebook.com/etnyx_ml", label: "Facebook", icon: FacebookIcon },
+            { href: sl.youtube || "https://youtube.com/@etnyx_ml", label: "YouTube", icon: YoutubeIcon },
+          ]);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <div className="min-h-screen bg-background flex flex-col items-center relative overflow-hidden">
       {/* Background effects */}

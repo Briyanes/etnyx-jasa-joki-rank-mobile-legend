@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { WHATSAPP_NUMBER } from "@/lib/constants";
 import Image from "next/image";
@@ -41,6 +42,19 @@ export default function Footer() {
   const { locale } = useLanguage();
   const currentYear = new Date().getFullYear();
 
+  const [socialLinks, setSocialLinks] = useState<{ instagram: string; facebook: string; tiktok: string; youtube: string; whatsapp: string } | null>(null);
+  const [siteInfo, setSiteInfo] = useState<{ supportEmail: string; companyName: string } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/settings?keys=social_links,site_info")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.social_links) setSocialLinks(d.social_links);
+        if (d.site_info) setSiteInfo(d.site_info);
+      })
+      .catch(() => {});
+  }, []);
+
   const t = {
     id: {
       tagline: "Jasa joki Mobile Legends terpercaya. Tinggal order, booster kami yang push rank kamu.",
@@ -76,10 +90,10 @@ export default function Footer() {
   ];
 
   const socials = [
-    { href: "https://instagram.com/etnyx_ml", label: "Instagram", icon: InstagramIcon },
-    { href: "https://facebook.com/etnyx_ml", label: "Facebook", icon: FacebookIcon },
-    { href: "https://tiktok.com/@etnyx_ml", label: "TikTok", icon: TikTokIcon },
-    { href: "https://youtube.com/@etnyx_ml", label: "YouTube", icon: YoutubeIcon },
+    { href: socialLinks?.instagram || "https://instagram.com/etnyx_ml", label: "Instagram", icon: InstagramIcon },
+    { href: socialLinks?.facebook || "https://facebook.com/etnyx_ml", label: "Facebook", icon: FacebookIcon },
+    { href: socialLinks?.tiktok || "https://tiktok.com/@etnyx_ml", label: "TikTok", icon: TikTokIcon },
+    { href: socialLinks?.youtube || "https://youtube.com/@etnyx_ml", label: "YouTube", icon: YoutubeIcon },
   ];
 
   return (
@@ -160,8 +174,8 @@ export default function Footer() {
               <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="text-text-muted hover:text-white text-xs sm:text-sm transition-colors duration-200">
                 WhatsApp
               </a>
-              <a href="mailto:support@etnyx.id" className="text-text-muted hover:text-white text-xs sm:text-sm transition-colors duration-200">
-                support@etnyx.id
+              <a href={`mailto:${siteInfo?.supportEmail || "support@etnyx.id"}`} className="text-text-muted hover:text-white text-xs sm:text-sm transition-colors duration-200">
+                {siteInfo?.supportEmail || "support@etnyx.id"}
               </a>
             </div>
           </div>
@@ -172,7 +186,7 @@ export default function Footer() {
           {/* Bottom bar */}
           <div className="flex flex-col items-center gap-2 sm:gap-3">
             <p className="text-text-muted/40 text-[10px] sm:text-xs tracking-wide">
-              PT Sumber Arto Moro Abadi Kreatif
+              {siteInfo?.companyName || "PT Sumber Arto Moro Abadi Kreatif"}
             </p>
             <div className="flex flex-col sm:flex-row items-center gap-1.5 sm:gap-6">
               <p className="text-text-muted/50 text-[10px] sm:text-xs">

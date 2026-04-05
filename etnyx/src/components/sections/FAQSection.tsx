@@ -102,7 +102,7 @@ export default function FAQSection() {
       .catch(() => {});
   }, []);
 
-  const faqItems = locale === "id" ? (cmsFaqItems || faqItemsId) : faqItemsEn;
+  const faqItems = cmsFaqItems || (locale === "id" ? faqItemsId : faqItemsEn);
 
   const t = {
     id: { title: "FAQ", subtitle: "Pertanyaan yang sering ditanyakan" },
