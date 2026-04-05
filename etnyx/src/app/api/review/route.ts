@@ -158,9 +158,11 @@ export async function POST(request: NextRequest) {
       rank_to: order.target_rank,
     };
 
-    const { error: insertError } = await supabase
+    const { data: insertedReview, error: insertError } = await supabase
       .from("reviews")
-      .insert(reviewData);
+      .insert(reviewData)
+      .select("id")
+      .single();
 
     if (insertError) {
       console.error("Review insert error:", insertError);
@@ -189,6 +191,7 @@ export async function POST(request: NextRequest) {
       customer_name: customerName?.trim() || null,
       rank_from: order.current_rank,
       rank_to: order.target_rank,
+      review_id: insertedReview?.id,
     });
 
     if (hasWorkerReport && reportType) {
@@ -199,6 +202,7 @@ export async function POST(request: NextRequest) {
         customer_name: customerName?.trim() || null,
         customer_whatsapp: customerWhatsapp?.trim() || null,
         worker_rating: workerRating || null,
+        review_id: insertedReview?.id,
       });
     }
 

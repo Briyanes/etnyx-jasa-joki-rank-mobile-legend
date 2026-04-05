@@ -196,6 +196,7 @@ export async function PATCH(request: Request) {
         is_express: data.is_express,
         is_premium: data.is_premium,
         notes: data.notes,
+        db_id: data.id,
       };
 
       // Status: confirmed/in_progress -> notify worker + customer

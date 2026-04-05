@@ -75,7 +75,8 @@ function formatRank(rank: string): string {
 export async function sendTelegramMessage(
   chatId: string,
   message: string,
-  botToken?: string
+  botToken?: string,
+  replyMarkup?: Record<string, unknown>
 ): Promise<boolean> {
   const settings = botToken ? { telegramBotToken: botToken } : await getIntegrationSettings();
   const token = settings.telegramBotToken;
@@ -86,14 +87,17 @@ export async function sendTelegramMessage(
   }
 
   try {
+    const body: Record<string, unknown> = {
+      chat_id: chatId,
+      text: message,
+      parse_mode: "HTML",
+    };
+    if (replyMarkup) body.reply_markup = replyMarkup;
+
     const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: message,
-        parse_mode: "HTML",
-      }),
+      body: JSON.stringify(body),
     });
     
     const data = await res.json();
@@ -108,7 +112,7 @@ export async function sendTelegramMessage(
   }
 }
 
-export async function notifyAdminNewOrder(order: OrderData): Promise<boolean> {
+export async function notifyAdminNewOrder(order: OrderData & { db_id?: string }): Promise<boolean> {
   const settings = await getIntegrationSettings();
   const chatId = settings.telegramAdminGroupId;
 
@@ -131,11 +135,20 @@ ${order.is_express ? "⚡ EXPRESS" : ""}${order.is_premium ? " 👑 PREMIUM" : "
 📝 <b>Catatan:</b> ${order.notes || "-"}
 
 ⏳ <b>Status:</b> Menunggu Konfirmasi
-
-🔗 Konfirmasi di Dashboard Admin
 `.trim();
 
-  return sendTelegramMessage(chatId, message);
+  // Add action buttons if we have the database ID
+  const replyMarkup = order.db_id ? {
+    inline_keyboard: [
+      [
+        { text: "✅ Konfirmasi", callback_data: `confirm:${order.db_id}` },
+        { text: "❌ Tolak", callback_data: `reject:${order.db_id}` },
+      ],
+      [{ text: "📋 Detail", callback_data: `detail:${order.db_id}` }],
+    ],
+  } : undefined;
+
+  return sendTelegramMessage(chatId, message, undefined, replyMarkup);
 }
 
 export async function notifyWorkerConfirmedOrder(order: OrderData): Promise<boolean> {
@@ -163,7 +176,7 @@ ${order.is_express ? "⚡ EXPRESS - PRIORITAS!" : ""}${order.is_premium ? " 👑
   return sendTelegramMessage(chatId, message);
 }
 
-export async function notifyAdminOrderCompleted(order: OrderData): Promise<boolean> {
+export async function notifyAdminOrderCompleted(order: OrderData & { db_id?: string }): Promise<boolean> {
   const settings = await getIntegrationSettings();
   const chatId = settings.telegramAdminGroupId;
   if (!chatId) return false;
@@ -182,10 +195,15 @@ export async function notifyAdminOrderCompleted(order: OrderData): Promise<boole
 💰 <b>Total:</b> ${formatRupiah(order.price)}
 
 📝 Review link sudah dikirim ke customer via WA.
-🔗 Cek di Dashboard Admin
 `.trim();
 
-  return sendTelegramMessage(chatId, message);
+  const replyMarkup = order.db_id ? {
+    inline_keyboard: [
+      [{ text: "📋 Detail", callback_data: `detail:${order.db_id}` }],
+    ],
+  } : undefined;
+
+  return sendTelegramMessage(chatId, message, undefined, replyMarkup);
 }
 
 // ============ WHATSAPP (Fonnte) ============
@@ -199,6 +217,7 @@ export async function notifyNewReview(review: {
   customer_name?: string | null;
   rank_from?: string | null;
   rank_to?: string | null;
+  review_id?: string;
 }): Promise<boolean> {
   const settings = await getIntegrationSettings();
   const chatId = settings.telegramAdminGroupId;
@@ -215,11 +234,18 @@ export async function notifyNewReview(review: {
 <b>Rating Layanan:</b> ${stars} (${review.service_rating}/5)
 ${review.worker_rating ? `<b>Rating Worker:</b> ${"⭐".repeat(review.worker_rating)} (${review.worker_rating}/5)` : ""}
 ${review.service_comment ? `\n💬 "${review.service_comment}"` : ""}
-
-🔗 Cek di Dashboard Admin → Reviews
 `.trim();
 
-  return sendTelegramMessage(chatId, message);
+  const replyMarkup = review.review_id ? {
+    inline_keyboard: [
+      [
+        { text: "👁 Show", callback_data: `review_toggle:${review.review_id}:show` },
+        { text: "🙈 Hide", callback_data: `review_toggle:${review.review_id}:hide` },
+      ],
+    ],
+  } : undefined;
+
+  return sendTelegramMessage(chatId, message, undefined, replyMarkup);
 }
 
 export async function notifyWorkerReport(report: {
@@ -229,6 +255,7 @@ export async function notifyWorkerReport(report: {
   customer_name?: string | null;
   customer_whatsapp?: string | null;
   worker_rating?: number | null;
+  review_id?: string;
 }): Promise<boolean> {
   const settings = await getIntegrationSettings();
   const chatId = settings.telegramAdminGroupId;
@@ -254,10 +281,18 @@ ${report.worker_rating ? `⭐ <b>Rating Worker:</b> ${report.worker_rating}/5` :
 ${report.report_detail ? `\n📝 <b>Detail:</b> ${report.report_detail}` : ""}
 
 ⚡ <b>SEGERA DITINDAKLANJUTI!</b>
-🔗 Dashboard Admin → Reviews → Reports
 `.trim();
 
-  return sendTelegramMessage(chatId, message);
+  const replyMarkup = report.review_id ? {
+    inline_keyboard: [
+      [
+        { text: "✅ Resolved", callback_data: `report:${report.review_id}:resolved` },
+        { text: "❌ Dismiss", callback_data: `report:${report.review_id}:dismissed` },
+      ],
+    ],
+  } : undefined;
+
+  return sendTelegramMessage(chatId, message, undefined, replyMarkup);
 }
 
 // ============ WHATSAPP (Fonnte) ============

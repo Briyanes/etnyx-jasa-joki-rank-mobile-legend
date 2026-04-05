@@ -123,6 +123,7 @@ export async function POST(request: NextRequest) {
         is_express: order.is_express,
         is_premium: order.is_premium,
         notes: order.notes,
+        db_id: order.id,
       };
       
       // Send all notifications (Telegram admin, WA, Email)
