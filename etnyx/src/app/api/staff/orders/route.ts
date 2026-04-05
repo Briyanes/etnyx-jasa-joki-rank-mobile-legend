@@ -264,6 +264,26 @@ export async function PUT(request: NextRequest) {
           });
         }
       }
+
+      // Award referrer bonus points if this order used a referral
+      if (completedOrder) {
+        const { data: referral } = await supabase
+          .from("referrals")
+          .select("id, referrer_id, reward_given")
+          .eq("referred_order_id", orderId)
+          .eq("reward_given", false)
+          .single();
+
+        if (referral) {
+          await supabase.rpc("award_reward_points", {
+            p_customer_id: referral.referrer_id,
+            p_order_id: orderId,
+            p_order_amount: completedOrder.total_price,
+            p_description: "Bonus referral - teman kamu menyelesaikan order",
+          });
+          await supabase.from("referrals").update({ reward_given: true }).eq("id", referral.id);
+        }
+      }
     } catch {
       // Non-blocking: reward point failure should not fail order completion
     }

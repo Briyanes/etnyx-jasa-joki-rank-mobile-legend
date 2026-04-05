@@ -307,6 +307,7 @@ const translations = {
     expressAddon: "Express (+20%)",
     premiumAddon: "Premium (+30%)",
     promoDiscount: "Diskon Promo",
+    tierDiscount: "Diskon Member",
     total: "Total Bayar",
     contact: "Kontak",
     // Buttons
@@ -395,6 +396,7 @@ const translations = {
     expressAddon: "Express (+20%)",
     premiumAddon: "Premium (+30%)",
     promoDiscount: "Promo Discount",
+    tierDiscount: "Member Discount",
     total: "Total",
     contact: "Contact",
     // Buttons
@@ -441,6 +443,8 @@ function OrderPageContent() {
   const [promoMessage, setPromoMessage] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
   const [promoLoading, setPromoLoading] = useState(false);
+  const [tierDiscount, setTierDiscount] = useState(0);
+  const [customerTier, setCustomerTier] = useState<string | null>(null);
   const [selectedPackage, setSelectedPackage] = useState<ProductPackage | null>(
     null
   );
@@ -519,6 +523,16 @@ function OrderPageContent() {
         }
       })
       .catch(() => {/* keep default catalog */});
+  }, []);
+
+  // Fetch customer tier for member discount
+  useEffect(() => {
+    fetch("/api/customer/rewards")
+      .then((res) => { if (!res.ok) throw new Error(); return res.json(); })
+      .then((data) => {
+        if (data.reward_tier) setCustomerTier(data.reward_tier);
+      })
+      .catch(() => {/* not logged in or no tier */});
   }, []);
 
   // Fetch per-star pricing from CMS
@@ -618,7 +632,13 @@ function OrderPageContent() {
     if (form.isPremium) price *= 1.3;
     return Math.round(price);
   })();
-  const finalPrice = Math.max(0, basePrice - promoDiscount);
+  // Calculate tier discount based on base price (before promo)
+  const tierDiscountAmount = (() => {
+    if (!customerTier || customerTier === "bronze") return 0;
+    const discountPct = customerTier === "platinum" ? 8 : customerTier === "gold" ? 5 : customerTier === "silver" ? 3 : 0;
+    return Math.round(basePrice * discountPct / 100);
+  })();
+  const finalPrice = Math.max(0, basePrice - promoDiscount - tierDiscountAmount);
 
   const updateForm = useCallback((updates: Partial<OrderForm>) => {
     setForm((prev) => ({ ...prev, ...updates }));
@@ -837,6 +857,7 @@ function OrderPageContent() {
           isPremium: form.isPremium,
           promoCode: promoApplied ? form.promoCode : undefined,
           promoDiscount,
+          tierDiscount: tierDiscountAmount,
           whatsapp: form.whatsapp,
           email: form.email,
           totalPrice: finalPrice,
@@ -1961,6 +1982,12 @@ function OrderPageContent() {
                         <span>-{formatRupiah(promoDiscount)}</span>
                       </div>
                     )}
+                    {tierDiscountAmount > 0 && (
+                      <div className="flex justify-between text-green-400">
+                        <span>{t.tierDiscount} ({customerTier === "platinum" ? "8%" : customerTier === "gold" ? "5%" : "3%"})</span>
+                        <span>-{formatRupiah(tierDiscountAmount)}</span>
+                      </div>
+                    )}
                     <div className="border-t border-white/10 pt-3 flex justify-between font-bold text-text">
                       <span className="text-lg">{t.total}</span>
                       <span className="gradient-text text-xl">{formatRupiah(finalPrice)}</span>
@@ -2212,6 +2239,12 @@ function OrderPageContent() {
                         <div className="flex justify-between text-green-400">
                           <span>Diskon Promo</span>
                           <span>-{formatRupiah(promoDiscount)}</span>
+                        </div>
+                      )}
+                      {tierDiscountAmount > 0 && (
+                        <div className="flex justify-between text-green-400">
+                          <span>Diskon Member ({customerTier === "platinum" ? "8%" : customerTier === "gold" ? "5%" : "3%"})</span>
+                          <span>-{formatRupiah(tierDiscountAmount)}</span>
                         </div>
                       )}
                       <div className="border-t border-white/10 pt-3 flex justify-between font-bold text-text">

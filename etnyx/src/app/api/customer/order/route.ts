@@ -180,7 +180,25 @@ export async function POST(request: NextRequest) {
     }
 
     // Recalculate final price server-side (never trust client totalPrice with discount)
-    const verifiedTotalPrice = Math.max(0, totalPrice - verifiedDiscount);
+    // Tier discount: look up customer tier by email or whatsapp
+    let verifiedTierDiscount = 0;
+    if (sanitizedEmail || cleanWhatsapp) {
+      try {
+        let customerQuery = supabase.from("customers").select("reward_tier");
+        if (sanitizedEmail) {
+          customerQuery = customerQuery.eq("email", sanitizedEmail);
+        } else {
+          customerQuery = customerQuery.eq("whatsapp", `+62${cleanWhatsapp}`);
+        }
+        const { data: cust } = await customerQuery.single();
+        if (cust?.reward_tier) {
+          const tierDiscountPct = cust.reward_tier === "platinum" ? 8 : cust.reward_tier === "gold" ? 5 : cust.reward_tier === "silver" ? 3 : 0;
+          verifiedTierDiscount = Math.round(totalPrice * tierDiscountPct / 100);
+        }
+      } catch { /* not a member or not found */ }
+    }
+
+    const verifiedTotalPrice = Math.max(0, totalPrice - verifiedDiscount - verifiedTierDiscount);
     const verifiedBasePrice = totalPrice;
 
     // Insert order

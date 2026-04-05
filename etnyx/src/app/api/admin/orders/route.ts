@@ -225,6 +225,25 @@ export async function PATCH(request: Request) {
               });
             }
           }
+
+          // Award referrer bonus points if this order used a referral
+          const { data: referral } = await supabase
+            .from("referrals")
+            .select("id, referrer_id, reward_given")
+            .eq("referred_order_id", data.id)
+            .eq("reward_given", false)
+            .single();
+
+          if (referral) {
+            const referrerBonus = Math.max(1, Math.floor(data.total_price / 10000));
+            await supabase.rpc("award_reward_points", {
+              p_customer_id: referral.referrer_id,
+              p_order_id: data.id,
+              p_order_amount: data.total_price,
+              p_description: "Bonus referral - teman kamu menyelesaikan order",
+            });
+            await supabase.from("referrals").update({ reward_given: true }).eq("id", referral.id);
+          }
         } catch {
           // Non-blocking
         }
