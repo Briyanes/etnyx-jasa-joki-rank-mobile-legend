@@ -10,10 +10,11 @@ import {
   Settings2, Package, Users, Shield, Trophy, Tag, Eye, TrendingUp,
   ShoppingCart, DollarSign, Clock, Activity, Loader2,
   Plus, Pencil, Trash2, Save, Search, Filter, RefreshCw, LogOut,
-  MessageCircle, Send, BookOpen, Copy, Gift,
+  MessageCircle, Send, BookOpen, Copy, Gift, Wallet,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import SettingsTab from "./SettingsTab";
+import PayrollTab from "./PayrollTab";
 
 const LineChart = dynamic(() => import("recharts").then((mod) => mod.LineChart), { ssr: false });
 const Line = dynamic(() => import("recharts").then((mod) => mod.Line), { ssr: false });
@@ -147,7 +148,7 @@ interface PerStarTier {
   icon: string;
 }
 
-type TabType = "overview" | "orders" | "boosters" | "testimonials" | "portfolio" | "promo" | "customers" | "rewards" | "pricing" | "staff" | "reviews" | "settings";
+type TabType = "overview" | "orders" | "boosters" | "testimonials" | "portfolio" | "promo" | "customers" | "rewards" | "pricing" | "staff" | "reviews" | "payroll" | "settings";
 
 // ---- Tab Config ----
 const TAB_CONFIG: { id: TabType; label: string; icon: typeof BarChart3 }[] = [
@@ -161,6 +162,7 @@ const TAB_CONFIG: { id: TabType; label: string; icon: typeof BarChart3 }[] = [
   { id: "customers", label: "Customers", icon: Users },
   { id: "rewards", label: "Rewards", icon: Gift },
   { id: "staff", label: "Staff", icon: Shield },
+  { id: "payroll", label: "Payroll", icon: Wallet },
   { id: "reviews", label: "Reviews", icon: MessageCircle },
   { id: "settings", label: "Settings", icon: Settings2 },
 ];
@@ -2029,6 +2031,11 @@ export default function AdminDashboard() {
                 </div>
               )}
             </div>
+          )}
+
+          {/* ===== PAYROLL TAB ===== */}
+          {activeTab === "payroll" && (
+            <PayrollTab />
           )}
 
           {/* ===== SETTINGS TAB ===== */}

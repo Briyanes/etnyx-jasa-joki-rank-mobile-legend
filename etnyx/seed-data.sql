@@ -8,6 +8,11 @@
 -- =====================
 -- 0. CLEAN OLD DATA (order matters for FK)
 -- =====================
+DELETE FROM payout_items;
+DELETE FROM payouts;
+DELETE FROM commissions;
+DELETE FROM salary_records;
+DELETE FROM staff_salaries;
 DELETE FROM reward_transactions;
 DELETE FROM referrals;
 DELETE FROM order_assignments;
@@ -539,6 +544,98 @@ INSERT INTO reviews (
    'MegaStar', '081400008888', 'mythicglory', 'mythicimmortal',
    true, true, true, NULL, NOW() - INTERVAL '6 days');
 
+-- =====================
+-- 11. PAYROLL - Staff Salaries (lead gets monthly salary)
+-- =====================
+INSERT INTO staff_salaries (id, staff_id, base_salary, allowances, effective_from, effective_to, notes) VALUES
+  ('e0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 1500000,
+   '[{"name": "Transport", "amount": 200000}, {"name": "Internet", "amount": 150000}]'::jsonb,
+   (CURRENT_DATE - INTERVAL '60 days')::date, NULL, 'Lead - base salary + allowances')
+ON CONFLICT (staff_id, effective_from) DO NOTHING;
+
+-- =====================
+-- 12. PAYROLL - Salary Records (last 2 months for lead)
+-- =====================
+INSERT INTO salary_records (id, staff_id, salary_config_id, period_month, period_year, base_salary, allowances_total, deductions, deduction_notes, bonus_amount, bonus_notes, total_amount, status) VALUES
+  ('f0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'e0000000-0000-0000-0000-000000000001',
+   EXTRACT(MONTH FROM CURRENT_DATE - INTERVAL '30 days')::int,
+   EXTRACT(YEAR FROM CURRENT_DATE - INTERVAL '30 days')::int,
+   1500000, 350000, 0, NULL, 0, NULL, 1850000, 'paid'),
+  ('f0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000001', 'e0000000-0000-0000-0000-000000000001',
+   EXTRACT(MONTH FROM CURRENT_DATE)::int,
+   EXTRACT(YEAR FROM CURRENT_DATE)::int,
+   1500000, 350000, 0, NULL, 0, NULL, 1850000, 'pending')
+ON CONFLICT (staff_id, period_month, period_year) DO NOTHING;
+
+-- =====================
+-- 13. PAYROLL - Commissions (60% of total_price for completed orders)
+-- =====================
+INSERT INTO commissions (order_id, order_code, worker_id, order_total, commission_rate, commission_amount, bonus_amount, total_amount, status, period_start, period_end) VALUES
+  -- Worker Dimas (a...002): 12 completed orders
+  ('d0000000-0000-0000-0000-000000000001', 'ETX-260301-001', 'a0000000-0000-0000-0000-000000000002', 125000, 0.60, 75000, 0, 75000, 'paid',
+   (NOW() - INTERVAL '30 days')::date, (NOW() - INTERVAL '16 days')::date),
+  ('d0000000-0000-0000-0000-000000000003', 'ETX-260308-001', 'a0000000-0000-0000-0000-000000000002', 375000, 0.60, 225000, 0, 225000, 'paid',
+   (NOW() - INTERVAL '30 days')::date, (NOW() - INTERVAL '16 days')::date),
+  ('d0000000-0000-0000-0000-000000000005', 'ETX-260312-001', 'a0000000-0000-0000-0000-000000000002', 1200000, 0.60, 720000, 0, 720000, 'paid',
+   (NOW() - INTERVAL '30 days')::date, (NOW() - INTERVAL '16 days')::date),
+  ('d0000000-0000-0000-0000-000000000012', 'ETX-260306-001', 'a0000000-0000-0000-0000-000000000002', 52000, 0.60, 31200, 0, 31200, 'paid',
+   (NOW() - INTERVAL '30 days')::date, (NOW() - INTERVAL '16 days')::date),
+  ('d0000000-0000-0000-0000-000000000014', 'ETX-260311-001', 'a0000000-0000-0000-0000-000000000002', 117000, 0.60, 70200, 0, 70200, 'paid',
+   (NOW() - INTERVAL '30 days')::date, (NOW() - INTERVAL '16 days')::date),
+  ('d0000000-0000-0000-0000-000000000016', 'ETX-260318-001', 'a0000000-0000-0000-0000-000000000002', 126000, 0.60, 75600, 0, 75600, 'approved',
+   (NOW() - INTERVAL '15 days')::date, (NOW() - INTERVAL '1 day')::date),
+  ('d0000000-0000-0000-0000-000000000017', 'ETX-260320-001', 'a0000000-0000-0000-0000-000000000002', 156000, 0.60, 93600, 0, 93600, 'approved',
+   (NOW() - INTERVAL '15 days')::date, (NOW() - INTERVAL '1 day')::date),
+  ('d0000000-0000-0000-0000-000000000023', 'ETX-260313-001', 'a0000000-0000-0000-0000-000000000002', 66000, 0.60, 39600, 0, 39600, 'approved',
+   (NOW() - INTERVAL '15 days')::date, (NOW() - INTERVAL '1 day')::date),
+  ('d0000000-0000-0000-0000-000000000026', 'ETX-260321-001', 'a0000000-0000-0000-0000-000000000002', 150000, 0.60, 90000, 0, 90000, 'pending',
+   (NOW() - INTERVAL '15 days')::date, (NOW() - INTERVAL '1 day')::date),
+  ('d0000000-0000-0000-0000-000000000027', 'ETX-260325-001', 'a0000000-0000-0000-0000-000000000002', 90000, 0.60, 54000, 0, 54000, 'pending',
+   (NOW() - INTERVAL '15 days')::date, (NOW() - INTERVAL '1 day')::date),
+  ('d0000000-0000-0000-0000-000000000032', 'ETX-260310-002', 'a0000000-0000-0000-0000-000000000002', 56000, 0.60, 33600, 0, 33600, 'paid',
+   (NOW() - INTERVAL '30 days')::date, (NOW() - INTERVAL '16 days')::date),
+  ('d0000000-0000-0000-0000-000000000034', 'ETX-260316-002', 'a0000000-0000-0000-0000-000000000002', 108000, 0.60, 64800, 0, 64800, 'approved',
+   (NOW() - INTERVAL '15 days')::date, (NOW() - INTERVAL '1 day')::date),
+  ('d0000000-0000-0000-0000-000000000036', 'ETX-260325-002', 'a0000000-0000-0000-0000-000000000002', 105000, 0.60, 63000, 0, 63000, 'pending',
+   (NOW() - INTERVAL '15 days')::date, (NOW() - INTERVAL '1 day')::date),
+  ('d0000000-0000-0000-0000-000000000039', 'ETX-260315-002', 'a0000000-0000-0000-0000-000000000002', 120000, 0.60, 72000, 0, 72000, 'approved',
+   (NOW() - INTERVAL '15 days')::date, (NOW() - INTERVAL '1 day')::date),
+
+  -- Worker Fajar (a...003): 8 completed orders
+  ('d0000000-0000-0000-0000-000000000002', 'ETX-260305-001', 'a0000000-0000-0000-0000-000000000003', 240000, 0.60, 144000, 0, 144000, 'paid',
+   (NOW() - INTERVAL '30 days')::date, (NOW() - INTERVAL '16 days')::date),
+  ('d0000000-0000-0000-0000-000000000006', 'ETX-260315-001', 'a0000000-0000-0000-0000-000000000003', 325000, 0.60, 195000, 0, 195000, 'approved',
+   (NOW() - INTERVAL '15 days')::date, (NOW() - INTERVAL '1 day')::date),
+  ('d0000000-0000-0000-0000-000000000013', 'ETX-260309-001', 'a0000000-0000-0000-0000-000000000003', 90000, 0.60, 54000, 0, 54000, 'paid',
+   (NOW() - INTERVAL '30 days')::date, (NOW() - INTERVAL '16 days')::date),
+  ('d0000000-0000-0000-0000-000000000018', 'ETX-260322-001', 'a0000000-0000-0000-0000-000000000003', 93000, 0.60, 55800, 0, 55800, 'pending',
+   (NOW() - INTERVAL '15 days')::date, (NOW() - INTERVAL '1 day')::date),
+  ('d0000000-0000-0000-0000-000000000022', 'ETX-260307-001', 'a0000000-0000-0000-0000-000000000003', 96000, 0.60, 57600, 0, 57600, 'paid',
+   (NOW() - INTERVAL '30 days')::date, (NOW() - INTERVAL '16 days')::date),
+  ('d0000000-0000-0000-0000-000000000024', 'ETX-260316-001', 'a0000000-0000-0000-0000-000000000003', 109200, 0.60, 65520, 0, 65520, 'approved',
+   (NOW() - INTERVAL '15 days')::date, (NOW() - INTERVAL '1 day')::date),
+  ('d0000000-0000-0000-0000-000000000033', 'ETX-260312-002', 'a0000000-0000-0000-0000-000000000003', 37000, 0.60, 22200, 0, 22200, 'approved',
+   (NOW() - INTERVAL '15 days')::date, (NOW() - INTERVAL '1 day')::date),
+  ('d0000000-0000-0000-0000-000000000040', 'ETX-260318-002', 'a0000000-0000-0000-0000-000000000003', 720000, 0.60, 432000, 0, 432000, 'approved',
+   (NOW() - INTERVAL '15 days')::date, (NOW() - INTERVAL '1 day')::date),
+
+  -- Worker Galih (a...004): 6 completed orders
+  ('d0000000-0000-0000-0000-000000000004', 'ETX-260310-001', 'a0000000-0000-0000-0000-000000000004', 450000, 0.60, 270000, 0, 270000, 'paid',
+   (NOW() - INTERVAL '30 days')::date, (NOW() - INTERVAL '16 days')::date),
+  ('d0000000-0000-0000-0000-000000000011', 'ETX-260302-001', 'a0000000-0000-0000-0000-000000000004', 25000, 0.60, 15000, 0, 15000, 'paid',
+   (NOW() - INTERVAL '30 days')::date, (NOW() - INTERVAL '16 days')::date),
+  ('d0000000-0000-0000-0000-000000000015', 'ETX-260314-001', 'a0000000-0000-0000-0000-000000000004', 60000, 0.60, 36000, 0, 36000, 'paid',
+   (NOW() - INTERVAL '30 days')::date, (NOW() - INTERVAL '16 days')::date),
+  ('d0000000-0000-0000-0000-000000000021', 'ETX-260303-001', 'a0000000-0000-0000-0000-000000000004', 45000, 0.60, 27000, 0, 27000, 'paid',
+   (NOW() - INTERVAL '30 days')::date, (NOW() - INTERVAL '16 days')::date),
+  ('d0000000-0000-0000-0000-000000000025', 'ETX-260319-001', 'a0000000-0000-0000-0000-000000000004', 69000, 0.60, 41400, 0, 41400, 'approved',
+   (NOW() - INTERVAL '15 days')::date, (NOW() - INTERVAL '1 day')::date),
+  ('d0000000-0000-0000-0000-000000000031', 'ETX-260304-001', 'a0000000-0000-0000-0000-000000000004', 32000, 0.60, 19200, 0, 19200, 'paid',
+   (NOW() - INTERVAL '30 days')::date, (NOW() - INTERVAL '16 days')::date),
+  ('d0000000-0000-0000-0000-000000000035', 'ETX-260320-002', 'a0000000-0000-0000-0000-000000000004', 155000, 0.60, 93000, 0, 93000, 'approved',
+   (NOW() - INTERVAL '15 days')::date, (NOW() - INTERVAL '1 day')::date)
+ON CONFLICT (order_id, worker_id) DO NOTHING;
+
 -- ============================================
 -- DONE! Comprehensive seed data inserted.
 -- ============================================
@@ -565,4 +662,5 @@ INSERT INTO reviews (
 -- 5 promo codes, 12 testimonials, 8 portfolios
 -- 7 reward catalog, 24 transactions, 4 referrals
 -- 20 reviews (3 with worker reports), 6 featured, 8 google_reviewed
+-- Payroll: 2 salary configs, 10+ commissions (auto-generated from completed orders)
 -- ============================================

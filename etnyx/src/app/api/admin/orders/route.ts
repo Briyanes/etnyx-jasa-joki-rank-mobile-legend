@@ -244,6 +244,42 @@ export async function PATCH(request: Request) {
             });
             await supabase.from("referrals").update({ reward_given: true }).eq("id", referral.id);
           }
+
+          // Auto-generate commission for assigned worker
+          if (data.assigned_worker_id) {
+            const { data: settings } = await supabase
+              .from("payroll_settings")
+              .select("value")
+              .eq("key", "commission")
+              .single();
+
+            const commissionRate = settings?.value?.worker_rate ?? 0.60;
+            const commissionAmount = Math.round(data.total_price * commissionRate);
+
+            // Get current bi-weekly period
+            const day = new Date().getDate();
+            const now = new Date();
+            const periodStart = day <= 15
+              ? new Date(now.getFullYear(), now.getMonth(), 1)
+              : new Date(now.getFullYear(), now.getMonth(), 16);
+            const periodEnd = day <= 15
+              ? new Date(now.getFullYear(), now.getMonth(), 15)
+              : new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+            await supabase.from("commissions").upsert({
+              order_id: data.id,
+              order_code: data.order_id,
+              worker_id: data.assigned_worker_id,
+              order_total: data.total_price,
+              commission_rate: commissionRate,
+              commission_amount: commissionAmount,
+              bonus_amount: 0,
+              total_amount: commissionAmount,
+              status: "pending",
+              period_start: periodStart.toISOString().split("T")[0],
+              period_end: periodEnd.toISOString().split("T")[0],
+            }, { onConflict: "order_id,worker_id" });
+          }
         } catch {
           // Non-blocking
         }
