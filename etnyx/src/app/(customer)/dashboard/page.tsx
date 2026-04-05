@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { formatRupiah } from "@/utils/helpers";
 import { siteConfig } from "@/lib/constants";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Customer {
   id: string;
@@ -85,6 +86,7 @@ const statusConfig: Record<string, { label: string; color: string }> = {
 
 export default function CustomerDashboard() {
   const router = useRouter();
+  const { locale } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -95,6 +97,102 @@ export default function CustomerDashboard() {
   const [catalogItems, setCatalogItems] = useState<CatalogItem[]>([]);
   const [redemptions, setRedemptions] = useState<Redemption[]>([]);
   const [redeemingId, setRedeemingId] = useState<string | null>(null);
+
+  const t = locale === "id" ? {
+    hello: "Halo",
+    totalOrder: "Total Order",
+    totalSpent: "Total Spent",
+    inProgress: "In Progress",
+    completed: "Completed",
+    tabs: { orders: "Order Saya", rewards: "Rewards", referral: "Referral", profile: "Profile" },
+    noOrders: "Belum ada order",
+    orderNow: "Order Sekarang",
+    viewDetail: "Lihat Detail →",
+    pointsAvailable: "Poin tersedia",
+    totalPoints: "Total poin",
+    discountValue: "Nilai diskon",
+    nextTier: "Progress tier berikutnya",
+    howItWorks: "Cara Kerja",
+    howStep1: "Setiap order selesai, kamu dapat",
+    howStep1b: "1 poin per Rp 10.000",
+    howStep2: "Kumpulkan poin untuk naik tier dan dapat",
+    howStep2b: "diskon otomatis",
+    howStep3: "Tukar",
+    howStep3b: "100 poin = Rp 10.000",
+    howStep3c: "diskon di order berikutnya",
+    tierBenefits: "Tier Benefits",
+    redeemPoints: "Tukar Poin",
+    redeemDesc: "Kumpulkan poin, tukar dengan hadiah!",
+    noRewards: "Belum ada hadiah tersedia",
+    enterGameId: "Masukkan Game ID / User ID kamu:",
+    confirmRedeem: (pts: number, name: string) => `Tukar ${pts} poin untuk "${name}"?`,
+    redeemFail: "Gagal redeem",
+    outOfStock: "Habis",
+    redeem: "Tukar",
+    notEnough: "Kurang poin",
+    myRedemptions: "Penukaran Saya",
+    statusDone: "Selesai",
+    statusProcessing: "Diproses",
+    statusRejected: "Ditolak",
+    statusWaiting: "Menunggu",
+    pointsHistory: "Riwayat Poin",
+    noPointsHistory: "Belum ada riwayat poin",
+    referralTitle: "Ajak Teman, Dapat Diskon!",
+    referralDesc: "Bagikan kode referral kamu. Teman dapat diskon 10%, kamu dapat Rp 10.000!",
+    referralCode: "Kode Referral Kamu",
+    shareWa: (code: string) => `Cobain jasa joki ML di ETNYX! Pakai kode referral ${code} untuk dapat diskon 10%. ${siteConfig.url}`,
+    name: "Nama",
+    email: "Email",
+    whatsapp: "WhatsApp",
+    memberSince: "Member Sejak",
+  } : {
+    hello: "Hi",
+    totalOrder: "Total Orders",
+    totalSpent: "Total Spent",
+    inProgress: "In Progress",
+    completed: "Completed",
+    tabs: { orders: "My Orders", rewards: "Rewards", referral: "Referral", profile: "Profile" },
+    noOrders: "No orders yet",
+    orderNow: "Order Now",
+    viewDetail: "View Details →",
+    pointsAvailable: "Available points",
+    totalPoints: "Total points",
+    discountValue: "Discount value",
+    nextTier: "Next tier progress",
+    howItWorks: "How it Works",
+    howStep1: "For every completed order, you earn",
+    howStep1b: "1 point per Rp 10,000",
+    howStep2: "Collect points to level up tiers and get",
+    howStep2b: "automatic discounts",
+    howStep3: "Redeem",
+    howStep3b: "100 points = Rp 10,000",
+    howStep3c: "discount on your next order",
+    tierBenefits: "Tier Benefits",
+    redeemPoints: "Redeem Points",
+    redeemDesc: "Collect points, exchange for rewards!",
+    noRewards: "No rewards available",
+    enterGameId: "Enter your Game ID / User ID:",
+    confirmRedeem: (pts: number, name: string) => `Redeem ${pts} points for "${name}"?`,
+    redeemFail: "Redeem failed",
+    outOfStock: "Out of stock",
+    redeem: "Redeem",
+    notEnough: "Not enough",
+    myRedemptions: "My Redemptions",
+    statusDone: "Done",
+    statusProcessing: "Processing",
+    statusRejected: "Rejected",
+    statusWaiting: "Pending",
+    pointsHistory: "Points History",
+    noPointsHistory: "No points history yet",
+    referralTitle: "Invite Friends, Get Discount!",
+    referralDesc: "Share your referral code. Friends get 10% off, you get Rp 10,000!",
+    referralCode: "Your Referral Code",
+    shareWa: (code: string) => `Try ML boosting at ETNYX! Use referral code ${code} for 10% discount. ${siteConfig.url}`,
+    name: "Name",
+    email: "Email",
+    whatsapp: "WhatsApp",
+    memberSince: "Member Since",
+  };
 
   const fetchData = useCallback(async () => {
     try {
@@ -178,7 +276,7 @@ export default function CustomerDashboard() {
           </Link>
           <div className="flex items-center gap-4">
             <span className="text-text hidden sm:block">
-              Halo, <span className="text-primary font-medium">{customer?.name}</span>
+              {t.hello}, <span className="text-primary font-medium">{customer?.name}</span>
             </span>
             <button
               onClick={handleLogout}
@@ -194,23 +292,23 @@ export default function CustomerDashboard() {
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-surface rounded-xl p-4 border border-surface/50">
-            <p className="text-muted text-sm">Total Order</p>
+            <p className="text-muted text-sm">{t.totalOrder}</p>
             <p className="text-2xl font-bold text-text">{orders.length}</p>
           </div>
           <div className="bg-surface rounded-xl p-4 border border-surface/50">
-            <p className="text-muted text-sm">Total Spent</p>
+            <p className="text-muted text-sm">{t.totalSpent}</p>
             <p className="text-xl font-bold text-primary">
               {formatRupiah(orders.reduce((sum, o) => sum + o.total_price, 0))}
             </p>
           </div>
           <div className="bg-surface rounded-xl p-4 border border-surface/50">
-            <p className="text-muted text-sm">In Progress</p>
+            <p className="text-muted text-sm">{t.inProgress}</p>
             <p className="text-2xl font-bold text-accent">
               {orders.filter(o => o.status === "in_progress").length}
             </p>
           </div>
           <div className="bg-surface rounded-xl p-4 border border-surface/50">
-            <p className="text-muted text-sm">Completed</p>
+            <p className="text-muted text-sm">{t.completed}</p>
             <p className="text-2xl font-bold text-green-400">
               {orders.filter(o => o.status === "completed").length}
             </p>
@@ -220,10 +318,10 @@ export default function CustomerDashboard() {
         {/* Tabs */}
         <div className="flex gap-2 mb-6 border-b border-surface/50">
           {[
-            { id: "orders", label: "Order Saya" },
-            { id: "rewards", label: "Rewards" },
-            { id: "referral", label: "Referral" },
-            { id: "profile", label: "Profile" },
+            { id: "orders", label: t.tabs.orders },
+            { id: "rewards", label: t.tabs.rewards },
+            { id: "referral", label: t.tabs.referral },
+            { id: "profile", label: t.tabs.profile },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -248,12 +346,12 @@ export default function CustomerDashboard() {
           <div>
             {orders.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-muted mb-4">Belum ada order</p>
+                <p className="text-muted mb-4">{t.noOrders}</p>
                 <Link
                   href="/#calculator"
                   className="inline-block px-6 py-3 bg-primary text-background font-semibold rounded-xl"
                 >
-                  Order Sekarang
+                  {t.orderNow}
                 </Link>
               </div>
             ) : (
@@ -300,7 +398,7 @@ export default function CustomerDashboard() {
                         href={`/track?id=${order.order_id}`}
                         className="text-sm text-primary hover:underline"
                       >
-                        Lihat Detail →
+                        {t.viewDetail}
                       </Link>
                     </div>
                   </div>
@@ -330,16 +428,16 @@ export default function CustomerDashboard() {
               </div>
 
               <p className="text-4xl font-bold text-primary mb-1">{(customer?.reward_points || 0).toLocaleString("id-ID")}</p>
-              <p className="text-muted text-sm mb-4">Poin tersedia</p>
+              <p className="text-muted text-sm mb-4">{t.pointsAvailable}</p>
 
               <div className="grid grid-cols-2 gap-4 text-center">
                 <div className="bg-background rounded-lg p-3">
                   <p className="text-lg font-bold text-text">{(customer?.lifetime_points || 0).toLocaleString("id-ID")}</p>
-                  <p className="text-muted text-xs">Total poin</p>
+                  <p className="text-muted text-xs">{t.totalPoints}</p>
                 </div>
                 <div className="bg-background rounded-lg p-3">
                   <p className="text-lg font-bold text-text">{formatRupiah((customer?.reward_points || 0) * 100)}</p>
-                  <p className="text-muted text-xs">Nilai diskon</p>
+                  <p className="text-muted text-xs">{t.discountValue}</p>
                 </div>
               </div>
 
@@ -347,7 +445,7 @@ export default function CustomerDashboard() {
               {customer?.reward_tier !== "platinum" && (
                 <div className="mt-4 text-left">
                   <div className="flex justify-between text-xs text-muted mb-1">
-                    <span>Progress tier berikutnya</span>
+                    <span>{t.nextTier}</span>
                     <span>
                       {customer?.reward_tier === "gold" ? `${customer?.lifetime_points || 0}/2500 (Platinum)` :
                        customer?.reward_tier === "silver" ? `${customer?.lifetime_points || 0}/1000 (Gold)` :
@@ -371,24 +469,24 @@ export default function CustomerDashboard() {
 
             {/* How it works */}
             <div className="bg-surface rounded-xl p-6 border border-surface/50">
-              <h3 className="font-bold text-text mb-3">Cara Kerja</h3>
+              <h3 className="font-bold text-text mb-3">{t.howItWorks}</h3>
               <div className="space-y-3 text-sm text-muted">
                 <div className="flex items-start gap-3">
                   <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary text-xs font-bold flex items-center justify-center">1</span>
-                  <p>Setiap order selesai, kamu dapat <span className="text-text font-medium">1 poin per Rp 10.000</span></p>
+                  <p>{t.howStep1} <span className="text-text font-medium">{t.howStep1b}</span></p>
                 </div>
                 <div className="flex items-start gap-3">
                   <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary text-xs font-bold flex items-center justify-center">2</span>
-                  <p>Kumpulkan poin untuk naik tier dan dapat <span className="text-text font-medium">diskon otomatis</span></p>
+                  <p>{t.howStep2} <span className="text-text font-medium">{t.howStep2b}</span></p>
                 </div>
                 <div className="flex items-start gap-3">
                   <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary text-xs font-bold flex items-center justify-center">3</span>
-                  <p>Tukar <span className="text-text font-medium">100 poin = Rp 10.000</span> diskon di order berikutnya</p>
+                  <p>{t.howStep3} <span className="text-text font-medium">{t.howStep3b}</span> {t.howStep3c}</p>
                 </div>
               </div>
 
               <div className="mt-4 pt-4 border-t border-surface/50">
-                <p className="text-xs text-muted mb-2">Tier Benefits</p>
+                <p className="text-xs text-muted mb-2">{t.tierBenefits}</p>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="flex items-center gap-2"><span>🥉</span> Bronze — 0%</div>
                   <div className="flex items-center gap-2"><span>🥈</span> Silver — 3%</div>
@@ -400,11 +498,11 @@ export default function CustomerDashboard() {
 
             {/* Reward Shop */}
             <div className="bg-surface rounded-xl p-6 border border-surface/50">
-              <h3 className="font-bold text-text mb-1">Tukar Poin</h3>
-              <p className="text-muted text-xs mb-4">Kumpulkan poin, tukar dengan hadiah!</p>
+              <h3 className="font-bold text-text mb-1">{t.redeemPoints}</h3>
+              <p className="text-muted text-xs mb-4">{t.redeemDesc}</p>
 
               {catalogItems.length === 0 ? (
-                <p className="text-muted text-sm text-center py-4">Belum ada hadiah tersedia</p>
+                <p className="text-muted text-sm text-center py-4">{t.noRewards}</p>
               ) : (
                 <div className="grid grid-cols-1 gap-3">
                   {catalogItems.map((item) => {
@@ -434,9 +532,9 @@ export default function CustomerDashboard() {
                           <button
                             disabled={!canAfford || outOfStock || redeemingId === item.id}
                             onClick={async () => {
-                              const gameId = prompt("Masukkan Game ID / User ID kamu:");
+                              const gameId = prompt(t.enterGameId);
                               if (!gameId) return;
-                              if (!confirm(`Tukar ${item.points_cost} poin untuk "${item.name}"?`)) return;
+                              if (!confirm(t.confirmRedeem(item.points_cost, item.name))) return;
                               setRedeemingId(item.id);
                               try {
                                 const res = await fetch("/api/customer/rewards/catalog", {
@@ -450,10 +548,10 @@ export default function CustomerDashboard() {
                                   fetchData();
                                   fetchRewards();
                                 } else {
-                                  alert(data.error || "Gagal redeem");
+                                  alert(data.error || t.redeemFail);
                                 }
                               } catch {
-                                alert("Gagal redeem");
+                                alert(t.redeemFail);
                               } finally {
                                 setRedeemingId(null);
                               }
@@ -464,7 +562,7 @@ export default function CustomerDashboard() {
                               "bg-white/5 text-muted cursor-not-allowed"
                             }`}
                           >
-                            {redeemingId === item.id ? "..." : outOfStock ? "Habis" : canAfford ? "Tukar" : "Kurang poin"}
+                            {redeemingId === item.id ? "..." : outOfStock ? t.outOfStock : canAfford ? t.redeem : t.notEnough}
                           </button>
                         </div>
                       </div>
@@ -477,7 +575,7 @@ export default function CustomerDashboard() {
             {/* My Redemptions */}
             {redemptions && redemptions.length > 0 && (
               <div className="bg-surface rounded-xl p-6 border border-surface/50">
-                <h3 className="font-bold text-text mb-4">Penukaran Saya</h3>
+                <h3 className="font-bold text-text mb-4">{t.myRedemptions}</h3>
                 <div className="space-y-3">
                   {redemptions.map((r) => (
                     <div key={r.id} className="flex items-center justify-between py-2 border-b border-surface/30 last:border-0">
@@ -492,7 +590,7 @@ export default function CustomerDashboard() {
                         r.status === "rejected" ? "bg-red-500/20 text-red-400" :
                         "bg-yellow-500/20 text-yellow-400"
                       }`}>
-                        {r.status === "completed" ? "Selesai" : r.status === "processing" ? "Diproses" : r.status === "rejected" ? "Ditolak" : "Menunggu"}
+                        {r.status === "completed" ? t.statusDone : r.status === "processing" ? t.statusProcessing : r.status === "rejected" ? t.statusRejected : t.statusWaiting}
                       </span>
                     </div>
                   ))}
@@ -502,13 +600,13 @@ export default function CustomerDashboard() {
 
             {/* Transaction History */}
             <div className="bg-surface rounded-xl p-6 border border-surface/50">
-              <h3 className="font-bold text-text mb-4">Riwayat Poin</h3>
+              <h3 className="font-bold text-text mb-4">{t.pointsHistory}</h3>
               {rewardLoading ? (
                 <div className="flex justify-center py-8">
                   <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
                 </div>
               ) : rewardTransactions.length === 0 ? (
-                <p className="text-muted text-sm text-center py-4">Belum ada riwayat poin</p>
+                <p className="text-muted text-sm text-center py-4">{t.noPointsHistory}</p>
               ) : (
                 <div className="space-y-3">
                   {rewardTransactions.map((tx) => (
@@ -537,13 +635,13 @@ export default function CustomerDashboard() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-text mb-2">Ajak Teman, Dapat Diskon!</h3>
+              <h3 className="text-xl font-bold text-text mb-2">{t.referralTitle}</h3>
               <p className="text-muted text-sm mb-6">
-                Bagikan kode referral kamu. Teman dapat diskon 10%, kamu dapat Rp 10.000!
+                {t.referralDesc}
               </p>
 
               <div className="bg-background rounded-xl p-4 mb-4">
-                <p className="text-xs text-muted mb-2">Kode Referral Kamu</p>
+                <p className="text-xs text-muted mb-2">{t.referralCode}</p>
                 <div className="flex items-center justify-center gap-3">
                   <span className="text-2xl font-bold text-primary tracking-wider">
                     {customer?.referral_code || "REF-XXXXXX"}
@@ -566,7 +664,7 @@ export default function CustomerDashboard() {
               </div>
 
               <a
-                href={`https://wa.me/?text=${encodeURIComponent(`Cobain jasa joki ML di ETNYX! Pakai kode referral ${customer?.referral_code} untuk dapat diskon 10%. ${siteConfig.url}`)}`}
+                href={`https://wa.me/?text=${encodeURIComponent(t.shareWa(customer?.referral_code || ""))}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-xl transition-all"
@@ -586,19 +684,19 @@ export default function CustomerDashboard() {
             <div className="bg-surface rounded-xl p-6 border border-surface/50">
               <div className="space-y-4">
                 <div>
-                  <p className="text-xs text-muted mb-1">Nama</p>
+                  <p className="text-xs text-muted mb-1">{t.name}</p>
                   <p className="text-text font-medium">{customer?.name}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted mb-1">Email</p>
+                  <p className="text-xs text-muted mb-1">{t.email}</p>
                   <p className="text-text font-medium">{customer?.email}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted mb-1">WhatsApp</p>
+                  <p className="text-xs text-muted mb-1">{t.whatsapp}</p>
                   <p className="text-text font-medium">{customer?.whatsapp || "-"}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted mb-1">Member Sejak</p>
+                  <p className="text-xs text-muted mb-1">{t.memberSince}</p>
                   <p className="text-text font-medium">
                     {customer?.created_at ? new Date(customer.created_at).toLocaleDateString("id-ID") : "-"}
                   </p>
