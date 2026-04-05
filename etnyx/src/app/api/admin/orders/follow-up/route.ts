@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import { verifyAdmin } from "@/lib/admin-auth";
+import { logAdminAction } from "@/lib/audit-log";
 import { siteConfig } from "@/lib/constants";
 import {
   sendWhatsAppMessage,
@@ -115,6 +116,14 @@ export async function POST(request: NextRequest) {
       notes: `Follow-up ${action} via WhatsApp`,
       created_by: auth.user?.email || "admin",
     }).then(() => {});
+
+    logAdminAction({
+      admin_email: auth.user!.email,
+      action: "create",
+      resource_type: "order",
+      resource_id: orderId,
+      details: `Follow-up ${action}: ${sent ? "sent" : "failed"} to ${order.whatsapp}`,
+    });
 
     return NextResponse.json({ 
       success: sent, 

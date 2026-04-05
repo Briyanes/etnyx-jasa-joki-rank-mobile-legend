@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { logAdminAction } from "@/lib/audit-log";
 
 // WhatsApp notification via wa.me link generator
 // In production, integrate with WhatsApp Business API or services like Twilio/Fonnte
@@ -54,8 +55,13 @@ export async function POST(request: Request) {
     // Generate WhatsApp URL
     const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(notifyMessage)}`;
 
-    // In production with WhatsApp Business API, you would send directly:
-    // await sendWhatsAppMessage(phone, notifyMessage);
+    logAdminAction({
+      admin_email: auth.user!.email,
+      action: "create",
+      resource_type: "order",
+      resource_id: orderId,
+      details: `Sent WA notification: ${status} to ${phone}`,
+    });
 
     return NextResponse.json({ 
       success: true, 
