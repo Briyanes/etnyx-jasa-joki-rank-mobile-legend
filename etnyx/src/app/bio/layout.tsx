@@ -13,14 +13,14 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "ETNYX - Link Bio",
   description:
-    "Jasa Joki Mobile Legends terpercaya. Order, cek harga, lacak progress, dan hubungi kami langsung.",
+    "Jasa Joki & Gendong Mobile Legends terpercaya. Order, cek harga, lacak progress, dan hubungi kami langsung.",
   robots: {
     index: false,
     follow: true,
   },
   openGraph: {
     title: "ETNYX - Link Bio",
-    description: "Jasa Joki Mobile Legends terpercaya.",
+    description: "Jasa Joki & Gendong Mobile Legends terpercaya.",
     url: `${siteUrl}/bio`,
     siteName: "ETNYX",
     type: "website",

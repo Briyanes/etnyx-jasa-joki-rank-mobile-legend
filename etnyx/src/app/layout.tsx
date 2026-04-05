@@ -25,14 +25,14 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   // Basic Meta
   title: {
-    default: "ETNYX - Jasa Joki Mobile Legends Terpercaya | Push Rank Cepat & Aman",
+    default: "ETNYX - Jasa Joki & Gendong Mobile Legends Terpercaya | Push Rank Cepat & Aman",
     template: "%s | ETNYX",
   },
   description:
-    "Platform jasa joki Mobile Legends terpercaya di Indonesia. Push rank cepat, aman, tanpa banned. Hitung harga instant, order langsung via WhatsApp.",
+    "Platform jasa joki & gendong Mobile Legends terpercaya di Indonesia. Push rank cepat, aman, tanpa banned. Hitung harga instant, order langsung via WhatsApp.",
   keywords: [
     "joki ml",
-    "jasa joki mobile legends",
+    "jasa joki & gendong mobile legends",
     "push rank ml",
     "joki rank ml",
     "booster ml",
@@ -83,7 +83,7 @@ export const metadata: Metadata = {
     locale: "id_ID",
     url: siteUrl,
     siteName: "ETNYX",
-    title: "ETNYX - Jasa Joki Mobile Legends Terpercaya",
+    title: "ETNYX - Jasa Joki & Gendong Mobile Legends Terpercaya",
     description:
       "Push rank ML cepat & aman. Hitung harga instant, order via WhatsApp. Booster berpengalaman, akun dijaga.",
     images: [
@@ -91,7 +91,7 @@ export const metadata: Metadata = {
         url: `${siteUrl}/og-image.jpg`,
         width: 1200,
         height: 630,
-        alt: "ETNYX - Jasa Joki Mobile Legends Terpercaya",
+        alt: "ETNYX - Jasa Joki & Gendong Mobile Legends Terpercaya",
         type: "image/jpeg",
       },
     ],
@@ -100,7 +100,7 @@ export const metadata: Metadata = {
   // Twitter Card
   twitter: {
     card: "summary_large_image",
-    title: "ETNYX - Jasa Joki Mobile Legends Terpercaya",
+    title: "ETNYX - Jasa Joki & Gendong Mobile Legends Terpercaya",
     description:
       "Push rank ML cepat & aman. Hitung harga instant, order via WhatsApp. Booster berpengalaman, akun dijaga.",
     images: [`${siteUrl}/og-image.jpg`],
@@ -175,7 +175,7 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "WebSite",
               name: "ETNYX",
-              description: "Platform jasa joki Mobile Legends terpercaya di Indonesia",
+              description: "Platform jasa joki & gendong Mobile Legends terpercaya di Indonesia",
               url: siteUrl,
               potentialAction: {
                 "@type": "SearchAction",
@@ -194,7 +194,7 @@ export default function RootLayout({
               name: "ETNYX",
               url: siteUrl,
               logo: `${siteUrl}/logo.png`,
-              description: "Jasa Joki Mobile Legends Terpercaya",
+              description: "Jasa Joki & Gendong Mobile Legends Terpercaya",
               contactPoint: {
                 "@type": "ContactPoint",
                 telephone: "+62-814-1413-1321",
@@ -215,7 +215,7 @@ export default function RootLayout({
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "Service",
-              name: "Jasa Joki Mobile Legends",
+              name: "Jasa Joki & Gendong Mobile Legends",
               description: "Layanan push rank Mobile Legends profesional dengan garansi keamanan",
               provider: {
                 "@type": "Organization",

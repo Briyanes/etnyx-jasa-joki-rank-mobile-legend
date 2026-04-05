@@ -57,7 +57,7 @@ export default function Footer() {
 
   const t = {
     id: {
-      tagline: "Jasa joki Mobile Legends terpercaya. Tinggal order, booster kami yang push rank kamu.",
+      tagline: "Jasa joki & gendong Mobile Legends terpercaya. Tinggal order, booster kami yang push rank kamu.",
       nav: "Navigasi",
       legal: "Legal",
       social: "Ikuti Kami",

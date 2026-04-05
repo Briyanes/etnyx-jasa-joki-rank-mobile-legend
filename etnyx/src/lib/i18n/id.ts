@@ -163,7 +163,7 @@ export const id = {
   
   // Footer
   footer: {
-    tagline: "Platform Jasa Joki Mobile Legends Terpercaya",
+    tagline: "Platform Jasa Joki & Gendong Mobile Legends Terpercaya",
     links: "Tautan",
     contact: "Kontak",
     copyright: "Hak Cipta",

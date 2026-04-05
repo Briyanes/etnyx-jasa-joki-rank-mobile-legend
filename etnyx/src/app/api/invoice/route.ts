@@ -133,7 +133,7 @@ export async function GET(request: NextRequest) {
         <tbody>
           <tr>
             <td>
-              <strong>Jasa Joki Mobile Legends</strong><br>
+              <strong>Jasa Joki & Gendong Mobile Legends</strong><br>
               <span style="color: #666; font-size: 13px;">Push Rank Service</span>
             </td>
             <td>

@@ -5,7 +5,7 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.vercel.app";
 export const metadata: Metadata = {
   title: "Order Joki ML - Pilih Paket Push Rank | ETNYX",
   description:
-    "Order jasa joki Mobile Legends sekarang. Pilih paket push rank dari Warrior hingga Mythic Glory. Harga mulai Rp3.999, proses cepat & aman. Bayar via QRIS, bank transfer, e-wallet.",
+    "Order jasa joki & gendong Mobile Legends sekarang. Pilih paket push rank dari Warrior hingga Mythic Glory. Harga mulai Rp3.999, proses cepat & aman. Bayar via QRIS, bank transfer, e-wallet.",
   keywords: [
     "order joki ml", "joki ml murah", "paket push rank ml", "harga joki mobile legends",
     "joki mythic murah", "order boost ml", "joki rank ml terpercaya",

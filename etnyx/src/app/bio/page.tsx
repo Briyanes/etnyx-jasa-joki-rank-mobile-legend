@@ -11,7 +11,7 @@ import {
 
 const translations = {
   id: {
-    subtitle: "Jasa Joki Mobile Legends",
+    subtitle: "Jasa Joki & Gendong Mobile Legends",
     online: "Online 24/7",
     orderTitle: "Order Joki",
     orderDesc: "Langsung order push rank",

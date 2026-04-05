@@ -40,13 +40,13 @@ export const faqItems: FAQItem[] = [
 export const siteConfig = {
   name: "ETNYX",
   description:
-    "Platform jasa joki Mobile Legends terpercaya. Push rank cepat, aman, tanpa ribet. Hitung harga instant, order langsung via WhatsApp.",
+    "Platform jasa joki & gendong Mobile Legends terpercaya. Push rank cepat, aman, tanpa ribet. Hitung harga instant, order langsung via WhatsApp.",
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.com",
   ogImage: "/og-image.jpg",
   creator: "@etnyx_ml",
   keywords: [
     "joki ml",
-    "jasa joki mobile legends",
+    "jasa joki & gendong mobile legends",
     "push rank ml",
     "joki rank ml",
     "booster ml",
