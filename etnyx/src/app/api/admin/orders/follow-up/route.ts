@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import { verifyAdmin } from "@/lib/admin-auth";
+import { siteConfig } from "@/lib/constants";
 import {
   sendWhatsAppMessage,
   sendOrderCompletedWA,
@@ -52,7 +53,7 @@ export async function POST(request: NextRequest) {
 
       case "follow_up_progress": {
         const progress = order.progress || 0;
-        message = `Halo kak! 👋\n\nUpdate progress order kamu:\n\n*📋 Order ID:* ${order.order_id}\n*📊 Progress:* ${progress}%\n*🎮 Target:* ${order.target_rank}\n\nBooster kami sedang mengerjakan order kamu. Estimasi selesai dalam waktu dekat! 💪\n\nJangan login ke akun selama proses ya! 🔒\n\nTrack order: https://etnyx.com/track?id=${order.order_id}\n\n_ETNYX - Push Rank, Tanpa Main_ ⚡`;
+        message = `Halo kak! 👋\n\nUpdate progress order kamu:\n\n*📋 Order ID:* ${order.order_id}\n*📊 Progress:* ${progress}%\n*🎮 Target:* ${order.target_rank}\n\nBooster kami sedang mengerjakan order kamu. Estimasi selesai dalam waktu dekat! 💪\n\nJangan login ke akun selama proses ya! 🔒\n\nTrack order: ${siteConfig.url}/track?id=${order.order_id}\n\n_ETNYX - Push Rank, Tanpa Main_ ⚡`;
         sent = await sendWhatsAppMessage(order.whatsapp, message);
         break;
       }
@@ -90,7 +91,7 @@ export async function POST(request: NextRequest) {
       }
 
       case "request_review": {
-        message = `Halo kak! 🌟\n\nTerima kasih sudah menggunakan *ETNYX*!\n\n*📋 Order ID:* ${order.order_id}\n*🎮 Rank:* ${order.current_rank} → ${order.target_rank} ✅\n\nKami senang banget order kamu sudah selesai! 🎉\n\nBoleh minta waktunya sebentar untuk kasih *testimoni*? Review kamu sangat berarti buat kami! ⭐\n\nKasih review di: https://etnyx.com/track?id=${order.order_id}\n\nTerima kasih banyak! 🙏\n\n_ETNYX - Push Rank, Tanpa Main_ ⚡`;
+        message = `Halo kak! 🌟\n\nTerima kasih sudah menggunakan *ETNYX*!\n\n*📋 Order ID:* ${order.order_id}\n*🎮 Rank:* ${order.current_rank} → ${order.target_rank} ✅\n\nKami senang banget order kamu sudah selesai! 🎉\n\nBoleh minta waktunya sebentar untuk kasih *testimoni*? Review kamu sangat berarti buat kami! ⭐\n\nKasih review di: ${siteConfig.url}/track?id=${order.order_id}\n\nTerima kasih banyak! 🙏\n\n_ETNYX - Push Rank, Tanpa Main_ ⚡`;
         sent = await sendWhatsAppMessage(order.whatsapp, message);
         break;
       }

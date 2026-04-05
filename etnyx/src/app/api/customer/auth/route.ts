@@ -44,6 +44,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Email dan password diperlukan" }, { status: 400 });
     }
 
+    // Validate email format
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json({ error: "Format email tidak valid" }, { status: 400 });
+    }
+
     const supabase = await createAdminClient();
 
     if (action === "register") {

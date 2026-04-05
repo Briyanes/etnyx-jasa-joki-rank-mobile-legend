@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { formatRupiah } from "@/utils/helpers";
+import { siteConfig } from "@/lib/constants";
 
 interface Customer {
   id: string;
@@ -565,7 +566,7 @@ export default function CustomerDashboard() {
               </div>
 
               <a
-                href={`https://wa.me/?text=${encodeURIComponent(`Cobain jasa joki ML di ETNYX! Pakai kode referral ${customer?.referral_code} untuk dapat diskon 10%. https://etnyx.vercel.app`)}`}
+                href={`https://wa.me/?text=${encodeURIComponent(`Cobain jasa joki ML di ETNYX! Pakai kode referral ${customer?.referral_code} untuk dapat diskon 10%. ${siteConfig.url}`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-xl transition-all"

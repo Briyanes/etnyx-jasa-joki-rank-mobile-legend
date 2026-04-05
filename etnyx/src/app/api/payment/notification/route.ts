@@ -47,8 +47,13 @@ export async function POST(request: NextRequest) {
     } = body;
 
     // Reject requests missing required fields
-    if (!order_id || !signature_key) {
+    if (!order_id || !signature_key || !status_code || gross_amount === undefined) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    // Validate gross_amount is a valid number string
+    if (typeof gross_amount !== "string" || isNaN(parseFloat(gross_amount)) || parseFloat(gross_amount) < 0) {
+      return NextResponse.json({ error: "Invalid gross_amount" }, { status: 400 });
     }
 
     const serverKey = await getMidtransServerKey();

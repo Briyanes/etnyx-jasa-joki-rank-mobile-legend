@@ -61,6 +61,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid rank value" }, { status: 400 });
     }
 
+    // Validate price if provided
+    if (body.total_price !== undefined) {
+      const price = Number(body.total_price);
+      if (isNaN(price) || price < 0 || price > 100000000) {
+        return NextResponse.json({ error: "Invalid price value" }, { status: 400 });
+      }
+    }
+
+    // Validate username length
+    if (body.username.length > 255) {
+      return NextResponse.json({ error: "Username too long" }, { status: 400 });
+    }
+
     // Sanitize string inputs
     const sanitizedBody = {
       ...body,

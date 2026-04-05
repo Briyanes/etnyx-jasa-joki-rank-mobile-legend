@@ -20,6 +20,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Email dan password wajib diisi" }, { status: 400 });
     }
 
+    // Validate email format
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json({ error: "Format email tidak valid" }, { status: 400 });
+    }
+
     const supabase = await createAdminClient();
     const { data: user, error } = await supabase
       .from("staff_users")

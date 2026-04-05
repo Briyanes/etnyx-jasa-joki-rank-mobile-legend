@@ -9,11 +9,15 @@ if (!_key) {
 const ENCRYPTION_KEY: string = _key;
 
 if (ENCRYPTION_KEY.length < 16) {
-  throw new Error(`ENCRYPTION_KEY too short (${ENCRYPTION_KEY.length} chars). Minimum 16, recommended 32.`);
+  throw new Error(`ENCRYPTION_KEY too short (${ENCRYPTION_KEY.length} chars). Minimum 16 characters required.`);
+}
+
+if (ENCRYPTION_KEY.length < 32) {
+  console.warn(`[SECURITY] ENCRYPTION_KEY is ${ENCRYPTION_KEY.length} chars. Recommended: 32+ characters for AES-256.`);
 }
 
 function getEncryptionKey(): Buffer {
-  // Derive exactly 32 bytes for AES-256: truncate if longer, pad if shorter
+  // Pad to 32 bytes for AES-256 if shorter, truncate if longer
   return Buffer.from(ENCRYPTION_KEY.padEnd(32, "0").slice(0, 32));
 }
 

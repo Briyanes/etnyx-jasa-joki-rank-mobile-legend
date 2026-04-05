@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Fix turbopack workspace root warning
+  turbopack: {
+    root: "..",
+  },
   // Security Headers
   async headers() {
     return [

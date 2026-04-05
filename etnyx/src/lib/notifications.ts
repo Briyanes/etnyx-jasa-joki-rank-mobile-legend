@@ -1,5 +1,7 @@
 import { createAdminClient } from "./supabase-server";
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.com";
+
 // ============ Types ============
 interface OrderData {
   order_id: string;
@@ -227,7 +229,7 @@ Terima kasih sudah order di *ETNYX*!
 
 Silakan selesaikan pembayaran untuk memproses order kamu.
 
-Track order: https://etnyx.com/track?id=${order.order_id}
+Track order: ${SITE_URL}/track?id=${order.order_id}
 
 Butuh bantuan? Balas pesan ini! 💬
 
@@ -249,7 +251,7 @@ Halo! Order kamu sudah dikonfirmasi dan sedang dalam pengerjaan oleh booster kam
 *🎮 Target:* ${formatRank(order.target_rank)}
 
 Kamu bisa track progress di:
-https://etnyx.com/track?id=${order.order_id}
+${SITE_URL}/track?id=${order.order_id}
 
 Jangan login ke akun selama proses joki ya! 🔒
 
@@ -362,7 +364,7 @@ export async function sendOrderConfirmationEmail(order: OrderData): Promise<bool
         </table>
         
         <div style="text-align: center; margin: 25px 0;">
-          <a href="https://etnyx.com/track?id=${order.order_id}" 
+          <a href="${SITE_URL}/track?id=${order.order_id}" 
              style="background: linear-gradient(135deg, #6366F1, #2DD4BF); color: white; padding: 14px 35px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
             Track Order
           </a>
