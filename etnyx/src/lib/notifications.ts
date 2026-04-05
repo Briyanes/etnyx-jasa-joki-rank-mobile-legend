@@ -163,6 +163,31 @@ ${order.is_express ? "⚡ EXPRESS - PRIORITAS!" : ""}${order.is_premium ? " 👑
   return sendTelegramMessage(chatId, message);
 }
 
+export async function notifyAdminOrderCompleted(order: OrderData): Promise<boolean> {
+  const settings = await getIntegrationSettings();
+  const chatId = settings.telegramAdminGroupId;
+  if (!chatId) return false;
+
+  const message = `
+✅ <b>ORDER SELESAI!</b>
+
+📋 <b>Order ID:</b> ${order.order_id}
+👤 <b>Username:</b> ${order.username}
+📱 <b>WhatsApp:</b> ${order.whatsapp || "-"}
+
+🎮 <b>Detail:</b>
+• Rank: ${formatRank(order.current_rank)} → ${formatRank(order.target_rank)}
+• Paket: ${order.package}
+
+💰 <b>Total:</b> ${formatRupiah(order.price)}
+
+📝 Review link sudah dikirim ke customer via WA.
+🔗 Cek di Dashboard Admin
+`.trim();
+
+  return sendTelegramMessage(chatId, message);
+}
+
 // ============ WHATSAPP (Fonnte) ============
 
 // ============ TELEGRAM: Reviews & Worker Reports ============
@@ -482,5 +507,6 @@ export async function sendOrderConfirmedNotifications(order: OrderData): Promise
 export async function sendOrderCompletedNotifications(order: OrderData): Promise<void> {
   await Promise.allSettled([
     sendOrderCompletedWA(order),
+    notifyAdminOrderCompleted(order),
   ]);
 }

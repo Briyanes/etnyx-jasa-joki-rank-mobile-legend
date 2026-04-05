@@ -3,6 +3,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import { verifyAdmin } from "@/lib/admin-auth";
+import { logAdminAction } from "@/lib/audit-log";
 
 // GET: Fetch all reviews
 export async function GET() {
@@ -57,6 +58,8 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Failed to update review" }, { status: 500 });
   }
 
+  logAdminAction({ admin_email: auth.user!.email, action: "update", resource_type: "testimonial", resource_id: id, details: `Updated review: ${Object.keys(updateData).join(", ")}` });
+
   return NextResponse.json({ success: true });
 }
 
@@ -79,6 +82,8 @@ export async function DELETE(request: Request) {
   if (error) {
     return NextResponse.json({ error: "Failed to delete review" }, { status: 500 });
   }
+
+  logAdminAction({ admin_email: auth.user!.email, action: "delete", resource_type: "testimonial", resource_id: id, details: "Deleted review" });
 
   return NextResponse.json({ success: true });
 }

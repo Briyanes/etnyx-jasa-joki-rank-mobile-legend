@@ -3,9 +3,39 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
+
+const translations = {
+  id: {
+    subtitle: "Login ke akun kamu",
+    email: "Email",
+    password: "Password",
+    loginBtn: "Login",
+    loading: "Loading...",
+    noAccount: "Belum punya akun?",
+    register: "Daftar",
+    back: "← Kembali ke Home",
+    errorDefault: "Login gagal",
+    errorGeneric: "Terjadi kesalahan. Coba lagi.",
+  },
+  en: {
+    subtitle: "Login to your account",
+    email: "Email",
+    password: "Password",
+    loginBtn: "Login",
+    loading: "Loading...",
+    noAccount: "Don't have an account?",
+    register: "Register",
+    back: "← Back to Home",
+    errorDefault: "Login failed",
+    errorGeneric: "Something went wrong. Try again.",
+  },
+};
 
 export default function LoginPage() {
   const router = useRouter();
+  const { locale } = useLanguage();
+  const t = translations[locale as keyof typeof translations] || translations.id;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -26,13 +56,13 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Login gagal");
+        setError(data.error || t.errorDefault);
         return;
       }
 
       router.push("/dashboard");
     } catch {
-      setError("Terjadi kesalahan. Coba lagi.");
+      setError(t.errorGeneric);
     } finally {
       setLoading(false);
     }
@@ -46,7 +76,7 @@ export default function LoginPage() {
           <Link href="/" className="text-3xl font-bold text-primary">
             ETNYX
           </Link>
-          <p className="text-muted mt-2">Login ke akun kamu</p>
+          <p className="text-muted mt-2">{t.subtitle}</p>
         </div>
 
         {/* Form Card */}
@@ -55,7 +85,7 @@ export default function LoginPage() {
             {/* Email */}
             <div>
               <label htmlFor="email" className="block text-sm text-muted mb-2">
-                Email
+                {t.email}
               </label>
               <input
                 id="email"
@@ -71,7 +101,7 @@ export default function LoginPage() {
             {/* Password */}
             <div>
               <label htmlFor="password" className="block text-sm text-muted mb-2">
-                Password
+                {t.password}
               </label>
               <input
                 id="password"
@@ -97,15 +127,15 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full py-3 bg-primary hover:bg-primary/90 text-background font-semibold rounded-xl transition-all disabled:opacity-50"
             >
-              {loading ? "Loading..." : "Login"}
+              {loading ? t.loading : t.loginBtn}
             </button>
           </form>
 
           {/* Register Link */}
           <p className="text-center text-muted text-sm mt-6">
-            Belum punya akun?{" "}
+            {t.noAccount}{" "}
             <Link href="/register" className="text-primary hover:underline">
-              Daftar
+              {t.register}
             </Link>
           </p>
         </div>
@@ -113,7 +143,7 @@ export default function LoginPage() {
         {/* Back to Home */}
         <p className="text-center mt-6">
           <Link href="/" className="text-muted hover:text-text text-sm">
-            ← Kembali ke Home
+            {t.back}
           </Link>
         </p>
       </div>

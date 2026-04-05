@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import { verifyAdmin } from "@/lib/admin-auth";
 import { sanitizeInput } from "@/lib/validation";
+import { logAdminAction } from "@/lib/audit-log";
 
 // GET - List all catalog items + redemptions
 export async function GET(request: NextRequest) {
@@ -75,6 +76,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) throw error;
+    logAdminAction({ admin_email: admin.user!.email, action: "create", resource_type: "reward_catalog", resource_id: data.id, details: `Created reward item: ${data.name}` });
     return NextResponse.json({ success: true, item: data });
   } catch {
     return NextResponse.json({ error: "Gagal create item" }, { status: 500 });
@@ -124,6 +126,7 @@ export async function PUT(request: NextRequest) {
         .eq("id", redemptionId);
 
       if (error) throw error;
+      logAdminAction({ admin_email: admin.user!.email, action: "update", resource_type: "reward_redemption", resource_id: redemptionId, details: `Updated redemption status: ${status}` });
       return NextResponse.json({ success: true });
     }
 
@@ -147,6 +150,7 @@ export async function PUT(request: NextRequest) {
       .eq("id", id);
 
     if (error) throw error;
+    logAdminAction({ admin_email: admin.user!.email, action: "update", resource_type: "reward_catalog", resource_id: id, details: "Updated reward catalog item" });
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Gagal update" }, { status: 500 });
@@ -171,6 +175,7 @@ export async function DELETE(request: NextRequest) {
       .eq("id", id);
 
     if (error) throw error;
+    logAdminAction({ admin_email: admin.user!.email, action: "delete", resource_type: "reward_catalog", resource_id: id, details: "Deactivated reward catalog item" });
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Gagal hapus" }, { status: 500 });

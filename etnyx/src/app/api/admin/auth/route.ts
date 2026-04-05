@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
+import { logAdminAction } from "@/lib/audit-log";
 
 function getAdminJwtSecret() {
   const secret = process.env.ADMIN_JWT_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -64,6 +65,8 @@ export async function POST(request: Request) {
       path: "/",
     });
 
+    logAdminAction({ admin_email: email, action: "login", resource_type: "auth", details: "Admin login" });
+
     return NextResponse.json({ success: true, email });
   } catch (error) {
     console.error("Login error:", error);
@@ -78,6 +81,7 @@ export async function DELETE() {
   try {
     const cookieStore = await cookies();
     cookieStore.delete("admin_token");
+    logAdminAction({ admin_email: "admin", action: "logout", resource_type: "auth", details: "Admin logout" });
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Logout error:", error);

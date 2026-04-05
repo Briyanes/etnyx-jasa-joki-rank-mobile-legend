@@ -3,9 +3,57 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
+
+const translations = {
+  id: {
+    subtitle: "Daftar akun baru",
+    name: "Nama",
+    namePlaceholder: "Nama kamu",
+    email: "Email",
+    whatsapp: "WhatsApp",
+    whatsappOptional: "(opsional)",
+    password: "Password",
+    passwordPlaceholder: "Minimal 6 karakter",
+    confirmPassword: "Konfirmasi Password",
+    confirmPlaceholder: "Ulangi password",
+    registerBtn: "Daftar",
+    loading: "Loading...",
+    hasAccount: "Sudah punya akun?",
+    login: "Login",
+    back: "← Kembali ke Home",
+    errorMismatch: "Password tidak sama",
+    errorMinLength: "Password minimal 6 karakter",
+    errorDefault: "Registrasi gagal",
+    errorGeneric: "Terjadi kesalahan. Coba lagi.",
+  },
+  en: {
+    subtitle: "Create a new account",
+    name: "Name",
+    namePlaceholder: "Your name",
+    email: "Email",
+    whatsapp: "WhatsApp",
+    whatsappOptional: "(optional)",
+    password: "Password",
+    passwordPlaceholder: "Minimum 6 characters",
+    confirmPassword: "Confirm Password",
+    confirmPlaceholder: "Repeat password",
+    registerBtn: "Register",
+    loading: "Loading...",
+    hasAccount: "Already have an account?",
+    login: "Login",
+    back: "← Back to Home",
+    errorMismatch: "Passwords don't match",
+    errorMinLength: "Password must be at least 6 characters",
+    errorDefault: "Registration failed",
+    errorGeneric: "Something went wrong. Try again.",
+  },
+};
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { locale } = useLanguage();
+  const t = translations[locale as keyof typeof translations] || translations.id;
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
@@ -20,13 +68,13 @@ export default function RegisterPage() {
     setError("");
 
     if (password !== confirmPassword) {
-      setError("Password tidak sama");
+      setError(t.errorMismatch);
       setLoading(false);
       return;
     }
 
     if (password.length < 6) {
-      setError("Password minimal 6 karakter");
+      setError(t.errorMinLength);
       setLoading(false);
       return;
     }
@@ -47,13 +95,13 @@ export default function RegisterPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Registrasi gagal");
+        setError(data.error || t.errorDefault);
         return;
       }
 
       router.push("/dashboard");
     } catch {
-      setError("Terjadi kesalahan. Coba lagi.");
+      setError(t.errorGeneric);
     } finally {
       setLoading(false);
     }
@@ -67,7 +115,7 @@ export default function RegisterPage() {
           <Link href="/" className="text-3xl font-bold text-primary">
             ETNYX
           </Link>
-          <p className="text-muted mt-2">Daftar akun baru</p>
+          <p className="text-muted mt-2">{t.subtitle}</p>
         </div>
 
         {/* Form Card */}
@@ -76,14 +124,14 @@ export default function RegisterPage() {
             {/* Name */}
             <div>
               <label htmlFor="name" className="block text-sm text-muted mb-2">
-                Nama
+                {t.name}
               </label>
               <input
                 id="name"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Nama kamu"
+                placeholder={t.namePlaceholder}
                 required
                 className="w-full px-4 py-3 bg-background border border-surface/50 rounded-xl text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
               />
@@ -92,7 +140,7 @@ export default function RegisterPage() {
             {/* Email */}
             <div>
               <label htmlFor="email" className="block text-sm text-muted mb-2">
-                Email
+                {t.email}
               </label>
               <input
                 id="email"
@@ -108,7 +156,7 @@ export default function RegisterPage() {
             {/* WhatsApp */}
             <div>
               <label htmlFor="whatsapp" className="block text-sm text-muted mb-2">
-                WhatsApp <span className="text-muted/50">(opsional)</span>
+                {t.whatsapp} <span className="text-muted/50">{t.whatsappOptional}</span>
               </label>
               <input
                 id="whatsapp"
@@ -123,14 +171,14 @@ export default function RegisterPage() {
             {/* Password */}
             <div>
               <label htmlFor="password" className="block text-sm text-muted mb-2">
-                Password
+                {t.password}
               </label>
               <input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Minimal 6 karakter"
+                placeholder={t.passwordPlaceholder}
                 required
                 className="w-full px-4 py-3 bg-background border border-surface/50 rounded-xl text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
               />
@@ -139,14 +187,14 @@ export default function RegisterPage() {
             {/* Confirm Password */}
             <div>
               <label htmlFor="confirmPassword" className="block text-sm text-muted mb-2">
-                Konfirmasi Password
+                {t.confirmPassword}
               </label>
               <input
                 id="confirmPassword"
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Ulangi password"
+                placeholder={t.confirmPlaceholder}
                 required
                 className="w-full px-4 py-3 bg-background border border-surface/50 rounded-xl text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
               />
@@ -165,15 +213,15 @@ export default function RegisterPage() {
               disabled={loading}
               className="w-full py-3 bg-primary hover:bg-primary/90 text-background font-semibold rounded-xl transition-all disabled:opacity-50"
             >
-              {loading ? "Loading..." : "Daftar"}
+              {loading ? t.loading : t.registerBtn}
             </button>
           </form>
 
           {/* Login Link */}
           <p className="text-center text-muted text-sm mt-6">
-            Sudah punya akun?{" "}
+            {t.hasAccount}{" "}
             <Link href="/login" className="text-primary hover:underline">
-              Login
+              {t.login}
             </Link>
           </p>
         </div>
@@ -181,7 +229,7 @@ export default function RegisterPage() {
         {/* Back to Home */}
         <p className="text-center mt-6">
           <Link href="/" className="text-muted hover:text-text text-sm">
-            ← Kembali ke Home
+            {t.back}
           </Link>
         </p>
       </div>

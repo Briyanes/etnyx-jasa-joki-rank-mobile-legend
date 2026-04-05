@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import { verifyAdmin } from "@/lib/admin-auth";
 import { sanitizeInput } from "@/lib/validation";
+import { logAdminAction } from "@/lib/audit-log";
 
 // GET - List customer rewards (admin)
 export async function GET(request: NextRequest) {
@@ -82,6 +83,7 @@ export async function POST(request: NextRequest) {
     }
 
     const result = data?.[0];
+    logAdminAction({ admin_email: admin.user!.email, action: "update", resource_type: "reward_catalog", resource_id: customerId, details: `Adjusted points: ${points > 0 ? "+" : ""}${points}` });
     return NextResponse.json({
       success: true,
       newBalance: result?.new_balance,

@@ -382,6 +382,163 @@ INSERT INTO settings (key, value) VALUES
   ('site_info', '{"supportEmail": "support@etnyx.id", "companyName": "PT Sumber Arto Moro Abadi Kreatif"}'::jsonb)
 ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW();
 
+-- =====================
+-- 18. REVIEWS & WORKER REPORTS
+-- =====================
+DELETE FROM reviews WHERE order_id IN (
+  'ETX-260301-001','ETX-260305-001','ETX-260308-001','ETX-260310-001','ETX-260312-001',
+  'ETX-260315-001','ETX-260302-001','ETX-260306-001','ETX-260309-001','ETX-260311-001',
+  'ETX-260303-001','ETX-260307-001','ETX-260313-001','ETX-260316-001','ETX-260319-001',
+  'ETX-260304-001','ETX-260310-002','ETX-260312-002','ETX-260316-002','ETX-260322-002'
+);
+
+INSERT INTO reviews (
+  order_id, customer_id, service_rating, service_comment,
+  worker_id, worker_rating, worker_comment,
+  has_worker_report, report_type, report_detail, report_status,
+  customer_name, customer_whatsapp, rank_from, rank_to,
+  is_visible, is_featured, google_reviewed, admin_notes, created_at
+) VALUES
+  -- 1. BudiGaming — Paket GM→Epic ⭐5
+  ('ETX-260301-001', 'c0000000-0000-0000-0000-000000000001', 5, 'Mantap banget, cepat selesai dan winrate bagus! Recommended!',
+   'b0000000-0000-0000-0000-000000000003', 5, 'Booster ramah dan profesional',
+   false, NULL, NULL, 'pending',
+   'BudiGaming', '081400001111', 'grandmaster', 'epic',
+   true, true, true, NULL, NOW() - INTERVAL '29 days'),
+
+  -- 2. RinaML — Paket Epic→Legend ⭐5
+  ('ETX-260305-001', 'c0000000-0000-0000-0000-000000000002', 5, 'Express service super cepat! Kurang dari 24 jam udah selesai.',
+   'b0000000-0000-0000-0000-000000000002', 5, 'Very professional, fast response',
+   false, NULL, NULL, 'pending',
+   'RinaML', '081400002222', 'epic', 'legend',
+   true, true, true, NULL, NOW() - INTERVAL '24 days'),
+
+  -- 3. AndiPro — Paket Legend→Mythic ⭐4
+  ('ETX-260308-001', 'c0000000-0000-0000-0000-000000000003', 4, 'Good service, sampai mythic dengan lancar. Sedikit lama tapi worth it.',
+   'b0000000-0000-0000-0000-000000000001', 4, 'Skill bagus, komunikasi cukup baik',
+   false, NULL, NULL, 'pending',
+   'AndiPro', '081400003333', 'legend', 'mythic',
+   true, false, true, NULL, NOW() - INTERVAL '21 days'),
+
+  -- 4. FarhanGG — Paket Epic→Mythic ⭐5
+  ('ETX-260310-001', 'c0000000-0000-0000-0000-000000000005', 5, 'Gilaa dari Epic langsung ke Mythic! Service terbaik!',
+   'b0000000-0000-0000-0000-000000000001', 5, 'Booster dewa, winrate 95%!',
+   false, NULL, NULL, 'pending',
+   'FarhanGG', '081400005555', 'epic', 'mythic',
+   true, true, false, NULL, NOW() - INTERVAL '19 days'),
+
+  -- 5. MegaStar — Paket Mythic→MG ⭐5
+  ('ETX-260312-001', 'c0000000-0000-0000-0000-000000000008', 5, 'Mythic Glory tercapai! Worth every penny. Premium pilot mantap.',
+   'b0000000-0000-0000-0000-000000000001', 5, 'Top tier booster, very skilled',
+   false, NULL, NULL, 'pending',
+   'MegaStar', '081400008888', 'mythic', 'mythicglory',
+   true, true, true, NULL, NOW() - INTERVAL '17 days'),
+
+  -- 6. DianaQ — Paket GM→Legend ⭐4
+  ('ETX-260315-001', 'c0000000-0000-0000-0000-000000000006', 4, 'Proses lancar, admin responsive. Overall puas!',
+   'b0000000-0000-0000-0000-000000000004', 4, 'Booster ramah dan sopan',
+   false, NULL, NULL, 'pending',
+   'DianaQ', '081400006666', 'grandmaster', 'legend',
+   true, false, false, NULL, NOW() - INTERVAL '14 days'),
+
+  -- 7. BudiGaming — Per Star GM ⭐5
+  ('ETX-260302-001', 'c0000000-0000-0000-0000-000000000001', 5, 'Per star service bagus, bisa pilih mau berapa bintang.',
+   'b0000000-0000-0000-0000-000000000004', 5, 'Tepat waktu dan rapi',
+   false, NULL, NULL, 'pending',
+   'BudiGaming', '081400001111', 'grandmaster', 'grandmaster',
+   true, false, true, NULL, NOW() - INTERVAL '27 days'),
+
+  -- 8. SitiGamer — Per Star Epic ⭐3 (average)
+  ('ETX-260306-001', 'c0000000-0000-0000-0000-000000000004', 3, 'Selesai sih tapi agak lama prosesnya. Komunikasi kurang.',
+   'b0000000-0000-0000-0000-000000000003', 3, 'Response time bisa lebih cepat',
+   false, NULL, NULL, 'pending',
+   'SitiGamer', '081400004444', 'epic', 'epic',
+   true, false, false, NULL, NOW() - INTERVAL '23 days'),
+
+  -- 9. DianaQ — Per Star Legend ⭐5 (express)
+  ('ETX-260309-001', 'c0000000-0000-0000-0000-000000000006', 5, 'Express per star legend cepat banget! Selesai dalam hitungan jam.',
+   'b0000000-0000-0000-0000-000000000002', 5, 'Speed demon! Sangat cepat',
+   false, NULL, NULL, 'pending',
+   'DianaQ', '081400006666', 'legend', 'legend',
+   true, true, false, NULL, NOW() - INTERVAL '20 days'),
+
+  -- 10. FarhanGG — Per Star Mythic ⭐4 (with WORKER REPORT - offering_services)
+  ('ETX-260311-001', 'c0000000-0000-0000-0000-000000000005', 4, 'Boost selesai dengan baik, tapi ada masalah kecil.',
+   'b0000000-0000-0000-0000-000000000001', 2, 'Booster nawarin jasa di luar ETNYX',
+   true, 'offering_services', 'Booster chat saya nawarin jasa boost langsung tanpa lewat ETNYX, katanya lebih murah. Saya tolak sih tapi mohon ditindak.', 'reviewed',
+   'FarhanGG', '081400005555', 'mythic', 'mythic',
+   true, false, false, 'Sudah ditegur via DM. Warning pertama.', NOW() - INTERVAL '18 days'),
+
+  -- 11. RinaML — Gendong GM ⭐5
+  ('ETX-260303-001', 'c0000000-0000-0000-0000-000000000002', 5, 'Gendong GM seru banget! Booster sabar nemenin main.',
+   'b0000000-0000-0000-0000-000000000004', 5, 'Duo partner yang asik dan jago',
+   false, NULL, NULL, 'pending',
+   'RinaML', '081400002222', 'grandmaster', 'grandmaster',
+   true, false, true, NULL, NOW() - INTERVAL '26 days'),
+
+  -- 12. BudiGaming — Gendong Epic ⭐4
+  ('ETX-260307-001', 'c0000000-0000-0000-0000-000000000001', 4, 'Gendong Epic fun! Belajar banyak dari booster.',
+   'b0000000-0000-0000-0000-000000000002', 4, 'Good duo partner, komunikatif',
+   false, NULL, NULL, 'pending',
+   'BudiGaming', '081400001111', 'epic', 'epic',
+   true, false, false, NULL, NOW() - INTERVAL '22 days'),
+
+  -- 13. FarhanGG — Gendong Legend ⭐5
+  ('ETX-260313-001', 'c0000000-0000-0000-0000-000000000005', 5, 'Best gendong service! Carry team terus sampe menang.',
+   'b0000000-0000-0000-0000-000000000002', 5, 'Carry god, MVP terus',
+   false, NULL, NULL, 'pending',
+   'FarhanGG', '081400005555', 'legend', 'legend',
+   true, true, false, NULL, NOW() - INTERVAL '15 days'),
+
+  -- 14. AndiPro — Gendong Mythic ⭐4 (with WORKER REPORT - rude)
+  ('ETX-260316-001', 'c0000000-0000-0000-0000-000000000003', 4, 'Boost selesai tapi booster agak kasar di chat.',
+   'b0000000-0000-0000-0000-000000000001', 2, 'Kurang sopan saat komunikasi',
+   true, 'rude', 'Pas saya tanya progress, booster bales dengan nada kasar kayak "sabar dong, gw lagi push". Tolong diperhatikan attitude nya.', 'resolved',
+   'AndiPro', '081400003333', 'mythic', 'mythic',
+   true, false, false, 'Sudah mediasi. Booster minta maaf. Case closed.', NOW() - INTERVAL '12 days'),
+
+  -- 15. DianaQ — Gendong Grading ⭐5
+  ('ETX-260319-001', 'c0000000-0000-0000-0000-000000000006', 5, 'Gendong mythic grading lancar! Booster jago banget.',
+   'b0000000-0000-0000-0000-000000000001', 5, 'Sangat terampil di rank tinggi',
+   false, NULL, NULL, 'pending',
+   'DianaQ', '081400006666', 'mythicgrading', 'mythicgrading',
+   true, false, false, NULL, NOW() - INTERVAL '10 days'),
+
+  -- 16. BudiGaming — Rush Epic ⭐5
+  ('ETX-260304-001', 'c0000000-0000-0000-0000-000000000001', 5, 'Rush promo murah dan cepat! Pasti order lagi.',
+   'b0000000-0000-0000-0000-000000000003', 5, 'Cepat dan efisien',
+   false, NULL, NULL, 'pending',
+   'BudiGaming', '081400001111', 'epic', 'epic',
+   true, false, true, NULL, NOW() - INTERVAL '25 days'),
+
+  -- 17. RinaML — Rush Epic ⭐4
+  ('ETX-260310-002', 'c0000000-0000-0000-0000-000000000002', 4, 'Rush 9 star selesai tepat waktu. Recommended!',
+   'b0000000-0000-0000-0000-000000000003', 4, 'Konsisten performanya',
+   false, NULL, NULL, 'pending',
+   'RinaML', '081400002222', 'epic', 'epic',
+   true, false, false, NULL, NOW() - INTERVAL '19 days'),
+
+  -- 18. FarhanGG — Rush Legend ⭐5 (with WORKER REPORT - account_issue)
+  ('ETX-260312-002', 'c0000000-0000-0000-0000-000000000005', 5, 'Boost selesai bagus, tapi ada issue kecil di awal.',
+   'b0000000-0000-0000-0000-000000000002', 4, 'Boost bagus, tapi sempat salah login',
+   true, 'account_issue', 'Di awal booster sempat salah masukkan password 3x sampe akun ke-lock 5 menit. Untung cepat resolved. Mungkin perlu double check credentials.', 'dismissed',
+   'FarhanGG', '081400005555', 'legend', 'legend',
+   true, false, false, 'Minor issue, sudah normal kembali. Credentials sudah di-verify.', NOW() - INTERVAL '17 days'),
+
+  -- 19. AndiPro — Rush Mythic ⭐5
+  ('ETX-260316-002', 'c0000000-0000-0000-0000-000000000003', 5, 'Express rush mythic combo! Selesai lebih cepat dari estimasi.',
+   'b0000000-0000-0000-0000-000000000001', 5, 'Speed + skill = perfect combo',
+   false, NULL, NULL, 'pending',
+   'AndiPro', '081400003333', 'mythic', 'mythic',
+   true, false, true, NULL, NOW() - INTERVAL '12 days'),
+
+  -- 20. MegaStar — Paket Glory→Immortal ⭐5
+  ('ETX-260322-002', 'c0000000-0000-0000-0000-000000000008', 5, 'Dari Mythic Glory ke Immortal! Tidak percaya bisa secepat ini. ETNYX the best!',
+   'b0000000-0000-0000-0000-000000000005', 5, 'Top 1 booster ETNYX, tidak diragukan lagi',
+   false, NULL, NULL, 'pending',
+   'MegaStar', '081400008888', 'mythicglory', 'mythicimmortal',
+   true, true, true, NULL, NOW() - INTERVAL '6 days');
+
 -- ============================================
 -- DONE! Comprehensive seed data inserted.
 -- ============================================
@@ -407,4 +564,5 @@ ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW();
 --
 -- 5 promo codes, 12 testimonials, 8 portfolios
 -- 7 reward catalog, 24 transactions, 4 referrals
+-- 20 reviews (3 with worker reports), 6 featured, 8 google_reviewed
 -- ============================================
