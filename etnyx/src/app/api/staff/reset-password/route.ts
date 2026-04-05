@@ -89,8 +89,8 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Token dan password baru wajib diisi" }, { status: 400 });
     }
 
-    if (password.length < 6) {
-      return NextResponse.json({ error: "Password minimal 6 karakter" }, { status: 400 });
+    if (password.length < 8) {
+      return NextResponse.json({ error: "Password minimal 8 karakter" }, { status: 400 });
     }
 
     // Verify reset token

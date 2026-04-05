@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import { verifyAdmin } from "@/lib/admin-auth";
+import { logAdminAction } from "@/lib/audit-log";
 
 export async function GET() {
   const auth = await verifyAdmin();
@@ -42,6 +43,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) throw error;
+    logAdminAction({ admin_email: auth.user!.email, action: "create", resource_type: "promo_code", resource_id: data.id, details: `Created promo code: ${data.code}` });
     return NextResponse.json({ success: true, promoCode: data });
   } catch (error) {
     console.error("Create promo code error:", error);
@@ -74,6 +76,7 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (error) throw error;
+    logAdminAction({ admin_email: auth.user!.email, action: "update", resource_type: "promo_code", resource_id: id, details: `Updated promo code: ${data.code}` });
     return NextResponse.json({ success: true, promoCode: data });
   } catch (error) {
     console.error("Update promo code error:", error);
@@ -95,6 +98,7 @@ export async function DELETE(request: NextRequest) {
       .eq("id", id);
 
     if (error) throw error;
+    logAdminAction({ admin_email: auth.user!.email, action: "delete", resource_type: "promo_code", resource_id: id, details: `Deleted promo code` });
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Delete promo code error:", error);

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import { verifyAdmin } from "@/lib/admin-auth";
+import { logAdminAction } from "@/lib/audit-log";
 
 export async function GET(request: NextRequest) {
   const auth = await verifyAdmin();
@@ -87,6 +88,13 @@ export async function GET(request: NextRequest) {
       ),
     ];
     const csv = csvRows.join("\n");
+
+    logAdminAction({
+      admin_email: auth.user!.email,
+      action: "export_data",
+      resource_type: "order",
+      details: `Exported ${type} (${data.length} rows)`,
+    });
 
     return new NextResponse(csv, {
       headers: {

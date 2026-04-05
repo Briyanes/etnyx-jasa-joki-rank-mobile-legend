@@ -10,7 +10,12 @@ function getAdminJwtSecret() {
   return new TextEncoder().encode(secret);
 }
 
-export async function verifyAdmin(): Promise<{ authenticated: boolean; error?: NextResponse }> {
+export interface AdminPayload {
+  email: string;
+  role: string;
+}
+
+export async function verifyAdmin(): Promise<{ authenticated: boolean; user?: AdminPayload; error?: NextResponse }> {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get("admin_token")?.value;
@@ -31,7 +36,13 @@ export async function verifyAdmin(): Promise<{ authenticated: boolean; error?: N
       };
     }
 
-    return { authenticated: true };
+    return {
+      authenticated: true,
+      user: {
+        email: payload.email as string,
+        role: payload.role as string,
+      },
+    };
   } catch {
     return {
       authenticated: false,

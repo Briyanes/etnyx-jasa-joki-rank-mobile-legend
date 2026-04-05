@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import { verifyAdmin } from "@/lib/admin-auth";
 import { sanitizeInput } from "@/lib/validation";
+import { logAdminAction } from "@/lib/audit-log";
 
 export async function GET() {
   const auth = await verifyAdmin();
@@ -46,6 +47,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) throw error;
+    logAdminAction({ admin_email: auth.user!.email, action: "create", resource_type: "booster", resource_id: data.id, details: `Created booster: ${data.name}` });
     return NextResponse.json({ success: true, booster: data });
   } catch (error) {
     console.error("Create booster error:", error);
@@ -70,6 +72,7 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (error) throw error;
+    logAdminAction({ admin_email: auth.user!.email, action: "update", resource_type: "booster", resource_id: id, details: `Updated booster` });
     return NextResponse.json({ success: true, booster: data });
   } catch (error) {
     console.error("Update booster error:", error);
@@ -91,6 +94,7 @@ export async function DELETE(request: NextRequest) {
       .eq("id", id);
 
     if (error) throw error;
+    logAdminAction({ admin_email: auth.user!.email, action: "delete", resource_type: "booster", resource_id: id, details: `Deleted booster` });
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Delete booster error:", error);

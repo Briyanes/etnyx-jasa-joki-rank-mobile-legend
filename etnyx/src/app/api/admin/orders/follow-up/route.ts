@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
       action: `follow_up_${action}`,
       new_value: sent ? "sent" : "failed",
       notes: `Follow-up ${action} via WhatsApp`,
-      created_by: "admin",
+      created_by: auth.user?.email || "admin",
     }).then(() => {});
 
     return NextResponse.json({ 

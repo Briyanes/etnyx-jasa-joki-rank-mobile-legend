@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import { verifyAdmin } from "@/lib/admin-auth";
+import { logAdminAction } from "@/lib/audit-log";
 
 export async function GET() {
   const auth = await verifyAdmin();
@@ -35,6 +36,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) throw error;
+    logAdminAction({ admin_email: auth.user!.email, action: "create", resource_type: "testimonial", resource_id: data.id, details: `Created testimonial by ${data.name}` });
     return NextResponse.json({ success: true, testimonial: data });
   } catch (error) {
     console.error("Create testimonial error:", error);
@@ -59,6 +61,7 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (error) throw error;
+    logAdminAction({ admin_email: auth.user!.email, action: "update", resource_type: "testimonial", resource_id: id, details: `Updated testimonial` });
     return NextResponse.json({ success: true, testimonial: data });
   } catch (error) {
     console.error("Update testimonial error:", error);
@@ -80,6 +83,7 @@ export async function DELETE(request: NextRequest) {
       .eq("id", id);
 
     if (error) throw error;
+    logAdminAction({ admin_email: auth.user!.email, action: "delete", resource_type: "testimonial", resource_id: id, details: `Deleted testimonial` });
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Delete testimonial error:", error);

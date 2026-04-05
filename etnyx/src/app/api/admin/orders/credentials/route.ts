@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import { verifyAdmin } from "@/lib/admin-auth";
 import { decryptField } from "@/lib/encryption";
+import { logAdminAction } from "@/lib/audit-log";
 
 export async function GET(request: NextRequest) {
   const auth = await verifyAdmin();
@@ -32,6 +33,14 @@ export async function GET(request: NextRequest) {
       account_login: data.account_login ? decryptField(data.account_login) : null,
       account_password: data.account_password ? decryptField(data.account_password) : null,
     };
+
+    logAdminAction({
+      admin_email: auth.user!.email,
+      action: "view_credentials",
+      resource_type: "order",
+      resource_id: data.order_id,
+      details: `Viewed credentials for order ${data.order_id}`,
+    });
 
     return NextResponse.json(credentials);
   } catch (error) {

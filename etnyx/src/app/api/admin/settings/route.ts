@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import { verifyAdmin } from "@/lib/admin-auth";
+import { logAdminAction } from "@/lib/audit-log";
 
 // Allowed CMS setting keys (whitelist for security)
 const ALLOWED_KEYS = [
@@ -71,8 +72,8 @@ export async function GET(request: NextRequest) {
 
 // PUT /api/admin/settings - Upsert a setting
 export async function PUT(request: NextRequest) {
-  const { authenticated, error: authError } = await verifyAdmin();
-  if (!authenticated) return authError;
+  const auth = await verifyAdmin();
+  if (!auth.authenticated) return auth.error;
 
   const body = await request.json();
   const { key, value } = body;
@@ -97,6 +98,14 @@ export async function PUT(request: NextRequest) {
     console.error("Settings upsert error:", error);
     return NextResponse.json({ error: "Failed to save setting" }, { status: 500 });
   }
+
+  logAdminAction({
+    admin_email: auth.user!.email,
+    action: "settings_change",
+    resource_type: "settings",
+    resource_id: key,
+    details: `Updated setting: ${key}`,
+  });
 
   return NextResponse.json({ success: true, key });
 }

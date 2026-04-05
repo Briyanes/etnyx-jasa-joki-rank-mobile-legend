@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase-server";
 import { verifyAdmin } from "@/lib/admin-auth";
 import { sanitizeInput, isValidRank } from "@/lib/validation";
 import { sendNewOrderNotifications, sendOrderConfirmedNotifications, sendOrderCompletedNotifications } from "@/lib/notifications";
+import { logAdminAction } from "@/lib/audit-log";
 
 export async function GET(request: Request) {
   const auth = await verifyAdmin();
@@ -97,6 +98,14 @@ export async function POST(request: Request) {
 
     if (error) throw error;
 
+    logAdminAction({
+      admin_email: auth.user!.email,
+      action: "create",
+      resource_type: "order",
+      resource_id: data.order_id,
+      details: `Created order ${data.order_id}`,
+    });
+
     return NextResponse.json(data, { status: 201 });
   } catch (error) {
     console.error("Order create error:", error);
@@ -161,6 +170,16 @@ export async function PATCH(request: Request) {
       .single();
 
     if (error) throw error;
+
+    logAdminAction({
+      admin_email: auth.user!.email,
+      action: "update",
+      resource_type: "order",
+      resource_id: data.order_id,
+      details: `Updated order: ${Object.keys(updates).join(", ")}`,
+      old_value: previousStatus ? JSON.stringify({ status: previousStatus }) : undefined,
+      new_value: JSON.stringify(updates),
+    });
 
     // Send notifications based on status change
     if (updates.status && updates.status !== previousStatus) {
