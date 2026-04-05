@@ -4,7 +4,8 @@ import { useEffect, useState, useCallback } from "react";
 import {
   DollarSign, Users, Clock, CheckCircle, Loader2, RefreshCw,
   Plus, ArrowRight, Ban, Receipt, Wallet, TrendingUp, Calendar,
-  ChevronDown, Search, Filter, Save,
+  ChevronDown, Search, Filter, Save, CreditCard, Building2, Banknote,
+  Smartphone, Trash2, Star,
 } from "lucide-react";
 import { formatRupiah } from "@/utils/helpers";
 
@@ -77,8 +78,30 @@ interface Payout {
   approved_at: string | null;
   paid_at: string | null;
   paid_by: string | null;
+  payment_method: string | null;
+  payment_method_label: string | null;
+  payment_reference: string | null;
+  recipient_info: { name?: string; method?: string; account?: string } | null;
   notes: string | null;
   created_at: string;
+}
+
+interface PaymentMethod {
+  id: string;
+  label: string;
+  icon: string;
+  type: string;
+}
+
+interface PaymentAccount {
+  id: string;
+  staff_id: string;
+  method: string;
+  label: string;
+  account_name: string;
+  account_number: string;
+  is_primary: boolean;
+  staff_users?: { name: string; email: string; role: string };
 }
 
 interface PayrollSettings {
@@ -94,6 +117,7 @@ interface PayrollSettings {
     biweekly_days: number[];
     monthly_day: number;
   };
+  payment_methods?: PaymentMethod[];
 }
 
 interface StaffUser {
@@ -137,6 +161,13 @@ export default function PayrollTab() {
   const [showPayoutForm, setShowPayoutForm] = useState(false);
   const [selectedCommissions, setSelectedCommissions] = useState<string[]>([]);
   const [selectedSalaryRecords, setSelectedSalaryRecords] = useState<string[]>([]);
+
+  // Payment
+  const [paymentAccounts, setPaymentAccounts] = useState<PaymentAccount[]>([]);
+  const [showPaymentModal, setShowPaymentModal] = useState<string | null>(null); // payout ID
+  const [paymentForm, setPaymentForm] = useState({ method: "", methodLabel: "", reference: "", accountId: "" });
+  const [showAddAccountForm, setShowAddAccountForm] = useState(false);
+  const [accountForm, setAccountForm] = useState({ staffId: "", method: "", label: "", accountName: "", accountNumber: "", isPrimary: false });
 
   // ---- Fetchers ----
   const fetchOverview = useCallback(async () => {
@@ -214,21 +245,31 @@ export default function PayrollTab() {
     }
   }, []);
 
+  const fetchPaymentAccounts = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/payroll/payment-accounts");
+      const data = await res.json();
+      setPaymentAccounts(data.accounts || []);
+    } catch (err) {
+      console.error("Fetch payment accounts error:", err);
+    }
+  }, []);
+
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      await Promise.all([fetchOverview(), fetchStaff()]);
+      await Promise.all([fetchOverview(), fetchStaff(), fetchPaymentAccounts()]);
       setLoading(false);
     };
     loadData();
-  }, [fetchOverview, fetchStaff]);
+  }, [fetchOverview, fetchStaff, fetchPaymentAccounts]);
 
   useEffect(() => {
     if (subTab === "commissions") fetchCommissions();
     if (subTab === "salaries") { fetchSalaryConfigs(); fetchSalaryRecords(); }
-    if (subTab === "payouts") fetchPayouts();
-    if (subTab === "settings") fetchSettings();
-  }, [subTab, fetchCommissions, fetchSalaryConfigs, fetchSalaryRecords, fetchPayouts, fetchSettings]);
+    if (subTab === "payouts") { fetchPayouts(); fetchPaymentAccounts(); }
+    if (subTab === "settings") { fetchSettings(); fetchPaymentAccounts(); }
+  }, [subTab, fetchCommissions, fetchSalaryConfigs, fetchSalaryRecords, fetchPayouts, fetchSettings, fetchPaymentAccounts]);
 
   // ---- Actions ----
   const generateCommissions = async () => {
@@ -347,20 +388,91 @@ export default function PayrollTab() {
     setActionLoading(false);
   };
 
-  const updatePayoutStatus = async (payoutId: string, action: string) => {
-    if (!confirm(`${action} payout ini?`)) return;
+  const updatePayoutStatus = async (payoutId: string, action: string, paymentData?: {
+    paymentMethod?: string; paymentMethodLabel?: string; paymentReference?: string;
+    recipientAccountId?: string; recipientInfo?: Record<string, string>;
+  }) => {
+    if (action !== "mark_paid" && !confirm(`${action} payout ini?`)) return;
     setActionLoading(true);
     try {
       const res = await fetch("/api/admin/payroll/payouts", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: payoutId, action }),
+        body: JSON.stringify({ id: payoutId, action, ...paymentData }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed");
+      }
+      setShowPaymentModal(null);
+      setPaymentForm({ method: "", methodLabel: "", reference: "", accountId: "" });
       fetchPayouts();
       fetchOverview();
+    } catch (err) {
+      alert(`Gagal ${action} payout: ${err instanceof Error ? err.message : "Unknown error"}`);
+    }
+    setActionLoading(false);
+  };
+
+  const markPaidWithDetails = async () => {
+    if (!showPaymentModal || !paymentForm.method) {
+      return alert("Pilih metode pembayaran");
+    }
+    const selectedAccount = paymentAccounts.find(a => a.id === paymentForm.accountId);
+    await updatePayoutStatus(showPaymentModal, "mark_paid", {
+      paymentMethod: paymentForm.method,
+      paymentMethodLabel: paymentForm.methodLabel,
+      paymentReference: paymentForm.reference || undefined,
+      recipientAccountId: paymentForm.accountId || undefined,
+      recipientInfo: selectedAccount ? {
+        name: selectedAccount.account_name,
+        method: selectedAccount.label,
+        account: selectedAccount.account_number,
+      } : undefined,
+    });
+  };
+
+  const savePaymentAccount = async () => {
+    if (!accountForm.staffId || !accountForm.method || !accountForm.accountName || !accountForm.accountNumber) {
+      return alert("Isi semua field");
+    }
+    setActionLoading(true);
+    try {
+      const res = await fetch("/api/admin/payroll/payment-accounts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          staffId: accountForm.staffId,
+          method: accountForm.method,
+          label: accountForm.label,
+          accountName: accountForm.accountName,
+          accountNumber: accountForm.accountNumber,
+          isPrimary: accountForm.isPrimary,
+        }),
+      });
+      if (!res.ok) throw new Error();
+      setShowAddAccountForm(false);
+      setAccountForm({ staffId: "", method: "", label: "", accountName: "", accountNumber: "", isPrimary: false });
+      fetchPaymentAccounts();
     } catch {
-      alert(`Gagal ${action} payout`);
+      alert("Gagal simpan akun pembayaran");
+    }
+    setActionLoading(false);
+  };
+
+  const deletePaymentAccount = async (accountId: string) => {
+    if (!confirm("Hapus akun pembayaran ini?")) return;
+    setActionLoading(true);
+    try {
+      const res = await fetch("/api/admin/payroll/payment-accounts", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: accountId, action: "deactivate" }),
+      });
+      if (!res.ok) throw new Error();
+      fetchPaymentAccounts();
+    } catch {
+      alert("Gagal hapus akun");
     }
     setActionLoading(false);
   };
@@ -394,6 +506,26 @@ export default function PayrollTab() {
     };
     return <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${colors[status] || colors.pending}`}>{status.replace("_", " ")}</span>;
   };
+
+  const paymentMethodIcon = (type?: string) => {
+    if (type === "bank") return <Building2 className="w-4 h-4" />;
+    if (type === "cash") return <Banknote className="w-4 h-4" />;
+    return <Smartphone className="w-4 h-4" />;
+  };
+
+  const availablePaymentMethods: PaymentMethod[] = settings.payment_methods || [
+    { id: "dana", label: "Dana", icon: "wallet", type: "ewallet" },
+    { id: "ovo", label: "OVO", icon: "wallet", type: "ewallet" },
+    { id: "gopay", label: "GoPay", icon: "wallet", type: "ewallet" },
+    { id: "shopeepay", label: "ShopeePay", icon: "wallet", type: "ewallet" },
+    { id: "bank_bca", label: "BCA", icon: "building", type: "bank" },
+    { id: "bank_bri", label: "BRI", icon: "building", type: "bank" },
+    { id: "bank_mandiri", label: "Mandiri", icon: "building", type: "bank" },
+    { id: "bank_bni", label: "BNI", icon: "building", type: "bank" },
+    { id: "bank_jago", label: "Bank Jago", icon: "building", type: "bank" },
+    { id: "bank_seabank", label: "SeaBank", icon: "building", type: "bank" },
+    { id: "cash", label: "Cash", icon: "banknote", type: "cash" },
+  ];
 
   if (loading) {
     return <div className="flex items-center justify-center p-12"><Loader2 className="w-8 h-8 animate-spin text-blue-500" /></div>;
@@ -772,7 +904,18 @@ export default function PayrollTab() {
                       {p.period_label} · {p.total_items} items · Created by {p.created_by}
                     </div>
                     {p.approved_by && <div className="text-xs text-gray-400 mt-0.5">Approved by {p.approved_by} at {new Date(p.approved_at!).toLocaleString("id-ID")}</div>}
-                    {p.paid_at && <div className="text-xs text-green-500 mt-0.5">Paid at {new Date(p.paid_at).toLocaleString("id-ID")} by {p.paid_by}</div>}
+                    {p.paid_at && (
+                      <div className="text-xs text-green-500 mt-0.5">
+                        Paid at {new Date(p.paid_at).toLocaleString("id-ID")} by {p.paid_by}
+                        {p.payment_method_label && <span className="ml-1">via <strong>{p.payment_method_label}</strong></span>}
+                        {p.payment_reference && <span className="ml-1">(Ref: {p.payment_reference})</span>}
+                      </div>
+                    )}
+                    {p.recipient_info && (
+                      <div className="text-xs text-gray-400 mt-0.5">
+                        Ke: {p.recipient_info.name} — {p.recipient_info.method} {p.recipient_info.account}
+                      </div>
+                    )}
                   </div>
                   <div className="text-right">
                     <div className="text-xl font-bold">{formatRupiah(p.total_amount)}</div>
@@ -783,8 +926,11 @@ export default function PayrollTab() {
                         </button>
                       )}
                       {p.status === "approved" && (
-                        <button onClick={() => updatePayoutStatus(p.id, "mark_paid")} className="flex items-center gap-1 px-3 py-1 bg-green-600 text-white rounded-lg text-xs">
-                          <DollarSign className="w-3 h-3" /> Mark Paid
+                        <button onClick={() => {
+                          setShowPaymentModal(p.id);
+                          setPaymentForm({ method: "", methodLabel: "", reference: "", accountId: "" });
+                        }} className="flex items-center gap-1 px-3 py-1 bg-green-600 text-white rounded-lg text-xs">
+                          <CreditCard className="w-3 h-3" /> Bayar Manual
                         </button>
                       )}
                       {p.status !== "paid" && p.status !== "cancelled" && (
@@ -883,13 +1029,134 @@ export default function PayrollTab() {
               <ArrowRight className="w-4 h-4" />
               <span className="bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded">Approved</span>
               <ArrowRight className="w-4 h-4" />
-              <span className="bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded">Paid ✓</span>
+              <span className="bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded flex items-center gap-1"><CreditCard className="w-3 h-3" /> Transfer Manual ✓</span>
             </div>
             <div className="mt-3 text-sm text-gray-500">
               <p>• <strong>Worker:</strong> Komisi per order ({((settings.commission?.worker_rate ?? 0.6) * 100).toFixed(0)}%) — payout setiap 2 minggu (tgl 1 & 16)</p>
               <p>• <strong>Staff (Lead/Admin):</strong> Gaji bulanan — payout tgl 28</p>
               <p>• Komisi otomatis dibuat saat order di-complete</p>
+              <p>• <strong>Pembayaran manual:</strong> Transfer via Dana, OVO, ShopeePay, Bank Transfer, dll</p>
             </div>
+          </div>
+
+          {/* Payment Accounts Management */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold flex items-center gap-2"><CreditCard className="w-5 h-5" /> Akun Pembayaran Staff</h3>
+              <button
+                onClick={() => setShowAddAccountForm(!showAddAccountForm)}
+                className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm"
+              >
+                <Plus className="w-4 h-4" /> Tambah Akun
+              </button>
+            </div>
+
+            {showAddAccountForm && (
+              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 mb-4 border border-blue-200 dark:border-blue-800">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Staff</label>
+                    <select
+                      value={accountForm.staffId}
+                      onChange={(e) => setAccountForm({ ...accountForm, staffId: e.target.value })}
+                      className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm"
+                    >
+                      <option value="">Pilih staff...</option>
+                      {staffList.map((s) => (
+                        <option key={s.id} value={s.id}>{s.name} ({s.role})</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Metode</label>
+                    <select
+                      value={accountForm.method}
+                      onChange={(e) => {
+                        const m = availablePaymentMethods.find(pm => pm.id === e.target.value);
+                        setAccountForm({ ...accountForm, method: e.target.value, label: m?.label || "" });
+                      }}
+                      className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm"
+                    >
+                      <option value="">Pilih metode...</option>
+                      {availablePaymentMethods.map((m) => (
+                        <option key={m.id} value={m.id}>{m.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Nama Pemilik</label>
+                    <input
+                      type="text"
+                      value={accountForm.accountName}
+                      onChange={(e) => setAccountForm({ ...accountForm, accountName: e.target.value })}
+                      placeholder="Nama di rekening/e-wallet"
+                      className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Nomor Akun / HP</label>
+                    <input
+                      type="text"
+                      value={accountForm.accountNumber}
+                      onChange={(e) => setAccountForm({ ...accountForm, accountNumber: e.target.value })}
+                      placeholder="e.g. 081234567890"
+                      className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm"
+                    />
+                  </div>
+                  <div className="flex items-end gap-3">
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={accountForm.isPrimary}
+                        onChange={(e) => setAccountForm({ ...accountForm, isPrimary: e.target.checked })}
+                        className="rounded"
+                      />
+                      Utama
+                    </label>
+                  </div>
+                </div>
+                <div className="flex gap-2 mt-3">
+                  <button onClick={savePaymentAccount} disabled={actionLoading} className="flex items-center gap-1 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm disabled:opacity-50">
+                    <Save className="w-4 h-4" /> Simpan
+                  </button>
+                  <button onClick={() => setShowAddAccountForm(false)} className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg text-sm">Batal</button>
+                </div>
+              </div>
+            )}
+
+            {paymentAccounts.length === 0 ? (
+              <p className="text-sm text-gray-400 text-center py-4">Belum ada akun pembayaran. Tambahkan agar bisa transfer manual.</p>
+            ) : (
+              <div className="space-y-2">
+                {/* Group by staff */}
+                {staffList.map((staff) => {
+                  const accounts = paymentAccounts.filter(a => a.staff_id === staff.id);
+                  if (accounts.length === 0) return null;
+                  return (
+                    <div key={staff.id} className="border border-gray-100 dark:border-gray-700 rounded-lg p-3">
+                      <div className="font-medium text-sm mb-2">{staff.name} <span className="text-xs text-gray-500">({staff.role})</span></div>
+                      <div className="flex flex-wrap gap-2">
+                        {accounts.map((acc) => (
+                          <div key={acc.id} className="flex items-center gap-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg px-3 py-2 text-sm">
+                            {paymentMethodIcon(availablePaymentMethods.find(m => m.id === acc.method)?.type)}
+                            <div>
+                              <div className="font-medium flex items-center gap-1">
+                                {acc.label}
+                                {acc.is_primary && <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />}
+                              </div>
+                              <div className="text-xs text-gray-500">{acc.account_name} · {acc.account_number}</div>
+                            </div>
+                            <button onClick={() => deletePaymentAccount(acc.id)} className="ml-2 text-red-400 hover:text-red-600">
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -938,6 +1205,111 @@ export default function PayrollTab() {
               <button
                 onClick={() => setShowPayoutForm(false)}
                 className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg text-sm"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ============ PAYMENT MODAL (Mark Paid) ============ */}
+      {showPaymentModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-semibold mb-1">Pembayaran Manual</h3>
+            <p className="text-sm text-gray-500 mb-4">
+              Payout: <strong>{payouts.find(p => p.id === showPaymentModal)?.payout_code}</strong> — {formatRupiah(payouts.find(p => p.id === showPaymentModal)?.total_amount || 0)}
+            </p>
+
+            {/* Payment Method Selection */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2">Metode Pembayaran *</label>
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                {availablePaymentMethods.map((m) => (
+                  <button
+                    key={m.id}
+                    onClick={() => setPaymentForm({ ...paymentForm, method: m.id, methodLabel: m.label })}
+                    className={`flex flex-col items-center gap-1 p-3 rounded-xl border-2 text-xs transition-colors ${
+                      paymentForm.method === m.id
+                        ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400"
+                        : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
+                    }`}
+                  >
+                    {paymentMethodIcon(m.type)}
+                    <span className="font-medium">{m.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Recipient Account */}
+            {(() => {
+              // Find payout items' staff IDs to show relevant accounts
+              const relevantAccounts = paymentAccounts.filter(a =>
+                paymentForm.method ? a.method === paymentForm.method : true
+              );
+              if (relevantAccounts.length > 0) {
+                return (
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium mb-2">Akun Penerima</label>
+                    <div className="space-y-2">
+                      {relevantAccounts.map((acc) => (
+                        <button
+                          key={acc.id}
+                          onClick={() => setPaymentForm({ ...paymentForm, accountId: acc.id })}
+                          className={`w-full flex items-center gap-3 p-3 rounded-lg border-2 text-left text-sm transition-colors ${
+                            paymentForm.accountId === acc.id
+                              ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                              : "border-gray-200 dark:border-gray-600 hover:border-gray-300"
+                          }`}
+                        >
+                          {paymentMethodIcon(availablePaymentMethods.find(m => m.id === acc.method)?.type)}
+                          <div className="flex-1">
+                            <div className="font-medium flex items-center gap-1">
+                              {acc.staff_users?.name || "Staff"}
+                              <span className="text-xs text-gray-500">— {acc.label}</span>
+                              {acc.is_primary && <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />}
+                            </div>
+                            <div className="text-xs text-gray-500">{acc.account_name} · {acc.account_number}</div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+
+            {/* Reference Number */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">No. Referensi / ID Transaksi</label>
+              <input
+                type="text"
+                value={paymentForm.reference}
+                onChange={(e) => setPaymentForm({ ...paymentForm, reference: e.target.value })}
+                placeholder="Opsional — No. transaksi dari app/bank"
+                className="w-full p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm"
+              />
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-2">
+              <button
+                onClick={markPaidWithDetails}
+                disabled={actionLoading || !paymentForm.method}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 text-white rounded-lg text-sm disabled:opacity-50 font-medium"
+              >
+                {actionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                Konfirmasi Sudah Dibayar
+              </button>
+              <button
+                onClick={() => {
+                  setShowPaymentModal(null);
+                  setPaymentForm({ method: "", methodLabel: "", reference: "", accountId: "" });
+                }}
+                className="px-4 py-2.5 bg-gray-200 dark:bg-gray-700 rounded-lg text-sm"
               >
                 Batal
               </button>

@@ -181,7 +181,7 @@ export async function PATCH(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { id, action, paymentProof, notes } = body;
+    const { id, action, paymentProof, notes, paymentMethod, paymentMethodLabel, paymentReference, recipientAccountId, recipientInfo } = body;
 
     if (!id || !action) {
       return NextResponse.json({ error: "id and action required" }, { status: 400 });
@@ -215,10 +215,18 @@ export async function PATCH(request: NextRequest) {
         if (payout.status !== "approved") {
           return NextResponse.json({ error: "Can only mark approved payouts as paid" }, { status: 400 });
         }
+        if (!paymentMethod) {
+          return NextResponse.json({ error: "Payment method required" }, { status: 400 });
+        }
         updates.status = "paid";
         updates.paid_by = auth.user!.email;
         updates.paid_at = new Date().toISOString();
+        updates.payment_method = paymentMethod;
+        if (paymentMethodLabel) updates.payment_method_label = paymentMethodLabel;
+        if (paymentReference) updates.payment_reference = sanitizeInput(paymentReference);
         if (paymentProof) updates.payment_proof = paymentProof;
+        if (recipientAccountId) updates.recipient_account_id = recipientAccountId;
+        if (recipientInfo) updates.recipient_info = recipientInfo;
 
         // Update all related commissions and salary records to paid
         await supabase

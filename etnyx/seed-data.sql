@@ -8,6 +8,7 @@
 -- =====================
 -- 0. CLEAN OLD DATA (order matters for FK)
 -- =====================
+DELETE FROM staff_payment_accounts;
 DELETE FROM payout_items;
 DELETE FROM payouts;
 DELETE FROM commissions;
@@ -552,6 +553,23 @@ INSERT INTO staff_salaries (id, staff_id, base_salary, allowances, effective_fro
    '[{"name": "Transport", "amount": 200000}, {"name": "Internet", "amount": 150000}]'::jsonb,
    (CURRENT_DATE - INTERVAL '60 days')::date, NULL, 'Lead - base salary + allowances')
 ON CONFLICT (staff_id, effective_from) DO NOTHING;
+
+-- =====================
+-- 11b. PAYROLL - Staff Payment Accounts (Dana, OVO, Bank, etc.)
+-- =====================
+INSERT INTO staff_payment_accounts (staff_id, method, label, account_name, account_number, is_primary) VALUES
+  -- Lead - Rian
+  ('a0000000-0000-0000-0000-000000000001', 'bank_bca', 'BCA', 'Rian Pratama', '1234567890', true),
+  ('a0000000-0000-0000-0000-000000000001', 'dana', 'Dana', 'Rian Pratama', '081200001111', false),
+  -- Worker Dimas
+  ('a0000000-0000-0000-0000-000000000002', 'dana', 'Dana', 'Dimas Saputra', '081200002222', true),
+  ('a0000000-0000-0000-0000-000000000002', 'ovo', 'OVO', 'Dimas Saputra', '081200002222', false),
+  -- Worker Fajar
+  ('a0000000-0000-0000-0000-000000000003', 'shopeepay', 'ShopeePay', 'Fajar Nugroho', '081200003333', true),
+  ('a0000000-0000-0000-0000-000000000003', 'bank_bri', 'BRI', 'Fajar Nugroho', '9876543210', false),
+  -- Worker Galih
+  ('a0000000-0000-0000-0000-000000000004', 'gopay', 'GoPay', 'Galih Ramadhan', '081200004444', true),
+  ('a0000000-0000-0000-0000-000000000004', 'bank_seabank', 'SeaBank', 'Galih Ramadhan', '1122334455', false);
 
 -- =====================
 -- 12. PAYROLL - Salary Records (last 2 months for lead)
