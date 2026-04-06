@@ -13,7 +13,7 @@ interface HeroSettings { headline: string; subheadline: string; ctaPrimary: stri
 interface PromoBannerSettings { text: string; link: string; isVisible: boolean }
 interface FAQItem { question: string; answer: string }
 interface SectionVisibility { hero: boolean; pricing: boolean; whyChooseUs: boolean; teamShowcase: boolean; testimonials: boolean; portfolio: boolean; tracking: boolean; faq: boolean; cta: boolean }
-interface TrackingPixels { metaPixelId: string; metaAccessToken: string; googleAdsId: string; googleAdsConversionLabel: string; googleAnalyticsId: string; tiktokPixelId: string; isMetaEnabled: boolean; isGoogleAdsEnabled: boolean; isGoogleAnalyticsEnabled: boolean; isTiktokEnabled: boolean }
+interface TrackingPixels { metaPixelId: string; metaAccessToken: string; googleAdsId: string; googleAdsConversionLabel: string; googleAnalyticsId: string; gtmId: string; tiktokPixelId: string; isMetaEnabled: boolean; isGoogleAdsEnabled: boolean; isGoogleAnalyticsEnabled: boolean; isGtmEnabled: boolean; isTiktokEnabled: boolean }
 interface SocialLinks { instagram: string; facebook: string; tiktok: string; youtube: string; whatsapp: string }
 interface SiteInfo { siteName: string; taglineId: string; taglineEn: string; supportEmail: string; companyName: string }
 interface IntegrationSettings {
@@ -58,7 +58,7 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
   const [promoBanner, setPromoBanner] = useState<PromoBannerSettings>({ text: "", link: "/order", isVisible: true });
   const [faqItems, setFaqItems] = useState<FAQItem[]>([]);
   const [sectionVisibility, setSectionVisibility] = useState<SectionVisibility>({ hero: true, pricing: true, whyChooseUs: true, teamShowcase: true, testimonials: true, portfolio: true, tracking: true, faq: true, cta: true });
-  const [trackingPixels, setTrackingPixels] = useState<TrackingPixels>({ metaPixelId: "", metaAccessToken: "", googleAdsId: "", googleAdsConversionLabel: "", googleAnalyticsId: "", tiktokPixelId: "", isMetaEnabled: false, isGoogleAdsEnabled: false, isGoogleAnalyticsEnabled: false, isTiktokEnabled: false });
+  const [trackingPixels, setTrackingPixels] = useState<TrackingPixels>({ metaPixelId: "", metaAccessToken: "", googleAdsId: "", googleAdsConversionLabel: "", googleAnalyticsId: "", gtmId: "", tiktokPixelId: "", isMetaEnabled: false, isGoogleAdsEnabled: false, isGoogleAnalyticsEnabled: false, isGtmEnabled: false, isTiktokEnabled: false });
   const [socialLinks, setSocialLinks] = useState<SocialLinks>({ instagram: "", facebook: "", tiktok: "", youtube: "", whatsapp: "" });
   const [siteInfo, setSiteInfo] = useState<SiteInfo>({ siteName: "", taglineId: "", taglineEn: "", supportEmail: "", companyName: "" });
   const [integrations, setIntegrations] = useState<IntegrationSettings>({
@@ -346,11 +346,15 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-bold text-text">Tracking Pixels</h2>
-              <p className="text-text-muted text-xs mt-1">Setup pixel untuk Meta Ads, Google Ads, GA4, dan TikTok Ads</p>
+              <p className="text-text-muted text-xs mt-1">Setup pixel untuk Meta Ads, Google Ads, GA4, GTM, dan TikTok Ads</p>
             </div>
             <CmsSaveButton settingKey="tracking_pixels" value={trackingPixels} />
           </div>
           {[
+            { key: "gtm", label: "Google Tag Manager", desc: "Container untuk mengelola semua tag & pixel dari satu dashboard", enabled: trackingPixels.isGtmEnabled, toggle: () => setTrackingPixels({ ...trackingPixels, isGtmEnabled: !trackingPixels.isGtmEnabled }),
+              fields: [
+                { label: "GTM Container ID", value: trackingPixels.gtmId, onChange: (v: string) => setTrackingPixels({ ...trackingPixels, gtmId: v }), placeholder: "GTM-XXXXXXX" },
+              ]},
             { key: "meta", label: "Meta (Facebook) Pixel", desc: "Tracking konversi Meta & Instagram Ads", enabled: trackingPixels.isMetaEnabled, toggle: () => setTrackingPixels({ ...trackingPixels, isMetaEnabled: !trackingPixels.isMetaEnabled }),
               fields: [
                 { label: "Pixel ID", value: trackingPixels.metaPixelId, onChange: (v: string) => setTrackingPixels({ ...trackingPixels, metaPixelId: v }), placeholder: "123456789012345" },

@@ -8,10 +8,12 @@ interface TrackingPixelsData {
   googleAdsId: string;
   googleAdsConversionLabel: string;
   googleAnalyticsId: string;
+  gtmId: string;
   tiktokPixelId: string;
   isMetaEnabled: boolean;
   isGoogleAdsEnabled: boolean;
   isGoogleAnalyticsEnabled: boolean;
+  isGtmEnabled: boolean;
   isTiktokEnabled: boolean;
 }
 
@@ -33,6 +35,23 @@ export default function TrackingPixels() {
 
   return (
     <>
+      {/* Google Tag Manager */}
+      {pixels.isGtmEnabled && pixels.gtmId && (
+        <Script
+          id="gtm-script"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+              new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+              'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+              })(window,document,'script','dataLayer','${pixels.gtmId.replace(/[^A-Za-z0-9-]/g, "")}');
+            `,
+          }}
+        />
+      )}
+
       {/* Meta (Facebook) Pixel */}
       {pixels.isMetaEnabled && pixels.metaPixelId && (
         <Script
