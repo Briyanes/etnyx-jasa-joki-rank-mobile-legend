@@ -21,7 +21,7 @@ interface IntegrationSettings {
   midtransPaymentChannels: Record<string, boolean>;
   resendApiKey: string; resendFromEmail: string;
   fonnteApiToken: string; fonnteDeviceId: string;
-  telegramBotToken: string; telegramAdminGroupId: string; telegramWorkerGroupId: string; telegramReviewGroupId: string;
+  telegramBotToken: string; telegramAdminGroupId: string; telegramWorkerGroupId: string; telegramReviewGroupId: string; telegramReportGroupId: string;
 }
 
 type SettingsSubTab = "cms-sections" | "hero" | "banner" | "faq" | "team" | "social" | "site" | "pixels" | "integrations" | "general";
@@ -66,7 +66,7 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
     midtransPaymentChannels: { bca: true, bni: true, mandiri: true, permata: false, gopay: true, shopeepay: true, dana: false, ovo: false, credit_card: true, qris: true, alfamart_indomaret: true },
     resendApiKey: "", resendFromEmail: "noreply@etnyx.com",
     fonnteApiToken: "", fonnteDeviceId: "",
-    telegramBotToken: "", telegramAdminGroupId: "", telegramWorkerGroupId: "", telegramReviewGroupId: "",
+    telegramBotToken: "", telegramAdminGroupId: "", telegramWorkerGroupId: "", telegramReviewGroupId: "", telegramReportGroupId: "",
   });
 
   const fetchSettings = useCallback(async () => {
@@ -562,10 +562,16 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
               <p className="text-text-muted text-xs mt-1">Notifikasi order yang sudah dikonfirmasi untuk dikerjakan</p>
             </div>
             <div>
-              <label className="block text-sm text-text-muted mb-1.5">Review & Report Group Chat ID</label>
+              <label className="block text-sm text-text-muted mb-1.5">Review Group Chat ID</label>
               <input type="text" value={integrations.telegramReviewGroupId} onChange={(e) => setIntegrations({ ...integrations, telegramReviewGroupId: e.target.value })}
                 placeholder="-1001234567890" className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
-              <p className="text-text-muted text-xs mt-1">Notifikasi review customer & laporan worker (opsional, default ke Admin Group)</p>
+              <p className="text-text-muted text-xs mt-1">Notifikasi review customer baru (opsional, default ke Admin Group)</p>
+            </div>
+            <div>
+              <label className="block text-sm text-text-muted mb-1.5">Report Group Chat ID</label>
+              <input type="text" value={integrations.telegramReportGroupId} onChange={(e) => setIntegrations({ ...integrations, telegramReportGroupId: e.target.value })}
+                placeholder="-1001234567890" className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
+              <p className="text-text-muted text-xs mt-1">Notifikasi laporan worker (opsional, default ke Admin Group)</p>
             </div>
             <div className="bg-background/50 rounded-lg p-3 text-xs text-text-muted space-y-1">
               <p><BookOpen className="w-3 h-3 inline mr-1" /> <strong>Cara mendapatkan Bot Token:</strong></p>

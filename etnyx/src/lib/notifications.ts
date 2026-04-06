@@ -28,6 +28,7 @@ interface IntegrationSettings {
   telegramAdminGroupId?: string;
   telegramWorkerGroupId?: string;
   telegramReviewGroupId?: string;
+  telegramReportGroupId?: string;
 }
 
 // ============ Helper: Get Integration Settings ============
@@ -271,8 +272,8 @@ export async function notifyWorkerReport(report: {
 }): Promise<boolean> {
   const settings = await getIntegrationSettings();
   const adminChatId = settings.telegramAdminGroupId;
-  const reviewChatId = settings.telegramReviewGroupId;
-  if (!adminChatId && !reviewChatId) return false;
+  const reportChatId = settings.telegramReportGroupId;
+  if (!adminChatId && !reportChatId) return false;
 
   const typeLabels: Record<string, string> = {
     cheating: "🎮 Bermain curang / cheat",
@@ -310,9 +311,9 @@ ${report.report_detail ? `\n📝 <b>Detail:</b> ${report.report_detail}` : ""}
     await sendTelegramMessage(adminChatId, message, undefined, replyMarkup);
   }
 
-  // Send to review group (if configured and different from admin)
-  if (reviewChatId && reviewChatId !== adminChatId) {
-    await sendTelegramMessage(reviewChatId, message, undefined, replyMarkup);
+  // Send to report group (if configured and different from admin)
+  if (reportChatId && reportChatId !== adminChatId) {
+    await sendTelegramMessage(reportChatId, message, undefined, replyMarkup);
   }
 
   return true;
