@@ -121,7 +121,7 @@ export async function notifyAdminNewOrder(order: OrderData & { db_id?: string })
   if (!chatId) return false;
 
   const message = `
-<b>ORDER BARU!</b>
+📢 <b>ORDER BARU!</b>
 
 <b>Order ID:</b> ${order.order_id}
 <b>Username:</b> ${order.username}
@@ -160,7 +160,7 @@ export async function notifyWorkerConfirmedOrder(order: OrderData): Promise<bool
   if (!chatId) return false;
 
   const message = `
-<b>ORDER DIKONFIRMASI!</b>
+📢 <b>ORDER DIKONFIRMASI!</b>
 
 <b>Order ID:</b> ${order.order_id}
 <b>Username:</b> ${order.username}
@@ -184,7 +184,7 @@ export async function notifyAdminOrderCompleted(order: OrderData & { db_id?: str
   if (!chatId) return false;
 
   const message = `
-<b>ORDER SELESAI!</b>
+📢 <b>ORDER SELESAI!</b>
 
 <b>Order ID:</b> ${order.order_id}
 <b>Username:</b> ${order.username}
@@ -227,7 +227,7 @@ export async function notifyNewReview(review: {
 
   const stars = "★".repeat(review.service_rating);
   const message = `
-<b>REVIEW BARU!</b>
+📢 <b>REVIEW BARU!</b>
 
 <b>Order:</b> ${review.order_id}
 <b>Customer:</b> ${review.customer_name || "-"}
@@ -278,7 +278,7 @@ export async function notifyWorkerReport(report: {
   };
 
   const message = `
-<b>WORKER REPORT!</b>
+📢 <b>WORKER REPORT!</b>
 
 <b>Order:</b> ${report.order_id}
 <b>Worker:</b> ${report.worker_name || "Belum di-assign"}

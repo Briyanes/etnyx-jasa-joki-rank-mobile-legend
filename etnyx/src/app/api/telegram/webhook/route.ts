@@ -532,7 +532,7 @@ async function handleConfirmOrder(callbackId: string, chatId: number, messageId:
 
   // Update the original message
   const updated = `
-<b>ORDER DIKONFIRMASI!</b>
+📢 <b>ORDER DIKONFIRMASI!</b>
 
 <b>Order:</b> ${order.order_id}
 <b>Username:</b> ${order.username}
