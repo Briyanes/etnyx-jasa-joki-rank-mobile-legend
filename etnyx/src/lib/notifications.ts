@@ -222,9 +222,8 @@ export async function notifyNewReview(review: {
   review_id?: string;
 }): Promise<boolean> {
   const settings = await getIntegrationSettings();
-  const adminChatId = settings.telegramAdminGroupId;
   const reviewChatId = settings.telegramReviewGroupId;
-  if (!adminChatId && !reviewChatId) return false;
+  if (!reviewChatId) return false;
 
   const stars = "⭐".repeat(review.service_rating);
   const message = `
@@ -248,13 +247,8 @@ ${review.service_comment ? `\n💬 "${review.service_comment}"` : ""}
     ],
   } : undefined;
 
-  // Send to admin group
-  if (adminChatId) {
-    await sendTelegramMessage(adminChatId, message, undefined, replyMarkup);
-  }
-
-  // Send to review group (if configured and different from admin)
-  if (reviewChatId && reviewChatId !== adminChatId) {
+  // Send to review group only (not admin/new order group)
+  if (reviewChatId) {
     await sendTelegramMessage(reviewChatId, message, undefined, replyMarkup);
   }
 
@@ -272,9 +266,8 @@ export async function notifyWorkerReport(report: {
   review_id?: string;
 }): Promise<boolean> {
   const settings = await getIntegrationSettings();
-  const adminChatId = settings.telegramAdminGroupId;
   const reportChatId = settings.telegramReportGroupId;
-  if (!adminChatId && !reportChatId) return false;
+  if (!reportChatId) return false;
 
   const typeLabels: Record<string, string> = {
     cheating: "🎮 Bermain curang / cheat",
@@ -308,13 +301,8 @@ ${report.report_detail ? `\n📝 <b>Detail:</b> ${report.report_detail}` : ""}
     ],
   } : undefined;
 
-  // Send to admin group
-  if (adminChatId) {
-    await sendTelegramMessage(adminChatId, message, undefined, replyMarkup);
-  }
-
-  // Send to report group (if configured and different from admin)
-  if (reportChatId && reportChatId !== adminChatId) {
+  // Send to report group only (not admin/new order group)
+  if (reportChatId) {
     await sendTelegramMessage(reportChatId, message, undefined, replyMarkup);
   }
 
