@@ -451,7 +451,7 @@ Silakan cek akun kamu dan ganti password untuk keamanan.
 👉 ${reviewLink}
 
 ⚠️ *Penting:*
-Jika worker menawarkan jasa joki di luar ETNYX, meminta kontak pribadi, atau melakukan hal mencurigakan lainnya, segera laporkan saat mengisi review. Keamanan akun kamu adalah prioritas kami.
+Jika worker menawarkan jasa joki di luar ETNYX, meminta kontak pribadi, atau melakukan hal mencurigakan lainnya, segera laporkan saat mengisi review. Laporan yang terbukti valid bisa mendapat *skin gratis* sebagai apresiasi dari kami! 🎁
 
 Terima kasih sudah menggunakan ETNYX! ⭐
 
