@@ -218,14 +218,9 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Return Google Maps review URL
-    const googleReviewUrl = "https://search.google.com/local/writereview?placeid=ChIJ_____ETNYX_PLACEHOLDER";
-    // The actual redirect is handled on the frontend using the business search URL
-
     return NextResponse.json({
       success: true,
       message: "Review submitted successfully",
-      googleReviewUrl,
     });
   } catch {
     return NextResponse.json({ error: "Server error" }, { status: 500 });
