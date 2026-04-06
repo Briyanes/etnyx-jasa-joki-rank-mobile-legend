@@ -10,6 +10,7 @@ import {
   UserCheck, Crown, Wrench, Star,
   Gift, Bot, TrendingUp, Search,
   ClipboardList, Gamepad2, Monitor,
+  Megaphone, Target, MousePointerClick,
 } from "lucide-react";
 
 // --- Reusable Components ---
@@ -113,8 +114,8 @@ function buildCategories(): DocCategory[] {
               </p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <StatCard label="Halaman" value="16" sub="Customer + Admin" />
-                <StatCard label="API Routes" value="58+" sub="RESTful endpoints" />
-                <StatCard label="Dashboard Tabs" value="14" sub="Admin CMS" />
+                <StatCard label="API Routes" value="60+" sub="RESTful endpoints" />
+                <StatCard label="Dashboard Tabs" value="15" sub="Admin CMS" />
                 <StatCard label="Integrasi" value="6" sub="External services" />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -136,8 +137,9 @@ function buildCategories(): DocCategory[] {
                     <li>&#8226; <strong className="text-text">Fonnte</strong> &mdash; WhatsApp notifikasi customer</li>
                     <li>&#8226; <strong className="text-text">Resend</strong> &mdash; Email transaksional</li>
                     <li>&#8226; <strong className="text-text">Web Push</strong> &mdash; Browser notifications</li>
-                    <li>&#8226; <strong className="text-text">Google Analytics</strong> &mdash; Tracking</li>
-                    <li>&#8226; <strong className="text-text">Meta/TikTok Pixel</strong> &mdash; Ads tracking</li>
+                    <li>&#8226; <strong className="text-text">Google Analytics 4</strong> &mdash; Website Analytics</li>
+                    <li>&#8226; <strong className="text-text">Meta/TikTok/Google Pixel</strong> &mdash; Conversion tracking</li>
+                    <li>&#8226; <strong className="text-text">Meta CAPI</strong> &mdash; Server-side conversion API</li>
                   </ul>
                 </div>
               </div>
@@ -287,6 +289,7 @@ function buildCategories(): DocCategory[] {
                   { tab: "Payroll", desc: "5 sub-tab: Overview (ringkasan), Commissions (auto-generated, filter worker/status), Salaries (gaji tetap), Payouts (batch pembayaran manual: Dana/OVO/Bank), Settings (commission rate, pay schedule)." },
                   { tab: "Reviews", desc: "Kelola review customer: approve/hide, worker reports (cheating/rude/etc), set report status (resolved/dismissed)." },
                   { tab: "Reports", desc: "3 sub-tab: P&L per bulan (revenue vs expenses, trend 6 bulan), Worker Performance (winrate, earnings, rating), Export CSV (8 jenis data)." },
+                  { tab: "Ads", desc: "Ad Performance dashboard: Total Spend, Revenue, Profit/Loss, ROAS, CPA. Per-platform breakdown, campaign drill-down, ad spend log." },
                   { tab: "Settings", desc: "10 sub-tab: Visibilitas, Hero, Banner, FAQ, Tim, Sosial, Info Situs, Pixels, Integrasi (Midtrans/Telegram/WA/Email), General." },
                 ].map((item, i) => (
                   <div key={i} className="bg-background rounded-lg p-3 border border-white/5 flex gap-3 items-start">
@@ -373,6 +376,118 @@ function buildCategories(): DocCategory[] {
           ),
         },
         {
+          id: "conversion-tracking",
+          icon: MousePointerClick,
+          title: "Conversion Tracking & Pixels",
+          content: (
+            <div className="space-y-4">
+              <p className="text-text-muted text-sm">Full-funnel conversion tracking ke 3 platform sekaligus. Semua dikelola dari Dashboard &rarr; Settings &rarr; Pixels.</p>
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">Conversion Funnel</h4>
+                <StepFlow steps={[
+                  { title: "PageView", desc: "Otomatis di setiap halaman (Meta fbq, TikTok ttq.page)", badge: "auto" },
+                  { title: "ViewContent", desc: "Customer buka halaman /order", page: "/order" },
+                  { title: "AddToCart", desc: "Customer pilih paket atau klik Lanjut dari step 1", page: "/order (step 1 → 2)" },
+                  { title: "InitiateCheckout", desc: "Customer submit order (step 4 Konfirmasi)", page: "/order (step 4)" },
+                  { title: "Purchase", desc: "Setelah bayar via Midtrans, redirect ke success page", page: "/payment/success" },
+                ]} />
+              </div>
+              <div className="bg-background rounded-lg p-3 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-2">Event Mapping per Platform</h4>
+                <Table headers={["Event", "Meta Pixel (fbq)", "Google (gtag)", "TikTok (ttq)"]} rows={[
+                  ["PageView", "PageView", "page_view", "page"],
+                  ["ViewContent", "ViewContent", "view_item", "ViewContent"],
+                  ["AddToCart", "AddToCart", "add_to_cart", "AddToCart"],
+                  ["InitiateCheckout", "InitiateCheckout", "begin_checkout", "InitiateCheckout"],
+                  ["Purchase", "Purchase", "purchase + conversion", "CompletePayment"],
+                  ["Lead", "Lead", "generate_lead", "SubmitForm"],
+                ]} />
+              </div>
+              <div className="bg-background rounded-lg p-3 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-2">Pixel Dashboard Settings</h4>
+                <Table headers={["Pixel", "Toggle", "Fields"]} rows={[
+                  ["Google Tag Manager", "isGtmEnabled", "GTM Container ID (GTM-XXXXXXX)"],
+                  ["Meta (Facebook) Pixel", "isMetaEnabled", "Pixel ID + Access Token (untuk CAPI)"],
+                  ["Google Ads", "isGoogleAdsEnabled", "Google Ads ID (AW-xxx) + Conversion Label"],
+                  ["Google Analytics 4", "isGoogleAnalyticsEnabled", "Measurement ID (G-xxx)"],
+                  ["TikTok Pixel", "isTiktokEnabled", "Pixel ID"],
+                ]} />
+              </div>
+              <div className="bg-background rounded-lg p-3 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-2">Meta CAPI (Server-Side)</h4>
+                <ul className="text-text-muted text-xs space-y-1 list-disc ml-4">
+                  <li>Server-side Purchase event via Meta Conversions API</li>
+                  <li>Trigger: payment webhook setelah berhasil bayar</li>
+                  <li>PII hashing: SHA-256 (email, phone)</li>
+                  <li>Event deduplication via event_id</li>
+                  <li>File: <Code>lib/meta-capi.ts</Code></li>
+                </ul>
+              </div>
+              <InfoBox type="warning">
+                <strong>CSP:</strong> Domain tracking sudah di-whitelist di <Code>next.config.ts</Code> (script-src, connect-src, frame-src). Jika pixel tidak load, cek apakah customer pakai ad blocker.
+              </InfoBox>
+              <InfoBox type="info">
+                <strong>File:</strong> <Code>lib/tracking.ts</Code> (client events), <Code>lib/meta-capi.ts</Code> (server CAPI), <Code>components/TrackingPixels.tsx</Code> (pixel loader)
+              </InfoBox>
+            </div>
+          ),
+        },
+        {
+          id: "utm-attribution",
+          icon: Target,
+          title: "UTM Attribution & Ad Performance",
+          content: (
+            <div className="space-y-4">
+              <p className="text-text-muted text-sm">Track dari mana customer datang (UTM), click IDs (fbclid/gclid/ttclid), dan hitung ROI/ROAS per platform.</p>
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">UTM Capture Flow</h4>
+                <StepFlow steps={[
+                  { title: "Customer klik iklan", desc: "URL berisi ?utm_source=meta&utm_medium=cpc&utm_campaign=promo_april&fbclid=xxx" },
+                  { title: "UTM disimpan di sessionStorage", desc: "captureUtmParams() dipanggil saat page load (homepage + order page)" },
+                  { title: "Submit order", desc: "UTM params dikirim bersama data order ke backend" },
+                  { title: "Tersimpan di DB", desc: "Kolom utm_source, utm_medium, utm_campaign, fbclid, gclid, ttclid di tabel orders" },
+                  { title: "Attribution stats", desc: "Dashboard Ads tab menampilkan revenue per source/campaign" },
+                ]} />
+              </div>
+              <div className="bg-background rounded-lg p-3 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-2">UTM Fields Tersimpan</h4>
+                <Table headers={["Field", "Contoh", "Keterangan"]} rows={[
+                  ["utm_source", "meta, google, tiktok", "Platform iklan"],
+                  ["utm_medium", "cpc, cpm, social", "Tipe traffic"],
+                  ["utm_campaign", "promo_april", "Nama campaign"],
+                  ["utm_content", "creative_a", "Variant ad creative"],
+                  ["utm_term", "joki ml murah", "Keyword (search ads)"],
+                  ["fbclid", "auto dari Meta", "Facebook click ID"],
+                  ["gclid", "auto dari Google", "Google click ID"],
+                  ["ttclid", "auto dari TikTok", "TikTok click ID"],
+                  ["referrer_url", "auto", "HTTP referrer"],
+                ]} />
+              </div>
+              <div className="bg-background rounded-lg p-3 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-2">Ads Tab Dashboard</h4>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mb-3">
+                  <StatCard label="Total Spend" value="Rp X" sub="Manual input" />
+                  <StatCard label="Revenue" value="Rp X" sub="From attributed orders" />
+                  <StatCard label="Profit/Loss" value="+/- X" sub="Revenue - Spend" />
+                  <StatCard label="ROAS" value="X.Xx" sub="Return on Ad Spend" />
+                  <StatCard label="CPA" value="Rp X" sub="Cost per Acquisition" />
+                </div>
+                <ul className="text-text-muted text-xs space-y-1 list-disc ml-4">
+                  <li>Per-platform breakdown (Meta, Google, TikTok, Other)</li>
+                  <li>Campaign drill-down: revenue, orders, CPA per campaign</li>
+                  <li>Ad Spend log: input manual spend, impressions, clicks per tanggal &amp; platform</li>
+                </ul>
+              </div>
+              <InfoBox type="info">
+                <strong>Schema:</strong> Run <Code>supabase-schema-v15.sql</Code> di Supabase SQL Editor untuk menambahkan kolom UTM di orders + tabel ad_spend.
+              </InfoBox>
+              <InfoBox type="success">
+                <strong>API:</strong> <Code>GET/POST/DELETE /api/admin/ads</Code> &mdash; CRUD ad spend + attribution stats.
+              </InfoBox>
+            </div>
+          ),
+        },
+        {
           id: "telegram-bot",
           icon: Bot,
           title: "Telegram Bot (Interactive)",
@@ -389,7 +504,8 @@ function buildCategories(): DocCategory[] {
                   [<Code key="5">/stats</Code>, "Statistik: total orders, pending, in progress, revenue bulan ini"],
                   [<Code key="6">/reviews</Code>, "5 review terbaru (+ tombol Show/Hide)"],
                   [<Code key="7">/reports</Code>, "Worker reports terbaru (+ tombol Resolved/Dismiss)"],
-                  [<Code key="8">/help</Code>, "Menu bantuan"],
+                  [<Code key="8">/reviewstats</Code>, "Rekap rating & report per worker"],
+                  [<Code key="9">/help</Code>, "Menu bantuan"],
                 ]} />
               </div>
               <div className="bg-background rounded-lg p-4 border border-white/5">
@@ -407,7 +523,7 @@ function buildCategories(): DocCategory[] {
                 <ol className="text-text-muted text-xs space-y-1 list-decimal ml-4">
                   <li>Buat bot di Telegram: chat <Code>@BotFather</Code> &rarr; <Code>/newbot</Code> &rarr; copy token</li>
                   <li>Tambahkan bot ke grup Admin &amp; Worker</li>
-                  <li>Masukkan token &amp; chat IDs di Dashboard &rarr; Settings &rarr; Integrations &rarr; Telegram Bot</li>
+                  <li>Masukkan token &amp; chat IDs di Dashboard &rarr; Settings &rarr; Integrations &rarr; Telegram Bot (Admin, Worker, Review group)</li>
                   <li>Buka URL: <Code>{"https://etnyx.com/api/telegram/webhook?action=register"}</Code></li>
                   <li>Selesai! Bot aktif dan menerima commands.</li>
                 </ol>
@@ -418,8 +534,8 @@ function buildCategories(): DocCategory[] {
                   ["Order baru (bayar)", "Admin", "ORDER BARU! + detail + tombol konfirmasi"],
                   ["Order dikonfirmasi", "Worker", "ORDER DIKONFIRMASI! + detail order"],
                   ["Order selesai", "Admin", "ORDER SELESAI! + detail + tombol detail"],
-                  ["Review masuk", "Admin", "REVIEW BARU! + rating + tombol show/hide"],
-                  ["Worker report", "Admin", "WORKER REPORT! + detail + tombol resolved"],
+                  ["Review masuk", "Admin + Review", "REVIEW BARU! + rating + tombol show/hide"],
+                  ["Worker report", "Admin + Review", "WORKER REPORT! + detail + tombol resolved"],
                   ["Order di-assign", "Worker", "ORDER DITUGASKAN + worker name"],
                 ]} />
               </div>
@@ -604,6 +720,7 @@ function buildCategories(): DocCategory[] {
                   ["/api/admin/reports", "GET", "P&L, trend, worker performance"],
                   ["/api/admin/export", "GET", "CSV export (8 types)"],
                   ["/api/admin/upload", "POST", "File upload to Supabase Storage"],
+                  ["/api/admin/ads", "GET/POST/DELETE", "Ad spend CRUD + attribution stats (ROAS, CPA)"],
                   ["/api/admin/notify", "POST", "Manual notification"],
                   ["/api/admin/test-notifications", "POST", "Test notification channels"],
                 ]} />
@@ -719,6 +836,15 @@ function buildCategories(): DocCategory[] {
                 ]} />
               </div>
               <div className="bg-background rounded-lg p-3 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-2">Tracking & Attribution Tables</h4>
+                <Table headers={["Tabel/Kolom", "Purpose"]} rows={[
+                  [<strong key="1" className="text-text">orders.utm_*</strong>, "UTM attribution: source, medium, campaign, content, term"],
+                  [<strong key="2" className="text-text">orders.fbclid/gclid/ttclid</strong>, "Platform click IDs (Meta, Google, TikTok)"],
+                  [<strong key="3" className="text-text">orders.referrer_url</strong>, "HTTP referrer URL"],
+                  [<strong key="4" className="text-text">ad_spend</strong>, "Manual ad spend per date/platform/campaign: spend, impressions, clicks"],
+                ]} />
+              </div>
+              <div className="bg-background rounded-lg p-3 border border-white/5">
                 <h4 className="text-text font-medium text-sm mb-2">Other Tables</h4>
                 <Table headers={["Tabel", "Purpose"]} rows={[
                   [<strong key="1" className="text-text">admin_audit_log</strong>, "Admin action audit trail"],
@@ -727,7 +853,7 @@ function buildCategories(): DocCategory[] {
                 ]} />
               </div>
               <InfoBox type="info">
-                <strong>Schema Files:</strong> v8 (storage), v9 (order logs), v10 (rewards), v11 (staff), v12 (reviews), v13 (payroll), v14 (payment methods). Run sequentially via Supabase SQL Editor.
+                <strong>Schema Files:</strong> v8 (storage), v9 (order logs), v10 (rewards), v11 (staff), v12 (reviews), v13 (payroll), v14 (payment methods), v15 (UTM attribution &amp; ad spend). Run sequentially via Supabase SQL Editor.
               </InfoBox>
             </div>
           ),
@@ -741,6 +867,7 @@ function buildCategories(): DocCategory[] {
               <p className="text-text-muted text-sm">4 channel + interactive Telegram bot. Konfigurasi di Dashboard &rarr; Settings &rarr; Integrations.</p>
               <Table headers={["Channel", "Provider", "Penerima", "Events"]} rows={[
                 ["Telegram Admin", "Bot API (webhook)", "Admin Group", "Order baru (+ tombol), selesai, review, report"],
+                ["Telegram Review", "Bot API", "Review Group", "Review baru + worker report (duplikat dari admin)"],
                 ["Telegram Worker", "Bot API", "Worker Group", "Order dikonfirmasi, order di-assign"],
                 ["WhatsApp", "Fonnte API", "Customer", "Konfirmasi bayar, mulai dikerjakan, selesai, follow-up"],
                 ["Email", "Resend", "Customer", "Konfirmasi bayar, invoice, verification, password reset"],
@@ -900,7 +1027,7 @@ function buildCategories(): DocCategory[] {
 \u2502   \u2502
 \u2502   \u251C\u2500\u2500 admin/                  # Staff panel
 \u2502   \u2502   \u251C\u2500\u2500 page.tsx            # Login (all roles)
-\u2502   \u2502   \u251C\u2500\u2500 dashboard/          # Admin (page + PayrollTab + ReportsTab + SettingsTab)
+\u2502   \u2502   \u251C\u2500\u2500 dashboard/          # Admin (page + PayrollTab + ReportsTab + SettingsTab + AdsTab)
 \u2502   \u2502   \u251C\u2500\u2500 lead/               # Lead dashboard
 \u2502   \u2502   \u251C\u2500\u2500 worker/             # Worker dashboard
 \u2502   \u2502   \u2514\u2500\u2500 docs/               # This docs page
@@ -924,6 +1051,8 @@ function buildCategories(): DocCategory[] {
 \u2502   \u251C\u2500\u2500 admin-auth.ts           # Admin JWT verify
 \u2502   \u251C\u2500\u2500 staff-auth.ts           # Staff RBAC verify
 \u2502   \u251C\u2500\u2500 notifications.ts        # Telegram + WA + Email + Push
+\u2502   \u251C\u2500\u2500 tracking.ts             # Client-side conversion events
+\u2502   \u251C\u2500\u2500 meta-capi.ts            # Server-side Meta CAPI
 \u2502   \u251C\u2500\u2500 encryption.ts           # AES-256-GCM
 \u2502   \u251C\u2500\u2500 validation.ts           # Input sanitization
 \u2502   \u251C\u2500\u2500 audit-log.ts            # Admin audit logging
