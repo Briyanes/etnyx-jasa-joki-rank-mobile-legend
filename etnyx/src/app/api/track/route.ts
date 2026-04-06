@@ -16,7 +16,7 @@ export async function GET(request: Request) {
     const supabase = await createAdminClient();
     const { data, error } = await supabase
       .from("orders")
-      .select("order_id, username, current_rank, target_rank, package, status, progress, current_progress_rank, created_at, updated_at")
+      .select("id, order_id, username, current_rank, target_rank, package, status, progress, current_progress_rank, created_at, updated_at")
       .eq("order_id", sanitizedId)
       .single();
 
@@ -24,7 +24,17 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Order tidak ditemukan" }, { status: 404 });
     }
 
-    return NextResponse.json(data);
+    // Fetch worker submissions for this order (public: no credentials/notes)
+    const { data: submissions } = await supabase
+      .from("worker_submissions")
+      .select("id, stars_gained, mvp_count, savage_count, maniac_count, matches_played, win_count, duration_minutes, screenshots, submitted_at")
+      .eq("order_id", data.id)
+      .order("submitted_at", { ascending: false });
+
+    // Strip internal id from response
+    const { id: _id, ...orderData } = data;
+
+    return NextResponse.json({ ...orderData, submissions: submissions || [] });
   } catch {
     return NextResponse.json({ error: "Gagal mengambil data order" }, { status: 500 });
   }

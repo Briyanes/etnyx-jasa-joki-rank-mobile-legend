@@ -4,10 +4,23 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Clock, CheckCircle, Rocket, XCircle, Check, ChevronLeft, Shield, Zap, MessageCircle, Loader2 } from "lucide-react";
+import { Clock, CheckCircle, Rocket, XCircle, Check, ChevronLeft, Shield, Zap, MessageCircle, Loader2, Trophy, Star, Swords, Target, Timer, Camera } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { WHATSAPP_NUMBER } from "@/lib/constants";
 import { ReactNode } from "react";
+
+interface Submission {
+  id: string;
+  stars_gained: number;
+  mvp_count: number;
+  savage_count: number;
+  maniac_count: number;
+  matches_played: number;
+  win_count: number;
+  duration_minutes: number;
+  screenshots: string[];
+  submitted_at: string;
+}
 
 interface OrderData {
   order_id: string;
@@ -20,6 +33,7 @@ interface OrderData {
   current_progress_rank: string | null;
   created_at: string;
   updated_at: string;
+  submissions: Submission[];
 }
 
 const rankLabels: Record<string, string> = {
@@ -62,6 +76,15 @@ const t = {
     waMessage: "Halo kak, saya mau tanya tentang order",
     enterOrderId: "Masukkan Order ID",
     orderNotFound: "Order tidak ditemukan",
+    boostingResults: "Hasil Boosting",
+    session: "Sesi",
+    matches: "Match",
+    wins: "Win",
+    winrate: "Winrate",
+    duration: "Durasi",
+    minutes: "menit",
+    screenshots: "Screenshot",
+    noSubmissions: "Belum ada hasil boosting",
     status: {
       pending: "Menunggu Konfirmasi",
       confirmed: "Dikonfirmasi",
@@ -97,6 +120,15 @@ const t = {
     waMessage: "Hi, I have a question about order",
     enterOrderId: "Enter Order ID",
     orderNotFound: "Order not found",
+    boostingResults: "Boosting Results",
+    session: "Session",
+    matches: "Matches",
+    wins: "Wins",
+    winrate: "Winrate",
+    duration: "Duration",
+    minutes: "min",
+    screenshots: "Screenshots",
+    noSubmissions: "No boosting results yet",
     status: {
       pending: "Waiting Confirmation",
       confirmed: "Confirmed",
@@ -362,6 +394,82 @@ function TrackOrderContent() {
                   <p className="text-text font-medium">{new Date(order.updated_at).toLocaleDateString(locale === "id" ? "id-ID" : "en-US")}</p>
                 </div>
               </div>
+
+              {/* Boosting Results */}
+              {order.submissions && order.submissions.length > 0 && (
+                <div className="mt-8 pt-6 border-t border-surface/50">
+                  <h3 className="text-text font-semibold text-lg mb-4 flex items-center gap-2">
+                    <Trophy className="w-5 h-5 text-yellow-400" />
+                    {txt.boostingResults}
+                  </h3>
+
+                  {/* Aggregate Stats */}
+                  {(() => {
+                    const totals = order.submissions.reduce((acc, s) => ({
+                      stars: acc.stars + (s.stars_gained || 0),
+                      mvp: acc.mvp + (s.mvp_count || 0),
+                      savage: acc.savage + (s.savage_count || 0),
+                      maniac: acc.maniac + (s.maniac_count || 0),
+                      matches: acc.matches + (s.matches_played || 0),
+                      wins: acc.wins + (s.win_count || 0),
+                      duration: acc.duration + (s.duration_minutes || 0),
+                    }), { stars: 0, mvp: 0, savage: 0, maniac: 0, matches: 0, wins: 0, duration: 0 });
+                    const wr = totals.matches > 0 ? Math.round((totals.wins / totals.matches) * 100) : 0;
+
+                    return (
+                      <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-6">
+                        {[
+                          { icon: <Star className="w-4 h-4 text-yellow-400" />, value: `+${totals.stars}`, label: "Stars" },
+                          { icon: <Trophy className="w-4 h-4 text-orange-400" />, value: totals.mvp, label: "MVP" },
+                          { icon: <Swords className="w-4 h-4 text-red-400" />, value: totals.savage, label: "Savage" },
+                          { icon: <Target className="w-4 h-4 text-purple-400" />, value: totals.maniac, label: "Maniac" },
+                          { icon: <CheckCircle className="w-4 h-4 text-green-400" />, value: `${wr}%`, label: txt.winrate },
+                          { icon: <Timer className="w-4 h-4 text-blue-400" />, value: `${totals.duration}${txt.minutes.charAt(0)}`, label: txt.duration },
+                        ].map((stat, i) => (
+                          <div key={i} className="bg-background rounded-xl p-3 text-center">
+                            <div className="flex justify-center mb-1">{stat.icon}</div>
+                            <p className="text-text font-bold text-lg">{stat.value}</p>
+                            <p className="text-muted text-[10px]">{stat.label}</p>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
+
+                  {/* Per-Session Details */}
+                  <div className="space-y-4">
+                    {order.submissions.map((sub, idx) => (
+                      <div key={sub.id} className="bg-background rounded-xl p-4 border border-white/5">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-accent font-medium text-sm">{txt.session} {order.submissions.length - idx}</span>
+                          <span className="text-muted text-xs">{new Date(sub.submitted_at).toLocaleDateString(locale === "id" ? "id-ID" : "en-US", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                        </div>
+                        <div className="flex flex-wrap gap-3 text-xs text-muted">
+                          {sub.stars_gained > 0 && <span className="flex items-center gap-1"><Star className="w-3 h-3 text-yellow-400" /> +{sub.stars_gained} Stars</span>}
+                          {sub.matches_played > 0 && <span>{sub.win_count}/{sub.matches_played} {txt.wins} ({sub.matches_played > 0 ? Math.round((sub.win_count / sub.matches_played) * 100) : 0}%)</span>}
+                          {sub.mvp_count > 0 && <span className="text-orange-400">{sub.mvp_count} MVP</span>}
+                          {sub.savage_count > 0 && <span className="text-red-400">{sub.savage_count} Savage</span>}
+                          {sub.maniac_count > 0 && <span className="text-purple-400">{sub.maniac_count} Maniac</span>}
+                          {sub.duration_minutes > 0 && <span><Timer className="w-3 h-3 inline" /> {sub.duration_minutes} {txt.minutes}</span>}
+                        </div>
+                        {/* Screenshots */}
+                        {sub.screenshots && sub.screenshots.length > 0 && (
+                          <div className="mt-3">
+                            <p className="text-muted text-xs mb-2 flex items-center gap-1"><Camera className="w-3 h-3" /> {txt.screenshots}</p>
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                              {sub.screenshots.map((url, si) => (
+                                <a key={si} href={url} target="_blank" rel="noopener noreferrer" className="block rounded-lg overflow-hidden border border-white/10 hover:border-accent/50 transition-colors">
+                                  <Image src={url} alt={`Screenshot ${si + 1}`} width={300} height={200} className="w-full h-auto object-cover" />
+                                </a>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* CTA */}
               <div className="mt-6 text-center">

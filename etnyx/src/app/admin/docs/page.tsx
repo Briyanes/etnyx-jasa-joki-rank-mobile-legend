@@ -224,7 +224,7 @@ function buildCategories(): DocCategory[] {
                   <p className="text-text-muted text-xs mb-2">Pelanggan yang memesan jasa.</p>
                   <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
                     <li>Order jasa, bayar via Midtrans</li>
-                    <li>Track progress order</li>
+                    <li>Track progress order + lihat hasil boosting (MVP, Savage, screenshot)</li>
                     <li>Submit review &amp; report worker</li>
                     <li>Reward points, redeem katalog</li>
                     <li>Referral system (dapatkan diskon)</li>
@@ -248,7 +248,7 @@ function buildCategories(): DocCategory[] {
                 { title: "Lead/Admin Assign Order", desc: "Buka Lead Dashboard, pilih worker, Assign. Worker dapat notif Telegram. Atau konfirmasi langsung dari Telegram bot.", badge: "lead", page: "/admin/lead" },
                 { title: "Worker Mulai Kerja", desc: "Worker buka dashboard, klik Mulai, status in_progress. Push rank customer.", badge: "worker", page: "/admin/worker" },
                 { title: "Worker Update Progress", desc: "Update progress %, current rank. Customer bisa lihat real-time di /track.", badge: "worker" },
-                { title: "Worker Submit Hasil", desc: "Input: stars gained, MVP, savage, maniac, wins, durasi. Upload screenshot.", badge: "worker" },
+                { title: "Worker Submit Hasil", desc: "Input: stars gained, MVP, savage, maniac, wins, durasi. Upload screenshot. Customer bisa lihat langsung di /track.", badge: "worker" },
                 { title: "Worker Selesai", desc: "Klik Selesai, status completed. Auto-generate commission. Telegram notif ke admin.", badge: "worker" },
                 { title: "Customer Review", desc: "Customer dapat link review via WA/Email, rating service & worker, bisa report. Auto-create testimonial jika rating 4-5 bintang.", badge: "customer", page: "/review" },
               ]} />
@@ -832,7 +832,7 @@ function buildCategories(): DocCategory[] {
                   <li><strong className="text-text">Assign order</strong> &rarr; bisa langsung dari Telegram (tidak perlu buka dashboard)</li>
                   <li><strong className="text-text">Komisi</strong> &rarr; auto-generate saat order selesai</li>
                   <li><strong className="text-text">Review</strong> &rarr; auto-notify + auto-testimonial</li>
-                  <li><strong className="text-text">Tracking</strong> &rarr; customer track sendiri, tidak perlu ditanya manual</li>
+                  <li><strong className="text-text">Tracking</strong> &rarr; customer track sendiri + lihat achievement &amp; screenshot real-time</li>
                   <li><strong className="text-text">Follow-up</strong> &rarr; 7 template WA tinggal klik</li>
                 </ul>
               </div>
