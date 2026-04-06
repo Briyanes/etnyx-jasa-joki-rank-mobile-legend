@@ -5,7 +5,7 @@ import {
   Layout, Megaphone, HelpCircle, Users, Share2, Building,
   BarChart3, Zap, Settings2, Eye, EyeOff, Plus, Trash2,
   Save, Loader2, CheckCircle, GripVertical, Download,
-  CreditCard, Mail, MessageCircle, Send, BookOpen, AlertTriangle, Copy, Plug,
+  CreditCard, Mail, MessageCircle, Send, BookOpen, AlertTriangle, Copy, Plug, Upload,
   Landmark, Wallet, QrCode, Smartphone, Building2, Banknote,
   type LucideIcon,
 } from "lucide-react";
@@ -85,7 +85,7 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
     fonnteApiToken: "", fonnteDeviceId: "",
     telegramBotToken: "", telegramAdminGroupId: "", telegramWorkerGroupId: "", telegramReviewGroupId: "", telegramReportGroupId: "",
   });
-  const DEFAULT_BANK_ACCOUNTS: { bank: string; category: string; account_number: string; account_name: string; is_active: boolean }[] = [
+  const DEFAULT_BANK_ACCOUNTS: { bank: string; category: string; account_number: string; account_name: string; is_active: boolean; qris_image_url?: string }[] = [
     { bank: "BCA", category: "bank", account_number: "", account_name: "", is_active: true },
     { bank: "BRI", category: "bank", account_number: "", account_name: "", is_active: true },
     { bank: "BNI", category: "bank", account_number: "", account_name: "", is_active: true },
@@ -99,6 +99,7 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
     { bank: "QRIS", category: "qris", account_number: "", account_name: "", is_active: true },
   ];
   const [bankAccounts, setBankAccounts] = useState(DEFAULT_BANK_ACCOUNTS);
+  const [qrisUploading, setQrisUploading] = useState(false);
 
   const fetchSettings = useCallback(async () => {
     try {
@@ -613,6 +614,41 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
                                 placeholder="Nama pemilik" className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm focus:border-accent focus:outline-none" />
                             </div>
                           </div>
+                          {/* QRIS Image Upload */}
+                          {group.key === "qris" && (
+                            <div className="mt-3">
+                              <label className="block text-xs text-text-muted mb-1.5">Gambar QR Code</label>
+                              {bank.qris_image_url ? (
+                                <div className="relative inline-block">
+                                  <img src={bank.qris_image_url} alt="QRIS" className="w-40 h-40 object-contain rounded-lg border border-white/10 bg-white p-2" />
+                                  <button onClick={() => { const updated = [...bankAccounts]; updated[bank._idx] = { ...updated[bank._idx], qris_image_url: "" }; setBankAccounts(updated); }}
+                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600">×</button>
+                                </div>
+                              ) : (
+                                <label className="flex items-center gap-2 px-4 py-3 rounded-lg border border-dashed border-white/10 text-text-muted text-sm hover:border-accent/50 hover:text-accent transition-colors cursor-pointer">
+                                  {qrisUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                                  {qrisUploading ? "Mengupload..." : "Upload Gambar QRIS"}
+                                  <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                                    const f = e.target.files?.[0];
+                                    if (!f) return;
+                                    if (f.size > 5 * 1024 * 1024) { alert("Maks 5MB"); return; }
+                                    setQrisUploading(true);
+                                    try {
+                                      const formData = new FormData();
+                                      formData.append("file", f);
+                                      const res = await fetch("/api/admin/upload-qris", { method: "POST", body: formData });
+                                      const data = await res.json();
+                                      if (res.ok && data.url) {
+                                        const updated = [...bankAccounts]; updated[bank._idx] = { ...updated[bank._idx], qris_image_url: data.url }; setBankAccounts(updated);
+                                      } else { alert(data.error || "Gagal upload"); }
+                                    } catch { alert("Gagal upload"); }
+                                    finally { setQrisUploading(false); }
+                                  }} />
+                                </label>
+                              )}
+                              <p className="text-text-muted text-xs mt-1">Upload gambar QR code QRIS (JPG/PNG, maks 5MB)</p>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>

@@ -32,6 +32,7 @@ interface BankAccount {
   account_number: string;
   account_name: string;
   is_active: boolean;
+  qris_image_url?: string;
   logo?: string;
 }
 
@@ -332,7 +333,7 @@ function ManualPaymentContent() {
             { key: "ewallet", label: "Dompet Digital", icon: Wallet, color: "text-green-400" },
             { key: "qris", label: "QRIS", icon: QrCode, color: "text-purple-400" },
           ].map((group) => {
-            const items = bankAccounts.filter(b => b.is_active && b.account_number && (b.category || "bank") === group.key);
+            const items = bankAccounts.filter(b => b.is_active && (b.account_number || b.qris_image_url) && (b.category || "bank") === group.key);
             if (items.length === 0) return null;
             const GroupIcon = group.icon;
             return (
@@ -344,44 +345,64 @@ function ManualPaymentContent() {
                   {items.map((bank, i) => (
                     <div
                       key={i}
-                      className="bg-background rounded-xl p-4 flex items-center justify-between"
+                      className="bg-background rounded-xl p-4"
                     >
-                      <div className="flex items-center gap-3">
-                        {(() => {
-                          const iconInfo = PAYMENT_ICONS[bank.bank];
-                          if (bank.logo) {
-                            return <Image src={bank.logo} alt={bank.bank} width={40} height={40} className="w-10 h-10 object-contain rounded-lg" />;
-                          }
-                          if (iconInfo) {
-                            const Icon = iconInfo.icon;
-                            return (
-                              <div className={`w-10 h-10 rounded-lg ${iconInfo.bg} flex items-center justify-center`}>
-                                <Icon className={`w-5 h-5 ${iconInfo.text}`} />
-                              </div>
-                            );
-                          }
-                          return (
-                            <div className="w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center">
-                              <CreditCard className="w-5 h-5 text-accent" />
-                            </div>
-                          );
-                        })()}
-                        <div>
-                          <p className="text-text font-bold text-sm">{bank.bank}</p>
-                          <p className="text-accent font-mono font-bold">{bank.account_number}</p>
+                      {/* QRIS with image */}
+                      {group.key === "qris" && bank.qris_image_url ? (
+                        <div className="text-center space-y-3">
+                          <div className="flex items-center justify-center gap-2 mb-2">
+                            <QrCode className="w-5 h-5 text-indigo-400" />
+                            <span className="text-text font-bold">Scan QRIS</span>
+                          </div>
+                          <div className="bg-white rounded-xl p-4 inline-block mx-auto">
+                            <img src={bank.qris_image_url} alt="QRIS Code" className="w-52 h-52 object-contain" />
+                          </div>
+                          <p className="text-text-muted text-xs">
+                            {locale === "id" ? "Scan QR code di atas menggunakan aplikasi banking/e-wallet kamu" : "Scan the QR code above using your banking/e-wallet app"}
+                          </p>
                           {bank.account_name && <p className="text-text-muted text-xs">a.n. {bank.account_name}</p>}
                         </div>
-                      </div>
-                      <button
-                        onClick={() => handleCopy(bank.account_number, `${bank.bank}-${i}`)}
-                        className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-accent/10 text-accent text-xs font-medium hover:bg-accent/20 transition-colors"
-                      >
-                        {copiedAccount === `${bank.bank}-${i}` ? (
-                          <><Check className="w-3.5 h-3.5" /> {t.copySuccess}</>
-                        ) : (
-                          <><Copy className="w-3.5 h-3.5" /> {t.copy}</>
-                        )}
-                      </button>
+                      ) : (
+                        /* Bank / E-Wallet normal display */
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            {(() => {
+                              const iconInfo = PAYMENT_ICONS[bank.bank];
+                              if (bank.logo) {
+                                return <Image src={bank.logo} alt={bank.bank} width={40} height={40} className="w-10 h-10 object-contain rounded-lg" />;
+                              }
+                              if (iconInfo) {
+                                const Icon = iconInfo.icon;
+                                return (
+                                  <div className={`w-10 h-10 rounded-lg ${iconInfo.bg} flex items-center justify-center`}>
+                                    <Icon className={`w-5 h-5 ${iconInfo.text}`} />
+                                  </div>
+                                );
+                              }
+                              return (
+                                <div className="w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center">
+                                  <CreditCard className="w-5 h-5 text-accent" />
+                                </div>
+                              );
+                            })()}
+                            <div>
+                              <p className="text-text font-bold text-sm">{bank.bank}</p>
+                              <p className="text-accent font-mono font-bold">{bank.account_number}</p>
+                              {bank.account_name && <p className="text-text-muted text-xs">a.n. {bank.account_name}</p>}
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => handleCopy(bank.account_number, `${bank.bank}-${i}`)}
+                            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-accent/10 text-accent text-xs font-medium hover:bg-accent/20 transition-colors"
+                          >
+                            {copiedAccount === `${bank.bank}-${i}` ? (
+                              <><Check className="w-3.5 h-3.5" /> {t.copySuccess}</>
+                            ) : (
+                              <><Copy className="w-3.5 h-3.5" /> {t.copy}</>
+                            )}
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -389,7 +410,7 @@ function ManualPaymentContent() {
             );
           })}
 
-          {bankAccounts.filter(b => b.is_active && b.account_number).length === 0 && (
+          {bankAccounts.filter(b => b.is_active && (b.account_number || b.qris_image_url)).length === 0 && (
             <div className="text-center py-6 text-text-muted text-sm">
               Belum ada rekening yang dikonfigurasi. Hubungi admin via WhatsApp.
             </div>
