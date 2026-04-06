@@ -270,10 +270,10 @@ function buildCategories(): DocCategory[] {
         {
           id: "admin-guide",
           icon: Settings,
-          title: "Dashboard Admin (14 Tab)",
+          title: "Dashboard Admin (15 Tab)",
           content: (
             <div className="space-y-4">
-              <p className="text-text-muted text-sm">Admin Dashboard berisi 14 tab CMS lengkap.</p>
+              <p className="text-text-muted text-sm">Admin Dashboard berisi 15 tab CMS lengkap.</p>
               <div className="space-y-2">
                 {[
                   { tab: "Overview", desc: "KPI metrics: total orders, revenue, pending, completed. Chart trend 7 hari + orders/day bar chart. Refresh 30 detik." },
@@ -523,7 +523,7 @@ function buildCategories(): DocCategory[] {
                 <ol className="text-text-muted text-xs space-y-1 list-decimal ml-4">
                   <li>Buat bot di Telegram: chat <Code>@BotFather</Code> &rarr; <Code>/newbot</Code> &rarr; copy token</li>
                   <li>Tambahkan bot ke grup Admin &amp; Worker</li>
-                  <li>Masukkan token &amp; chat IDs di Dashboard &rarr; Settings &rarr; Integrations &rarr; Telegram Bot (Admin, Worker, Review group)</li>
+                  <li>Masukkan token &amp; chat IDs di Dashboard &rarr; Settings &rarr; Integrations &rarr; Telegram Bot (Admin, Worker, Review, Report group)</li>
                   <li>Buka URL: <Code>{"https://etnyx.com/api/telegram/webhook?action=register"}</Code></li>
                   <li>Selesai! Bot aktif dan menerima commands.</li>
                 </ol>
@@ -864,10 +864,11 @@ function buildCategories(): DocCategory[] {
           title: "Notification System",
           content: (
             <div className="space-y-4">
-              <p className="text-text-muted text-sm">4 channel + interactive Telegram bot. Konfigurasi di Dashboard &rarr; Settings &rarr; Integrations.</p>
+              <p className="text-text-muted text-sm">5 channel + interactive Telegram bot. Konfigurasi di Dashboard &rarr; Settings &rarr; Integrations.</p>
               <Table headers={["Channel", "Provider", "Penerima", "Events"]} rows={[
                 ["Telegram Admin", "Bot API (webhook)", "Admin Group", "Order baru (+ tombol), selesai, review, report"],
-                ["Telegram Review", "Bot API", "Review Group", "Review baru + worker report (duplikat dari admin)"],
+                ["Telegram Review", "Bot API", "Review Group", "Review customer baru (opsional, default Admin)"],
+                ["Telegram Report", "Bot API", "Report Group", "Laporan worker: cheating, rude, dll (opsional, default Admin)"],
                 ["Telegram Worker", "Bot API", "Worker Group", "Order dikonfirmasi, order di-assign"],
                 ["WhatsApp", "Fonnte API", "Customer", "Konfirmasi bayar, mulai dikerjakan, selesai, follow-up"],
                 ["Email", "Resend", "Customer", "Konfirmasi bayar, invoice, verification, password reset"],
