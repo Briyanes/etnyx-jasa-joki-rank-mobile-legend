@@ -41,7 +41,28 @@ export async function POST(request: NextRequest) {
 
     switch (action) {
       case "follow_up_payment": {
-        message = `Halo kak! 👋\n\nIni dari *ETNYX*. Kami ingin mengingatkan terkait order yang belum dibayar:\n\n*📋 Order ID:* ${order.order_id}\n*🎮 Paket:* ${order.current_rank} → ${order.target_rank}\n*💰 Total:* Rp ${order.total_price.toLocaleString("id-ID")}\n\nSilakan selesaikan pembayaran agar order bisa segera diproses ya! 🙏\n\nAda pertanyaan? Balas pesan ini aja~ 💬\n\n_ETNYX - Push Rank, Tanpa Main_ ⚡`;
+        // Fetch active bank accounts from settings
+        let paymentInfo = "";
+        try {
+          const { data: bankSettings } = await supabase
+            .from("settings")
+            .select("value")
+            .eq("key", "bank_accounts")
+            .single();
+          if (bankSettings?.value && Array.isArray(bankSettings.value)) {
+            const activeAccounts = (bankSettings.value as { bank: string; account_number: string; account_name: string; is_active: boolean; category?: string }[])
+              .filter((a) => a.is_active);
+            if (activeAccounts.length > 0) {
+              const bankList = activeAccounts
+                .map((a) => `• *${a.bank}*: ${a.account_number} (a.n. ${a.account_name})`)
+                .join("\n");
+              paymentInfo = `\n\n💳 *Transfer ke salah satu rekening berikut:*\n${bankList}`;
+            }
+          }
+        } catch { /* no bank accounts configured */ }
+
+        const uploadUrl = `${siteConfig.url}/payment/manual?order_id=${order.order_id}`;
+        message = `Halo kak! 👋\n\nIni dari *ETNYX*. Kami ingin mengingatkan terkait order yang belum dibayar:\n\n*📋 Order ID:* ${order.order_id}\n*🎮 Paket:* ${order.current_rank} → ${order.target_rank}\n*💰 Total:* Rp ${order.total_price.toLocaleString("id-ID")}${paymentInfo}\n\nSetelah transfer, upload bukti di sini:\n🔗 ${uploadUrl}\n\nSilakan selesaikan pembayaran agar order bisa segera diproses ya! 🙏\n\nAda pertanyaan? Balas pesan ini aja~ 💬\n\n_ETNYX - Push Rank, Tanpa Main_ ⚡`;
         sent = await sendWhatsAppMessage(order.whatsapp, message);
         break;
       }

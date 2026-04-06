@@ -918,6 +918,12 @@ function OrderPageContent() {
         window.location.href = data.paymentUrl;
         return;
       }
+
+      // Auto-redirect to manual payment page
+      if (data.paymentMethod === "manual_transfer") {
+        window.location.href = `/payment/manual?order_id=${data.orderId}`;
+        return;
+      }
     } catch {
       alert("Terjadi kesalahan, coba lagi.");
     } finally {
@@ -957,38 +963,21 @@ function OrderPageContent() {
       return (
         <div className="min-h-screen bg-background flex items-center justify-center p-4">
           <div className="bg-surface rounded-3xl p-8 max-w-md w-full text-center border border-white/5">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-yellow-500/20 flex items-center justify-center">
-              <CreditCard className="w-10 h-10 text-yellow-400" />
+            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-accent/20 flex items-center justify-center">
+              <Loader2 className="w-10 h-10 text-accent animate-spin" />
             </div>
-            <h1 className="text-2xl font-bold text-text mb-2">
-              Order Berhasil Dibuat! 🎉
+            <h1 className="text-xl font-bold text-text mb-2">
+              Mengalihkan ke Halaman Pembayaran...
             </h1>
-            <p className="text-text-muted text-sm mb-4">
-              Silakan lakukan pembayaran manual transfer dan upload bukti.
+            <p className="text-text-muted text-sm mb-6">
+              Order <span className="font-mono text-accent font-bold">{orderResult.orderId}</span> berhasil dibuat.
             </p>
-            <div className="bg-background rounded-xl p-4 mb-6">
-              <p className="text-text-muted text-xs">Order ID</p>
-              <p className="font-mono text-accent font-bold text-lg">
-                {orderResult.orderId}
-              </p>
-              <p className="text-yellow-400 font-bold text-lg mt-1">
-                {formatRupiah(finalPrice)}
-              </p>
-            </div>
-            <div className="space-y-3">
-              <Link
-                href={`/payment/manual?order_id=${orderResult.orderId}`}
-                className="block w-full gradient-primary px-6 py-3.5 rounded-xl text-white font-semibold hover:opacity-90 transition-opacity"
-              >
-                Upload Bukti Transfer
-              </Link>
-              <Link
-                href={`/track?order_id=${orderResult.orderId}`}
-                className="block w-full px-6 py-3 rounded-xl border border-white/10 text-text font-medium hover:bg-white/5 transition-colors"
-              >
-                Track Order
-              </Link>
-            </div>
+            <Link
+              href={`/payment/manual?order_id=${orderResult.orderId}`}
+              className="block w-full gradient-primary px-6 py-3.5 rounded-xl text-white font-semibold hover:opacity-90 transition-opacity"
+            >
+              Klik di sini jika tidak otomatis redirect
+            </Link>
           </div>
         </div>
       );

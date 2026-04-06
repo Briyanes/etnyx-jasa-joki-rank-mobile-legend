@@ -3,6 +3,9 @@ import { verifyAdmin } from "@/lib/admin-auth";
 import {
   notifyAdminNewOrder,
   notifyWorkerConfirmedOrder,
+  notifyAdminOrderCompleted,
+  notifyNewReview,
+  notifyWorkerReport,
   sendOrderConfirmationWA,
   sendOrderStartedWA,
   sendOrderConfirmationEmail,
@@ -86,6 +89,55 @@ export async function POST(request: NextRequest) {
       if (!ok) results.email_confirmation.error = "Resend API key belum diisi atau email salah";
     } catch (e) {
       results.email_confirmation = { success: false, error: e instanceof Error ? e.message : String(e) };
+    }
+  }
+
+  // Telegram Admin - Order Completed
+  if (channels?.includes("telegram_completed")) {
+    try {
+      const ok = await notifyAdminOrderCompleted({ ...testOrder, status: "completed" });
+      results.telegram_completed = { success: ok };
+      if (!ok) results.telegram_completed.error = "Bot token atau Admin Group ID belum diisi/salah";
+    } catch (e) {
+      results.telegram_completed = { success: false, error: e instanceof Error ? e.message : String(e) };
+    }
+  }
+
+  // Telegram Review Group - New Review
+  if (channels?.includes("telegram_review")) {
+    try {
+      const ok = await notifyNewReview({
+        order_id: "TEST-ORDER-001",
+        service_rating: 5,
+        service_comment: "Mantap, cepat dan aman! Rekomen banget.",
+        worker_rating: 4,
+        customer_name: "TestPlayer123",
+        rank_from: "grandmaster",
+        rank_to: "mythic",
+      });
+      results.telegram_review = { success: ok };
+      if (!ok) results.telegram_review.error = "Review Group ID belum diisi";
+    } catch (e) {
+      results.telegram_review = { success: false, error: e instanceof Error ? e.message : String(e) };
+    }
+  }
+
+  // Telegram Report Group - Worker Report
+  if (channels?.includes("telegram_report")) {
+    try {
+      const ok = await notifyWorkerReport({
+        order_id: "TEST-ORDER-001",
+        report_type: "offering_services",
+        report_detail: "Ini adalah test worker report dari admin dashboard",
+        customer_name: "TestPlayer123",
+        customer_whatsapp: "+6281234567890",
+        worker_rating: 2,
+        worker_name: "TestWorker",
+      });
+      results.telegram_report = { success: ok };
+      if (!ok) results.telegram_report.error = "Report Group ID belum diisi";
+    } catch (e) {
+      results.telegram_report = { success: false, error: e instanceof Error ? e.message : String(e) };
     }
   }
 
