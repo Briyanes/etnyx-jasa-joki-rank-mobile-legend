@@ -9,6 +9,7 @@ import {
   Server, Lock, Zap, Layers, Wallet, BarChart3,
   UserCheck, Crown, Wrench, Star,
   Gift, Bot, TrendingUp, Search,
+  ClipboardList, Gamepad2, Monitor,
 } from "lucide-react";
 
 // --- Reusable Components ---
@@ -83,7 +84,7 @@ interface DocSection {
 interface DocCategory {
   id: string;
   label: string;
-  emoji: string;
+  catIcon: typeof Book;
   color: string;
   sections: DocSection[];
 }
@@ -97,7 +98,7 @@ function buildCategories(): DocCategory[] {
     {
       id: "general",
       label: "Umum",
-      emoji: "\u{1F4CB}",
+      catIcon: ClipboardList,
       color: "text-gray-400",
       sections: [
         {
@@ -261,7 +262,7 @@ function buildCategories(): DocCategory[] {
     {
       id: "management",
       label: "Management",
-      emoji: "\u{1F451}",
+      catIcon: Crown,
       color: "text-red-400",
       sections: [
         {
@@ -487,7 +488,7 @@ function buildCategories(): DocCategory[] {
     {
       id: "lead",
       label: "Lead",
-      emoji: "\u{1F465}",
+      catIcon: Users,
       color: "text-blue-400",
       sections: [
         {
@@ -526,7 +527,7 @@ function buildCategories(): DocCategory[] {
     {
       id: "worker",
       label: "Worker",
-      emoji: "\u{1F3AE}",
+      catIcon: Gamepad2,
       color: "text-green-400",
       sections: [
         {
@@ -572,7 +573,7 @@ function buildCategories(): DocCategory[] {
     {
       id: "developer",
       label: "Developer",
-      emoji: "\u{1F4BB}",
+      catIcon: Monitor,
       color: "text-accent",
       sections: [
         {
@@ -1030,7 +1031,7 @@ export default function DocsPage() {
                 className="w-full flex items-center justify-between px-4 py-2 text-xs font-semibold uppercase tracking-wider hover:bg-white/[0.02] transition-colors"
               >
                 <span className={`flex items-center gap-2 ${cat.color}`}>
-                  <span>{cat.emoji}</span>
+                  <cat.catIcon className="w-4 h-4" />
                   {cat.label}
                 </span>
                 <ChevronDown className={`w-3 h-3 text-text-muted transition-transform ${collapsedCategories[cat.id] ? "-rotate-90" : ""}`} />
@@ -1071,7 +1072,7 @@ export default function DocsPage() {
               </button>
             )}
             <div className="flex items-center gap-2">
-              {currentCategory && <span className="text-xs">{currentCategory.emoji}</span>}
+              {currentCategory && <currentCategory.catIcon className="w-3.5 h-3.5 text-text-muted" />}
               <span className="text-text-muted text-xs">{currentCategory?.label}</span>
               <ChevronRight className="w-3 h-3 text-text-muted/50" />
               <currentSection.icon className="w-4 h-4 text-accent" />
