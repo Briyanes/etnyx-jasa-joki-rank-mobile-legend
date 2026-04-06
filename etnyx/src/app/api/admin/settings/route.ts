@@ -21,6 +21,7 @@ const ALLOWED_KEYS = [
   "integrations",
   "perstar_pricing",
   "gendong_pricing",
+  "bank_accounts",
   // Telegram integration keys
   "telegramBotToken",
   "telegramAdminGroupId",
