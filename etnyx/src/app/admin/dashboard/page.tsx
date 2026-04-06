@@ -64,6 +64,8 @@ interface Order {
   promo_discount: number;
   whatsapp: string | null;
   assigned_worker_id: string | null;
+  payment_method: string | null;
+  payment_status: string | null;
 }
 
 interface Testimonial {
@@ -914,6 +916,9 @@ export default function AdminDashboard() {
                           <td className="px-4 py-3">
                             <span className="text-xs font-medium text-text">{formatRupiah(o.total_price)}</span>
                             {o.promo_discount > 0 && <p className="text-[10px] text-green-400">-{formatRupiah(o.promo_discount)}</p>}
+                            {o.payment_method === "manual_transfer" && (
+                              <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded text-[9px] font-medium bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">Manual</span>
+                            )}
                           </td>
                           <td className="px-4 py-3">
                             {o.assigned_worker_id ? (
@@ -939,6 +944,12 @@ export default function AdminDashboard() {
                             <div className="flex flex-col gap-1.5 min-w-[160px]">
                               {/* === PENDING: Konfirmasi + Follow Up Bayar === */}
                               {o.status === "pending" && (<>
+                                {o.payment_method === "manual_transfer" && (
+                                  <button onClick={() => window.open(`/api/admin/payment-proof?order_id=${o.id}`, '_blank')}
+                                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 transition-colors w-full">
+                                    <Eye className="w-3 h-3" /> Lihat Bukti Transfer
+                                  </button>
+                                )}
                                 <button onClick={() => updateOrderStatus(o.id, "confirmed")}
                                   className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors w-full">
                                   <CheckCircle className="w-3 h-3" /> Konfirmasi Bayar

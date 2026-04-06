@@ -439,11 +439,13 @@ function OrderPageContent() {
   const [orderResult, setOrderResult] = useState<{
     orderId: string;
     paymentUrl?: string;
+    paymentMethod?: string;
   } | null>(null);
   const [promoDiscount, setPromoDiscount] = useState(0);
   const [promoMessage, setPromoMessage] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
   const [promoLoading, setPromoLoading] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"midtrans" | "manual_transfer">("manual_transfer");
   const [tierDiscount, setTierDiscount] = useState(0);
   const [customerTier, setCustomerTier] = useState<string | null>(null);
   const [selectedPackage, setSelectedPackage] = useState<ProductPackage | null>(
@@ -881,6 +883,7 @@ function OrderPageContent() {
           whatsapp: form.whatsapp,
           email: form.email,
           totalPrice: finalPrice,
+          paymentMethod,
           ...utmParams,
         }),
       });
@@ -898,10 +901,11 @@ function OrderPageContent() {
       setOrderResult({
         orderId: data.orderId,
         paymentUrl: data.paymentUrl,
+        paymentMethod: data.paymentMethod,
       });
 
-      // Auto-redirect to Midtrans payment page
-      if (data.paymentUrl) {
+      // Auto-redirect to Midtrans payment page (not for manual transfer)
+      if (data.paymentUrl && data.paymentMethod !== "manual_transfer") {
         window.location.href = data.paymentUrl;
         return;
       }
@@ -910,12 +914,12 @@ function OrderPageContent() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [form, selectedPackage, canSubmit, promoApplied, promoDiscount, finalPrice]);
+  }, [form, selectedPackage, canSubmit, promoApplied, promoDiscount, finalPrice, paymentMethod]);
 
   // === REDIRECTING TO PAYMENT / FALLBACK SUCCESS ===
   if (orderResult) {
-    // If payment URL exists, user is being redirected — show loading
-    if (orderResult.paymentUrl) {
+    // If payment URL exists and not manual, user is being redirected — show loading
+    if (orderResult.paymentUrl && orderResult.paymentMethod !== "manual_transfer") {
       return (
         <div className="min-h-screen bg-background flex items-center justify-center p-4">
           <div className="bg-surface rounded-3xl p-8 max-w-md w-full text-center border border-white/5">
@@ -934,6 +938,48 @@ function OrderPageContent() {
             >
               Klik di sini jika tidak otomatis redirect
             </a>
+          </div>
+        </div>
+      );
+    }
+
+    // Manual Transfer — redirect to manual payment page
+    if (orderResult.paymentMethod === "manual_transfer") {
+      return (
+        <div className="min-h-screen bg-background flex items-center justify-center p-4">
+          <div className="bg-surface rounded-3xl p-8 max-w-md w-full text-center border border-white/5">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-yellow-500/20 flex items-center justify-center">
+              <CreditCard className="w-10 h-10 text-yellow-400" />
+            </div>
+            <h1 className="text-2xl font-bold text-text mb-2">
+              Order Berhasil Dibuat! 🎉
+            </h1>
+            <p className="text-text-muted text-sm mb-4">
+              Silakan lakukan pembayaran manual transfer dan upload bukti.
+            </p>
+            <div className="bg-background rounded-xl p-4 mb-6">
+              <p className="text-text-muted text-xs">Order ID</p>
+              <p className="font-mono text-accent font-bold text-lg">
+                {orderResult.orderId}
+              </p>
+              <p className="text-yellow-400 font-bold text-lg mt-1">
+                {formatRupiah(finalPrice)}
+              </p>
+            </div>
+            <div className="space-y-3">
+              <Link
+                href={`/payment/manual?order_id=${orderResult.orderId}`}
+                className="block w-full gradient-primary px-6 py-3.5 rounded-xl text-white font-semibold hover:opacity-90 transition-opacity"
+              >
+                Upload Bukti Transfer
+              </Link>
+              <Link
+                href={`/track?order_id=${orderResult.orderId}`}
+                className="block w-full px-6 py-3 rounded-xl border border-white/10 text-text font-medium hover:bg-white/5 transition-colors"
+              >
+                Track Order
+              </Link>
+            </div>
           </div>
         </div>
       );
@@ -2280,6 +2326,55 @@ function OrderPageContent() {
                     </div>
                   </div>
                 )}
+
+                {/* Payment Method Selection */}
+                <div className="bg-background rounded-xl p-4">
+                  <p className="text-text-muted text-xs mb-3 uppercase tracking-wider">
+                    Metode Pembayaran
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod("manual_transfer")}
+                      className={`relative p-4 rounded-xl border-2 text-left transition-all ${
+                        paymentMethod === "manual_transfer"
+                          ? "border-accent bg-accent/10"
+                          : "border-white/10 hover:border-white/20"
+                      }`}
+                    >
+                      {paymentMethod === "manual_transfer" && (
+                        <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-accent flex items-center justify-center">
+                          <Check className="w-3 h-3 text-white" />
+                        </div>
+                      )}
+                      <CreditCard className="w-5 h-5 text-yellow-400 mb-2" />
+                      <p className="text-text font-semibold text-sm">Transfer Manual</p>
+                      <p className="text-text-muted text-xs mt-0.5">
+                        BCA, BNI, Mandiri, DANA, GoPay, ShopeePay
+                      </p>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod("midtrans")}
+                      className={`relative p-4 rounded-xl border-2 text-left transition-all ${
+                        paymentMethod === "midtrans"
+                          ? "border-accent bg-accent/10"
+                          : "border-white/10 hover:border-white/20"
+                      }`}
+                    >
+                      {paymentMethod === "midtrans" && (
+                        <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-accent flex items-center justify-center">
+                          <Check className="w-3 h-3 text-white" />
+                        </div>
+                      )}
+                      <Zap className="w-5 h-5 text-green-400 mb-2" />
+                      <p className="text-text font-semibold text-sm">Otomatis (Midtrans)</p>
+                      <p className="text-text-muted text-xs mt-0.5">
+                        QRIS, VA, GoPay, ShopeePay, Kartu Kredit
+                      </p>
+                    </button>
+                  </div>
+                </div>
 
                 {/* Trust */}
                 <div className="flex items-start gap-2 bg-green-500/5 border border-green-500/20 rounded-xl px-4 py-3">

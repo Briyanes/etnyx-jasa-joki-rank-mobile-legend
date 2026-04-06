@@ -246,6 +246,7 @@ export async function POST(request: NextRequest) {
         gclid,
         ttclid,
         referrer_url: referrerUrl,
+        payment_method: body.paymentMethod === "manual_transfer" ? "manual_transfer" : "midtrans",
       })
       .select("id, order_id, total_price")
       .single();
@@ -278,9 +279,11 @@ export async function POST(request: NextRequest) {
       if (refErr) console.error("Referral insert error:", refErr);
     }
 
-    // Create Midtrans payment
+    // Create Midtrans payment (only for auto/midtrans payment method)
     let paymentUrl: string | undefined;
+    const isManualTransfer = body.paymentMethod === "manual_transfer";
 
+    if (!isManualTransfer) {
     // Get Midtrans key: prefer database (admin dashboard) over env
     let midtransKey = MIDTRANS_SERVER_KEY;
     let midtransIsProduction = MIDTRANS_IS_PRODUCTION;
@@ -362,13 +365,14 @@ export async function POST(request: NextRequest) {
         // Order still created, payment can be retried
       }
     }
+    } // end if (!isManualTransfer)
 
     // Log order creation
     await supabase.from("order_logs").insert({
       order_id: order.id,
       action: "created",
       new_value: "pending",
-      notes: `Order created via website. ${paymentUrl ? "Payment link generated." : "Payment pending."}`,
+      notes: `Order created via website. ${isManualTransfer ? "Manual transfer." : paymentUrl ? "Payment link generated." : "Payment pending."}`,
       created_by: "system",
     });
 
@@ -379,6 +383,7 @@ export async function POST(request: NextRequest) {
         totalPrice: verifiedTotalPrice,
         discount: verifiedDiscount,
         paymentUrl,
+        paymentMethod: isManualTransfer ? "manual_transfer" : "midtrans",
       },
       { status: 201 }
     );

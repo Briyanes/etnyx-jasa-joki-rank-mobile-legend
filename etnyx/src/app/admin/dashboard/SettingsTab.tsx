@@ -68,6 +68,14 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
     fonnteApiToken: "", fonnteDeviceId: "",
     telegramBotToken: "", telegramAdminGroupId: "", telegramWorkerGroupId: "", telegramReviewGroupId: "", telegramReportGroupId: "",
   });
+  const [bankAccounts, setBankAccounts] = useState<{ bank: string; account_number: string; account_name: string; is_active: boolean }[]>([
+    { bank: "BCA", account_number: "", account_name: "", is_active: true },
+    { bank: "BNI", account_number: "", account_name: "", is_active: false },
+    { bank: "Mandiri", account_number: "", account_name: "", is_active: false },
+    { bank: "DANA", account_number: "", account_name: "", is_active: false },
+    { bank: "GoPay", account_number: "", account_name: "", is_active: false },
+    { bank: "ShopeePay", account_number: "", account_name: "", is_active: false },
+  ]);
 
   const fetchSettings = useCallback(async () => {
     try {
@@ -82,6 +90,7 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
       if (settings.social_links) setSocialLinks(settings.social_links);
       if (settings.site_info) setSiteInfo(settings.site_info);
       if (settings.integrations) setIntegrations(settings.integrations);
+      if (settings.bank_accounts && Array.isArray(settings.bank_accounts)) setBankAccounts(settings.bank_accounts);
     } catch (err) { console.error("Failed to fetch CMS settings:", err); }
   }, []);
 
@@ -498,6 +507,50 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
                 <BookOpen className="w-3 h-3 inline mr-1" /> Dapatkan credentials di <a href="https://dashboard.midtrans.com" target="_blank" rel="noopener" className="text-accent hover:underline">dashboard.midtrans.com</a>
               </p>
             </div>
+          </div>
+
+          {/* Bank Accounts for Manual Transfer */}
+          <div className="bg-surface rounded-xl border border-white/5 p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-text font-bold text-sm flex items-center gap-2"><CreditCard className="w-4 h-4 text-yellow-400" /> Rekening Transfer Manual</h3>
+                <p className="text-text-muted text-xs mt-0.5">Rekening tujuan untuk pembayaran manual transfer</p>
+              </div>
+              <CmsSaveButton settingKey="bank_accounts" value={bankAccounts} />
+            </div>
+            <div className="space-y-3">
+              {bankAccounts.map((bank, idx) => (
+                <div key={idx} className="bg-background rounded-lg p-4 border border-white/5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-text font-bold text-sm">{bank.bank}</span>
+                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                      <input type="checkbox" checked={bank.is_active}
+                        onChange={(e) => { const updated = [...bankAccounts]; updated[idx] = { ...updated[idx], is_active: e.target.checked }; setBankAccounts(updated); }}
+                        className="w-4 h-4 rounded border-white/20 bg-surface text-accent focus:ring-accent cursor-pointer" />
+                      <span className="text-text-muted text-xs">Aktif</span>
+                    </label>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs text-text-muted mb-1">No. Rekening</label>
+                      <input type="text" value={bank.account_number}
+                        onChange={(e) => { const updated = [...bankAccounts]; updated[idx] = { ...updated[idx], account_number: e.target.value }; setBankAccounts(updated); }}
+                        placeholder="1234567890" className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm focus:border-accent focus:outline-none font-mono" />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-text-muted mb-1">Atas Nama</label>
+                      <input type="text" value={bank.account_name}
+                        onChange={(e) => { const updated = [...bankAccounts]; updated[idx] = { ...updated[idx], account_name: e.target.value }; setBankAccounts(updated); }}
+                        placeholder="Nama pemilik rekening" className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm focus:border-accent focus:outline-none" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <button onClick={() => setBankAccounts([...bankAccounts, { bank: "", account_number: "", account_name: "", is_active: true }])}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg border border-dashed border-white/10 text-text-muted text-sm hover:border-white/20 hover:text-text transition-colors w-full justify-center">
+              <Plus className="w-4 h-4" /> Tambah Rekening
+            </button>
           </div>
 
           {/* Resend Email */}
