@@ -8,7 +8,7 @@ import { formatRupiah } from "@/utils/helpers";
 import {
   BarChart3, Zap, Gamepad2, Star, CheckCircle, XCircle, Crown,
   Settings2, Package, Users, Shield, Trophy, Tag, Eye, TrendingUp,
-  ShoppingCart, DollarSign, Clock, Activity, Loader2,
+  ShoppingCart, DollarSign, Clock, Activity, Loader2, AlertTriangle,
   Plus, Pencil, Trash2, Save, Search, Filter, RefreshCw, LogOut,
   MessageCircle, Send, BookOpen, Copy, Gift, Wallet,
 } from "lucide-react";
@@ -205,6 +205,13 @@ export default function AdminDashboard() {
   const [credentials, setCredentials] = useState<{ order_id: string; account_login: string | null; account_password: string | null } | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [followUpLoading, setFollowUpLoading] = useState<string | null>(null);
+
+  // Payment proof review state
+  interface PaymentProof { id: string; order_id: string; image_url: string; sender_name: string | null; sender_bank: string | null; amount: number | null; status: string; created_at: string; reject_reason?: string | null }
+  const [proofModal, setProofModal] = useState<{ orderId: string; orderDisplayId: string } | null>(null);
+  const [proofs, setProofs] = useState<PaymentProof[]>([]);
+  const [proofsLoading, setProofsLoading] = useState(false);
+  const [proofActionLoading, setProofActionLoading] = useState<string | null>(null);
 
   // Pricing state
   const [pricingCatalog, setPricingCatalog] = useState<PricingCategory[]>([]);
@@ -425,6 +432,42 @@ export default function AdminDashboard() {
   const openWhatsApp = (phone: string, message: string) => {
     const normalized = phone.replace(/\D/g, "").replace(/^0/, "62");
     window.open(`https://wa.me/${normalized}?text=${encodeURIComponent(message)}`, "_blank");
+  };
+
+  // Payment proof functions
+  const openProofModal = async (orderId: string, orderDisplayId: string) => {
+    setProofModal({ orderId, orderDisplayId });
+    setProofsLoading(true);
+    try {
+      const res = await fetch(`/api/admin/payment-proof?order_id=${orderId}`);
+      const data = await res.json();
+      setProofs(data.proofs || []);
+    } catch { setProofs([]); }
+    setProofsLoading(false);
+  };
+
+  const handleProofAction = async (proofId: string, action: "approve" | "reject") => {
+    const rejectReason = action === "reject" ? prompt("Alasan reject (opsional):") : null;
+    if (action === "reject" && rejectReason === null) return; // cancelled
+
+    setProofActionLoading(proofId);
+    try {
+      const res = await fetch("/api/admin/payment-proof", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ proofId, action, rejectReason }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        alert(`✅ Bukti transfer ${action === "approve" ? "diapprove" : "direject"}`);
+        // Refresh proofs
+        setProofs(proofs.map(p => p.id === proofId ? { ...p, status: action === "approve" ? "approved" : "rejected" } : p));
+        if (action === "approve") fetchOrders();
+      } else {
+        alert("⚠️ " + (data.error || "Gagal"));
+      }
+    } catch { alert("Network error"); }
+    setProofActionLoading(null);
   };
 
   const copyOrderInfo = (o: Order) => {
@@ -945,7 +988,7 @@ export default function AdminDashboard() {
                               {/* === PENDING: Konfirmasi + Follow Up Bayar === */}
                               {o.status === "pending" && (<>
                                 {o.payment_method === "manual_transfer" && (
-                                  <button onClick={() => window.open(`/api/admin/payment-proof?order_id=${o.id}`, '_blank')}
+                                  <button onClick={() => openProofModal(o.id, o.order_id)}
                                     className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 transition-colors w-full">
                                     <Eye className="w-3 h-3" /> Lihat Bukti Transfer
                                   </button>
@@ -2199,6 +2242,92 @@ export default function AdminDashboard() {
                 <Save className="w-4 h-4 inline mr-1" /> Simpan
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Payment Proof Modal */}
+      {proofModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setProofModal(null)}>
+          <div className="bg-surface rounded-xl p-5 w-full max-w-lg border border-white/10 max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-bold text-text">Bukti Transfer — {proofModal.orderDisplayId}</h3>
+              <button onClick={() => setProofModal(null)} className="text-text-muted hover:text-text text-lg">×</button>
+            </div>
+
+            {proofsLoading ? (
+              <div className="text-center py-8"><Loader2 className="w-6 h-6 animate-spin text-accent mx-auto" /></div>
+            ) : proofs.length === 0 ? (
+              <div className="text-center py-8">
+                <AlertTriangle className="w-8 h-8 text-yellow-400 mx-auto mb-2" />
+                <p className="text-text-muted text-sm">Belum ada bukti transfer yang diupload customer.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {proofs.map((proof) => (
+                  <div key={proof.id} className="bg-background rounded-xl p-4 border border-white/5 space-y-3">
+                    {/* Proof Image */}
+                    <a href={proof.image_url} target="_blank" rel="noopener noreferrer">
+                      <img src={proof.image_url} alt="Bukti Transfer" className="w-full max-h-72 object-contain rounded-lg bg-white/5 cursor-pointer hover:opacity-90 transition-opacity" />
+                    </a>
+
+                    {/* Info */}
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div>
+                        <span className="text-text-muted">Pengirim:</span>
+                        <p className="text-text font-medium">{proof.sender_name || "-"}</p>
+                      </div>
+                      <div>
+                        <span className="text-text-muted">Bank:</span>
+                        <p className="text-text font-medium">{proof.sender_bank || "-"}</p>
+                      </div>
+                      <div>
+                        <span className="text-text-muted">Nominal:</span>
+                        <p className="text-text font-medium">{proof.amount ? formatRupiah(proof.amount) : "-"}</p>
+                      </div>
+                      <div>
+                        <span className="text-text-muted">Waktu:</span>
+                        <p className="text-text font-medium">{new Date(proof.created_at).toLocaleString("id-ID", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
+                      </div>
+                    </div>
+
+                    {/* Status */}
+                    <div className="flex items-center justify-between">
+                      <span className={`px-2.5 py-1 rounded-lg text-xs font-medium border ${
+                        proof.status === "approved" ? "bg-green-500/10 text-green-400 border-green-500/20" :
+                        proof.status === "rejected" ? "bg-red-500/10 text-red-400 border-red-500/20" :
+                        "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
+                      }`}>
+                        {proof.status === "approved" ? "✅ Approved" : proof.status === "rejected" ? "❌ Rejected" : "⏳ Pending"}
+                      </span>
+
+                      {/* Actions */}
+                      {proof.status === "pending" && (
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleProofAction(proof.id, "approve")}
+                            disabled={proofActionLoading === proof.id}
+                            className="px-3 py-1.5 rounded-lg text-xs font-medium bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors disabled:opacity-50"
+                          >
+                            {proofActionLoading === proof.id ? "..." : "✓ Approve"}
+                          </button>
+                          <button
+                            onClick={() => handleProofAction(proof.id, "reject")}
+                            disabled={proofActionLoading === proof.id}
+                            className="px-3 py-1.5 rounded-lg text-xs font-medium bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors disabled:opacity-50"
+                          >
+                            ✗ Reject
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    {proof.reject_reason && (
+                      <p className="text-xs text-red-400/70">Alasan: {proof.reject_reason}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
