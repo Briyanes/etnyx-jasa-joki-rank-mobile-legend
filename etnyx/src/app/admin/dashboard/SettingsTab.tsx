@@ -85,7 +85,7 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
     fonnteApiToken: "", fonnteDeviceId: "",
     telegramBotToken: "", telegramAdminGroupId: "", telegramWorkerGroupId: "", telegramReviewGroupId: "", telegramReportGroupId: "",
   });
-  const [bankAccounts, setBankAccounts] = useState<{ bank: string; category?: string; account_number: string; account_name: string; is_active: boolean }[]>([
+  const DEFAULT_BANK_ACCOUNTS: { bank: string; category: string; account_number: string; account_name: string; is_active: boolean }[] = [
     { bank: "BCA", category: "bank", account_number: "", account_name: "", is_active: true },
     { bank: "BRI", category: "bank", account_number: "", account_name: "", is_active: true },
     { bank: "BNI", category: "bank", account_number: "", account_name: "", is_active: true },
@@ -97,7 +97,8 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
     { bank: "ShopeePay", category: "ewallet", account_number: "081414131321", account_name: "", is_active: true },
     { bank: "LinkAja", category: "ewallet", account_number: "081414131321", account_name: "", is_active: true },
     { bank: "QRIS", category: "qris", account_number: "", account_name: "", is_active: true },
-  ]);
+  ];
+  const [bankAccounts, setBankAccounts] = useState(DEFAULT_BANK_ACCOUNTS);
 
   const fetchSettings = useCallback(async () => {
     try {
@@ -112,7 +113,17 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
       if (settings.social_links) setSocialLinks(settings.social_links);
       if (settings.site_info) setSiteInfo(settings.site_info);
       if (settings.integrations) setIntegrations(settings.integrations);
-      if (settings.bank_accounts && Array.isArray(settings.bank_accounts)) setBankAccounts(settings.bank_accounts);
+      if (settings.bank_accounts && Array.isArray(settings.bank_accounts)) {
+        // Merge with defaults so accidentally deleted entries come back
+        const saved = settings.bank_accounts as typeof DEFAULT_BANK_ACCOUNTS;
+        const merged = [...saved];
+        for (const def of DEFAULT_BANK_ACCOUNTS) {
+          if (!saved.some((s: { bank: string }) => s.bank === def.bank)) {
+            merged.push(def);
+          }
+        }
+        setBankAccounts(merged);
+      }
     } catch (err) { console.error("Failed to fetch CMS settings:", err); }
   }, []);
 
