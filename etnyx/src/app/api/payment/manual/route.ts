@@ -177,12 +177,12 @@ export async function POST(request: NextRequest) {
       const adminGroupId = process.env.TELEGRAM_ADMIN_GROUP_ID || "-1003869338441";
       await notifModule.sendTelegramMessage(
         adminGroupId,
-        `💰 <b>BUKTI TRANSFER BARU</b>\n\n` +
-        `📋 Order: <code>${order.order_id}</code>\n` +
-        `👤 ${order.username}\n` +
-        `💵 ${new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(order.total_price)}\n` +
-        `🏦 ${sanitizedSenderName || "-"} (${sanitizedSenderBank || "-"})\n\n` +
-        `⚡ Segera verifikasi di Admin Dashboard → Orders`
+        `<b>BUKTI TRANSFER BARU</b>\n\n` +
+        `Order: <code>${order.order_id}</code>\n` +
+        `${order.username}\n` +
+        `${new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(order.total_price)}\n` +
+        `${sanitizedSenderName || "-"} (${sanitizedSenderBank || "-"})\n\n` +
+        `Segera verifikasi di Admin Dashboard`
       );
     } catch (e) {
       console.error("Telegram notification error:", e);

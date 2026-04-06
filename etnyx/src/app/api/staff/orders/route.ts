@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
   // Notify worker via Telegram (if worker has Telegram)
   const settings = await getSettings();
   if (settings.telegramBotToken && settings.telegramWorkerGroupId) {
-    const msg = `📋 <b>ORDER BARU DITUGASKAN</b>\n\n👷 Worker: <b>${worker.name}</b>\n🎫 Order: <b>${order?.order_id || orderId}</b>\n📝 Notes: ${notes || "-"}\n\n⚡ Segera kerjakan!`;
+    const msg = `<b>ORDER BARU DITUGASKAN</b>\n\nWorker: <b>${worker.name}</b>\nOrder: <b>${order?.order_id || orderId}</b>\nNotes: ${notes || "-"}\n\nSegera kerjakan!`;
     await sendTelegramMessage(settings.telegramWorkerGroupId, msg, settings.telegramBotToken);
   }
 
@@ -308,7 +308,7 @@ export async function PUT(request: NextRequest) {
     const settings = await getSettings();
     if (settings.telegramBotToken && settings.telegramAdminGroupId) {
       const { data: order } = await supabase.from("orders").select("order_id, username").eq("id", orderId).single();
-      const msg = `✅ <b>ORDER SELESAI!</b>\n\n🎫 Order: <b>${order?.order_id}</b>\n👤 Customer: ${order?.username}\n👷 Worker: ${user.name}\n\n🔍 Review di dashboard admin.`;
+      const msg = `<b>ORDER SELESAI!</b>\n\nOrder: <b>${order?.order_id}</b>\nCustomer: ${order?.username}\nWorker: ${user.name}\n\nReview di dashboard admin.`;
       await sendTelegramMessage(settings.telegramAdminGroupId, msg, settings.telegramBotToken);
     }
   }

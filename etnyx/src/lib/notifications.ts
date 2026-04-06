@@ -121,32 +121,32 @@ export async function notifyAdminNewOrder(order: OrderData & { db_id?: string })
   if (!chatId) return false;
 
   const message = `
-🆕 <b>ORDER BARU!</b>
+<b>ORDER BARU!</b>
 
-📋 <b>Order ID:</b> ${order.order_id}
-👤 <b>Username:</b> ${order.username}
-📱 <b>WhatsApp:</b> ${order.whatsapp || "-"}
+<b>Order ID:</b> ${order.order_id}
+<b>Username:</b> ${order.username}
+<b>WhatsApp:</b> ${order.whatsapp || "-"}
 
-🎮 <b>Detail Order:</b>
+<b>Detail Order:</b>
 • Rank: ${formatRank(order.current_rank)} → ${formatRank(order.target_rank)}
 • Paket: ${order.package}
-${order.is_express ? "⚡ EXPRESS" : ""}${order.is_premium ? " 👑 PREMIUM" : ""}
+${order.is_express ? "EXPRESS" : ""}${order.is_premium ? " PREMIUM" : ""}
 
-💰 <b>Total:</b> ${formatRupiah(order.price)}
+<b>Total:</b> ${formatRupiah(order.price)}
 
-📝 <b>Catatan:</b> ${order.notes || "-"}
+<b>Catatan:</b> ${order.notes || "-"}
 
-⏳ <b>Status:</b> Menunggu Konfirmasi
+<b>Status:</b> Menunggu Konfirmasi
 `.trim();
 
   // Add action buttons if we have the database ID
   const replyMarkup = order.db_id ? {
     inline_keyboard: [
       [
-        { text: "✅ Konfirmasi", callback_data: `confirm:${order.db_id}` },
-        { text: "❌ Tolak", callback_data: `reject:${order.db_id}` },
+        { text: "Konfirmasi", callback_data: `confirm:${order.db_id}` },
+        { text: "Tolak", callback_data: `reject:${order.db_id}` },
       ],
-      [{ text: "📋 Detail", callback_data: `detail:${order.db_id}` }],
+      [{ text: "Detail", callback_data: `detail:${order.db_id}` }],
     ],
   } : undefined;
 
@@ -160,19 +160,19 @@ export async function notifyWorkerConfirmedOrder(order: OrderData): Promise<bool
   if (!chatId) return false;
 
   const message = `
-✅ <b>ORDER DIKONFIRMASI!</b>
+<b>ORDER DIKONFIRMASI!</b>
 
-📋 <b>Order ID:</b> ${order.order_id}
-👤 <b>Username:</b> ${order.username}
+<b>Order ID:</b> ${order.order_id}
+<b>Username:</b> ${order.username}
 
-🎮 <b>Detail Order:</b>
+<b>Detail Order:</b>
 • Rank: ${formatRank(order.current_rank)} → ${formatRank(order.target_rank)}
 • Paket: ${order.package}
-${order.is_express ? "⚡ EXPRESS - PRIORITAS!" : ""}${order.is_premium ? " 👑 PREMIUM" : ""}
+${order.is_express ? "EXPRESS - PRIORITAS!" : ""}${order.is_premium ? " PREMIUM" : ""}
 
-📝 <b>Catatan:</b> ${order.notes || "-"}
+<b>Catatan:</b> ${order.notes || "-"}
 
-⚠️ Segera kerjakan order ini!
+Segera kerjakan order ini!
 `.trim();
 
   return sendTelegramMessage(chatId, message);
@@ -184,24 +184,24 @@ export async function notifyAdminOrderCompleted(order: OrderData & { db_id?: str
   if (!chatId) return false;
 
   const message = `
-✅ <b>ORDER SELESAI!</b>
+<b>ORDER SELESAI!</b>
 
-📋 <b>Order ID:</b> ${order.order_id}
-👤 <b>Username:</b> ${order.username}
-📱 <b>WhatsApp:</b> ${order.whatsapp || "-"}
+<b>Order ID:</b> ${order.order_id}
+<b>Username:</b> ${order.username}
+<b>WhatsApp:</b> ${order.whatsapp || "-"}
 
-🎮 <b>Detail:</b>
+<b>Detail:</b>
 • Rank: ${formatRank(order.current_rank)} → ${formatRank(order.target_rank)}
 • Paket: ${order.package}
 
-💰 <b>Total:</b> ${formatRupiah(order.price)}
+<b>Total:</b> ${formatRupiah(order.price)}
 
-📝 Review link sudah dikirim ke customer via WA.
+Review link sudah dikirim ke customer via WA.
 `.trim();
 
   const replyMarkup = order.db_id ? {
     inline_keyboard: [
-      [{ text: "📋 Detail", callback_data: `detail:${order.db_id}` }],
+      [{ text: "Detail", callback_data: `detail:${order.db_id}` }],
     ],
   } : undefined;
 
@@ -225,24 +225,24 @@ export async function notifyNewReview(review: {
   const reviewChatId = settings.telegramReviewGroupId;
   if (!reviewChatId) return false;
 
-  const stars = "⭐".repeat(review.service_rating);
+  const stars = "★".repeat(review.service_rating);
   const message = `
-⭐ <b>REVIEW BARU!</b>
+<b>REVIEW BARU!</b>
 
-📋 <b>Order:</b> ${review.order_id}
-👤 <b>Customer:</b> ${review.customer_name || "-"}
-🎮 <b>Rank:</b> ${review.rank_from ? formatRank(review.rank_from) : "-"} → ${review.rank_to ? formatRank(review.rank_to) : "-"}
+<b>Order:</b> ${review.order_id}
+<b>Customer:</b> ${review.customer_name || "-"}
+<b>Rank:</b> ${review.rank_from ? formatRank(review.rank_from) : "-"} → ${review.rank_to ? formatRank(review.rank_to) : "-"}
 
 <b>Rating Layanan:</b> ${stars} (${review.service_rating}/5)
-${review.worker_rating ? `<b>Rating Worker:</b> ${"⭐".repeat(review.worker_rating)} (${review.worker_rating}/5)` : ""}
-${review.service_comment ? `\n💬 "${review.service_comment}"` : ""}
+${review.worker_rating ? `<b>Rating Worker:</b> ${"★".repeat(review.worker_rating)} (${review.worker_rating}/5)` : ""}
+${review.service_comment ? `\n"${review.service_comment}"` : ""}
 `.trim();
 
   const replyMarkup = review.review_id ? {
     inline_keyboard: [
       [
-        { text: "👁 Show", callback_data: `review_toggle:${review.review_id}:show` },
-        { text: "🙈 Hide", callback_data: `review_toggle:${review.review_id}:hide` },
+        { text: "Show", callback_data: `review_toggle:${review.review_id}:show` },
+        { text: "Hide", callback_data: `review_toggle:${review.review_id}:hide` },
       ],
     ],
   } : undefined;
@@ -270,33 +270,33 @@ export async function notifyWorkerReport(report: {
   if (!reportChatId) return false;
 
   const typeLabels: Record<string, string> = {
-    cheating: "🎮 Bermain curang / cheat",
-    offering_services: "🚫 Menawarkan jasa di luar ETNYX",
-    rude: "😤 Kasar / tidak sopan",
-    account_issue: "🔐 Masalah akun",
-    other: "❓ Lainnya",
+    cheating: "Bermain curang / cheat",
+    offering_services: "Menawarkan jasa di luar ETNYX",
+    rude: "Kasar / tidak sopan",
+    account_issue: "Masalah akun",
+    other: "Lainnya",
   };
 
   const message = `
-🚨🚨🚨 <b>WORKER REPORT!</b> 🚨🚨🚨
+<b>WORKER REPORT!</b>
 
-📋 <b>Order:</b> ${report.order_id}
-� <b>Worker:</b> ${report.worker_name || "Belum di-assign"}
-�👤 <b>Pelapor:</b> ${report.customer_name || "-"}
-📱 <b>WA:</b> ${report.customer_whatsapp || "-"}
-${report.worker_rating ? `⭐ <b>Rating Worker:</b> ${report.worker_rating}/5` : ""}
+<b>Order:</b> ${report.order_id}
+<b>Worker:</b> ${report.worker_name || "Belum di-assign"}
+<b>Pelapor:</b> ${report.customer_name || "-"}
+<b>WA:</b> ${report.customer_whatsapp || "-"}
+${report.worker_rating ? `<b>Rating Worker:</b> ${report.worker_rating}/5` : ""}
 
-⚠️ <b>Jenis Laporan:</b> ${typeLabels[report.report_type] || report.report_type}
-${report.report_detail ? `\n📝 <b>Detail:</b> ${report.report_detail}` : ""}
+<b>Jenis Laporan:</b> ${typeLabels[report.report_type] || report.report_type}
+${report.report_detail ? `\n<b>Detail:</b> ${report.report_detail}` : ""}
 
-⚡ <b>SEGERA DITINDAKLANJUTI!</b>
+<b>SEGERA DITINDAKLANJUTI!</b>
 `.trim();
 
   const replyMarkup = report.review_id ? {
     inline_keyboard: [
       [
-        { text: "✅ Resolved", callback_data: `report:${report.review_id}:resolved` },
-        { text: "❌ Dismiss", callback_data: `report:${report.review_id}:dismissed` },
+        { text: "Resolved", callback_data: `report:${report.review_id}:resolved` },
+        { text: "Dismiss", callback_data: `report:${report.review_id}:dismissed` },
       ],
     ],
   } : undefined;

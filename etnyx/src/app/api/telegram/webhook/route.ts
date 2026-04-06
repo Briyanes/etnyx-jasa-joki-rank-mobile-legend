@@ -97,9 +97,9 @@ async function handleCommand(message: TelegramMessage) {
 
   if (text === "/start" || text === "/help") {
     return reply(chatId, `
-🤖 <b>ETNYX Bot</b>
+<b>ETNYX Bot</b>
 
-<b>📋 Commands:</b>
+<b>Commands:</b>
 /orders — Lihat 10 order terbaru
 /pending — Order yang belum dikonfirmasi
 /progress — Order sedang dikerjakan
@@ -110,12 +110,12 @@ async function handleCommand(message: TelegramMessage) {
 /reviewstats — Rekap rating & review semua worker
 /help — Tampilkan menu ini
 
-<b>🔔 Notifikasi Otomatis:</b>
-• Order baru → tombol ✅ Konfirmasi / ❌ Tolak
+<b>Notifikasi Otomatis:</b>
+• Order baru → tombol Konfirmasi / Tolak
 • Review masuk → tombol untuk approve/hide
 • Report worker → alert langsung
 
-⚡ <i>ETNYX - Push Rank, Tanpa Main</i>
+<i>ETNYX - Push Rank, Tanpa Main</i>
 `.trim());
   }
 
@@ -153,7 +153,7 @@ async function handleCommand(message: TelegramMessage) {
 
   // Unknown command
   if (text.startsWith("/")) {
-    return reply(chatId, "❓ Command tidak dikenal. Ketik /help untuk menu.");
+    return reply(chatId, "Command tidak dikenal. Ketik /help untuk menu.");
   }
 }
 
@@ -181,26 +181,26 @@ async function handleOrdersList(chatId: number, status: string, limit: number) {
 
   if (error || !orders?.length) {
     const labels: Record<string, string> = { all: "semua", pending: "pending", in_progress: "in progress", completed: "selesai" };
-    return reply(chatId, `📋 Tidak ada order ${labels[status] || status} saat ini.`);
+    return reply(chatId, `Tidak ada order ${labels[status] || status} saat ini.`);
   }
 
-  const statusEmoji: Record<string, string> = { pending: "⏳", confirmed: "✅", in_progress: "🔄", completed: "✅", cancelled: "❌", refunded: "💸" };
+  const statusEmoji: Record<string, string> = { pending: "[Pending]", confirmed: "[Confirmed]", in_progress: "[Progress]", completed: "[Done]", cancelled: "[Cancelled]", refunded: "[Refunded]" };
 
-  let msg = `📋 <b>Orders${status !== "all" ? ` (${status})` : ""}</b>\n\n`;
+  let msg = `<b>Orders${status !== "all" ? ` (${status})` : ""}</b>\n\n`;
 
   for (const o of orders) {
-    const emoji = statusEmoji[o.status] || "📦";
+    const emoji = statusEmoji[o.status] || "";
     msg += `${emoji} <code>${o.order_id}</code>\n`;
-    msg += `   👤 ${o.username} • ${formatRank(o.current_rank)} → ${formatRank(o.target_rank)}\n`;
-    msg += `   💰 ${formatRupiah(o.total_price)}${o.is_express ? " ⚡" : ""}${o.is_premium ? " 👑" : ""}\n`;
-    if (o.assigned_worker_name) msg += `   🎮 Worker: ${o.assigned_worker_name}\n`;
+    msg += `   ${o.username} • ${formatRank(o.current_rank)} → ${formatRank(o.target_rank)}\n`;
+    msg += `   ${formatRupiah(o.total_price)}${o.is_express ? " EXPRESS" : ""}${o.is_premium ? " PREMIUM" : ""}\n`;
+    if (o.assigned_worker_name) msg += `   Worker: ${o.assigned_worker_name}\n`;
     msg += `\n`;
   }
 
   // Add action buttons for pending orders
   if (status === "pending" && orders.length > 0) {
     const buttons = orders.slice(0, 5).map(o => ([{
-      text: `✅ Konfirmasi ${o.order_id}`,
+      text: `Konfirmasi ${o.order_id}`,
       callback_data: `confirm:${o.id}`,
     }]));
     return reply(chatId, msg.trim(), {
@@ -235,16 +235,16 @@ async function handleStats(chatId: number) {
   const monthRevenue = revenueData?.reduce((s, o) => s + (o.total_price || 0), 0) || 0;
 
   const msg = `
-📊 <b>Statistik ETNYX</b>
+<b>Statistik ETNYX</b>
 
-📦 <b>Total Orders:</b> ${totalOrders || 0}
-⏳ <b>Pending:</b> ${pendingOrders || 0}
-🔄 <b>In Progress:</b> ${inProgressOrders || 0}
-✅ <b>Selesai Bulan Ini:</b> ${completedThisMonth || 0}
+<b>Total Orders:</b> ${totalOrders || 0}
+<b>Pending:</b> ${pendingOrders || 0}
+<b>In Progress:</b> ${inProgressOrders || 0}
+<b>Selesai Bulan Ini:</b> ${completedThisMonth || 0}
 
-💰 <b>Revenue Bulan Ini:</b> ${formatRupiah(monthRevenue)}
+<b>Revenue Bulan Ini:</b> ${formatRupiah(monthRevenue)}
 
-📅 <i>${now.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</i>
+<i>${now.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</i>
 `.trim();
 
   return reply(chatId, msg);
@@ -259,21 +259,21 @@ async function handleReviews(chatId: number) {
     .limit(5);
 
   if (!reviews?.length) {
-    return reply(chatId, "⭐ Belum ada review.");
+    return reply(chatId, "Belum ada review.");
   }
 
-  let msg = "⭐ <b>Review Terbaru</b>\n\n";
+  let msg = "<b>Review Terbaru</b>\n\n";
   for (const r of reviews) {
-    const stars = "⭐".repeat(r.service_rating);
+    const stars = "★".repeat(r.service_rating);
     msg += `${stars} <b>${r.customer_name || "Anonim"}</b>\n`;
-    msg += `   📋 ${r.order_id || "-"}\n`;
-    if (r.service_comment) msg += `   💬 "${r.service_comment}"\n`;
-    msg += `   ${r.is_visible ? "👁 Visible" : "🙈 Hidden"}\n\n`;
+    msg += `   ${r.order_id || "-"}\n`;
+    if (r.service_comment) msg += `   "${r.service_comment}"\n`;
+    msg += `   ${r.is_visible ? "Visible" : "Hidden"}\n\n`;
   }
 
   // Add toggle visibility buttons
   const buttons = reviews.map(r => ([{
-    text: `${r.is_visible ? "🙈 Hide" : "👁 Show"} ${r.order_id || r.id.slice(0, 8)}`,
+    text: `${r.is_visible ? "Hide" : "Show"} ${r.order_id || r.id.slice(0, 8)}`,
     callback_data: `review_toggle:${r.id}:${r.is_visible ? "hide" : "show"}`,
   }]));
 
@@ -292,19 +292,19 @@ async function handleReports(chatId: number) {
     .limit(5);
 
   if (!reports?.length) {
-    return reply(chatId, "📝 Tidak ada worker report.");
+    return reply(chatId, "Tidak ada worker report.");
   }
 
   const typeLabels: Record<string, string> = {
-    cheating: "🎮 Cheat", offering_services: "🚫 Jasa Luar", rude: "😤 Kasar",
-    account_issue: "🔐 Akun", other: "❓ Lain",
+    cheating: "Cheat", offering_services: "Jasa Luar", rude: "Kasar",
+    account_issue: "Akun", other: "Lain",
   };
 
-  let msg = "🚨 <b>Worker Reports</b>\n\n";
+  let msg = "<b>Worker Reports</b>\n\n";
   for (const r of reports) {
-    msg += `⚠️ <b>${typeLabels[r.report_type] || r.report_type}</b> — ${r.customer_name || "Anonim"}\n`;
-    msg += `   📋 ${r.order_id || "-"}\n`;
-    if (r.report_detail) msg += `   📝 ${r.report_detail.substring(0, 100)}\n`;
+    msg += `<b>${typeLabels[r.report_type] || r.report_type}</b> — ${r.customer_name || "Anonim"}\n`;
+    msg += `   ${r.order_id || "-"}\n`;
+    if (r.report_detail) msg += `   ${r.report_detail.substring(0, 100)}\n`;
     msg += `   Status: ${r.report_status || "pending"}\n\n`;
   }
 
@@ -313,8 +313,8 @@ async function handleReports(chatId: number) {
   if (pending.length > 0) {
     const buttons = pending.flatMap(r => ([
       [
-        { text: `✅ Resolved ${r.order_id || r.id.slice(0, 8)}`, callback_data: `report:${r.id}:resolved` },
-        { text: `❌ Dismiss`, callback_data: `report:${r.id}:dismissed` },
+        { text: `Resolved ${r.order_id || r.id.slice(0, 8)}`, callback_data: `report:${r.id}:resolved` },
+        { text: `Dismiss`, callback_data: `report:${r.id}:dismissed` },
       ],
     ]));
     return reply(chatId, msg.trim(), {
@@ -341,7 +341,7 @@ async function handleReviewStats(chatId: number) {
     .eq("role", "worker");
 
   if (!reviews?.length || !workers?.length) {
-    return reply(chatId, "📊 Belum ada data review worker.");
+    return reply(chatId, "Belum ada data review worker.");
   }
 
   const workerMap = new Map(workers.map(w => [w.id, w.name]));
@@ -398,15 +398,15 @@ async function handleReviewStats(chatId: number) {
     }))
     .sort((a, b) => b.avgService - a.avgService);
 
-  let msg = "📊 <b>Rekap Review Worker</b>\n\n";
+  let msg = "<b>Rekap Review Worker</b>\n\n";
 
   for (const w of sorted) {
-    const serviceStars = "⭐".repeat(Math.round(w.avgService));
-    const workerStars = w.workerRated > 0 ? "⭐".repeat(Math.round(w.avgWorker)) : "-";
-    const reportBadge = w.reports > 0 ? ` 🚨${w.reports}` : "";
-    const pendingBadge = w.reportsPending > 0 ? ` (⏳${w.reportsPending} pending)` : "";
+    const serviceStars = "★".repeat(Math.round(w.avgService));
+    const workerStars = w.workerRated > 0 ? "★".repeat(Math.round(w.avgWorker)) : "-";
+    const reportBadge = w.reports > 0 ? ` [${w.reports} report]` : "";
+    const pendingBadge = w.reportsPending > 0 ? ` (${w.reportsPending} pending)` : "";
 
-    msg += `👤 <b>${w.name}</b>${reportBadge}${pendingBadge}\n`;
+    msg += `<b>${w.name}</b>${reportBadge}${pendingBadge}\n`;
     msg += `   Layanan: ${serviceStars} (${w.avgService.toFixed(1)}/5) — ${w.totalReviews} review\n`;
     msg += `   Worker: ${workerStars}${w.workerRated > 0 ? ` (${w.avgWorker.toFixed(1)}/5)` : ""}\n\n`;
   }
@@ -419,8 +419,8 @@ async function handleReviewStats(chatId: number) {
     : 0;
 
   msg += `━━━━━━━━━━━━━━━━━━━━\n`;
-  msg += `📈 <b>Total:</b> ${totalReviews} review, Avg ${overallAvg.toFixed(1)}/5\n`;
-  msg += `🚨 <b>Reports:</b> ${totalReports} total`;
+  msg += `<b>Total:</b> ${totalReviews} review, Avg ${overallAvg.toFixed(1)}/5\n`;
+  msg += `<b>Reports:</b> ${totalReports} total`;
 
   return reply(chatId, msg.trim());
 }
@@ -489,7 +489,7 @@ async function handleConfirmOrder(callbackId: string, chatId: number, messageId:
     .single();
 
   if (error || !order) {
-    return answerCallback(callbackId, "❌ Order tidak ditemukan");
+    return answerCallback(callbackId, "Order tidak ditemukan");
   }
 
   if (order.status !== "pending") {
@@ -502,7 +502,7 @@ async function handleConfirmOrder(callbackId: string, chatId: number, messageId:
     .eq("id", orderId);
 
   if (updateErr) {
-    return answerCallback(callbackId, "❌ Gagal mengkonfirmasi order");
+    return answerCallback(callbackId, "Gagal mengkonfirmasi order");
   }
 
   // Send confirmed notifications
@@ -528,24 +528,24 @@ async function handleConfirmOrder(callbackId: string, chatId: number, messageId:
 
   // Update the original message
   const updated = `
-✅ <b>ORDER DIKONFIRMASI!</b>
+<b>ORDER DIKONFIRMASI!</b>
 
-📋 <b>Order:</b> ${order.order_id}
-👤 <b>Username:</b> ${order.username}
-🎮 ${formatRank(order.current_rank)} → ${formatRank(order.target_rank)}
-💰 ${formatRupiah(order.total_price)}
+<b>Order:</b> ${order.order_id}
+<b>Username:</b> ${order.username}
+${formatRank(order.current_rank)} → ${formatRank(order.target_rank)}
+${formatRupiah(order.total_price)}
 
-✅ Dikonfirmasi oleh <b>${userName}</b>
+Dikonfirmasi oleh <b>${userName}</b>
 `.trim();
 
   await editMessage(chatId, messageId, updated, {
     inline_keyboard: [
-      [{ text: "🔄 Mulai Kerjakan", callback_data: `start:${orderId}` }],
-      [{ text: "📋 Detail", callback_data: `detail:${orderId}` }],
+      [{ text: "Mulai Kerjakan", callback_data: `start:${orderId}` }],
+      [{ text: "Detail", callback_data: `detail:${orderId}` }],
     ],
   });
 
-  return answerCallback(callbackId, "✅ Order dikonfirmasi!");
+  return answerCallback(callbackId, "Order dikonfirmasi!");
 }
 
 async function handleRejectOrder(callbackId: string, chatId: number, messageId: number, orderId: string, userName: string) {
@@ -558,7 +558,7 @@ async function handleRejectOrder(callbackId: string, chatId: number, messageId: 
     .single();
 
   if (error || !order) {
-    return answerCallback(callbackId, "❌ Order tidak ditemukan");
+    return answerCallback(callbackId, "Order tidak ditemukan");
   }
 
   if (order.status === "cancelled") {
@@ -571,22 +571,22 @@ async function handleRejectOrder(callbackId: string, chatId: number, messageId: 
     .eq("id", orderId);
 
   if (updateErr) {
-    return answerCallback(callbackId, "❌ Gagal membatalkan order");
+    return answerCallback(callbackId, "Gagal membatalkan order");
   }
 
   const updated = `
-❌ <b>ORDER DITOLAK</b>
+<b>ORDER DITOLAK</b>
 
-📋 <b>Order:</b> ${order.order_id}
-👤 <b>Username:</b> ${order.username}
-🎮 ${formatRank(order.current_rank)} → ${formatRank(order.target_rank)}
-💰 ${formatRupiah(order.total_price)}
+<b>Order:</b> ${order.order_id}
+<b>Username:</b> ${order.username}
+${formatRank(order.current_rank)} → ${formatRank(order.target_rank)}
+${formatRupiah(order.total_price)}
 
-❌ Ditolak oleh <b>${userName}</b>
+Ditolak oleh <b>${userName}</b>
 `.trim();
 
   await editMessage(chatId, messageId, updated);
-  return answerCallback(callbackId, "❌ Order ditolak");
+  return answerCallback(callbackId, "Order ditolak");
 }
 
 async function handleStartOrder(callbackId: string, chatId: number, messageId: number, orderId: string, userName: string) {
@@ -599,7 +599,7 @@ async function handleStartOrder(callbackId: string, chatId: number, messageId: n
     .single();
 
   if (error || !order) {
-    return answerCallback(callbackId, "❌ Order tidak ditemukan");
+    return answerCallback(callbackId, "Order tidak ditemukan");
   }
 
   if (order.status !== "confirmed") {
@@ -612,26 +612,26 @@ async function handleStartOrder(callbackId: string, chatId: number, messageId: n
     .eq("id", orderId);
 
   if (updateErr) {
-    return answerCallback(callbackId, "❌ Gagal update status");
+    return answerCallback(callbackId, "Gagal update status");
   }
 
   const updated = `
-🔄 <b>ORDER IN PROGRESS</b>
+<b>ORDER IN PROGRESS</b>
 
-📋 <b>Order:</b> ${order.order_id}
-👤 <b>Username:</b> ${order.username}
-🎮 ${formatRank(order.current_rank)} → ${formatRank(order.target_rank)}
-💰 ${formatRupiah(order.total_price)}
+<b>Order:</b> ${order.order_id}
+<b>Username:</b> ${order.username}
+${formatRank(order.current_rank)} → ${formatRank(order.target_rank)}
+${formatRupiah(order.total_price)}
 
-🔄 Dimulai oleh <b>${userName}</b>
+Dimulai oleh <b>${userName}</b>
 `.trim();
 
   await editMessage(chatId, messageId, updated, {
     inline_keyboard: [
-      [{ text: "📋 Detail", callback_data: `detail:${orderId}` }],
+      [{ text: "Detail", callback_data: `detail:${orderId}` }],
     ],
   });
-  return answerCallback(callbackId, "🔄 Order dimulai!");
+  return answerCallback(callbackId, "Order dimulai!");
 }
 
 async function handleOrderDetail(callbackId: string, chatId: number, orderId: string) {
@@ -644,49 +644,49 @@ async function handleOrderDetail(callbackId: string, chatId: number, orderId: st
     .single();
 
   if (error || !order) {
-    return answerCallback(callbackId, "❌ Order tidak ditemukan");
+    return answerCallback(callbackId, "Order tidak ditemukan");
   }
 
-  const statusEmoji: Record<string, string> = { pending: "⏳", confirmed: "✅", in_progress: "🔄", completed: "✅", cancelled: "❌" };
+  const statusLabel: Record<string, string> = { pending: "Pending", confirmed: "Confirmed", in_progress: "In Progress", completed: "Completed", cancelled: "Cancelled" };
 
   const msg = `
-📋 <b>DETAIL ORDER</b>
+<b>DETAIL ORDER</b>
 
-🆔 <b>Order ID:</b> <code>${order.order_id}</code>
-${statusEmoji[order.status] || "📦"} <b>Status:</b> ${order.status}
+<b>Order ID:</b> <code>${order.order_id}</code>
+<b>Status:</b> ${statusLabel[order.status] || order.status}
 
-👤 <b>Username:</b> ${order.username}
-📱 <b>WhatsApp:</b> ${order.whatsapp || "-"}
-📧 <b>Email:</b> ${order.email || "-"}
+<b>Username:</b> ${order.username}
+<b>WhatsApp:</b> ${order.whatsapp || "-"}
+<b>Email:</b> ${order.email || "-"}
 
-🎮 <b>Rank:</b> ${formatRank(order.current_rank)} → ${formatRank(order.target_rank)}
-📦 <b>Paket:</b> ${order.package}
-${order.is_express ? "⚡ <b>EXPRESS</b>" : ""}${order.is_premium ? " 👑 <b>PREMIUM</b>" : ""}
+<b>Rank:</b> ${formatRank(order.current_rank)} → ${formatRank(order.target_rank)}
+<b>Paket:</b> ${order.package}
+${order.is_express ? "<b>EXPRESS</b>" : ""}${order.is_premium ? " <b>PREMIUM</b>" : ""}
 
-💰 <b>Harga Dasar:</b> ${formatRupiah(order.price || 0)}
-💰 <b>Total:</b> ${formatRupiah(order.total_price)}
-${order.promo_code ? `🎟 <b>Promo:</b> ${order.promo_code} (-${formatRupiah(order.discount_amount || 0)})` : ""}
+<b>Harga Dasar:</b> ${formatRupiah(order.price || 0)}
+<b>Total:</b> ${formatRupiah(order.total_price)}
+${order.promo_code ? `<b>Promo:</b> ${order.promo_code} (-${formatRupiah(order.discount_amount || 0)})` : ""}
 
-${order.assigned_worker_name ? `🎮 <b>Worker:</b> ${order.assigned_worker_name}` : ""}
-📝 <b>Catatan:</b> ${order.notes || "-"}
+${order.assigned_worker_name ? `<b>Worker:</b> ${order.assigned_worker_name}` : ""}
+<b>Catatan:</b> ${order.notes || "-"}
 
-🕐 <b>Dibuat:</b> ${new Date(order.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+<b>Dibuat:</b> ${new Date(order.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
 `.trim();
 
   // Add context-appropriate buttons
   const buttons: { text: string; callback_data: string }[][] = [];
   if (order.status === "pending") {
     buttons.push([
-      { text: "✅ Konfirmasi", callback_data: `confirm:${orderId}` },
-      { text: "❌ Tolak", callback_data: `reject:${orderId}` },
+      { text: "Konfirmasi", callback_data: `confirm:${orderId}` },
+      { text: "Tolak", callback_data: `reject:${orderId}` },
     ]);
   }
   if (order.status === "confirmed") {
-    buttons.push([{ text: "🔄 Mulai Kerjakan", callback_data: `start:${orderId}` }]);
+    buttons.push([{ text: "Mulai Kerjakan", callback_data: `start:${orderId}` }]);
   }
 
   await reply(chatId, msg, buttons.length > 0 ? { reply_markup: { inline_keyboard: buttons } } : undefined);
-  return answerCallback(callbackId, "📋 Detail order");
+  return answerCallback(callbackId, "Detail order");
 }
 
 async function handleReviewToggle(callbackId: string, chatId: number, messageId: number, reviewId: string, action: string, userName: string) {
@@ -699,10 +699,10 @@ async function handleReviewToggle(callbackId: string, chatId: number, messageId:
     .eq("id", reviewId);
 
   if (error) {
-    return answerCallback(callbackId, "❌ Gagal update review");
+    return answerCallback(callbackId, "Gagal update review");
   }
 
-  await answerCallback(callbackId, `${isVisible ? "👁 Review ditampilkan" : "🙈 Review disembunyikan"} oleh ${userName}`);
+  await answerCallback(callbackId, `${isVisible ? "Review ditampilkan" : "Review disembunyikan"} oleh ${userName}`);
   
   // Refresh the reviews list
   return handleReviews(chatId);
@@ -717,10 +717,10 @@ async function handleReportStatus(callbackId: string, chatId: number, messageId:
     .eq("id", reportId);
 
   if (error) {
-    return answerCallback(callbackId, "❌ Gagal update report");
+    return answerCallback(callbackId, "Gagal update report");
   }
 
-  const label = status === "resolved" ? "✅ Resolved" : "❌ Dismissed";
+  const label = status === "resolved" ? "Resolved" : "Dismissed";
   await answerCallback(callbackId, `${label} oleh ${userName}`);
   
   // Refresh the reports list
