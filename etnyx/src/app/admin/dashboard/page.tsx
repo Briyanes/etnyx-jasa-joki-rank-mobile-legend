@@ -216,7 +216,7 @@ export default function AdminDashboard() {
   const [gendongPricing, setGendongPricing] = useState<PerStarTier[]>([]);
 
   // Staff state
-  interface StaffUser { id: string; email: string; name: string; role: string; phone: string | null; is_active: boolean; last_login_at: string | null; created_at: string }
+  interface StaffUser { id: string; email: string; name: string; role: string; phone: string | null; is_active: boolean; last_login_at: string | null; created_at: string; lead_id: string | null }
   const [staffUsers, setStaffUsers] = useState<StaffUser[]>([]);
   const [staffModal, setStaffModal] = useState(false);
   const [editStaff, setEditStaff] = useState<StaffUser | null>(null);
@@ -230,7 +230,7 @@ export default function AdminDashboard() {
   const [catalogModal, setCatalogModal] = useState(false);
   const [editCatalogItem, setEditCatalogItem] = useState<CatalogItem | null>(null);
   const [catalogForm, setCatalogForm] = useState({ name: "", description: "", category: "skin", pointsCost: 500, stock: "" as string, imageUrl: "" });
-  const [staffForm, setStaffForm] = useState({ email: "", name: "", password: "", role: "worker", phone: "" });
+  const [staffForm, setStaffForm] = useState({ email: "", name: "", password: "", role: "worker", phone: "", lead_id: "" });
   const [staffSaving, setStaffSaving] = useState(false);
 
   // Reviews state
@@ -347,11 +347,11 @@ export default function AdminDashboard() {
     try {
       const method = editStaff ? "PUT" : "POST";
       const body = editStaff
-        ? { id: editStaff.id, name: staffForm.name, role: staffForm.role, phone: staffForm.phone || undefined, password: staffForm.password || undefined }
-        : { email: staffForm.email, name: staffForm.name, password: staffForm.password, role: staffForm.role, phone: staffForm.phone || undefined };
+        ? { id: editStaff.id, name: staffForm.name, role: staffForm.role, phone: staffForm.phone || undefined, password: staffForm.password || undefined, lead_id: staffForm.role === "worker" ? (staffForm.lead_id || null) : null }
+        : { email: staffForm.email, name: staffForm.name, password: staffForm.password, role: staffForm.role, phone: staffForm.phone || undefined, lead_id: staffForm.role === "worker" ? (staffForm.lead_id || null) : null };
       const res = await fetch("/api/staff/users", { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
       if (!res.ok) { const d = await res.json(); alert(d.error || "Gagal simpan staff"); return; }
-      setStaffModal(false); setEditStaff(null); setStaffForm({ email: "", name: "", password: "", role: "worker", phone: "" });
+      setStaffModal(false); setEditStaff(null); setStaffForm({ email: "", name: "", password: "", role: "worker", phone: "", lead_id: "" });
       fetchStaffUsers();
     } catch { alert("Network error"); }
     setStaffSaving(false);
@@ -1815,7 +1815,7 @@ export default function AdminDashboard() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-bold text-text">Staff Management</h2>
-                <button onClick={() => { setEditStaff(null); setStaffForm({ email: "", name: "", password: "", role: "worker", phone: "" }); setStaffModal(true); }}
+                <button onClick={() => { setEditStaff(null); setStaffForm({ email: "", name: "", password: "", role: "worker", phone: "", lead_id: "" }); setStaffModal(true); }}
                   className="flex items-center gap-2 gradient-primary px-4 py-2 rounded-xl text-white text-sm font-medium">
                   <Plus className="w-4 h-4" /> Tambah Staff
                 </button>
@@ -1828,6 +1828,7 @@ export default function AdminDashboard() {
                       <th className="px-4 py-3 text-left">Nama</th>
                       <th className="px-4 py-3 text-left">Email</th>
                       <th className="px-4 py-3 text-center">Role</th>
+                      <th className="px-4 py-3 text-center">Lead</th>
                       <th className="px-4 py-3 text-center">Status</th>
                       <th className="px-4 py-3 text-center">Last Login</th>
                       <th className="px-4 py-3 text-center">Aksi</th>
@@ -1845,6 +1846,9 @@ export default function AdminDashboard() {
                             "bg-green-500/10 text-green-400"
                           }`}>{u.role}</span>
                         </td>
+                        <td className="px-4 py-3 text-center text-text-muted text-xs">
+                          {u.role === "worker" && u.lead_id ? staffUsers.find(s => s.id === u.lead_id)?.name || "-" : "-"}
+                        </td>
                         <td className="px-4 py-3 text-center">
                           <span className={`px-2 py-0.5 rounded text-xs ${u.is_active ? "bg-green-500/10 text-green-400" : "bg-red-500/10 text-red-400"}`}>
                             {u.is_active ? "Active" : "Inactive"}
@@ -1855,7 +1859,7 @@ export default function AdminDashboard() {
                         </td>
                         <td className="px-4 py-3 text-center">
                           <div className="flex items-center justify-center gap-2">
-                            <button onClick={() => { setEditStaff(u); setStaffForm({ email: u.email, name: u.name, password: "", role: u.role, phone: u.phone || "" }); setStaffModal(true); }}
+                            <button onClick={() => { setEditStaff(u); setStaffForm({ email: u.email, name: u.name, password: "", role: u.role, phone: u.phone || "", lead_id: u.lead_id || "" }); setStaffModal(true); }}
                               className="p-1.5 text-text-muted hover:text-accent transition-colors"><Pencil className="w-3.5 h-3.5" /></button>
                             {u.is_active && u.role !== "admin" && (
                               <button onClick={() => handleDeactivateStaff(u.id)}
@@ -1866,7 +1870,7 @@ export default function AdminDashboard() {
                       </tr>
                     ))}
                     {staffUsers.length === 0 && (
-                      <tr><td colSpan={6} className="px-4 py-8 text-center text-text-muted">Belum ada staff</td></tr>
+                      <tr><td colSpan={7} className="px-4 py-8 text-center text-text-muted">Belum ada staff</td></tr>
                     )}
                   </tbody>
                 </table>
@@ -1885,12 +1889,21 @@ export default function AdminDashboard() {
                       className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 text-text text-sm focus:border-accent focus:outline-none" />
                     <input placeholder={editStaff ? "Password baru (kosongkan jika tidak diubah)" : "Password"} type="password" value={staffForm.password} onChange={e => setStaffForm(p => ({ ...p, password: e.target.value }))}
                       className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 text-text text-sm focus:border-accent focus:outline-none" />
-                    <select value={staffForm.role} onChange={e => setStaffForm(p => ({ ...p, role: e.target.value }))}
+                    <select value={staffForm.role} onChange={e => setStaffForm(p => ({ ...p, role: e.target.value, lead_id: e.target.value !== "worker" ? "" : p.lead_id }))}
                       className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 text-text text-sm focus:border-accent focus:outline-none">
                       <option value="worker">Worker</option>
                       <option value="lead">Lead</option>
                       <option value="admin">Admin</option>
                     </select>
+                    {staffForm.role === "worker" && (
+                      <select value={staffForm.lead_id} onChange={e => setStaffForm(p => ({ ...p, lead_id: e.target.value }))}
+                        className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 text-text text-sm focus:border-accent focus:outline-none">
+                        <option value="">-- Pilih Lead (opsional) --</option>
+                        {staffUsers.filter(s => s.role === "lead" && s.is_active).map(lead => (
+                          <option key={lead.id} value={lead.id}>{lead.name}</option>
+                        ))}
+                      </select>
+                    )}
                     <input placeholder="Phone / WhatsApp (opsional)" value={staffForm.phone} onChange={e => setStaffForm(p => ({ ...p, phone: e.target.value }))}
                       className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 text-text text-sm focus:border-accent focus:outline-none" />
                     <div className="flex gap-3">

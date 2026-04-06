@@ -191,12 +191,13 @@ function buildCategories(): DocCategory[] {
                     <h4 className="text-blue-400 font-semibold text-sm">LEAD</h4>
                     <RoleBadge role="lead" />
                   </div>
-                  <p className="text-text-muted text-xs mb-2">Koordinator &mdash; assign order ke worker.</p>
+                  <p className="text-text-muted text-xs mb-2">Koordinator &mdash; manage tim worker masing-masing.</p>
                   <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
                     <li>Lihat semua orders + assignment status</li>
-                    <li>Assign/reassign order ke worker (single &amp; bulk)</li>
-                    <li>Lihat workload per worker</li>
-                    <li><strong className="text-text">TIDAK BISA:</strong> settings, pricing, payroll, CMS</li>
+                    <li>Assign/reassign order ke <strong>worker tim sendiri</strong> (single &amp; bulk)</li>
+                    <li>Lihat workload per worker <strong>dalam tim</strong></li>
+                    <li>Worker list otomatis difilter berdasarkan <Code>lead_id</Code></li>
+                    <li><strong className="text-text">TIDAK BISA:</strong> settings, pricing, payroll, CMS, lihat worker tim lain</li>
                   </ul>
                 </div>
                 <div className="bg-background rounded-lg p-4 border border-green-500/20">
@@ -285,7 +286,7 @@ function buildCategories(): DocCategory[] {
                   { tab: "Promo", desc: "CRUD promo code: percentage/fixed, max uses, expiry, tracking." },
                   { tab: "Customers", desc: "Database customer: email, nama, WA, total orders/spent, referral code, reward tier." },
                   { tab: "Rewards", desc: "2 sub-tab: Catalog (CRUD items: skin, diamond, dll) + Redemptions (process pending, completed/rejected)." },
-                  { tab: "Staff", desc: "CRUD staff: Admin, Lead, Worker. Set role, active status, password." },
+                  { tab: "Staff", desc: "CRUD staff: Admin, Lead, Worker. Set role, active status, password. Assign worker ke lead (tim hierarchy via lead_id)." },
                   { tab: "Payroll", desc: "5 sub-tab: Overview (ringkasan), Commissions (auto-generated, filter worker/status), Salaries (gaji tetap), Payouts (batch pembayaran manual: Dana/OVO/Bank), Settings (commission rate, pay schedule)." },
                   { tab: "Reviews", desc: "Kelola review customer: approve/hide, worker reports (cheating/rude/etc), set report status (resolved/dismissed)." },
                   { tab: "Reports", desc: "3 sub-tab: P&L per bulan (revenue vs expenses, trend 6 bulan), Worker Performance (winrate, earnings, rating), Export CSV (8 jenis data)." },

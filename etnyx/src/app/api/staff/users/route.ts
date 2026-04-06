@@ -12,12 +12,12 @@ export async function GET() {
 
   let query = supabase
     .from("staff_users")
-    .select("id, email, name, role, phone, is_active, last_login_at, created_at")
+    .select("id, email, name, role, phone, is_active, last_login_at, created_at, lead_id")
     .order("created_at", { ascending: false });
 
-  // Lead can only see workers
+  // Lead can only see their own workers
   if (user.role === "lead") {
-    query = query.eq("role", "worker");
+    query = query.eq("role", "worker").eq("lead_id", user.id);
   }
 
   const { data, error: dbError } = await query;
@@ -63,16 +63,22 @@ export async function POST(request: NextRequest) {
 
   const passwordHash = await bcrypt.hash(password, 12);
 
+  const insertData: Record<string, unknown> = {
+    email: email.toLowerCase().trim(),
+    name,
+    password_hash: passwordHash,
+    role,
+    phone: phone || null,
+  };
+  // Only workers can have a lead_id
+  if (role === "worker" && body.lead_id) {
+    insertData.lead_id = body.lead_id;
+  }
+
   const { data: newUser, error: createError } = await supabase
     .from("staff_users")
-    .insert({
-      email: email.toLowerCase().trim(),
-      name,
-      password_hash: passwordHash,
-      role,
-      phone: phone || null,
-    })
-    .select("id, email, name, role, phone, is_active, created_at")
+    .insert(insertData)
+    .select("id, email, name, role, phone, is_active, created_at, lead_id")
     .single();
 
   if (createError) {
@@ -103,6 +109,11 @@ export async function PUT(request: NextRequest) {
   if (phone !== undefined) updates.phone = phone;
   if (is_active !== undefined) updates.is_active = is_active;
   if (password) updates.password_hash = await bcrypt.hash(password, 12);
+  // lead_id: set for workers, clear for non-workers
+  if (body.lead_id !== undefined) {
+    const targetRole = role ?? (await supabase.from("staff_users").select("role").eq("id", id).single()).data?.role;
+    updates.lead_id = targetRole === "worker" ? (body.lead_id || null) : null;
+  }
 
   const { error: updateError } = await supabase
     .from("staff_users")

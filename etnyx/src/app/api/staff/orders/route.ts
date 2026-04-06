@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
   // Verify worker exists and is active
   const { data: worker } = await supabase
     .from("staff_users")
-    .select("id, name, role")
+    .select("id, name, role, lead_id")
     .eq("id", workerId)
     .eq("role", "worker")
     .eq("is_active", true)
@@ -108,6 +108,11 @@ export async function POST(request: NextRequest) {
 
   if (!worker) {
     return NextResponse.json({ error: "Worker tidak ditemukan atau tidak aktif" }, { status: 404 });
+  }
+
+  // Lead can only assign to their own team workers
+  if (user.role === "lead" && worker.lead_id !== user.id) {
+    return NextResponse.json({ error: "Worker bukan anggota tim kamu" }, { status: 403 });
   }
 
   // Create assignment
