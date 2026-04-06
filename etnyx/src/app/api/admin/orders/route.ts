@@ -162,6 +162,15 @@ export async function PATCH(request: Request) {
 
     const previousStatus = currentOrder?.status;
 
+    // Auto-set timestamps on status transitions
+    if (updates.status === "confirmed" && previousStatus !== "confirmed") {
+      updates.confirmed_at = new Date().toISOString();
+    }
+    if (updates.status === "completed" && previousStatus !== "completed") {
+      updates.completed_at = new Date().toISOString();
+    }
+    updates.updated_at = new Date().toISOString();
+
     const { data, error } = await supabase
       .from("orders")
       .update(updates)
@@ -189,9 +198,9 @@ export async function PATCH(request: Request) {
         current_rank: data.current_rank,
         target_rank: data.target_rank,
         package: data.package,
-        price: data.price,
+        price: data.total_price,
         whatsapp: data.whatsapp,
-        email: data.email,
+        email: data.customer_email,
         status: data.status,
         is_express: data.is_express,
         is_premium: data.is_premium,

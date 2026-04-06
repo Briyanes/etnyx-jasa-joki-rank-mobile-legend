@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import crypto from "crypto";
-import { sendNewOrderNotifications } from "@/lib/notifications";
+import { sendPaymentConfirmedWA, notifyWorkerConfirmedOrder } from "@/lib/notifications";
 import { sendMetaCAPI } from "@/lib/meta-capi";
 
 // Get Midtrans server key from settings or env
@@ -106,6 +106,8 @@ export async function POST(request: NextRequest) {
         payment_type: payment_type,
         status: orderStatus,
         paid_at: paymentStatus === "paid" ? new Date().toISOString() : null,
+        confirmed_at: paymentStatus === "paid" ? new Date().toISOString() : undefined,
+        updated_at: new Date().toISOString(),
       })
       .eq("id", order.id);
 
@@ -117,9 +119,9 @@ export async function POST(request: NextRequest) {
         current_rank: order.current_rank,
         target_rank: order.target_rank,
         package: order.package,
-        price: order.price || order.total_price,
+        price: order.total_price,
         whatsapp: order.whatsapp,
-        email: order.email,
+        email: order.customer_email,
         status: orderStatus,
         is_express: order.is_express,
         is_premium: order.is_premium,
@@ -127,8 +129,11 @@ export async function POST(request: NextRequest) {
         db_id: order.id,
       };
       
-      // Send all notifications (Telegram admin, WA, Email)
-      sendNewOrderNotifications(orderData).catch(console.error);
+      // Send payment confirmed notifications (WA + Telegram worker group)
+      Promise.allSettled([
+        sendPaymentConfirmedWA(orderData),
+        notifyWorkerConfirmedOrder(orderData),
+      ]).catch(console.error);
 
       // Fire Meta Conversions API (server-side dedup with client pixel)
       try {

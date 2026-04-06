@@ -498,30 +498,34 @@ async function handleConfirmOrder(callbackId: string, chatId: number, messageId:
 
   const { error: updateErr } = await supabase
     .from("orders")
-    .update({ status: "confirmed" })
+    .update({ status: "confirmed", confirmed_at: new Date().toISOString(), updated_at: new Date().toISOString() })
     .eq("id", orderId);
 
   if (updateErr) {
     return answerCallback(callbackId, "Gagal mengkonfirmasi order");
   }
 
-  // Send confirmed notifications
+  // Send payment confirmed notifications
   try {
-    const { sendOrderConfirmedNotifications } = await import("@/lib/notifications");
-    sendOrderConfirmedNotifications({
+    const { sendPaymentConfirmedWA, notifyWorkerConfirmedOrder } = await import("@/lib/notifications");
+    const orderData = {
       order_id: order.order_id,
       username: order.username,
       current_rank: order.current_rank,
       target_rank: order.target_rank,
       package: order.package,
-      price: order.price || order.total_price,
+      price: order.total_price,
       whatsapp: order.whatsapp,
-      email: order.email,
-      status: "confirmed",
+      email: order.customer_email,
+      status: "confirmed" as const,
       is_express: order.is_express,
       is_premium: order.is_premium,
       notes: order.notes,
-    }).catch(console.error);
+    };
+    Promise.allSettled([
+      sendPaymentConfirmedWA(orderData),
+      notifyWorkerConfirmedOrder(orderData),
+    ]).catch(console.error);
   } catch {
     // non-blocking
   }

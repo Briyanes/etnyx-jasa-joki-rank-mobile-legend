@@ -357,6 +357,30 @@ export async function sendWhatsAppMessage(
   }
 }
 
+export async function sendPaymentConfirmedWA(order: OrderData): Promise<boolean> {
+  if (!order.whatsapp) return false;
+
+  const message = `
+✅ *Pembayaran Dikonfirmasi!*
+
+Halo! Pembayaran kamu sudah kami terima dan dikonfirmasi.
+
+*📋 Order ID:* ${order.order_id}
+*🎮 Paket:* ${formatRank(order.current_rank)} → ${formatRank(order.target_rank)}
+*💰 Total:* ${formatRupiah(order.price)}
+
+Order kamu akan segera diproses oleh tim booster kami. Kamu akan menerima notifikasi saat pengerjaan dimulai.
+
+Track order: ${SITE_URL}/track?id=${order.order_id}
+
+Jangan login ke akun selama proses ya! 🔒
+
+_ETNYX - Push Rank, Tanpa Main_ ⚡
+`.trim();
+
+  return sendWhatsAppMessage(order.whatsapp, message);
+}
+
 export async function sendOrderConfirmationWA(order: OrderData): Promise<boolean> {
   if (!order.whatsapp) return false;
 

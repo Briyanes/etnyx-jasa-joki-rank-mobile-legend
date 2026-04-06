@@ -80,6 +80,8 @@ export async function POST(request: NextRequest) {
           payment_status: "paid",
           status: "confirmed",
           paid_at: new Date().toISOString(),
+          confirmed_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         })
         .eq("id", order.id);
 
@@ -94,9 +96,8 @@ export async function POST(request: NextRequest) {
 
       // Send notifications
       try {
-        const { sendOrderConfirmedNotifications, notifyAdminNewOrder } = await import("@/lib/notifications");
-        // Notify worker group + send "order dikerjakan" WA to customer
-        await sendOrderConfirmedNotifications({
+        const { sendPaymentConfirmedWA, notifyWorkerConfirmedOrder } = await import("@/lib/notifications");
+        const orderData = {
           order_id: order.order_id,
           username: order.username,
           current_rank: order.current_rank,
@@ -109,22 +110,11 @@ export async function POST(request: NextRequest) {
           is_express: order.is_express,
           is_premium: order.is_premium,
           notes: order.notes,
-        });
-        // Also notify admin Telegram group about the confirmed order
-        await notifyAdminNewOrder({
-          order_id: order.order_id,
-          username: order.username,
-          current_rank: order.current_rank,
-          target_rank: order.target_rank,
-          package: order.package,
-          price: order.total_price,
-          whatsapp: order.whatsapp,
-          email: order.customer_email,
-          status: "confirmed",
-          is_express: order.is_express,
-          is_premium: order.is_premium,
-          notes: order.notes,
-        });
+        };
+        // WA to customer: "Pembayaran Dikonfirmasi"
+        await sendPaymentConfirmedWA(orderData);
+        // Telegram to worker group: order ready to be assigned
+        await notifyWorkerConfirmedOrder(orderData);
       } catch (e) {
         console.error("Notification error:", e);
       }
