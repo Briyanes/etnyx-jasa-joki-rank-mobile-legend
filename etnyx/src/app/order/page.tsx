@@ -446,6 +446,7 @@ function OrderPageContent() {
   const [promoApplied, setPromoApplied] = useState(false);
   const [promoLoading, setPromoLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"midtrans" | "manual_transfer">("manual_transfer");
+  const [midtransEnabled, setMidtransEnabled] = useState(false);
   const [tierDiscount, setTierDiscount] = useState(0);
   const [customerTier, setCustomerTier] = useState<string | null>(null);
   const [selectedPackage, setSelectedPackage] = useState<ProductPackage | null>(
@@ -557,6 +558,14 @@ function OrderPageContent() {
         }
       })
       .catch(() => {/* keep defaults */});
+  }, []);
+
+  // Check available payment methods
+  useEffect(() => {
+    fetch("/api/payment-methods")
+      .then((res) => res.json())
+      .then((data) => { if (data.midtransEnabled) setMidtransEnabled(true); })
+      .catch(() => {/* keep manual only */});
   }, []);
 
   // Pre-fill from query params
@@ -2332,7 +2341,7 @@ function OrderPageContent() {
                   <p className="text-text-muted text-xs mb-3 uppercase tracking-wider">
                     Metode Pembayaran
                   </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className={`grid grid-cols-1 ${midtransEnabled ? "sm:grid-cols-2" : ""} gap-3`}>
                     <button
                       type="button"
                       onClick={() => setPaymentMethod("manual_transfer")}
@@ -2353,6 +2362,7 @@ function OrderPageContent() {
                         Bank (BCA, BRI, BNI, Mandiri, Jago), E-Wallet, QRIS
                       </p>
                     </button>
+                    {midtransEnabled && (
                     <button
                       type="button"
                       onClick={() => setPaymentMethod("midtrans")}
@@ -2373,6 +2383,7 @@ function OrderPageContent() {
                         QRIS, VA, GoPay, ShopeePay, Kartu Kredit
                       </p>
                     </button>
+                    )}
                   </div>
                 </div>
 
