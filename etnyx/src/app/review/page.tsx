@@ -409,52 +409,53 @@ export default function ReviewPage() {
               />
             )}
 
-            {/* Worker Report */}
-            <div className="border-t border-white/5 pt-4">
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  checked={showReport}
-                  onChange={(e) => setShowReport(e.target.checked)}
-                  className="w-4 h-4 rounded border-white/20 bg-white/5 accent-red-500"
-                />
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 text-red-400" />
-                  <span className="text-sm text-red-400 group-hover:text-red-300">{t.reportToggle}</span>
-                </div>
-              </label>
-
-              {showReport && (
-                <div className="mt-4 space-y-3 pl-7">
-                  <p className="text-xs text-text-muted">{t.reportDesc}</p>
-                  <div className="space-y-2">
-                    {(Object.entries(t.reportTypes) as [string, string][]).map(([key, label]) => (
-                      <label key={key} className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="reportType"
-                          value={key}
-                          checked={reportType === key}
-                          onChange={(e) => setReportType(e.target.value)}
-                          className="w-3.5 h-3.5 accent-red-500"
-                        />
-                        <span className="text-sm text-text-muted">{label}</span>
-                      </label>
-                    ))}
-                  </div>
-                  <textarea
-                    value={reportDetail}
-                    onChange={(e) => setReportDetail(e.target.value)}
-                    placeholder={t.reportDetailPlaceholder}
-                    rows={3}
-                    maxLength={2000}
-                    className="w-full px-3 py-2 bg-red-500/5 border border-red-500/20 rounded-lg text-sm text-text placeholder:text-red-400/30 focus:border-red-500/50 focus:outline-none resize-none"
-                  />
-                </div>
-              )}
-            </div>
           </div>
         )}
+
+        {/* Worker Report - Always visible */}
+        <div className="bg-white/[0.03] border border-white/10 rounded-xl p-6 space-y-4">
+          <label className="flex items-center gap-3 cursor-pointer group">
+            <input
+              type="checkbox"
+              checked={showReport}
+              onChange={(e) => setShowReport(e.target.checked)}
+              className="w-4 h-4 rounded border-white/20 bg-white/5 accent-red-500"
+            />
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-red-400" />
+              <span className="text-sm text-red-400 group-hover:text-red-300">{t.reportToggle}</span>
+            </div>
+          </label>
+
+          {showReport && (
+            <div className="space-y-3 pl-7">
+              <p className="text-xs text-text-muted">{t.reportDesc}</p>
+              <div className="space-y-2">
+                {(Object.entries(t.reportTypes) as [string, string][]).map(([key, label]) => (
+                  <label key={key} className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="reportType"
+                      value={key}
+                      checked={reportType === key}
+                      onChange={(e) => setReportType(e.target.value)}
+                      className="w-3.5 h-3.5 accent-red-500"
+                    />
+                    <span className="text-sm text-text-muted">{label}</span>
+                  </label>
+                ))}
+              </div>
+              <textarea
+                value={reportDetail}
+                onChange={(e) => setReportDetail(e.target.value)}
+                placeholder={t.reportDetailPlaceholder}
+                rows={3}
+                maxLength={2000}
+                className="w-full px-3 py-2 bg-red-500/5 border border-red-500/20 rounded-lg text-sm text-text placeholder:text-red-400/30 focus:border-red-500/50 focus:outline-none resize-none"
+              />
+            </div>
+          )}
+        </div>
 
         {/* WhatsApp (optional) */}
         <div className="bg-white/[0.03] border border-white/10 rounded-xl p-4">
