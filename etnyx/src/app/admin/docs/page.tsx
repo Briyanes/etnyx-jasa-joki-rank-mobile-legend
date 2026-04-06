@@ -11,6 +11,7 @@ import {
   Gift, Bot, TrendingUp, Search,
   ClipboardList, Gamepad2, Monitor,
   Megaphone, Target, MousePointerClick, MessageCircle,
+  Clock, FileText,
 } from "lucide-react";
 
 // --- Reusable Components ---
@@ -242,18 +243,23 @@ function buildCategories(): DocCategory[] {
             <div className="space-y-4">
               <StepFlow steps={[
                 { title: "Customer Isi Form Order", desc: "Pilih rank awal ke tujuan, package (Paket/Per-Star/Gendong), credentials akun ML. Apply promo/referral code.", badge: "customer", page: "/order" },
-                { title: "Pembayaran Midtrans", desc: "Sistem generate Snap Token, customer bayar via VA, QRIS, Gopay, OVO, dll.", badge: "customer", page: "Midtrans Snap" },
-                { title: "Webhook & Auto-Confirm", desc: "Midtrans kirim callback, verifikasi signature, order status confirmed. Reward points ditambahkan.", badge: "auto", page: "/api/payment/notification" },
-                { title: "Multi-Channel Notifikasi", desc: "Telegram ke Admin Group (dengan tombol Konfirmasi/Tolak), WhatsApp ke customer, Email konfirmasi.", badge: "auto" },
+                { title: "Pilih Metode Bayar", desc: "2 opsi: Transfer Manual (BCA, BRI, BNI, Mandiri, Jago, DANA, GoPay, OVO, ShopeePay, LinkAja, QRIS) atau Midtrans Auto (VA, QRIS, GoPay, ShopeePay, CC).", badge: "customer", page: "/order (step 3)" },
+                { title: "A) Transfer Manual", desc: "Auto-redirect ke /payment/manual — lihat daftar rekening + upload bukti transfer. Admin approve/reject bukti.", badge: "customer", page: "/payment/manual" },
+                { title: "B) Midtrans Auto", desc: "Snap Token di-generate, customer bayar via popup/redirect. Webhook otomatis confirm.", badge: "customer", page: "Midtrans Snap" },
+                { title: "Pembayaran Dikonfirmasi", desc: "Manual: admin approve bukti. Midtrans: webhook auto-confirm. Status: confirmed, payment: paid. WA 'Pembayaran Dikonfirmasi' + Telegram ke Worker Group.", badge: "auto", page: "/api/payment/notification" },
+                { title: "Multi-Channel Notifikasi", desc: "Telegram ke Admin Group (dengan tombol Konfirmasi/Tolak), WhatsApp 'Pembayaran Dikonfirmasi' ke customer, Telegram ke Worker Group.", badge: "auto" },
                 { title: "Lead/Admin Assign Order", desc: "Buka Lead Dashboard, pilih worker, Assign. Worker dapat notif Telegram. Atau konfirmasi langsung dari Telegram bot.", badge: "lead", page: "/admin/lead" },
-                { title: "Worker Mulai Kerja", desc: "Worker buka dashboard, klik Mulai, status in_progress. Push rank customer.", badge: "worker", page: "/admin/worker" },
+                { title: "Worker Mulai Kerja", desc: "Worker buka dashboard, klik Mulai, status in_progress. WA 'Sedang Dikerjakan' ke customer. Push rank customer.", badge: "worker", page: "/admin/worker" },
                 { title: "Worker Update Progress", desc: "Update progress %, current rank. Customer bisa lihat real-time di /track.", badge: "worker" },
                 { title: "Worker Submit Hasil", desc: "Input: stars gained, MVP, savage, maniac, wins, durasi. Upload screenshot. Customer bisa lihat langsung di /track.", badge: "worker" },
-                { title: "Worker Selesai", desc: "Klik Selesai, status completed. Auto-generate commission. Telegram notif ke admin.", badge: "worker" },
+                { title: "Worker Selesai", desc: "Klik Selesai, status completed. Auto-generate commission. Telegram notif ke admin. WA 'Order Selesai' + link review ke customer.", badge: "worker" },
                 { title: "Customer Review", desc: "Customer dapat link review via WA/Email, rating service & worker, bisa report. Auto-create testimonial jika rating 4-5 bintang.", badge: "customer", page: "/review" },
               ]} />
+              <InfoBox type="info">
+                <strong>Dual Payment:</strong> Transfer Manual muncul di /payment/manual setelah order dibuat. Midtrans Auto muncul jika Server Key dikonfigurasi di Settings &rarr; Integrations.
+              </InfoBox>
               <InfoBox type="warning">
-                <strong>Status Flow:</strong> pending &rarr; confirmed (bayar) &rarr; in_progress (dikerjakan) &rarr; completed (selesai). Admin bisa cancel kapan saja.
+                <strong>Status Flow:</strong> pending &rarr; confirmed (bayar dikonfirmasi) &rarr; in_progress (dikerjakan) &rarr; completed (selesai). Admin bisa cancel kapan saja.
               </InfoBox>
             </div>
           ),
@@ -677,13 +683,13 @@ function buildCategories(): DocCategory[] {
               <p className="text-text-muted text-sm">7 template WhatsApp yang bisa dikirim dari Dashboard &rarr; Orders &rarr; Smart Actions. Kirim via Fonnte API.</p>
               <div className="space-y-3">
                 {[
-                  { action: "follow_up_payment", title: "💰 Follow-up Payment", desc: "Reminder untuk order belum bayar. Berisi Order ID, rank, harga, link pembayaran.", when: "Status: pending" },
-                  { action: "follow_up_credentials", title: "🔐 Request Credentials", desc: "Minta akun ML customer setelah bayar. Berisi peringatan keamanan akun.", when: "Status: confirmed" },
-                  { action: "notify_started", title: "🚀 Notify Started", desc: "Info order mulai dikerjakan. Target rank, link track, peringatan jangan login.", when: "Status: in_progress" },
-                  { action: "follow_up_progress", title: "📊 Progress Update", desc: "Update progress %, rank saat ini, link track. Peringatan jangan login.", when: "Status: in_progress" },
-                  { action: "notify_completed", title: "🎉 Notify Completed", desc: "Order selesai! Minta ganti password, link review + janji skin gratis.", when: "Status: completed" },
-                  { action: "request_review", title: "⭐ Request Review", desc: "Follow-up minta review. Janji skin gratis, link review + terima kasih.", when: "Status: completed" },
-                  { action: "reactivation", title: "🔄 Reactivation", desc: "Win-back untuk order stalled/lama. Tanya apakah ingin lanjut.", when: "Order tidak aktif" },
+                  { action: "follow_up_payment", title: "Follow-up Payment", desc: "Reminder order belum bayar. Berisi Order ID, rank, harga, daftar rekening aktif (bank + e-wallet), link upload bukti transfer.", when: "Status: pending" },
+                  { action: "follow_up_credentials", title: "Request Credentials", desc: "Minta akun ML customer setelah bayar. Berisi peringatan keamanan akun.", when: "Status: confirmed" },
+                  { action: "notify_started", title: "Notify Started", desc: "Info order mulai dikerjakan. Target rank, link track, peringatan jangan login.", when: "Status: in_progress" },
+                  { action: "follow_up_progress", title: "Progress Update", desc: "Update progress %, rank saat ini, link track. Peringatan jangan login.", when: "Status: in_progress" },
+                  { action: "notify_completed", title: "Notify Completed", desc: "Order selesai! Minta ganti password, link review + janji skin gratis.", when: "Status: completed" },
+                  { action: "request_review", title: "Request Review", desc: "Follow-up minta review. Janji skin gratis, link review + terima kasih.", when: "Status: completed" },
+                  { action: "reactivation", title: "Reactivation", desc: "Win-back untuk order stalled/lama. Tanya apakah ingin lanjut.", when: "Order tidak aktif" },
                 ].map((item, i) => (
                   <div key={i} className="bg-background rounded-lg p-3 border border-white/5">
                     <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -952,14 +958,15 @@ function buildCategories(): DocCategory[] {
           title: "API Routes (58+)",
           content: (
             <div className="space-y-4">
-              <p className="text-text-muted text-sm">58+ API routes. Auth via JWT cookie (HTTPOnly). Rate limited via middleware.</p>
+              <p className="text-text-muted text-sm">63+ API routes. Auth via JWT cookie (HTTPOnly). Rate limited via middleware.</p>
               <div className="bg-background rounded-lg p-3 border border-white/5">
                 <h4 className="text-text font-medium text-sm mb-2">{"Admin API"} <Code>/api/admin/*</Code></h4>
                 <Table headers={["Endpoint", "Methods", "Deskripsi"]} rows={[
                   ["/api/admin/auth", "POST/GET/DELETE", "Login/session/logout"],
                   ["/api/admin/orders", "GET/POST/PATCH", "CRUD orders + status update + auto-commission"],
                   ["/api/admin/orders/credentials", "GET", "View encrypted credentials"],
-                  ["/api/admin/orders/follow-up", "POST", "Smart WA follow-up (6 templates)"],
+                  ["/api/admin/orders/follow-up", "POST", "Smart WA follow-up (7 templates + info rekening)"],
+                  ["/api/admin/payment-proof", "PATCH", "Approve/reject bukti transfer manual"],
                   ["/api/admin/stats", "GET", "KPI metrics"],
                   ["/api/admin/chart-data", "GET", "Revenue chart data"],
                   ["/api/admin/settings", "GET/PUT", "Key-value config (CMS, integrations)"],
@@ -1019,6 +1026,7 @@ function buildCategories(): DocCategory[] {
                 <h4 className="text-text font-medium text-sm mb-2">{"Public API & Webhooks"}</h4>
                 <Table headers={["Endpoint", "Methods", "Deskripsi"]} rows={[
                   ["/api/payment", "POST", "Create Midtrans transaction"],
+                  ["/api/payment/manual", "POST", "Upload bukti transfer manual"],
                   ["/api/payment/notification", "POST", "Midtrans webhook (signature verify)"],
                   ["/api/payment/test-connection", "POST", "Test Midtrans keys"],
                   ["/api/telegram/webhook", "POST/GET", "Telegram bot webhook + register"],
@@ -1120,21 +1128,21 @@ function buildCategories(): DocCategory[] {
             <div className="space-y-4">
               <p className="text-text-muted text-sm">5 channel + interactive Telegram bot. Konfigurasi di Dashboard &rarr; Settings &rarr; Integrations.</p>
               <Table headers={["Channel", "Provider", "Penerima", "Events"]} rows={[
-                ["Telegram Admin", "Bot API (webhook)", "Admin Group", "Order baru (+ tombol), selesai, review, report"],
+                ["Telegram Admin", "Bot API (webhook)", "Admin Group", "Order baru (+ tombol Konfirmasi/Tolak), selesai, review, report"],
                 ["Telegram Review", "Bot API", "Review Group", "Review customer baru (+ tombol Show/Hide)"],
                 ["Telegram Report", "Bot API", "Report Group", "Laporan worker + nama worker (+ tombol Resolved/Dismiss)"],
-                ["Telegram Worker", "Bot API", "Worker Group", "Order dikonfirmasi, order di-assign"],
-                ["WhatsApp", "Fonnte API", "Customer", "Konfirmasi bayar, mulai dikerjakan, selesai, follow-up (7 template)"],
+                ["Telegram Worker", "Bot API", "Worker Group", "Pembayaran dikonfirmasi, order di-assign"],
+                ["WhatsApp", "Fonnte API", "Customer", "Order dibuat, pembayaran dikonfirmasi, sedang dikerjakan, selesai, follow-up (7 template)"],
                 ["Email", "Resend", "Customer", "Konfirmasi bayar, invoice, verification, password reset"],
                 ["Web Push", "VAPID", "Subscribers", "Manual push dari admin"],
               ]} />
               <div className="bg-background rounded-lg p-4 border border-white/5">
                 <h4 className="text-text font-medium text-sm mb-3">Notification Trigger Map</h4>
                 <Table headers={["Event", "Telegram", "WhatsApp", "Email"]} rows={[
-                  ["Order dibuat (belum bayar)", "—", "Konfirmasi order + link bayar", "Invoice"],
-                  ["Bayar berhasil (confirmed)", "Admin: ORDER BARU! + tombol Konfirmasi/Tolak", "Konfirmasi bayar + track link", "Payment confirmed"],
-                  ["Mulai dikerjakan (in_progress)", "Worker: ORDER DIKONFIRMASI!", "Order mulai dikerjakan + jangan login", "—"],
+                  ["Order dibuat (belum bayar)", "Admin: ORDER BARU! + tombol Konfirmasi/Tolak", "Konfirmasi order + info rekening + link upload bukti", "Invoice"],
+                  ["Bayar dikonfirmasi (confirmed)", "Worker: ORDER DIKONFIRMASI!", "Pembayaran Dikonfirmasi + track link + reminder keamanan", "Payment confirmed"],
                   ["Order di-assign ke worker", "Worker: ORDER DITUGASKAN", "—", "—"],
+                  ["Mulai dikerjakan (in_progress)", "—", "Sedang Dikerjakan + jangan login + track link", "—"],
                   ["Order selesai (completed)", "Admin: ORDER SELESAI!", "Selesai + ganti password + link review + skin gratis", "—"],
                   ["Review masuk", "Admin + Review: REVIEW BARU! + Show/Hide", "—", "—"],
                   ["Worker di-report", "Admin + Report: WORKER REPORT! + nama worker + Resolved/Dismiss", "—", "—"],
@@ -1151,7 +1159,7 @@ function buildCategories(): DocCategory[] {
                 <p className="text-text-muted text-[11px] mt-2">Jika Review/Report group ID sama dengan Admin → tidak double-send. Sistem auto-skip duplikat.</p>
               </div>
               <InfoBox type="success">
-                <strong>Test Notifications:</strong> POST <Code>/api/admin/test-notifications</Code> &mdash; test per channel: telegram_admin, telegram_worker, whatsapp, email.
+                <strong>Test Notifications:</strong> POST <Code>/api/admin/test-notifications</Code> &mdash; test per channel: telegram_admin, telegram_worker, telegram_completed, telegram_review, telegram_report, whatsapp, email.
               </InfoBox>
             </div>
           ),
@@ -1162,23 +1170,43 @@ function buildCategories(): DocCategory[] {
           title: "Payment Gateway",
           content: (
             <div className="space-y-4">
-              <p className="text-text-muted text-sm">Midtrans Snap API. Sandbox/Production toggle dari dashboard.</p>
-              <div className="bg-background rounded-lg p-3 border border-white/5">
-                <h4 className="text-text font-medium text-sm mb-2">Alur Teknis</h4>
-                <ol className="text-text-muted text-xs space-y-1 list-decimal ml-4">
-                  <li>Frontend POST ke <Code>/api/customer/order</Code> dengan data order</li>
-                  <li>Backend buat Snap Token via <Code>{"snap.createTransaction()"}</Code></li>
-                  <li>Return <Code>snap_url</Code> &rarr; customer redirect / popup</li>
-                  <li>Customer bayar &rarr; Midtrans POST webhook ke <Code>/api/payment/notification</Code></li>
-                  <li>Verifikasi: <Code>{"SHA512(order_id + status_code + gross_amount + serverKey)"}</Code></li>
-                  <li>Update order status &rarr; trigger notifikasi multi-channel</li>
-                </ol>
+              <p className="text-text-muted text-sm">Dual payment system: Transfer Manual + Midtrans Auto. Toggle dari Settings &rarr; Integrations.</p>
+
+              <div className="bg-background rounded-lg p-4 border border-green-500/20">
+                <h4 className="text-green-400 font-semibold text-sm mb-3">Transfer Manual</h4>
+                <StepFlow steps={[
+                  { title: "Customer pilih Transfer Manual", desc: "Di form order step 3, pilih 'Transfer Manual'.", page: "/order (step 3)" },
+                  { title: "Auto-redirect ke halaman bayar", desc: "Setelah submit, auto-redirect ke /payment/manual?order_id=XXX. Tampil daftar rekening aktif.", page: "/payment/manual" },
+                  { title: "Customer transfer & upload bukti", desc: "Transfer ke salah satu rekening, upload foto bukti via form upload.", badge: "customer" },
+                  { title: "Admin approve/reject bukti", desc: "Di dashboard Orders tab, admin review bukti transfer lalu approve atau reject.", badge: "admin" },
+                  { title: "WA Pembayaran Dikonfirmasi", desc: "Setelah approve: status confirmed + paid, WA ke customer + Telegram ke Worker Group.", badge: "auto" },
+                ]} />
+                <Table headers={["Rekening Tersedia", "Kelola"]} rows={[
+                  ["BCA, BRI, BNI, Mandiri, Jago", "Dashboard > Settings > Rekening"],
+                  ["DANA, GoPay, OVO, ShopeePay, LinkAja", "Dashboard > Settings > Rekening"],
+                  ["QRIS (upload gambar)", "Dashboard > Settings > Rekening"],
+                ]} />
               </div>
+
+              <div className="bg-background rounded-lg p-4 border border-blue-500/20">
+                <h4 className="text-blue-400 font-semibold text-sm mb-3">Midtrans Auto</h4>
+                <StepFlow steps={[
+                  { title: "Frontend POST ke /api/customer/order", desc: "Kirim data order + payment_method: midtrans" },
+                  { title: "Backend generate Snap Token", desc: "Via snap.createTransaction() — return snap_url" },
+                  { title: "Customer bayar via popup/redirect", desc: "VA, QRIS, GoPay, ShopeePay, Kartu Kredit" },
+                  { title: "Webhook auto-confirm", desc: "Midtrans POST ke /api/payment/notification — SHA-512 signature verification", page: "/api/payment/notification" },
+                  { title: "Status update + notifikasi", desc: "Order confirmed + paid, WA 'Pembayaran Dikonfirmasi', Telegram Worker Group" },
+                ]} />
+                <InfoBox type="info">
+                  Midtrans muncul otomatis jika Server Key diisi di Settings &rarr; Integrations. Bisa toggle Sandbox/Production.
+                </InfoBox>
+              </div>
+
               <Table headers={["Setting", "Lokasi"]} rows={[
-                ["Server Key", "Dashboard > Settings > Integrations"],
-                ["Client Key", "Dashboard > Settings > Integrations"],
+                ["Server Key / Client Key", "Dashboard > Settings > Integrations"],
+                ["Rekening Transfer Manual", "Dashboard > Settings > Rekening"],
                 ["Environment", "Toggle Sandbox / Production"],
-                ["Payment Channels", "Enable/disable VA, Gopay, QRIS, dll"],
+                ["Payment Channels", "Enable/disable VA, GoPay, QRIS, dll"],
                 ["Notification URL", "Set di Midtrans Dashboard"],
               ]} />
             </div>
@@ -1389,6 +1417,137 @@ function buildCategories(): DocCategory[] {
         },
       ],
     },
+
+    // ===================== CHANGELOG =====================
+    {
+      id: "changelog",
+      label: "Changelog",
+      catIcon: Clock,
+      color: "text-yellow-400",
+      sections: [
+        {
+          id: "changelog-latest",
+          icon: FileText,
+          title: "Update Terbaru",
+          content: (
+            <div className="space-y-4">
+              <p className="text-text-muted text-sm">Riwayat update fitur, perbaikan bug, dan perubahan workflow. Diurutkan dari yang terbaru.</p>
+
+              <div className="bg-background rounded-lg p-4 border border-yellow-500/20">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-yellow-500/10 text-yellow-400 font-medium">v2.1</span>
+                  <h4 className="text-yellow-400 font-semibold text-sm">7 April 2026</h4>
+                </div>
+
+                <div className="space-y-3">
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">Dual Payment System</h5>
+                    <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
+                      <li><strong className="text-text">Transfer Manual</strong> &mdash; BCA, BRI, BNI, Mandiri, Jago, DANA, GoPay, OVO, ShopeePay, LinkAja, QRIS</li>
+                      <li>Halaman <Code>/payment/manual</Code> &mdash; auto-redirect setelah order, daftar rekening aktif + upload bukti</li>
+                      <li>Admin approve/reject bukti transfer dari Dashboard</li>
+                      <li>Follow-up WA payment sekarang include daftar rekening + link upload bukti</li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">Perbaikan Alur Notifikasi</h5>
+                    <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
+                      <li><strong className="text-text">WA baru: Pembayaran Dikonfirmasi</strong> &mdash; Dikirim setelah admin approve bukti / Midtrans auto-confirm. Berisi detail order, link tracking, reminder keamanan</li>
+                      <li><strong className="text-text">WA Sedang Dikerjakan</strong> &mdash; Sekarang hanya dikirim saat worker mulai kerja (bukan saat bayar)</li>
+                      <li>Fix: Telegram &quot;ORDER BARU!&quot; hanya dikirim 1x saat order dibuat (tidak lagi double saat bayar)</li>
+                      <li>Fix: Telegram confirm dari bot sekarang kirim WA &quot;Pembayaran Dikonfirmasi&quot; (bukan &quot;Sedang Dikerjakan&quot;)</li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">Bug Fixes</h5>
+                    <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
+                      <li>Fix: <Code>confirmed_at</Code> dan <Code>completed_at</Code> timestamp sekarang otomatis diisi saat status berubah</li>
+                      <li>Fix: Field <Code>price</Code> dan <Code>email</Code> di notifikasi tidak lagi undefined (mapping ke kolom DB yang benar)</li>
+                      <li>Fix: Midtrans webhook sekarang set <Code>confirmed_at</Code> + kirim notifikasi yang benar</li>
+                      <li>Mobile UI payment page diperbaiki &mdash; steps compact, cards lebih rapi</li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">API Baru</h5>
+                    <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
+                      <li><Code>POST /api/payment/manual</Code> &mdash; Upload bukti transfer manual</li>
+                      <li><Code>PATCH /api/admin/payment-proof</Code> &mdash; Admin approve/reject bukti transfer</li>
+                      <li>Test notifications sekarang support: <Code>telegram_completed</Code>, <Code>telegram_review</Code>, <Code>telegram_report</Code></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-white/10 text-text-muted font-medium">v2.0</span>
+                  <h4 className="text-text-muted font-semibold text-sm">Release Awal</h4>
+                </div>
+                <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
+                  <li>Full platform: order, payment (Midtrans), staff management (RBAC), reward system</li>
+                  <li>15-tab admin dashboard, lead &amp; worker dashboards</li>
+                  <li>Multi-channel notification: Telegram 4 grup, WhatsApp, Email, Push</li>
+                  <li>Conversion tracking: Meta Pixel, GA4, GTM, TikTok, Google Ads, Meta CAPI</li>
+                  <li>UTM attribution &amp; ad performance dashboard</li>
+                  <li>Payroll: komisi auto, gaji, batch payout</li>
+                  <li>Security: AES-256 encrypted credentials, rate limiting, CSP, RLS</li>
+                  <li>Customer dashboard: order history, reward points, referral</li>
+                  <li>Order chat system, real-time tracking, review &amp; report</li>
+                </ul>
+              </div>
+            </div>
+          ),
+        },
+        {
+          id: "workflow-summary",
+          icon: Zap,
+          title: "Ringkasan Workflow Terkini",
+          content: (
+            <div className="space-y-4">
+              <p className="text-text-muted text-sm">Workflow lengkap per role setelah update terakhir.</p>
+
+              <div className="bg-background rounded-lg p-4 border border-purple-500/20">
+                <h4 className="text-purple-400 font-semibold text-sm mb-3">Customer Workflow</h4>
+                <StepFlow steps={[
+                  { title: "Buka /order", desc: "Pilih rank, package, isi credentials, pilih metode bayar" },
+                  { title: "Transfer Manual", desc: "Auto-redirect ke /payment/manual — lihat rekening — transfer — upload bukti" },
+                  { title: "Atau Midtrans Auto", desc: "Bayar via VA/QRIS/GoPay/ShopeePay langsung dari popup" },
+                  { title: "Terima WA 'Pembayaran Dikonfirmasi'", desc: "Setelah admin approve / auto-confirm. Berisi link tracking." },
+                  { title: "Track progress di /track", desc: "Lihat status, progress %, achievement worker, screenshot" },
+                  { title: "Terima WA 'Order Selesai'", desc: "Ganti password, submit review di link yang dikirim" },
+                ]} />
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-red-500/20">
+                <h4 className="text-red-400 font-semibold text-sm mb-3">Admin Workflow</h4>
+                <StepFlow steps={[
+                  { title: "Terima Telegram 'ORDER BARU!'", desc: "Notif ke admin group saat customer order. Tombol Konfirmasi/Tolak." },
+                  { title: "Approve bukti transfer (manual)", desc: "Dashboard > Orders > klik order > approve bukti. Auto: WA + Telegram worker." },
+                  { title: "Atau confirm dari Telegram", desc: "Klik tombol Konfirmasi di Telegram = approve + notif ke customer + worker." },
+                  { title: "Assign ke worker", desc: "Dashboard > Orders / Lead Dashboard > pilih worker > Assign." },
+                  { title: "Monitor progress", desc: "Dashboard overview, worker submissions, follow-up WA jika perlu." },
+                  { title: "Review & report", desc: "Telegram notif masuk > approve/hide review > resolve/dismiss report." },
+                ]} />
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-green-500/20">
+                <h4 className="text-green-400 font-semibold text-sm mb-3">Worker Workflow</h4>
+                <StepFlow steps={[
+                  { title: "Terima Telegram 'ORDER DIKONFIRMASI'", desc: "Notif ke worker group saat pembayaran dikonfirmasi." },
+                  { title: "Terima assignment", desc: "Telegram 'ORDER DITUGASKAN' + muncul di worker dashboard." },
+                  { title: "Mulai kerja", desc: "Klik 'Mulai' di dashboard. Customer dapat WA 'Sedang Dikerjakan'." },
+                  { title: "Update progress", desc: "Update %, submit match results + screenshot." },
+                  { title: "Selesai", desc: "Klik 'Selesai'. Auto: commission, Telegram admin, WA customer." },
+                ]} />
+              </div>
+            </div>
+          ),
+        },
+      ],
+    },
   ];
 }
 
@@ -1455,7 +1614,7 @@ export default function DocsPage() {
             <div className="flex items-center gap-2">
               <Book className="w-5 h-5 text-accent" />
               <h1 className="text-text font-bold text-sm">ETNYX DOCS</h1>
-              <span className="text-[9px] px-1.5 py-0.5 rounded bg-accent/10 text-accent font-medium">v2.0</span>
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-accent/10 text-accent font-medium">v2.1</span>
             </div>
             <button onClick={() => setSidebarOpen(false)} className="text-text-muted hover:text-text p-1">
               <ChevronDown className="w-4 h-4 rotate-90" />
@@ -1561,7 +1720,7 @@ export default function DocsPage() {
 
         <footer className="px-6 py-4 border-t border-white/5">
           <p className="text-text-muted/40 text-[10px] text-center">
-            ETNYX Documentation v2.0 &mdash; {allSections.length} sections across {categories.length} categories
+            ETNYX Documentation v2.1 &mdash; {allSections.length} sections across {categories.length} categories
           </p>
         </footer>
       </main>
