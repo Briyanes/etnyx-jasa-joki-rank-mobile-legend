@@ -297,35 +297,44 @@ function ManualPaymentContent() {
 
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
         {/* Order Info */}
-        <div className="bg-surface rounded-2xl border border-white/5 p-5">
+        <div className="bg-surface rounded-2xl border border-white/5 p-4">
           <div className="flex items-center justify-between mb-3">
-            <div>
-              <p className="text-text-muted text-xs">Order ID</p>
-              <p className="font-mono text-accent font-bold">{order.order_id}</p>
+            <div className="min-w-0">
+              <p className="text-text-muted text-[10px] uppercase tracking-wider">Order ID</p>
+              <p className="font-mono text-accent font-bold text-sm truncate">{order.order_id}</p>
             </div>
-            <div className="flex items-center gap-2 bg-yellow-500/20 text-yellow-400 px-3 py-1.5 rounded-lg text-xs font-medium">
-              <Clock className="w-3.5 h-3.5" />
+            <div className="flex items-center gap-1.5 bg-yellow-500/15 text-yellow-400 px-2.5 py-1 rounded-full text-[10px] font-semibold flex-shrink-0">
+              <Clock className="w-3 h-3" />
               Menunggu Bayar
             </div>
           </div>
           <div className="bg-background rounded-xl p-4 text-center">
-            <p className="text-text-muted text-xs mb-1">{t.totalPayment}</p>
-            <p className="gradient-text text-3xl font-bold">{formatRupiah(order.total_price)}</p>
+            <p className="text-text-muted text-[10px] uppercase tracking-wider mb-1">{t.totalPayment}</p>
+            <p className="gradient-text text-3xl font-bold tracking-tight">{formatRupiah(order.total_price)}</p>
           </div>
         </div>
 
         {/* Steps */}
-        <div className="flex items-center gap-2 text-xs text-text-muted">
-          <span className="bg-accent/20 text-accent px-2.5 py-1 rounded-full font-medium">{t.step1}</span>
-          <span className="text-white/20">→</span>
-          <span className="bg-white/5 px-2.5 py-1 rounded-full">{t.step2}</span>
-          <span className="text-white/20">→</span>
-          <span className="bg-white/5 px-2.5 py-1 rounded-full">{t.step3}</span>
+        <div className="flex items-center justify-between text-xs text-text-muted bg-surface rounded-xl border border-white/5 p-3">
+          <div className="flex flex-col items-center gap-1 flex-1">
+            <div className="w-7 h-7 rounded-full bg-accent/20 text-accent flex items-center justify-center font-bold text-sm">1</div>
+            <span className="text-accent font-medium text-center text-[10px] leading-tight">Pilih<br/>Rekening</span>
+          </div>
+          <div className="w-8 h-px bg-white/10 flex-shrink-0" />
+          <div className="flex flex-col items-center gap-1 flex-1">
+            <div className="w-7 h-7 rounded-full bg-white/5 text-text-muted flex items-center justify-center font-bold text-sm">2</div>
+            <span className="text-center text-[10px] leading-tight">Transfer<br/>Nominal</span>
+          </div>
+          <div className="w-8 h-px bg-white/10 flex-shrink-0" />
+          <div className="flex flex-col items-center gap-1 flex-1">
+            <div className="w-7 h-7 rounded-full bg-white/5 text-text-muted flex items-center justify-center font-bold text-sm">3</div>
+            <span className="text-center text-[10px] leading-tight">Upload<br/>Bukti</span>
+          </div>
         </div>
 
         {/* Bank Accounts */}
-        <div className="bg-surface rounded-2xl border border-white/5 p-5">
-          <h2 className="text-text font-bold text-sm mb-4">{t.transferTo}</h2>
+        <div className="bg-surface rounded-2xl border border-white/5 p-4">
+          <h2 className="text-text font-bold text-sm mb-3">{t.transferTo}</h2>
           
           {/* Group by category */}
           {[
@@ -337,15 +346,15 @@ function ManualPaymentContent() {
             if (items.length === 0) return null;
             const GroupIcon = group.icon;
             return (
-              <div key={group.key} className="mb-4">
-                <p className={`text-xs font-semibold mb-2 uppercase tracking-wider flex items-center gap-1.5 ${group.color}`}>
-                  <GroupIcon className="w-3.5 h-3.5" /> {group.label}
+              <div key={group.key} className="mb-3 last:mb-0">
+                <p className={`text-[10px] font-bold mb-2 uppercase tracking-widest flex items-center gap-1.5 ${group.color}`}>
+                  <GroupIcon className="w-3 h-3" /> {group.label}
                 </p>
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {items.map((bank, i) => (
                     <div
                       key={i}
-                      className="bg-background rounded-xl p-4"
+                      className="bg-background rounded-xl p-3"
                     >
                       {/* QRIS with image */}
                       {group.key === "qris" && bank.qris_image_url ? (
@@ -364,36 +373,36 @@ function ManualPaymentContent() {
                         </div>
                       ) : (
                         /* Bank / E-Wallet normal display */
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2.5 min-w-0">
                             {(() => {
                               const iconInfo = PAYMENT_ICONS[bank.bank];
                               if (bank.logo) {
-                                return <Image src={bank.logo} alt={bank.bank} width={40} height={40} className="w-10 h-10 object-contain rounded-lg" />;
+                                return <Image src={bank.logo} alt={bank.bank} width={36} height={36} className="w-9 h-9 object-contain rounded-lg flex-shrink-0" />;
                               }
                               if (iconInfo) {
                                 const Icon = iconInfo.icon;
                                 return (
-                                  <div className={`w-10 h-10 rounded-lg ${iconInfo.bg} flex items-center justify-center`}>
-                                    <Icon className={`w-5 h-5 ${iconInfo.text}`} />
+                                  <div className={`w-9 h-9 rounded-lg ${iconInfo.bg} flex items-center justify-center flex-shrink-0`}>
+                                    <Icon className={`w-4 h-4 ${iconInfo.text}`} />
                                   </div>
                                 );
                               }
                               return (
-                                <div className="w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center">
-                                  <CreditCard className="w-5 h-5 text-accent" />
+                                <div className="w-9 h-9 rounded-lg bg-accent/20 flex items-center justify-center flex-shrink-0">
+                                  <CreditCard className="w-4 h-4 text-accent" />
                                 </div>
                               );
                             })()}
-                            <div>
-                              <p className="text-text font-bold text-sm">{bank.bank}</p>
-                              <p className="text-accent font-mono font-bold">{bank.account_number}</p>
-                              {bank.account_name && <p className="text-text-muted text-xs">a.n. {bank.account_name}</p>}
+                            <div className="min-w-0">
+                              <p className="text-text font-bold text-xs">{bank.bank}</p>
+                              <p className="text-accent font-mono font-bold text-sm truncate">{bank.account_number}</p>
+                              {bank.account_name && <p className="text-text-muted text-[10px]">a.n. {bank.account_name}</p>}
                             </div>
                           </div>
                           <button
                             onClick={() => handleCopy(bank.account_number, `${bank.bank}-${i}`)}
-                            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-accent/10 text-accent text-xs font-medium hover:bg-accent/20 transition-colors"
+                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-accent/10 text-accent text-[10px] font-semibold hover:bg-accent/20 transition-colors flex-shrink-0"
                           >
                             {copiedAccount === `${bank.bank}-${i}` ? (
                               <><Check className="w-3.5 h-3.5" /> {t.copySuccess}</>
@@ -427,17 +436,17 @@ function ManualPaymentContent() {
         </div>
 
         {/* Upload Proof */}
-        <div className="bg-surface rounded-2xl border border-white/5 p-5">
-          <h2 className="text-text font-bold text-sm mb-4 flex items-center gap-2">
+        <div className="bg-surface rounded-2xl border border-white/5 p-4">
+          <h2 className="text-text font-bold text-sm mb-3 flex items-center gap-2">
             <Upload className="w-4 h-4 text-accent" />
             {t.uploadProof}
           </h2>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {/* Sender Info */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-text-muted text-xs block mb-1">{t.senderName}</label>
+                <label className="text-text-muted text-[10px] block mb-1">{t.senderName}</label>
                 <input
                   type="text"
                   value={senderName}
@@ -447,7 +456,7 @@ function ManualPaymentContent() {
                 />
               </div>
               <div>
-                <label className="text-text-muted text-xs block mb-1">{t.senderBank}</label>
+                <label className="text-text-muted text-[10px] block mb-1">{t.senderBank}</label>
                 <input
                   type="text"
                   value={senderBank}
