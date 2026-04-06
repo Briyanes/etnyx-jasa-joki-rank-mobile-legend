@@ -10,7 +10,7 @@ import {
   UserCheck, Crown, Wrench, Star,
   Gift, Bot, TrendingUp, Search,
   ClipboardList, Gamepad2, Monitor,
-  Megaphone, Target, MousePointerClick,
+  Megaphone, Target, MousePointerClick, MessageCircle,
 } from "lucide-react";
 
 // --- Reusable Components ---
@@ -177,7 +177,7 @@ function buildCategories(): DocCategory[] {
                   </div>
                   <p className="text-text-muted text-xs mb-2">Akses penuh ke semua fitur.</p>
                   <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
-                    <li>Dashboard 14 tab: Overview, Orders, Pricing, Boosters, Testi, Portfolio, Promo, Customers, Rewards, Staff, Payroll, Reviews, Reports, Settings</li>
+                    <li>Dashboard 15 tab: Overview, Orders, Pricing, Boosters, Testi, Portfolio, Promo, Customers, Rewards, Staff, Payroll, Reviews, Reports, Ads, Settings</li>
                     <li>CRUD semua data + staff management</li>
                     <li>Konfigurasi integrasi (Midtrans, Telegram, WhatsApp, Email)</li>
                     <li>Payroll: kelola gaji, komisi, payout</li>
@@ -551,34 +551,60 @@ function buildCategories(): DocCategory[] {
           title: "Review & Report System",
           content: (
             <div className="space-y-4">
-              <p className="text-text-muted text-sm">Customer bisa review layanan + worker setelah order selesai. Bisa juga report worker.</p>
+              <p className="text-text-muted text-sm">Customer bisa review layanan + worker setelah order selesai. Report worker selalu tersedia di halaman review.</p>
               <div className="bg-background rounded-lg p-4 border border-white/5">
-                <h4 className="text-text font-medium text-sm mb-3">Alur Review</h4>
+                <h4 className="text-text font-medium text-sm mb-3">Alur Lengkap Review</h4>
                 <StepFlow steps={[
-                  { title: "Order selesai", desc: "Customer dapat link review via WhatsApp & Email" },
-                  { title: "Submit review", desc: "Rating service (1-5 bintang) + komentar, Rating worker (1-5 bintang), Report worker (opsional)" },
-                  { title: "Auto-testimonial", desc: "Jika rating 4-5 bintang + ada komentar, otomatis masuk testimonial (hidden, perlu approve)" },
-                  { title: "Telegram notif", desc: "Admin Group dapat notif dengan tombol Show/Hide" },
-                  { title: "Admin kelola", desc: "Dashboard Reviews: approve, hide, set featured. Reports: resolved/dismissed." },
+                  { title: "Order selesai", desc: "Admin set status completed → sistem kirim WhatsApp ke customer dengan link review: etnyx.com/review?id=ORDER_ID", badge: "auto" },
+                  { title: "Customer buka link", desc: "Halaman review load info order, validasi token, cek belum pernah review", badge: "customer", page: "/review?id=xxx&token=xxx" },
+                  { title: "Rating service", desc: "Rating 1-5 bintang + komentar (maks 1000 karakter) + nama (opsional untuk testimonial)", badge: "customer" },
+                  { title: "Rating worker (opsional)", desc: "Muncul jika ada worker assigned. Rating 1-5 bintang + komentar worker", badge: "customer" },
+                  { title: "Report worker (opsional)", desc: "Checkbox 'Saya ingin melaporkan worker' — SELALU tersedia walau tanpa worker. Pilih tipe laporan + detail", badge: "customer" },
+                  { title: "Auto-testimonial", desc: "Jika rating service ≥ 4 + ada komentar → auto-create testimonial (hidden, admin harus approve)", badge: "auto" },
+                  { title: "Telegram Review Group", desc: "Notifikasi review baru + rating stars + tombol Show/Hide ke grup Admin + Review", badge: "auto" },
+                  { title: "Telegram Report Group", desc: "Jika ada report → notifikasi ke grup Admin + Report. Menampilkan NAMA WORKER + tipe laporan + tombol Resolved/Dismiss", badge: "auto" },
+                  { title: "Admin kelola", desc: "Dashboard Reviews: approve/hide testimonial, set featured. Report: set status resolved/dismissed", badge: "admin" },
                 ]} />
               </div>
-              <Table headers={["Report Type", "Label"]} rows={[
-                ["cheating", "Bermain curang / cheat"],
-                ["offering_services", "Menawarkan jasa di luar ETNYX"],
-                ["rude", "Kasar / tidak sopan"],
-                ["account_issue", "Masalah akun"],
-                ["other", "Lainnya"],
-              ]} />
+              <div className="bg-background rounded-lg p-3 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-2">Report Types</h4>
+                <Table headers={["Type", "Label", "Emoji"]} rows={[
+                  ["cheating", "Bermain curang / cheat", "🎮"],
+                  ["offering_services", "Menawarkan jasa di luar ETNYX", "🚫"],
+                  ["rude", "Kasar / tidak sopan", "😤"],
+                  ["account_issue", "Masalah akun (diamankan, dll)", "🔐"],
+                  ["other", "Lainnya", "❓"],
+                ]} />
+              </div>
+              <div className="bg-background rounded-lg p-3 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-2">Telegram Report Notification</h4>
+                <pre className="text-text-muted text-[11px] font-mono bg-white/[0.02] p-3 rounded">{`🚨🚨🚨 WORKER REPORT! 🚨🚨🚨
+
+📋 Order: ORD-XXXX
+🔧 Worker: Budi ← nama worker otomatis
+👤 Pelapor: Customer Name
+📱 WA: 08xxx
+⭐ Rating Worker: 2/5
+
+⚠️ Jenis Laporan: 🎮 Bermain curang
+📝 Detail: Player menggunakan cheat...
+
+⚡ SEGERA DITINDAKLANJUTI!
+[✅ Resolved] [❌ Dismiss]`}</pre>
+              </div>
+              <InfoBox type="info">
+                Report worker selalu visible meskipun order tidak punya worker assigned. Nama worker otomatis di-lookup dari <Code>staff_users</Code> berdasarkan <Code>assigned_worker_id</Code>.
+              </InfoBox>
             </div>
           ),
         },
         {
           id: "rewards",
           icon: Gift,
-          title: "Reward & Loyalty",
+          title: "Reward, Referral & Loyalty",
           content: (
             <div className="space-y-4">
-              <p className="text-text-muted text-sm">Sistem poin &amp; tier untuk customer loyal. Otomatis dapat poin saat order selesai.</p>
+              <p className="text-text-muted text-sm">Sistem poin, tier, referral, dan katalog reward. Otomatis dapat poin saat order selesai.</p>
               <Table headers={["Tier", "Min Poin", "Diskon", "Benefit"]} rows={[
                 ["Bronze", "0", "0%", "Akses dasar"],
                 ["Silver", "50", "2%", "Diskon otomatis"],
@@ -588,19 +614,190 @@ function buildCategories(): DocCategory[] {
               <div className="bg-background rounded-lg p-4 border border-white/5">
                 <h4 className="text-text font-medium text-sm mb-2">Earning &amp; Redeem</h4>
                 <ul className="text-text-muted text-xs space-y-1 list-disc ml-4">
-                  <li><strong>Earning:</strong> 1 poin per Rp 10.000 yang dibelanjakan (auto saat order complete)</li>
+                  <li><strong>Earning:</strong> 1 poin per Rp 10.000 yang dibelanjakan (auto saat order complete via RPC <Code>award_reward_points</Code>)</li>
                   <li><strong>Referral bonus:</strong> Referrer dapat bonus poin saat teman menyelesaikan order</li>
                   <li><strong>Katalog:</strong> Admin buat items (skin, diamond, dll), customer redeem dengan poin</li>
                   <li><strong>Proses:</strong> Redemption masuk ke admin, approve/reject</li>
                 </ul>
               </div>
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">Referral System</h4>
+                <StepFlow steps={[
+                  { title: "Customer register", desc: "Otomatis dapat referral_code unik (alfanumerik, case-insensitive)", badge: "auto" },
+                  { title: "Share ke teman", desc: "Customer share kode ke teman. Teman input saat order.", badge: "customer" },
+                  { title: "Validasi kode", desc: "Sistem cek: kode valid, bukan self-referral (cek email + WA dengan normalisasi ±62/08), belum pernah dipakai customer yang sama", badge: "auto" },
+                  { title: "Diskon 10%", desc: "Teman yang pakai kode dapat flat diskon 10% di order", badge: "auto" },
+                  { title: "Bonus poin referrer", desc: "Saat order teman selesai → referrer dapat poin: floor(total_order / 10.000), minimum 1 poin", badge: "auto" },
+                ]} />
+                <InfoBox type="warning">
+                  <strong>Anti-abuse:</strong> Self-referral diblokir via email + nomor WA (normalisasi: 08 ↔ 628, strip simbol). Satu customer tidak bisa pakai kode referral yang sama 2x.
+                </InfoBox>
+              </div>
+            </div>
+          ),
+        },
+        {
+          id: "status-logic",
+          icon: Zap,
+          title: "Order Status & Auto-Actions",
+          content: (
+            <div className="space-y-4">
+              <p className="text-text-muted text-sm">Setiap perubahan status order memicu aksi otomatis. Berikut detail lengkap apa yang terjadi di setiap transisi.</p>
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">Status Flow</h4>
+                <div className="flex items-center gap-2 flex-wrap text-xs mb-4">
+                  <span className="px-2 py-1 rounded bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">pending</span>
+                  <span className="text-text-muted">&rarr;</span>
+                  <span className="px-2 py-1 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">confirmed</span>
+                  <span className="text-text-muted">&rarr;</span>
+                  <span className="px-2 py-1 rounded bg-accent/10 text-accent border border-accent/20">in_progress</span>
+                  <span className="text-text-muted">&rarr;</span>
+                  <span className="px-2 py-1 rounded bg-green-500/10 text-green-400 border border-green-500/20">completed</span>
+                </div>
+                <Table headers={["Transisi", "Trigger", "Aksi Otomatis"]} rows={[
+                  [<span key="t1" className="whitespace-nowrap"><strong className="text-yellow-400">pending</strong> → <strong className="text-blue-400">confirmed</strong></span>, "Bayar via Midtrans / Admin konfirmasi", <ul key="a1" className="list-disc ml-3 space-y-0.5"><li>Telegram ke Admin Group (+ tombol Assign)</li><li>WhatsApp ke customer (konfirmasi bayar)</li><li>Email ke customer (invoice)</li><li>Reward points dicatat (pending)</li></ul>],
+                  [<span key="t2" className="whitespace-nowrap"><strong className="text-blue-400">confirmed</strong> → <strong className="text-accent">in_progress</strong></span>, "Worker klik Mulai / Admin assign", <ul key="a2" className="list-disc ml-3 space-y-0.5"><li>Telegram ke Worker Group</li><li>WhatsApp ke customer (order mulai dikerjakan)</li><li>Customer bisa track via /track</li></ul>],
+                  [<span key="t3" className="whitespace-nowrap"><strong className="text-accent">in_progress</strong> → <strong className="text-green-400">completed</strong></span>, "Worker klik Selesai / Admin set", <ul key="a3" className="list-disc ml-3 space-y-0.5"><li>WhatsApp ke customer (selesai + link review)</li><li>Telegram ke Admin Group</li><li><strong>Auto-generate commission</strong> (60% × total_price)</li><li><strong>Award reward points</strong> ke customer (1 poin/Rp10K)</li><li><strong>Referral bonus</strong> jika ada referrer (poin ke referrer)</li><li>Commission period: bi-weekly (tgl 1-15 atau 16-akhir)</li></ul>],
+                  [<span key="t4" className="whitespace-nowrap">Semua → <strong className="text-red-400">cancelled</strong></span>, "Admin cancel", <ul key="a4" className="list-disc ml-3 space-y-0.5"><li>WhatsApp ke customer (order dibatalkan)</li><li>Telegram ke Admin Group</li></ul>],
+                ]} />
+              </div>
+              <InfoBox type="warning">
+                <strong>Commission logic:</strong> Auto-generate hanya untuk order dengan <Code>assigned_worker_id</Code>. Rate diambil dari <Code>payroll_settings</Code> (default 60%). Period dihitung: tgl 1-15 = &quot;1-15 Bulan&quot;, tgl 16+ = &quot;16-akhir Bulan&quot;.
+              </InfoBox>
+            </div>
+          ),
+        },
+        {
+          id: "wa-templates",
+          icon: MessageCircle,
+          title: "WhatsApp Follow-up Templates",
+          content: (
+            <div className="space-y-4">
+              <p className="text-text-muted text-sm">7 template WhatsApp yang bisa dikirim dari Dashboard &rarr; Orders &rarr; Smart Actions. Kirim via Fonnte API.</p>
+              <div className="space-y-3">
+                {[
+                  { action: "follow_up_payment", title: "💰 Follow-up Payment", desc: "Reminder untuk order belum bayar. Berisi Order ID, rank, harga, link pembayaran.", when: "Status: pending" },
+                  { action: "follow_up_credentials", title: "🔐 Request Credentials", desc: "Minta akun ML customer setelah bayar. Berisi peringatan keamanan akun.", when: "Status: confirmed" },
+                  { action: "notify_started", title: "🚀 Notify Started", desc: "Info order mulai dikerjakan. Target rank, link track, peringatan jangan login.", when: "Status: in_progress" },
+                  { action: "follow_up_progress", title: "📊 Progress Update", desc: "Update progress %, rank saat ini, link track. Peringatan jangan login.", when: "Status: in_progress" },
+                  { action: "notify_completed", title: "🎉 Notify Completed", desc: "Order selesai! Minta ganti password, link review + janji skin gratis.", when: "Status: completed" },
+                  { action: "request_review", title: "⭐ Request Review", desc: "Follow-up minta review. Janji skin gratis, link review + terima kasih.", when: "Status: completed" },
+                  { action: "reactivation", title: "🔄 Reactivation", desc: "Win-back untuk order stalled/lama. Tanya apakah ingin lanjut.", when: "Order tidak aktif" },
+                ].map((item, i) => (
+                  <div key={i} className="bg-background rounded-lg p-3 border border-white/5">
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <h4 className="text-text font-medium text-sm">{item.title}</h4>
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-white/5 text-text-muted">{item.when}</span>
+                    </div>
+                    <p className="text-text-muted text-xs mt-1">{item.desc}</p>
+                    <code className="text-accent/50 text-[10px] font-mono">{item.action}</code>
+                  </div>
+                ))}
+              </div>
+              <InfoBox type="info">
+                Semua template otomatis include: Order ID, info rank, emoji formatting, link tracking, branding ETNYX footer. API: <Code>POST /api/admin/orders/follow-up</Code>
+              </InfoBox>
+            </div>
+          ),
+        },
+        {
+          id: "customer-auth",
+          icon: Users,
+          title: "Customer Auth Flow",
+          content: (
+            <div className="space-y-4">
+              <p className="text-text-muted text-sm">Alur registrasi, login, dan sesi customer.</p>
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">Registrasi</h4>
+                <StepFlow steps={[
+                  { title: "Customer isi form register", desc: "Email, nama, password, nomor WA. Validasi format + cek email duplikat.", badge: "customer", page: "/register" },
+                  { title: "Hash password", desc: "Bcrypt 12 rounds. Simpan hash, never plaintext.", badge: "auto" },
+                  { title: "Auto-generate referral code", desc: "Kode alfanumerik unik, disimpan di tabel customers.", badge: "auto" },
+                  { title: "Create JWT", desc: "HS256, expire 7 hari. Payload: id, email, name.", badge: "auto" },
+                  { title: "Set HTTPOnly cookie", desc: "Cookie customer_token, secure (production), sameSite: lax.", badge: "auto" },
+                  { title: "Email verifikasi", desc: "Link verifikasi dikirim via Resend. Customer klik untuk aktivasi.", badge: "auto" },
+                ]} />
+              </div>
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">Login</h4>
+                <StepFlow steps={[
+                  { title: "Input email + password", desc: "Email case-insensitive lookup di tabel customers.", badge: "customer", page: "/login" },
+                  { title: "Password verify", desc: "Coba bcrypt dulu. Jika gagal → fallback SHA-256+salt (legacy migration).", badge: "auto" },
+                  { title: "Update last_login_at", desc: "Catat waktu login terakhir.", badge: "auto" },
+                  { title: "JWT + Cookie", desc: "Sama seperti registrasi. Return customer data + total_orders + total_spent.", badge: "auto" },
+                ]} />
+              </div>
+              <InfoBox type="info">
+                <strong>Password Migration:</strong> Sistem support 2 format hash: bcrypt (baru) dan SHA-256 + salt &quot;etnyx-salt&quot; (legacy). Login otomatis coba keduanya untuk backward compatibility.
+              </InfoBox>
+            </div>
+          ),
+        },
+        {
+          id: "promo-system",
+          icon: Megaphone,
+          title: "Promo & Diskon System",
+          content: (
+            <div className="space-y-4">
+              <p className="text-text-muted text-sm">Sistem kode promo yang dikelola dari Dashboard &rarr; Promo tab.</p>
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">Validasi Promo Code</h4>
+                <StepFlow steps={[
+                  { title: "Customer input kode", desc: "Di form order, masukkan kode promo.", badge: "customer", page: "/order" },
+                  { title: "Validasi via RPC", desc: "Backend panggil validate_promo_code(code, order_amount) di Supabase.", badge: "auto" },
+                  { title: "Cek syarat", desc: "Kode aktif? Belum expired? Max uses belum tercapai? Min order amount?", badge: "auto" },
+                  { title: "Hitung diskon", desc: "Percentage: (order × %) capped max_discount. Fixed: langsung amount tetap.", badge: "auto" },
+                  { title: "Apply ke order", desc: "Diskon ditampilkan di summary. Tersimpan di order record.", badge: "auto" },
+                ]} />
+              </div>
+              <Table headers={["Tipe", "Contoh", "Logika"]} rows={[
+                ["Percentage", "DISKON20 (20%)", "order_amount × 20%, max capped ke max_discount"],
+                ["Fixed", "HEMAT50K (Rp50.000)", "Flat Rp50.000 off, tidak melebihi total"],
+              ]} />
+              <Table headers={["Field Promo", "Keterangan"]} rows={[
+                ["code", "Kode unik (uppercase)"],
+                ["discount_type", "percentage atau fixed"],
+                ["discount_value", "Nilai diskon (% atau Rp)"],
+                ["max_discount", "Batas maks diskon (untuk percentage)"],
+                ["max_uses", "Maks penggunaan total (0 = unlimited)"],
+                ["min_order", "Minimum order amount"],
+                ["valid_until", "Tanggal kadaluarsa"],
+                ["is_active", "Toggle aktif/nonaktif"],
+              ]} />
+            </div>
+          ),
+        },
+        {
+          id: "chat-system",
+          icon: MessageCircle,
+          title: "Order Chat System",
+          content: (
+            <div className="space-y-4">
+              <p className="text-text-muted text-sm">Chat antara customer dan admin per order. Polling-based (bukan real-time).</p>
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">Cara Kerja Chat</h4>
+                <StepFlow steps={[
+                  { title: "Customer buka order detail", desc: "Chat muncul di halaman tracking/dashboard. Load 50 pesan terakhir.", badge: "customer", page: "/track atau /dashboard" },
+                  { title: "Kirim pesan", desc: "Pesan disanitasi, disimpan ke tabel chat_messages. sender_type: customer/admin.", badge: "customer" },
+                  { title: "Admin balas", desc: "Admin melihat chat di order detail di Dashboard. Bisa balas langsung.", badge: "admin" },
+                  { title: "Read status", desc: "Otomatis: pesan admin = read. Pesan customer = unread sampai admin buka.", badge: "auto" },
+                ]} />
+              </div>
+              <Table headers={["Fitur", "Detail"]} rows={[
+                ["Auth", "Admin: JWT admin. Customer: JWT customer. Masing-masing hanya bisa akses order miliknya."],
+                ["Limit", "50 pesan per query (ascending by created_at)"],
+                ["Read status", "PATCH /api/chat — mark pesan lawan sebagai read"],
+                ["Sanitize", "Input disanitasi via sanitizeInput() untuk XSS prevention"],
+                ["Storage", "Tabel chat_messages: order_id, customer_id, sender_type, message, is_read, created_at"],
+              ]} />
+              <InfoBox type="warning">
+                Chat bukan real-time. Customer dan admin perlu refresh untuk melihat pesan baru. Tidak ada WebSocket/SSE.
+              </InfoBox>
             </div>
           ),
         },
       ],
     },
-
-    // ===================== LEAD =====================
     {
       id: "lead",
       label: "Lead",
@@ -867,13 +1064,35 @@ function buildCategories(): DocCategory[] {
               <p className="text-text-muted text-sm">5 channel + interactive Telegram bot. Konfigurasi di Dashboard &rarr; Settings &rarr; Integrations.</p>
               <Table headers={["Channel", "Provider", "Penerima", "Events"]} rows={[
                 ["Telegram Admin", "Bot API (webhook)", "Admin Group", "Order baru (+ tombol), selesai, review, report"],
-                ["Telegram Review", "Bot API", "Review Group", "Review customer baru (opsional, default Admin)"],
-                ["Telegram Report", "Bot API", "Report Group", "Laporan worker: cheating, rude, dll (opsional, default Admin)"],
+                ["Telegram Review", "Bot API", "Review Group", "Review customer baru (+ tombol Show/Hide)"],
+                ["Telegram Report", "Bot API", "Report Group", "Laporan worker + nama worker (+ tombol Resolved/Dismiss)"],
                 ["Telegram Worker", "Bot API", "Worker Group", "Order dikonfirmasi, order di-assign"],
-                ["WhatsApp", "Fonnte API", "Customer", "Konfirmasi bayar, mulai dikerjakan, selesai, follow-up"],
+                ["WhatsApp", "Fonnte API", "Customer", "Konfirmasi bayar, mulai dikerjakan, selesai, follow-up (7 template)"],
                 ["Email", "Resend", "Customer", "Konfirmasi bayar, invoice, verification, password reset"],
                 ["Web Push", "VAPID", "Subscribers", "Manual push dari admin"],
               ]} />
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">Notification Trigger Map</h4>
+                <Table headers={["Event", "Telegram", "WhatsApp", "Email"]} rows={[
+                  ["Order dibuat (belum bayar)", "—", "Konfirmasi order + link bayar", "Invoice"],
+                  ["Bayar berhasil (confirmed)", "Admin: ORDER BARU! + tombol Konfirmasi/Tolak", "Konfirmasi bayar + track link", "Payment confirmed"],
+                  ["Mulai dikerjakan (in_progress)", "Worker: ORDER DIKONFIRMASI!", "Order mulai dikerjakan + jangan login", "—"],
+                  ["Order di-assign ke worker", "Worker: ORDER DITUGASKAN", "—", "—"],
+                  ["Order selesai (completed)", "Admin: ORDER SELESAI!", "Selesai + ganti password + link review + skin gratis", "—"],
+                  ["Review masuk", "Admin + Review: REVIEW BARU! + Show/Hide", "—", "—"],
+                  ["Worker di-report", "Admin + Report: WORKER REPORT! + nama worker + Resolved/Dismiss", "—", "—"],
+                ]} />
+              </div>
+              <div className="bg-background rounded-lg p-3 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-2">Telegram 4 Grup</h4>
+                <Table headers={["Grup", "Setting Key", "Fungsi"]} rows={[
+                  ["Admin", "telegramAdminGroupId", "Semua notifikasi order + review + report"],
+                  ["Worker", "telegramWorkerGroupId", "Order dikonfirmasi, order di-assign"],
+                  ["Review", "telegramReviewGroupId", "Khusus review baru (skip jika sama dengan Admin)"],
+                  ["Report", "telegramReportGroupId", "Khusus report worker (skip jika sama dengan Admin)"],
+                ]} />
+                <p className="text-text-muted text-[11px] mt-2">Jika Review/Report group ID sama dengan Admin → tidak double-send. Sistem auto-skip duplikat.</p>
+              </div>
               <InfoBox type="success">
                 <strong>Test Notifications:</strong> POST <Code>/api/admin/test-notifications</Code> &mdash; test per channel: telegram_admin, telegram_worker, whatsapp, email.
               </InfoBox>
@@ -939,21 +1158,65 @@ function buildCategories(): DocCategory[] {
         {
           id: "security",
           icon: Shield,
-          title: "Security",
+          title: "Security & Encryption",
           content: (
             <div className="space-y-4">
+              <p className="text-text-muted text-sm">Multi-layer security: auth, encryption, rate limiting, middleware, CSP.</p>
               <Table headers={["Layer", "Mekanisme", "Detail"]} rows={[
-                ["Auth", "JWT (JOSE)", "HTTPOnly cookie, expire 24h"],
-                ["Password", "Bcrypt (12 rounds)", "Hash stored, never plaintext"],
-                ["Rate Limiting", "Sliding window", "100 req/60s, 10 req/5min auth"],
+                ["Auth", "JWT (JOSE)", "HTTPOnly cookie, expire 24h (staff) / 7d (customer)"],
+                ["Password", "Bcrypt (12 rounds)", "Hash stored, never plaintext. Legacy SHA-256 fallback."],
+                ["Rate Limiting", "Sliding window", "100 req/60s general, 10 req/5min auth endpoints"],
                 ["Input", "Sanitize + DOMPurify", "XSS, SQLi, template injection blocking"],
-                ["Credentials", "AES-256-GCM", "Game login encrypted at rest"],
-                ["Middleware", "Pattern matching", "Block path traversal, bot paths, injection"],
+                ["Credentials", "AES-256-GCM", "Game login encrypted at rest, auth tag verified"],
+                ["Middleware", "Pattern matching", "Block path traversal, bot paths, injection attempts"],
                 ["RLS", "Supabase", "Row Level Security on all tables"],
-                ["Headers", "CSP, HSTS, X-Frame", "next.config.ts"],
+                ["Headers", "CSP, HSTS, X-Frame", "next.config.ts — whitelist tracking domains"],
                 ["Audit", "logAdminAction()", "Admin actions logged to admin_audit_log"],
                 ["Signature", "SHA-512", "Midtrans payment webhook verification"],
               ]} />
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">🔐 Credential Encryption (AES-256-GCM)</h4>
+                <p className="text-text-muted text-xs mb-3">Akun game ML (login + password) dienkripsi sebelum disimpan di database.</p>
+                <StepFlow steps={[
+                  { title: "Key Derivation", desc: "ENCRYPTION_KEY (env var, min 16 char) → SHA-256 hash → 32-byte key" },
+                  { title: "Encrypt", desc: "Random 12-byte IV + AES-256-GCM cipher → Format: IV:AuthTag:Ciphertext (hex)" },
+                  { title: "Stored", desc: "account_login & account_password tersimpan terenkripsi di tabel orders" },
+                  { title: "Decrypt", desc: "Worker buka credentials → coba derived key, fallback legacy padded key. Auth tag diverifikasi." },
+                ]} />
+                <InfoBox type="info">
+                  <strong>Legacy support:</strong> Data lama yang dienkripsi dengan key padding (bukan SHA-256) tetap bisa didekripsi. Sistem otomatis fallback.
+                </InfoBox>
+              </div>
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">🛡️ Middleware Security Details</h4>
+                <div className="space-y-3">
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">Rate Limiting</h5>
+                    <Table headers={["Scope", "Limit", "Window"]} rows={[
+                      ["General API (/api/*)", "100 requests", "60 detik per IP"],
+                      ["Auth endpoints", "10 requests", "5 menit per IP"],
+                    ]} />
+                    <p className="text-text-muted text-[11px] mt-1">IP dari x-forwarded-for. In-memory sliding window (reset saat cold start). Return 429 + Retry-After header.</p>
+                  </div>
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">Pattern Blocking (400 Bad Request)</h5>
+                    <ul className="text-text-muted text-[11px] space-y-0.5 ml-3 list-disc">
+                      <li><strong>Path traversal:</strong> <Code>{".."}</Code></li>
+                      <li><strong>XSS:</strong> <Code>{"<script"}</Code>, <Code>{"javascript:"}</Code>, event handlers (<Code>{"on*="}</Code>), encoded scripts</li>
+                      <li><strong>Template injection:</strong> <Code>{"${...}"}</Code></li>
+                      <li><strong>SQL injection:</strong> <Code>union select</Code>, <Code>insert into</Code>, <Code>delete from</Code>, <Code>drop table</Code></li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">Bot/Scanner Blocking (404)</h5>
+                    <p className="text-text-muted text-[11px]">Auto-block: <Code>/wp-admin</Code>, <Code>/wp-login</Code>, <Code>/phpmyadmin</Code>, <Code>/.env</Code>, <Code>/.git</Code>, <Code>/config</Code>, <Code>/backup</Code>, <Code>/shell</Code>, <Code>/cmd</Code>, <Code>/eval</Code>, dll. Route <Code>/admin</Code> tetap boleh.</p>
+                  </div>
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">HTTP Method Validation</h5>
+                    <p className="text-text-muted text-[11px]">Hanya <Code>GET, POST, PUT, DELETE, PATCH, OPTIONS</Code> yang diizinkan di /api/*. Method lain ditolak.</p>
+                  </div>
+                </div>
+              </div>
             </div>
           ),
         },
