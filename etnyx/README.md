@@ -1,202 +1,371 @@
 # ETNYX - Jasa Joki Mobile Legends
 
-Platform jasa joki Mobile Legends dengan konsep SaaS-style dashboard. Modern, cepat, dan aman.
+Platform jasa joki Mobile Legends profesional dengan sistem pembayaran ganda, manajemen tim, reward system, dan admin dashboard lengkap.
 
-![ETNYX Preview](public/og-image.jpg)
+## ✨ Fitur Utama
 
-## ✨ Features
+### 🎮 Order & Pembayaran
+- **Dual Payment System** - Transfer Manual (Bank, E-Wallet, QRIS) + Otomatis (Midtrans)
+- **Payment Manual** - 5 Bank (BCA, BRI, BNI, Mandiri, Jago), 5 E-Wallet (DANA, GoPay, OVO, ShopeePay, LinkAja), QRIS dengan upload gambar QR
+- **Midtrans Auto** - QRIS, VA, GoPay, ShopeePay, Kartu Kredit (muncul otomatis jika Server Key diisi)
+- **Upload Bukti Transfer** - Customer upload bukti, admin approve/reject
+- **3 Mode Order** - Paket, Per-Star, Gendong
+- **Promo Code & Referral** - Diskon otomatis + referral bonus
+- **Order Tracking** - Real-time status tracking publik
 
-- 🎮 **SaaS-style Dashboard** - UI/UX seperti aplikasi modern
-- 🧮 **Real-time Calculator** - Hitung harga instant
-- 📱 **Mobile First** - Responsive untuk semua device
-- 🔒 **Secure** - Security headers, rate limiting, input sanitization
-- 🚀 **Fast** - Optimized dengan Next.js 15
-- 📊 **SEO Ready** - Meta tags lengkap untuk semua platform
+### 👥 Manajemen Tim (RBAC)
+- **Admin** - Full access, kelola semua
+- **Lead** - Kelola worker tim sendiri, assign order
+- **Worker** - Submit progress, upload screenshot
+
+### 💰 Reward & Loyalty
+- **Tier System** - Bronze → Silver → Gold → Platinum
+- **Points** - Earn dari order, redeem di catalog
+- **Referral Bonus** - Ajak teman dapat reward
+
+### 💼 Payroll
+- **Komisi Per-Order** - Otomatis dihitung
+- **Gaji Bulanan** - Staff salaries
+- **Payout Batch** - Proses pembayaran massal
+
+### 📊 Admin Dashboard
+- **CMS Sections** - Visibilitas section, Hero, Banner, FAQ, Tim, Sosial, Info Situs
+- **Tracking Pixels** - Meta Pixel, GA4, GTM, TikTok
+- **Integrasi** - Midtrans, Resend Email, Fonnte WA, Telegram Bot
+- **Rekening Transfer Manual** - Kelola rekening, upload QRIS
+- **Export Data** - CSV/Excel
+- **Audit Log** - Semua aksi admin tercatat
+
+### 🔔 Notifikasi
+- **Telegram Bot** - Notif ke grup admin/worker/review
+- **Email** - Via Resend
+- **WhatsApp** - Via Fonnte
+- **Push Notification** - Browser push
+
+### 🔒 Security
+- **Enkripsi** - Credential order dienkripsi di database
+- **Rate Limiting** - Per-IP, strict untuk auth endpoints
+- **Input Sanitization** - XSS prevention
+- **CSP Headers** - Content Security Policy
+- **RLS** - Row Level Security di Supabase
+
+---
 
 ## 🛠️ Tech Stack
 
-- **Framework**: Next.js 15 (App Router)
-- **Styling**: Tailwind CSS 4
-- **Language**: TypeScript
-- **Database**: Supabase (optional)
-- **Deployment**: Vercel
+| Layer | Teknologi |
+|-------|-----------|
+| Framework | Next.js 16 (App Router) |
+| UI | React 19, Tailwind CSS 4 |
+| Language | TypeScript |
+| Database | Supabase (PostgreSQL) |
+| Storage | Supabase Storage |
+| Payment | Midtrans Snap |
+| Email | Resend |
+| WhatsApp | Fonnte |
+| Bot | Telegram Bot API |
+| Deploy | Vercel |
+| Icons | Lucide React |
 
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Node.js 18.17 or later
-- npm or yarn
-
-### Installation
-
-```bash
-# Clone repository
-git clone https://github.com/yourusername/etnyx.git
-cd etnyx
-
-# Install dependencies
-npm install
-
-# Copy environment variables
-cp .env.example .env.local
-
-# Edit .env.local with your values
-# NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-# NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-# NEXT_PUBLIC_WHATSAPP_NUMBER=6281234567890
-# NEXT_PUBLIC_SITE_URL=https://your-domain.com
-
-# Run development server
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) to see the result.
+---
 
 ## 📁 Project Structure
 
 ```
 etnyx/
-├── public/              # Static assets
-│   ├── icons/          # PWA icons
-│   ├── manifest.json   # PWA manifest
-│   └── robots.txt      # SEO robots
+├── public/                    # Static assets, PWA, icons
 ├── src/
-│   ├── app/            # Next.js App Router
-│   │   ├── api/        # API routes
-│   │   ├── layout.tsx  # Root layout with SEO
-│   │   ├── page.tsx    # Home page
-│   │   └── globals.css # Global styles
-│   ├── components/     # React components
-│   │   ├── layout/     # Navbar, Footer, etc
-│   │   └── sections/   # Page sections
-│   ├── lib/            # Utilities & constants
-│   ├── types/          # TypeScript types
-│   └── middleware.ts   # Security middleware
-├── .env.example        # Environment template
-└── next.config.ts      # Next.js config with security headers
+│   ├── app/
+│   │   ├── api/              # 60+ API routes
+│   │   │   ├── admin/        # Admin CRUD (orders, settings, staff, rewards, payroll)
+│   │   │   ├── customer/     # Customer auth, orders, rewards
+│   │   │   ├── staff/        # Staff auth, orders, submissions
+│   │   │   ├── payment/      # Midtrans + manual payment
+│   │   │   ├── payment-methods/ # Check available payment methods
+│   │   │   ├── chat/         # Customer support chat
+│   │   │   ├── push/         # Push notifications
+│   │   │   ├── telegram/     # Telegram webhook
+│   │   │   └── settings/     # Public CMS settings
+│   │   ├── (customer)/       # Customer portal (login, dashboard, etc)
+│   │   ├── admin/            # Admin panel (dashboard, lead, worker, docs)
+│   │   ├── order/            # Order form (paket, perstar, gendong)
+│   │   ├── payment/          # Payment pages (manual, success)
+│   │   └── track/            # Public order tracking
+│   ├── components/           # React components
+│   │   ├── layout/           # Navbar, Footer
+│   │   └── sections/         # Homepage sections
+│   ├── contexts/             # React contexts (Language)
+│   ├── lib/                  # Utilities
+│   │   ├── admin-auth.ts     # Admin session verification
+│   │   ├── constants.ts      # App constants
+│   │   ├── email.ts          # Resend email service
+│   │   ├── encryption.ts     # AES encryption for credentials
+│   │   ├── notifications.ts  # Multi-channel notification sender
+│   │   ├── supabase.ts       # Client-side Supabase
+│   │   ├── supabase-server.ts # Server-side Supabase
+│   │   ├── validation.ts     # Input validation & sanitization
+│   │   └── i18n/             # Internationalization (ID/EN)
+│   ├── types/                # TypeScript type definitions
+│   └── middleware.ts         # Rate limiting & security
+├── supabase-schema-v*.sql    # Database migration scripts
+└── vercel.json               # Vercel routing config
 ```
 
-## 🔒 Security Features
+---
 
-- **CSP Headers** - Content Security Policy
-- **Rate Limiting** - 100 requests/minute per IP
-- **Input Sanitization** - DOMPurify for XSS prevention
-- **Suspicious Pattern Blocking** - SQL injection, path traversal
-- **Security Headers** - HSTS, X-Frame-Options, etc
-
-## 📦 Deployment to Vercel
-
-### Option 1: Vercel CLI
+## 🚀 Quick Start
 
 ```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy
-vercel
+git clone https://github.com/Briyanes/etnyx-jasa-joki-rank-mobile-legend.git
+cd etnyx
+npm install
+cp .env.example .env.local  # Edit with your values
+npm run dev
 ```
 
-### Option 2: Git Integration (Recommended)
+---
 
-1. Push code to GitHub
-2. Go to [vercel.com](https://vercel.com)
-3. Import your repository
-4. Add environment variables
-5. Deploy!
+## ⚙️ Environment Variables
 
-### Environment Variables for Vercel
+### Required (Vercel + .env.local)
 
-Add these in Vercel Dashboard → Settings → Environment Variables:
-
-| Variable | Description |
-|----------|-------------|
+| Variable | Deskripsi |
+|----------|-----------|
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key |
-| `NEXT_PUBLIC_WHATSAPP_NUMBER` | WhatsApp number (62xxx) |
-| `NEXT_PUBLIC_SITE_URL` | Your production URL |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key |
+| `NEXT_PUBLIC_SITE_URL` | Production URL (https://etnyx.com) |
+| `ENCRYPTION_KEY` | 32-char key untuk encrypt credentials |
 
-## 🗃️ Supabase Setup (Optional)
+### Optional (aktifkan sesuai kebutuhan)
 
-1. Create project at [supabase.com](https://supabase.com)
-2. Get URL and anon key from Settings → API
-3. Add to environment variables
+| Variable | Deskripsi |
+|----------|-----------|
+| `MIDTRANS_SERVER_KEY` | Midtrans server key (atau isi via dashboard) |
+| `MIDTRANS_CLIENT_KEY` | Midtrans client key |
+| `NEXT_PUBLIC_MIDTRANS_CLIENT_KEY` | Midtrans client key (public) |
+| `MIDTRANS_IS_PRODUCTION` | `true` untuk production mode |
+| `RESEND_API_KEY` | Resend API key untuk email |
+| `ADMIN_PASSWORD_HASH` | bcrypt hash password admin |
 
-### Database Schema (if needed)
+> **Note**: Midtrans, Telegram, Fonnte, dan Resend juga bisa diisi via Admin Dashboard → Settings → Integrasi. Database config takes priority over env vars.
 
-```sql
--- Orders table
-CREATE TABLE orders (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_id TEXT UNIQUE NOT NULL,
-  username TEXT,
-  game_id TEXT,
-  current_rank TEXT NOT NULL,
-  target_rank TEXT NOT NULL,
-  package TEXT NOT NULL,
-  price INTEGER NOT NULL,
-  status TEXT DEFAULT 'pending',
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
+---
 
--- Enable RLS
-ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+## 💳 Sistem Pembayaran
+
+### Transfer Manual (Selalu Aktif)
+- Customer pilih "Transfer Manual" → redirect ke `/payment/manual`
+- Lihat daftar rekening aktif (Bank, E-Wallet, QRIS)
+- Transfer → upload bukti + nama pengirim
+- Admin dapat notifikasi Telegram → approve/reject di dashboard
+
+### Midtrans Otomatis (Conditional)
+- Muncul **hanya jika** Server Key diisi (env var ATAU dashboard)
+- Customer pilih "Otomatis (Midtrans)" → redirect ke Midtrans Snap
+- Payment otomatis diverifikasi via webhook (`/api/payment/notification`)
+
+### Logic Flow
+```
+Order Page → GET /api/payment-methods
+  ├── midtransEnabled: true  → Tampil 2 pilihan
+  └── midtransEnabled: false → Hanya Transfer Manual
+
+Saat Submit Order → POST /api/customer/order
+  ├── paymentMethod: "manual_transfer"
+  │   └── Skip Midtrans → Redirect /payment/manual
+  └── paymentMethod: "midtrans"
+      └── Create Midtrans transaction → Redirect Snap URL
 ```
 
-## 🎨 Customization
-
-### Colors (in globals.css)
-
-```css
-:root {
-  --primary: #7FA8A3;    /* Main brand color */
-  --accent: #2DD4BF;     /* Accent/highlight */
-  --background: #0F1419; /* Dark background */
-  --surface: #151B22;    /* Card background */
-  --text: #E6F1EF;       /* Main text */
-}
+### Admin Approve Bukti Transfer
+```
+Dashboard → Orders → Klik "Lihat Bukti Transfer"
+  → GET /api/admin/payment-proof?order_id=xxx
+  → Review gambar → POST /api/admin/payment-proof {action: "approve"/"reject"}
+  → Approve: order → paid + confirmed + notif customer
+  → Reject: log reason + notif customer
 ```
 
-### WhatsApp Number
+### Rekening & QRIS Setup
+1. Admin Dashboard → Settings → Integrasi → scroll ke **Rekening Transfer Manual**
+2. Isi nomor rekening + atas nama untuk bank yang aktif
+3. Untuk QRIS: klik **Upload Gambar QRIS** → upload QR code
+4. Klik **Simpan**
 
-Edit in `.env.local`:
-```
-NEXT_PUBLIC_WHATSAPP_NUMBER=628123456789
-```
+---
 
-## 📊 SEO Checklist
+## 📡 API Routes
 
-- [x] Meta title & description
-- [x] Open Graph tags
-- [x] Twitter Card tags
-- [x] Schema.org JSON-LD
-- [x] Sitemap.xml
-- [x] Robots.txt
-- [x] Canonical URLs
-- [x] Mobile viewport
+### Public
+| Method | Route | Deskripsi |
+|--------|-------|-----------|
+| GET | `/api/settings` | CMS settings public |
+| GET | `/api/payment-methods` | Cek payment methods available |
+| GET | `/api/boosters` | Daftar booster |
+| GET | `/api/portfolio` | Portfolio items |
+| GET | `/api/testimonials` | Testimoni |
+| GET | `/api/track` | Track order status |
+| POST | `/api/promo` | Validasi promo code |
+| POST | `/api/review` | Submit review |
+
+### Customer (Auth Required)
+| Method | Route | Deskripsi |
+|--------|-------|-----------|
+| POST | `/api/customer/auth` | Register/login |
+| POST | `/api/customer/order` | Buat order baru |
+| GET | `/api/customer/orders` | Daftar order customer |
+| GET/POST | `/api/customer/rewards` | Reward points & redeem |
+
+### Payment
+| Method | Route | Deskripsi |
+|--------|-------|-----------|
+| GET/POST | `/api/payment/manual` | Info rekening + upload bukti |
+| POST | `/api/payment/notification` | Midtrans webhook |
+
+### Admin (Auth Required)
+| Method | Route | Deskripsi |
+|--------|-------|-----------|
+| GET/PATCH | `/api/admin/orders` | Kelola orders |
+| GET/PUT | `/api/admin/settings` | CMS settings (30+ keys) |
+| GET/POST | `/api/admin/payment-proof` | Review bukti transfer |
+| POST | `/api/admin/upload-qris` | Upload gambar QRIS |
+| GET | `/api/admin/stats` | Dashboard statistik |
+| GET | `/api/admin/chart-data` | Data grafik |
+| GET | `/api/admin/export` | Export data |
+| CRUD | `/api/admin/testimonials` | Kelola testimoni |
+| CRUD | `/api/admin/portfolio` | Kelola portfolio |
+| CRUD | `/api/admin/promo-codes` | Kelola promo codes |
+| CRUD | `/api/admin/boosters` | Kelola booster profiles |
+| CRUD | `/api/admin/rewards/catalog` | Kelola reward catalog |
+| * | `/api/admin/payroll/*` | Payroll management |
+
+### Staff
+| Method | Route | Deskripsi |
+|--------|-------|-----------|
+| POST | `/api/staff/auth` | Staff login |
+| GET/POST | `/api/staff/orders` | Order assignments |
+| CRUD | `/api/staff/submissions` | Worker submissions |
+| CRUD | `/api/staff/users` | Staff management (admin/lead) |
+
+---
+
+## 🗃️ Database (27+ Tables)
+
+### Core
+- `orders` - Order dengan payment_method, payment_status, encryption
+- `order_logs` - Audit trail status changes
+- `order_assignments` - Worker assignment tracking
+- `payment_proofs` - Bukti transfer manual
+
+### Users
+- `customers` - Customer profiles, tier, referral
+- `staff_users` - Admin/Lead/Worker (RBAC)
+- `chat_messages` - Support chat
+
+### Content
+- `boosters`, `portfolio`, `testimonials`, `reviews`
+- `settings` - Key-value CMS store
+
+### Pricing & Promo
+- `promo_codes`, `promo_usage`, `ad_spend`
+
+### Rewards
+- `reward_transactions`, `reward_catalog`, `reward_redemptions`, `referrals`
+
+### Payroll
+- `commissions`, `salary_records`, `payouts`, `payroll_settings`, `staff_salaries`, `staff_payment_accounts`
+
+### System
+- `admin_audit_log`, `push_subscriptions`
+
+---
+
+## 🗂️ Schema Migrations
+
+Jalankan di Supabase SQL Editor secara berurutan:
+
+| File | Deskripsi |
+|------|-----------|
+| `supabase-schema.sql` | v1: Base tables (orders, settings) |
+| `supabase-schema-v2.sql` | v2: Promo codes |
+| `supabase-schema-v3.sql` | v3: Testimonials, portfolio |
+| `supabase-schema-v4.sql` | v4: Boosters |
+| `supabase-schema-v8.sql` | v8: Customer auth & profiles |
+| `supabase-schema-v9.sql` | v9: Staff RBAC, worker submissions |
+| `supabase-schema-v10.sql` | v10: Reward system |
+| `supabase-schema-v11.sql` | v11: Audit log |
+| `supabase-schema-v12.sql` | v12: Reviews |
+| `supabase-schema-v13.sql` | v13: Payroll system |
+| `supabase-schema-v14.sql` | v14: Payment accounts |
+| `supabase-schema-v15.sql` | v15: Ad spend tracking |
+| `supabase-schema-v16.sql` | v16: Lead-worker hierarchy |
+| `supabase-schema-v17.sql` | v17: Dual payment (manual + Midtrans) |
+
+---
+
+## 📦 Supabase Storage Buckets
+
+| Bucket | Type | Kegunaan |
+|--------|------|----------|
+| `payment-proofs` | Public | Bukti transfer + gambar QRIS |
+| `worker-screenshots` | Public | Screenshot progress worker |
+| `portfolio` | Public | Portfolio before/after images |
+
+---
+
+## 🔧 Admin Dashboard Settings
+
+### CMS Keys (via `/api/admin/settings`)
+
+| Key | Deskripsi |
+|-----|-----------|
+| `hero` | Hero section content |
+| `promo_banner` | Promo banner text & link |
+| `faq_items` | FAQ items |
+| `section_visibility` | Toggle homepage sections |
+| `tracking_pixels` | Meta Pixel, GA4, GTM, TikTok |
+| `social_links` | Instagram, Facebook, TikTok, YouTube, WhatsApp |
+| `site_info` | Site name, tagline, email |
+| `integrations` | Midtrans, Resend, Fonnte, Telegram |
+| `bank_accounts` | Rekening transfer manual (bank, ewallet, qris) |
+| `pricing_catalog` | Paket harga |
+| `perstar_pricing` | Harga per-star |
+| `gendong_pricing` | Harga gendong |
+
+---
 
 ## 🧪 Testing
 
 ```bash
-# Run ESLint
-npm run lint
-
-# Type check
-npx tsc --noEmit
-
-# Build production
-npm run build
+npm run lint          # ESLint check
+npx tsc --noEmit     # TypeScript check
+npm run build         # Production build
 ```
 
-## 📝 License
+---
 
-MIT License - feel free to use for your own projects!
+## 📝 Recent Commits
+
+| Hash | Deskripsi |
+|------|-----------|
+| `a24d538` | Auto-hide Midtrans jika tidak configured |
+| `c698ec8` | QRIS image upload untuk payment manual |
+| `dbed915` | Fix urutan bank account (bank → ewallet → qris) |
+| `78967a6` | Auto-restore missing bank account entries |
+| `08498f6` | Fix bank_accounts ke ALLOWED_KEYS whitelist |
+| `1ba09a8` | Lucide icons untuk payment methods |
+| `e55820b` | Expand payment options (5 bank, 5 ewallet, QRIS) |
+| `89b269a` | Dual payment system (auto Midtrans + manual transfer) |
+
+---
+
+## 📄 License
+
+MIT License
 
 ## 🤝 Support
 
-WhatsApp: +62 812-3456-7890
-
----
+Website: [etnyx.com](https://etnyx.com)
 
 Made with ❤️ by ETNYX Team
