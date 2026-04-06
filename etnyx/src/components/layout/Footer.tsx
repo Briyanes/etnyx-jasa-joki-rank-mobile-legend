@@ -171,7 +171,7 @@ export default function Footer() {
               <h4 className="text-accent/80 font-semibold text-[10px] sm:text-xs uppercase tracking-widest">
                 {locale === "id" ? "Kontak" : "Contact"}
               </h4>
-              <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="text-text-muted hover:text-white text-xs sm:text-sm transition-colors duration-200">
+              <a href={`https://wa.me/${socialLinks?.whatsapp || WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="text-text-muted hover:text-white text-xs sm:text-sm transition-colors duration-200">
                 WhatsApp
               </a>
               <a href={`mailto:${siteInfo?.supportEmail || "support@etnyx.id"}`} className="text-text-muted hover:text-white text-xs sm:text-sm transition-colors duration-200">

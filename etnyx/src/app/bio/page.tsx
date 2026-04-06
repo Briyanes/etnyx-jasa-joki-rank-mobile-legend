@@ -127,7 +127,7 @@ export default function BioPage() {
     { href: "/order", icon: ShoppingCart, title: t.orderTitle, desc: t.orderDesc, accent: true },
     { href: "/track", icon: Search, title: t.trackTitle, desc: t.trackDesc },
     {
-      href: `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "6281414131321"}?text=${encodeURIComponent(locale === "id" ? "Halo kak, mau tanya soal joki ML" : "Hi, I want to ask about ML boosting")}`,
+      href: `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "6281515141452"}?text=${encodeURIComponent(locale === "id" ? "Halo kak, mau tanya soal joki ML" : "Hi, I want to ask about ML boosting")}`,
       icon: MessageCircle, title: t.chatTitle, desc: t.chatDesc, external: true,
     },
     { href: "/dashboard", icon: Gift, title: t.rewardsTitle, desc: t.rewardsDesc },

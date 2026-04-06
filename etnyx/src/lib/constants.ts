@@ -58,7 +58,7 @@ export const siteConfig = {
   ],
 };
 
-export const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "6281414131321";
+export const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "6281515141452";
 
 // Reward system tiers
 export const REWARD_TIERS = {

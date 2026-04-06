@@ -4,7 +4,7 @@ import { logAdminAction } from "@/lib/audit-log";
 // WhatsApp notification via wa.me link generator
 // In production, integrate with WhatsApp Business API or services like Twilio/Fonnte
 
-const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "6281414131321";
+const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "6281515141452";
 
 interface NotifyRequest {
   customerWhatsapp: string;

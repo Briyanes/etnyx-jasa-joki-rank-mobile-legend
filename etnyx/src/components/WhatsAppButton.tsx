@@ -8,6 +8,7 @@ export default function WhatsAppButton() {
   const { locale } = useLanguage();
   const [isVisible, setIsVisible] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
+  const [waNumber, setWaNumber] = useState(WHATSAPP_NUMBER);
 
   const t = {
     id: {
@@ -21,8 +22,14 @@ export default function WhatsAppButton() {
   };
 
   const txt = t[locale];
-  const whatsappNumber = WHATSAPP_NUMBER;
-  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(txt.message)}`;
+  const whatsappUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent(txt.message)}`;
+
+  useEffect(() => {
+    fetch("/api/settings?keys=social_links")
+      .then(r => r.json())
+      .then(d => { if (d.social_links?.whatsapp) setWaNumber(d.social_links.whatsapp); })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     // Show button after scroll
