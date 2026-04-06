@@ -797,6 +797,62 @@ function buildCategories(): DocCategory[] {
             </div>
           ),
         },
+        {
+          id: "sdm",
+          icon: TrendingUp,
+          title: "SDM & Skalabilitas",
+          content: (
+            <div className="space-y-4">
+              <p className="text-text-muted text-sm">Berdasarkan fitur automasi yang sudah dibangun di ETNYX, berikut rekomendasi SDM:</p>
+
+              <div className="bg-background rounded-lg p-4 border border-red-500/20">
+                <h4 className="text-red-400 font-semibold text-sm mb-3">Minimum: 3 Orang</h4>
+                <Table headers={["Role", "Jumlah", "Tugas"]} rows={[
+                  ["Owner/Admin", "1", "Settings, pricing, payroll, promo, approve review/report, financial reports, ads"],
+                  ["CS/Lead", "1", "Assign order ke worker, follow-up WA customer, handle chat, monitor progress"],
+                  ["Worker (Booster)", "1+", "Kerjakan order, submit hasil, update progress"],
+                ]} />
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-blue-500/20">
+                <h4 className="text-blue-400 font-semibold text-sm mb-3">Rekomendasi Skala: 5-7 Orang</h4>
+                <Table headers={["Role", "Jumlah", "Kenapa"]} rows={[
+                  ["Admin", "1", "Cukup 1, semua bisa dikelola dari dashboard + Telegram"],
+                  ["CS/Lead", "1-2", "1 orang bisa handle ~20-30 order/hari. Tambah 1 jika >30 order/hari atau mau 24 jam"],
+                  ["Worker", "3-4", "1 worker bisa handle ~2-3 order/hari (tergantung rank gap). Target 10+ order/hari butuh minimal 3-4"],
+                ]} />
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-green-500/20">
+                <h4 className="text-green-400 font-semibold text-sm mb-3">Kenapa Bisa Sedikit?</h4>
+                <p className="text-text-muted text-xs mb-2">Sistem sudah otomasi banyak hal:</p>
+                <ul className="text-text-muted text-xs space-y-1 ml-4 list-disc">
+                  <li><strong className="text-text">Pembayaran</strong> &rarr; auto-confirm via Midtrans webhook</li>
+                  <li><strong className="text-text">Notifikasi</strong> &rarr; auto WA + Telegram + Email</li>
+                  <li><strong className="text-text">Assign order</strong> &rarr; bisa langsung dari Telegram (tidak perlu buka dashboard)</li>
+                  <li><strong className="text-text">Komisi</strong> &rarr; auto-generate saat order selesai</li>
+                  <li><strong className="text-text">Review</strong> &rarr; auto-notify + auto-testimonial</li>
+                  <li><strong className="text-text">Tracking</strong> &rarr; customer track sendiri, tidak perlu ditanya manual</li>
+                  <li><strong className="text-text">Follow-up</strong> &rarr; 7 template WA tinggal klik</li>
+                </ul>
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-accent/20">
+                <h4 className="text-accent font-semibold text-sm mb-3">Skenario Berdasarkan Volume</h4>
+                <Table headers={["Order/Hari", "Admin", "CS/Lead", "Worker", "Total SDM"]} rows={[
+                  ["1-10", "1 (rangkap CS)", "—", "1-2", "2-3"],
+                  ["10-30", "1", "1", "3-4", "5-6"],
+                  ["30-50", "1", "2", "5-7", "8-10"],
+                  ["50+", "1", "2-3", "8+", "11+"],
+                ]} />
+              </div>
+
+              <InfoBox type="info">
+                <strong>Tim Hierarchy:</strong> Setiap Lead mengelola tim worker sendiri via <Code>lead_id</Code>. Lead hanya bisa lihat &amp; assign ke worker timnya. Admin bisa assign worker ke lead manapun via Staff tab.
+              </InfoBox>
+            </div>
+          ),
+        },
       ],
     },
     {
