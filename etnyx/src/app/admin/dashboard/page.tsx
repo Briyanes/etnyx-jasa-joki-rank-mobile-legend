@@ -63,6 +63,7 @@ interface Order {
   promo_code: string | null;
   promo_discount: number;
   whatsapp: string | null;
+  assigned_worker_id: string | null;
 }
 
 interface Testimonial {
@@ -372,7 +373,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (loading) return;
-    if (activeTab === "orders") fetchOrders();
+    if (activeTab === "orders") { fetchOrders(); fetchStaffUsers(); }
     else if (activeTab === "testimonials") fetchTestimonials();
     else if (activeTab === "portfolio") fetchPortfolios();
     else if (activeTab === "promo") fetchPromoCodes();
@@ -881,6 +882,7 @@ export default function AdminDashboard() {
                         <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Customer</th>
                         <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Package</th>
                         <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Price</th>
+                        <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Worker</th>
                         <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Status</th>
                         <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Progress</th>
                         <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Actions</th>
@@ -888,7 +890,7 @@ export default function AdminDashboard() {
                     </thead>
                     <tbody>
                       {orders.length === 0 ? (
-                        <tr><td colSpan={7} className="text-center py-12 text-text-muted">No orders found</td></tr>
+                        <tr><td colSpan={8} className="text-center py-12 text-text-muted">No orders found</td></tr>
                       ) : orders.map((o) => (
                         <tr key={o.id} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
                           <td className="px-4 py-3">
@@ -912,6 +914,13 @@ export default function AdminDashboard() {
                           <td className="px-4 py-3">
                             <span className="text-xs font-medium text-text">{formatRupiah(o.total_price)}</span>
                             {o.promo_discount > 0 && <p className="text-[10px] text-green-400">-{formatRupiah(o.promo_discount)}</p>}
+                          </td>
+                          <td className="px-4 py-3">
+                            {o.assigned_worker_id ? (
+                              <span className="text-xs text-text">{staffUsers.find(s => s.id === o.assigned_worker_id)?.name || "Unknown"}</span>
+                            ) : (
+                              <span className="text-[10px] text-text-muted">—</span>
+                            )}
                           </td>
                           <td className="px-4 py-3">
                             <span className={`px-2 py-1 rounded-md text-[10px] font-medium border ${getStatusColor(o.status)}`}>
