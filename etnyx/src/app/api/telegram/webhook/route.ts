@@ -107,6 +107,7 @@ async function handleCommand(message: TelegramMessage) {
 /stats — Statistik ringkas
 /reviews — Review terbaru
 /reports — Worker reports terbaru
+/reviewstats — Rekap rating & review semua worker
 /help — Tampilkan menu ini
 
 <b>🔔 Notifikasi Otomatis:</b>
@@ -144,6 +145,10 @@ async function handleCommand(message: TelegramMessage) {
 
   if (text === "/reports") {
     return handleReports(chatId);
+  }
+
+  if (text === "/reviewstats") {
+    return handleReviewStats(chatId);
   }
 
   // Unknown command
@@ -316,6 +321,106 @@ async function handleReports(chatId: number) {
       reply_markup: { inline_keyboard: buttons },
     });
   }
+
+  return reply(chatId, msg.trim());
+}
+
+async function handleReviewStats(chatId: number) {
+  const supabase = await createAdminClient();
+
+  // Get all reviews with worker info
+  const { data: reviews } = await supabase
+    .from("reviews")
+    .select("worker_id, service_rating, worker_rating, has_worker_report, report_type, report_status")
+    .not("worker_id", "is", null);
+
+  // Get worker names
+  const { data: workers } = await supabase
+    .from("staff_users")
+    .select("id, name")
+    .eq("role", "worker");
+
+  if (!reviews?.length || !workers?.length) {
+    return reply(chatId, "📊 Belum ada data review worker.");
+  }
+
+  const workerMap = new Map(workers.map(w => [w.id, w.name]));
+
+  // Aggregate per worker
+  const stats: Record<string, {
+    name: string;
+    totalReviews: number;
+    avgService: number;
+    avgWorker: number;
+    sumService: number;
+    sumWorker: number;
+    workerRated: number;
+    reports: number;
+    reportsPending: number;
+  }> = {};
+
+  for (const r of reviews) {
+    const wId = r.worker_id;
+    if (!stats[wId]) {
+      stats[wId] = {
+        name: workerMap.get(wId) || "Unknown",
+        totalReviews: 0,
+        avgService: 0,
+        avgWorker: 0,
+        sumService: 0,
+        sumWorker: 0,
+        workerRated: 0,
+        reports: 0,
+        reportsPending: 0,
+      };
+    }
+    const s = stats[wId];
+    s.totalReviews += 1;
+    s.sumService += r.service_rating || 0;
+    if (r.worker_rating) {
+      s.sumWorker += r.worker_rating;
+      s.workerRated += 1;
+    }
+    if (r.has_worker_report) {
+      s.reports += 1;
+      if (!r.report_status || r.report_status === "pending") {
+        s.reportsPending += 1;
+      }
+    }
+  }
+
+  // Calculate averages and sort by avg service desc
+  const sorted = Object.values(stats)
+    .map(s => ({
+      ...s,
+      avgService: s.totalReviews > 0 ? s.sumService / s.totalReviews : 0,
+      avgWorker: s.workerRated > 0 ? s.sumWorker / s.workerRated : 0,
+    }))
+    .sort((a, b) => b.avgService - a.avgService);
+
+  let msg = "📊 <b>Rekap Review Worker</b>\n\n";
+
+  for (const w of sorted) {
+    const serviceStars = "⭐".repeat(Math.round(w.avgService));
+    const workerStars = w.workerRated > 0 ? "⭐".repeat(Math.round(w.avgWorker)) : "-";
+    const reportBadge = w.reports > 0 ? ` 🚨${w.reports}` : "";
+    const pendingBadge = w.reportsPending > 0 ? ` (⏳${w.reportsPending} pending)` : "";
+
+    msg += `👤 <b>${w.name}</b>${reportBadge}${pendingBadge}\n`;
+    msg += `   Layanan: ${serviceStars} (${w.avgService.toFixed(1)}/5) — ${w.totalReviews} review\n`;
+    msg += `   Worker: ${workerStars}${w.workerRated > 0 ? ` (${w.avgWorker.toFixed(1)}/5)` : ""}\n\n`;
+  }
+
+  // Overall summary
+  const totalReviews = sorted.reduce((sum, w) => sum + w.totalReviews, 0);
+  const totalReports = sorted.reduce((sum, w) => sum + w.reports, 0);
+  const overallAvg = totalReviews > 0
+    ? sorted.reduce((sum, w) => sum + w.sumService, 0) / totalReviews
+    : 0;
+
+  msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+  msg += `📈 <b>Total:</b> ${totalReviews} review, Avg ${overallAvg.toFixed(1)}/5\n`;
+  msg += `🚨 <b>Reports:</b> ${totalReports} total`;
 
   return reply(chatId, msg.trim());
 }

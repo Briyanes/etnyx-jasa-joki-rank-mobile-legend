@@ -27,6 +27,7 @@ interface IntegrationSettings {
   telegramBotToken?: string;
   telegramAdminGroupId?: string;
   telegramWorkerGroupId?: string;
+  telegramReviewGroupId?: string;
 }
 
 // ============ Helper: Get Integration Settings ============
@@ -220,8 +221,9 @@ export async function notifyNewReview(review: {
   review_id?: string;
 }): Promise<boolean> {
   const settings = await getIntegrationSettings();
-  const chatId = settings.telegramAdminGroupId;
-  if (!chatId) return false;
+  const adminChatId = settings.telegramAdminGroupId;
+  const reviewChatId = settings.telegramReviewGroupId;
+  if (!adminChatId && !reviewChatId) return false;
 
   const stars = "⭐".repeat(review.service_rating);
   const message = `
@@ -245,7 +247,17 @@ ${review.service_comment ? `\n💬 "${review.service_comment}"` : ""}
     ],
   } : undefined;
 
-  return sendTelegramMessage(chatId, message, undefined, replyMarkup);
+  // Send to admin group
+  if (adminChatId) {
+    await sendTelegramMessage(adminChatId, message, undefined, replyMarkup);
+  }
+
+  // Send to review group (if configured and different from admin)
+  if (reviewChatId && reviewChatId !== adminChatId) {
+    await sendTelegramMessage(reviewChatId, message, undefined, replyMarkup);
+  }
+
+  return true;
 }
 
 export async function notifyWorkerReport(report: {
@@ -258,8 +270,9 @@ export async function notifyWorkerReport(report: {
   review_id?: string;
 }): Promise<boolean> {
   const settings = await getIntegrationSettings();
-  const chatId = settings.telegramAdminGroupId;
-  if (!chatId) return false;
+  const adminChatId = settings.telegramAdminGroupId;
+  const reviewChatId = settings.telegramReviewGroupId;
+  if (!adminChatId && !reviewChatId) return false;
 
   const typeLabels: Record<string, string> = {
     cheating: "🎮 Bermain curang / cheat",
@@ -292,7 +305,17 @@ ${report.report_detail ? `\n📝 <b>Detail:</b> ${report.report_detail}` : ""}
     ],
   } : undefined;
 
-  return sendTelegramMessage(chatId, message, undefined, replyMarkup);
+  // Send to admin group
+  if (adminChatId) {
+    await sendTelegramMessage(adminChatId, message, undefined, replyMarkup);
+  }
+
+  // Send to review group (if configured and different from admin)
+  if (reviewChatId && reviewChatId !== adminChatId) {
+    await sendTelegramMessage(reviewChatId, message, undefined, replyMarkup);
+  }
+
+  return true;
 }
 
 // ============ WHATSAPP (Fonnte) ============
