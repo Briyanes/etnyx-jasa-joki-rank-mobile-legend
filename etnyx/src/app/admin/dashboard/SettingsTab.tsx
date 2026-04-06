@@ -6,7 +6,24 @@ import {
   BarChart3, Zap, Settings2, Eye, EyeOff, Plus, Trash2,
   Save, Loader2, CheckCircle, GripVertical, Download,
   CreditCard, Mail, MessageCircle, Send, BookOpen, AlertTriangle, Copy, Plug,
+  Landmark, Wallet, QrCode, Smartphone, Building2, Banknote,
+  type LucideIcon,
 } from "lucide-react";
+
+// Icon mapping for payment methods
+const BANK_ICONS: Record<string, { icon: LucideIcon; color: string }> = {
+  BCA: { icon: Landmark, color: "text-blue-400" },
+  BRI: { icon: Building2, color: "text-blue-300" },
+  BNI: { icon: Landmark, color: "text-orange-400" },
+  Mandiri: { icon: Building2, color: "text-yellow-400" },
+  Jago: { icon: Banknote, color: "text-purple-400" },
+  DANA: { icon: Wallet, color: "text-blue-400" },
+  GoPay: { icon: Smartphone, color: "text-green-400" },
+  OVO: { icon: Wallet, color: "text-purple-400" },
+  ShopeePay: { icon: Smartphone, color: "text-orange-400" },
+  LinkAja: { icon: Wallet, color: "text-red-400" },
+  QRIS: { icon: QrCode, color: "text-indigo-400" },
+};
 
 // ---- Types ----
 interface HeroSettings { headline: string; subheadline: string; ctaPrimary: string; ctaSecondary: string; isVisible: boolean }
@@ -526,22 +543,32 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
 
             {/* Group: Bank */}
             {(() => {
-              const groups = [
-                { key: "bank", label: "🏦 Bank Transfer", color: "text-blue-400" },
-                { key: "ewallet", label: "📱 Dompet Digital", color: "text-green-400" },
-                { key: "qris", label: "📷 QRIS", color: "text-purple-400" },
+              const groups: { key: string; label: string; color: string; icon: LucideIcon }[] = [
+                { key: "bank", label: "Bank Transfer", color: "text-blue-400", icon: Landmark },
+                { key: "ewallet", label: "Dompet Digital", color: "text-green-400", icon: Wallet },
+                { key: "qris", label: "QRIS", color: "text-purple-400", icon: QrCode },
               ];
               return groups.map((group) => {
                 const items = bankAccounts.map((b, i) => ({ ...b, _idx: i })).filter((b) => (b.category || "bank") === group.key);
                 if (items.length === 0) return null;
                 return (
                   <div key={group.key}>
-                    <p className={`text-xs font-semibold mb-2 uppercase tracking-wider ${group.color}`}>{group.label}</p>
+                    <p className={`text-xs font-semibold mb-2 uppercase tracking-wider ${group.color} flex items-center gap-1.5`}>
+                      <group.icon className="w-3.5 h-3.5" /> {group.label}
+                    </p>
                     <div className="space-y-3">
                       {items.map((bank) => (
                         <div key={bank._idx} className="bg-background rounded-lg p-4 border border-white/5 space-y-3">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
+                              {(() => {
+                                const bi = BANK_ICONS[bank.bank];
+                                if (bi) {
+                                  const BIcon = bi.icon;
+                                  return <BIcon className={`w-4 h-4 ${bi.color}`} />;
+                                }
+                                return <CreditCard className="w-4 h-4 text-accent" />;
+                              })()}
                               <span className="text-text font-bold text-sm">{bank.bank}</span>
                               {bank.is_active && bank.account_number && <span className="w-2 h-2 rounded-full bg-green-400" />}
                             </div>

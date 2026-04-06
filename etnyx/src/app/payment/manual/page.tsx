@@ -17,6 +17,13 @@ import {
   AlertTriangle,
   CheckCircle,
   Camera,
+  Landmark,
+  Wallet,
+  QrCode,
+  Smartphone,
+  Building2,
+  Banknote,
+  type LucideIcon,
 } from "lucide-react";
 
 interface BankAccount {
@@ -27,6 +34,21 @@ interface BankAccount {
   is_active: boolean;
   logo?: string;
 }
+
+// Icon & color mapping for each payment method
+const PAYMENT_ICONS: Record<string, { icon: LucideIcon; bg: string; text: string }> = {
+  BCA: { icon: Landmark, bg: "bg-blue-500/20", text: "text-blue-400" },
+  BRI: { icon: Building2, bg: "bg-blue-600/20", text: "text-blue-300" },
+  BNI: { icon: Landmark, bg: "bg-orange-500/20", text: "text-orange-400" },
+  Mandiri: { icon: Building2, bg: "bg-yellow-500/20", text: "text-yellow-400" },
+  Jago: { icon: Banknote, bg: "bg-purple-500/20", text: "text-purple-400" },
+  DANA: { icon: Wallet, bg: "bg-blue-400/20", text: "text-blue-400" },
+  GoPay: { icon: Smartphone, bg: "bg-green-500/20", text: "text-green-400" },
+  OVO: { icon: Wallet, bg: "bg-purple-500/20", text: "text-purple-400" },
+  ShopeePay: { icon: Smartphone, bg: "bg-orange-500/20", text: "text-orange-400" },
+  LinkAja: { icon: Wallet, bg: "bg-red-500/20", text: "text-red-400" },
+  QRIS: { icon: QrCode, bg: "bg-indigo-500/20", text: "text-indigo-400" },
+};
 
 interface OrderInfo {
   order_id: string;
@@ -306,15 +328,18 @@ function ManualPaymentContent() {
           
           {/* Group by category */}
           {[
-            { key: "bank", label: "🏦 Bank Transfer" },
-            { key: "ewallet", label: "📱 Dompet Digital" },
-            { key: "qris", label: "📷 QRIS" },
+            { key: "bank", label: "Bank Transfer", icon: Landmark, color: "text-blue-400" },
+            { key: "ewallet", label: "Dompet Digital", icon: Wallet, color: "text-green-400" },
+            { key: "qris", label: "QRIS", icon: QrCode, color: "text-purple-400" },
           ].map((group) => {
             const items = bankAccounts.filter(b => b.is_active && b.account_number && (b.category || "bank") === group.key);
             if (items.length === 0) return null;
+            const GroupIcon = group.icon;
             return (
               <div key={group.key} className="mb-4">
-                <p className="text-text-muted text-xs font-semibold mb-2 uppercase tracking-wider">{group.label}</p>
+                <p className={`text-xs font-semibold mb-2 uppercase tracking-wider flex items-center gap-1.5 ${group.color}`}>
+                  <GroupIcon className="w-3.5 h-3.5" /> {group.label}
+                </p>
                 <div className="space-y-3">
                   {items.map((bank, i) => (
                     <div
@@ -322,13 +347,25 @@ function ManualPaymentContent() {
                       className="bg-background rounded-xl p-4 flex items-center justify-between"
                     >
                       <div className="flex items-center gap-3">
-                        {bank.logo ? (
-                          <Image src={bank.logo} alt={bank.bank} width={40} height={40} className="w-10 h-10 object-contain rounded-lg" />
-                        ) : (
-                          <div className="w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center text-accent font-bold text-sm">
-                            {bank.bank.slice(0, 3)}
-                          </div>
-                        )}
+                        {(() => {
+                          const iconInfo = PAYMENT_ICONS[bank.bank];
+                          if (bank.logo) {
+                            return <Image src={bank.logo} alt={bank.bank} width={40} height={40} className="w-10 h-10 object-contain rounded-lg" />;
+                          }
+                          if (iconInfo) {
+                            const Icon = iconInfo.icon;
+                            return (
+                              <div className={`w-10 h-10 rounded-lg ${iconInfo.bg} flex items-center justify-center`}>
+                                <Icon className={`w-5 h-5 ${iconInfo.text}`} />
+                              </div>
+                            );
+                          }
+                          return (
+                            <div className="w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center">
+                              <CreditCard className="w-5 h-5 text-accent" />
+                            </div>
+                          );
+                        })()}
                         <div>
                           <p className="text-text font-bold text-sm">{bank.bank}</p>
                           <p className="text-accent font-mono font-bold">{bank.account_number}</p>
