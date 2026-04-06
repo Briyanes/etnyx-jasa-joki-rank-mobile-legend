@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import crypto from "crypto";
 import { sendNewOrderNotifications } from "@/lib/notifications";
+import { sendMetaCAPI } from "@/lib/meta-capi";
 
 // Get Midtrans server key from settings or env
 async function getMidtransServerKey(): Promise<string> {
@@ -128,6 +129,32 @@ export async function POST(request: NextRequest) {
       
       // Send all notifications (Telegram admin, WA, Email)
       sendNewOrderNotifications(orderData).catch(console.error);
+
+      // Fire Meta Conversions API (server-side dedup with client pixel)
+      try {
+        const { data: pixelSettings } = await supabase
+          .from("settings")
+          .select("value")
+          .eq("key", "tracking_pixels")
+          .single();
+
+        if (pixelSettings?.value) {
+          sendMetaCAPI(
+            {
+              eventName: "Purchase",
+              eventId: `purchase_${order.order_id}`,
+              value: order.total_price || 0,
+              currency: "IDR",
+              email: order.customer_email,
+              phone: order.whatsapp,
+              orderId: order.order_id,
+              ipAddress: request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || undefined,
+              userAgent: request.headers.get("user-agent") || undefined,
+            },
+            pixelSettings.value
+          ).catch(console.error);
+        }
+      } catch { /* pixel settings not configured */ }
     }
 
     return NextResponse.json({ success: true });

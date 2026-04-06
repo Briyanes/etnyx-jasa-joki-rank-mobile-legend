@@ -2,10 +2,14 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { captureUtmParams } from "@/lib/tracking";
 
 export default function LoadingScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [progress, setProgress] = useState(0);
+
+  // Capture UTM params on page load
+  useEffect(() => { captureUtmParams(); }, []);
 
   useEffect(() => {
     // Simulate loading progress

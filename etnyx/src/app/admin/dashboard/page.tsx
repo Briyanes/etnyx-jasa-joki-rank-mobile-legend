@@ -16,6 +16,7 @@ import dynamic from "next/dynamic";
 import SettingsTab from "./SettingsTab";
 import PayrollTab from "./PayrollTab";
 import ReportsTab from "./ReportsTab";
+import AdsTab from "./AdsTab";
 
 const LineChart = dynamic(() => import("recharts").then((mod) => mod.LineChart), { ssr: false });
 const Line = dynamic(() => import("recharts").then((mod) => mod.Line), { ssr: false });
@@ -149,7 +150,7 @@ interface PerStarTier {
   icon: string;
 }
 
-type TabType = "overview" | "orders" | "boosters" | "testimonials" | "portfolio" | "promo" | "customers" | "rewards" | "pricing" | "staff" | "reviews" | "payroll" | "reports" | "settings";
+type TabType = "overview" | "orders" | "boosters" | "testimonials" | "portfolio" | "promo" | "customers" | "rewards" | "pricing" | "staff" | "reviews" | "payroll" | "reports" | "ads" | "settings";
 
 // ---- Tab Config ----
 const TAB_CONFIG: { id: TabType; label: string; icon: typeof BarChart3 }[] = [
@@ -166,6 +167,7 @@ const TAB_CONFIG: { id: TabType; label: string; icon: typeof BarChart3 }[] = [
   { id: "payroll", label: "Payroll", icon: Wallet },
   { id: "reviews", label: "Reviews", icon: MessageCircle },
   { id: "reports", label: "Reports", icon: BarChart3 },
+  { id: "ads", label: "Ads", icon: TrendingUp },
   { id: "settings", label: "Settings", icon: Settings2 },
 ];
 
@@ -2043,6 +2045,11 @@ export default function AdminDashboard() {
           {/* ===== REPORTS TAB ===== */}
           {activeTab === "reports" && (
             <ReportsTab />
+          )}
+
+          {/* ===== ADS PERFORMANCE TAB ===== */}
+          {activeTab === "ads" && (
+            <AdsTab />
           )}
 
           {/* ===== SETTINGS TAB ===== */}

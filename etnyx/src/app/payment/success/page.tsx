@@ -2,9 +2,10 @@
 
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Suspense } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import { Check, Loader2, Package, ArrowRight, XCircle, Clock } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { trackPurchase } from "@/lib/tracking";
 
 function PaymentSuccessContent() {
   const searchParams = useSearchParams();
@@ -12,9 +13,23 @@ function PaymentSuccessContent() {
   const orderId = searchParams.get("order_id");
   const transactionStatus = searchParams.get("transaction_status");
   const statusCode = searchParams.get("status_code");
+  const grossAmount = searchParams.get("gross_amount");
+  const firedRef = useRef(false);
 
   const isPending = transactionStatus === "pending";
   const isFailed = transactionStatus === "deny" || transactionStatus === "cancel" || transactionStatus === "expire" || statusCode === "202";
+  const isSuccess = !isPending && !isFailed;
+
+  // Fire Purchase conversion event once on successful payment
+  useEffect(() => {
+    if (isSuccess && orderId && !firedRef.current) {
+      firedRef.current = true;
+      const value = grossAmount ? parseInt(grossAmount, 10) : 0;
+      if (value > 0) {
+        trackPurchase({ orderId, value });
+      }
+    }
+  }, [isSuccess, orderId, grossAmount]);
 
   const t = locale === "id" ? {
     invalidPage: "Halaman Tidak Valid",

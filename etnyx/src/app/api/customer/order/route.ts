@@ -45,6 +45,17 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
+    // Extract UTM attribution params (sanitized)
+    const utmSource = body.utm_source ? String(body.utm_source).replace(/[^a-zA-Z0-9_.-]/g, "").slice(0, 100) : null;
+    const utmMedium = body.utm_medium ? String(body.utm_medium).replace(/[^a-zA-Z0-9_.-]/g, "").slice(0, 100) : null;
+    const utmCampaign = body.utm_campaign ? String(body.utm_campaign).replace(/[^a-zA-Z0-9_. -]/g, "").slice(0, 200) : null;
+    const utmContent = body.utm_content ? String(body.utm_content).replace(/[^a-zA-Z0-9_. -]/g, "").slice(0, 200) : null;
+    const utmTerm = body.utm_term ? String(body.utm_term).replace(/[^a-zA-Z0-9_. -]/g, "").slice(0, 200) : null;
+    const fbclid = body.fbclid ? String(body.fbclid).replace(/[^a-zA-Z0-9_.-]/g, "").slice(0, 500) : null;
+    const gclid = body.gclid ? String(body.gclid).replace(/[^a-zA-Z0-9_.-]/g, "").slice(0, 500) : null;
+    const ttclid = body.ttclid ? String(body.ttclid).replace(/[^a-zA-Z0-9_.-]/g, "").slice(0, 500) : null;
+    const referrerUrl = body.referrer_url ? String(body.referrer_url).slice(0, 500) : null;
+
     // Validate required fields
     const {
       currentRank,
@@ -226,6 +237,15 @@ export async function POST(request: NextRequest) {
         customer_email: sanitizedEmail,
         promo_code: verifiedPromoCode,
         promo_discount: verifiedDiscount,
+        utm_source: utmSource,
+        utm_medium: utmMedium,
+        utm_campaign: utmCampaign,
+        utm_content: utmContent,
+        utm_term: utmTerm,
+        fbclid,
+        gclid,
+        ttclid,
+        referrer_url: referrerUrl,
       })
       .select("id, order_id, total_price")
       .single();

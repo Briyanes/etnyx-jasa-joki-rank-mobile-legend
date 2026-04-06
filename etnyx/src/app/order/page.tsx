@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { FaFacebook, FaGoogle, FaTiktok, FaVk, FaApple, FaGamepad } from "react-icons/fa";
 import type { IconType } from "react-icons";
+import { captureUtmParams, getStoredUtmParams, trackInitiateCheckout, trackViewContent } from "@/lib/tracking";
 
 type LoginMethod = "moonton" | "facebook" | "google" | "tiktok" | "vk" | "apple";
 
@@ -535,6 +536,12 @@ function OrderPageContent() {
       .catch(() => {/* not logged in or no tier */});
   }, []);
 
+  // Capture UTM params + fire ViewContent on page load
+  useEffect(() => {
+    captureUtmParams();
+    trackViewContent({ contentName: "Order Page" });
+  }, []);
+
   // Fetch per-star pricing from CMS
   useEffect(() => {
     fetch("/api/settings?keys=perstar_pricing,gendong_pricing")
@@ -838,6 +845,7 @@ function OrderPageContent() {
     if (!canSubmit) return;
     setIsSubmitting(true);
     try {
+      const utmParams = getStoredUtmParams();
       const res = await fetch("/api/customer/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -861,6 +869,7 @@ function OrderPageContent() {
           whatsapp: form.whatsapp,
           email: form.email,
           totalPrice: finalPrice,
+          ...utmParams,
         }),
       });
 
@@ -870,6 +879,9 @@ function OrderPageContent() {
         alert(data.error || "Gagal membuat order");
         return;
       }
+
+      // Fire InitiateCheckout conversion event
+      trackInitiateCheckout({ orderId: data.orderId, value: finalPrice });
 
       setOrderResult({
         orderId: data.orderId,
