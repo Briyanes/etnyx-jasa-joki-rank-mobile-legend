@@ -361,21 +361,22 @@ export async function sendPaymentConfirmedWA(order: OrderData): Promise<boolean>
   if (!order.whatsapp) return false;
 
   const message = `
-✅ *Pembayaran Dikonfirmasi!*
+*Pembayaran Dikonfirmasi!*
 
 Halo! Pembayaran kamu sudah kami terima dan dikonfirmasi.
 
-*📋 Order ID:* ${order.order_id}
-*🎮 Paket:* ${formatRank(order.current_rank)} → ${formatRank(order.target_rank)}
-*💰 Total:* ${formatRupiah(order.price)}
+*Order ID:* ${order.order_id}
+*Paket:* ${formatRank(order.current_rank)} → ${formatRank(order.target_rank)}
+*Total:* ${formatRupiah(order.price)}
 
 Order kamu akan segera diproses oleh tim booster kami. Kamu akan menerima notifikasi saat pengerjaan dimulai.
 
-Track order: ${SITE_URL}/track?id=${order.order_id}
+Track order di sini:
+${SITE_URL}/track?id=${order.order_id}
 
-Jangan login ke akun selama proses ya! 🔒
+Jangan login ke akun selama proses ya!
 
-_ETNYX - Push Rank, Tanpa Main_ ⚡
+_ETNYX - Push Rank, Tanpa Main_
 `.trim();
 
   return sendWhatsAppMessage(order.whatsapp, message);
@@ -385,25 +386,26 @@ export async function sendOrderConfirmationWA(order: OrderData): Promise<boolean
   if (!order.whatsapp) return false;
 
   const message = `
-Halo! 👋
+Halo!
 
 Terima kasih sudah order di *ETNYX*!
 
-*📋 Detail Order:*
+*Detail Order:*
 • Order ID: ${order.order_id}
 • Rank: ${formatRank(order.current_rank)} → ${formatRank(order.target_rank)}
 • Paket: ${order.package}
 • Total: ${formatRupiah(order.price)}
 
-*Status:* ⏳ Menunggu Pembayaran
+*Status:* Menunggu Pembayaran
 
 Silakan selesaikan pembayaran untuk memproses order kamu.
 
-Track order: ${SITE_URL}/track?id=${order.order_id}
+Track order di sini:
+${SITE_URL}/track?id=${order.order_id}
 
-Butuh bantuan? Balas pesan ini! 💬
+Butuh bantuan? Balas pesan ini!
 
-_ETNYX - Push Rank, Tanpa Main_ ⚡
+_ETNYX - Push Rank, Tanpa Main_
 `.trim();
 
   return sendWhatsAppMessage(order.whatsapp, message);
@@ -413,19 +415,19 @@ export async function sendOrderStartedWA(order: OrderData): Promise<boolean> {
   if (!order.whatsapp) return false;
 
   const message = `
-✅ *Order Sedang Dikerjakan!*
+*Order Sedang Dikerjakan!*
 
 Halo! Order kamu sudah dikonfirmasi dan sedang dalam pengerjaan oleh booster kami.
 
-*📋 Order ID:* ${order.order_id}
-*🎮 Target:* ${formatRank(order.target_rank)}
+*Order ID:* ${order.order_id}
+*Target:* ${formatRank(order.target_rank)}
 
-Kamu bisa track progress di:
+Kamu bisa track progress di sini:
 ${SITE_URL}/track?id=${order.order_id}
 
-Jangan login ke akun selama proses joki ya! 🔒
+Jangan login ke akun selama proses joki ya!
 
-_ETNYX - Push Rank, Tanpa Main_ ⚡
+_ETNYX - Push Rank, Tanpa Main_
 `.trim();
 
   return sendWhatsAppMessage(order.whatsapp, message);
@@ -438,24 +440,25 @@ export async function sendOrderCompletedWA(order: OrderData): Promise<boolean> {
   const reviewLink = `${siteUrl}/review?id=${order.order_id}`;
 
   const message = `
-🎉 *Order Selesai!*
+*Order Selesai!*
 
 Yeay! Order kamu sudah selesai dikerjakan.
 
-*📋 Order ID:* ${order.order_id}
-*🎮 Rank Akhir:* ${formatRank(order.target_rank)}
+*Order ID:* ${order.order_id}
+*Rank Akhir:* ${formatRank(order.target_rank)}
 
 Silakan cek akun kamu dan ganti password untuk keamanan.
 
-⭐ *Bantu kami dengan review yuk!*
-👉 ${reviewLink}
+*Bantu kami dengan review yuk!*
+Kasih review di sini:
+${reviewLink}
 
-⚠️ *Penting:*
-Jika worker menawarkan jasa joki di luar ETNYX, meminta kontak pribadi, atau melakukan hal mencurigakan lainnya, segera laporkan saat mengisi review. Laporan yang terbukti valid bisa mendapat *skin gratis* sebagai apresiasi dari kami! 🎁
+*Penting:*
+Jika worker menawarkan jasa joki di luar ETNYX, meminta kontak pribadi, atau melakukan hal mencurigakan lainnya, segera laporkan saat mengisi review. Laporan yang terbukti valid bisa mendapat *skin gratis* sebagai apresiasi dari kami!
 
-Terima kasih sudah menggunakan ETNYX! ⭐
+Terima kasih sudah menggunakan ETNYX!
 
-_ETNYX - Push Rank, Tanpa Main_ ⚡
+_ETNYX - Push Rank, Tanpa Main_
 `.trim();
 
   return sendWhatsAppMessage(order.whatsapp, message);
