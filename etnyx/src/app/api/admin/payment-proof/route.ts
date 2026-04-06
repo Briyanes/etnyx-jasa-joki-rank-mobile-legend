@@ -94,8 +94,24 @@ export async function POST(request: NextRequest) {
 
       // Send notifications
       try {
-        const { sendNewOrderNotifications } = await import("@/lib/notifications");
-        await sendNewOrderNotifications({
+        const { sendOrderConfirmedNotifications, notifyAdminNewOrder } = await import("@/lib/notifications");
+        // Notify worker group + send "order dikerjakan" WA to customer
+        await sendOrderConfirmedNotifications({
+          order_id: order.order_id,
+          username: order.username,
+          current_rank: order.current_rank,
+          target_rank: order.target_rank,
+          package: order.package,
+          price: order.total_price,
+          whatsapp: order.whatsapp,
+          email: order.customer_email,
+          status: "confirmed",
+          is_express: order.is_express,
+          is_premium: order.is_premium,
+          notes: order.notes,
+        });
+        // Also notify admin Telegram group about the confirmed order
+        await notifyAdminNewOrder({
           order_id: order.order_id,
           username: order.username,
           current_rank: order.current_rank,

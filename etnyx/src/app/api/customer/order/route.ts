@@ -376,6 +376,40 @@ export async function POST(request: NextRequest) {
       created_by: "system",
     });
 
+    // Send WA confirmation + Telegram admin notification for new order
+    try {
+      const { sendOrderConfirmationWA, notifyAdminNewOrder } = await import("@/lib/notifications");
+      await Promise.allSettled([
+        sendOrderConfirmationWA({
+          order_id: order.order_id,
+          username: sanitizedNickname,
+          current_rank: currentRank,
+          target_rank: targetRank,
+          package: body.package || "standard",
+          price: verifiedTotalPrice,
+          whatsapp: `+62${cleanWhatsapp}`,
+          email: sanitizedEmail || undefined,
+          status: "pending",
+        }),
+        notifyAdminNewOrder({
+          order_id: order.order_id,
+          username: sanitizedNickname,
+          current_rank: currentRank,
+          target_rank: targetRank,
+          package: body.package || "standard",
+          price: verifiedTotalPrice,
+          whatsapp: `+62${cleanWhatsapp}`,
+          email: sanitizedEmail || undefined,
+          status: "pending",
+          is_express: body.isExpress,
+          is_premium: body.isPremium,
+          notes: body.notes,
+        }),
+      ]);
+    } catch (e) {
+      console.error("Order notification error:", e);
+    }
+
     return NextResponse.json(
       {
         success: true,
