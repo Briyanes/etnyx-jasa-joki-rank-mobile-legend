@@ -450,6 +450,9 @@ Silakan cek akun kamu dan ganti password untuk keamanan.
 ⭐ *Bantu kami dengan review yuk!*
 👉 ${reviewLink}
 
+⚠️ *Penting:*
+Jika worker menawarkan jasa joki di luar ETNYX, meminta kontak pribadi, atau melakukan hal mencurigakan lainnya, segera laporkan saat mengisi review. Keamanan akun kamu adalah prioritas kami.
+
 Terima kasih sudah menggunakan ETNYX! ⭐
 
 _ETNYX - Push Rank, Tanpa Main_ ⚡
