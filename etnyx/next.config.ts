@@ -44,12 +44,12 @@ const nextConfig: NextConfig = {
             key: "Content-Security-Policy",
             value: `
               default-src 'self';
-              script-src 'self' 'unsafe-inline';
-              style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+              script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://googleads.g.doubleclick.net https://connect.facebook.net https://analytics.tiktok.com https://www.google.com;
+              style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://www.googletagmanager.com;
               img-src 'self' data: https: blob:;
               font-src 'self' https://fonts.gstatic.com;
-              connect-src 'self' https://*.supabase.co wss://*.supabase.co https://wa.me https://app.midtrans.com https://app.sandbox.midtrans.com;
-              frame-src https://app.midtrans.com https://app.sandbox.midtrans.com;
+              connect-src 'self' https://*.supabase.co wss://*.supabase.co https://wa.me https://app.midtrans.com https://app.sandbox.midtrans.com https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://www.googletagmanager.com https://www.facebook.com https://graph.facebook.com https://connect.facebook.net https://analytics.tiktok.com https://googleads.g.doubleclick.net;
+              frame-src https://app.midtrans.com https://app.sandbox.midtrans.com https://www.googletagmanager.com https://td.doubleclick.net;
               frame-ancestors 'none';
               base-uri 'self';
               form-action 'self';
