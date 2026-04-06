@@ -21,6 +21,7 @@ import {
 
 interface BankAccount {
   bank: string;
+  category?: string;
   account_number: string;
   account_name: string;
   is_active: boolean;
@@ -302,44 +303,60 @@ function ManualPaymentContent() {
         {/* Bank Accounts */}
         <div className="bg-surface rounded-2xl border border-white/5 p-5">
           <h2 className="text-text font-bold text-sm mb-4">{t.transferTo}</h2>
-          <div className="space-y-3">
-            {bankAccounts.filter(b => b.is_active && b.account_number).map((bank, i) => (
-              <div
-                key={i}
-                className="bg-background rounded-xl p-4 flex items-center justify-between"
-              >
-                <div className="flex items-center gap-3">
-                  {bank.logo ? (
-                    <Image src={bank.logo} alt={bank.bank} width={40} height={40} className="w-10 h-10 object-contain rounded-lg" />
-                  ) : (
-                    <div className="w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center text-accent font-bold text-sm">
-                      {bank.bank.slice(0, 3)}
+          
+          {/* Group by category */}
+          {[
+            { key: "bank", label: "🏦 Bank Transfer" },
+            { key: "ewallet", label: "📱 Dompet Digital" },
+            { key: "qris", label: "📷 QRIS" },
+          ].map((group) => {
+            const items = bankAccounts.filter(b => b.is_active && b.account_number && (b.category || "bank") === group.key);
+            if (items.length === 0) return null;
+            return (
+              <div key={group.key} className="mb-4">
+                <p className="text-text-muted text-xs font-semibold mb-2 uppercase tracking-wider">{group.label}</p>
+                <div className="space-y-3">
+                  {items.map((bank, i) => (
+                    <div
+                      key={i}
+                      className="bg-background rounded-xl p-4 flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-3">
+                        {bank.logo ? (
+                          <Image src={bank.logo} alt={bank.bank} width={40} height={40} className="w-10 h-10 object-contain rounded-lg" />
+                        ) : (
+                          <div className="w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center text-accent font-bold text-sm">
+                            {bank.bank.slice(0, 3)}
+                          </div>
+                        )}
+                        <div>
+                          <p className="text-text font-bold text-sm">{bank.bank}</p>
+                          <p className="text-accent font-mono font-bold">{bank.account_number}</p>
+                          {bank.account_name && <p className="text-text-muted text-xs">a.n. {bank.account_name}</p>}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleCopy(bank.account_number, `${bank.bank}-${i}`)}
+                        className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-accent/10 text-accent text-xs font-medium hover:bg-accent/20 transition-colors"
+                      >
+                        {copiedAccount === `${bank.bank}-${i}` ? (
+                          <><Check className="w-3.5 h-3.5" /> {t.copySuccess}</>
+                        ) : (
+                          <><Copy className="w-3.5 h-3.5" /> {t.copy}</>
+                        )}
+                      </button>
                     </div>
-                  )}
-                  <div>
-                    <p className="text-text font-bold text-sm">{bank.bank}</p>
-                    <p className="text-accent font-mono font-bold">{bank.account_number}</p>
-                    <p className="text-text-muted text-xs">a.n. {bank.account_name}</p>
-                  </div>
+                  ))}
                 </div>
-                <button
-                  onClick={() => handleCopy(bank.account_number, `${bank.bank}-${i}`)}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-accent/10 text-accent text-xs font-medium hover:bg-accent/20 transition-colors"
-                >
-                  {copiedAccount === `${bank.bank}-${i}` ? (
-                    <><Check className="w-3.5 h-3.5" /> {t.copySuccess}</>
-                  ) : (
-                    <><Copy className="w-3.5 h-3.5" /> {t.copy}</>
-                  )}
-                </button>
               </div>
-            ))}
-            {bankAccounts.filter(b => b.is_active && b.account_number).length === 0 && (
-              <div className="text-center py-6 text-text-muted text-sm">
-                Belum ada rekening yang dikonfigurasi. Hubungi admin via WhatsApp.
-              </div>
-            )}
-          </div>
+            );
+          })}
+
+          {bankAccounts.filter(b => b.is_active && b.account_number).length === 0 && (
+            <div className="text-center py-6 text-text-muted text-sm">
+              Belum ada rekening yang dikonfigurasi. Hubungi admin via WhatsApp.
+            </div>
+          )}
         </div>
 
         {/* Important Notice */}

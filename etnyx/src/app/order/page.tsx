@@ -2350,7 +2350,7 @@ function OrderPageContent() {
                       <CreditCard className="w-5 h-5 text-yellow-400 mb-2" />
                       <p className="text-text font-semibold text-sm">Transfer Manual</p>
                       <p className="text-text-muted text-xs mt-0.5">
-                        BCA, BNI, Mandiri, DANA, GoPay, ShopeePay
+                        Bank (BCA, BRI, BNI, Mandiri, Jago), E-Wallet, QRIS
                       </p>
                     </button>
                     <button

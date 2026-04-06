@@ -29,14 +29,19 @@ CREATE INDEX IF NOT EXISTS idx_payment_proofs_status ON payment_proofs(status);
 -- 3) Add bank_accounts setting (admin will configure via dashboard)
 -- This uses the existing settings table
 INSERT INTO settings (key, value) VALUES ('bank_accounts', '[
-  {"bank": "BCA", "account_number": "", "account_name": "", "is_active": true},
-  {"bank": "BNI", "account_number": "", "account_name": "", "is_active": false},
-  {"bank": "Mandiri", "account_number": "", "account_name": "", "is_active": false},
-  {"bank": "DANA", "account_number": "", "account_name": "", "is_active": false},
-  {"bank": "GoPay", "account_number": "", "account_name": "", "is_active": false},
-  {"bank": "ShopeePay", "account_number": "", "account_name": "", "is_active": false}
+  {"bank": "BCA", "category": "bank", "account_number": "", "account_name": "", "is_active": true},
+  {"bank": "BRI", "category": "bank", "account_number": "", "account_name": "", "is_active": true},
+  {"bank": "BNI", "category": "bank", "account_number": "", "account_name": "", "is_active": true},
+  {"bank": "Mandiri", "category": "bank", "account_number": "", "account_name": "", "is_active": true},
+  {"bank": "Jago", "category": "bank", "account_number": "", "account_name": "", "is_active": true},
+  {"bank": "DANA", "category": "ewallet", "account_number": "081414131321", "account_name": "", "is_active": true},
+  {"bank": "GoPay", "category": "ewallet", "account_number": "081414131321", "account_name": "", "is_active": true},
+  {"bank": "OVO", "category": "ewallet", "account_number": "081414131321", "account_name": "", "is_active": true},
+  {"bank": "ShopeePay", "category": "ewallet", "account_number": "081414131321", "account_name": "", "is_active": true},
+  {"bank": "LinkAja", "category": "ewallet", "account_number": "081414131321", "account_name": "", "is_active": true},
+  {"bank": "QRIS", "category": "qris", "account_number": "", "account_name": "", "is_active": true}
 ]'::jsonb)
-ON CONFLICT (key) DO NOTHING;
+ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
 
 -- 4) Create storage bucket for payment proofs (run in Supabase Dashboard > Storage)
 -- CREATE POLICY for public read on payment-proofs bucket
