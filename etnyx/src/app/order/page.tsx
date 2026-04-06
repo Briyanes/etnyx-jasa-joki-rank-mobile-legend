@@ -34,7 +34,7 @@ import {
 } from "lucide-react";
 import { FaFacebook, FaGoogle, FaTiktok, FaVk, FaApple, FaGamepad } from "react-icons/fa";
 import type { IconType } from "react-icons";
-import { captureUtmParams, getStoredUtmParams, trackInitiateCheckout, trackViewContent } from "@/lib/tracking";
+import { captureUtmParams, getStoredUtmParams, trackAddToCart, trackInitiateCheckout, trackViewContent } from "@/lib/tracking";
 
 type LoginMethod = "moonton" | "facebook" | "google" | "tiktok" | "vk" | "apple";
 
@@ -660,15 +660,19 @@ function OrderPageContent() {
   // Proceed from per-star selection
   const handleProceedPerStar = useCallback(() => {
     if (selectedStarRank && starQuantity >= 3) {
+      const price = selectedStarRank.price * starQuantity;
+      const title = `${selectedStarRank.name} × ${starQuantity} Star`;
       // Create a virtual package for the order flow
       setSelectedPackage({
         id: `perstar-${selectedStarRank.id}-${starQuantity}`,
-        title: `${selectedStarRank.name} × ${starQuantity} Star`,
-        price: selectedStarRank.price * starQuantity,
+        title,
+        price,
         rankKey: selectedStarRank.id,
         currentRank: selectedStarRank.id,
         targetRank: selectedStarRank.id,
       });
+      // Fire AddToCart conversion event
+      trackAddToCart({ value: price, contentName: title });
       setTimeout(() => {
         setSlideDirection("right");
         setCurrentStep(2);
@@ -684,6 +688,8 @@ function OrderPageContent() {
         currentRank: pkg.currentRank as RankTier,
         targetRank: pkg.targetRank as RankTier,
       });
+      // Fire AddToCart conversion event
+      trackAddToCart({ value: pkg.price, contentName: pkg.title });
       // Auto-advance to step 2 after 400ms
       setTimeout(() => {
         setSlideDirection("right");
@@ -740,25 +746,31 @@ function OrderPageContent() {
     if (canProceedStep(currentStep) && currentStep < 4) {
       // For per-star mode on step 1, create virtual package first
       if (currentStep === 1 && orderMode === "perstar" && selectedStarRank) {
+        const price = selectedStarRank.price * starQuantity;
+        const title = `${selectedStarRank.name} × ${starQuantity} Star`;
         setSelectedPackage({
           id: `perstar-${selectedStarRank.id}-${starQuantity}`,
-          title: `${selectedStarRank.name} × ${starQuantity} Star`,
-          price: selectedStarRank.price * starQuantity,
+          title,
+          price,
           rankKey: selectedStarRank.id,
           currentRank: selectedStarRank.id,
           targetRank: selectedStarRank.id,
         });
+        trackAddToCart({ value: price, contentName: title });
       }
       // For gendong mode on step 1, create virtual package first
       if (currentStep === 1 && orderMode === "gendong" && selectedGendongRank) {
+        const price = selectedGendongRank.price * gendongQuantity;
+        const title = `Duo Boost ${selectedGendongRank.name} × ${gendongQuantity} Star`;
         setSelectedPackage({
           id: `gendong-${selectedGendongRank.id}-${gendongQuantity}`,
-          title: `Duo Boost ${selectedGendongRank.name} × ${gendongQuantity} Star`,
-          price: selectedGendongRank.price * gendongQuantity,
+          title,
+          price,
           rankKey: selectedGendongRank.id,
           currentRank: selectedGendongRank.id,
           targetRank: selectedGendongRank.id,
         });
+        trackAddToCart({ value: price, contentName: title });
       }
       setSlideDirection("right");
       setCurrentStep((s) => s + 1);

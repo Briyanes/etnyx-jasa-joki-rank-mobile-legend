@@ -58,6 +58,37 @@ export function trackPurchase({ orderId, value, currency = "IDR" }: ConversionDa
   }
 }
 
+/** Fire AddToCart event (when user selects a package) */
+export function trackAddToCart(data: { value: number; contentName: string; currency?: string }) {
+  const currency = data.currency || "IDR";
+
+  if (typeof window.fbq === "function") {
+    window.fbq("track", "AddToCart", {
+      content_name: data.contentName,
+      content_type: "product",
+      value: data.value,
+      currency,
+    });
+  }
+
+  if (typeof window.gtag === "function") {
+    window.gtag("event", "add_to_cart", {
+      items: [{ item_name: data.contentName, price: data.value, quantity: 1 }],
+      value: data.value,
+      currency,
+    });
+  }
+
+  if (window.ttq?.track) {
+    window.ttq.track("AddToCart", {
+      content_name: data.contentName,
+      content_type: "product",
+      value: data.value,
+      currency,
+    });
+  }
+}
+
 /** Fire InitiateCheckout event (when order is submitted) */
 export function trackInitiateCheckout({ orderId, value, currency = "IDR" }: ConversionData) {
   if (typeof window.fbq === "function") {
