@@ -195,6 +195,17 @@ export async function POST(request: NextRequest) {
     });
 
     if (hasWorkerReport && reportType) {
+      // Get worker name for report
+      let workerName: string | null = null;
+      if (order.assigned_worker_id) {
+        const { data: worker } = await supabase
+          .from("staff_users")
+          .select("name")
+          .eq("id", order.assigned_worker_id)
+          .single();
+        workerName = worker?.name || null;
+      }
+
       await notifyWorkerReport({
         order_id: orderId,
         report_type: reportType,
@@ -202,6 +213,7 @@ export async function POST(request: NextRequest) {
         customer_name: customerName?.trim() || null,
         customer_whatsapp: customerWhatsapp?.trim() || null,
         worker_rating: workerRating || null,
+        worker_name: workerName,
         review_id: insertedReview?.id,
       });
     }

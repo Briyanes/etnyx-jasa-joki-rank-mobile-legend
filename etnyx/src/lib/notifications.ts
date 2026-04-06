@@ -268,6 +268,7 @@ export async function notifyWorkerReport(report: {
   customer_name?: string | null;
   customer_whatsapp?: string | null;
   worker_rating?: number | null;
+  worker_name?: string | null;
   review_id?: string;
 }): Promise<boolean> {
   const settings = await getIntegrationSettings();
@@ -287,7 +288,8 @@ export async function notifyWorkerReport(report: {
 🚨🚨🚨 <b>WORKER REPORT!</b> 🚨🚨🚨
 
 📋 <b>Order:</b> ${report.order_id}
-👤 <b>Pelapor:</b> ${report.customer_name || "-"}
+� <b>Worker:</b> ${report.worker_name || "Belum di-assign"}
+�👤 <b>Pelapor:</b> ${report.customer_name || "-"}
 📱 <b>WA:</b> ${report.customer_whatsapp || "-"}
 ${report.worker_rating ? `⭐ <b>Rating Worker:</b> ${report.worker_rating}/5` : ""}
 
