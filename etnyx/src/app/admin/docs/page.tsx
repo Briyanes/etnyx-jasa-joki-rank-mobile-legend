@@ -687,8 +687,8 @@ function buildCategories(): DocCategory[] {
                   { action: "follow_up_credentials", title: "Request Credentials", desc: "Minta akun ML customer setelah bayar. Berisi peringatan keamanan akun.", when: "Status: confirmed" },
                   { action: "notify_started", title: "Notify Started", desc: "Info order mulai dikerjakan. Target rank, link track, peringatan jangan login.", when: "Status: in_progress" },
                   { action: "follow_up_progress", title: "Progress Update", desc: "Update progress %, rank saat ini, link track. Peringatan jangan login.", when: "Status: in_progress" },
-                  { action: "notify_completed", title: "Notify Completed", desc: "Order selesai! Minta ganti password, link review + janji skin gratis.", when: "Status: completed" },
-                  { action: "request_review", title: "Request Review", desc: "Follow-up minta review. Janji skin gratis, link review + terima kasih.", when: "Status: completed" },
+                  { action: "notify_completed", title: "Notify Completed", desc: "Order selesai! Minta ganti password + link review.", when: "Status: completed" },
+                  { action: "request_review", title: "Request Review", desc: "Follow-up minta review, link review + terima kasih.", when: "Status: completed" },
                   { action: "reactivation", title: "Reactivation", desc: "Win-back untuk order stalled/lama. Tanya apakah ingin lanjut.", when: "Order tidak aktif" },
                 ].map((item, i) => (
                   <div key={i} className="bg-background rounded-lg p-3 border border-white/5">
@@ -1143,7 +1143,7 @@ function buildCategories(): DocCategory[] {
                   ["Bayar dikonfirmasi (confirmed)", "Worker: ORDER DIKONFIRMASI!", "Pembayaran Dikonfirmasi + track link + reminder keamanan", "Payment confirmed"],
                   ["Order di-assign ke worker", "Worker: ORDER DITUGASKAN", "—", "—"],
                   ["Mulai dikerjakan (in_progress)", "—", "Sedang Dikerjakan + jangan login + track link", "—"],
-                  ["Order selesai (completed)", "Admin: ORDER SELESAI!", "Selesai + ganti password + link review + skin gratis", "—"],
+                  ["Order selesai (completed)", "Admin: ORDER SELESAI!", "Selesai + ganti password + link review", "—"],
                   ["Review masuk", "Admin + Review: REVIEW BARU! + Show/Hide", "—", "—"],
                   ["Worker di-report", "Admin + Report: WORKER REPORT! + nama worker + Resolved/Dismiss", "—", "—"],
                 ]} />

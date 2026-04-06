@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
 
       case "request_review": {
         const reviewUrl = `${siteConfig.url}/review?id=${order.order_id}`;
-        message = `Halo kak! 🌟\n\nTerima kasih sudah menggunakan *ETNYX*!\n\n*📋 Order ID:* ${order.order_id}\n*🎮 Rank:* ${order.current_rank} → ${order.target_rank} ✅\n\nKami senang banget order kamu sudah selesai! 🎉\n\nBoleh minta waktunya sebentar untuk kasih *review*? Sebagai terima kasih, kamu akan mendapat *skin gratis*! 🎁\n\n⭐ Kasih review di: ${reviewUrl}\n\nTerima kasih banyak! 🙏\n\n_ETNYX - Push Rank, Tanpa Main_ ⚡`;
+        message = `Halo kak! 🌟\n\nTerima kasih sudah menggunakan *ETNYX*!\n\n*📋 Order ID:* ${order.order_id}\n*🎮 Rank:* ${order.current_rank} → ${order.target_rank} ✅\n\nKami senang banget order kamu sudah selesai! 🎉\n\nBoleh minta waktunya sebentar untuk kasih *review*?\n\n⭐ Kasih review di: ${reviewUrl}\n\nTerima kasih banyak! 🙏\n\n_ETNYX - Push Rank, Tanpa Main_ ⚡`;
         sent = await sendWhatsAppMessage(order.whatsapp, message);
         break;
       }
