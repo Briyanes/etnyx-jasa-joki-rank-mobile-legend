@@ -114,12 +114,16 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
       if (settings.site_info) setSiteInfo(settings.site_info);
       if (settings.integrations) setIntegrations(settings.integrations);
       if (settings.bank_accounts && Array.isArray(settings.bank_accounts)) {
-        // Merge with defaults so accidentally deleted entries come back
+        // Merge with defaults, maintain correct order (bank → ewallet → qris)
         const saved = settings.bank_accounts as typeof DEFAULT_BANK_ACCOUNTS;
-        const merged = [...saved];
-        for (const def of DEFAULT_BANK_ACCOUNTS) {
-          if (!saved.some((s: { bank: string }) => s.bank === def.bank)) {
-            merged.push(def);
+        const merged = DEFAULT_BANK_ACCOUNTS.map((def) => {
+          const existing = saved.find((s: { bank: string }) => s.bank === def.bank);
+          return existing ? { ...def, ...existing, category: def.category } : def;
+        });
+        // Append any custom entries not in defaults
+        for (const s of saved) {
+          if (!DEFAULT_BANK_ACCOUNTS.some((d) => d.bank === s.bank)) {
+            merged.push(s);
           }
         }
         setBankAccounts(merged);
