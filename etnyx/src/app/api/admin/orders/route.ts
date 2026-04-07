@@ -199,6 +199,8 @@ export async function PATCH(request: Request) {
         username: data.username,
         current_rank: data.current_rank,
         target_rank: data.target_rank,
+        current_star: data.current_star,
+        target_star: data.target_star,
         package: data.package,
         price: data.total_price,
         whatsapp: data.whatsapp,

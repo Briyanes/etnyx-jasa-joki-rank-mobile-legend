@@ -16,6 +16,8 @@ interface Order {
   game_id: string;
   current_rank: string;
   target_rank: string;
+  current_star: number | null;
+  target_star: number | null;
   package: string;
   is_express: boolean;
   is_premium: boolean;
@@ -72,6 +74,13 @@ const RANK_LABELS: Record<string, string> = {
   epic: "Epic", legend: "Legend", mythic: "Mythic", mythicgrading: "Mythic Grading",
   mythichonor: "Mythic Honor", mythicglory: "Mythic Glory", mythicimmortal: "Mythic Immortal",
 };
+
+const STAR_LABELS: Record<number, string> = { 5: "V", 4: "IV", 3: "III", 2: "II", 1: "I" };
+function rankWithStar(rank: string, star?: number | null): string {
+  const label = RANK_LABELS[rank] || rank;
+  if (star && STAR_LABELS[star]) return `${label} ${STAR_LABELS[star]}`;
+  return label;
+}
 
 const RANKS_ORDER = ["warrior", "elite", "master", "grandmaster", "epic", "legend", "mythic", "mythicgrading", "mythichonor", "mythicglory", "mythicimmortal"];
 
@@ -511,7 +520,7 @@ export default function WorkerDashboard() {
                         {order.is_express && <span className="px-1.5 py-0.5 rounded text-xs bg-orange-500/10 text-orange-400">Express</span>}
                       </div>
                       <p className="text-text-muted text-xs mt-1">
-                        {RANK_LABELS[order.current_rank] || order.current_rank} → {RANK_LABELS[order.target_rank] || order.target_rank}
+                        {rankWithStar(order.current_rank, order.current_star)} → {rankWithStar(order.target_rank, order.target_star)}
                       </p>
                       {order.hero_request && <p className="text-text-muted text-xs">Hero: {order.hero_request}</p>}
                     </div>
@@ -568,7 +577,7 @@ export default function WorkerDashboard() {
                 <div key={order.id} className="bg-surface rounded-xl border border-white/5 p-3 flex items-center justify-between">
                   <div>
                     <span className="text-text font-mono text-sm">{order.order_id}</span>
-                    <span className="text-text-muted text-xs ml-2">{RANK_LABELS[order.current_rank]} → {RANK_LABELS[order.target_rank]}</span>
+                    <span className="text-text-muted text-xs ml-2">{rankWithStar(order.current_rank, order.current_star)} → {rankWithStar(order.target_rank, order.target_star)}</span>
                   </div>
                   <span className="text-green-400 text-xs">{formatDate(order.created_at)}</span>
                 </div>
@@ -668,7 +677,7 @@ function OrderCard({
               {order.is_premium && <span className="px-1.5 py-0.5 rounded text-xs bg-purple-500/10 text-purple-400">Premium</span>}
             </div>
             <p className="text-text-muted text-xs mt-1">
-              {order.username} • {RANK_LABELS[order.current_rank] || order.current_rank} → {RANK_LABELS[order.target_rank] || order.target_rank}
+              {order.username} • {rankWithStar(order.current_rank, order.current_star)} → {rankWithStar(order.target_rank, order.target_star)}
             </p>
           </div>
           <div className="flex items-center gap-2">

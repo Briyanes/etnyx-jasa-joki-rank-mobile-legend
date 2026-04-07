@@ -17,6 +17,8 @@ interface Order {
   game_id: string;
   current_rank: string;
   target_rank: string;
+  current_star: number | null;
+  target_star: number | null;
   package: string;
   is_express: boolean;
   is_premium: boolean;
@@ -71,6 +73,13 @@ const RANK_LABELS: Record<string, string> = {
   epic: "Epic", legend: "Legend", mythic: "Mythic", mythicgrading: "Mythic Grading",
   mythichonor: "Mythic Honor", mythicglory: "Mythic Glory", mythicimmortal: "Mythic Immortal",
 };
+
+const STAR_LABELS: Record<number, string> = { 5: "V", 4: "IV", 3: "III", 2: "II", 1: "I" };
+function rankWithStar(rank: string, star?: number | null): string {
+  const label = RANK_LABELS[rank] || rank;
+  if (star && STAR_LABELS[star]) return `${label} ${STAR_LABELS[star]}`;
+  return label;
+}
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
   pending: { label: "Pending", color: "text-yellow-400", bg: "bg-yellow-500/10" },
@@ -449,7 +458,7 @@ export default function LeadDashboard() {
                       <div className="flex items-center gap-2 mt-1 text-text-muted text-xs">
                         <span>{order.username}</span>
                         <span>•</span>
-                        <span>{RANK_LABELS[order.current_rank] || order.current_rank} → {RANK_LABELS[order.target_rank] || order.target_rank}</span>
+                        <span>{rankWithStar(order.current_rank, order.current_star)} → {rankWithStar(order.target_rank, order.target_star)}</span>
                       </div>
                     </div>
                     <div className="text-right shrink-0">

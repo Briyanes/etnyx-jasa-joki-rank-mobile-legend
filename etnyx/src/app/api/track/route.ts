@@ -16,7 +16,7 @@ export async function GET(request: Request) {
     const supabase = await createAdminClient();
     const { data, error } = await supabase
       .from("orders")
-      .select("id, order_id, username, current_rank, target_rank, package, status, progress, current_progress_rank, created_at, updated_at")
+      .select("id, order_id, username, current_rank, target_rank, current_star, target_star, package, status, progress, current_progress_rank, created_at, updated_at")
       .eq("order_id", sanitizedId)
       .single();
 

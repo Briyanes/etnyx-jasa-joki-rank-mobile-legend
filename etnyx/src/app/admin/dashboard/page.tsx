@@ -49,6 +49,8 @@ interface Order {
   game_id: string;
   current_rank: string;
   target_rank: string;
+  current_star: number | null;
+  target_star: number | null;
   package: string;
   package_title: string | null;
   is_express: boolean;
@@ -178,8 +180,15 @@ const TAB_CONFIG: { id: TabType; label: string; icon: typeof BarChart3 }[] = [
 const RANKS = ["warrior", "elite", "master", "grandmaster", "epic", "legend", "mythic", "mythicglory"];
 
 const rankLabel = (r: string) => {
-  const m: Record<string, string> = { warrior: "Warrior", elite: "Elite", master: "Master", grandmaster: "Grandmaster", epic: "Epic", legend: "Legend", mythic: "Mythic", mythicglory: "Mythic Glory" };
+  const m: Record<string, string> = { warrior: "Warrior", elite: "Elite", master: "Master", grandmaster: "Grandmaster", epic: "Epic", legend: "Legend", mythic: "Mythic", mythicgrading: "Mythic Grading", mythichonor: "Mythic Honor", mythicglory: "Mythic Glory", mythicimmortal: "Mythic Immortal" };
   return m[r] || r;
+};
+
+const STAR_LABELS: Record<number, string> = { 5: "V", 4: "IV", 3: "III", 2: "II", 1: "I" };
+const rankWithStar = (r: string, star?: number | null) => {
+  const label = rankLabel(r);
+  if (star && STAR_LABELS[star]) return `${label} ${STAR_LABELS[star]}`;
+  return label;
 };
 
 // ---- Component ----
@@ -948,7 +957,7 @@ export default function AdminDashboard() {
                             {o.whatsapp && <p className="text-text-muted text-[10px]">{o.whatsapp}</p>}
                           </td>
                           <td className="px-4 py-3">
-                            <span className="text-xs text-text">{o.package_title || `${o.current_rank} → ${o.target_rank}`}</span>
+                            <span className="text-xs text-text">{o.package_title || `${rankWithStar(o.current_rank, o.current_star)} → ${rankWithStar(o.target_rank, o.target_star)}`}</span>
                             <div className="flex items-center gap-1 mt-0.5">
                               {o.is_express && <Zap className="w-3 h-3 text-yellow-400" />}
                               {o.is_premium && <Crown className="w-3 h-3 text-purple-400" />}

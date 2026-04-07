@@ -27,6 +27,8 @@ interface OrderData {
   username: string;
   current_rank: string;
   target_rank: string;
+  current_star: number | null;
+  target_star: number | null;
   package: string;
   status: string;
   progress: number;
@@ -44,8 +46,18 @@ const rankLabels: Record<string, string> = {
   epic: "Epic",
   legend: "Legend",
   mythic: "Mythic",
+  mythicgrading: "Mythic Grading",
+  mythichonor: "Mythic Honor",
   mythicglory: "Mythic Glory",
+  mythicimmortal: "Mythic Immortal",
 };
+
+const STAR_LABELS: Record<number, string> = { 5: "V", 4: "IV", 3: "III", 2: "II", 1: "I" };
+function rankWithStar(rank: string, star?: number | null): string {
+  const label = rankLabels[rank] || rank;
+  if (star && STAR_LABELS[star]) return `${label} ${STAR_LABELS[star]}`;
+  return label;
+}
 
 // Translations
 const t = {
@@ -379,11 +391,11 @@ function TrackOrderContent() {
                 </div>
                 <div>
                   <p className="text-muted text-xs mb-1">{txt.startRank}</p>
-                  <p className="text-text font-medium">{rankLabels[order.current_rank] || order.current_rank}</p>
+                  <p className="text-text font-medium">{rankWithStar(order.current_rank, order.current_star)}</p>
                 </div>
                 <div>
                   <p className="text-muted text-xs mb-1">{txt.targetRank}</p>
-                  <p className="text-accent font-medium">{rankLabels[order.target_rank] || order.target_rank}</p>
+                  <p className="text-accent font-medium">{rankWithStar(order.target_rank, order.target_star)}</p>
                 </div>
                 <div>
                   <p className="text-muted text-xs mb-1">{txt.orderDate}</p>

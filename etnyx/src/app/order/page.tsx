@@ -875,6 +875,8 @@ function OrderPageContent() {
         body: JSON.stringify({
           currentRank: selectedPackage?.currentRank || form.currentRank,
           targetRank: selectedPackage?.targetRank || form.targetRank,
+          currentStar: RANKS_WITH_STARS.includes(selectedPackage?.currentRank || form.currentRank) ? currentStar : null,
+          targetStar: RANKS_WITH_STARS.includes(selectedPackage?.targetRank || form.targetRank) ? targetStar : null,
           packageTitle: selectedPackage?.title || (orderMode === "gendong" ? `Gendong ${selectedGendongRank?.name} x${gendongQuantity} star` : undefined),
           orderType: orderMode,
           loginMethod: form.loginMethod,
