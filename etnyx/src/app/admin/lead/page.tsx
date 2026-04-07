@@ -7,7 +7,7 @@ import {
   ShoppingCart, Users, LogOut, RefreshCw, Filter, Search,
   ChevronDown, ChevronUp, UserPlus, Clock, CheckCircle, XCircle,
   AlertCircle, Loader2, Package, TrendingUp, Eye, MessageSquare,
-  Send, RotateCcw, CheckSquare, Square,
+  Send, RotateCcw, CheckSquare, Square, Star, Trophy, Swords, Target, Timer, Camera,
 } from "lucide-react";
 
 interface Order {
@@ -70,6 +70,20 @@ interface Note {
   created_at: string;
 }
 
+interface Submission {
+  id: string;
+  stars_gained: number;
+  mvp_count: number;
+  savage_count: number;
+  maniac_count: number;
+  matches_played: number;
+  win_count: number;
+  duration_minutes: number;
+  screenshots: string[];
+  submitted_at: string;
+  staff_users: { id: string; name: string } | null;
+}
+
 const RANK_LABELS: Record<string, string> = {
   warrior: "Warrior", elite: "Elite", master: "Master", grandmaster: "Grandmaster",
   epic: "Epic", legend: "Legend", mythic: "Mythic", mythicgrading: "Mythic Grading",
@@ -122,6 +136,10 @@ export default function LeadDashboard() {
   const [newNote, setNewNote] = useState("");
   const [noteSending, setNoteSending] = useState(false);
 
+  // Submissions
+  const [submissionsOrder, setSubmissionsOrder] = useState<string | null>(null);
+  const [submissions, setSubmissions] = useState<Record<string, Submission[]>>({});
+
   const checkAuth = useCallback(async () => {
     try {
       const res = await fetch("/api/staff/auth");
@@ -172,6 +190,14 @@ export default function LeadDashboard() {
       const data = await res.json();
       setNotes(data.notes || []);
     } catch { setNotes([]); }
+  }, []);
+
+  const fetchSubmissions = useCallback(async (orderId: string) => {
+    try {
+      const res = await fetch(`/api/staff/submissions?orderId=${orderId}`);
+      const data = await res.json();
+      setSubmissions(prev => ({ ...prev, [orderId]: data.submissions || [] }));
+    } catch (e) { console.error(e); }
   }, []);
 
   useEffect(() => {
@@ -462,7 +488,11 @@ export default function LeadDashboard() {
                           : <Square className="w-5 h-5 text-text-muted hover:text-text" />}
                       </button>
                     )}
-                    <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setExpandedOrder(isExpanded ? null : order.id)}>
+                    <div className="flex-1 min-w-0 cursor-pointer" onClick={() => { 
+                      const newExpanded = isExpanded ? null : order.id;
+                      setExpandedOrder(newExpanded);
+                      if (newExpanded && order.assigned_worker_id && !submissions[order.id]) fetchSubmissions(order.id);
+                    }}>
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-text font-mono text-sm font-medium">{order.order_id}</span>
                         <span className={`px-2 py-0.5 rounded-md text-xs ${sc.bg} ${sc.color}`}>{sc.label}</span>
@@ -490,7 +520,11 @@ export default function LeadDashboard() {
                         </div>
                       )}
                     </div>
-                    <button onClick={() => setExpandedOrder(isExpanded ? null : order.id)} className="shrink-0">
+                    <button onClick={() => {
+                      const newExpanded = isExpanded ? null : order.id;
+                      setExpandedOrder(newExpanded);
+                      if (newExpanded && order.assigned_worker_id && !submissions[order.id]) fetchSubmissions(order.id);
+                    }} className="shrink-0">
                       {isExpanded ? <ChevronUp className="w-4 h-4 text-text-muted" /> : <ChevronDown className="w-4 h-4 text-text-muted" />}
                     </button>
                   </div>
@@ -577,6 +611,16 @@ export default function LeadDashboard() {
                           <MessageSquare className="w-3.5 h-3.5" /> Catatan
                         </button>
 
+                        {/* Submissions */}
+                        {order.assigned_worker_id && (
+                          <button
+                            onClick={() => { setSubmissionsOrder(submissionsOrder === order.id ? null : order.id); if (submissionsOrder !== order.id) fetchSubmissions(order.id); }}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-purple-500/10 text-purple-400 rounded-lg text-xs hover:bg-purple-500/20 transition-colors"
+                          >
+                            <Camera className="w-3.5 h-3.5" /> Hasil ({submissions[order.id]?.length || 0})
+                          </button>
+                        )}
+
                         {/* WhatsApp */}
                         {order.whatsapp && (
                           <a href={`https://wa.me/${order.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer"
@@ -648,6 +692,80 @@ export default function LeadDashboard() {
                               </div>
                             ))}
                           </div>
+                        </div>
+                      )}
+
+                      {/* Submissions Panel */}
+                      {submissionsOrder === order.id && (
+                        <div className="bg-background rounded-lg p-4 space-y-3">
+                          <h4 className="text-text font-medium text-sm flex items-center gap-2">
+                            <Camera className="w-4 h-4 text-purple-400" /> Hasil Boosting Worker
+                          </h4>
+                          {!submissions[order.id] || submissions[order.id].length === 0 ? (
+                            <p className="text-text-muted text-xs text-center py-2">Belum ada hasil submit</p>
+                          ) : (
+                            <>
+                              {/* Aggregate Stats */}
+                              <div className="grid grid-cols-4 gap-2">
+                                {[
+                                  { label: "Match", value: submissions[order.id].reduce((s, x) => s + x.matches_played, 0), icon: Swords },
+                                  { label: "Win", value: submissions[order.id].reduce((s, x) => s + x.win_count, 0), icon: Trophy },
+                                  { label: "Bintang", value: submissions[order.id].reduce((s, x) => s + x.stars_gained, 0), icon: Star },
+                                  { label: "Menit", value: submissions[order.id].reduce((s, x) => s + x.duration_minutes, 0), icon: Timer },
+                                ].map(({ label, value, icon: Icon }) => (
+                                  <div key={label} className="bg-surface rounded-lg p-2 text-center">
+                                    <Icon className="w-3.5 h-3.5 text-accent mx-auto mb-1" />
+                                    <div className="text-text font-bold text-sm">{value}</div>
+                                    <div className="text-text-muted text-[10px]">{label}</div>
+                                  </div>
+                                ))}
+                              </div>
+                              {/* Winrate */}
+                              {(() => {
+                                const totalMatches = submissions[order.id].reduce((s, x) => s + x.matches_played, 0);
+                                const totalWins = submissions[order.id].reduce((s, x) => s + x.win_count, 0);
+                                const wr = totalMatches > 0 ? ((totalWins / totalMatches) * 100).toFixed(1) : "0";
+                                return (
+                                  <div className="flex items-center gap-2 text-xs">
+                                    <Target className="w-3.5 h-3.5 text-accent" />
+                                    <span className="text-text-muted">Winrate:</span>
+                                    <span className={`font-bold ${Number(wr) >= 70 ? "text-green-400" : Number(wr) >= 50 ? "text-yellow-400" : "text-red-400"}`}>{wr}%</span>
+                                    <span className="text-text-muted">({totalWins}/{totalMatches})</span>
+                                  </div>
+                                );
+                              })()}
+                              {/* Per-session list */}
+                              <div className="space-y-2 max-h-60 overflow-y-auto">
+                                {submissions[order.id].map((sub, idx) => (
+                                  <div key={sub.id} className="bg-surface rounded-lg p-2.5 text-xs">
+                                    <div className="flex items-center justify-between mb-1">
+                                      <span className="text-text font-medium">Sesi {idx + 1}</span>
+                                      <span className="text-text-muted">{new Date(sub.submitted_at).toLocaleDateString("id-ID", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                                    </div>
+                                    <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-text-muted">
+                                      <span>⭐ {sub.stars_gained} bintang</span>
+                                      <span>🎮 {sub.matches_played} match</span>
+                                      <span>✅ {sub.win_count} win</span>
+                                      <span>⏱ {sub.duration_minutes} menit</span>
+                                      {sub.mvp_count > 0 && <span>🏅 {sub.mvp_count} MVP</span>}
+                                      {sub.savage_count > 0 && <span>🔥 {sub.savage_count} Savage</span>}
+                                      {sub.maniac_count > 0 && <span>💥 {sub.maniac_count} Maniac</span>}
+                                    </div>
+                                    {sub.screenshots && sub.screenshots.length > 0 && (
+                                      <div className="flex gap-1 mt-1.5 overflow-x-auto">
+                                        {sub.screenshots.map((ss, si) => (
+                                          <a key={si} href={ss} target="_blank" rel="noopener noreferrer"
+                                            className="flex-shrink-0 w-16 h-16 rounded border border-white/10 overflow-hidden hover:border-accent transition-colors">
+                                            <img src={ss} alt={`Screenshot ${si + 1}`} className="w-full h-full object-cover" />
+                                          </a>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </>
+                          )}
                         </div>
                       )}
 

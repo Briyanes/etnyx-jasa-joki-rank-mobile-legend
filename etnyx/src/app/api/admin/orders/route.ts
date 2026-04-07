@@ -198,8 +198,24 @@ export async function PATCH(request: Request) {
       await supabase.from("order_logs").insert({
         order_id: id,
         action: `status_${updates.status}`,
-        new_value: updates.status,
+        new_value: updates.status as string,
         notes: `Status changed by admin (${auth.user!.email})`,
+        created_by: auth.user!.email,
+      });
+    }
+
+    // Log worker assignment to order_logs
+    if (updates.assigned_worker_id && updates.assigned_worker_id !== currentOrder?.assigned_worker_id) {
+      const { data: worker } = await supabase
+        .from("staff_users")
+        .select("name")
+        .eq("id", updates.assigned_worker_id as string)
+        .single();
+      await supabase.from("order_logs").insert({
+        order_id: id,
+        action: "assigned",
+        new_value: `Assigned to ${worker?.name || "Unknown"}`,
+        notes: `Assigned by admin (${auth.user!.email})`,
         created_by: auth.user!.email,
       });
     }

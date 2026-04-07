@@ -93,6 +93,7 @@ export default function WorkerDashboard() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [showAllCompleted, setShowAllCompleted] = useState(false);
 
   // Submission form
   const [submittingOrder, setSubmittingOrder] = useState<string | null>(null);
@@ -143,9 +144,10 @@ export default function WorkerDashboard() {
     } catch { router.push("/admin"); return null; }
   }, [router]);
 
-  const fetchOrders = useCallback(async () => {
+  const fetchOrders = useCallback(async (includeCompleted = false) => {
     try {
-      const res = await fetch("/api/staff/orders");
+      const params = includeCompleted ? "?includeCompleted=true" : "";
+      const res = await fetch(`/api/staff/orders${params}`);
       const data = await res.json();
       setOrders(data.orders || []);
     } catch (e) { console.error(e); }
@@ -571,11 +573,21 @@ export default function WorkerDashboard() {
         {/* Completed */}
         {completedOrders.length > 0 && (
           <section>
-            <h2 className="text-text font-semibold mb-3 flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-green-400" /> Selesai
-            </h2>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-text font-semibold flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-green-400" /> Selesai ({completedOrders.length})
+              </h2>
+              {!showAllCompleted && completedOrders.length > 5 && (
+                <button onClick={() => { setShowAllCompleted(true); fetchOrders(true); }}
+                  className="text-accent text-xs hover:underline">Lihat Semua</button>
+              )}
+              {showAllCompleted && (
+                <button onClick={() => setShowAllCompleted(false)}
+                  className="text-text-muted text-xs hover:underline">Tutup</button>
+              )}
+            </div>
             <div className="space-y-2">
-              {completedOrders.slice(0, 10).map(order => (
+              {(showAllCompleted ? completedOrders : completedOrders.slice(0, 5)).map(order => (
                 <div key={order.id} className="bg-surface rounded-xl border border-white/5 p-3 flex items-center justify-between">
                   <div>
                     <span className="text-text font-mono text-sm">{order.order_id}</span>
