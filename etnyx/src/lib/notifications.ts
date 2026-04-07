@@ -392,10 +392,7 @@ Halo! Pembayaran kamu sudah kami terima dan dikonfirmasi.
 
 Order kamu akan segera diproses oleh tim booster kami. Kamu akan menerima notifikasi saat pengerjaan dimulai.
 
-Track order di sini:
-${SITE_URL}/track/?id=${order.order_id}/
-
-Jangan login ke akun selama proses ya!
+Terima kasih sudah mempercayai *ETNYX*!
 
 _ETNYX - Push Rank, Tanpa Main_
 `.trim();
