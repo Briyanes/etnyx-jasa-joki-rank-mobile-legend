@@ -214,6 +214,7 @@ export default function AdminDashboard() {
   const [credentials, setCredentials] = useState<{ order_id: string; account_login: string | null; account_password: string | null } | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [followUpLoading, setFollowUpLoading] = useState<string | null>(null);
+  const [statusActionLoading, setStatusActionLoading] = useState<string | null>(null);
 
   // Payment proof review state
   interface PaymentProof { id: string; order_id: string; image_url: string; sender_name: string | null; sender_bank: string | null; amount: number | null; status: string; created_at: string; reject_reason?: string | null }
@@ -406,10 +407,12 @@ export default function AdminDashboard() {
   const handleLogout = async () => { await fetch("/api/admin/auth", { method: "DELETE" }); router.push("/admin"); };
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    setStatusActionLoading(`${orderId}-${newStatus}`);
     try {
       await fetch("/api/admin/orders", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: orderId, status: newStatus }) });
       fetchOrders(); fetchStats();
     } catch (e) { console.error(e); }
+    setStatusActionLoading(null);
   };
 
   const viewCredentials = async (orderId: string) => {
@@ -993,37 +996,42 @@ export default function AdminDashboard() {
                             </div>
                           </td>
                           <td className="px-4 py-3">
-                            <div className="flex flex-col gap-1.5 min-w-[160px]">
-                              {/* === PENDING: Konfirmasi + Follow Up Bayar === */}
+                            <div className="flex flex-col gap-1 min-w-[150px]">
+                              {/* === PENDING === */}
                               {o.status === "pending" && (<>
                                 {o.payment_method === "manual_transfer" && (
                                   <button onClick={() => openProofModal(o.id, o.order_id)}
                                     className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 transition-colors w-full">
-                                    <Eye className="w-3 h-3" /> Lihat Bukti Transfer
+                                    <Eye className="w-3 h-3" /> Lihat Bukti
                                   </button>
                                 )}
                                 <button onClick={() => updateOrderStatus(o.id, "confirmed")}
-                                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors w-full">
-                                  <CheckCircle className="w-3 h-3" /> Konfirmasi Bayar
+                                  disabled={statusActionLoading === `${o.id}-confirmed`}
+                                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors w-full disabled:opacity-50">
+                                  {statusActionLoading === `${o.id}-confirmed` ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />} Konfirmasi Bayar
                                 </button>
-                                {o.whatsapp && (
-                                  <button onClick={() => sendFollowUp(o.id, "follow_up_payment")}
-                                    disabled={followUpLoading === `${o.id}-follow_up_payment`}
-                                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors w-full disabled:opacity-50">
-                                    {followUpLoading === `${o.id}-follow_up_payment` ? <Loader2 className="w-3 h-3 animate-spin" /> : <MessageCircle className="w-3 h-3" />} Follow Up Bayar
+                                <div className="flex gap-1">
+                                  {o.whatsapp && (
+                                    <button onClick={() => sendFollowUp(o.id, "follow_up_payment")}
+                                      disabled={followUpLoading === `${o.id}-follow_up_payment`}
+                                      className="flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded-lg text-[9px] font-medium bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors disabled:opacity-50">
+                                      {followUpLoading === `${o.id}-follow_up_payment` ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <MessageCircle className="w-2.5 h-2.5" />} Follow Up
+                                    </button>
+                                  )}
+                                  <button onClick={() => updateOrderStatus(o.id, "cancelled")}
+                                    disabled={statusActionLoading === `${o.id}-cancelled`}
+                                    className="flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded-lg text-[9px] font-medium bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors disabled:opacity-50">
+                                    {statusActionLoading === `${o.id}-cancelled` ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <XCircle className="w-2.5 h-2.5" />} Cancel
                                   </button>
-                                )}
-                                <button onClick={() => updateOrderStatus(o.id, "cancelled")}
-                                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors w-full">
-                                  <XCircle className="w-3 h-3" /> Cancel
-                                </button>
+                                </div>
                               </>)}
 
-                              {/* === CONFIRMED: Mulai Kerjakan + Follow Up Creds === */}
+                              {/* === CONFIRMED === */}
                               {o.status === "confirmed" && (<>
                                 <button onClick={() => updateOrderStatus(o.id, "in_progress")}
-                                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-accent/10 text-accent hover:bg-accent/20 transition-colors w-full">
-                                  <TrendingUp className="w-3 h-3" /> Mulai Kerjakan
+                                  disabled={statusActionLoading === `${o.id}-in_progress`}
+                                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-accent/10 text-accent hover:bg-accent/20 transition-colors w-full disabled:opacity-50">
+                                  {statusActionLoading === `${o.id}-in_progress` ? <Loader2 className="w-3 h-3 animate-spin" /> : <TrendingUp className="w-3 h-3" />} Mulai Kerjakan
                                 </button>
                                 <button onClick={() => viewCredentials(o.id)}
                                   className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 transition-colors w-full">
@@ -1032,17 +1040,18 @@ export default function AdminDashboard() {
                                 {o.whatsapp && (
                                   <button onClick={() => sendFollowUp(o.id, "follow_up_credentials")}
                                     disabled={followUpLoading === `${o.id}-follow_up_credentials`}
-                                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors w-full disabled:opacity-50">
-                                    {followUpLoading === `${o.id}-follow_up_credentials` ? <Loader2 className="w-3 h-3 animate-spin" /> : <MessageCircle className="w-3 h-3" />} Minta Credentials
+                                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[9px] font-medium bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors w-full disabled:opacity-50">
+                                    {followUpLoading === `${o.id}-follow_up_credentials` ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <MessageCircle className="w-2.5 h-2.5" />} Minta Credentials
                                   </button>
                                 )}
                               </>)}
 
-                              {/* === IN PROGRESS: Selesaikan + Update Progress + Follow Up === */}
+                              {/* === IN PROGRESS === */}
                               {o.status === "in_progress" && (<>
                                 <button onClick={() => updateOrderStatus(o.id, "completed")}
-                                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors w-full">
-                                  <CheckCircle className="w-3 h-3" /> Selesaikan
+                                  disabled={statusActionLoading === `${o.id}-completed`}
+                                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors w-full disabled:opacity-50">
+                                  {statusActionLoading === `${o.id}-completed` ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />} Selesaikan
                                 </button>
                                 <button onClick={() => viewCredentials(o.id)}
                                   className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 transition-colors w-full">
@@ -1051,48 +1060,52 @@ export default function AdminDashboard() {
                                 {o.whatsapp && (
                                   <button onClick={() => sendFollowUp(o.id, "follow_up_progress")}
                                     disabled={followUpLoading === `${o.id}-follow_up_progress`}
-                                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors w-full disabled:opacity-50">
-                                    {followUpLoading === `${o.id}-follow_up_progress` ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />} Update Progress WA
+                                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[9px] font-medium bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors w-full disabled:opacity-50">
+                                    {followUpLoading === `${o.id}-follow_up_progress` ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Send className="w-2.5 h-2.5" />} Update Progress WA
                                   </button>
                                 )}
                               </>)}
 
-                              {/* === COMPLETED: Review + Reopen + Notif Ulang === */}
+                              {/* === COMPLETED === */}
                               {o.status === "completed" && (<>
-                                {o.whatsapp && (<>
-                                  <button onClick={() => sendFollowUp(o.id, "request_review")}
-                                    disabled={followUpLoading === `${o.id}-request_review`}
-                                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 transition-colors w-full disabled:opacity-50">
-                                    {followUpLoading === `${o.id}-request_review` ? <Loader2 className="w-3 h-3 animate-spin" /> : <Star className="w-3 h-3" />} Minta Review
-                                  </button>
-                                  <button onClick={() => sendFollowUp(o.id, "notify_completed")}
-                                    disabled={followUpLoading === `${o.id}-notify_completed`}
-                                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors w-full disabled:opacity-50">
-                                    {followUpLoading === `${o.id}-notify_completed` ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />} Kirim Notif Selesai
-                                  </button>
-                                </>)}
+                                {o.whatsapp && (
+                                  <div className="flex gap-1">
+                                    <button onClick={() => sendFollowUp(o.id, "request_review")}
+                                      disabled={followUpLoading === `${o.id}-request_review`}
+                                      className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg text-[9px] font-medium bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 transition-colors disabled:opacity-50">
+                                      {followUpLoading === `${o.id}-request_review` ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Star className="w-2.5 h-2.5" />} Review
+                                    </button>
+                                    <button onClick={() => sendFollowUp(o.id, "notify_completed")}
+                                      disabled={followUpLoading === `${o.id}-notify_completed`}
+                                      className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg text-[9px] font-medium bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors disabled:opacity-50">
+                                      {followUpLoading === `${o.id}-notify_completed` ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Send className="w-2.5 h-2.5" />} Notif
+                                    </button>
+                                  </div>
+                                )}
                                 <button onClick={() => updateOrderStatus(o.id, "in_progress")}
-                                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 transition-colors w-full">
-                                  <RefreshCw className="w-3 h-3" /> Reopen Order
+                                  disabled={statusActionLoading === `${o.id}-in_progress`}
+                                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 transition-colors w-full disabled:opacity-50">
+                                  {statusActionLoading === `${o.id}-in_progress` ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />} Reopen
                                 </button>
                               </>)}
 
-                              {/* === CANCELLED: Reaktivasi === */}
+                              {/* === CANCELLED === */}
                               {o.status === "cancelled" && (<>
                                 <button onClick={() => updateOrderStatus(o.id, "pending")}
-                                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-accent/10 text-accent hover:bg-accent/20 transition-colors w-full">
-                                  <RefreshCw className="w-3 h-3" /> Reaktivasi
+                                  disabled={statusActionLoading === `${o.id}-pending`}
+                                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-accent/10 text-accent hover:bg-accent/20 transition-colors w-full disabled:opacity-50">
+                                  {statusActionLoading === `${o.id}-pending` ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />} Reaktivasi
                                 </button>
                                 {o.whatsapp && (
                                   <button onClick={() => sendFollowUp(o.id, "reactivation")}
                                     disabled={followUpLoading === `${o.id}-reactivation`}
-                                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors w-full disabled:opacity-50">
-                                    {followUpLoading === `${o.id}-reactivation` ? <Loader2 className="w-3 h-3 animate-spin" /> : <MessageCircle className="w-3 h-3" />} Follow Up WA
+                                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[9px] font-medium bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors w-full disabled:opacity-50">
+                                    {followUpLoading === `${o.id}-reactivation` ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <MessageCircle className="w-2.5 h-2.5" />} Follow Up WA
                                   </button>
                                 )}
                               </>)}
 
-                              {/* === Universal actions === */}
+                              {/* Universal: WA + Copy */}
                               <div className="flex gap-1 pt-1 border-t border-white/5">
                                 {o.whatsapp && (
                                   <button onClick={() => openWhatsApp(o.whatsapp!, `Halo kak, ini dari ETNYX terkait order ${o.order_id}. `)}
