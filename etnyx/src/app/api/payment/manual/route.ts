@@ -111,6 +111,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Order cancelled" }, { status: 400 });
     }
 
+    // Idempotency: prevent duplicate proof uploads
+    const { data: existingProof } = await supabase
+      .from("payment_proofs")
+      .select("id")
+      .eq("order_id", order.id)
+      .limit(1);
+
+    if (existingProof && existingProof.length > 0) {
+      return NextResponse.json({ error: "Bukti pembayaran sudah diupload sebelumnya" }, { status: 409 });
+    }
+
     // Upload file to Supabase Storage
     const ext = file.name.split(".").pop() || "jpg";
     const fileName = `proof-${orderId}-${Date.now()}.${ext}`;

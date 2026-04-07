@@ -166,10 +166,16 @@ export async function POST(request: NextRequest) {
           .single();
 
         if (referrer) {
-          // Self-referral check: compare by email or whatsapp
-          const isSelfReferral =
-            (sanitizedEmail && sanitizedEmail === referrer.referral_code) ||
-            false;
+          // Self-referral check: compare by customer ID or email
+          let isSelfReferral = false;
+          if (sanitizedEmail) {
+            const { data: selfCheck } = await supabase
+              .from("customers")
+              .select("id")
+              .eq("email", sanitizedEmail.toLowerCase())
+              .single();
+            isSelfReferral = !!selfCheck && selfCheck.id === referrer.id;
+          }
 
           if (!isSelfReferral) {
             // Check duplicate: has this whatsapp already used this referral?

@@ -14,6 +14,7 @@ const translations = {
     loading: "Loading...",
     noAccount: "Belum punya akun?",
     register: "Daftar",
+    forgotPassword: "Lupa password?",
     back: "← Kembali ke Home",
     errorDefault: "Login gagal",
     errorGeneric: "Terjadi kesalahan. Coba lagi.",
@@ -26,6 +27,7 @@ const translations = {
     loading: "Loading...",
     noAccount: "Don't have an account?",
     register: "Register",
+    forgotPassword: "Forgot password?",
     back: "← Back to Home",
     errorDefault: "Login failed",
     errorGeneric: "Something went wrong. Try again.",
@@ -129,6 +131,13 @@ export default function LoginPage() {
             >
               {loading ? t.loading : t.loginBtn}
             </button>
+
+            {/* Forgot Password */}
+            <p className="text-center">
+              <Link href="/reset-password" className="text-primary text-sm hover:underline">
+                {t.forgotPassword}
+              </Link>
+            </p>
           </form>
 
           {/* Register Link */}

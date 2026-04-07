@@ -198,7 +198,24 @@ export async function PUT(request: NextRequest) {
   }
 
   const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
-  if (newStatus) updates.status = newStatus;
+  if (newStatus) {
+    // Validate status transitions
+    const { data: currentOrder } = await supabase.from("orders").select("status").eq("id", orderId).single();
+    if (currentOrder && newStatus !== currentOrder.status) {
+      const validTransitions: Record<string, string[]> = {
+        pending: ["confirmed", "cancelled"],
+        confirmed: ["in_progress", "cancelled"],
+        in_progress: ["completed", "cancelled", "confirmed"],
+        completed: ["in_progress"],
+        cancelled: ["pending"],
+      };
+      const allowed = validTransitions[currentOrder.status] || [];
+      if (!allowed.includes(newStatus)) {
+        return NextResponse.json({ error: `Tidak bisa mengubah status dari ${currentOrder.status} ke ${newStatus}` }, { status: 400 });
+      }
+    }
+    updates.status = newStatus;
+  }
   if (progress !== undefined) updates.progress = Math.min(100, Math.max(0, progress));
   if (currentProgressRank) updates.current_progress_rank = currentProgressRank;
 

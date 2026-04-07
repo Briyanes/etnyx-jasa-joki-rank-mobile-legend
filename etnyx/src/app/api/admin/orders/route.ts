@@ -11,6 +11,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
+    const search = searchParams.get("search");
     const limit = parseInt(searchParams.get("limit") || "50");
     const offset = parseInt(searchParams.get("offset") || "0");
 
@@ -24,6 +25,13 @@ export async function GET(request: Request) {
 
     if (status && status !== "all") {
       query = query.eq("status", status);
+    }
+
+    if (search) {
+      const sanitized = search.replace(/[^a-zA-Z0-9\s\-_@+.]/g, "");
+      if (sanitized) {
+        query = query.or(`order_id.ilike.%${sanitized}%,username.ilike.%${sanitized}%,whatsapp.ilike.%${sanitized}%,game_id.ilike.%${sanitized}%`);
+      }
     }
 
     const { data, error, count } = await query;
@@ -161,6 +169,24 @@ export async function PATCH(request: Request) {
       .single();
 
     const previousStatus = currentOrder?.status;
+
+    // Validate status transitions
+    if (updates.status && updates.status !== previousStatus) {
+      const validTransitions: Record<string, string[]> = {
+        pending: ["confirmed", "cancelled"],
+        confirmed: ["in_progress", "cancelled"],
+        in_progress: ["completed", "cancelled", "confirmed"],
+        completed: ["in_progress"], // Reopen
+        cancelled: ["pending"], // Restore
+      };
+      const allowed = validTransitions[previousStatus || ""] || [];
+      if (!allowed.includes(updates.status as string)) {
+        return NextResponse.json(
+          { error: `Tidak bisa mengubah status dari ${previousStatus} ke ${updates.status}` },
+          { status: 400 }
+        );
+      }
+    }
 
     // Auto-set timestamps on status transitions
     if (updates.status === "confirmed" && previousStatus !== "confirmed") {

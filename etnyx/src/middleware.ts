@@ -33,8 +33,8 @@ function checkRateLimit(ip: string): { allowed: boolean; remaining: number } {
   timestamps.push(now);
   rateLimitStore.set(ip, timestamps);
 
-  // Periodic cleanup: remove old entries every 100 requests
-  if (rateLimitStore.size > 1000) {
+  // Periodic cleanup: remove old entries every 200 requests or when store exceeds 500
+  if (rateLimitStore.size > 500 || timestamps.length % 200 === 0) {
     for (const [key, val] of rateLimitStore) {
       const fresh = val.filter((t) => now - t < RATE_LIMIT_WINDOW);
       if (fresh.length === 0) rateLimitStore.delete(key);

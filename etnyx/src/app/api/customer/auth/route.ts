@@ -16,8 +16,8 @@ async function hashPassword(password: string): Promise<string> {
 }
 
 async function verifyPassword(password: string, hash: string): Promise<boolean> {
-  // Support legacy SHA-256 hashes (64 hex chars) for migration
-  if (hash.length === 64 && /^[a-f0-9]+$/.test(hash)) {
+  // Support legacy SHA-256 hashes (exactly 64 hex chars) for migration
+  if (hash.length === 64 && /^[a-f0-9]{64}$/i.test(hash)) {
     const encoder = new TextEncoder();
     const data = encoder.encode(password + "etnyx-salt");
     const digest = await crypto.subtle.digest("SHA-256", data);

@@ -79,14 +79,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
+    // Idempotency: skip if order already processed to this state
+    if (order.payment_status === "paid" && (transaction_status === "capture" || transaction_status === "settlement")) {
+      return NextResponse.json({ success: true, message: "Already processed" });
+    }
+
     // Determine payment status
     let paymentStatus = "pending";
     let orderStatus = order.status;
 
     if (transaction_status === "capture" || transaction_status === "settlement") {
       if (fraud_status === "accept" || !fraud_status) {
-        paymentStatus = "paid";
-        orderStatus = "confirmed"; // Auto-confirm when paid
+        // Verify payment amount matches order total
+        const paidAmount = parseFloat(gross_amount);
+        if (paidAmount < order.total_price) {
+          console.error(`Amount mismatch for ${order_id}: paid ${paidAmount}, expected ${order.total_price}`);
+          paymentStatus = "underpaid";
+          // Don't auto-confirm — admin must review
+        } else {
+          paymentStatus = "paid";
+          orderStatus = "confirmed"; // Auto-confirm when paid correct amount
+        }
       } else {
         paymentStatus = "challenge";
       }
