@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Clock, CheckCircle, Rocket, XCircle, Check, ChevronLeft, Shield, Zap, MessageCircle, Loader2, Trophy, Star, Swords, Target, Timer, Camera } from "lucide-react";
+import { Clock, CheckCircle, Rocket, XCircle, Check, ChevronLeft, Shield, Zap, MessageCircle, Loader2, Trophy, Star, Swords, Target, Timer, Camera, Crown, ExternalLink } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { WHATSAPP_NUMBER } from "@/lib/constants";
 import { ReactNode } from "react";
@@ -22,6 +22,12 @@ interface Submission {
   submitted_at: string;
 }
 
+interface StatusLog {
+  action: string;
+  new_value: string;
+  created_at: string;
+}
+
 interface OrderData {
   order_id: string;
   username: string;
@@ -30,12 +36,16 @@ interface OrderData {
   current_star: number | null;
   target_star: number | null;
   package: string;
+  package_title: string | null;
   status: string;
   progress: number;
   current_progress_rank: string | null;
+  is_express: boolean;
+  is_premium: boolean;
   created_at: string;
   updated_at: string;
   submissions: Submission[];
+  status_logs: StatusLog[];
 }
 
 const rankLabels: Record<string, string> = {
@@ -97,6 +107,12 @@ const t = {
     minutes: "menit",
     screenshots: "Screenshot",
     noSubmissions: "Belum ada hasil boosting",
+    reviewOrder: "Beri Rating & Review",
+    reportWorker: "Laporkan Worker",
+    orderCompleted: "Order selesai! Terima kasih telah menggunakan layanan kami.",
+    noBoostingYet: "Worker belum submit hasil. Mohon tunggu update selanjutnya.",
+    express: "Express",
+    premium: "Premium",
     status: {
       pending: "Menunggu Konfirmasi",
       confirmed: "Dikonfirmasi",
@@ -141,6 +157,12 @@ const t = {
     minutes: "min",
     screenshots: "Screenshots",
     noSubmissions: "No boosting results yet",
+    reviewOrder: "Rate & Review",
+    reportWorker: "Report Worker",
+    orderCompleted: "Order completed! Thank you for using our service.",
+    noBoostingYet: "Worker has not submitted results yet. Please wait for the next update.",
+    express: "Express",
+    premium: "Premium",
     status: {
       pending: "Waiting Confirmation",
       confirmed: "Confirmed",
@@ -353,9 +375,14 @@ function TrackOrderContent() {
                     const isCurrent = idx === currentStep && order.status !== "completed";
                     const isCancelled = order.status === "cancelled";
 
+                    // Find timestamp for this status from logs
+                    const stepLog = step === "pending"
+                      ? { created_at: order.created_at }
+                      : order.status_logs?.find(l => l.new_value === step);
+
                     return (
                       <div key={step} className="flex items-center gap-4">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${
                           isCancelled && idx >= currentStep
                             ? "bg-red-500/20 text-red-400"
                             : isCompleted
@@ -372,6 +399,11 @@ function TrackOrderContent() {
                           }`}>
                             {statusConfig[step]?.label}
                           </p>
+                          {(isCompleted || isCurrent) && stepLog && (
+                            <p className="text-muted text-[10px] mt-0.5">
+                              {new Date(stepLog.created_at).toLocaleDateString(locale === "id" ? "id-ID" : "en-US", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                            </p>
+                          )}
                         </div>
                       </div>
                     );
@@ -387,25 +419,59 @@ function TrackOrderContent() {
                 </div>
                 <div>
                   <p className="text-muted text-xs mb-1">{txt.package}</p>
-                  <p className="text-text font-medium">{order.package}</p>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <p className="text-text font-medium">{order.package}</p>
+                    {order.is_express && <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-yellow-500/15 text-yellow-400 border border-yellow-500/20"><Zap className="w-2.5 h-2.5" />{txt.express}</span>}
+                    {order.is_premium && <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold bg-purple-500/15 text-purple-400 border border-purple-500/20"><Crown className="w-2.5 h-2.5" />{txt.premium}</span>}
+                  </div>
                 </div>
-                <div>
-                  <p className="text-muted text-xs mb-1">{txt.startRank}</p>
-                  <p className="text-text font-medium">{rankWithStar(order.current_rank, order.current_star)}</p>
-                </div>
-                <div>
-                  <p className="text-muted text-xs mb-1">{txt.targetRank}</p>
-                  <p className="text-accent font-medium">{rankWithStar(order.target_rank, order.target_star)}</p>
-                </div>
+                {order.current_rank === order.target_rank && order.package_title ? (
+                  <div className="col-span-2">
+                    <p className="text-muted text-xs mb-1">{txt.targetRank}</p>
+                    <p className="text-accent font-medium">{order.package_title}</p>
+                  </div>
+                ) : (
+                  <>
+                    <div>
+                      <p className="text-muted text-xs mb-1">{txt.startRank}</p>
+                      <p className="text-text font-medium">{rankWithStar(order.current_rank, order.current_star)}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted text-xs mb-1">{txt.targetRank}</p>
+                      <p className="text-accent font-medium">{rankWithStar(order.target_rank, order.target_star)}</p>
+                    </div>
+                  </>
+                )}
                 <div>
                   <p className="text-muted text-xs mb-1">{txt.orderDate}</p>
-                  <p className="text-text font-medium">{new Date(order.created_at).toLocaleDateString(locale === "id" ? "id-ID" : "en-US")}</p>
+                  <p className="text-text font-medium">{new Date(order.created_at).toLocaleDateString(locale === "id" ? "id-ID" : "en-US", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
                 </div>
                 <div>
                   <p className="text-muted text-xs mb-1">{txt.lastUpdate}</p>
-                  <p className="text-text font-medium">{new Date(order.updated_at).toLocaleDateString(locale === "id" ? "id-ID" : "en-US")}</p>
+                  <p className="text-text font-medium">{new Date(order.updated_at).toLocaleDateString(locale === "id" ? "id-ID" : "en-US", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
                 </div>
               </div>
+
+              {/* Completed Order: Review & Report Links */}
+              {order.status === "completed" && (
+                <div className="mt-6 p-4 bg-green-500/5 border border-green-500/20 rounded-xl">
+                  <p className="text-green-400 text-sm font-medium text-center mb-3">{txt.orderCompleted}</p>
+                  <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                    <a
+                      href={`/review/?id=${order.order_id}`}
+                      className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-accent/10 text-accent border border-accent/20 rounded-lg text-sm font-medium hover:bg-accent/20 transition-colors"
+                    >
+                      <Star className="w-4 h-4" /> {txt.reviewOrder} <ExternalLink className="w-3 h-3" />
+                    </a>
+                    <a
+                      href={`/review/?id=${order.order_id}&report=1`}
+                      className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-500/10 text-red-400 border border-red-500/20 rounded-lg text-sm font-medium hover:bg-red-500/20 transition-colors"
+                    >
+                      <XCircle className="w-4 h-4" /> {txt.reportWorker} <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
+                </div>
+              )}
 
               {/* Boosting Results */}
               {order.submissions && order.submissions.length > 0 && (
@@ -485,6 +551,12 @@ function TrackOrderContent() {
 
               {/* CTA */}
               <div className="mt-6 text-center">
+                {/* No submissions message for in_progress */}
+                {(order.status === "in_progress" || order.status === "completed") && (!order.submissions || order.submissions.length === 0) && (
+                  <div className="mb-4 p-3 bg-yellow-500/5 border border-yellow-500/20 rounded-xl">
+                    <p className="text-yellow-400 text-sm">{txt.noBoostingYet}</p>
+                  </div>
+                )}
                 <p className="text-muted text-sm mb-3">{txt.question}</p>
                 <a
                   href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`${txt.waMessage} ${order.order_id}`)}`}
