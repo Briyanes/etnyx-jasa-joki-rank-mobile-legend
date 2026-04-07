@@ -321,6 +321,252 @@ function buildCategories(): DocCategory[] {
           ),
         },
         {
+          id: "settings-guide",
+          icon: Settings,
+          title: "Settings Tab (10 Sub-Tab)",
+          content: (
+            <div className="space-y-4">
+              <p className="text-text-muted text-sm">Dashboard &rarr; Settings berisi 10 sub-tab untuk mengontrol seluruh konfigurasi platform. Setiap perubahan langsung tersimpan ke database <Code>settings</Code> (key-value JSONB).</p>
+
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">1. Visibilitas &mdash; Kontrol Homepage Sections</h4>
+                <p className="text-text-muted text-xs mb-2"><strong>Fungsi:</strong> Toggle show/hide 9 section di homepage. Visitor tidak akan melihat section yang dimatikan.</p>
+                <Table headers={["Section", "Default", "Keterangan"]} rows={[
+                  ["Hero", "On", "Banner utama: headline, subheadline, tombol CTA"],
+                  ["Pricing", "On", "Tampilan harga paket ke customer"],
+                  ["Why Choose Us", "On", "Keunggulan layanan ETNYX"],
+                  ["Team Showcase", "On", "Profil booster featured"],
+                  ["Testimonials", "On", "Review customer (yang di-approve admin)"],
+                  ["Portfolio", "On", "Showcase hasil boosting (before/after)"],
+                  ["Tracking", "On", "Info fitur tracking real-time"],
+                  ["FAQ", "On", "Pertanyaan yang sering ditanyakan"],
+                  ["CTA", "On", "Tombol call-to-action terakhir"],
+                ]} />
+                <p className="text-text-muted text-[11px] mt-2"><strong>Cara kerja:</strong> Disimpan ke key <Code>section_visibility</Code>. Homepage fetch saat load → section yang false tidak di-render. Navbar juga auto-hide menu item untuk section hidden.</p>
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">2. Hero &mdash; Banner Utama Homepage</h4>
+                <Table headers={["Field", "Contoh", "Keterangan"]} rows={[
+                  ["Headline", "Push Rank, Tanpa Main.", "Teks utama. Koma = baris baru di tampilan. Bisa multi-line."],
+                  ["Subheadline", "Jasa joki ML terpercaya...", "Teks deskripsi di bawah headline"],
+                  ["CTA Primary", "Order Sekarang", "Tombol utama (link ke /order)"],
+                  ["CTA Secondary", "Cek Harga", "Tombol kedua (scroll ke pricing)"],
+                  ["isVisible", "on/off", "Toggle tampilkan hero section"],
+                ]} />
+                <p className="text-text-muted text-[11px] mt-2"><strong>Disimpan ke:</strong> <Code>hero</Code> key. Customer melihat ini sebagai hal pertama saat buka website.</p>
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">3. Banner &mdash; Promo Banner</h4>
+                <p className="text-text-muted text-xs mb-2"><strong>Fungsi:</strong> Banner kecil di atas navbar. Untuk mengumumkan promo atau info penting.</p>
+                <Table headers={["Field", "Contoh"]} rows={[
+                  ["Text", "🔥 Diskon 20% untuk order pertama!"],
+                  ["Link", "/order"],
+                  ["isVisible", "on/off"],
+                ]} />
+                <p className="text-text-muted text-[11px] mt-2"><strong>Cara kerja:</strong> Disimpan ke <Code>promo_banner</Code>. Customer klik banner → redirect ke link. Ada countdown timer yang persist lewat localStorage.</p>
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">4. FAQ &mdash; Kelola Pertanyaan</h4>
+                <p className="text-text-muted text-xs mb-2"><strong>Fungsi:</strong> CRUD item FAQ. Tampil di homepage section FAQ.</p>
+                <ul className="text-text-muted text-xs space-y-1 ml-4 list-disc">
+                  <li><strong>Tambah FAQ:</strong> Klik &ldquo;Tambah FAQ&rdquo; → isi question &amp; answer</li>
+                  <li><strong>Reorder:</strong> Gunakan tombol ↑↓ untuk pindah urutan</li>
+                  <li><strong>Hapus:</strong> Klik ikon hapus per item</li>
+                  <li><strong>Simpan:</strong> Klik Simpan untuk update semua sekaligus</li>
+                </ul>
+                <p className="text-text-muted text-[11px] mt-2"><strong>Disimpan ke:</strong> <Code>faq_items</Code> (array JSON). Jika kosong, homepage tampilkan FAQ default built-in.</p>
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">5. Tim &mdash; Redirect ke Boosters</h4>
+                <p className="text-text-muted text-xs">Data booster sekarang dikelola dari tab <strong>Boosters</strong> di dashboard utama (CRUD: nama, WA, specialization, rating, status). Tab ini hanya menampilkan pesan redirect.</p>
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">6. Sosial &mdash; Link Media Sosial</h4>
+                <Table headers={["Field", "Format", "Tampil di"]} rows={[
+                  ["Instagram", "URL profil", "Footer + bio page"],
+                  ["Facebook", "URL page", "Footer + bio page"],
+                  ["TikTok", "URL profil", "Footer + bio page"],
+                  ["YouTube", "URL channel", "Footer + bio page"],
+                  ["WhatsApp", "62xxxxxxxxx", "Footer + floating button"],
+                ]} />
+                <p className="text-text-muted text-[11px] mt-2"><strong>Disimpan ke:</strong> <Code>social_links</Code>. WhatsApp number juga dipakai floating chat button &amp; footer otomatis.</p>
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">7. Info Situs &mdash; Identitas Brand</h4>
+                <Table headers={["Field", "Contoh", "Dipakai untuk"]} rows={[
+                  ["Nama Situs", "ETNYX", "Logo text, meta title, email sender name"],
+                  ["Nama Perusahaan", "ETNYX Digital", "Footer, invoice, legal pages"],
+                  ["Email Support", "cs@etnyx.com", "Footer, contact info, from email"],
+                  ["Tagline (ID)", "Jasa Joki ML #1...", "SEO meta description (Indonesian)"],
+                  ["Tagline (EN)", "#1 Trusted ML Boosting...", "SEO meta description (English)"],
+                ]} />
+                <p className="text-text-muted text-[11px] mt-2"><strong>Disimpan ke:</strong> <Code>site_info</Code>. Dipakai di SEO, email template, footer, dan invoice.</p>
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">8. Pixels &mdash; Tracking &amp; Analytics</h4>
+                <p className="text-text-muted text-xs mb-2"><strong>Fungsi:</strong> Toggle &amp; konfigurasi 5 platform tracking tanpa edit kode.</p>
+                <Table headers={["Platform", "Toggle", "Field"]} rows={[
+                  ["Google Tag Manager", "isGtmEnabled", "GTM Container ID (GTM-XXXXXXX)"],
+                  ["Meta Pixel", "isMetaEnabled", "Pixel ID + Access Token (CAPI)"],
+                  ["Google Ads", "isGoogleAdsEnabled", "Ads ID (AW-xxx) + Conversion Label"],
+                  ["Google Analytics 4", "isGoogleAnalyticsEnabled", "Measurement ID (G-xxx)"],
+                  ["TikTok Pixel", "isTiktokEnabled", "Pixel ID (CXXXXXXX)"],
+                ]} />
+                <p className="text-text-muted text-[11px] mt-2"><strong>Cara kerja:</strong> Disimpan ke <Code>tracking_pixels</Code>. Component <Code>TrackingPixels.tsx</Code> load script hanya jika enabled. Events (PageView, Purchase, dll) fire otomatis ke semua platform aktif. Lihat section &ldquo;Conversion Tracking&rdquo; untuk detail events.</p>
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">9. Integrasi &mdash; Payment &amp; Notification APIs</h4>
+                <p className="text-text-muted text-xs mb-2">Semua API keys disimpan ke <Code>integrations</Code>. Bisa diubah tanpa redeploy.</p>
+                <div className="space-y-3">
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">A. Midtrans (Payment Gateway)</h5>
+                    <ul className="text-text-muted text-[11px] space-y-0.5 ml-3 list-disc">
+                      <li>Toggle Sandbox ↔ Production (uang asli!)</li>
+                      <li>Merchant ID, Server Key, Client Key</li>
+                      <li>Pilih channel: BCA, BNI, Mandiri, Permata, GoPay, ShopeePay, DANA, OVO, CC, QRIS, Alfamart/Indomaret</li>
+                      <li>Tombol &ldquo;Test Connection&rdquo; untuk validasi credential</li>
+                      <li>Auto-display webhook URL untuk di-set di Midtrans Dashboard</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">B. Rekening Transfer Manual</h5>
+                    <ul className="text-text-muted text-[11px] space-y-0.5 ml-3 list-disc">
+                      <li>11 opsi: BCA, BRI, BNI, Mandiri, Jago, DANA, GoPay, OVO, ShopeePay, LinkAja, QRIS</li>
+                      <li>Per rekening: nomor, nama pemilik, toggle aktif</li>
+                      <li>QRIS: upload gambar QR code</li>
+                      <li>Bisa tambah custom rekening/e-wallet</li>
+                      <li>Rekening aktif otomatis tampil di halaman payment manual + follow-up WA</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">C. Resend (Email)</h5>
+                    <ul className="text-text-muted text-[11px] space-y-0.5 ml-3 list-disc">
+                      <li>API Key + From Email</li>
+                      <li>Dipakai: konfirmasi bayar, invoice, verifikasi email, password reset</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">D. Fonnte (WhatsApp)</h5>
+                    <ul className="text-text-muted text-[11px] space-y-0.5 ml-3 list-disc">
+                      <li>API Token + Device ID (opsional)</li>
+                      <li>Dipakai: 7 template WA otomatis + follow-up + semua notifikasi customer</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">E. Telegram Bot</h5>
+                    <ul className="text-text-muted text-[11px] space-y-0.5 ml-3 list-disc">
+                      <li>Bot Token + 4 Group IDs (Admin, Worker, Review, Report)</li>
+                      <li>Dipakai: notifikasi interaktif + 9 bot commands</li>
+                      <li>Setup: buat bot di @BotFather → tambah ke grup → isi Chat ID → register webhook</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">F. Cek Akun ML (Custom API)</h5>
+                    <ul className="text-text-muted text-[11px] space-y-0.5 ml-3 list-disc">
+                      <li>URL custom untuk lookup nickname ML (opsional)</li>
+                      <li>Jika tidak di-set, sistem pakai 2 free API publik sebagai fallback</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">10. General &mdash; Export &amp; Konfigurasi</h4>
+                <p className="text-text-muted text-xs">Fitur export data dan konfigurasi environment. Export CSV tersedia juga di Reports tab (lebih lengkap).</p>
+              </div>
+
+              <InfoBox type="info">
+                <strong>Semua settings disimpan instant.</strong> Klik Simpan → POST/PUT ke <Code>/api/admin/settings</Code> → response langsung. Tidak perlu redeploy. Homepage &amp; order page otomatis ambil data terbaru saat load.
+              </InfoBox>
+            </div>
+          ),
+        },
+        {
+          id: "homepage-cms",
+          icon: Globe,
+          title: "Homepage CMS & Sections",
+          content: (
+            <div className="space-y-4">
+              <p className="text-text-muted text-sm">Homepage terdiri dari 9 section dinamis + navbar/footer. Semua konten bisa dikelola dari Dashboard tanpa edit kode.</p>
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">Cara Kerja CMS Homepage</h4>
+                <StepFlow steps={[
+                  { title: "Visitor buka homepage", desc: "Browser request ke etnyx.com" },
+                  { title: "Fetch settings dari DB", desc: "Parallel fetch: section_visibility, hero, promo_banner, faq_items, social_links, site_info, tracking_pixels" },
+                  { title: "Render sections", desc: "Hanya section yang visibility = true yang di-render. Setiap section dibungkus ScrollAnimation (fade-in saat scroll)." },
+                  { title: "Dynamic content", desc: "Hero text, FAQ items, testimonials, portfolio → semua dari database. Pricing → dari pricing_catalog." },
+                  { title: "Navbar sync", desc: "Menu items otomatis hide jika section-nya hidden. Smooth scroll ke section masing-masing." },
+                ]} />
+              </div>
+              <Table headers={["Section", "Sumber Data", "Dikelola dari"]} rows={[
+                ["Hero Banner", "hero (settings)", "Settings → Hero"],
+                ["Promo Banner", "promo_banner (settings)", "Settings → Banner"],
+                ["Pricing", "pricing_catalog + season_pricing", "Dashboard → Pricing tab"],
+                ["Why Choose Us", "Hardcoded (bisa di-hide)", "Settings → Visibilitas"],
+                ["Team Showcase", "boosters (tabel)", "Dashboard → Boosters tab"],
+                ["Testimonials", "testimonials (tabel, visible=true)", "Dashboard → Testi tab"],
+                ["Portfolio", "portfolio (tabel)", "Dashboard → Portfolio tab"],
+                ["FAQ", "faq_items (settings)", "Settings → FAQ"],
+                ["CTA", "Hardcoded + social_links", "Settings → Visibilitas + Sosial"],
+                ["Footer", "social_links + site_info", "Settings → Sosial + Info Situs"],
+              ]} />
+              <InfoBox type="info">
+                <strong>Perubahan instan:</strong> Edit di dashboard → simpan → refresh homepage → konten berubah. Tidak ada cache delay. Pricing section juga menampilkan label season pricing jika aktif.
+              </InfoBox>
+            </div>
+          ),
+        },
+        {
+          id: "price-calculation",
+          icon: BarChart3,
+          title: "Cara Hitung Harga Order",
+          content: (
+            <div className="space-y-4">
+              <p className="text-text-muted text-sm">Formula lengkap perhitungan harga dari base price hingga total akhir yang dibayar customer.</p>
+              <div className="bg-background rounded-lg p-4 border border-accent/20">
+                <h4 className="text-accent font-semibold text-sm mb-3">Formula Harga</h4>
+                <div className="bg-background rounded-lg p-3 border border-white/10 font-mono text-xs text-text space-y-1.5">
+                  <p>1. <strong className="text-blue-400">Base Price</strong> = harga paket / (perStar × jumlah bintang) / (gendong × jumlah bintang)</p>
+                  <p>2. <strong className="text-red-400">Season Multiplier</strong> = base × multiplier fase aktif (jika season pricing ON)</p>
+                  <p>3. <strong className="text-yellow-400">Express</strong> = +20% dari harga setelah season (jika dipilih)</p>
+                  <p>4. <strong className="text-purple-400">Premium</strong> = +30% dari harga setelah season (jika dipilih)</p>
+                  <p>5. <strong className="text-green-400">Diskon Promo</strong> = kurangi amount promo code (% atau fixed)</p>
+                  <p>6. <strong className="text-green-400">Diskon Member</strong> = kurangi tier discount (Silver 2%, Gold 5%, Plat 10%)</p>
+                  <p>7. <strong className="text-accent">TOTAL</strong> = hasil akhir setelah semua perhitungan</p>
+                </div>
+              </div>
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">Contoh Perhitungan</h4>
+                <Table headers={["Step", "Hitung", "Hasil"]} rows={[
+                  ["Base (Paket Epic I → Legend V)", "Rp 150.000", "Rp 150.000"],
+                  ["Season: Early Season (×1.25)", "150.000 × 1.25", "Rp 187.500"],
+                  ["Express (+20%)", "187.500 × 0.20 = 37.500", "Rp 225.000"],
+                  ["Premium (+30%)", "187.500 × 0.30 = 56.250", "Rp 281.250"],
+                  ["Promo DISKON20 (20%, max 50K)", "−50.000", "Rp 231.250"],
+                  ["Member Gold (5%)", "−11.562", "Rp 219.688"],
+                ]} />
+                <p className="text-text-muted text-[11px] mt-2">Express &amp; Premium dihitung dari harga <strong>setelah</strong> season multiplier, bukan base original.</p>
+              </div>
+              <Table headers={["Mode", "Cara Hitung Base Price"]} rows={[
+                ["Paket", "Harga tetap per paket (Rp X dari pricing_catalog)"],
+                ["Per Star", "Harga per bintang tier × jumlah star. Contoh: Epic = Rp 8.000/star × 15 star = Rp 120.000"],
+                ["Gendong", "Harga per bintang tier × jumlah star (lebih mahal dari Per Star karena duo)"],
+              ]} />
+              <InfoBox type="warning">
+                <strong>Di halaman order &amp; homepage:</strong> Jika season pricing aktif, semua harga yang ditampilkan sudah dikalikan multiplier fase aktif. Customer melihat harga final, bukan harga dasar.
+              </InfoBox>
+            </div>
+          ),
+        },
+        {
           id: "admin-action-buttons",
           icon: Zap,
           title: "Order Action Buttons",
@@ -1036,6 +1282,176 @@ function buildCategories(): DocCategory[] {
           ),
         },
         {
+          id: "order-form",
+          icon: ShoppingCart,
+          title: "Order Form (4 Step)",
+          content: (
+            <div className="space-y-4">
+              <p className="text-text-muted text-sm">Halaman <Code>/order</Code> memiliki 4 step wizard dan 3 mode pemesanan. Customer dipandu langkah demi langkah.</p>
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">3 Mode Pemesanan</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="rounded-lg border border-blue-500/20 p-3">
+                    <h5 className="text-blue-400 font-semibold text-sm mb-1">Joki Paket</h5>
+                    <p className="text-text-muted text-[11px]">Pilih paket bundel rank A → B. Harga tetap per paket. Tersedia kategori: GM, Epic, Legend, Mythic, dll.</p>
+                  </div>
+                  <div className="rounded-lg border border-green-500/20 p-3">
+                    <h5 className="text-green-400 font-semibold text-sm mb-1">Joki Per Bintang</h5>
+                    <p className="text-text-muted text-[11px]">Pilih rank + jumlah bintang (min 3). Harga per bintang beda tiap tier. Lebih fleksibel.</p>
+                  </div>
+                  <div className="rounded-lg border border-purple-500/20 p-3">
+                    <h5 className="text-purple-400 font-semibold text-sm mb-1">Joki Gendong</h5>
+                    <p className="text-text-muted text-[11px]">Duo — main bareng booster. Per bintang, harga lebih tinggi. Customer tetap bermain pakai akun sendiri.</p>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">Step 1: Pilih Paket</h4>
+                <ul className="text-text-muted text-xs space-y-1 ml-4 list-disc">
+                  <li>Tab selector untuk pilih mode (Paket/Per Star/Gendong)</li>
+                  <li><strong>Paket:</strong> Carousel kategori → klik paket → auto-show harga + rank</li>
+                  <li><strong>Per Star/Gendong:</strong> Dropdown rank → input jumlah bintang (min 3) → harga dihitung otomatis</li>
+                  <li>Harga sudah termasuk season multiplier jika season pricing aktif</li>
+                  <li>Badge diskon jika ada promo harga di catalog</li>
+                </ul>
+              </div>
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">Step 2: Data Akun &amp; Kontak</h4>
+                <Table headers={["Field", "Validasi", "Keterangan"]} rows={[
+                  ["Login Method", "Wajib pilih 1", "6 opsi: Moonton, Facebook, Google, TikTok, VK, Apple"],
+                  ["User ID", "Numerik, 3-15 digit", "User ID dari profil ML"],
+                  ["Server ID", "Numerik, 3-6 digit", "Zone/Server ID ML"],
+                  ["Cek Akun", "Tombol verifikasi", "Hit API → tampilkan nickname. WAJIB verifikasi sebelum lanjut."],
+                  ["Nickname", "Wajib", "Auto-fill dari Cek Akun atau manual input"],
+                  ["Email/No HP", "Wajib", "Email atau nomor HP untuk login akun ML"],
+                  ["Password", "Wajib", "Password akun ML (dienkripsi AES-256 saat disimpan)"],
+                  ["Request Hero", "Opsional, min 3", "Daftar hero yang diminta (pisah koma)"],
+                  ["Catatan", "Opsional", "Pesan khusus ke penjoki"],
+                ]} />
+                <InfoBox type="info">
+                  <strong>Keamanan:</strong> Credentials (email + password akun ML) langsung dienkripsi AES-256-GCM saat order dibuat. Hanya worker yang ditugaskan bisa decrypt.
+                </InfoBox>
+              </div>
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">Step 3: Opsi &amp; Pembayaran</h4>
+                <ul className="text-text-muted text-xs space-y-1 ml-4 list-disc">
+                  <li><strong>Express Boost (+20%):</strong> Prioritas pengerjaan 1-2 hari, tim senior</li>
+                  <li><strong>Premium Pilot (+30%):</strong> Pilot MG dengan winrate 75%+</li>
+                  <li><strong>Kode Promo:</strong> Input kode → klik Terapkan → validasi via API → tampilkan diskon</li>
+                  <li><strong>Kode Referral:</strong> Input kode teman → diskon 10% (cek anti-self-referral)</li>
+                  <li><strong>Metode Bayar:</strong> Transfer Manual atau Midtrans (jika dikonfigurasi)</li>
+                </ul>
+              </div>
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">Step 4: Konfirmasi &amp; Bayar</h4>
+                <ul className="text-text-muted text-xs space-y-1 ml-4 list-disc">
+                  <li>Review lengkap: paket, info akun, add-ons, breakdown harga</li>
+                  <li>Input: nomor WhatsApp (wajib) + email (opsional)</li>
+                  <li>Klik &ldquo;Bayar Sekarang&rdquo; → create order + generate Snap Token (Midtrans) atau redirect ke /payment/manual</li>
+                  <li>Sukses: tampil Order ID + instruksi lanjut</li>
+                </ul>
+              </div>
+              <InfoBox type="warning">
+                <strong>Conversion events fire otomatis:</strong> ViewContent (buka /order) → AddToCart (step 1→2) → InitiateCheckout (step 4 submit) → Purchase (success). Semua ke Meta, Google, TikTok.
+              </InfoBox>
+            </div>
+          ),
+        },
+        {
+          id: "customer-pages",
+          icon: Users,
+          title: "Customer Dashboard & Pages",
+          content: (
+            <div className="space-y-4">
+              <p className="text-text-muted text-sm">Halaman-halaman customer setelah login. Accessible dari <Code>/dashboard</Code>, <Code>/track</Code>, <Code>/review</Code>.</p>
+
+              <div className="bg-background rounded-lg p-4 border border-purple-500/20">
+                <h4 className="text-purple-400 font-semibold text-sm mb-3">Customer Dashboard (/dashboard) &mdash; 4 Tab</h4>
+                <div className="space-y-2">
+                  <div className="bg-background rounded-lg p-3 border border-white/5">
+                    <h5 className="text-text font-medium text-xs mb-1">Header Stats</h5>
+                    <p className="text-text-muted text-[11px]">4 kartu: Total Orders, Total Spent (Rp), In Progress, Completed. Data real-time dari API.</p>
+                  </div>
+                  <div className="bg-background rounded-lg p-3 border border-white/5">
+                    <h5 className="text-text font-medium text-xs mb-1">Tab 1: Order Saya</h5>
+                    <p className="text-text-muted text-[11px]">List semua order dengan: Order ID, username, rank awal → target, paket, harga, status (warna), progress bar %, tanggal. Link ke detail/track. Jika kosong: &ldquo;Belum ada order&rdquo; + link Order Sekarang.</p>
+                  </div>
+                  <div className="bg-background rounded-lg p-3 border border-white/5">
+                    <h5 className="text-text font-medium text-xs mb-1">Tab 2: Rewards</h5>
+                    <p className="text-text-muted text-[11px]">Saldo poin, info tier + progress ke tier berikutnya, diskon tier otomatis. Katalog reward (skin, diamond, dll) yang bisa ditukar poin. Riwayat redeem + riwayat poin (earn/redeem/bonus/adjust).</p>
+                  </div>
+                  <div className="bg-background rounded-lg p-3 border border-white/5">
+                    <h5 className="text-text font-medium text-xs mb-1">Tab 3: Referral</h5>
+                    <p className="text-text-muted text-[11px]">Kode referral unik + tombol Copy + tombol Share WhatsApp. Template: &ldquo;Cobain jasa joki ML di ETNYX! Pakai kode [CODE] untuk diskon 10%.&rdquo;</p>
+                  </div>
+                  <div className="bg-background rounded-lg p-3 border border-white/5">
+                    <h5 className="text-text font-medium text-xs mb-1">Tab 4: Profile</h5>
+                    <p className="text-text-muted text-[11px]">Display: nama, email, WA, member since. Edit mode: ubah nama, WA, password (harus verifikasi current password dulu). PATCH ke /api/customer/profile.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-blue-500/20">
+                <h4 className="text-blue-400 font-semibold text-sm mb-3">Track Order (/track) &mdash; Real-time Tracking</h4>
+                <p className="text-text-muted text-xs mb-2">Halaman publik, bisa diakses tanpa login. Customer input Order ID atau buka dari link WA (auto-fill dari URL ?id=xxx).</p>
+                <ul className="text-text-muted text-xs space-y-1 ml-4 list-disc">
+                  <li><strong>Status Timeline:</strong> 4 step visual: pending → confirmed → in_progress → completed. Warna berubah sesuai status aktif.</li>
+                  <li><strong>Order Summary:</strong> Username, paket, rank awal/target, tanggal order, update terakhir</li>
+                  <li><strong>Progress Bar:</strong> Persentase 0-100% + rank saat ini yang sedang di-push</li>
+                  <li><strong>Hasil Boosting:</strong> Per sesi: stars gained, matches, wins, winrate, durasi, MVP/Savage/Maniac, screenshot gallery (klik untuk zoom)</li>
+                  <li><strong>Action buttons:</strong> Beri Review + Laporkan Worker + Chat WA support</li>
+                </ul>
+                <InfoBox type="info">
+                  <strong>Multi-bahasa:</strong> Track page support ID + EN. Toggle di header. Semua teks otomatis berubah.
+                </InfoBox>
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-green-500/20">
+                <h4 className="text-green-400 font-semibold text-sm mb-3">Password Reset (/reset-password)</h4>
+                <StepFlow steps={[
+                  { title: "Customer klik 'Lupa Password' di login", desc: "Redirect ke /reset-password", badge: "customer" },
+                  { title: "Input email", desc: "Customer isi email yang terdaftar. Sistem selalu tampilkan 'Link dikirim' (mencegah email enumeration).", badge: "customer" },
+                  { title: "Generate token", desc: "Backend: buat random token (32 bytes hex), simpan di tabel password_resets, expire 1 jam. Kirim email via Resend.", badge: "auto" },
+                  { title: "Klik link di email", desc: "Link: /reset-password?token=xxx. Form: password baru + konfirmasi (min 6 karakter).", badge: "customer" },
+                  { title: "Reset password", desc: "Backend: validasi token (belum dipakai, belum expired) → hash bcrypt 12 rounds → update customers → mark token used.", badge: "auto" },
+                  { title: "Login dengan password baru", desc: "Redirect ke login.", badge: "customer" },
+                ]} />
+                <InfoBox type="warning">
+                  <strong>Keamanan token:</strong> Token single-use (flag <Code>used</Code>), expire 1 jam, 1 token per customer (upsert on conflict). Tabel: <Code>password_resets</Code> (migration v19).
+                </InfoBox>
+              </div>
+            </div>
+          ),
+        },
+        {
+          id: "ml-account-check",
+          icon: Gamepad2,
+          title: "Cek Akun ML (Verifikasi)",
+          content: (
+            <div className="space-y-4">
+              <p className="text-text-muted text-sm">Verifikasi akun Mobile Legends sebelum order. Mencegah salah input User ID/Server ID.</p>
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">Cara Kerja</h4>
+                <StepFlow steps={[
+                  { title: "Customer input User ID + Server ID", desc: "Di form order step 2. Validasi: User ID 3-15 digit, Server ID 3-6 digit (numerik).", badge: "customer" },
+                  { title: "Klik 'Cek Akun'", desc: "POST ke /api/check-account. Rate limit: 15 request/menit per IP.", badge: "customer" },
+                  { title: "Backend lookup nickname", desc: "Prioritas: (1) Custom API admin jika dikonfigurasi, (2) Free API isan.eu.org, (3) Free API whynotbeta.dev. Timeout 8 detik per API.", badge: "auto" },
+                  { title: "Tampilkan hasil", desc: "Sukses: nickname ditampilkan (sanitized, max 100 char). Gagal: 'Akun tidak ditemukan'. Timeout: 'Coba lagi nanti'.", badge: "auto" },
+                  { title: "Lanjut order", desc: "Nickname terverifikasi → customer bisa lanjut ke step berikutnya.", badge: "customer" },
+                ]} />
+              </div>
+              <Table headers={["Config", "Lokasi", "Keterangan"]} rows={[
+                ["Custom ML API URL", "Settings → Integrasi", "Admin bisa set URL custom. Template: {userId} dan {zoneId} diganti otomatis."],
+                ["Fallback APIs", "Hardcoded", "2 free API publik sebagai cadangan. Otomatis dipakai jika custom tidak di-set."],
+                ["Rate Limit", "Middleware", "15 req/menit per IP. Return 429 jika exceeded."],
+              ]} />
+              <InfoBox type="info">
+                <strong>Anti-abuse:</strong> Rate limit 15 req/menit. Response di-sanitize (strip HTML/script). Nickname max 100 karakter. IP tracking via x-forwarded-for.
+              </InfoBox>
+            </div>
+          ),
+        },
+        {
           id: "chat-system",
           icon: MessageCircle,
           title: "Order Chat System",
@@ -1743,12 +2159,12 @@ function buildCategories(): DocCategory[] {
                   [<strong key="1" className="text-text">admin_audit_log</strong>, "Admin action audit trail"],
                   [<strong key="2" className="text-text">push_subscriptions</strong>, "Web push notification subscriptions"],
                   [<strong key="3" className="text-text">chat_messages</strong>, "Order chat messages"],
-                  [<strong key="4" className="text-text">password_resets</strong>, "Customer password reset tokens"],
+                  [<strong key="4" className="text-text">password_resets</strong>, "Customer password reset tokens (v19). Token single-use, expire 1 jam, unique per customer."],
                   [<strong key="5" className="text-text">payment_proofs</strong>, "Manual transfer proof uploads"],
                 ]} />
               </div>
               <InfoBox type="info">
-                <strong>Schema Files:</strong> v8 (storage), v9 (order logs), v10 (rewards), v11 (staff), v12 (reviews), v13 (payroll), v14 (payment methods), v15 (UTM attribution &amp; ad spend), v16-v18 (minor fixes), v19 (password resets). Run sequentially via Supabase SQL Editor.
+                <strong>Schema Files:</strong> v8 (storage), v9 (order logs), v10 (rewards), v11 (staff), v12 (reviews), v13 (payroll), v14 (payment methods), v15 (UTM attribution &amp; ad spend), v16-v18 (minor fixes), v19 (password_resets: WAJIB run di Supabase SQL Editor). Run sequentially via Supabase SQL Editor.
               </InfoBox>
             </div>
           ),
@@ -2109,6 +2525,8 @@ function buildCategories(): DocCategory[] {
                     "Security audit v2.4: 19 fixes (mass assignment, IDOR, idempotent points, input validation, etc.)",
                     "Payment: webhook idempotency, amount verification, duplicate proof rejection",
                     "Lead submissions view + worker showAllCompleted + admin assign order_logs",
+                    "Season Pricing auto-scheduler: 3 fase (Early/Mid/End) dengan multiplier otomatis",
+                    "Customer password reset via email token (tabel password_resets, migration v19)",
                   ].map((item, i) => (
                     <li key={i} className="flex items-start gap-2">
                       <span className="text-green-400 shrink-0">{"✓"}</span> {item}
@@ -2191,6 +2609,65 @@ function buildCategories(): DocCategory[] {
           content: (
             <div className="space-y-4">
               <p className="text-text-muted text-sm">Riwayat update fitur, perbaikan bug, dan perubahan workflow. Diurutkan dari yang terbaru.</p>
+
+              <div className="bg-background rounded-lg p-4 border border-accent/20">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-accent/10 text-accent font-medium">v2.5</span>
+                  <h4 className="text-accent font-semibold text-sm">8 April 2026 (Season Pricing &amp; Docs Overhaul)</h4>
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">Season Pricing Auto-Scheduler</h5>
+                    <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
+                      <li><strong className="text-text">3 fase</strong> &mdash; Early Season (×1.25), Mid Season (×1.00), End Season (×0.85)</li>
+                      <li>Toggle on/off + nama season + tanggal mulai tiap fase + multiplier adjustable (0.5x–2.0x)</li>
+                      <li>Auto-apply di homepage (PricingSection) + order page (price calculation)</li>
+                      <li>Badge season label di homepage saat aktif</li>
+                      <li>Line season pricing di breakdown harga order</li>
+                      <li>Rekomendasi ML: 1 season ≈ 90 hari (Early 3 minggu, Mid 5-6 minggu, End 4 minggu)</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">Dashboard UX Overhaul</h5>
+                    <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
+                      <li><strong className="text-text">Overview</strong> &mdash; Compact stat cards, enhanced order indicators, responsive mobile layout</li>
+                      <li><strong className="text-text">Orders</strong> &mdash; Improved credential toggle UX, inline worker info, responsive action buttons</li>
+                      <li><strong className="text-text">Customer Profile</strong> &mdash; Inline edit mode (name, WA, password) di Customer tab</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">Settings Tab Fixes</h5>
+                    <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
+                      <li><strong className="text-text">Hero isVisible toggle</strong> &mdash; Field sudah ada di DB, sekarang muncul di UI</li>
+                      <li><strong className="text-text">FAQ Reorder</strong> &mdash; GripVertical diganti ChevronUp/ChevronDown move buttons</li>
+                      <li><strong className="text-text">Bank Account</strong> &mdash; prompt() diganti inline form untuk tambah rekening</li>
+                      <li><strong className="text-text">ALLOWED_KEYS cleanup</strong> &mdash; Hapus key Telegram redundan</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">Public Page Fixes</h5>
+                    <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
+                      <li><strong className="text-text">FAQ Section</strong> &mdash; Fix empty array bypass ([] || defaults evaluates to [] → now checks .length)</li>
+                      <li><strong className="text-text">Promo Banner</strong> &mdash; Countdown timer persist via localStorage (no reset on reload)</li>
+                      <li><strong className="text-text">Testimonials</strong> &mdash; Loading state + opacity transition (prevent flicker)</li>
+                      <li><strong className="text-text">Hero headline</strong> &mdash; Added placeholder + helper text about comma-split format</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">Docs Major Overhaul v2.5</h5>
+                    <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
+                      <li><strong className="text-text">Settings Tab Guide</strong> &mdash; Penjelasan lengkap 10 sub-tab: field, cara kerja, key database</li>
+                      <li><strong className="text-text">Homepage CMS</strong> &mdash; Cara kerja CMS, sumber data tiap section, flow render</li>
+                      <li><strong className="text-text">Cara Hitung Harga</strong> &mdash; Formula lengkap: base → season → express/premium → promo → member → total</li>
+                      <li><strong className="text-text">Order Form 4 Step</strong> &mdash; Detail tiap step: field, validasi, add-ons, payment methods</li>
+                      <li><strong className="text-text">Customer Pages</strong> &mdash; Dashboard 4 tab, Track page, Password Reset flow</li>
+                      <li><strong className="text-text">Cek Akun ML</strong> &mdash; Cara kerja API lookup, fallback, rate limit, sanitization</li>
+                      <li><strong className="text-text">Season Pricing</strong> &mdash; Tabel fase + multiplier + cara setup + rekomendasi timing</li>
+                      <li><strong className="text-text">Migration v19</strong> &mdash; password_resets table documented</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
 
               <div className="bg-background rounded-lg p-4 border border-accent/20">
                 <div className="flex items-center gap-2 mb-3">
@@ -2506,7 +2983,7 @@ export default function DocsPage() {
             <div className="flex items-center gap-2">
               <Book className="w-5 h-5 text-accent" />
               <h1 className="text-text font-bold text-sm">ETNYX DOCS</h1>
-              <span className="text-[9px] px-1.5 py-0.5 rounded bg-accent/10 text-accent font-medium">v2.4</span>
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-accent/10 text-accent font-medium">v2.5</span>
             </div>
             <button onClick={() => setSidebarOpen(false)} className="text-text-muted hover:text-text p-1">
               <ChevronDown className="w-4 h-4 rotate-90" />
@@ -2612,7 +3089,7 @@ export default function DocsPage() {
 
         <footer className="px-6 py-4 border-t border-white/5">
           <p className="text-text-muted/40 text-[10px] text-center">
-            ETNYX Documentation v2.4 &mdash; {allSections.length} sections across {categories.length} categories
+            ETNYX Documentation v2.5 &mdash; {allSections.length} sections across {categories.length} categories
           </p>
         </footer>
       </main>
