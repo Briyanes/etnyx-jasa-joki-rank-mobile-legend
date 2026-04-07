@@ -170,6 +170,7 @@ export async function PATCH(request: Request) {
     }
     if (updates.status === "completed" && previousStatus !== "completed") {
       updates.completed_at = new Date().toISOString();
+      updates.progress = 100;
     }
     updates.updated_at = new Date().toISOString();
 
@@ -230,7 +231,9 @@ export async function PATCH(request: Request) {
       
       // Status: completed -> notify customer + award reward points
       if (updates.status === "completed") {
-        sendOrderCompletedNotifications(orderData).catch(console.error);
+        sendOrderCompletedNotifications(orderData)
+          .then(() => console.log(`[completed] Notifications sent for ${data.order_id}, WA: ${data.whatsapp}`))
+          .catch((err) => console.error(`[completed] Notification failed for ${data.order_id}:`, err));
 
         // Award reward points to linked customer
         try {
