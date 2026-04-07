@@ -486,6 +486,9 @@ function OrderPageContent() {
   const [gendongRanks, setGendongRanks] = useState<PerStarRank[]>(GENDONG_RANKS);
   const [selectedGendongRank, setSelectedGendongRank] = useState<PerStarRank | null>(null);
   const [gendongQuantity, setGendongQuantity] = useState(3);
+  // Season pricing multiplier
+  const [seasonMultiplier, setSeasonMultiplier] = useState(1);
+  const [seasonLabel, setSeasonLabel] = useState("");
   // Rank selector for paket mode
   const [currentStar, setCurrentStar] = useState(5); // V=5, IV=4, III=3, II=2, I=1
   const [targetStar, setTargetStar] = useState(5);
@@ -569,7 +572,7 @@ function OrderPageContent() {
 
   // Fetch per-star pricing from CMS
   useEffect(() => {
-    fetch("/api/settings?keys=perstar_pricing,gendong_pricing")
+    fetch("/api/settings?keys=perstar_pricing,gendong_pricing,season_pricing")
       .then((res) => res.json())
       .then((data) => {
         if (data.perstar_pricing && Array.isArray(data.perstar_pricing) && data.perstar_pricing.length > 0) {
@@ -577,6 +580,17 @@ function OrderPageContent() {
         }
         if (data.gendong_pricing && Array.isArray(data.gendong_pricing) && data.gendong_pricing.length > 0) {
           setGendongRanks(data.gendong_pricing);
+        }
+        // Determine active season multiplier
+        if (data.season_pricing && data.season_pricing.isEnabled && Array.isArray(data.season_pricing.phases)) {
+          const now = new Date();
+          const sorted = [...data.season_pricing.phases]
+            .filter((p: { startDate: string }) => p.startDate && new Date(p.startDate) <= now)
+            .sort((a: { startDate: string }, b: { startDate: string }) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+          if (sorted.length > 0) {
+            setSeasonMultiplier(sorted[0].multiplier || 1);
+            setSeasonLabel(sorted[0].label || "");
+          }
         }
       })
       .catch(() => {/* keep defaults */});
@@ -668,6 +682,8 @@ function OrderPageContent() {
     } else if (orderMode === "gendong" && selectedGendongRank) {
       price = selectedGendongRank.price * gendongQuantity;
     }
+    // Apply season multiplier
+    if (seasonMultiplier !== 1) price *= seasonMultiplier;
     if (form.isExpress) price *= 1.2;
     if (form.isPremium) price *= 1.3;
     return Math.round(price);
@@ -2403,6 +2419,12 @@ function OrderPageContent() {
                           <span>{formatRupiah(selectedPackage.price)}</span>
                         </div>
                       ) : null}
+                      {seasonMultiplier !== 1 && (
+                        <div className={`flex justify-between ${seasonMultiplier > 1 ? "text-yellow-400" : "text-green-400"}`}>
+                          <span>{seasonLabel || "Season Pricing"} ({seasonMultiplier > 1 ? `+${Math.round((seasonMultiplier - 1) * 100)}%` : `-${Math.round((1 - seasonMultiplier) * 100)}%`})</span>
+                          <span>{seasonMultiplier > 1 ? "+" : "-"}{formatRupiah(Math.abs(Math.round(basePrice - basePrice / seasonMultiplier)))}</span>
+                        </div>
+                      )}
                       {form.isExpress && (
                         <div className="flex justify-between text-text-muted">
                           <span>Express (+20%)</span>

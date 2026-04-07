@@ -22,6 +22,7 @@ const ALLOWED_KEYS = [
   "perstar_pricing",
   "gendong_pricing",
   "bank_accounts",
+  "season_pricing",
 ];
 
 // GET /api/admin/settings?key=hero or GET all

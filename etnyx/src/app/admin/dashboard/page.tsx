@@ -10,7 +10,7 @@ import {
   Settings2, Package, Users, Shield, Trophy, Tag, Eye, TrendingUp,
   ShoppingCart, DollarSign, Clock, Activity, Loader2, AlertTriangle,
   Plus, Pencil, Trash2, Save, Search, Filter, RefreshCw, LogOut,
-  MessageCircle, Send, BookOpen, Copy, Gift, Wallet,
+  MessageCircle, Send, BookOpen, Copy, Gift, Wallet, CalendarDays,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import SettingsTab from "./SettingsTab";
@@ -237,6 +237,20 @@ export default function AdminDashboard() {
   const [activePricingCat, setActivePricingCat] = useState("");
   const [pricingMode, setPricingMode] = useState<"paket" | "perstar" | "gendong">("paket");
   const [gendongPricing, setGendongPricing] = useState<PerStarTier[]>([]);
+  // Season pricing state
+  interface SeasonPhase { id: string; label: string; multiplier: number; startDate: string }
+  interface SeasonPricing { isEnabled: boolean; seasonName: string; phases: SeasonPhase[] }
+  const [seasonPricing, setSeasonPricing] = useState<SeasonPricing>({
+    isEnabled: false,
+    seasonName: "",
+    phases: [
+      { id: "early", label: "Early Season", multiplier: 1.25, startDate: "" },
+      { id: "mid", label: "Mid Season", multiplier: 1.0, startDate: "" },
+      { id: "end", label: "End Season", multiplier: 0.85, startDate: "" },
+    ],
+  });
+  const [seasonSaving, setSeasonSaving] = useState(false);
+  const [seasonSaved, setSeasonSaved] = useState(false);
 
   // Staff state
   interface StaffUser { id: string; email: string; name: string; role: string; phone: string | null; is_active: boolean; last_login_at: string | null; created_at: string; lead_id: string | null }
@@ -351,6 +365,12 @@ export default function AdminDashboard() {
           { id: "glory", name: "Mythic Glory", price: 30000, icon: "/icons-tier/Mythical_Glory.webp" },
           { id: "immortal", name: "Mythic Immortal", price: 35000, icon: "/icons-tier/Mythical_Immortal.webp" },
         ]);
+      }
+      // Fetch season pricing
+      const res4 = await fetch("/api/admin/settings?key=season_pricing");
+      const d4 = await res4.json();
+      if (d4.value && typeof d4.value === "object") {
+        setSeasonPricing(d4.value);
       }
     } catch (e) { console.error(e); }
   }, [activePricingCat]);
@@ -647,6 +667,26 @@ export default function AdminDashboard() {
     setGendongPricing(newTiers);
     setEditingPriceId(null);
     saveGendongPricing(newTiers);
+  };
+
+  const saveSeasonPricing = async (data: typeof seasonPricing) => {
+    setSeasonSaving(true);
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "PUT", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: "season_pricing", value: data }),
+      });
+      if (res.ok) { setSeasonSaved(true); setTimeout(() => setSeasonSaved(false), 2000); }
+      else alert("Gagal menyimpan season pricing.");
+    } catch { alert("Gagal menyimpan season pricing."); }
+    finally { setSeasonSaving(false); }
+  };
+
+  const getActivePhase = (sp: typeof seasonPricing) => {
+    if (!sp.isEnabled || sp.phases.every(p => !p.startDate)) return null;
+    const now = new Date();
+    const sorted = [...sp.phases].filter(p => p.startDate).sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+    return sorted.find(p => new Date(p.startDate) <= now) || null;
   };
 
   const startEditPrice = (pkg: PricingPackage) => {
@@ -1299,6 +1339,95 @@ export default function AdminDashboard() {
                   <Users className="w-4 h-4 inline-block mr-2" />
                   Joki Gendong
                 </button>
+              </div>
+
+              {/* Season Pricing Scheduler */}
+              <div className="bg-surface rounded-xl border border-white/5 p-5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <CalendarDays className="w-5 h-5 text-accent" />
+                    <div>
+                      <h3 className="text-sm font-bold text-text">Season Pricing</h3>
+                      <p className="text-text-muted text-[10px]">Harga otomatis berubah sesuai fase season ML</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {seasonPricing.isEnabled && (() => {
+                      const active = getActivePhase(seasonPricing);
+                      return active ? (
+                        <span className={`text-[10px] font-medium px-2 py-1 rounded-full ${active.id === "early" ? "bg-red-500/20 text-red-400" : active.id === "mid" ? "bg-blue-500/20 text-blue-400" : "bg-green-500/20 text-green-400"}`}>
+                          {active.label} aktif ({active.multiplier > 1 ? `+${Math.round((active.multiplier - 1) * 100)}%` : active.multiplier < 1 ? `-${Math.round((1 - active.multiplier) * 100)}%` : "Normal"})
+                        </span>
+                      ) : <span className="text-[10px] text-yellow-400">Tanggal belum di-set</span>;
+                    })()}
+                    <button onClick={() => { const next = { ...seasonPricing, isEnabled: !seasonPricing.isEnabled }; setSeasonPricing(next); saveSeasonPricing(next); }}
+                      className={`w-11 h-6 rounded-full transition-colors relative ${seasonPricing.isEnabled ? "bg-accent" : "bg-white/10"}`}>
+                      <div className={`w-5 h-5 rounded-full bg-white absolute top-0.5 transition-all ${seasonPricing.isEnabled ? "left-5" : "left-0.5"}`} />
+                    </button>
+                  </div>
+                </div>
+
+                {seasonPricing.isEnabled && (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs text-text-muted mb-1">Nama Season</label>
+                      <input type="text" value={seasonPricing.seasonName} onChange={(e) => setSeasonPricing({ ...seasonPricing, seasonName: e.target.value })}
+                        placeholder="Season 35 - April 2026" className="w-full sm:w-80 bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-sm focus:border-accent focus:outline-none" />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      {seasonPricing.phases.map((phase, idx) => (
+                        <div key={phase.id} className={`rounded-xl border p-4 space-y-3 ${phase.id === "early" ? "border-red-500/30 bg-red-500/5" : phase.id === "mid" ? "border-blue-500/30 bg-blue-500/5" : "border-green-500/30 bg-green-500/5"}`}>
+                          <div className="flex items-center justify-between">
+                            <span className={`text-xs font-bold ${phase.id === "early" ? "text-red-400" : phase.id === "mid" ? "text-blue-400" : "text-green-400"}`}>
+                              {phase.id === "early" ? "🔥" : phase.id === "mid" ? "⚡" : "🎯"} {phase.label}
+                            </span>
+                            <span className={`text-[10px] font-mono font-bold ${phase.multiplier > 1 ? "text-red-400" : phase.multiplier < 1 ? "text-green-400" : "text-blue-400"}`}>
+                              ×{phase.multiplier}
+                            </span>
+                          </div>
+                          <div>
+                            <label className="block text-[10px] text-text-muted mb-1">Tanggal Mulai</label>
+                            <input type="date" value={phase.startDate} onChange={(e) => {
+                              const next = { ...seasonPricing, phases: seasonPricing.phases.map((p, i) => i === idx ? { ...p, startDate: e.target.value } : p) };
+                              setSeasonPricing(next);
+                            }} className="w-full bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-xs focus:border-accent focus:outline-none" />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] text-text-muted mb-1">Multiplier Harga</label>
+                            <div className="flex items-center gap-2">
+                              <input type="number" step="0.05" min="0.5" max="2" value={phase.multiplier} onChange={(e) => {
+                                const val = Math.min(2, Math.max(0.5, parseFloat(e.target.value) || 1));
+                                const next = { ...seasonPricing, phases: seasonPricing.phases.map((p, i) => i === idx ? { ...p, multiplier: val } : p) };
+                                setSeasonPricing(next);
+                              }} className="w-20 bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-xs focus:border-accent focus:outline-none font-mono" />
+                              <span className="text-text-muted text-[10px]">
+                                {phase.multiplier > 1 ? `+${Math.round((phase.multiplier - 1) * 100)}% dari harga dasar` : phase.multiplier < 1 ? `${Math.round((1 - phase.multiplier) * 100)}% diskon` : "Harga normal"}
+                              </span>
+                            </div>
+                          </div>
+                          {/* Preview prices */}
+                          <div className="bg-background/50 rounded-lg p-2 space-y-1">
+                            <p className="text-[10px] text-text-muted font-semibold">Preview (Per Star):</p>
+                            {perStarPricing.slice(0, 4).map(tier => (
+                              <div key={tier.id} className="flex justify-between text-[10px]">
+                                <span className="text-text-muted">{tier.name}</span>
+                                <span className="text-text font-mono">{formatRupiah(Math.round(tier.price * phase.multiplier))}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                      <p className="text-text-muted text-[10px]">Harga di halaman order & homepage akan otomatis ×multiplier sesuai fase aktif saat ini.</p>
+                      <button onClick={() => saveSeasonPricing(seasonPricing)} disabled={seasonSaving}
+                        className="flex items-center gap-2 px-4 py-2 gradient-primary rounded-lg text-white text-sm font-medium hover:opacity-90 transition disabled:opacity-50">
+                        {seasonSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : seasonSaved ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+                        {seasonSaved ? "Tersimpan!" : "Simpan Season"}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* PAKET MODE */}

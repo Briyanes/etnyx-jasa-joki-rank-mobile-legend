@@ -98,11 +98,26 @@ const defaultHighlights = [
 export default function PricingSection() {
   const { locale } = useLanguage();
   const [packageHighlights, setPackageHighlights] = useState(defaultHighlights);
+  const [seasonLabel, setSeasonLabel] = useState("");
 
   useEffect(() => {
-    fetch("/api/settings?keys=pricing_catalog,perstar_pricing,gendong_pricing")
+    fetch("/api/settings?keys=pricing_catalog,perstar_pricing,gendong_pricing,season_pricing")
       .then((res) => res.json())
       .then((data) => {
+        // Determine season multiplier
+        let sMult = 1;
+        if (data.season_pricing && data.season_pricing.isEnabled && Array.isArray(data.season_pricing.phases)) {
+          const now = new Date();
+          const sorted = [...data.season_pricing.phases]
+            .filter((p: { startDate: string }) => p.startDate && new Date(p.startDate) <= now)
+            .sort((a: { startDate: string }, b: { startDate: string }) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+          if (sorted.length > 0) {
+            sMult = sorted[0].multiplier || 1;
+            setSeasonLabel(sorted[0].label || "");
+          }
+        }
+        const applyS = (price: number) => Math.round(price * sMult);
+
         const catalog: CatalogCategory[] = data.pricing_catalog && Array.isArray(data.pricing_catalog) ? data.pricing_catalog : [];
         const perStar = catalog.find((c) => c.id === "per-star");
         const paketGm = catalog.find((c) => c.id === "paket-gm");
@@ -119,18 +134,18 @@ export default function PricingSection() {
         setPackageHighlights((prev) =>
           prev.map((h) => {
             if (h.id === "per-star" && perStarMin) {
-              return { ...h, priceLabel: formatPriceLabel(perStarMin) };
+              return { ...h, priceLabel: formatPriceLabel(applyS(perStarMin)) };
             }
             if (h.id === "paket-rank" && paketGm?.packages?.length) {
               const minPrice = Math.min(...paketGm.packages.map((p) => p.price));
-              return { ...h, priceLabel: formatPriceLabel(minPrice) };
+              return { ...h, priceLabel: formatPriceLabel(applyS(minPrice)) };
             }
             if (h.id === "promo" && promo?.packages?.length) {
               const minPrice = Math.min(...promo.packages.map((p) => p.price));
-              return { ...h, priceLabel: formatPriceLabel(minPrice) };
+              return { ...h, priceLabel: formatPriceLabel(applyS(minPrice)) };
             }
             if (h.id === "gendong" && gendongMin) {
-              return { ...h, priceLabel: formatPriceLabel(gendongMin) };
+              return { ...h, priceLabel: formatPriceLabel(applyS(gendongMin)) };
             }
             return h;
           })
@@ -179,6 +194,12 @@ export default function PricingSection() {
             <span className="text-accent">{txt.titleHighlight}</span>
           </h2>
           <p className="text-text-muted text-sm sm:text-base">{txt.subtitle}</p>
+          {seasonLabel && (
+            <span className="inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-primary/10 border border-primary/20 text-primary">
+              <Flame className="w-3 h-3" />
+              {seasonLabel} {locale === "id" ? "— Harga spesial berlaku!" : "— Special prices active!"}
+            </span>
+          )}
         </div>
 
         {/* Pricing Cards */}
