@@ -1611,7 +1611,6 @@ function buildCategories(): DocCategory[] {
                   ["/api/admin/export", "GET", "CSV export (8 types)"],
                   ["/api/admin/upload", "POST", "File upload to Supabase Storage"],
                   ["/api/admin/ads", "GET/POST/DELETE", "Ad spend CRUD + attribution stats (ROAS, CPA)"],
-                  ["/api/admin/notify", "POST", "Manual notification"],
                   ["/api/admin/test-notifications", "POST", "Test notification channels"],
                 ]} />
               </div>

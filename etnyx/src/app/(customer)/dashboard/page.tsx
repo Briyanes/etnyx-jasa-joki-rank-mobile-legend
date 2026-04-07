@@ -97,6 +97,10 @@ export default function CustomerDashboard() {
   const [catalogItems, setCatalogItems] = useState<CatalogItem[]>([]);
   const [redemptions, setRedemptions] = useState<Redemption[]>([]);
   const [redeemingId, setRedeemingId] = useState<string | null>(null);
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [profileForm, setProfileForm] = useState({ name: "", whatsapp: "", currentPassword: "", newPassword: "" });
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileMsg, setProfileMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const t = locale === "id" ? {
     hello: "Halo",
@@ -145,6 +149,13 @@ export default function CustomerDashboard() {
     email: "Email",
     whatsapp: "WhatsApp",
     memberSince: "Member Sejak",
+    editProfile: "Edit Profil",
+    save: "Simpan",
+    cancel: "Batal",
+    currentPassword: "Password Lama",
+    newPassword: "Password Baru (opsional)",
+    profileUpdated: "Profil berhasil diupdate",
+    changePassword: "Ganti Password",
   } : {
     hello: "Hi",
     totalOrder: "Total Orders",
@@ -192,6 +203,13 @@ export default function CustomerDashboard() {
     email: "Email",
     whatsapp: "WhatsApp",
     memberSince: "Member Since",
+    editProfile: "Edit Profile",
+    save: "Save",
+    cancel: "Cancel",
+    currentPassword: "Current Password",
+    newPassword: "New Password (optional)",
+    profileUpdated: "Profile updated successfully",
+    changePassword: "Change Password",
   };
 
   const fetchData = useCallback(async () => {
@@ -680,28 +698,151 @@ export default function CustomerDashboard() {
 
         {/* Profile Tab */}
         {activeTab === "profile" && (
-          <div className="max-w-lg mx-auto">
+          <div className="max-w-lg mx-auto space-y-4">
             <div className="bg-surface rounded-xl p-6 border border-surface/50">
-              <div className="space-y-4">
-                <div>
-                  <p className="text-xs text-muted mb-1">{t.name}</p>
-                  <p className="text-text font-medium">{customer?.name}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted mb-1">{t.email}</p>
-                  <p className="text-text font-medium">{customer?.email}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted mb-1">{t.whatsapp}</p>
-                  <p className="text-text font-medium">{customer?.whatsapp || "-"}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted mb-1">{t.memberSince}</p>
-                  <p className="text-text font-medium">
-                    {customer?.created_at ? new Date(customer.created_at).toLocaleDateString("id-ID") : "-"}
-                  </p>
-                </div>
-              </div>
+              {!editingProfile ? (
+                <>
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-xs text-muted mb-1">{t.name}</p>
+                      <p className="text-text font-medium">{customer?.name}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted mb-1">{t.email}</p>
+                      <p className="text-text font-medium">{customer?.email}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted mb-1">{t.whatsapp}</p>
+                      <p className="text-text font-medium">{customer?.whatsapp || "-"}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted mb-1">{t.memberSince}</p>
+                      <p className="text-text font-medium">
+                        {customer?.created_at ? new Date(customer.created_at).toLocaleDateString("id-ID") : "-"}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setProfileForm({
+                        name: customer?.name || "",
+                        whatsapp: customer?.whatsapp?.replace(/^\+62/, "") || "",
+                        currentPassword: "",
+                        newPassword: "",
+                      });
+                      setProfileMsg(null);
+                      setEditingProfile(true);
+                    }}
+                    className="mt-4 w-full px-4 py-2.5 bg-primary/10 text-primary font-medium rounded-lg hover:bg-primary/20 transition-colors text-sm"
+                  >
+                    {t.editProfile}
+                  </button>
+                </>
+              ) : (
+                <form
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    setProfileSaving(true);
+                    setProfileMsg(null);
+                    try {
+                      const body: Record<string, string> = { name: profileForm.name };
+                      if (profileForm.whatsapp) body.whatsapp = profileForm.whatsapp;
+                      else body.whatsapp = "";
+                      if (profileForm.newPassword) {
+                        body.currentPassword = profileForm.currentPassword;
+                        body.newPassword = profileForm.newPassword;
+                      }
+                      const res = await fetch("/api/customer/profile", {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(body),
+                      });
+                      const data = await res.json();
+                      if (res.ok) {
+                        setProfileMsg({ type: "success", text: t.profileUpdated });
+                        setEditingProfile(false);
+                        fetchData();
+                      } else {
+                        setProfileMsg({ type: "error", text: data.error || "Error" });
+                      }
+                    } catch {
+                      setProfileMsg({ type: "error", text: "Error" });
+                    } finally {
+                      setProfileSaving(false);
+                    }
+                  }}
+                  className="space-y-4"
+                >
+                  <div>
+                    <label className="text-xs text-muted mb-1 block">{t.name}</label>
+                    <input
+                      type="text"
+                      value={profileForm.name}
+                      onChange={(e) => setProfileForm((p) => ({ ...p, name: e.target.value }))}
+                      required
+                      className="w-full px-3 py-2.5 rounded-lg bg-background border border-surface/50 text-text text-sm focus:outline-none focus:border-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-muted mb-1 block">{t.whatsapp}</label>
+                    <div className="flex items-center">
+                      <span className="px-3 py-2.5 bg-background border border-r-0 border-surface/50 rounded-l-lg text-muted text-sm">+62</span>
+                      <input
+                        type="tel"
+                        value={profileForm.whatsapp}
+                        onChange={(e) => setProfileForm((p) => ({ ...p, whatsapp: e.target.value.replace(/\D/g, "") }))}
+                        placeholder="81234567890"
+                        className="w-full px-3 py-2.5 rounded-r-lg bg-background border border-surface/50 text-text text-sm focus:outline-none focus:border-primary"
+                      />
+                    </div>
+                  </div>
+                  <div className="border-t border-surface/50 pt-4">
+                    <p className="text-xs text-muted mb-3 font-medium">{t.changePassword}</p>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-xs text-muted mb-1 block">{t.currentPassword}</label>
+                        <input
+                          type="password"
+                          value={profileForm.currentPassword}
+                          onChange={(e) => setProfileForm((p) => ({ ...p, currentPassword: e.target.value }))}
+                          className="w-full px-3 py-2.5 rounded-lg bg-background border border-surface/50 text-text text-sm focus:outline-none focus:border-primary"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted mb-1 block">{t.newPassword}</label>
+                        <input
+                          type="password"
+                          value={profileForm.newPassword}
+                          onChange={(e) => setProfileForm((p) => ({ ...p, newPassword: e.target.value }))}
+                          minLength={6}
+                          className="w-full px-3 py-2.5 rounded-lg bg-background border border-surface/50 text-text text-sm focus:outline-none focus:border-primary"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  {profileMsg && (
+                    <p className={`text-sm ${profileMsg.type === "success" ? "text-green-400" : "text-red-400"}`}>
+                      {profileMsg.text}
+                    </p>
+                  )}
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => { setEditingProfile(false); setProfileMsg(null); }}
+                      className="flex-1 px-4 py-2.5 border border-surface/50 text-muted rounded-lg text-sm hover:text-text transition-colors"
+                    >
+                      {t.cancel}
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={profileSaving}
+                      className="flex-1 px-4 py-2.5 bg-primary text-background font-medium rounded-lg text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
+                    >
+                      {profileSaving ? "..." : t.save}
+                    </button>
+                  </div>
+                </form>
+              )}
             </div>
           </div>
         )}
