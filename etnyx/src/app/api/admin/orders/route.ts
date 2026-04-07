@@ -202,6 +202,7 @@ export async function PATCH(request: Request) {
         current_star: data.current_star,
         target_star: data.target_star,
         package: data.package,
+        package_title: data.package_title,
         price: data.total_price,
         whatsapp: data.whatsapp,
         email: data.customer_email,

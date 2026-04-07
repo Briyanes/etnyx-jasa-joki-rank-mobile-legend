@@ -308,13 +308,13 @@ export async function PUT(request: NextRequest) {
     // WA to customer: "Sedang Dikerjakan"
     try {
       const { data: order } = await supabase.from("orders")
-        .select("order_id, username, current_rank, target_rank, current_star, target_star, package, total_price, whatsapp, customer_email, is_express, is_premium, notes")
+        .select("order_id, username, current_rank, target_rank, current_star, target_star, package, package_title, total_price, whatsapp, customer_email, is_express, is_premium, notes")
         .eq("id", orderId).single();
       if (order) {
         sendOrderStartedWA({
           order_id: order.order_id, username: order.username, current_rank: order.current_rank,
           target_rank: order.target_rank, current_star: order.current_star, target_star: order.target_star,
-          package: order.package, price: order.total_price,
+          package: order.package, package_title: order.package_title, price: order.total_price,
           whatsapp: order.whatsapp, email: order.customer_email, status: "in_progress",
         }).catch(console.error);
       }
@@ -333,13 +333,13 @@ export async function PUT(request: NextRequest) {
     // WA to customer: "Order Selesai" + link review
     try {
       const { data: order } = await supabase.from("orders")
-        .select("order_id, username, current_rank, target_rank, current_star, target_star, package, total_price, whatsapp, customer_email, assigned_worker_id, is_express, is_premium, notes")
+        .select("order_id, username, current_rank, target_rank, current_star, target_star, package, package_title, total_price, whatsapp, customer_email, assigned_worker_id, is_express, is_premium, notes")
         .eq("id", orderId).single();
       if (order) {
         sendOrderCompletedWA({
           order_id: order.order_id, username: order.username, current_rank: order.current_rank,
           target_rank: order.target_rank, current_star: order.current_star, target_star: order.target_star,
-          package: order.package, price: order.total_price,
+          package: order.package, package_title: order.package_title, price: order.total_price,
           whatsapp: order.whatsapp, email: order.customer_email, status: "completed",
         }).catch(console.error);
 

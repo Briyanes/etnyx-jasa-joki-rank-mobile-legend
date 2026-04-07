@@ -42,8 +42,14 @@ export async function POST(request: NextRequest) {
       if (star && STAR_LABELS[star]) return `${rank} ${STAR_LABELS[star]}`;
       return rank;
     };
-    const currentRankFmt = fmtRank(order.current_rank, order.current_star);
-    const targetRankFmt = fmtRank(order.target_rank, order.target_star);
+    // For per-bintang/gendong orders (same rank), show package_title
+    const isPerStar = order.current_rank === order.target_rank && order.package_title;
+    const rankDisplay = isPerStar
+      ? order.package_title
+      : `${fmtRank(order.current_rank, order.current_star)} → ${fmtRank(order.target_rank, order.target_star)}`;
+    const targetDisplay = isPerStar
+      ? order.package_title
+      : fmtRank(order.target_rank, order.target_star);
 
     let message = "";
     let sent = false;
@@ -71,7 +77,7 @@ export async function POST(request: NextRequest) {
         } catch { /* no bank accounts configured */ }
 
         const uploadUrl = `${siteConfig.url}/payment/manual/?order_id=${order.order_id}/`;
-        message = `Halo kak!\n\nIni dari *ETNYX*. Kami ingin mengingatkan terkait order yang belum dibayar:\n\n*Order ID:* ${order.order_id}\n*Paket:* ${currentRankFmt} → ${targetRankFmt}\n*Total:* Rp ${order.total_price.toLocaleString("id-ID")}${paymentInfo}\n\nSetelah transfer, upload bukti di sini:\n${uploadUrl}\n\nSilakan selesaikan pembayaran agar order bisa segera diproses ya!\n\nAda pertanyaan? Balas pesan ini aja~\n\n_ETNYX - Push Rank, Tanpa Main_`;
+        message = `Halo kak!\n\nIni dari *ETNYX*. Kami ingin mengingatkan terkait order yang belum dibayar:\n\n*Order ID:* ${order.order_id}\n*Paket:* ${rankDisplay}\n*Total:* Rp ${order.total_price.toLocaleString("id-ID")}${paymentInfo}\n\nSetelah transfer, upload bukti di sini:\n${uploadUrl}\n\nSilakan selesaikan pembayaran agar order bisa segera diproses ya!\n\nAda pertanyaan? Balas pesan ini aja~\n\n_ETNYX - Push Rank, Tanpa Main_`;
         sent = await sendWhatsAppMessage(order.whatsapp, message);
         break;
       }
@@ -84,7 +90,7 @@ export async function POST(request: NextRequest) {
 
       case "follow_up_progress": {
         const progress = order.progress || 0;
-        message = `Halo kak!\n\nUpdate progress order kamu:\n\n*Order ID:* ${order.order_id}\n*Progress:* ${progress}%\n*Target:* ${targetRankFmt}\n\nBooster kami sedang mengerjakan order kamu. Estimasi selesai dalam waktu dekat!\n\nJangan login ke akun selama proses ya!\n\nTrack order di sini:\n${siteConfig.url}/track/?id=${order.order_id}/\n\n_ETNYX - Push Rank, Tanpa Main_`;
+        message = `Halo kak!\n\nUpdate progress order kamu:\n\n*Order ID:* ${order.order_id}\n*Progress:* ${progress}%\n*Target:* ${targetDisplay}\n\nBooster kami sedang mengerjakan order kamu. Estimasi selesai dalam waktu dekat!\n\nJangan login ke akun selama proses ya!\n\nTrack order di sini:\n${siteConfig.url}/track/?id=${order.order_id}/\n\n_ETNYX - Push Rank, Tanpa Main_`;
         sent = await sendWhatsAppMessage(order.whatsapp, message);
         break;
       }
@@ -98,6 +104,7 @@ export async function POST(request: NextRequest) {
           current_star: order.current_star,
           target_star: order.target_star,
           package: order.package,
+          package_title: order.package_title,
           price: order.total_price,
           whatsapp: order.whatsapp,
           email: order.customer_email,
@@ -116,6 +123,7 @@ export async function POST(request: NextRequest) {
           current_star: order.current_star,
           target_star: order.target_star,
           package: order.package,
+          package_title: order.package_title,
           price: order.total_price,
           whatsapp: order.whatsapp,
           email: order.customer_email,
@@ -127,13 +135,13 @@ export async function POST(request: NextRequest) {
 
       case "request_review": {
         const reviewUrl = `${siteConfig.url}/review/?id=${order.order_id}/`;
-        message = `Halo kak!\n\nTerima kasih sudah menggunakan *ETNYX*!\n\n*Order ID:* ${order.order_id}\n*Rank:* ${currentRankFmt} → ${targetRankFmt}\n\nKami senang banget order kamu sudah selesai!\n\nBoleh minta waktunya sebentar untuk kasih *review*?\n\nKasih review di sini:\n${reviewUrl}\n\nTerima kasih banyak!\n\n_ETNYX - Push Rank, Tanpa Main_`;
+        message = `Halo kak!\n\nTerima kasih sudah menggunakan *ETNYX*!\n\n*Order ID:* ${order.order_id}\n*Rank:* ${rankDisplay}\n\nKami senang banget order kamu sudah selesai!\n\nBoleh minta waktunya sebentar untuk kasih *review*?\n\nKasih review di sini:\n${reviewUrl}\n\nTerima kasih banyak!\n\n_ETNYX - Push Rank, Tanpa Main_`;
         sent = await sendWhatsAppMessage(order.whatsapp, message);
         break;
       }
 
       case "reactivation": {
-        message = `Halo kak!\n\nKami dari *ETNYX*. Kami lihat order kamu sebelumnya belum selesai:\n\n*Order ID:* ${order.order_id}\n*Paket:* ${currentRankFmt} → ${targetRankFmt}\n\nApakah kamu masih tertarik untuk melanjutkan? Kami siap bantu push rank kamu kapan saja!\n\nBalas pesan ini untuk melanjutkan order.\n\n_ETNYX - Push Rank, Tanpa Main_`;
+        message = `Halo kak!\n\nKami dari *ETNYX*. Kami lihat order kamu sebelumnya belum selesai:\n\n*Order ID:* ${order.order_id}\n*Paket:* ${rankDisplay}\n\nApakah kamu masih tertarik untuk melanjutkan? Kami siap bantu push rank kamu kapan saja!\n\nBalas pesan ini untuk melanjutkan order.\n\n_ETNYX - Push Rank, Tanpa Main_`;
         sent = await sendWhatsAppMessage(order.whatsapp, message);
         break;
       }

@@ -11,6 +11,7 @@ interface OrderData {
   current_star?: number | null;
   target_star?: number | null;
   package: string;
+  package_title?: string | null;
   price: number;
   whatsapp?: string;
   email?: string;
@@ -78,6 +79,21 @@ function formatRank(rank: string, star?: number | null): string {
   return label;
 }
 
+// For per-bintang/gendong orders (same rank), show package_title instead of "Rank → Rank"
+function formatRankDisplay(order: OrderData): string {
+  if (order.current_rank === order.target_rank && order.package_title) {
+    return order.package_title;
+  }
+  return `${formatRank(order.current_rank, order.current_star)} → ${formatRank(order.target_rank, order.target_star)}`;
+}
+
+function formatTargetDisplay(order: OrderData): string {
+  if (order.current_rank === order.target_rank && order.package_title) {
+    return order.package_title;
+  }
+  return formatRank(order.target_rank, order.target_star);
+}
+
 // ============ TELEGRAM ============
 export async function sendTelegramMessage(
   chatId: string,
@@ -133,7 +149,7 @@ export async function notifyAdminNewOrder(order: OrderData & { db_id?: string })
 <b>WhatsApp:</b> ${order.whatsapp || "-"}
 
 <b>Detail Order:</b>
-• Rank: ${formatRank(order.current_rank, order.current_star)} → ${formatRank(order.target_rank, order.target_star)}
+• Rank: ${formatRankDisplay(order)}
 • Paket: ${order.package}
 ${order.is_express ? "EXPRESS" : ""}${order.is_premium ? " PREMIUM" : ""}
 
@@ -171,7 +187,7 @@ export async function notifyWorkerConfirmedOrder(order: OrderData): Promise<bool
 <b>Username:</b> ${order.username}
 
 <b>Detail Order:</b>
-• Rank: ${formatRank(order.current_rank, order.current_star)} → ${formatRank(order.target_rank, order.target_star)}
+• Rank: ${formatRankDisplay(order)}
 • Paket: ${order.package}
 ${order.is_express ? "EXPRESS - PRIORITAS!" : ""}${order.is_premium ? " PREMIUM" : ""}
 
@@ -196,7 +212,7 @@ export async function notifyAdminOrderCompleted(order: OrderData & { db_id?: str
 <b>WhatsApp:</b> ${order.whatsapp || "-"}
 
 <b>Detail:</b>
-• Rank: ${formatRank(order.current_rank, order.current_star)} → ${formatRank(order.target_rank, order.target_star)}
+• Rank: ${formatRankDisplay(order)}
 • Paket: ${order.package}
 
 <b>Total:</b> ${formatRupiah(order.price)}
@@ -371,7 +387,7 @@ export async function sendPaymentConfirmedWA(order: OrderData): Promise<boolean>
 Halo! Pembayaran kamu sudah kami terima dan dikonfirmasi.
 
 *Order ID:* ${order.order_id}
-*Paket:* ${formatRank(order.current_rank, order.current_star)} → ${formatRank(order.target_rank, order.target_star)}
+*Paket:* ${formatRankDisplay(order)}
 *Total:* ${formatRupiah(order.price)}
 
 Order kamu akan segera diproses oleh tim booster kami. Kamu akan menerima notifikasi saat pengerjaan dimulai.
@@ -397,7 +413,7 @@ Terima kasih sudah order di *ETNYX*!
 
 *Detail Order:*
 • Order ID: ${order.order_id}
-• Rank: ${formatRank(order.current_rank, order.current_star)} → ${formatRank(order.target_rank, order.target_star)}
+• Rank: ${formatRankDisplay(order)}
 • Paket: ${order.package}
 • Total: ${formatRupiah(order.price)}
 
@@ -425,7 +441,7 @@ export async function sendOrderStartedWA(order: OrderData): Promise<boolean> {
 Halo! Order kamu sudah dikonfirmasi dan sedang dalam pengerjaan oleh booster kami.
 
 *Order ID:* ${order.order_id}
-*Target:* ${formatRank(order.target_rank, order.target_star)}
+*Paket:* ${formatTargetDisplay(order)}
 
 Kamu bisa track progress di sini:
 ${SITE_URL}/track/?id=${order.order_id}/
@@ -450,7 +466,7 @@ export async function sendOrderCompletedWA(order: OrderData): Promise<boolean> {
 Yeay! Order kamu sudah selesai dikerjakan.
 
 *Order ID:* ${order.order_id}
-*Rank Akhir:* ${formatRank(order.target_rank, order.target_star)}
+*Rank Akhir:* ${formatTargetDisplay(order)}
 
 Silakan cek akun kamu dan ganti password untuk keamanan.
 
@@ -556,7 +572,7 @@ export async function sendOrderConfirmationEmail(order: OrderData): Promise<bool
           </tr>
           <tr>
             <td style="padding: 8px 0; border-bottom: 1px solid #333;">Rank</td>
-            <td style="padding: 8px 0; border-bottom: 1px solid #333; text-align: right;">${formatRank(order.current_rank, order.current_star)} → ${formatRank(order.target_rank, order.target_star)}</td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #333; text-align: right;">${formatRankDisplay(order)}</td>
           </tr>
           <tr>
             <td style="padding: 8px 0; border-bottom: 1px solid #333;">Paket</td>
