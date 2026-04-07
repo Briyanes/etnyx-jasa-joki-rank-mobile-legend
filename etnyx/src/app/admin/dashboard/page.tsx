@@ -215,6 +215,9 @@ export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [followUpLoading, setFollowUpLoading] = useState<string | null>(null);
   const [statusActionLoading, setStatusActionLoading] = useState<string | null>(null);
+  const [searchDebounce, setSearchDebounce] = useState<ReturnType<typeof setTimeout> | null>(null);
+  const [customerSearch, setCustomerSearch] = useState("");
+  const [assigningWorker, setAssigningWorker] = useState<string | null>(null);
 
   // Payment proof review state
   interface PaymentProof { id: string; order_id: string; image_url: string; sender_name: string | null; sender_bank: string | null; amount: number | null; status: string; created_at: string; reject_reason?: string | null }
@@ -453,6 +456,31 @@ export default function AdminDashboard() {
   const openWhatsApp = (phone: string, message: string) => {
     const normalized = phone.replace(/\D/g, "").replace(/^0/, "62");
     window.open(`https://wa.me/${normalized}?text=${encodeURIComponent(message)}`, "_blank");
+  };
+
+  const assignWorker = async (orderId: string, workerId: string | null) => {
+    setAssigningWorker(orderId);
+    try {
+      const res = await fetch("/api/admin/orders", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: orderId, assigned_worker_id: workerId }),
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        alert(d.error || "Gagal assign worker");
+      } else {
+        fetchOrders();
+      }
+    } catch { alert("Network error"); }
+    setAssigningWorker(null);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    setOrdersPage(1);
+    if (searchDebounce) clearTimeout(searchDebounce);
+    setSearchDebounce(setTimeout(() => fetchOrders(), 500));
   };
 
   // Payment proof functions
@@ -732,7 +760,11 @@ export default function AdminDashboard() {
 
         {/* Nav */}
         <nav className="flex-1 py-2 overflow-y-auto">
-          {TAB_CONFIG.map((tab) => (
+          {TAB_CONFIG.map((tab) => {
+            const badge = tab.id === "orders" ? stats?.pending_orders || 0
+              : tab.id === "reviews" ? reviews.filter(r => r.has_worker_report && r.report_status === "pending").length
+              : 0;
+            return (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
@@ -743,9 +775,15 @@ export default function AdminDashboard() {
               }`}
             >
               <tab.icon className="w-4 h-4 flex-shrink-0" />
-              {sidebarOpen && <span>{tab.label}</span>}
+              {sidebarOpen && <span className="flex-1 text-left">{tab.label}</span>}
+              {badge > 0 && (
+                <span className={`${sidebarOpen ? "" : "absolute right-1 top-1"} min-w-[18px] h-[18px] flex items-center justify-center rounded-full text-[10px] font-bold ${
+                  tab.id === "orders" ? "bg-yellow-500 text-black" : "bg-red-500 text-white"
+                }`}>{badge > 99 ? "99+" : badge}</span>
+              )}
             </button>
-          ))}
+            );
+          })}
         </nav>
 
         {/* Bottom */}
@@ -899,7 +937,7 @@ export default function AdminDashboard() {
               </div>
 
               {/* Quick Stats */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-surface rounded-xl p-5 border border-white/5">
                   <p className="text-xs text-text-muted mb-1">Minggu Ini</p>
                   <p className="text-3xl font-bold gradient-text">{stats.orders_this_week}</p>
@@ -909,6 +947,43 @@ export default function AdminDashboard() {
                   <p className="text-xs text-text-muted mb-1">Bulan Ini</p>
                   <p className="text-3xl font-bold gradient-text">{stats.orders_this_month}</p>
                   <p className="text-xs text-text-muted">orders</p>
+                </div>
+                <div className="bg-surface rounded-xl p-5 border border-white/5">
+                  <p className="text-xs text-text-muted mb-1">Pending Revenue</p>
+                  <p className="text-2xl font-bold text-yellow-400">{formatRupiah(stats.pending_revenue)}</p>
+                  <p className="text-xs text-text-muted">menunggu bayar</p>
+                </div>
+                <div className="bg-surface rounded-xl p-5 border border-white/5">
+                  <p className="text-xs text-text-muted mb-1">Conversion Rate</p>
+                  <p className="text-2xl font-bold text-green-400">
+                    {stats.total_orders > 0 ? Math.round((stats.completed_orders / stats.total_orders) * 100) : 0}%
+                  </p>
+                  <p className="text-xs text-text-muted">completed / total</p>
+                </div>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="bg-surface rounded-xl p-5 border border-white/5">
+                <h3 className="text-sm font-semibold text-text mb-3 flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-yellow-400" /> Quick Actions
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {stats.pending_orders > 0 && (
+                    <button onClick={() => { setActiveTab("orders"); setStatusFilter("pending"); }} className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 transition-colors border border-yellow-500/20">
+                      <Clock className="w-3.5 h-3.5" /> {stats.pending_orders} Pending Orders
+                    </button>
+                  )}
+                  {stats.confirmed_orders > 0 && (
+                    <button onClick={() => { setActiveTab("orders"); setStatusFilter("confirmed"); }} className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors border border-blue-500/20">
+                      <CheckCircle className="w-3.5 h-3.5" /> {stats.confirmed_orders} Siap Dikerjakan
+                    </button>
+                  )}
+                  <button onClick={() => setActiveTab("reviews")} className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-white/5 text-text-muted hover:bg-white/10 transition-colors border border-white/5">
+                    <MessageCircle className="w-3.5 h-3.5" /> Reviews
+                  </button>
+                  <button onClick={() => setActiveTab("reports")} className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-white/5 text-text-muted hover:bg-white/10 transition-colors border border-white/5">
+                    <BarChart3 className="w-3.5 h-3.5" /> Laporan
+                  </button>
                 </div>
               </div>
             </div>
@@ -925,7 +1000,7 @@ export default function AdminDashboard() {
                     type="text"
                     placeholder="Cari order ID, username, game ID, WhatsApp..."
                     value={searchQuery}
-                    onChange={(e) => { setSearchQuery(e.target.value); setOrdersPage(1); }}
+                    onChange={(e) => handleSearchChange(e.target.value)}
                     className="w-full bg-surface border border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none"
                   />
                 </div>
@@ -985,11 +1060,17 @@ export default function AdminDashboard() {
                             )}
                           </td>
                           <td className="px-4 py-3">
-                            {o.assigned_worker_id ? (
-                              <span className="text-xs text-text">{staffUsers.find(s => s.id === o.assigned_worker_id)?.name || "Unknown"}</span>
-                            ) : (
-                              <span className="text-[10px] text-text-muted">—</span>
-                            )}
+                            <select
+                              value={o.assigned_worker_id || ""}
+                              onChange={(e) => assignWorker(o.id, e.target.value || null)}
+                              disabled={assigningWorker === o.id}
+                              className="bg-background border border-white/10 rounded-lg px-2 py-1.5 text-xs text-text focus:border-accent focus:outline-none min-w-[100px] disabled:opacity-50"
+                            >
+                              <option value="">— Belum —</option>
+                              {staffUsers.filter(s => s.role === "worker" && s.is_active).map(s => (
+                                <option key={s.id} value={s.id}>{s.name}</option>
+                              ))}
+                            </select>
                           </td>
                           <td className="px-4 py-3">
                             <span className={`px-2 py-1 rounded-md text-[10px] font-medium border ${getStatusColor(o.status)}`}>
@@ -1512,7 +1593,10 @@ export default function AdminDashboard() {
           {activeTab === "boosters" && (
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <p className="text-sm text-text-muted">{boosters.length} boosters</p>
+                <div className="flex items-center gap-3">
+                  <p className="text-sm text-text-muted">{boosters.length} boosters</p>
+                  <span className="text-[10px] text-text-muted bg-white/5 px-2 py-1 rounded">Tampilan publik di website • Untuk akun login, kelola di tab Staff</span>
+                </div>
                 <button onClick={() => { setEditItem(null); setShowModal("booster"); }}
                   className="flex items-center gap-1.5 gradient-primary px-3 py-2 rounded-lg text-white text-xs font-medium">
                   <Plus className="w-3.5 h-3.5" /> Add Booster
@@ -1692,7 +1776,27 @@ export default function AdminDashboard() {
           {/* ===== CUSTOMERS TAB ===== */}
           {activeTab === "customers" && (
             <div className="space-y-4">
-              <p className="text-sm text-text-muted">{customers.length} customers</p>
+              <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+                <p className="text-sm text-text-muted">{customers.length} customers</p>
+                <div className="relative w-full sm:w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                  <input
+                    type="text"
+                    placeholder="Cari nama, email, WA..."
+                    value={customerSearch}
+                    onChange={(e) => setCustomerSearch(e.target.value)}
+                    className="w-full bg-surface border border-white/10 rounded-lg pl-10 pr-4 py-2 text-text text-sm focus:border-accent focus:outline-none"
+                  />
+                </div>
+              </div>
+              {(() => {
+                const filtered = customers.filter(c => {
+                  if (!customerSearch.trim()) return true;
+                  const q = customerSearch.toLowerCase();
+                  return c.name?.toLowerCase().includes(q) || c.email?.toLowerCase().includes(q) || c.whatsapp?.includes(q) || c.referral_code?.toLowerCase().includes(q);
+                });
+                return (
+                  <>
               <div className="bg-surface rounded-xl border border-white/5 overflow-hidden overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
@@ -1709,7 +1813,7 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {customers.map((c) => (
+                    {filtered.map((c) => (
                       <tr key={c.id} className="border-b border-white/5 hover:bg-white/[0.02]">
                         <td className="px-4 py-3 text-text text-xs font-medium">{c.name}</td>
                         <td className="px-4 py-3 text-text-muted text-xs">{c.email}</td>
@@ -1758,6 +1862,12 @@ export default function AdminDashboard() {
                   </tbody>
                 </table>
               </div>
+              {filtered.length > 20 && (
+                <p className="text-xs text-text-muted text-center">{filtered.length} customers ditampilkan</p>
+              )}
+                  </>
+                );
+              })()}
             </div>
           )}
 
@@ -2016,7 +2126,7 @@ export default function AdminDashboard() {
           {activeTab === "reviews" && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
                   <button onClick={() => setReviewsSubTab("all")} className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${reviewsSubTab === "all" ? "bg-accent/20 text-accent" : "bg-white/5 text-text-muted hover:bg-white/10"}`}>
                     Semua ({reviews.length})
                   </button>
@@ -2030,7 +2140,7 @@ export default function AdminDashboard() {
               </div>
 
               {/* Stats cards */}
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                 <div className="bg-surface rounded-xl border border-white/5 p-4 text-center">
                   <p className="text-2xl font-bold text-text">{reviews.length}</p>
                   <p className="text-xs text-text-muted mt-1">Total Reviews</p>
@@ -2046,6 +2156,10 @@ export default function AdminDashboard() {
                 <div className="bg-surface rounded-xl border border-white/5 p-4 text-center">
                   <p className="text-2xl font-bold text-accent">{reviews.filter(r => r.service_rating >= 4).length}</p>
                   <p className="text-xs text-text-muted mt-1">Rating 4-5</p>
+                </div>
+                <div className="bg-surface rounded-xl border border-white/5 p-4 text-center">
+                  <p className="text-2xl font-bold text-green-400">{reviews.filter(r => r.google_reviewed).length}</p>
+                  <p className="text-xs text-text-muted mt-1">Google Reviewed</p>
                 </div>
               </div>
 
@@ -2094,15 +2208,26 @@ export default function AdminDashboard() {
                         </td>
                         <td className="px-4 py-3 text-text-muted text-xs">{new Date(r.created_at).toLocaleDateString("id-ID")}</td>
                         <td className="px-4 py-3">
-                          <div className="flex gap-1">
+                          <div className="flex gap-1 flex-wrap">
                             <button
                               onClick={async () => {
                                 await fetch("/api/admin/reviews", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: r.id, is_visible: !r.is_visible }) });
                                 fetchReviews();
                               }}
                               className={`text-xs px-2 py-1 rounded ${r.is_visible ? "text-accent" : "text-text-muted"} hover:underline`}
+                              title={r.is_visible ? "Sembunyikan" : "Tampilkan"}
                             >
                               <Eye className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={async () => {
+                                await fetch("/api/admin/reviews", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: r.id, google_reviewed: !r.google_reviewed }) });
+                                fetchReviews();
+                              }}
+                              className={`text-[10px] px-2 py-1 rounded font-medium ${r.google_reviewed ? "bg-green-500/10 text-green-400" : "bg-white/5 text-text-muted"} hover:opacity-80`}
+                              title={r.google_reviewed ? "Sudah review Google" : "Belum review Google"}
+                            >
+                              G
                             </button>
                             {r.has_worker_report && r.report_status === "pending" && (
                               <button
