@@ -171,7 +171,7 @@ export default function ReviewPage() {
   const [serviceComment, setServiceComment] = useState("");
   const [workerRating, setWorkerRating] = useState(0);
   const [workerComment, setWorkerComment] = useState("");
-  const [showReport, setShowReport] = useState(false);
+  const [showReport, setShowReport] = useState(searchParams.get("report") === "1");
   const [reportType, setReportType] = useState("");
   const [reportDetail, setReportDetail] = useState("");
   const [customerName, setCustomerName] = useState("");

@@ -456,6 +456,7 @@ export async function sendOrderCompletedWA(order: OrderData): Promise<boolean> {
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.com";
   const reviewLink = `${siteUrl}/review/?id=${order.order_id}`;
+  const reportLink = `${siteUrl}/review/?id=${order.order_id}&report=1`;
 
   const message = `
 *Order Selesai!*
@@ -468,13 +469,13 @@ Yeay! Order kamu sudah selesai dikerjakan.
 Silakan cek akun kamu dan ganti password untuk keamanan.
 
 *Bantu kami dengan review yuk!*
-Kasih review di sini:
 ${reviewLink}
 
-*Penting:*
-Jika worker menawarkan jasa joki di luar ETNYX, meminta kontak pribadi, atau melakukan hal mencurigakan lainnya, segera laporkan saat mengisi review. Laporan yang terbukti valid bisa mendapat *skin gratis* sebagai apresiasi dari kami!
+*Ada masalah dengan worker?*
+Laporkan di sini:
+${reportLink}
 
-Terima kasih sudah menggunakan ETNYX!
+Terima kasih sudah menggunakan *ETNYX*!
 
 _ETNYX - Push Rank, Tanpa Main_
 `.trim();
