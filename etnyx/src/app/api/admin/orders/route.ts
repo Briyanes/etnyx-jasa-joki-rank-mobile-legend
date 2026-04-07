@@ -193,6 +193,17 @@ export async function PATCH(request: Request) {
       new_value: JSON.stringify(updates),
     });
 
+    // Log status change to order_logs (for timeline tracking)
+    if (updates.status && updates.status !== previousStatus) {
+      await supabase.from("order_logs").insert({
+        order_id: id,
+        action: `status_${updates.status}`,
+        new_value: updates.status,
+        notes: `Status changed by admin (${auth.user!.email})`,
+        created_by: auth.user!.email,
+      });
+    }
+
     // Send notifications based on status change
     if (updates.status && updates.status !== previousStatus) {
       const orderData = {

@@ -378,7 +378,11 @@ function TrackOrderContent() {
                     // Find timestamp for this status from logs
                     const stepLog = step === "pending"
                       ? { created_at: order.created_at }
-                      : order.status_logs?.find(l => l.new_value === step);
+                      : order.status_logs?.find(l =>
+                          l.new_value === step ||
+                          l.action === `status_${step}` ||
+                          (step === "confirmed" && l.action === "payment_confirmed")
+                        );
 
                     return (
                       <div key={step} className="flex items-center gap-4">

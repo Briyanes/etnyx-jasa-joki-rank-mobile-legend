@@ -36,7 +36,7 @@ export async function GET(request: Request) {
       .from("order_logs")
       .select("action, new_value, created_at")
       .eq("order_id", data.id)
-      .eq("action", "status_change")
+      .in("action", ["status_change", "status_confirmed", "status_in_progress", "status_completed", "status_cancelled", "payment_confirmed", "created"])
       .order("created_at", { ascending: true });
 
     // Strip internal id from response

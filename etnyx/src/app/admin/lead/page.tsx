@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
@@ -20,6 +20,7 @@ interface Order {
   current_star: number | null;
   target_star: number | null;
   package: string;
+  package_title: string | null;
   is_express: boolean;
   is_premium: boolean;
   total_price: number;
@@ -27,6 +28,7 @@ interface Order {
   progress: number;
   current_progress_rank: string | null;
   created_at: string;
+  updated_at: string;
   assigned_worker_id: string | null;
   assigned_lead_id: string | null;
   whatsapp: string | null;
@@ -132,17 +134,29 @@ export default function LeadDashboard() {
     } catch { router.push("/admin"); return null; }
   }, [router]);
 
+  // Debounced search
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+    searchTimerRef.current = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 400);
+    return () => { if (searchTimerRef.current) clearTimeout(searchTimerRef.current); };
+  }, [searchQuery]);
+
   const fetchOrders = useCallback(async () => {
     try {
       const params = new URLSearchParams();
       if (statusFilter !== "all") params.set("status", statusFilter);
-      if (searchQuery.trim()) params.set("search", searchQuery.trim());
+      if (debouncedSearch.trim()) params.set("search", debouncedSearch.trim());
       const url = `/api/staff/orders${params.toString() ? `?${params}` : ""}`;
       const res = await fetch(url);
       const data = await res.json();
       setOrders(data.orders || []);
     } catch (e) { console.error(e); }
-  }, [statusFilter, searchQuery]);
+  }, [statusFilter, debouncedSearch]);
 
   const fetchWorkers = useCallback(async () => {
     try {
@@ -173,7 +187,7 @@ export default function LeadDashboard() {
 
   useEffect(() => {
     if (!loading) fetchOrders();
-  }, [statusFilter, loading, fetchOrders]);
+  }, [statusFilter, debouncedSearch, loading, fetchOrders]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -458,7 +472,7 @@ export default function LeadDashboard() {
                       <div className="flex items-center gap-2 mt-1 text-text-muted text-xs">
                         <span>{order.username}</span>
                         <span>•</span>
-                        <span>{rankWithStar(order.current_rank, order.current_star)} → {rankWithStar(order.target_rank, order.target_star)}</span>
+                        <span>{order.current_rank === order.target_rank && order.package_title ? order.package_title : `${rankWithStar(order.current_rank, order.current_star)} → ${rankWithStar(order.target_rank, order.target_star)}`}</span>
                       </div>
                     </div>
                     <div className="text-right shrink-0">

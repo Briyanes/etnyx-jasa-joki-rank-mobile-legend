@@ -19,6 +19,7 @@ interface Order {
   current_star: number | null;
   target_star: number | null;
   package: string;
+  package_title: string | null;
   is_express: boolean;
   is_premium: boolean;
   total_price: number;
@@ -26,6 +27,7 @@ interface Order {
   progress: number;
   current_progress_rank: string | null;
   created_at: string;
+  updated_at: string;
   whatsapp: string | null;
   hero_request: string | null;
   login_method: string | null;
@@ -520,7 +522,7 @@ export default function WorkerDashboard() {
                         {order.is_express && <span className="px-1.5 py-0.5 rounded text-xs bg-orange-500/10 text-orange-400">Express</span>}
                       </div>
                       <p className="text-text-muted text-xs mt-1">
-                        {rankWithStar(order.current_rank, order.current_star)} → {rankWithStar(order.target_rank, order.target_star)}
+                        {order.current_rank === order.target_rank && order.package_title ? order.package_title : `${rankWithStar(order.current_rank, order.current_star)} → ${rankWithStar(order.target_rank, order.target_star)}`}
                       </p>
                       {order.hero_request && <p className="text-text-muted text-xs">Hero: {order.hero_request}</p>}
                     </div>
@@ -577,9 +579,9 @@ export default function WorkerDashboard() {
                 <div key={order.id} className="bg-surface rounded-xl border border-white/5 p-3 flex items-center justify-between">
                   <div>
                     <span className="text-text font-mono text-sm">{order.order_id}</span>
-                    <span className="text-text-muted text-xs ml-2">{rankWithStar(order.current_rank, order.current_star)} → {rankWithStar(order.target_rank, order.target_star)}</span>
+                    <span className="text-text-muted text-xs ml-2">{order.current_rank === order.target_rank && order.package_title ? order.package_title : `${rankWithStar(order.current_rank, order.current_star)} → ${rankWithStar(order.target_rank, order.target_star)}`}</span>
                   </div>
-                  <span className="text-green-400 text-xs">{formatDate(order.created_at)}</span>
+                  <span className="text-green-400 text-xs">{formatDate(order.updated_at)}</span>
                 </div>
               ))}
             </div>
@@ -677,7 +679,7 @@ function OrderCard({
               {order.is_premium && <span className="px-1.5 py-0.5 rounded text-xs bg-purple-500/10 text-purple-400">Premium</span>}
             </div>
             <p className="text-text-muted text-xs mt-1">
-              {order.username} • {rankWithStar(order.current_rank, order.current_star)} → {rankWithStar(order.target_rank, order.target_star)}
+              {order.username} • {order.current_rank === order.target_rank && order.package_title ? order.package_title : `${rankWithStar(order.current_rank, order.current_star)} → ${rankWithStar(order.target_rank, order.target_star)}`}
             </p>
           </div>
           <div className="flex items-center gap-2">
