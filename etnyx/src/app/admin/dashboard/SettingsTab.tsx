@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import {
   Layout, Megaphone, HelpCircle, Users, Share2, Building,
   BarChart3, Zap, Settings2, Eye, EyeOff, Plus, Trash2,
-  Save, Loader2, CheckCircle, GripVertical, Download,
+  Save, Loader2, CheckCircle, ChevronUp, ChevronDown, Download,
   CreditCard, Mail, MessageCircle, Send, BookOpen, AlertTriangle, Copy, Plug, Upload,
   Landmark, Wallet, QrCode, Smartphone, Building2, Banknote,
   type LucideIcon,
@@ -207,6 +207,13 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
             <CmsSaveButton settingKey="hero" value={hero} />
           </div>
           <div className="bg-surface rounded-xl border border-white/5 p-6 space-y-5">
+            <div className="flex items-center justify-between">
+              <label className="text-sm text-text font-medium">Tampilkan Hero Section</label>
+              <button onClick={() => setHero({ ...hero, isVisible: !hero.isVisible })}
+                className={`w-12 h-6 rounded-full transition-colors relative ${hero.isVisible ? "bg-accent" : "bg-white/10"}`}>
+                <div className={`w-5 h-5 rounded-full bg-white absolute top-0.5 transition-all ${hero.isVisible ? "left-6" : "left-0.5"}`} />
+              </button>
+            </div>
             <div>
               <label className="block text-sm text-text-muted mb-1.5">Headline</label>
               <input type="text" value={hero.headline} onChange={(e) => setHero({ ...hero, headline: e.target.value })}
@@ -285,7 +292,16 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
             {faqItems.map((item, i) => (
               <div key={i} className="bg-surface rounded-xl border border-white/5 p-4 space-y-3">
                 <div className="flex items-start gap-3">
-                  <GripVertical className="w-4 h-4 text-text-muted mt-3 flex-shrink-0 cursor-grab" />
+                  <div className="flex flex-col gap-1 mt-2 flex-shrink-0">
+                    <button onClick={() => { if (i === 0) return; const next = [...faqItems]; [next[i - 1], next[i]] = [next[i], next[i - 1]]; setFaqItems(next); }}
+                      disabled={i === 0} className="text-text-muted hover:text-accent disabled:opacity-30 transition-colors" title="Pindah ke atas">
+                      <ChevronUp className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => { if (i === faqItems.length - 1) return; const next = [...faqItems]; [next[i], next[i + 1]] = [next[i + 1], next[i]]; setFaqItems(next); }}
+                      disabled={i === faqItems.length - 1} className="text-text-muted hover:text-accent disabled:opacity-30 transition-colors" title="Pindah ke bawah">
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
+                  </div>
                   <div className="flex-1 space-y-3">
                     <input type="text" value={item.question} onChange={(e) => { const next = [...faqItems]; next[i] = { ...next[i], question: e.target.value }; setFaqItems(next); }}
                       placeholder="Pertanyaan..." className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none" />
@@ -657,17 +673,38 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
               });
             })()}
 
-            <button onClick={() => {
-              const cat = prompt("Kategori?\n1 = Bank\n2 = Dompet Digital\n3 = QRIS");
-              const catMap: Record<string, string> = { "1": "bank", "2": "ewallet", "3": "qris" };
-              const category = catMap[cat || "1"] || "bank";
-              const name = prompt("Nama Bank/Wallet:") || "";
-              if (!name) return;
-              setBankAccounts([...bankAccounts, { bank: name, category, account_number: "", account_name: "", is_active: true }]);
-            }}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg border border-dashed border-white/10 text-text-muted text-sm hover:border-white/20 hover:text-text transition-colors w-full justify-center">
-              <Plus className="w-4 h-4" /> Tambah Rekening / Wallet
-            </button>
+            <div className="bg-background rounded-lg p-4 border border-white/5 space-y-3">
+              <p className="text-text-muted text-xs font-semibold uppercase tracking-wider">Tambah Rekening / Wallet Baru</p>
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs text-text-muted mb-1">Kategori</label>
+                  <select id="new-bank-category" defaultValue="bank"
+                    className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm focus:border-accent focus:outline-none">
+                    <option value="bank">Bank Transfer</option>
+                    <option value="ewallet">Dompet Digital</option>
+                    <option value="qris">QRIS</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs text-text-muted mb-1">Nama Bank / Wallet</label>
+                  <input type="text" id="new-bank-name" placeholder="Contoh: BCA, DANA..."
+                    className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm focus:border-accent focus:outline-none" />
+                </div>
+                <div className="flex items-end">
+                  <button onClick={() => {
+                    const nameEl = document.getElementById("new-bank-name") as HTMLInputElement;
+                    const catEl = document.getElementById("new-bank-category") as HTMLSelectElement;
+                    const name = nameEl?.value?.trim();
+                    if (!name) return;
+                    setBankAccounts([...bankAccounts, { bank: name, category: catEl.value, account_number: "", account_name: "", is_active: true }]);
+                    nameEl.value = "";
+                  }}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg gradient-primary text-white text-sm font-medium hover:opacity-90 transition-opacity">
+                    <Plus className="w-4 h-4" /> Tambah
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Resend Email */}

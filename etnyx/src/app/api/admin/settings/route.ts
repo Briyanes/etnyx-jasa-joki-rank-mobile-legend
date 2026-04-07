@@ -22,10 +22,6 @@ const ALLOWED_KEYS = [
   "perstar_pricing",
   "gendong_pricing",
   "bank_accounts",
-  // Telegram integration keys
-  "telegramBotToken",
-  "telegramAdminGroupId",
-  "telegramWorkerGroupId",
 ];
 
 // GET /api/admin/settings?key=hero or GET all
