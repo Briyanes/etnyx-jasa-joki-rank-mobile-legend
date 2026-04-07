@@ -294,7 +294,7 @@ function buildCategories(): DocCategory[] {
                 {[
                   { tab: "Overview", desc: "KPI metrics: total orders, revenue, pending, completed. Chart trend 7 hari + orders/day bar chart. Refresh 30 detik." },
                   { tab: "Orders", desc: "List semua order + search + filter status. Smart action buttons per status: Follow-up Payment, Request Credentials, Notify Completed, Request Review. Copy order info. 6 template WhatsApp follow-up." },
-                  { tab: "Pricing", desc: "3 mode pricing: Paket (bundle rank), Per Star (per bintang), Gendong (duo). Edit harga inline, save all." },
+                  { tab: "Pricing", desc: "3 mode pricing: Paket (bundle rank), Per Star (per bintang), Gendong (duo). Edit harga inline, save all. Season Pricing auto-scheduler: harga otomatis berubah sesuai fase season ML." },
                   { tab: "Boosters", desc: "CRUD booster profiles: nama, WA, specialization, rating, status." },
                   { tab: "Testi", desc: "Kelola testimonial customer. Toggle featured & visibility. Tampil di homepage." },
                   { tab: "Portfolio", desc: "Upload hasil boosting. Before/After rank, gambar (Supabase Storage)." },
@@ -1870,6 +1870,21 @@ function buildCategories(): DocCategory[] {
                 ["Express", "1.2x", "Pengerjaan diprioritaskan"],
                 ["Premium", "1.3x", "High WR booster + hero request"],
               ]} />
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">📅 Season Pricing (Auto-Scheduler)</h4>
+                <p className="text-text-muted text-xs mb-3">Harga otomatis berubah sesuai fase season ML. Dikelola di Pricing tab → Season Pricing card.</p>
+                <Table headers={["Fase", "Durasi", "Multiplier", "Keterangan"]} rows={[
+                  ["🔥 Early Season", "Hari 1–21 (~3 minggu)", "×1.25 (+25%)", "Demand tinggi, banyak yg push rank di awal season"],
+                  ["⚡ Mid Season", "Hari 22–60 (~5-6 minggu)", "×1.00 (normal)", "Season stabil, harga normal"],
+                  ["🎯 End Season", "Hari 61–90 (~4 minggu)", "×0.85 (-15%)", "Push rank akhir, diskon menarik customer"],
+                ]} />
+                <InfoBox type="info">
+                  <strong>Cara setup:</strong> Dashboard → Pricing → aktifkan toggle Season Pricing → isi nama season (cth: &quot;Season 35&quot;) → set tanggal mulai tiap fase → Simpan. Multiplier bisa disesuaikan (0.5x–2.0x). Harga di homepage &amp; order page otomatis berubah.
+                </InfoBox>
+                <InfoBox type="warning">
+                  <strong>1 season ML ≈ 90 hari (3 bulan).</strong> Ada 4 season per tahun. Set tanggal sesuai jadwal resmi Moonton. Jika season pricing dinonaktifkan, semua harga kembali ke harga dasar.
+                </InfoBox>
+              </div>
             </div>
           ),
         },

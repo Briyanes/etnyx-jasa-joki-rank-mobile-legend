@@ -1348,7 +1348,7 @@ export default function AdminDashboard() {
                     <CalendarDays className="w-5 h-5 text-accent" />
                     <div>
                       <h3 className="text-sm font-bold text-text">Season Pricing</h3>
-                      <p className="text-text-muted text-[10px]">Harga otomatis berubah sesuai fase season ML</p>
+                      <p className="text-text-muted text-[10px]">Harga otomatis berubah sesuai fase season ML (1 season ≈ 90 hari)</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
@@ -1417,6 +1417,14 @@ export default function AdminDashboard() {
                           </div>
                         </div>
                       ))}
+                    </div>
+                    <div className="bg-background/50 rounded-lg p-3 mb-2">
+                      <p className="text-[10px] text-text-muted font-semibold mb-1">💡 Rekomendasi pembagian season ML (~90 hari):</p>
+                      <div className="flex flex-wrap gap-3 text-[10px] text-text-muted">
+                        <span><strong className="text-red-400">Early:</strong> Hari 1–21 (~3 minggu) — demand tinggi, harga naik</span>
+                        <span><strong className="text-blue-400">Mid:</strong> Hari 22–60 (~5-6 minggu) — stabil, harga normal</span>
+                        <span><strong className="text-green-400">End:</strong> Hari 61–90 (~4 minggu) — push rank akhir, diskon</span>
+                      </div>
                     </div>
                     <div className="flex items-center justify-between pt-2 border-t border-white/5">
                       <p className="text-text-muted text-[10px]">Harga di halaman order & homepage akan otomatis ×multiplier sesuai fase aktif saat ini.</p>
