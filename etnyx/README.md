@@ -10,6 +10,7 @@ Platform jasa joki Mobile Legends profesional dengan sistem pembayaran ganda, ma
 - **Midtrans Auto** - QRIS, VA, GoPay, ShopeePay, Kartu Kredit (muncul otomatis jika Server Key diisi)
 - **Upload Bukti Transfer** - Customer upload bukti, admin approve/reject
 - **3 Mode Order** - Paket, Per-Star, Gendong
+- **Star & Division Tracking** - Track bintang (I-V) per rank untuk Warrior-Legend
 - **Promo Code & Referral** - Diskon otomatis + referral bonus
 - **Order Tracking** - Real-time status tracking publik
 
@@ -39,8 +40,11 @@ Platform jasa joki Mobile Legends profesional dengan sistem pembayaran ganda, ma
 ### 🔔 Notifikasi
 - **Telegram Bot** - Notif ke grup admin/worker/review
 - **Email** - Via Resend
-- **WhatsApp** - Via Fonnte
+- **WhatsApp** - Via Fonnte (order confirmation, payment confirmed, order started, order completed)
 - **Push Notification** - Browser push
+- **Smart Display** - Per-bintang orders tampil `package_title` (misal "Legend × 6 Star") bukan rank→rank
+- **Follow-Up Templates** - 7 template WA follow-up (payment, credentials, progress, dll)
+- **Separate Review & Report** - Link review dan report worker terpisah di WA order selesai
 
 ### 🔒 Security
 - **Enkripsi** - Credential order dienkripsi di database
@@ -253,7 +257,7 @@ Dashboard → Orders → Klik "Lihat Bukti Transfer"
 ## 🗃️ Database (27+ Tables)
 
 ### Core
-- `orders` - Order dengan payment_method, payment_status, encryption
+- `orders` - Order dengan payment_method, payment_status, encryption, current_star/target_star
 - `order_logs` - Audit trail status changes
 - `order_assignments` - Worker assignment tracking
 - `payment_proofs` - Bukti transfer manual
@@ -301,6 +305,7 @@ Jalankan di Supabase SQL Editor secara berurutan:
 | `supabase-schema-v15.sql` | v15: Ad spend tracking |
 | `supabase-schema-v16.sql` | v16: Lead-worker hierarchy |
 | `supabase-schema-v17.sql` | v17: Dual payment (manual + Midtrans) |
+| `supabase-schema-v18.sql` | v18: Star/division tracking (current_star, target_star) |
 
 ---
 
@@ -349,6 +354,15 @@ npm run build         # Production build
 
 | Hash | Deskripsi |
 |------|-----------|
+| `ec493e3` | Style: spasi harga-Manual badge, custom dropdown arrow |
+| `6552859` | Pisah link Review & Report Worker di WA order selesai |
+| `496b698` | Loading spinner di semua action button dashboard |
+| `594947e` | Fix WA link clickable di mobile (hapus trailing slash) |
+| `33babfa` | Admin selesaikan auto progress 100% + notification logging |
+| `ff3ece3` | Hapus track link & jangan login dari WA payment confirmed |
+| `c35fa6f` | Fix link WA order confirmation ke /payment/manual |
+| `9df75fa` | package_title untuk per-bintang di semua notifikasi |
+| `e26391c` | Star/division tracking di order flow |
 | `a24d538` | Auto-hide Midtrans jika tidak configured |
 | `c698ec8` | QRIS image upload untuk payment manual |
 | `dbed915` | Fix urutan bank account (bank → ewallet → qris) |
