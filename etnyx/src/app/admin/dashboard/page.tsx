@@ -972,7 +972,7 @@ export default function AdminDashboard() {
                             <span className="text-xs font-medium text-text">{formatRupiah(o.total_price)}</span>
                             {o.promo_discount > 0 && <p className="text-[10px] text-green-400">-{formatRupiah(o.promo_discount)}</p>}
                             {o.payment_method === "manual_transfer" && (
-                              <span className="inline-block mt-0.5 px-1.5 py-0.5 rounded text-[9px] font-medium bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">Manual</span>
+                              <span className="inline-block mt-1.5 px-1.5 py-0.5 rounded text-[9px] font-medium bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">Manual</span>
                             )}
                           </td>
                           <td className="px-4 py-3">
