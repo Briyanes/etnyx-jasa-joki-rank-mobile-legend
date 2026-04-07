@@ -421,8 +421,8 @@ Terima kasih sudah order di *ETNYX*!
 
 Silakan selesaikan pembayaran untuk memproses order kamu.
 
-Track order di sini:
-${SITE_URL}/track/?id=${order.order_id}/
+Bayar & upload bukti di sini:
+${SITE_URL}/payment/manual/?order_id=${order.order_id}/
 
 Butuh bantuan? Balas pesan ini!
 
