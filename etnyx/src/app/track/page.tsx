@@ -171,7 +171,7 @@ function TrackOrderContent() {
 
   // Auto-track from URL params (?id= or ?order_id=)
   useEffect(() => {
-    const idParam = searchParams.get("id") || searchParams.get("order_id");
+    const idParam = (searchParams.get("id") || searchParams.get("order_id") || "").replace(/\/+$/, "");
     if (idParam) {
       setOrderId(idParam);
       trackOrder(idParam);

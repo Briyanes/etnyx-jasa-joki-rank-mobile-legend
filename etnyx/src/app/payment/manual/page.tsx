@@ -63,7 +63,7 @@ interface OrderInfo {
 function ManualPaymentContent() {
   const searchParams = useSearchParams();
   const { locale } = useLanguage();
-  const orderId = searchParams.get("order_id");
+  const orderId = (searchParams.get("order_id") || "").replace(/\/+$/, "") || null;
 
   const [order, setOrder] = useState<OrderInfo | null>(null);
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);

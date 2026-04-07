@@ -372,7 +372,7 @@ Halo! Pembayaran kamu sudah kami terima dan dikonfirmasi.
 Order kamu akan segera diproses oleh tim booster kami. Kamu akan menerima notifikasi saat pengerjaan dimulai.
 
 Track order di sini:
-${SITE_URL}/track/?id=${order.order_id}
+${SITE_URL}/track/?id=${order.order_id}/
 
 Jangan login ke akun selama proses ya!
 
@@ -401,7 +401,7 @@ Terima kasih sudah order di *ETNYX*!
 Silakan selesaikan pembayaran untuk memproses order kamu.
 
 Track order di sini:
-${SITE_URL}/track/?id=${order.order_id}
+${SITE_URL}/track/?id=${order.order_id}/
 
 Butuh bantuan? Balas pesan ini!
 
@@ -423,7 +423,7 @@ Halo! Order kamu sudah dikonfirmasi dan sedang dalam pengerjaan oleh booster kam
 *Target:* ${formatRank(order.target_rank)}
 
 Kamu bisa track progress di sini:
-${SITE_URL}/track/?id=${order.order_id}
+${SITE_URL}/track/?id=${order.order_id}/
 
 Jangan login ke akun selama proses joki ya!
 
@@ -437,7 +437,7 @@ export async function sendOrderCompletedWA(order: OrderData): Promise<boolean> {
   if (!order.whatsapp) return false;
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.vercel.app";
-  const reviewLink = `${siteUrl}/review/?id=${order.order_id}`;
+  const reviewLink = `${siteUrl}/review/?id=${order.order_id}/`;
 
   const message = `
 *Order Selesai!*

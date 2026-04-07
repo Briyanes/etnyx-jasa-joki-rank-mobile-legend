@@ -155,7 +155,7 @@ function formatRank(rank: string) {
 
 export default function ReviewPage() {
   const searchParams = useSearchParams();
-  const orderId = searchParams.get("id") || searchParams.get("orderId") || "";
+  const orderId = (searchParams.get("id") || searchParams.get("orderId") || "").replace(/\/+$/, "");
   const token = searchParams.get("token") || "";
   const lang = searchParams.get("lang") || "id";
   const t = translations[lang as keyof typeof translations] || translations.id;
