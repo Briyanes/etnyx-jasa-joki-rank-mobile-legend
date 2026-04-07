@@ -93,6 +93,7 @@ const staticTestimonials: Testimonial[] = [
 export default function Testimonials() {
   const { locale } = useLanguage();
   const [testimonials, setTestimonials] = useState<Testimonial[]>(staticTestimonials);
+  const [isLoading, setIsLoading] = useState(true);
   const [showAll, setShowAll] = useState(false);
 
   const t = {
@@ -137,6 +138,8 @@ export default function Testimonials() {
         }
       } catch {
         // Keep static testimonials
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchTestimonials();
@@ -183,6 +186,7 @@ export default function Testimonials() {
         </div>
 
         {/* Testimonials Carousel */}
+        <div className={`transition-opacity duration-300 ${isLoading ? "opacity-70" : "opacity-100"}`}>
         <CardCarousel desktopCols={3} tabletCols={2}>
           {testimonials.map((testimonial) => (
             <div
@@ -231,6 +235,7 @@ export default function Testimonials() {
             </div>
           ))}
         </CardCarousel>
+        </div>
       </div>
     </section>
   );

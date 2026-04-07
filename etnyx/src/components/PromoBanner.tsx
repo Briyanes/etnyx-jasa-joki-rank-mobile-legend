@@ -13,10 +13,11 @@ export default function PromoBanner() {
   const [cmsLink, setCmsLink] = useState<string>("/order");
   const [cmsEnabled, setCmsEnabled] = useState(true);
   const [timeLeft, setTimeLeft] = useState({
-    hours: 23,
-    minutes: 59,
-    seconds: 59,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
   });
+  const [endTime, setEndTime] = useState<number | null>(null);
 
   const t = {
     id: {
@@ -47,24 +48,42 @@ export default function PromoBanner() {
       .catch(() => {});
   }, []);
 
-  // Countdown timer
+  // Initialize persistent countdown end time
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev.seconds > 0) {
-          return { ...prev, seconds: prev.seconds - 1 };
-        } else if (prev.minutes > 0) {
-          return { ...prev, minutes: prev.minutes - 1, seconds: 59 };
-        } else if (prev.hours > 0) {
-          return { hours: prev.hours - 1, minutes: 59, seconds: 59 };
-        } else {
-          return { hours: 23, minutes: 59, seconds: 59 };
-        }
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
+    const STORAGE_KEY = "promo_banner_end";
+    const stored = localStorage.getItem(STORAGE_KEY);
+    const now = Date.now();
+    if (stored && Number(stored) > now) {
+      setEndTime(Number(stored));
+    } else {
+      // Set new 24h countdown
+      const newEnd = now + 24 * 60 * 60 * 1000;
+      localStorage.setItem(STORAGE_KEY, String(newEnd));
+      setEndTime(newEnd);
+    }
   }, []);
+
+  // Countdown timer synced to endTime
+  useEffect(() => {
+    if (!endTime) return;
+    const tick = () => {
+      const diff = Math.max(0, endTime - Date.now());
+      if (diff <= 0) {
+        // Reset for another 24h cycle
+        const newEnd = Date.now() + 24 * 60 * 60 * 1000;
+        localStorage.setItem("promo_banner_end", String(newEnd));
+        setEndTime(newEnd);
+        return;
+      }
+      const hours = Math.floor(diff / 3600000);
+      const minutes = Math.floor((diff % 3600000) / 60000);
+      const seconds = Math.floor((diff % 60000) / 1000);
+      setTimeLeft({ hours, minutes, seconds });
+    };
+    tick();
+    const timer = setInterval(tick, 1000);
+    return () => clearInterval(timer);
+  }, [endTime]);
 
   // Show banner after small delay
   useEffect(() => {

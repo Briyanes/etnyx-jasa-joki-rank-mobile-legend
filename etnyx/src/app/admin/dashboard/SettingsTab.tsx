@@ -217,7 +217,9 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
             <div>
               <label className="block text-sm text-text-muted mb-1.5">Headline</label>
               <input type="text" value={hero.headline} onChange={(e) => setHero({ ...hero, headline: e.target.value })}
+                placeholder="Push Rank, Tanpa Main."
                 className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none" />
+              <p className="text-text-muted text-[10px] mt-1">Gunakan koma (,) untuk memisahkan baris. Contoh: <code className="text-accent">Push Rank, Tanpa Main.</code></p>
             </div>
             <div>
               <label className="block text-sm text-text-muted mb-1.5">Sub-headline</label>

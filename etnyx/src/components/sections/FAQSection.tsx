@@ -98,7 +98,7 @@ export default function FAQSection() {
   useEffect(() => {
     fetch("/api/settings?keys=faq_items")
       .then((res) => res.json())
-      .then((data) => { if (data.faq_items && Array.isArray(data.faq_items)) setCmsFaqItems(data.faq_items); })
+      .then((data) => { if (data.faq_items && Array.isArray(data.faq_items) && data.faq_items.length > 0) setCmsFaqItems(data.faq_items); })
       .catch(() => {});
   }, []);
 
