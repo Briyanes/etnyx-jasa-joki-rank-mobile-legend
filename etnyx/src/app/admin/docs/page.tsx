@@ -114,10 +114,10 @@ function buildCategories(): DocCategory[] {
                 Platform full-stack dengan admin dashboard, staff management, payment gateway, dan multi-channel notification.
               </p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <StatCard label="Halaman" value="16" sub="Customer + Admin" />
-                <StatCard label="API Routes" value="60+" sub="RESTful endpoints" />
+                <StatCard label="Halaman" value="18" sub="Customer + Admin" />
+                <StatCard label="API Routes" value="65+" sub="RESTful endpoints" />
                 <StatCard label="Dashboard Tabs" value="15" sub="Admin CMS" />
-                <StatCard label="Integrasi" value="6" sub="External services" />
+                <StatCard label="Integrasi" value="7" sub="External services" />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="bg-background rounded-lg p-3 border border-white/5">
@@ -141,6 +141,7 @@ function buildCategories(): DocCategory[] {
                     <li>&#8226; <strong className="text-text">Google Analytics 4</strong> &mdash; Website Analytics</li>
                     <li>&#8226; <strong className="text-text">Meta/TikTok/Google Pixel</strong> &mdash; Conversion tracking</li>
                     <li>&#8226; <strong className="text-text">Meta CAPI</strong> &mdash; Server-side conversion API</li>
+                    <li>&#8226; <strong className="text-text">ML Account API</strong> &mdash; Cek akun ML (nickname lookup)</li>
                   </ul>
                 </div>
               </div>
@@ -151,12 +152,20 @@ function buildCategories(): DocCategory[] {
                   ["Order Form", "/order", <RoleBadge key="p2" role="public" />],
                   ["Track Order", "/track", <RoleBadge key="p3" role="public" />],
                   ["Bio / Link Tree", "/bio", <RoleBadge key="p4" role="public" />],
+                  ["Login", "/login", <RoleBadge key="p6" role="public" />],
+                  ["Register", "/register", <RoleBadge key="p7" role="public" />],
+                  ["Reset Password", "/reset-password", <RoleBadge key="p8" role="public" />],
+                  ["Payment Manual", "/payment/manual", <RoleBadge key="p9" role="customer" />],
+                  ["Payment Success", "/payment/success", <RoleBadge key="p10" role="customer" />],
                   ["Submit Review", "/review?id=xxx", <RoleBadge key="p5" role="customer" />],
                   ["Customer Dashboard", "/dashboard", <RoleBadge key="c" role="customer" />],
+                  ["Privacy Policy", "/privacy", <RoleBadge key="pp" role="public" />],
+                  ["Terms of Service", "/terms", <RoleBadge key="tos" role="public" />],
                   ["Admin Dashboard", "/admin/dashboard", <RoleBadge key="a" role="admin" />],
                   ["Lead Dashboard", "/admin/lead", <RoleBadge key="l" role="lead" />],
                   ["Worker Dashboard", "/admin/worker", <RoleBadge key="w" role="worker" />],
-                  ["Dokumentasi (ini)", "/admin/docs", <span key="all" className="flex gap-1"><RoleBadge role="admin" /><RoleBadge role="lead" /><RoleBadge role="worker" /></span>],
+                  ["Admin Docs", "/admin/docs", <span key="all" className="flex gap-1"><RoleBadge role="admin" /><RoleBadge role="lead" /><RoleBadge role="worker" /></span>],
+                  ["Sitemap", "/sitemap.xml", <RoleBadge key="sm" role="public" />],
                 ]} />
               </div>
             </div>
@@ -1575,10 +1584,10 @@ function buildCategories(): DocCategory[] {
         {
           id: "api",
           icon: Server,
-          title: "API Routes (58+)",
+          title: "API Routes (65+)",
           content: (
             <div className="space-y-4">
-              <p className="text-text-muted text-sm">63+ API routes. Auth via JWT cookie (HTTPOnly). Rate limited via middleware.</p>
+              <p className="text-text-muted text-sm">65+ API routes. Auth via JWT cookie (HTTPOnly). Rate limited via middleware.</p>
               <div className="bg-background rounded-lg p-3 border border-white/5">
                 <h4 className="text-text font-medium text-sm mb-2">{"Admin API"} <Code>/api/admin/*</Code></h4>
                 <Table headers={["Endpoint", "Methods", "Deskripsi"]} rows={[
@@ -1640,6 +1649,8 @@ function buildCategories(): DocCategory[] {
                   ["/api/customer/resend-verify", "POST", "Resend verification email"],
                   ["/api/customer/rewards", "GET/POST", "Points balance + redeem"],
                   ["/api/customer/rewards/catalog", "GET/POST", "Browse + redeem catalog"],
+                  ["/api/customer/profile", "GET/PATCH", "Get/update profile (name, whatsapp, password)"],
+                  ["/api/customer/password-reset", "POST", "Request + reset password via email token"],
                 ]} />
               </div>
               <div className="bg-background rounded-lg p-3 border border-white/5">
@@ -1662,6 +1673,7 @@ function buildCategories(): DocCategory[] {
                   ["/api/chat", "GET/POST", "Order chat messages"],
                   ["/api/push/subscribe", "POST", "Save push subscription"],
                   ["/api/push/send", "POST", "Send push notification (admin)"],
+                  ["/api/check-account", "POST", "Cek akun ML (User ID + Server ID → Nickname)"],
                 ]} />
               </div>
             </div>
@@ -1732,10 +1744,12 @@ function buildCategories(): DocCategory[] {
                   [<strong key="1" className="text-text">admin_audit_log</strong>, "Admin action audit trail"],
                   [<strong key="2" className="text-text">push_subscriptions</strong>, "Web push notification subscriptions"],
                   [<strong key="3" className="text-text">chat_messages</strong>, "Order chat messages"],
+                  [<strong key="4" className="text-text">password_resets</strong>, "Customer password reset tokens"],
+                  [<strong key="5" className="text-text">payment_proofs</strong>, "Manual transfer proof uploads"],
                 ]} />
               </div>
               <InfoBox type="info">
-                <strong>Schema Files:</strong> v8 (storage), v9 (order logs), v10 (rewards), v11 (staff), v12 (reviews), v13 (payroll), v14 (payment methods), v15 (UTM attribution &amp; ad spend). Run sequentially via Supabase SQL Editor.
+                <strong>Schema Files:</strong> v8 (storage), v9 (order logs), v10 (rewards), v11 (staff), v12 (reviews), v13 (payroll), v14 (payment methods), v15 (UTM attribution &amp; ad spend), v16-v18 (minor fixes), v19 (password resets). Run sequentially via Supabase SQL Editor.
               </InfoBox>
             </div>
           ),
@@ -1760,7 +1774,7 @@ function buildCategories(): DocCategory[] {
                 <h4 className="text-text font-medium text-sm mb-3">Notification Trigger Map</h4>
                 <Table headers={["Event", "Telegram", "WhatsApp", "Email"]} rows={[
                   ["Order dibuat (belum bayar)", "Admin: ORDER BARU! + tombol Konfirmasi/Tolak", "Konfirmasi order + info rekening + link upload bukti", "Invoice"],
-                  ["Bayar dikonfirmasi (confirmed)", "Worker: ORDER DIKONFIRMASI!", "Pembayaran Dikonfirmasi + track link + reminder keamanan", "Payment confirmed"],
+                  ["Bayar dikonfirmasi (confirmed)", "Worker: ORDER DIKONFIRMASI!", "Pembayaran Dikonfirmasi + track link + reminder keamanan", "Pembayaran Dikonfirmasi"],
                   ["Order di-assign ke worker", "Worker: ORDER DITUGASKAN", "—", "—"],
                   ["Mulai dikerjakan (in_progress)", "—", "Sedang Dikerjakan + jangan login + track link", "—"],
                   ["Order selesai (completed)", "Admin: ORDER SELESAI!", "Selesai + ganti password + link review", "—"],
@@ -2003,7 +2017,7 @@ function buildCategories(): DocCategory[] {
 \u2502   \u2502
 \u2502   \u251C\u2500\u2500 order/ track/ review/ payment/  # Public pages
 \u2502   \u2502
-\u2502   \u2514\u2500\u2500 api/                    # 58+ API routes
+\u2502   \u2514\u2500\u2500 api/                    # 65+ API routes
 \u2502       \u251C\u2500\u2500 admin/              # 20 admin endpoints
 \u2502       \u2502   \u2514\u2500\u2500 payroll/        # 6 payroll endpoints
 \u2502       \u251C\u2500\u2500 staff/              # 8 staff endpoints
@@ -2056,7 +2070,7 @@ function buildCategories(): DocCategory[] {
               <div className="bg-background rounded-lg p-4 border border-green-500/20">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-[10px] px-2 py-0.5 rounded bg-green-500/10 text-green-400 font-medium">DONE</span>
-                  <h4 className="text-green-400 font-semibold text-sm">Phase 1 &mdash; Core Platform (v1.0 - v2.3)</h4>
+                  <h4 className="text-green-400 font-semibold text-sm">Phase 1 &mdash; Core Platform (v1.0 - v2.4)</h4>
                 </div>
                 <ul className="text-text-muted text-xs space-y-1.5 ml-4">
                   {[
@@ -2076,6 +2090,11 @@ function buildCategories(): DocCategory[] {
                     "Order tracking real-time + worker submissions + screenshot gallery",
                     "Order chat system (polling-based) + internal order notes",
                     "WA messages: clean formatting, links clickable, trailing slash fix",
+                    "Cek Akun ML: verifikasi User ID + Server ID via external API sebelum order",
+                    "Customer auth: login, register, password reset via email, profile update",
+                    "Security audit v2.4: 19 fixes (mass assignment, IDOR, idempotent points, input validation, etc.)",
+                    "Payment: webhook idempotency, amount verification, duplicate proof rejection",
+                    "Lead submissions view + worker showAllCompleted + admin assign order_logs",
                   ].map((item, i) => (
                     <li key={i} className="flex items-start gap-2">
                       <span className="text-green-400 shrink-0">{"✓"}</span> {item}
@@ -2158,6 +2177,65 @@ function buildCategories(): DocCategory[] {
           content: (
             <div className="space-y-4">
               <p className="text-text-muted text-sm">Riwayat update fitur, perbaikan bug, dan perubahan workflow. Diurutkan dari yang terbaru.</p>
+
+              <div className="bg-background rounded-lg p-4 border border-accent/20">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-accent/10 text-accent font-medium">v2.4</span>
+                  <h4 className="text-accent font-semibold text-sm">7 April 2026 (Security &amp; Features)</h4>
+                </div>
+
+                <div className="space-y-3">
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">Cek Akun ML</h5>
+                    <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
+                      <li><strong className="text-text">Order page</strong> &mdash; User ID + Server ID terpisah + tombol &quot;Cek Akun&quot; untuk verifikasi nickname sebelum order</li>
+                      <li><Code>POST /api/check-account</Code> &mdash; Lookup ML account via free external APIs + custom URL fallback dari admin settings</li>
+                      <li>Rate limited: 15 req/menit per IP</li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">Customer Auth &amp; Profile</h5>
+                    <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
+                      <li><strong className="text-text">Password Reset</strong> &mdash; Customer bisa reset password via email token (1 jam expiry)</li>
+                      <li><strong className="text-text">Profile Update</strong> &mdash; PATCH name, whatsapp, password (verifikasi currentPassword)</li>
+                      <li>&quot;Lupa password?&quot; link di halaman login</li>
+                      <li>Schema migration v19: <Code>password_resets</Code> table</li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">Security Audit (19 Fixes)</h5>
+                    <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
+                      <li><strong className="text-text">Admin Orders POST</strong> &mdash; Whitelist allowed insert fields (cegah mass assignment)</li>
+                      <li><strong className="text-text">Invoice API</strong> &mdash; Ganti phone-based auth ke customer JWT (fix IDOR)</li>
+                      <li><strong className="text-text">Payment webhook</strong> &mdash; Idempotency check + amount verification</li>
+                      <li><strong className="text-text">Reward points</strong> &mdash; Idempotent check sebelum award (cegah double points)</li>
+                      <li><strong className="text-text">Promo codes</strong> &mdash; Validasi input + post-increment race condition check</li>
+                      <li><strong className="text-text">Worker submissions</strong> &mdash; Validasi numeric fields 0-999</li>
+                      <li><strong className="text-text">Upload bucket</strong> &mdash; Whitelist allowed storage buckets</li>
+                      <li><strong className="text-text">Order ID</strong> &mdash; Random UUID suffix (cegah enumeration)</li>
+                      <li><strong className="text-text">JWT Secret</strong> &mdash; Wajib di profile route (cegah empty key bypass)</li>
+                      <li><strong className="text-text">Telegram hardcoded ID</strong> &mdash; Pakai DB settings (hapus hardcoded)</li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">Dashboard &amp; UX</h5>
+                    <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
+                      <li><strong className="text-text">WA notification feedback</strong> &mdash; Alert muncul jika notifikasi WA gagal terkirim saat update status</li>
+                      <li><strong className="text-text">Lead submissions view</strong> &mdash; Panel hasil kerja worker + statistik match/win/star/screenshot</li>
+                      <li><strong className="text-text">Worker showAllCompleted</strong> &mdash; Toggle lihat semua order selesai</li>
+                      <li><strong className="text-text">Admin assign order_logs</strong> &mdash; Log assignment ke timeline</li>
+                      <li><strong className="text-text">Track page</strong> &mdash; Loading spinner + "assigned" di timeline</li>
+                      <li><strong className="text-text">Email konfirmasi bayar</strong> &mdash; Dikirim saat payment confirmed</li>
+                      <li><strong className="text-text">Pagination</strong> &mdash; Admin customers + testimonials API</li>
+                      <li><strong className="text-text">Status transition validation</strong> &mdash; Cegah lompatan status invalid (admin + staff)</li>
+                      <li><strong className="text-text">Self-referral fix</strong> &mdash; Compare by customer ID (bukan email vs referral_code)</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
 
               <div className="bg-background rounded-lg p-4 border border-yellow-500/20">
                 <div className="flex items-center gap-2 mb-3">
@@ -2414,7 +2492,7 @@ export default function DocsPage() {
             <div className="flex items-center gap-2">
               <Book className="w-5 h-5 text-accent" />
               <h1 className="text-text font-bold text-sm">ETNYX DOCS</h1>
-              <span className="text-[9px] px-1.5 py-0.5 rounded bg-accent/10 text-accent font-medium">v2.3</span>
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-accent/10 text-accent font-medium">v2.4</span>
             </div>
             <button onClick={() => setSidebarOpen(false)} className="text-text-muted hover:text-text p-1">
               <ChevronDown className="w-4 h-4 rotate-90" />
@@ -2520,7 +2598,7 @@ export default function DocsPage() {
 
         <footer className="px-6 py-4 border-t border-white/5">
           <p className="text-text-muted/40 text-[10px] text-center">
-            ETNYX Documentation v2.3 &mdash; {allSections.length} sections across {categories.length} categories
+            ETNYX Documentation v2.4 &mdash; {allSections.length} sections across {categories.length} categories
           </p>
         </footer>
       </main>
