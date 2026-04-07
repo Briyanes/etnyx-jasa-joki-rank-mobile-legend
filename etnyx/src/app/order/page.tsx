@@ -31,6 +31,7 @@ import {
   Plus,
   Users,
   ArrowRight,
+  Search,
 } from "lucide-react";
 import { FaFacebook, FaGoogle, FaTiktok, FaVk, FaApple, FaGamepad } from "react-icons/fa";
 import type { IconType } from "react-icons";
@@ -41,6 +42,7 @@ type LoginMethod = "moonton" | "facebook" | "google" | "tiktok" | "vk" | "apple"
 interface OrderForm {
   loginMethod: LoginMethod;
   userId: string;
+  serverId: string;
   nickname: string;
   accountLogin: string;
   accountPassword: string;
@@ -266,8 +268,15 @@ const translations = {
     accountData: "Data Akun Game",
     loginMethod: "Metode Login",
     selectLoginMethod: "Pilih metode login akun ML kamu",
-    labelUserId: "User ID Game",
-    placeholderUserId: "Contoh: 123456789(1234)",
+    labelUserId: "User ID",
+    placeholderUserId: "Contoh: 123456789",
+    labelServerId: "Server ID",
+    placeholderServerId: "Contoh: 1234",
+    checkAccount: "Cek Akun",
+    checking: "Mengecek...",
+    accountVerified: "Akun terverifikasi",
+    accountNotFound: "Akun tidak ditemukan",
+    checkAccountHint: "Masukkan User ID & Server ID, lalu klik Cek Akun untuk verifikasi",
     labelNickname: "Nickname / IGN",
     placeholderNickname: "Nickname dalam game",
     labelAccountLogin: "Email / No. HP",
@@ -355,8 +364,15 @@ const translations = {
     accountData: "Game Account Data",
     loginMethod: "Login Method",
     selectLoginMethod: "Select your ML account login method",
-    labelUserId: "Game User ID",
-    placeholderUserId: "Example: 123456789(1234)",
+    labelUserId: "User ID",
+    placeholderUserId: "Example: 123456789",
+    labelServerId: "Server ID",
+    placeholderServerId: "Example: 1234",
+    checkAccount: "Check Account",
+    checking: "Checking...",
+    accountVerified: "Account verified",
+    accountNotFound: "Account not found",
+    checkAccountHint: "Enter User ID & Server ID, then click Check Account to verify",
     labelNickname: "Nickname / IGN",
     placeholderNickname: "In-game nickname",
     labelAccountLogin: "Email / Phone",
@@ -475,6 +491,11 @@ function OrderPageContent() {
   const [targetStar, setTargetStar] = useState(5);
   const [showPackages, setShowPackages] = useState(false);
 
+  // Account verification (Cek Akun)
+  const [accountCheckLoading, setAccountCheckLoading] = useState(false);
+  const [accountCheckResult, setAccountCheckResult] = useState<{ verified: boolean; nickname: string } | null>(null);
+  const [accountCheckError, setAccountCheckError] = useState("");
+
   const markTouched = useCallback((field: string) => {
     setTouched((prev) => ({ ...prev, [field]: true }));
   }, []);
@@ -487,6 +508,7 @@ function OrderPageContent() {
   const [form, setForm] = useState<OrderForm>({
     loginMethod: "moonton",
     userId: "",
+    serverId: "",
     nickname: "",
     accountLogin: "",
     accountPassword: "",
@@ -661,6 +683,35 @@ function OrderPageContent() {
   const updateForm = useCallback((updates: Partial<OrderForm>) => {
     setForm((prev) => ({ ...prev, ...updates }));
   }, []);
+
+  // Check ML account (Cek Akun)
+  const handleCheckAccount = useCallback(async () => {
+    if (!form.userId.trim() || !form.serverId.trim()) {
+      setAccountCheckError(t.checkAccountHint);
+      return;
+    }
+    setAccountCheckLoading(true);
+    setAccountCheckError("");
+    setAccountCheckResult(null);
+    try {
+      const res = await fetch("/api/check-account", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: form.userId.trim(), zoneId: form.serverId.trim() }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setAccountCheckResult({ verified: true, nickname: data.nickname });
+        setForm(prev => ({ ...prev, nickname: data.nickname }));
+      } else {
+        setAccountCheckError(data.error || t.accountNotFound);
+      }
+    } catch {
+      setAccountCheckError("Gagal menghubungi server");
+    } finally {
+      setAccountCheckLoading(false);
+    }
+  }, [form.userId, form.serverId, t.checkAccountHint, t.accountNotFound]);
 
   // Handle per-star rank selection
   const handleSelectStarRank = useCallback((rank: PerStarRank) => {
@@ -880,7 +931,7 @@ function OrderPageContent() {
           packageTitle: selectedPackage?.title || (orderMode === "gendong" ? `Gendong ${selectedGendongRank?.name} x${gendongQuantity} star` : undefined),
           orderType: orderMode,
           loginMethod: form.loginMethod,
-          userId: form.userId,
+          userId: form.serverId ? `${form.userId}(${form.serverId})` : form.userId,
           nickname: form.nickname,
           accountLogin: form.accountLogin,
           accountPassword: form.accountPassword,
@@ -1739,21 +1790,83 @@ function OrderPageContent() {
                 </div>
               </div>
 
-              {/* User ID Game */}
+              {/* User ID + Server ID + Cek Akun */}
               <div>
-                <label className="block text-sm text-text-muted mb-1.5">
-                  {t.labelUserId} <span className="text-error">*</span>
+                <label className="block text-sm text-text-muted mb-1.5 font-medium">
+                  MASUKKAN ID DAN SERVER
                 </label>
-                <input
-                  type="text"
-                  value={form.userId}
-                  onChange={(e) => updateForm({ userId: e.target.value })}
-                  onBlur={() => markTouched("userId")}
-                  placeholder={t.placeholderUserId}
-                  className={`w-full bg-background border rounded-xl px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none transition-colors ${
-                    touched.userId && !form.userId ? "border-red-500" : "border-white/10"
-                  }`}
-                />
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-sm font-bold">(</span>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={form.userId}
+                        onChange={(e) => {
+                          updateForm({ userId: e.target.value.replace(/\D/g, "") });
+                          setAccountCheckResult(null);
+                          setAccountCheckError("");
+                        }}
+                        onBlur={() => markTouched("userId")}
+                        placeholder={t.placeholderUserId}
+                        className={`w-full bg-background border rounded-xl pl-7 pr-7 py-2.5 text-text text-sm text-center focus:border-accent focus:outline-none transition-colors ${
+                          touched.userId && !form.userId ? "border-red-500" : "border-white/10"
+                        }`}
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted text-sm font-bold">)</span>
+                    </div>
+                  </div>
+                  <div className="w-28 sm:w-36">
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-sm font-bold">(</span>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={form.serverId}
+                        onChange={(e) => {
+                          updateForm({ serverId: e.target.value.replace(/\D/g, "") });
+                          setAccountCheckResult(null);
+                          setAccountCheckError("");
+                        }}
+                        onBlur={() => markTouched("serverId")}
+                        placeholder={t.placeholderServerId}
+                        className={`w-full bg-background border rounded-xl pl-7 pr-7 py-2.5 text-text text-sm text-center focus:border-accent focus:outline-none transition-colors ${
+                          touched.serverId && !form.serverId ? "border-red-500" : "border-white/10"
+                        }`}
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted text-sm font-bold">)</span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCheckAccount}
+                    disabled={accountCheckLoading || !form.userId || !form.serverId}
+                    className="px-4 py-2.5 bg-yellow-500 hover:bg-yellow-400 text-black font-bold rounded-xl text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 whitespace-nowrap"
+                  >
+                    {accountCheckLoading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Search className="w-4 h-4" />
+                    )}
+                    {accountCheckLoading ? t.checking : t.checkAccount}
+                  </button>
+                </div>
+
+                {/* Verification Result */}
+                {accountCheckResult?.verified && (
+                  <div className="mt-2 flex items-center gap-2 px-3 py-2 bg-green-500/10 border border-green-500/30 rounded-xl">
+                    <Check className="w-4 h-4 text-green-400 shrink-0" />
+                    <span className="text-green-400 text-sm font-medium">{accountCheckResult.nickname}</span>
+                    <span className="text-green-400/60 text-xs">— {t.accountVerified}</span>
+                  </div>
+                )}
+                {accountCheckError && (
+                  <p className="text-red-400 text-xs mt-1.5">{accountCheckError}</p>
+                )}
+                {!accountCheckResult && !accountCheckError && (
+                  <p className="text-text-muted text-xs mt-1.5">{t.checkAccountHint}</p>
+                )}
                 {touched.userId && !form.userId && (
                   <p className="text-red-400 text-xs mt-1">{t.required}</p>
                 )}
@@ -2210,7 +2323,10 @@ function OrderPageContent() {
                     <span className="text-text-muted">Nickname</span>
                     <span className="text-text font-medium">{form.nickname || "-"}</span>
                     <span className="text-text-muted">User ID</span>
-                    <span className="text-text font-medium">{form.userId || "-"}</span>
+                    <span className="text-text font-medium">
+                      {form.userId || "-"}{form.serverId ? ` (${form.serverId})` : ""}
+                      {accountCheckResult?.verified && <Check className="w-3.5 h-3.5 text-green-400 inline ml-1" />}
+                    </span>
                     <span className="text-text-muted">Login Via</span>
                     <span className="text-text font-medium">
                       {LOGIN_METHODS.find(m => m.id === form.loginMethod)?.name || form.loginMethod}
