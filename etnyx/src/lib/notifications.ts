@@ -400,6 +400,35 @@ _ETNYX - Push Rank, Tanpa Main_
   return sendWhatsAppMessage(order.whatsapp, message);
 }
 
+export async function sendPaymentConfirmedEmail(order: OrderData): Promise<boolean> {
+  if (!order.email) return false;
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #0D0D1A; color: #fff;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="color: #2DD4BF; margin: 0;">ETNYX</h1>
+        <p style="color: #888; margin: 5px 0;">Push Rank, Tanpa Main</p>
+      </div>
+      <div style="background: #1A1A2E; padding: 25px; border-radius: 12px; border: 1px solid #333;">
+        <h2 style="color: #fff; margin-top: 0;">Pembayaran Dikonfirmasi! ✅</h2>
+        <p style="color: #ccc;">Pembayaran kamu sudah kami terima. Order akan segera diproses oleh tim booster kami.</p>
+        <table style="width: 100%; color: #ccc; margin: 20px 0;">
+          <tr><td style="padding: 8px 0; border-bottom: 1px solid #333;">Order ID</td><td style="padding: 8px 0; border-bottom: 1px solid #333; text-align: right; font-family: monospace; color: #2DD4BF;">${order.order_id}</td></tr>
+          <tr><td style="padding: 8px 0; border-bottom: 1px solid #333;">Paket</td><td style="padding: 8px 0; border-bottom: 1px solid #333; text-align: right;">${formatTargetDisplay(order)}</td></tr>
+          <tr><td style="padding: 8px 0; font-weight: bold;">Total</td><td style="padding: 8px 0; text-align: right; font-weight: bold; color: #2DD4BF;">${formatRupiah(order.price)}</td></tr>
+        </table>
+        <div style="text-align: center; margin: 25px 0;">
+          <a href="${SITE_URL}/track/?id=${order.order_id}" style="background: linear-gradient(135deg, #6366F1, #2DD4BF); color: white; padding: 14px 35px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">Track Order</a>
+        </div>
+        <p style="color: #888; font-size: 14px; text-align: center;">Kamu akan menerima notifikasi saat pengerjaan dimulai.</p>
+      </div>
+      <p style="color: #666; font-size: 12px; text-align: center; margin-top: 20px;">© 2026 ETNYX. All rights reserved.</p>
+    </div>
+  `;
+
+  return sendEmail(order.email, `Pembayaran Dikonfirmasi - ${order.order_id}`, html);
+}
+
 export async function sendOrderConfirmationWA(order: OrderData): Promise<boolean> {
   if (!order.whatsapp) return false;
 
@@ -617,6 +646,7 @@ export async function sendOrderConfirmedNotifications(order: OrderData): Promise
   await Promise.allSettled([
     notifyWorkerConfirmedOrder(order),
     sendPaymentConfirmedWA(order),
+    sendPaymentConfirmedEmail(order),
   ]);
 }
 

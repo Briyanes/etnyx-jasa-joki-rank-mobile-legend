@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
     const encryptedLogin = encryptField(sanitizedLogin);
 
     // Generate order ID
-    const orderId = `ETX-${Date.now().toString(36).toUpperCase()}`;
+    const orderId = `ETX-${Date.now().toString(36).toUpperCase()}${crypto.randomUUID().slice(0, 4).toUpperCase()}`;
 
     // Determine package name from price
     const packageName =
@@ -272,6 +272,22 @@ export async function POST(request: NextRequest) {
       const { error: rpcErr } = await supabase.rpc("increment_promo_used_count", { p_promo_id: promoId });
       if (rpcErr) {
         console.error("Failed to increment promo used_count:", rpcErr);
+      } else {
+        // Post-increment check: if used_count now exceeds max_uses, the promo was over-used (race condition)
+        const { data: promoCheck } = await supabase
+          .from("promo_codes")
+          .select("used_count, max_uses")
+          .eq("id", promoId)
+          .single();
+        if (promoCheck?.max_uses && promoCheck.used_count > promoCheck.max_uses) {
+          // Revert: decrement back and remove discount from order
+          await supabase.rpc("increment_promo_used_count", { p_promo_id: promoId });
+          await supabase.from("orders").update({
+            promo_code: null,
+            promo_discount: 0,
+            total_price: verifiedBasePrice,
+          }).eq("id", order.id);
+        }
       }
     }
 

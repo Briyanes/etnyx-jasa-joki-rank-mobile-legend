@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.vercel.app";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.com";
 
 export const viewport: Viewport = {
   width: "device-width",

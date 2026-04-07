@@ -278,12 +278,22 @@ export async function PUT(request: NextRequest) {
           .single();
 
         if (customer) {
-          await supabase.rpc("award_reward_points", {
-            p_customer_id: customer.id,
-            p_order_id: orderId,
-            p_order_amount: completedOrder.total_price,
-            p_description: "Poin dari order selesai",
-          });
+          // Check if points already awarded for this order
+          const { data: existingReward } = await supabase
+            .from("reward_transactions")
+            .select("id")
+            .eq("order_id", orderId)
+            .eq("type", "earn")
+            .single();
+
+          if (!existingReward) {
+            await supabase.rpc("award_reward_points", {
+              p_customer_id: customer.id,
+              p_order_id: orderId,
+              p_order_amount: completedOrder.total_price,
+              p_description: "Poin dari order selesai",
+            });
+          }
         }
       }
 

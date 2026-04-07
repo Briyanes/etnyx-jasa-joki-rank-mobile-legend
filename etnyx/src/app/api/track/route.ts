@@ -24,10 +24,10 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Order tidak ditemukan" }, { status: 404 });
     }
 
-    // Fetch worker submissions for this order (public: no credentials/notes)
+    // Fetch worker submissions for this order (public: no credentials/notes, no screenshots)
     const { data: submissions } = await supabase
       .from("worker_submissions")
-      .select("id, stars_gained, mvp_count, savage_count, maniac_count, matches_played, win_count, duration_minutes, screenshots, submitted_at")
+      .select("id, stars_gained, mvp_count, savage_count, maniac_count, matches_played, win_count, duration_minutes, submitted_at")
       .eq("order_id", data.id)
       .order("submitted_at", { ascending: false });
 

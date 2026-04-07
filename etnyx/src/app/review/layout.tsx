@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.vercel.app";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.com";
 
 export const metadata: Metadata = {
   title: "Review Pesanan | ETNYX",

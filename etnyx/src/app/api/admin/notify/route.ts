@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     }
     
     notifyMessage += `\n${message || statusMessages[status] || "Ada update untuk order kamu."}\n`;
-    notifyMessage += `\n🔗 Lacak order: https://etnyx.vercel.app/track?id=${orderId}`;
+    notifyMessage += `\n🔗 Lacak order: https://etnyx.com/track?id=${orderId}`;
     notifyMessage += `\n\nTerima kasih! 🙏\n- ETNYX Team`;
 
     // Generate WhatsApp URL

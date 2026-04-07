@@ -14,6 +14,10 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
     const bucket = (formData.get("bucket") as string) || "portfolio";
+    const ALLOWED_BUCKETS = ["portfolio", "booster-avatars", "payment-proofs", "submissions"];
+    if (!ALLOWED_BUCKETS.includes(bucket)) {
+      return NextResponse.json({ error: `Invalid bucket. Allowed: ${ALLOWED_BUCKETS.join(", ")}` }, { status: 400 });
+    }
 
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });

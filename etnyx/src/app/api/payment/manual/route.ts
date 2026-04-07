@@ -183,11 +183,15 @@ export async function POST(request: NextRequest) {
     // Send Telegram notification to admin about new payment proof
     try {
       const notifModule = await import("@/lib/notifications");
-      // notifyAdminNewOrder uses admin group - we'll use sendTelegramMessage with admin group ID from env/settings
-      // sendTelegramMessage auto-fetches botToken from settings if not provided
-      const adminGroupId = process.env.TELEGRAM_ADMIN_GROUP_ID || "-1003869338441";
-      await notifModule.sendTelegramMessage(
-        adminGroupId,
+      const { data: integrationSettings } = await supabase
+        .from("settings")
+        .select("value")
+        .eq("key", "integrations")
+        .single();
+      const adminGroupId = integrationSettings?.value?.telegramAdminGroupId;
+      if (adminGroupId) {
+        await notifModule.sendTelegramMessage(
+          adminGroupId,
         `<b>BUKTI TRANSFER BARU</b>\n\n` +
         `Order: <code>${order.order_id}</code>\n` +
         `${order.username}\n` +
@@ -195,6 +199,7 @@ export async function POST(request: NextRequest) {
         `${sanitizedSenderName || "-"} (${sanitizedSenderBank || "-"})\n\n` +
         `Segera verifikasi di Admin Dashboard`
       );
+      }
     } catch (e) {
       console.error("Telegram notification error:", e);
     }

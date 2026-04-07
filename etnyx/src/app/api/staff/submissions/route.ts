@@ -55,6 +55,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Order ID wajib" }, { status: 400 });
   }
 
+  // Validate numeric fields
+  const numericFields = { starsGained, mvpCount, savageCount, maniacCount, matchesPlayed, winCount, durationMinutes };
+  for (const [key, val] of Object.entries(numericFields)) {
+    if (val !== undefined && val !== null) {
+      const num = Number(val);
+      if (!Number.isFinite(num) || num < 0 || num > 999) {
+        return NextResponse.json({ error: `${key} harus angka 0-999` }, { status: 400 });
+      }
+    }
+  }
+
   const supabase = await createAdminClient();
 
   // Verify worker is assigned to this order

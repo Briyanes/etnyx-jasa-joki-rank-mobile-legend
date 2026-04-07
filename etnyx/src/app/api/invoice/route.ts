@@ -9,7 +9,6 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const orderId = searchParams.get("orderId");
     const format = searchParams.get("format") || "html"; // html or pdf
-    const verifyPhone = searchParams.get("phone");
 
     if (!orderId) {
       return NextResponse.json({ error: "orderId required" }, { status: 400 });
@@ -17,10 +16,32 @@ export async function GET(request: NextRequest) {
 
     const supabase = await createAdminClient();
 
-    // Auth: require admin token or phone verification
+    // Auth: require admin token or customer JWT
     const admin = await verifyAdmin();
-    if (!admin.authenticated && !verifyPhone) {
-      return NextResponse.json({ error: "Authentication required. Pass ?phone=<whatsapp> for verification." }, { status: 401 });
+    let customerPhone: string | null = null;
+
+    if (!admin.authenticated) {
+      // Try customer JWT auth
+      try {
+        const { jwtVerify: jv } = await import("jose");
+        const { cookies: getCookies } = await import("next/headers");
+        const cookieStore = await getCookies();
+        const token = cookieStore.get("customer_token")?.value;
+        if (!token || !process.env.JWT_SECRET) {
+          return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+        }
+        const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+        const { payload } = await jv(token, secret);
+        if (payload.id) {
+          const { data: cust } = await supabase.from("customers").select("whatsapp").eq("id", payload.id).single();
+          customerPhone = cust?.whatsapp || null;
+        }
+        if (!customerPhone) {
+          return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+        }
+      } catch {
+        return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+      }
     }
 
     // Fetch order with customer
@@ -34,10 +55,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    // Verify phone ownership for non-admin requests
-    if (!admin.authenticated && verifyPhone) {
+    // Verify ownership for customer requests
+    if (!admin.authenticated && customerPhone) {
       const orderWhatsapp = order.whatsapp || order.customers?.whatsapp || "";
-      if (orderWhatsapp !== verifyPhone) {
+      if (orderWhatsapp !== customerPhone) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
       }
     }

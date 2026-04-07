@@ -29,10 +29,29 @@ export async function POST(request: NextRequest) {
     const supabase = await createAdminClient();
     const body = await request.json();
 
-    // Convert expires_at to proper format
-    const insertData = {
-      ...body,
-      code: body.code.toUpperCase(),
+    // Validate required fields
+    if (!body.code || typeof body.code !== "string" || body.code.trim().length < 2) {
+      return NextResponse.json({ error: "Kode promo wajib minimal 2 karakter" }, { status: 400 });
+    }
+    if (!body.discount_type || !["percentage", "fixed"].includes(body.discount_type)) {
+      return NextResponse.json({ error: "Tipe diskon harus 'percentage' atau 'fixed'" }, { status: 400 });
+    }
+    const discountValue = Number(body.discount_value);
+    if (!Number.isFinite(discountValue) || discountValue <= 0) {
+      return NextResponse.json({ error: "Nilai diskon harus lebih dari 0" }, { status: 400 });
+    }
+    if (body.discount_type === "percentage" && discountValue > 100) {
+      return NextResponse.json({ error: "Diskon persen maksimal 100%" }, { status: 400 });
+    }
+
+    // Whitelist allowed fields
+    const insertData: Record<string, unknown> = {
+      code: body.code.toUpperCase().trim(),
+      discount_type: body.discount_type,
+      discount_value: discountValue,
+      min_order: Number(body.min_order) || 0,
+      max_uses: Number(body.max_uses) || null,
+      is_active: body.is_active !== false,
       expires_at: body.expires_at ? new Date(body.expires_at).toISOString() : null,
     };
 

@@ -131,7 +131,9 @@ export async function POST(request: NextRequest) {
     const result = await lookupMLAccount(cleanUserId, cleanZoneId);
 
     if (result.success) {
-      return NextResponse.json({ success: true, nickname: result.nickname });
+      // Sanitize nickname from external API — strip HTML/script tags
+      const safeNickname = (result.nickname || "").replace(/<[^>]*>/g, "").slice(0, 100);
+      return NextResponse.json({ success: true, nickname: safeNickname });
     }
 
     return NextResponse.json({ error: result.error || "Akun tidak ditemukan" }, { status: 404 });

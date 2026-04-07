@@ -53,10 +53,12 @@ export async function POST(request: Request) {
 
     if (action === "register") {
       // Check if email exists
+      const cleanEmail = email.trim().toLowerCase();
+
       const { data: existing } = await supabase
         .from("customers")
         .select("id")
-        .eq("email", email.toLowerCase())
+        .eq("email", cleanEmail)
         .single();
 
       if (existing) {
@@ -69,7 +71,7 @@ export async function POST(request: Request) {
       const { data: customer, error } = await supabase
         .from("customers")
         .insert({
-          email: email.toLowerCase(),
+          email: cleanEmail,
           password_hash: passwordHash,
           name: name || email.split("@")[0],
           whatsapp: whatsapp || null,

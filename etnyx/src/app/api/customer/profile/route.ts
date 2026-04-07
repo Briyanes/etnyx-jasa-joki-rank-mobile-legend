@@ -5,7 +5,10 @@ import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 
 function getJwtSecret() {
-  return new TextEncoder().encode(process.env.JWT_SECRET || "");
+  if (!process.env.JWT_SECRET) {
+    throw new Error("JWT_SECRET environment variable is required.");
+  }
+  return new TextEncoder().encode(process.env.JWT_SECRET);
 }
 
 async function getCustomerId(): Promise<string | null> {

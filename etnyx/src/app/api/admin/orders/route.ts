@@ -93,14 +93,27 @@ export async function POST(request: Request) {
     const supabase = await createAdminClient();
 
     // Generate order ID
-    const orderId = `ETX-${Date.now().toString(36).toUpperCase()}`;
+    const orderId = `ETX-${Date.now().toString(36).toUpperCase()}${crypto.randomUUID().slice(0, 4).toUpperCase()}`;
+
+    // Whitelist allowed insert fields to prevent mass assignment
+    const ALLOWED_INSERT_FIELDS = [
+      "username", "game_id", "whatsapp", "customer_email",
+      "current_rank", "target_rank", "current_star", "target_star",
+      "package", "package_title", "total_price", "status",
+      "is_express", "is_premium", "notes", "hero_request",
+      "login_method", "account_login", "account_password",
+    ] as const;
+
+    const insertData: Record<string, unknown> = { order_id: orderId };
+    for (const field of ALLOWED_INSERT_FIELDS) {
+      if (field in sanitizedBody) {
+        insertData[field] = sanitizedBody[field];
+      }
+    }
 
     const { data, error } = await supabase
       .from("orders")
-      .insert({
-        order_id: orderId,
-        ...sanitizedBody,
-      })
+      .insert(insertData)
       .select()
       .single();
 
@@ -299,7 +312,7 @@ export async function PATCH(request: Request) {
           console.log(`[completed] Notifications sent for ${data.order_id}, WA: ${data.whatsapp}`);
         } catch (err) { console.error(`[completed] Notification failed for ${data.order_id}:`, err); }
 
-        // Award reward points to linked customer
+        // Award reward points to linked customer (idempotent check)
         try {
           if (data.whatsapp) {
             const { data: customer } = await supabase
@@ -309,12 +322,22 @@ export async function PATCH(request: Request) {
               .single();
 
             if (customer) {
-              await supabase.rpc("award_reward_points", {
-                p_customer_id: customer.id,
-                p_order_id: data.id,
-                p_order_amount: data.total_price,
-                p_description: "Poin dari order selesai",
-              });
+              // Check if points already awarded for this order
+              const { data: existingReward } = await supabase
+                .from("reward_transactions")
+                .select("id")
+                .eq("order_id", data.id)
+                .eq("type", "earn")
+                .single();
+
+              if (!existingReward) {
+                await supabase.rpc("award_reward_points", {
+                  p_customer_id: customer.id,
+                  p_order_id: data.id,
+                  p_order_amount: data.total_price,
+                  p_description: "Poin dari order selesai",
+                });
+              }
             }
           }
 
