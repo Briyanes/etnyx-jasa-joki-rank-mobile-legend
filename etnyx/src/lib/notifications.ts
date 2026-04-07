@@ -419,7 +419,7 @@ Terima kasih sudah order di *ETNYX*!
 Silakan selesaikan pembayaran untuk memproses order kamu.
 
 Bayar & upload bukti di sini:
-${SITE_URL}/payment/manual/?order_id=${order.order_id}/
+${SITE_URL}/payment/manual/?order_id=${order.order_id}
 
 Butuh bantuan? Balas pesan ini!
 
@@ -441,7 +441,7 @@ Halo! Order kamu sudah dikonfirmasi dan sedang dalam pengerjaan oleh booster kam
 *Paket:* ${formatTargetDisplay(order)}
 
 Kamu bisa track progress di sini:
-${SITE_URL}/track/?id=${order.order_id}/
+${SITE_URL}/track/?id=${order.order_id}
 
 Jangan login ke akun selama proses joki ya!
 
@@ -454,8 +454,8 @@ _ETNYX - Push Rank, Tanpa Main_
 export async function sendOrderCompletedWA(order: OrderData): Promise<boolean> {
   if (!order.whatsapp) return false;
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.vercel.app";
-  const reviewLink = `${siteUrl}/review/?id=${order.order_id}/`;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.com";
+  const reviewLink = `${siteUrl}/review/?id=${order.order_id}`;
 
   const message = `
 *Order Selesai!*
