@@ -247,6 +247,7 @@ export async function PATCH(request: Request) {
     }
 
     // Send notifications based on status change
+    let notificationSent = false;
     if (updates.status && updates.status !== previousStatus) {
       const orderData = {
         order_id: data.order_id,
@@ -269,24 +270,34 @@ export async function PATCH(request: Request) {
 
       // Status: confirmed -> WA "Pembayaran Dikonfirmasi" + Telegram worker
       if (updates.status === "confirmed") {
-        sendOrderConfirmedNotifications(orderData).catch(console.error);
+        try {
+          await sendOrderConfirmedNotifications(orderData);
+          notificationSent = true;
+        } catch (e) { console.error(`[confirmed] Notification failed for ${data.order_id}:`, e); }
       }
 
       // Status: in_progress -> WA "Sedang Dikerjakan"
       if (updates.status === "in_progress") {
-        sendOrderStartedWA(orderData).catch(console.error);
+        try {
+          notificationSent = await sendOrderStartedWA(orderData);
+          console.log(`[in_progress] WA sent for ${data.order_id}: ${notificationSent}, phone: ${data.whatsapp}`);
+        } catch (e) { console.error(`[in_progress] Notification failed for ${data.order_id}:`, e); }
       }
 
       // Status: cancelled -> WA "Order Dibatalkan"
       if (updates.status === "cancelled") {
-        sendOrderCancelledWA(orderData).catch(console.error);
+        try {
+          notificationSent = await sendOrderCancelledWA(orderData);
+        } catch (e) { console.error(`[cancelled] Notification failed for ${data.order_id}:`, e); }
       }
       
       // Status: completed -> notify customer + award reward points
       if (updates.status === "completed") {
-        sendOrderCompletedNotifications(orderData)
-          .then(() => console.log(`[completed] Notifications sent for ${data.order_id}, WA: ${data.whatsapp}`))
-          .catch((err) => console.error(`[completed] Notification failed for ${data.order_id}:`, err));
+        try {
+          await sendOrderCompletedNotifications(orderData);
+          notificationSent = true;
+          console.log(`[completed] Notifications sent for ${data.order_id}, WA: ${data.whatsapp}`);
+        } catch (err) { console.error(`[completed] Notification failed for ${data.order_id}:`, err); }
 
         // Award reward points to linked customer
         try {
@@ -367,7 +378,8 @@ export async function PATCH(request: Request) {
       }
     }
 
-    return NextResponse.json(data);
+    const hasStatusChange = updates.status && updates.status !== previousStatus;
+    return NextResponse.json({ ...data, _notificationSent: hasStatusChange ? notificationSent : undefined });
   } catch (error) {
     console.error("Order update error:", error);
     return NextResponse.json(

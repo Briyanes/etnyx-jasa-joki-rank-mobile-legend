@@ -409,7 +409,16 @@ export default function AdminDashboard() {
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     setStatusActionLoading(`${orderId}-${newStatus}`);
     try {
-      await fetch("/api/admin/orders", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: orderId, status: newStatus }) });
+      const res = await fetch("/api/admin/orders", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: orderId, status: newStatus }) });
+      const result = await res.json();
+      if (!res.ok) {
+        alert(`Gagal update status: ${result.error || "Unknown error"}`);
+        setStatusActionLoading(null);
+        return;
+      }
+      if (result._notificationSent === false) {
+        alert(`⚠️ Status berhasil diubah ke ${newStatus}, tapi WA notifikasi GAGAL terkirim ke customer. Cek pengaturan Fonnte di Settings > Integrations.`);
+      }
       fetchOrders(); fetchStats();
     } catch (e) { console.error(e); }
     setStatusActionLoading(null);
