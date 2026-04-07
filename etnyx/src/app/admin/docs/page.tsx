@@ -312,6 +312,232 @@ function buildCategories(): DocCategory[] {
           ),
         },
         {
+          id: "admin-action-buttons",
+          icon: Zap,
+          title: "Order Action Buttons",
+          content: (
+            <div className="space-y-4">
+              <p className="text-text-muted text-sm">Tombol aksi yang muncul di setiap order berdasarkan status. Dashboard &rarr; Orders tab.</p>
+
+              <div className="bg-background rounded-lg p-4 border border-yellow-500/20">
+                <h4 className="text-yellow-400 font-semibold text-sm mb-3">{"PENDING"} &mdash; Menunggu Bayar</h4>
+                <Table headers={["Tombol", "Warna", "Aksi", "WA ke Customer"]} rows={[
+                  ["Lihat Bukti Transfer", "Kuning", "Buka modal bukti transfer (hanya jika transfer manual)", "—"],
+                  ["Konfirmasi Bayar", "Hijau", "Status → confirmed, payment → paid", "\"Pembayaran Dikonfirmasi\" + link track"],
+                  ["Follow Up Bayar", "Biru", "Kirim WA reminder bayar", "\"Reminder pembayaran\" + rekening + link upload bukti"],
+                  ["Cancel", "Merah", "Status → cancelled", "—"],
+                ]} />
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-blue-500/20">
+                <h4 className="text-blue-400 font-semibold text-sm mb-3">{"CONFIRMED"} &mdash; Sudah Bayar</h4>
+                <Table headers={["Tombol", "Warna", "Aksi", "WA ke Customer"]} rows={[
+                  ["Mulai Kerjakan", "Accent", "Status → in_progress", "\"Sedang Dikerjakan\" + link track"],
+                  ["Credentials", "Kuning", "Lihat akun ML customer (AES-256 encrypted)", "—"],
+                  ["Minta Credentials", "Biru", "Kirim WA minta data login akun ML", "\"Minta data login\" + instruksi"],
+                ]} />
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-accent/20">
+                <h4 className="text-accent font-semibold text-sm mb-3">{"IN PROGRESS"} &mdash; Sedang Dikerjakan</h4>
+                <Table headers={["Tombol", "Warna", "Aksi", "WA ke Customer"]} rows={[
+                  ["Selesaikan", "Hijau", "Status → completed + auto commission 60%", "\"Order Selesai\" + link review + warning worker"],
+                  ["Credentials", "Kuning", "Lihat akun ML customer", "—"],
+                  ["Update Progress WA", "Biru", "Kirim WA update progress %", "\"Update progress\" + % + link track"],
+                ]} />
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-green-500/20">
+                <h4 className="text-green-400 font-semibold text-sm mb-3">{"COMPLETED"} &mdash; Selesai</h4>
+                <Table headers={["Tombol", "Warna", "Aksi", "WA ke Customer"]} rows={[
+                  ["Minta Review", "Kuning", "Kirim WA minta review", "\"Terima kasih\" + link review"],
+                  ["Kirim Notif Selesai", "Biru", "Kirim ulang notif selesai", "\"Order Selesai\" (ulang)"],
+                  ["Reopen Order", "Oranye", "Status → in_progress (buka kembali)", "—"],
+                ]} />
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-red-500/20">
+                <h4 className="text-red-400 font-semibold text-sm mb-3">{"CANCELLED"} &mdash; Dibatalkan</h4>
+                <Table headers={["Tombol", "Warna", "Aksi", "WA ke Customer"]} rows={[
+                  ["Reaktivasi", "Accent", "Status → pending (aktifkan kembali)", "—"],
+                  ["Follow Up WA", "Biru", "Kirim WA reactivation", "\"Mau lanjut order?\""],
+                ]} />
+              </div>
+
+              <div className="bg-background rounded-lg p-3 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-2">Tombol Universal (Semua Status)</h4>
+                <Table headers={["Tombol", "Aksi"]} rows={[
+                  ["WA (hijau kecil)", "Buka WhatsApp manual ke customer dengan template sapaan"],
+                  ["Copy", "Copy info order ke clipboard (ID, username, rank, dll)"],
+                ]} />
+              </div>
+
+              <InfoBox type="warning">
+                <strong>Urutan penting!</strong> Selalu lihat bukti transfer dulu sebelum klik Konfirmasi Bayar. Jangan konfirmasi tanpa verifikasi bukti transfer.
+              </InfoBox>
+            </div>
+          ),
+        },
+        {
+          id: "sop-admin",
+          icon: ClipboardList,
+          title: "SOP Harian Admin",
+          content: (
+            <div className="space-y-4">
+              <p className="text-text-muted text-sm">Checklist harian untuk Admin/Owner. Pastikan semua operasional berjalan lancar.</p>
+
+              <div className="bg-background rounded-lg p-4 border border-red-500/20">
+                <h4 className="text-red-400 font-semibold text-sm mb-3">Pagi (08:00 - 10:00)</h4>
+                <ul className="space-y-2">
+                  {[
+                    "Cek Telegram — ada ORDER BARU atau BUKTI TRANSFER BARU semalam?",
+                    "Buka Dashboard > Orders — filter status 'pending'. Verifikasi bukti transfer yang masuk",
+                    "Konfirmasi pembayaran yang sudah valid (Lihat Bukti > Konfirmasi Bayar)",
+                    "Cek apakah ada order confirmed yang belum di-assign ke worker",
+                    "Pastikan Lead sudah assign order — jika belum, assign sendiri atau hubungi Lead",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2 text-text-muted text-xs">
+                      <span className="w-5 h-5 rounded bg-red-500/10 text-red-400 flex items-center justify-center text-[10px] font-bold shrink-0">{i + 1}</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-red-500/20">
+                <h4 className="text-red-400 font-semibold text-sm mb-3">Siang (12:00 - 14:00)</h4>
+                <ul className="space-y-2">
+                  {[
+                    "Monitor order in_progress — cek progress % worker. Adakah yang stuck?",
+                    "Follow-up customer yang status pending > 6 jam via WA (Follow Up Bayar)",
+                    "Cek Dashboard Overview — KPI hari ini: orders masuk, revenue, completion",
+                    "Cek Telegram Review/Report group — ada review atau laporan worker baru?",
+                    "Approve/hide review + resolve/dismiss report jika ada",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2 text-text-muted text-xs">
+                      <span className="w-5 h-5 rounded bg-red-500/10 text-red-400 flex items-center justify-center text-[10px] font-bold shrink-0">{i + 1}</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-red-500/20">
+                <h4 className="text-red-400 font-semibold text-sm mb-3">Malam (20:00 - 22:00)</h4>
+                <ul className="space-y-2">
+                  {[
+                    "Cek order completed hari ini — pastikan worker sudah submit hasil + screenshot",
+                    "Kirim 'Minta Review' ke customer yang belum review (order selesai > 24 jam)",
+                    "Review laporan Ads (jika ada campaign berjalan) — cek ROAS & CPA",
+                    "Cek Reports > P&L — revenue vs expense hari/minggu ini",
+                    "Siapkan payout worker jika sudah masuk jadwal (per 2 minggu)",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2 text-text-muted text-xs">
+                      <span className="w-5 h-5 rounded bg-red-500/10 text-red-400 flex items-center justify-center text-[10px] font-bold shrink-0">{i + 1}</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-red-500/20">
+                <h4 className="text-red-400 font-semibold text-sm mb-3">Mingguan / Bi-Weekly</h4>
+                <ul className="space-y-2">
+                  {[
+                    "Proses payout worker — Payroll > Payouts > Generate. Bayar via Dana/OVO/Bank",
+                    "Review worker performance — Reports > Worker Performance. Identifikasi yang perform bagus/buruk",
+                    "Update pricing jika perlu — cek kompetitor, adjust harga di Pricing tab",
+                    "Evaluasi promo code — mana yang paling efektif? Buat promo baru jika perlu",
+                    "Cek Ads tab — allocated budget vs actual spend. Adjust campaign jika ROAS rendah",
+                    "Backup session — pastikan semua settings, rekening, staff data up-to-date",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2 text-text-muted text-xs">
+                      <span className="w-5 h-5 rounded bg-red-500/10 text-red-400 flex items-center justify-center text-[10px] font-bold shrink-0">{i + 1}</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <InfoBox type="info">
+                <strong>Tip:</strong> Kebanyakan task bisa ditangani langsung dari Telegram (konfirmasi order, review, report). Dashboard untuk hal yang butuh detail: bukti transfer, payroll, reports, settings.
+              </InfoBox>
+            </div>
+          ),
+        },
+        {
+          id: "admin-rules",
+          icon: AlertTriangle,
+          title: "Do's & Don'ts Admin",
+          content: (
+            <div className="space-y-4">
+              <div className="bg-background rounded-lg p-4 border border-green-500/20">
+                <h4 className="text-green-400 font-semibold text-sm mb-3">{"DO's (Lakukan)"}</h4>
+                <ul className="space-y-1.5 text-text-muted text-xs">
+                  {[
+                    "Verifikasi bukti transfer sebelum konfirmasi — cek nominal, nama pengirim, tanggal",
+                    "Konfirmasi pembayaran secepat mungkin (target < 1 jam saat jam kerja)",
+                    "Assign order ke worker via Lead atau langsung jika urgent",
+                    "Follow-up customer pending > 6 jam via WA template",
+                    "Approve review & resolve report dalam 24 jam",
+                    "Bayar komisi worker tepat waktu (bi-weekly)",
+                    "Backup data penting (export CSV rutin) dan monitor Reports P&L",
+                    "Update Settings & Integrations jika ada perubahan (rekening, token, dll)",
+                    "Pantau worker performance — reward yang bagus, tegur yang bermasalah",
+                    "Respon cepat di Telegram — customer & tim expect fast response",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span className="text-green-400 shrink-0">{"✓"}</span> {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-red-500/20">
+                <h4 className="text-red-400 font-semibold text-sm mb-3">{"DON'Ts (Jangan)"}</h4>
+                <ul className="space-y-1.5 text-text-muted text-xs">
+                  {[
+                    "Jangan konfirmasi pembayaran tanpa lihat bukti transfer dulu",
+                    "Jangan biarkan order pending > 24 jam tanpa follow-up",
+                    "Jangan cancel order tanpa konfirmasi ke customer terlebih dahulu",
+                    "Jangan share ENCRYPTION_KEY, JWT_SECRET, atau API keys ke siapapun",
+                    "Jangan edit payroll_settings tanpa perhitungan matang (affect commission semua worker)",
+                    "Jangan abaikan worker report — tindak lanjuti sesuai SOP sanksi",
+                    "Jangan ubah Settings Integrations di jam sibuk (bisa disrupt notifikasi)",
+                    "Jangan hapus order data — cancel saja (untuk audit trail)",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span className="text-red-400 shrink-0">{"✗"}</span> {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-yellow-500/20">
+                <h4 className="text-yellow-400 font-semibold text-sm mb-3">Checklist Verifikasi Bukti Transfer</h4>
+                <ul className="space-y-1.5 text-text-muted text-xs">
+                  {[
+                    "Nominal transfer cocok dengan total order (persis atau lebih)",
+                    "Nama pengirim masuk akal (bukan random atau mencurigakan)",
+                    "Tanggal transfer masih relevan (bukan transfer lama yang di-reuse)",
+                    "Bank/e-wallet tujuan sesuai dengan rekening ETNYX yang aktif",
+                    "Bukti bukan screenshot palsu (cek resolusi, font, layout yang aneh)",
+                    "Jika ragu — tanya customer untuk konfirmasi via WA manual sebelum approve",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span className="text-yellow-400 shrink-0">{"☑"}</span> {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <InfoBox type="warning">
+                <strong>Fraud prevention:</strong> Jika menemukan bukti transfer palsu, JANGAN konfirmasi. Cancel order + block customer jika repeat offender. Simpan bukti untuk referensi.
+              </InfoBox>
+            </div>
+          ),
+        },
+        {
           id: "payroll",
           icon: Wallet,
           title: "Payroll & Komisi",
@@ -1917,6 +2143,9 @@ function buildCategories(): DocCategory[] {
                   <div>
                     <h5 className="text-text text-xs font-medium mb-1">Docs Major Update</h5>
                     <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
+                      <li><strong className="text-text">Order Action Buttons</strong> &mdash; Referensi lengkap tombol aksi per status order (pending → cancelled) + aksi &amp; WA yang dikirim</li>
+                      <li><strong className="text-text">SOP Harian Admin</strong> &mdash; Checklist pagi/siang/malam/mingguan untuk owner</li>
+                      <li><strong className="text-text">{"Do's & Don'ts Admin"}</strong> &mdash; 10 do&apos;s, 8 don&apos;ts + checklist verifikasi bukti transfer</li>
                       <li><strong className="text-text">Team Management &amp; Hierarchy</strong> &mdash; Panduan lengkap hierarki Admin → Lead → Worker, cara buat tim, permission matrix</li>
                       <li><strong className="text-text">SOP Harian Lead</strong> &mdash; Checklist pagi/siang/malam untuk koordinator</li>
                       <li><strong className="text-text">{"Do's & Don'ts Lead"}</strong> &mdash; Aturan yang harus dan tidak boleh dilakukan Lead</li>
@@ -1925,6 +2154,15 @@ function buildCategories(): DocCategory[] {
                       <li><strong className="text-text">Komisi &amp; Penghasilan Worker</strong> &mdash; Cara hitung komisi, contoh perhitungan, payment methods</li>
                       <li><strong className="text-text">FAQ &amp; Troubleshooting</strong> &mdash; 12 pertanyaan umum + solusi (WA, Telegram, Midtrans, dll)</li>
                       <li><strong className="text-text">Development Roadmap</strong> &mdash; 3 phase: Done, Planning, Future</li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">Bug Fix: Konfirmasi Bayar WA</h5>
+                    <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
+                      <li>Fix: Admin klik &quot;Konfirmasi Bayar&quot; sekarang kirim WA <strong className="text-text">&quot;Pembayaran Dikonfirmasi&quot;</strong> (sebelumnya salah kirim &quot;Sedang Dikerjakan&quot;)</li>
+                      <li>Fix: Status confirmed dan in_progress sekarang kirim WA template yang berbeda</li>
+                      <li>Fix: Auto-set <Code>payment_status=paid</Code> + <Code>paid_at</Code> saat admin konfirmasi pembayaran</li>
                     </ul>
                   </div>
 
