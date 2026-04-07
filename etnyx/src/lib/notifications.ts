@@ -333,7 +333,8 @@ ${report.report_detail ? `\n<b>Detail:</b> ${report.report_detail}` : ""}
 // ============ WHATSAPP (Fonnte) ============
 export async function sendWhatsAppMessage(
   phone: string,
-  message: string
+  message: string,
+  url?: string
 ): Promise<boolean> {
   const settings = await getIntegrationSettings();
   const token = settings.fonnteApiToken;
@@ -353,17 +354,24 @@ export async function sendWhatsAppMessage(
   }
 
   try {
+    const body: Record<string, string> = {
+      target: normalizedPhone,
+      message: message,
+      countryCode: "62",
+    };
+    // Fonnte `url` parameter creates a clickable link preview card
+    // that is always tappable even without prior conversation
+    if (url) {
+      body.url = url;
+    }
+
     const res = await fetch("https://api.fonnte.com/send", {
       method: "POST",
       headers: {
         Authorization: token,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        target: normalizedPhone,
-        message: message,
-        countryCode: "62",
-      }),
+      body: JSON.stringify(body),
     });
 
     const data = await res.json();
@@ -455,7 +463,7 @@ Butuh bantuan? Balas pesan ini!
 _ETNYX - Push Rank, Tanpa Main_
 `.trim();
 
-  return sendWhatsAppMessage(order.whatsapp, message);
+  return sendWhatsAppMessage(order.whatsapp, message, `${SITE_URL}/payment/manual/?order_id=${order.order_id}`);
 }
 
 export async function sendOrderStartedWA(order: OrderData): Promise<boolean> {
@@ -477,7 +485,7 @@ Jangan login ke akun selama proses joki ya!
 _ETNYX - Push Rank, Tanpa Main_
 `.trim();
 
-  return sendWhatsAppMessage(order.whatsapp, message);
+  return sendWhatsAppMessage(order.whatsapp, message, `${SITE_URL}/track/?id=${order.order_id}`);
 }
 
 export async function sendOrderCompletedWA(order: OrderData): Promise<boolean> {
@@ -509,7 +517,7 @@ Terima kasih sudah menggunakan *ETNYX*!
 _ETNYX - Push Rank, Tanpa Main_
 `.trim();
 
-  return sendWhatsAppMessage(order.whatsapp, message);
+  return sendWhatsAppMessage(order.whatsapp, message, reviewLink);
 }
 
 export async function sendOrderCancelledWA(order: OrderData): Promise<boolean> {
