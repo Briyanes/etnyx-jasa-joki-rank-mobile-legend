@@ -11,7 +11,7 @@ import {
   Gift, Bot, TrendingUp, Search,
   ClipboardList, Gamepad2, Monitor,
   Megaphone, Target, MousePointerClick, MessageCircle,
-  Clock, FileText,
+  Clock, FileText, AlertTriangle, HelpCircle, Rocket,
 } from "lucide-react";
 
 // --- Reusable Components ---
@@ -702,7 +702,7 @@ function buildCategories(): DocCategory[] {
                 ))}
               </div>
               <InfoBox type="info">
-                Semua template otomatis include: Order ID, info rank, emoji formatting, link tracking, branding ETNYX footer. API: <Code>POST /api/admin/orders/follow-up</Code>
+                Semua template otomatis include: Order ID, info rank, link tracking, branding ETNYX footer. Emoji dihapus untuk kompatibilitas link WhatsApp. API: <Code>POST /api/admin/orders/follow-up</Code>
               </InfoBox>
             </div>
           ),
@@ -859,6 +859,104 @@ function buildCategories(): DocCategory[] {
             </div>
           ),
         },
+        {
+          id: "team-management",
+          icon: Users,
+          title: "Team Management & Hierarchy",
+          content: (
+            <div className="space-y-4">
+              <p className="text-text-muted text-sm">Struktur organisasi ETNYX: Admin → Lead → Worker. Setiap level punya akses dan tanggung jawab berbeda.</p>
+
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">Hierarki Tim</h4>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3 p-3 rounded-lg border border-red-500/20">
+                    <Crown className="w-5 h-5 text-red-400 shrink-0" />
+                    <div>
+                      <h5 className="text-red-400 font-medium text-sm">Admin (Owner)</h5>
+                      <p className="text-text-muted text-xs">Full access. Kelola settings, pricing, payroll, staff, promo, reports, ads. Satu-satunya yang bisa CRUD staff.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-center"><ChevronDown className="w-4 h-4 text-text-muted" /></div>
+                  <div className="flex items-center gap-3 p-3 rounded-lg border border-blue-500/20">
+                    <UserCheck className="w-5 h-5 text-blue-400 shrink-0" />
+                    <div>
+                      <h5 className="text-blue-400 font-medium text-sm">Lead (Koordinator)</h5>
+                      <p className="text-text-muted text-xs">Assign order ke worker tim sendiri. Monitor progress. Follow-up customer via WA template.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-center"><ChevronDown className="w-4 h-4 text-text-muted" /></div>
+                  <div className="flex items-center gap-3 p-3 rounded-lg border border-green-500/20">
+                    <Wrench className="w-5 h-5 text-green-400 shrink-0" />
+                    <div>
+                      <h5 className="text-green-400 font-medium text-sm">Worker (Booster)</h5>
+                      <p className="text-text-muted text-xs">Kerjakan order assigned. Update progress. Submit hasil + screenshot. Komisi otomatis.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">Cara Buat &amp; Kelola Tim</h4>
+                <StepFlow steps={[
+                  { title: "Buat akun Lead", desc: "Dashboard > Staff tab > Tambah Staff > Role: Lead. Set nama, email, password.", badge: "admin" },
+                  { title: "Buat akun Worker", desc: "Dashboard > Staff tab > Tambah Staff > Role: Worker. Set nama, email, password.", badge: "admin" },
+                  { title: "Assign Worker ke Lead", desc: "Dashboard > Staff tab > Edit Worker > pilih Lead di dropdown. Worker otomatis masuk tim Lead tersebut.", badge: "admin" },
+                  { title: "Lead lihat tim", desc: "Lead login > otomatis lihat hanya worker di timnya. Assign order hanya ke worker timnya.", badge: "lead" },
+                  { title: "Re-assign worker", desc: "Admin bisa pindahkan worker ke lead lain kapan saja via Staff tab.", badge: "admin" },
+                ]} />
+              </div>
+
+              <Table headers={["Aksi", "Admin", "Lead", "Worker"]} rows={[
+                ["Lihat semua orders", "Ya", "Ya (semua)", "Hanya assigned"],
+                ["Assign order ke worker", "Ya (semua worker)", "Ya (tim sendiri)", "Tidak"],
+                ["Bulk assign", "Ya", "Ya", "Tidak"],
+                ["Kelola staff", "Ya (CRUD)", "Tidak", "Tidak"],
+                ["Mulai/selesaikan order", "Ya", "Tidak", "Ya (assigned saja)"],
+                ["Submit hasil & screenshot", "Tidak", "Tidak", "Ya"],
+                ["Lihat credentials akun", "Ya", "Tidak", "Ya (assigned saja)"],
+                ["Follow-up WA", "Ya", "Ya", "Tidak"],
+                ["Payroll & komisi", "Ya", "Tidak", "Tidak"],
+                ["Settings & pricing", "Ya", "Tidak", "Tidak"],
+                ["Lihat docs", "Ya", "Ya", "Ya"],
+              ]} />
+
+              <InfoBox type="info">
+                <strong>Scalable:</strong> Satu lead bisa handle 3-5 worker. Jika tim tambah besar, tambah lead baru dan distribusikan worker.
+              </InfoBox>
+            </div>
+          ),
+        },
+        {
+          id: "faq",
+          icon: HelpCircle,
+          title: "FAQ & Troubleshooting",
+          content: (
+            <div className="space-y-4">
+              <p className="text-text-muted text-sm">Pertanyaan yang sering muncul dan cara mengatasinya.</p>
+
+              {[
+                { q: "Customer bilang belum terima WA notifikasi?", a: "Cek Fonnte API token di Settings > Integrations. Cek nomor WA customer sudah benar (format 628xxx). Test via POST /api/admin/test-notifications." },
+                { q: "Telegram bot tidak merespon command?", a: "Cek bot token di Settings > Integrations. Pastikan webhook terdaftar: buka /api/telegram/webhook?action=register. Cek bot sudah ditambahkan ke grup." },
+                { q: "Link di WA tidak bisa diklik (tidak biru)?", a: "Pastikan URL ada di baris sendiri (tidak nempel emoji/teks lain). URL harus punya trailing slash sebelum query params, contoh: /track/?id=xxx bukan /track?id=xxx." },
+                { q: "Midtrans payment tidak auto-confirm?", a: "Cek Server Key di Settings > Integrations. Pastikan Notification URL di Midtrans Dashboard mengarah ke /api/payment/notification. Cek environment (Sandbox vs Production)." },
+                { q: "Worker tidak bisa lihat order?", a: "Pastikan order sudah di-assign ke worker tersebut. Worker hanya bisa lihat order yang ditugaskan via lead/admin." },
+                { q: "Commission tidak muncul setelah order selesai?", a: "Komisi auto-generate saat status diubah ke completed DAN ada assigned_worker_id. Cek di Payroll > Commissions." },
+                { q: "Customer tidak bisa bayar via Midtrans?", a: "Cek Midtrans Server Key & Client Key sudah benar dan aktif. Toggle Sandbox/Production sesuai environment." },
+                { q: "Bagaimana reset password staff?", a: "Admin bisa reset lewat Staff tab > Edit > isi password baru. Atau staff bisa via halaman login > Lupa Password (email reset link via Resend)." },
+                { q: "Order stuck di pending lama?", a: "Kirim follow-up WA via Dashboard > Orders > Follow-up Payment. Template include daftar rekening + link upload bukti." },
+                { q: "Review tidak muncul di homepage?", a: "Review otomatis hidden saat dibuat. Admin harus approve/show di Reviews tab > toggle visibility. Hanya rating 4-5 yang auto-create testimonial." },
+                { q: "Mau tambah rekening bank/e-wallet baru?", a: "Dashboard > Settings > Rekening tab. Tambah rekening baru dengan nama, nomor, nama pemilik. Toggle aktif/nonaktif." },
+                { q: "Bagaimana test semua notifikasi channel?", a: "POST /api/admin/test-notifications — support: telegram_admin, telegram_worker, telegram_completed, telegram_review, telegram_report, whatsapp, email." },
+              ].map((item, i) => (
+                <div key={i} className="bg-background rounded-lg p-3 border border-white/5">
+                  <h4 className="text-accent font-medium text-sm">{item.q}</h4>
+                  <p className="text-text-muted text-xs mt-1">{item.a}</p>
+                </div>
+              ))}
+            </div>
+          ),
+        },
       ],
     },
     {
@@ -892,6 +990,123 @@ function buildCategories(): DocCategory[] {
               </div>
               <InfoBox type="info">
                 <strong>Tips:</strong> Distribusi berdasarkan skill worker (lihat history). Jangan stack terlalu banyak ke 1 worker. Gunakan Telegram untuk koordinasi cepat.
+              </InfoBox>
+            </div>
+          ),
+        },
+        {
+          id: "sop-lead",
+          icon: ClipboardList,
+          title: "SOP Harian Lead",
+          content: (
+            <div className="space-y-4">
+              <p className="text-text-muted text-sm">Checklist harian untuk Lead. Lakukan setiap hari untuk memastikan operasional lancar.</p>
+
+              <div className="bg-background rounded-lg p-4 border border-blue-500/20">
+                <h4 className="text-blue-400 font-semibold text-sm mb-3">Pagi (08:00 - 10:00)</h4>
+                <ul className="space-y-2">
+                  {[
+                    "Login ke Lead Dashboard — cek order baru yang masuk semalam",
+                    "Cek Telegram — ada notifikasi order baru / payment confirmed?",
+                    "Assign order yang belum di-assign ke worker yang available",
+                    "Cek workload per worker — pastikan distribusi merata",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2 text-text-muted text-xs">
+                      <span className="w-5 h-5 rounded bg-blue-500/10 text-blue-400 flex items-center justify-center text-[10px] font-bold shrink-0">{i + 1}</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-blue-500/20">
+                <h4 className="text-blue-400 font-semibold text-sm mb-3">Siang (12:00 - 14:00)</h4>
+                <ul className="space-y-2">
+                  {[
+                    "Monitor progress order yang sedang dikerjakan",
+                    "Follow-up worker yang progress-nya lambat via Telegram",
+                    "Kirim WA progress update ke customer jika perlu (template: follow_up_progress)",
+                    "Cek order yang payment belum masuk — kirim follow-up payment",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2 text-text-muted text-xs">
+                      <span className="w-5 h-5 rounded bg-blue-500/10 text-blue-400 flex items-center justify-center text-[10px] font-bold shrink-0">{i + 1}</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-blue-500/20">
+                <h4 className="text-blue-400 font-semibold text-sm mb-3">Malam (20:00 - 22:00)</h4>
+                <ul className="space-y-2">
+                  {[
+                    "Cek order selesai hari ini — pastikan worker sudah submit hasil + screenshot",
+                    "Pastikan customer sudah dikirim WA notifikasi selesai + link review",
+                    "Review report masuk — eskalasi ke admin jika perlu",
+                    "Brief worker untuk order besok jika ada yang urgent/express",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2 text-text-muted text-xs">
+                      <span className="w-5 h-5 rounded bg-blue-500/10 text-blue-400 flex items-center justify-center text-[10px] font-bold shrink-0">{i + 1}</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <InfoBox type="info">
+                <strong>Tip:</strong> Gunakan Telegram untuk koordinasi cepat dengan worker. Dashboard untuk monitoring data dan follow-up customer via WA template.
+              </InfoBox>
+            </div>
+          ),
+        },
+        {
+          id: "lead-rules",
+          icon: AlertTriangle,
+          title: "Do's & Don'ts Lead",
+          content: (
+            <div className="space-y-4">
+              <div className="bg-background rounded-lg p-4 border border-green-500/20">
+                <h4 className="text-green-400 font-semibold text-sm mb-3">{"DO's (Lakukan)"}</h4>
+                <ul className="space-y-1.5 text-text-muted text-xs">
+                  {[
+                    "Distribusikan order merata ke semua worker aktif",
+                    "Assign order secepat mungkin setelah payment confirmed (target < 30 menit)",
+                    "Follow-up customer yang belum bayar dalam 24 jam via WA template",
+                    "Monitor progress worker & ingatkan yang lambat melalui Telegram",
+                    "Gunakan bulk assign untuk efisiensi saat order banyak",
+                    "Catat notes di order jika ada info penting untuk worker/admin",
+                    "Cek workload worker sebelum assign — lihat jumlah order aktif di panel Tim Worker",
+                    "Eskalasi ke Admin jika ada masalah yang tidak bisa ditangani sendiri",
+                    "Respon cepat via Telegram — customer expect fast service",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span className="text-green-400 shrink-0">{"✓"}</span> {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-red-500/20">
+                <h4 className="text-red-400 font-semibold text-sm mb-3">{"DON'Ts (Jangan)"}</h4>
+                <ul className="space-y-1.5 text-text-muted text-xs">
+                  {[
+                    "Jangan stack >3 order aktif ke 1 worker (kecuali gap rank kecil)",
+                    "Jangan assign ke worker yang sedang offline / tidak responsif",
+                    "Jangan abaikan customer report — eskalasi ke Admin segera",
+                    "Jangan ubah pricing atau settings (bukan hak akses Lead)",
+                    "Jangan share credentials customer ke pihak lain",
+                    "Jangan biarkan order belum di-assign lebih dari 1 jam saat jam kerja",
+                    "Jangan hapus notes yang ditulis staff lain",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span className="text-red-400 shrink-0">{"✗"}</span> {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <InfoBox type="warning">
+                <strong>Eskalasi ke Admin jika:</strong> Worker tidak merespon &gt; 2 jam, customer komplain keras, order stuck &gt; 24 jam tanpa progress, ada report misconduct worker, masalah teknis/payment.
               </InfoBox>
             </div>
           ),
@@ -938,6 +1153,159 @@ function buildCategories(): DocCategory[] {
                   <li>&#8226; Jangan share credentials customer ke siapapun</li>
                   <li>&#8226; Komisi masuk otomatis saat order selesai (60% dari total)</li>
                 </ul>
+              </InfoBox>
+            </div>
+          ),
+        },
+        {
+          id: "sop-worker",
+          icon: ClipboardList,
+          title: "SOP Harian Worker",
+          content: (
+            <div className="space-y-4">
+              <p className="text-text-muted text-sm">Panduan langkah demi langkah untuk setiap order. Ikuti dengan disiplin.</p>
+
+              <div className="bg-background rounded-lg p-4 border border-green-500/20">
+                <h4 className="text-green-400 font-semibold text-sm mb-3">Sebelum Mulai Kerja</h4>
+                <ul className="space-y-2">
+                  {[
+                    "Login ke Worker Dashboard — cek ada order baru yang di-assign",
+                    "Cek Telegram — ada notifikasi assignment baru?",
+                    "Klik 'Credentials' untuk lihat akun ML customer (terenkripsi AES-256)",
+                    "Pastikan akun bisa login dengan baik sebelum klik 'Mulai'",
+                    "Jika akun bermasalah, laporkan ke Lead/Admin via Telegram segera",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2 text-text-muted text-xs">
+                      <span className="w-5 h-5 rounded bg-green-500/10 text-green-400 flex items-center justify-center text-[10px] font-bold shrink-0">{i + 1}</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-green-500/20">
+                <h4 className="text-green-400 font-semibold text-sm mb-3">Selama Pengerjaan</h4>
+                <ul className="space-y-2">
+                  {[
+                    "Klik 'Mulai' di dashboard — customer otomatis dapat WA 'Sedang Dikerjakan'",
+                    "Update progress % setiap selesai beberapa match (customer bisa track real-time)",
+                    "Submit hasil match: stars gained, MVP, savage, maniac, wins, durasi",
+                    "Upload screenshot setiap sesi bermain (WAJIB sebagai bukti)",
+                    "Jangan login dari device lain — risiko akun banned customer",
+                    "Jika ada masalah (akun locked, maintenance ML), lapor ke Lead segera",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2 text-text-muted text-xs">
+                      <span className="w-5 h-5 rounded bg-green-500/10 text-green-400 flex items-center justify-center text-[10px] font-bold shrink-0">{i + 1}</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-green-500/20">
+                <h4 className="text-green-400 font-semibold text-sm mb-3">Setelah Selesai</h4>
+                <ul className="space-y-2">
+                  {[
+                    "Submit semua hasil akhir + screenshot terakhir",
+                    "Klik 'Selesai' — customer dapat WA 'Order Selesai' + link review",
+                    "Komisi masuk otomatis ke sistem payroll (60% dari total_price)",
+                    "Logout dari akun ML customer — jangan simpan credentials di device",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2 text-text-muted text-xs">
+                      <span className="w-5 h-5 rounded bg-green-500/10 text-green-400 flex items-center justify-center text-[10px] font-bold shrink-0">{i + 1}</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <InfoBox type="info">
+                <strong>Edit Submission:</strong> Kamu bisa edit/hapus submission dalam 30 menit setelah submit. Setelah itu, minta Admin untuk koreksi.
+              </InfoBox>
+            </div>
+          ),
+        },
+        {
+          id: "worker-rules",
+          icon: AlertTriangle,
+          title: "Aturan & Sanksi",
+          content: (
+            <div className="space-y-4">
+              <p className="text-text-muted text-sm">Aturan wajib yang harus dipatuhi semua worker. Pelanggaran akan dikenakan sanksi bertingkat.</p>
+
+              <div className="bg-background rounded-lg p-4 border border-red-500/20">
+                <h4 className="text-red-400 font-semibold text-sm mb-3">Aturan Wajib</h4>
+                <Table headers={["No", "Aturan", "Keterangan"]} rows={[
+                  ["1", "Jangan share credentials customer", "Data login hanya untuk pengerjaan order. Dilarang menyebarkan ke siapapun."],
+                  ["2", "Jangan tawarkan jasa di luar ETNYX", "Dilarang menghubungi customer untuk menawarkan jasa pribadi."],
+                  ["3", "Jangan minta kontak pribadi customer", "Semua komunikasi melalui sistem ETNYX."],
+                  ["4", "Wajib upload screenshot", "Setiap sesi bermain harus ada bukti screenshot yang di-upload."],
+                  ["5", "Submit hasil yang jujur", "Jangan manipulasi data match (stars, MVP, dll)."],
+                  ["6", "Jangan gunakan cheat/hack", "Akun customer bisa kena banned. Tanggung jawab penuh worker."],
+                  ["7", "Selesaikan order tepat waktu", "Jangan biarkan order stuck tanpa progress > 24 jam."],
+                  ["8", "Jangan login dari banyak device", "Risiko banned akun. Gunakan 1 device saja per order."],
+                ]} />
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-yellow-500/20">
+                <h4 className="text-yellow-400 font-semibold text-sm mb-3">Tingkatan Sanksi</h4>
+                <Table headers={["Level", "Sanksi", "Contoh Pelanggaran"]} rows={[
+                  ["Peringatan 1", "Teguran tertulis via Telegram", "Lupa upload screenshot, progress lambat tanpa alasan jelas"],
+                  ["Peringatan 2", "Tidak dapat order baru selama 3 hari", "Order terlambat selesai, tidak responsif > 24 jam, repeat minor"],
+                  ["Peringatan 3", "Suspend akun 1 minggu + potong komisi", "Customer report valid (kasar, tidak profesional), major offense"],
+                  ["Pemutusan", "Akun di-nonaktifkan permanen", "Share credentials, tawarkan jasa luar, gunakan cheat, repeat offender"],
+                ]} />
+              </div>
+
+              <InfoBox type="warning">
+                <strong>Customer bisa report worker!</strong> Saat order selesai, customer dapat link review yang bisa digunakan untuk report. Laporan valid yang terbukti bisa langsung ke sanksi. Customer yang report valid bahkan bisa dapat skin gratis.
+              </InfoBox>
+            </div>
+          ),
+        },
+        {
+          id: "worker-earnings",
+          icon: Wallet,
+          title: "Komisi & Penghasilan",
+          content: (
+            <div className="space-y-4">
+              <p className="text-text-muted text-sm">Penjelasan lengkap sistem komisi dan pembayaran worker.</p>
+
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <StatCard label="Commission Rate" value="60%" sub="Dari total harga order" />
+                <StatCard label="Pay Period" value="Bi-weekly" sub="Tgl 1-15 & 16-akhir bulan" />
+                <StatCard label="Min. Payout" value="Rp 0" sub="Tidak ada minimum" />
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">Cara Hitung Komisi</h4>
+                <StepFlow steps={[
+                  { title: "Order selesai", desc: "Worker klik 'Selesai' di dashboard. Status berubah ke completed." },
+                  { title: "Auto-generate commission", desc: "Sistem hitung: total_price × 60% = komisi. Masuk ke tabel commissions otomatis." },
+                  { title: "Period otomatis", desc: "Tgl 1-15 = periode pertama bulan itu. Tgl 16-akhir bulan = periode kedua." },
+                  { title: "Admin proses payout", desc: "Admin buat batch payout di Payroll tab sesuai jadwal (per 2 minggu)." },
+                  { title: "Pembayaran ke worker", desc: "Admin bayar via Dana/OVO/BCA/dll ke rekening/e-wallet worker yang terdaftar." },
+                ]} />
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">Contoh Perhitungan</h4>
+                <Table headers={["Order", "Total Harga", "Komisi (60%)", "Status"]} rows={[
+                  ["ETX-ABC123", "Rp 150.000", "Rp 90.000", "Pending payout"],
+                  ["ETX-DEF456", "Rp 300.000", "Rp 180.000", "Pending payout"],
+                  ["ETX-GHI789", "Rp 80.000", "Rp 48.000", "Paid"],
+                ]} />
+                <p className="text-text-muted text-xs mt-2"><strong>Total pending:</strong> Rp 270.000 | <strong>Total paid:</strong> Rp 48.000</p>
+              </div>
+
+              <div className="bg-background rounded-lg p-3 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-2">Payment Methods Tersedia</h4>
+                <p className="text-text-muted text-xs">Admin bisa bayar ke rekening/e-wallet yang terdaftar: Dana, OVO, GoPay, ShopeePay, BCA, BRI, Mandiri, BNI, Jago, SeaBank, atau Cash.</p>
+                <p className="text-text-muted text-xs mt-1">Pastikan kamu sudah mendaftarkan rekening/e-wallet di profil. Tanyakan ke Admin untuk setup.</p>
+              </div>
+
+              <InfoBox type="info">
+                <strong>Tips:</strong> Semakin banyak order selesai, semakin besar komisi. Express order (1.2x harga) otomatis berarti komisi lebih besar juga.
               </InfoBox>
             </div>
           ),
@@ -1418,6 +1786,112 @@ function buildCategories(): DocCategory[] {
       ],
     },
 
+    // ===================== ROADMAP =====================
+    {
+      id: "roadmap",
+      label: "Roadmap",
+      catIcon: Rocket,
+      color: "text-orange-400",
+      sections: [
+        {
+          id: "roadmap-overview",
+          icon: Rocket,
+          title: "Development Roadmap",
+          content: (
+            <div className="space-y-4">
+              <p className="text-text-muted text-sm">Rencana pengembangan fitur ETNYX ke depan. Prioritas bisa berubah sesuai kebutuhan bisnis dan feedback tim.</p>
+
+              <div className="bg-background rounded-lg p-4 border border-green-500/20">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-green-500/10 text-green-400 font-medium">DONE</span>
+                  <h4 className="text-green-400 font-semibold text-sm">Phase 1 &mdash; Core Platform (v1.0 - v2.2)</h4>
+                </div>
+                <ul className="text-text-muted text-xs space-y-1.5 ml-4">
+                  {[
+                    "Full ordering system: 3 mode (Paket, Per Star, Gendong) + promo code + referral",
+                    "Dual payment: Transfer Manual (11 rekening) + Midtrans Auto (VA, QRIS, e-wallet)",
+                    "Staff management RBAC: Admin, Lead, Worker + tim hierarchy via lead_id",
+                    "15-tab admin dashboard + Lead dashboard + Worker dashboard",
+                    "Multi-channel notification: Telegram 4 grup, WhatsApp (Fonnte), Email (Resend), Web Push",
+                    "Interactive Telegram bot: 9 commands + inline keyboard (konfirmasi/tolak/assign)",
+                    "Security: AES-256-GCM encrypted credentials, rate limiting, CSP, middleware blocking",
+                    "Payroll: auto commission 60%, salary, batch payout, 11 payment methods",
+                    "Reward system: points, 4 tiers (Bronze-Platinum), referral, reward catalog",
+                    "Review & report system: rating service + worker, auto-testimonial, worker report",
+                    "Full-funnel conversion tracking: Meta Pixel, GA4, GTM, TikTok, Google Ads, Meta CAPI",
+                    "UTM attribution + Ad Performance dashboard (ROAS, CPA per platform/campaign)",
+                    "Customer dashboard: order history, reward points, referral code",
+                    "Order tracking real-time + worker submissions + screenshot gallery",
+                    "Order chat system (polling-based) + internal order notes",
+                    "WA messages: clean formatting, links clickable, trailing slash fix",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span className="text-green-400 shrink-0">{"✓"}</span> {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-yellow-500/20">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-yellow-500/10 text-yellow-400 font-medium">PLANNING</span>
+                  <h4 className="text-yellow-400 font-semibold text-sm">Phase 2 &mdash; Optimization &amp; Automation</h4>
+                </div>
+                <ul className="text-text-muted text-xs space-y-1.5 ml-4">
+                  {[
+                    "Auto-assign: order otomatis ke worker berdasarkan skill, rating, dan workload",
+                    "Real-time chat: WebSocket/SSE, ganti polling saat ini",
+                    "Worker earnings dashboard: lihat pending earnings + riwayat komisi langsung",
+                    "Auto follow-up scheduler: otomatis kirim WA jika belum bayar dalam X jam",
+                    "Dashboard analytics lanjutan: retention rate, repeat order, churn prediction",
+                    "PWA improvements: offline support, push notif dari browser",
+                    "Multi-bahasa full (saat ini ID + EN partial)",
+                    "WhatsApp Business API integration (upgrade dari Fonnte)",
+                    "Bulk order import via CSV untuk admin",
+                    "Order priority queue: express order otomatis muncul di atas daftar",
+                    "Notification preferences: customer bisa pilih channel (WA/email/push)",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span className="text-yellow-400 shrink-0">{"○"}</span> {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-purple-500/20">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 font-medium">FUTURE</span>
+                  <h4 className="text-purple-400 font-semibold text-sm">Phase 3 &mdash; Scale &amp; Expand</h4>
+                </div>
+                <ul className="text-text-muted text-xs space-y-1.5 ml-4">
+                  {[
+                    "Multi-game support: PUBG Mobile, Genshin Impact, Valorant, Honor of Kings",
+                    "Marketplace model: worker self-register + verifikasi + profile public",
+                    "Customer loyalty advanced: daily check-in, missions, limited-time reward",
+                    "Payment gateway tambahan: Xendit, Stripe (international)",
+                    "Mobile app native (React Native) untuk customer + worker",
+                    "AI-powered dynamic pricing berdasarkan demand & supply",
+                    "Worker leaderboard public: showcase top boosters di homepage",
+                    "Subscription model: langganan bulanan maintenance rank",
+                    "Public API: integrasi dengan platform/partner lain",
+                    "Multi-tenant / whitelabel: jual platform ke brand joki lain",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span className="text-purple-400 shrink-0">{"◇"}</span> {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <InfoBox type="info">
+                <strong>Request fitur?</strong> Sampaikan ke Admin / Developer via Telegram. Roadmap di-update berkala berdasarkan prioritas bisnis dan feedback tim.
+              </InfoBox>
+            </div>
+          ),
+        },
+      ],
+    },
+
     // ===================== CHANGELOG =====================
     {
       id: "changelog",
@@ -1435,8 +1909,59 @@ function buildCategories(): DocCategory[] {
 
               <div className="bg-background rounded-lg p-4 border border-yellow-500/20">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-yellow-500/10 text-yellow-400 font-medium">v2.1</span>
-                  <h4 className="text-yellow-400 font-semibold text-sm">7 April 2026</h4>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-yellow-500/10 text-yellow-400 font-medium">v2.2</span>
+                  <h4 className="text-yellow-400 font-semibold text-sm">7 April 2026 (Update)</h4>
+                </div>
+
+                <div className="space-y-3">
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">Docs Major Update</h5>
+                    <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
+                      <li><strong className="text-text">Team Management &amp; Hierarchy</strong> &mdash; Panduan lengkap hierarki Admin → Lead → Worker, cara buat tim, permission matrix</li>
+                      <li><strong className="text-text">SOP Harian Lead</strong> &mdash; Checklist pagi/siang/malam untuk koordinator</li>
+                      <li><strong className="text-text">{"Do's & Don'ts Lead"}</strong> &mdash; Aturan yang harus dan tidak boleh dilakukan Lead</li>
+                      <li><strong className="text-text">SOP Harian Worker</strong> &mdash; Step-by-step sebelum, selama, dan setelah pengerjaan</li>
+                      <li><strong className="text-text">Aturan &amp; Sanksi Worker</strong> &mdash; 8 aturan wajib + 4 tingkatan sanksi bertingkat</li>
+                      <li><strong className="text-text">Komisi &amp; Penghasilan Worker</strong> &mdash; Cara hitung komisi, contoh perhitungan, payment methods</li>
+                      <li><strong className="text-text">FAQ &amp; Troubleshooting</strong> &mdash; 12 pertanyaan umum + solusi (WA, Telegram, Midtrans, dll)</li>
+                      <li><strong className="text-text">Development Roadmap</strong> &mdash; 3 phase: Done, Planning, Future</li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">WhatsApp Link Fix</h5>
+                    <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
+                      <li>Semua emoji dihapus dari pesan WA (mengganggu deteksi link WhatsApp)</li>
+                      <li>Semua URL sekarang di baris sendiri (tidak nempel teks/emoji)</li>
+                      <li>Trailing slash ditambahkan sebelum query params: <Code>{"/track/?id=xxx"}</Code></li>
+                      <li>Fix berlaku untuk 4 auto-notification + 5 follow-up templates</li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">WA Number &amp; Dynamic Config</h5>
+                    <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
+                      <li>Nomor WA admin diubah ke <Code>081515141452</Code></li>
+                      <li>WhatsApp floating button sekarang ambil nomor dari Settings &rarr; Social Links (dinamis)</li>
+                      <li>Footer juga ambil nomor dari settings API</li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">Notifikasi Improvements</h5>
+                    <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
+                      <li>Semua judul notifikasi Telegram sekarang pakai prefix speaker emoji</li>
+                      <li>WA order selesai include peringatan worker misconduct + reward skin gratis untuk report valid</li>
+                      <li>Teks &quot;skin gratis&quot; dihapus dari follow-up messages (hanya di pesan selesai)</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-white/10">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-white/10 text-text-muted font-medium">v2.1</span>
+                  <h4 className="text-text-muted font-semibold text-sm">7 April 2026</h4>
                 </div>
 
                 <div className="space-y-3">
@@ -1614,7 +2139,7 @@ export default function DocsPage() {
             <div className="flex items-center gap-2">
               <Book className="w-5 h-5 text-accent" />
               <h1 className="text-text font-bold text-sm">ETNYX DOCS</h1>
-              <span className="text-[9px] px-1.5 py-0.5 rounded bg-accent/10 text-accent font-medium">v2.1</span>
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-accent/10 text-accent font-medium">v2.2</span>
             </div>
             <button onClick={() => setSidebarOpen(false)} className="text-text-muted hover:text-text p-1">
               <ChevronDown className="w-4 h-4 rotate-90" />
@@ -1720,7 +2245,7 @@ export default function DocsPage() {
 
         <footer className="px-6 py-4 border-t border-white/5">
           <p className="text-text-muted/40 text-[10px] text-center">
-            ETNYX Documentation v2.1 &mdash; {allSections.length} sections across {categories.length} categories
+            ETNYX Documentation v2.2 &mdash; {allSections.length} sections across {categories.length} categories
           </p>
         </footer>
       </main>
