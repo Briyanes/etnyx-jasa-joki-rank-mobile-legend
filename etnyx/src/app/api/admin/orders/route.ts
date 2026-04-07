@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import { verifyAdmin } from "@/lib/admin-auth";
 import { sanitizeInput, isValidRank } from "@/lib/validation";
-import { sendNewOrderNotifications, sendOrderConfirmedNotifications, sendOrderCompletedNotifications, sendOrderStartedWA } from "@/lib/notifications";
+import { sendNewOrderNotifications, sendOrderConfirmedNotifications, sendOrderCompletedNotifications, sendOrderStartedWA, sendOrderCancelledWA } from "@/lib/notifications";
 import { logAdminAction } from "@/lib/audit-log";
 
 export async function GET(request: Request) {
@@ -218,6 +218,11 @@ export async function PATCH(request: Request) {
       // Status: in_progress -> WA "Sedang Dikerjakan"
       if (updates.status === "in_progress") {
         sendOrderStartedWA(orderData).catch(console.error);
+      }
+
+      // Status: cancelled -> WA "Order Dibatalkan"
+      if (updates.status === "cancelled") {
+        sendOrderCancelledWA(orderData).catch(console.error);
       }
       
       // Status: completed -> notify customer + award reward points

@@ -325,7 +325,7 @@ function buildCategories(): DocCategory[] {
                   ["Lihat Bukti Transfer", "Kuning", "Buka modal bukti transfer (hanya jika transfer manual)", "—"],
                   ["Konfirmasi Bayar", "Hijau", "Status → confirmed, payment → paid", "\"Pembayaran Dikonfirmasi\" + link track"],
                   ["Follow Up Bayar", "Biru", "Kirim WA reminder bayar", "\"Reminder pembayaran\" + rekening + link upload bukti"],
-                  ["Cancel", "Merah", "Status → cancelled", "—"],
+                  ["Cancel", "Merah", "Status → cancelled", "\"Order Dibatalkan\" + info hubungi kami"],
                 ]} />
               </div>
 
@@ -375,6 +375,32 @@ function buildCategories(): DocCategory[] {
               <InfoBox type="warning">
                 <strong>Urutan penting!</strong> Selalu lihat bukti transfer dulu sebelum klik Konfirmasi Bayar. Jangan konfirmasi tanpa verifikasi bukti transfer.
               </InfoBox>
+
+              <div className="bg-background rounded-lg p-4 border border-accent/20 mt-4">
+                <h4 className="text-accent font-semibold text-sm mb-3">Akses Tombol per Role</h4>
+                <p className="text-text-muted text-xs mb-3">Berikut tombol yang bisa diklik oleh masing-masing role. Tombol di luar akses role tidak muncul di dashboard.</p>
+                <Table headers={["Tombol / Aksi", "Admin", "Lead", "Worker"]} rows={[
+                  ["Lihat Bukti Transfer", "Ya", "Ya", "—"],
+                  ["Konfirmasi Bayar", "Ya", "Ya", "—"],
+                  ["Follow Up Bayar", "Ya", "Ya", "—"],
+                  ["Cancel Order", "Ya", "—", "—"],
+                  ["Mulai Kerjakan", "Ya", "Ya", "—"],
+                  ["Credentials (lihat)", "Ya", "Ya", "Ya"],
+                  ["Minta Credentials", "Ya", "Ya", "—"],
+                  ["Selesaikan Order", "Ya", "Ya", "Ya"],
+                  ["Update Progress WA", "Ya", "Ya", "—"],
+                  ["Minta Review", "Ya", "Ya", "—"],
+                  ["Kirim Notif Selesai", "Ya", "Ya", "—"],
+                  ["Reopen Order", "Ya", "—", "—"],
+                  ["Reaktivasi", "Ya", "—", "—"],
+                  ["Assign Worker", "Ya", "Ya", "—"],
+                  ["WA Manual", "Ya", "Ya", "Ya"],
+                  ["Copy Info", "Ya", "Ya", "Ya"],
+                ]} />
+                <InfoBox type="info">
+                  <strong>Worker</strong> hanya bisa mengakses order yang di-assign ke mereka. Tombol utama worker: <strong>Credentials</strong> (lihat akun), <strong>Selesaikan</strong> (mark complete), <strong>WA Manual</strong>, dan <strong>Copy Info</strong>.
+                </InfoBox>
+              </div>
             </div>
           ),
         },
@@ -2030,7 +2056,7 @@ function buildCategories(): DocCategory[] {
               <div className="bg-background rounded-lg p-4 border border-green-500/20">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-[10px] px-2 py-0.5 rounded bg-green-500/10 text-green-400 font-medium">DONE</span>
-                  <h4 className="text-green-400 font-semibold text-sm">Phase 1 &mdash; Core Platform (v1.0 - v2.2)</h4>
+                  <h4 className="text-green-400 font-semibold text-sm">Phase 1 &mdash; Core Platform (v1.0 - v2.3)</h4>
                 </div>
                 <ul className="text-text-muted text-xs space-y-1.5 ml-4">
                   {[
@@ -2135,7 +2161,7 @@ function buildCategories(): DocCategory[] {
 
               <div className="bg-background rounded-lg p-4 border border-yellow-500/20">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-yellow-500/10 text-yellow-400 font-medium">v2.2</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-yellow-500/10 text-yellow-400 font-medium">v2.3</span>
                   <h4 className="text-yellow-400 font-semibold text-sm">7 April 2026 (Update)</h4>
                 </div>
 
@@ -2163,6 +2189,17 @@ function buildCategories(): DocCategory[] {
                       <li>Fix: Admin klik &quot;Konfirmasi Bayar&quot; sekarang kirim WA <strong className="text-text">&quot;Pembayaran Dikonfirmasi&quot;</strong> (sebelumnya salah kirim &quot;Sedang Dikerjakan&quot;)</li>
                       <li>Fix: Status confirmed dan in_progress sekarang kirim WA template yang berbeda</li>
                       <li>Fix: Auto-set <Code>payment_status=paid</Code> + <Code>paid_at</Code> saat admin konfirmasi pembayaran</li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">Fix: Notifikasi Action Buttons</h5>
+                    <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
+                      <li>Fix: Worker klik &quot;Selesai&quot; sekarang kirim WA <strong className="text-text">&quot;Order Selesai&quot;</strong> ke customer + link review (sebelumnya tidak ada WA)</li>
+                      <li>Fix: Worker &quot;Selesai&quot; sekarang auto-generate <strong className="text-text">komisi 60%</strong> (sebelumnya hanya admin yang generate)</li>
+                      <li>Fix: &quot;Mulai Kerjakan&quot; sekarang kirim WA <strong className="text-text">&quot;Sedang Dikerjakan&quot;</strong> ke customer + Telegram ke admin group</li>
+                      <li>Fix: &quot;Cancel&quot; sekarang kirim WA <strong className="text-text">&quot;Order Dibatalkan&quot;</strong> ke customer (sebelumnya silent)</li>
+                      <li>Ditambahkan tabel <strong className="text-text">Akses Tombol per Role</strong> (Admin/Lead/Worker) di docs</li>
                     </ul>
                   </div>
 
@@ -2377,7 +2414,7 @@ export default function DocsPage() {
             <div className="flex items-center gap-2">
               <Book className="w-5 h-5 text-accent" />
               <h1 className="text-text font-bold text-sm">ETNYX DOCS</h1>
-              <span className="text-[9px] px-1.5 py-0.5 rounded bg-accent/10 text-accent font-medium">v2.2</span>
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-accent/10 text-accent font-medium">v2.3</span>
             </div>
             <button onClick={() => setSidebarOpen(false)} className="text-text-muted hover:text-text p-1">
               <ChevronDown className="w-4 h-4 rotate-90" />
@@ -2483,7 +2520,7 @@ export default function DocsPage() {
 
         <footer className="px-6 py-4 border-t border-white/5">
           <p className="text-text-muted/40 text-[10px] text-center">
-            ETNYX Documentation v2.2 &mdash; {allSections.length} sections across {categories.length} categories
+            ETNYX Documentation v2.3 &mdash; {allSections.length} sections across {categories.length} categories
           </p>
         </footer>
       </main>

@@ -464,6 +464,25 @@ _ETNYX - Push Rank, Tanpa Main_
   return sendWhatsAppMessage(order.whatsapp, message);
 }
 
+export async function sendOrderCancelledWA(order: OrderData): Promise<boolean> {
+  if (!order.whatsapp) return false;
+
+  const message = `
+*Order Dibatalkan*
+
+Halo, order kamu telah dibatalkan.
+
+*Order ID:* ${order.order_id}
+*Username:* ${order.username}
+
+Jika kamu merasa ini adalah kesalahan atau ingin order ulang, silakan hubungi kami.
+
+_ETNYX - Push Rank, Tanpa Main_
+`.trim();
+
+  return sendWhatsAppMessage(order.whatsapp, message);
+}
+
 // ============ EMAIL (Resend) ============
 export async function sendEmail(
   to: string,

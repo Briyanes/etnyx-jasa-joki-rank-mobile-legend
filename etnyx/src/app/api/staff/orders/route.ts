@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import { verifyStaff } from "@/lib/staff-auth";
-import { sendTelegramMessage } from "@/lib/notifications";
+import { sendTelegramMessage, sendOrderCompletedWA, sendOrderStartedWA } from "@/lib/notifications";
 
 // Helper to get integration settings
 async function getSettings() {
@@ -303,8 +303,73 @@ export async function PUT(request: NextRequest) {
     created_by: user.name,
   });
 
-  // Notify admin when worker completes
-  if (newStatus === "completed" && user.role === "worker") {
+  // === Notifications on status change ===
+  if (newStatus === "in_progress") {
+    // WA to customer: "Sedang Dikerjakan"
+    try {
+      const { data: order } = await supabase.from("orders")
+        .select("order_id, username, current_rank, target_rank, package, total_price, whatsapp, customer_email, is_express, is_premium, notes")
+        .eq("id", orderId).single();
+      if (order) {
+        sendOrderStartedWA({
+          order_id: order.order_id, username: order.username, current_rank: order.current_rank,
+          target_rank: order.target_rank, package: order.package, price: order.total_price,
+          whatsapp: order.whatsapp, email: order.customer_email, status: "in_progress",
+        }).catch(console.error);
+      }
+    } catch { /* non-blocking */ }
+
+    // Telegram to admin group
+    const settings = await getSettings();
+    if (settings.telegramBotToken && settings.telegramAdminGroupId) {
+      const { data: order } = await supabase.from("orders").select("order_id, username").eq("id", orderId).single();
+      const msg = `📢 <b>ORDER DIKERJAKAN!</b>\n\nOrder: <b>${order?.order_id}</b>\nCustomer: ${order?.username}\nWorker: ${user.name}\n\nSedang dalam pengerjaan.`;
+      await sendTelegramMessage(settings.telegramAdminGroupId, msg, settings.telegramBotToken);
+    }
+  }
+
+  if (newStatus === "completed") {
+    // WA to customer: "Order Selesai" + link review
+    try {
+      const { data: order } = await supabase.from("orders")
+        .select("order_id, username, current_rank, target_rank, package, total_price, whatsapp, customer_email, assigned_worker_id, is_express, is_premium, notes")
+        .eq("id", orderId).single();
+      if (order) {
+        sendOrderCompletedWA({
+          order_id: order.order_id, username: order.username, current_rank: order.current_rank,
+          target_rank: order.target_rank, package: order.package, price: order.total_price,
+          whatsapp: order.whatsapp, email: order.customer_email, status: "completed",
+        }).catch(console.error);
+
+        // Auto-generate commission for assigned worker
+        if (order.assigned_worker_id) {
+          try {
+            const { data: payrollSettings } = await supabase
+              .from("payroll_settings").select("value").eq("key", "commission").single();
+            const commissionRate = payrollSettings?.value?.worker_rate ?? 0.60;
+            const commissionAmount = Math.round(order.total_price * commissionRate);
+            const day = new Date().getDate();
+            const now = new Date();
+            const periodStart = day <= 15
+              ? new Date(now.getFullYear(), now.getMonth(), 1)
+              : new Date(now.getFullYear(), now.getMonth(), 16);
+            const periodEnd = day <= 15
+              ? new Date(now.getFullYear(), now.getMonth(), 15)
+              : new Date(now.getFullYear(), now.getMonth() + 1, 0);
+            await supabase.from("commissions").upsert({
+              order_id: orderId, order_code: order.order_id,
+              worker_id: order.assigned_worker_id, order_total: order.total_price,
+              commission_rate: commissionRate, commission_amount: commissionAmount,
+              bonus_amount: 0, total_amount: commissionAmount, status: "pending",
+              period_start: periodStart.toISOString().split("T")[0],
+              period_end: periodEnd.toISOString().split("T")[0],
+            }, { onConflict: "order_id,worker_id" });
+          } catch { /* non-blocking */ }
+        }
+      }
+    } catch { /* non-blocking */ }
+
+    // Telegram to admin group
     const settings = await getSettings();
     if (settings.telegramBotToken && settings.telegramAdminGroupId) {
       const { data: order } = await supabase.from("orders").select("order_id, username").eq("id", orderId).single();
