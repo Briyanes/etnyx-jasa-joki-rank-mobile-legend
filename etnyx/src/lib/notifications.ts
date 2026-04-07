@@ -578,7 +578,7 @@ export async function sendNewOrderNotifications(order: OrderData): Promise<void>
 export async function sendOrderConfirmedNotifications(order: OrderData): Promise<void> {
   await Promise.allSettled([
     notifyWorkerConfirmedOrder(order),
-    sendOrderStartedWA(order),
+    sendPaymentConfirmedWA(order),
   ]);
 }
 

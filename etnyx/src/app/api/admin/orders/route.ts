@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import { verifyAdmin } from "@/lib/admin-auth";
 import { sanitizeInput, isValidRank } from "@/lib/validation";
-import { sendNewOrderNotifications, sendOrderConfirmedNotifications, sendOrderCompletedNotifications } from "@/lib/notifications";
+import { sendNewOrderNotifications, sendOrderConfirmedNotifications, sendOrderCompletedNotifications, sendOrderStartedWA } from "@/lib/notifications";
 import { logAdminAction } from "@/lib/audit-log";
 
 export async function GET(request: Request) {
@@ -165,6 +165,8 @@ export async function PATCH(request: Request) {
     // Auto-set timestamps on status transitions
     if (updates.status === "confirmed" && previousStatus !== "confirmed") {
       updates.confirmed_at = new Date().toISOString();
+      updates.payment_status = "paid";
+      if (!updates.paid_at) updates.paid_at = new Date().toISOString();
     }
     if (updates.status === "completed" && previousStatus !== "completed") {
       updates.completed_at = new Date().toISOString();
@@ -208,9 +210,14 @@ export async function PATCH(request: Request) {
         db_id: data.id,
       };
 
-      // Status: confirmed/in_progress -> notify worker + customer
-      if (updates.status === "confirmed" || updates.status === "in_progress") {
+      // Status: confirmed -> WA "Pembayaran Dikonfirmasi" + Telegram worker
+      if (updates.status === "confirmed") {
         sendOrderConfirmedNotifications(orderData).catch(console.error);
+      }
+
+      // Status: in_progress -> WA "Sedang Dikerjakan"
+      if (updates.status === "in_progress") {
+        sendOrderStartedWA(orderData).catch(console.error);
       }
       
       // Status: completed -> notify customer + award reward points
