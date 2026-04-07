@@ -11,6 +11,7 @@ import {
   ShoppingCart, DollarSign, Clock, Activity, Loader2, AlertTriangle,
   Plus, Pencil, Trash2, Save, Search, Filter, RefreshCw, LogOut,
   MessageCircle, Send, BookOpen, Copy, Gift, Wallet, CalendarDays,
+  Flame, Target, Lightbulb, Ban, HelpCircle,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import SettingsTab from "./SettingsTab";
@@ -1379,7 +1380,7 @@ export default function AdminDashboard() {
                         <div key={phase.id} className={`rounded-xl border p-4 space-y-3 ${phase.id === "early" ? "border-red-500/30 bg-red-500/5" : phase.id === "mid" ? "border-blue-500/30 bg-blue-500/5" : "border-green-500/30 bg-green-500/5"}`}>
                           <div className="flex items-center justify-between">
                             <span className={`text-xs font-bold ${phase.id === "early" ? "text-red-400" : phase.id === "mid" ? "text-blue-400" : "text-green-400"}`}>
-                              {phase.id === "early" ? "🔥" : phase.id === "mid" ? "⚡" : "🎯"} {phase.label}
+                              {phase.id === "early" ? <Flame className="w-3.5 h-3.5 inline" /> : phase.id === "mid" ? <Zap className="w-3.5 h-3.5 inline" /> : <Target className="w-3.5 h-3.5 inline" />}{" "}{phase.label}
                             </span>
                             <span className={`text-[10px] font-mono font-bold ${phase.multiplier > 1 ? "text-red-400" : phase.multiplier < 1 ? "text-green-400" : "text-blue-400"}`}>
                               ×{phase.multiplier}
@@ -1419,7 +1420,7 @@ export default function AdminDashboard() {
                       ))}
                     </div>
                     <div className="bg-background/50 rounded-lg p-3 mb-2">
-                      <p className="text-[10px] text-text-muted font-semibold mb-1">💡 Rekomendasi pembagian season ML (~90 hari):</p>
+                      <p className="text-[10px] text-text-muted font-semibold mb-1"><Lightbulb className="w-3 h-3 inline mr-1" />Rekomendasi pembagian season ML (~90 hari):</p>
                       <div className="flex flex-wrap gap-3 text-[10px] text-text-muted">
                         <span><strong className="text-red-400">Early:</strong> Hari 1–21 (~3 minggu) — demand tinggi, harga naik</span>
                         <span><strong className="text-blue-400">Mid:</strong> Hari 22–60 (~5-6 minggu) — stabil, harga normal</span>
@@ -2591,7 +2592,7 @@ export default function AdminDashboard() {
                         proof.status === "rejected" ? "bg-red-500/10 text-red-400 border-red-500/20" :
                         "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
                       }`}>
-                        {proof.status === "approved" ? "✅ Approved" : proof.status === "rejected" ? "❌ Rejected" : "⏳ Pending"}
+                        {proof.status === "approved" ? <><CheckCircle className="w-3.5 h-3.5 inline mr-1" />Approved</> : proof.status === "rejected" ? <><XCircle className="w-3.5 h-3.5 inline mr-1" />Rejected</> : <><Clock className="w-3.5 h-3.5 inline mr-1" />Pending</>}
                       </span>
 
                       {/* Actions */}

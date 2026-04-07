@@ -8,6 +8,7 @@ import {
   ChevronDown, ChevronUp, UserPlus, Clock, CheckCircle, XCircle,
   AlertCircle, Loader2, Package, TrendingUp, Eye, MessageSquare,
   Send, RotateCcw, CheckSquare, Square, Star, Trophy, Swords, Target, Timer, Camera,
+  Gamepad2, Flame, Zap,
 } from "lucide-react";
 
 interface Order {
@@ -743,13 +744,13 @@ export default function LeadDashboard() {
                                       <span className="text-text-muted">{new Date(sub.submitted_at).toLocaleDateString("id-ID", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
                                     </div>
                                     <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-text-muted">
-                                      <span>⭐ {sub.stars_gained} bintang</span>
-                                      <span>🎮 {sub.matches_played} match</span>
-                                      <span>✅ {sub.win_count} win</span>
-                                      <span>⏱ {sub.duration_minutes} menit</span>
-                                      {sub.mvp_count > 0 && <span>🏅 {sub.mvp_count} MVP</span>}
-                                      {sub.savage_count > 0 && <span>🔥 {sub.savage_count} Savage</span>}
-                                      {sub.maniac_count > 0 && <span>💥 {sub.maniac_count} Maniac</span>}
+                                      <span><Star className="w-3 h-3 inline mr-0.5" />{sub.stars_gained} bintang</span>
+                                      <span><Gamepad2 className="w-3 h-3 inline mr-0.5" />{sub.matches_played} match</span>
+                                      <span><CheckCircle className="w-3 h-3 inline mr-0.5" />{sub.win_count} win</span>
+                                      <span><Timer className="w-3 h-3 inline mr-0.5" />{sub.duration_minutes} menit</span>
+                                      {sub.mvp_count > 0 && <span><Trophy className="w-3 h-3 inline mr-0.5" />{sub.mvp_count} MVP</span>}
+                                      {sub.savage_count > 0 && <span><Flame className="w-3 h-3 inline mr-0.5" />{sub.savage_count} Savage</span>}
+                                      {sub.maniac_count > 0 && <span><Zap className="w-3 h-3 inline mr-0.5" />{sub.maniac_count} Maniac</span>}
                                     </div>
                                     {sub.screenshots && sub.screenshots.length > 0 && (
                                       <div className="flex gap-1 mt-1.5 overflow-x-auto">

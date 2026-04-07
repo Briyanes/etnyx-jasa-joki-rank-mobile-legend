@@ -32,6 +32,7 @@ import {
   Users,
   ArrowRight,
   Search,
+  Sparkles,
 } from "lucide-react";
 import { FaFacebook, FaGoogle, FaTiktok, FaVk, FaApple, FaGamepad } from "react-icons/fa";
 import type { IconType } from "react-icons";
@@ -1060,7 +1061,7 @@ function OrderPageContent() {
             <Check className="w-10 h-10 text-success" />
           </div>
           <h1 className="text-2xl font-bold text-text mb-2">
-            {t.orderSuccess} 🎉
+            {t.orderSuccess} <Sparkles className="w-6 h-6 inline text-yellow-400" />
           </h1>
           <p className="text-text-muted mb-6">
             {t.saveOrderId}

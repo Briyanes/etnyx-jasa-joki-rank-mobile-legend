@@ -3,7 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Suspense, useEffect, useRef } from "react";
-import { Check, Loader2, Package, ArrowRight, XCircle, Clock } from "lucide-react";
+import { Check, Loader2, Package, ArrowRight, XCircle, Clock, Sparkles } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { trackPurchase } from "@/lib/tracking";
 
@@ -37,7 +37,7 @@ function PaymentSuccessContent() {
     backHome: "Kembali ke Home",
     titleFailed: "Pembayaran Gagal",
     titlePending: "Menunggu Pembayaran",
-    titleSuccess: "Pembayaran Berhasil! 🎉",
+    titleSuccess: "Pembayaran Berhasil!",
     descFailed: "Pembayaran tidak berhasil diproses. Silakan coba lagi atau hubungi kami via WhatsApp.",
     descPending: "Selesaikan pembayaran sesuai instruksi yang diberikan. Status akan terupdate otomatis.",
     descSuccess: "Terima kasih! Pembayaran kamu sudah diterima. Tim kami akan segera memproses order.",
@@ -55,7 +55,7 @@ function PaymentSuccessContent() {
     backHome: "Back to Home",
     titleFailed: "Payment Failed",
     titlePending: "Awaiting Payment",
-    titleSuccess: "Payment Successful! 🎉",
+    titleSuccess: "Payment Successful!",
     descFailed: "Payment could not be processed. Please try again or contact us via WhatsApp.",
     descPending: "Complete the payment as instructed. Status will update automatically.",
     descSuccess: "Thank you! Your payment has been received. Our team will process your order shortly.",
@@ -101,7 +101,7 @@ function PaymentSuccessContent() {
 
         {/* Title */}
         <h1 className="text-2xl font-bold text-text mb-2">
-          {isFailed ? t.titleFailed : isPending ? t.titlePending : t.titleSuccess}
+          {isFailed ? t.titleFailed : isPending ? t.titlePending : <>{t.titleSuccess} <Sparkles className="w-6 h-6 inline text-yellow-400" /></>}
         </h1>
 
         {/* Description */}

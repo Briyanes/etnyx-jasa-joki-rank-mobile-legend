@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import {
   TrendingUp, TrendingDown, DollarSign, ShoppingCart,
   Target, Plus, Trash2, BarChart3, Loader2,
-  Calendar, ChevronDown,
+  Calendar, ChevronDown, Lightbulb,
 } from "lucide-react";
 import { formatRupiah } from "@/utils/helpers";
 import { FaFacebook, FaGoogle, FaTiktok } from "react-icons/fa";
@@ -377,7 +377,7 @@ export default function AdsTab() {
 
       {/* Tips */}
       <div className="bg-blue-500/5 border border-blue-500/10 rounded-xl p-4">
-        <h4 className="text-blue-400 font-medium text-xs mb-2">💡 Tips Attribution</h4>
+        <h4 className="text-blue-400 font-medium text-xs mb-2"><Lightbulb className="w-3.5 h-3.5 inline mr-1" />Tips Attribution</h4>
         <ul className="text-text-muted text-[11px] space-y-1">
           <li>• Gunakan UTM parameters di semua link iklan: <code className="text-accent">?utm_source=meta&utm_medium=cpc&utm_campaign=nama_campaign</code></li>
           <li>• ROAS &gt; 2x = profitable, 1-2x = break-even, &lt;1x = rugi</li>

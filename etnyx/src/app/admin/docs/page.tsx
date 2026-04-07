@@ -12,6 +12,8 @@ import {
   ClipboardList, Gamepad2, Monitor,
   Megaphone, Target, MousePointerClick, MessageCircle,
   Clock, FileText, AlertTriangle, HelpCircle, Rocket,
+  Flame, CheckSquare2, Ban, CalendarDays, ShieldCheck,
+  Lightbulb,
 } from "lucide-react";
 
 // --- Reusable Components ---
@@ -806,7 +808,7 @@ function buildCategories(): DocCategory[] {
                     "Jika ragu — tanya customer untuk konfirmasi via WA manual sebelum approve",
                   ].map((item, i) => (
                     <li key={i} className="flex items-start gap-2">
-                      <span className="text-yellow-400 shrink-0">{"☑"}</span> {item}
+                      <span className="text-yellow-400 shrink-0"><CheckSquare2 className="w-4 h-4" /></span> {item}
                     </li>
                   ))}
                 </ul>
@@ -1082,12 +1084,12 @@ function buildCategories(): DocCategory[] {
               </div>
               <div className="bg-background rounded-lg p-3 border border-white/5">
                 <h4 className="text-text font-medium text-sm mb-2">Report Types</h4>
-                <Table headers={["Type", "Label", "Emoji"]} rows={[
-                  ["cheating", "Bermain curang / cheat", "🎮"],
-                  ["offering_services", "Menawarkan jasa di luar ETNYX", "🚫"],
-                  ["rude", "Kasar / tidak sopan", "😤"],
-                  ["account_issue", "Masalah akun (diamankan, dll)", "🔐"],
-                  ["other", "Lainnya", "❓"],
+                <Table headers={["Type", "Label", "Icon"]} rows={[
+                  ["cheating", "Bermain curang / cheat", "Gamepad2"],
+                  ["offering_services", "Menawarkan jasa di luar ETNYX", "Ban"],
+                  ["rude", "Kasar / tidak sopan", "AlertTriangle"],
+                  ["account_issue", "Masalah akun (diamankan, dll)", "Lock"],
+                  ["other", "Lainnya", "HelpCircle"],
                 ]} />
               </div>
               <div className="bg-background rounded-lg p-3 border border-white/5">
@@ -2287,12 +2289,12 @@ function buildCategories(): DocCategory[] {
                 ["Premium", "1.3x", "High WR booster + hero request"],
               ]} />
               <div className="bg-background rounded-lg p-4 border border-white/5">
-                <h4 className="text-text font-medium text-sm mb-3">📅 Season Pricing (Auto-Scheduler)</h4>
+                <h4 className="text-text font-medium text-sm mb-3"><CalendarDays className="w-4 h-4 inline mr-1.5" />Season Pricing (Auto-Scheduler)</h4>
                 <p className="text-text-muted text-xs mb-3">Harga otomatis berubah sesuai fase season ML. Dikelola di Pricing tab → Season Pricing card.</p>
                 <Table headers={["Fase", "Durasi", "Multiplier", "Keterangan"]} rows={[
-                  ["🔥 Early Season", "Hari 1–21 (~3 minggu)", "×1.25 (+25%)", "Demand tinggi, banyak yg push rank di awal season"],
-                  ["⚡ Mid Season", "Hari 22–60 (~5-6 minggu)", "×1.00 (normal)", "Season stabil, harga normal"],
-                  ["🎯 End Season", "Hari 61–90 (~4 minggu)", "×0.85 (-15%)", "Push rank akhir, diskon menarik customer"],
+                  ["Early Season", "Hari 1–21 (~3 minggu)", "×1.25 (+25%)", "Demand tinggi, banyak yg push rank di awal season"],
+                  ["Mid Season", "Hari 22–60 (~5-6 minggu)", "×1.00 (normal)", "Season stabil, harga normal"],
+                  ["End Season", "Hari 61–90 (~4 minggu)", "×0.85 (-15%)", "Push rank akhir, diskon menarik customer"],
                 ]} />
                 <InfoBox type="info">
                   <strong>Cara setup:</strong> Dashboard → Pricing → aktifkan toggle Season Pricing → isi nama season (cth: &quot;Season 35&quot;) → set tanggal mulai tiap fase → Simpan. Multiplier bisa disesuaikan (0.5x–2.0x). Harga di homepage &amp; order page otomatis berubah.
@@ -2337,7 +2339,7 @@ function buildCategories(): DocCategory[] {
                 </InfoBox>
               </div>
               <div className="bg-background rounded-lg p-4 border border-white/5">
-                <h4 className="text-text font-medium text-sm mb-3">🛡️ Middleware Security Details</h4>
+                <h4 className="text-text font-medium text-sm mb-3"><ShieldCheck className="w-4 h-4 inline mr-1.5" />Middleware Security Details</h4>
                 <div className="space-y-3">
                   <div>
                     <h5 className="text-text text-xs font-medium mb-1">Rate Limiting</h5>
