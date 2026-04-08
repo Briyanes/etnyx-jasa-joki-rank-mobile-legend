@@ -2484,6 +2484,235 @@ function buildCategories(): DocCategory[] {
       ],
     },
 
+    // ===================== SOP OPERASIONAL =====================
+    {
+      id: "sop",
+      label: "SOP Operasional",
+      catIcon: ClipboardList,
+      color: "text-teal-400",
+      sections: [
+        {
+          id: "sop-customer",
+          icon: Users,
+          title: "Alur Customer (Order → Selesai)",
+          content: (
+            <div className="space-y-4">
+              <p className="text-text-muted text-sm">Perjalanan customer dari awal order sampai selesai dan review.</p>
+              <StepFlow steps={[
+                { title: "Buka Website & Pilih Layanan", desc: "Customer buka etnyx.com → scroll ke section layanan atau langsung klik 'Order Sekarang'. Pilih mode: Paket, Per-Star, atau Gendong.", badge: "customer", page: "/" },
+                { title: "Isi Form Order", desc: "Pilih rank awal → rank tujuan. Isi credentials akun ML (User ID, Server ID, Password). Cek akun via 'Cek Akun'. Apply promo/referral code.", badge: "customer", page: "/order" },
+                { title: "Pilih & Bayar", desc: "Transfer Manual (11 rekening) atau Midtrans Auto. Manual → upload bukti. Midtrans → popup otomatis.", badge: "customer", page: "/payment/manual" },
+                { title: "Upload Bukti (Manual)", desc: "Upload foto bukti transfer + nama pengirim. Tunggu admin approve.", badge: "customer" },
+                { title: "Pembayaran Dikonfirmasi", desc: "Notif WA 'Pembayaran Dikonfirmasi ✅'. Order masuk antrian. Bisa track di /track.", badge: "auto" },
+                { title: "Order Dikerjakan", desc: "Notif WA 'Sedang Dikerjakan 🎮'. Worker push rank. Pantau progress real-time di tracking.", badge: "auto", page: "/track?id=xxx" },
+                { title: "Lihat Progress", desc: "Dashboard → detail order: progress %, rank, submission worker (MVP, Savage, screenshot), timeline.", badge: "customer", page: "/dashboard/order?id=xxx" },
+                { title: "Order Selesai", desc: "Notif WA 'Order Selesai 🏆' + link review. Points reward otomatis ditambahkan.", badge: "auto" },
+                { title: "Review & Reward", desc: "Submit review (rating 1-5). Cek points → redeem reward. Share referral code ke teman.", badge: "customer", page: "/review?id=xxx" },
+              ]} />
+              <InfoBox type="info">Customer bisa download invoice PDF dan atur preferensi notifikasi dari dashboard.</InfoBox>
+            </div>
+          ),
+        },
+        {
+          id: "sop-admin",
+          icon: Crown,
+          title: "Tugas Admin (Harian & Bulanan)",
+          content: (
+            <div className="space-y-4">
+              <p className="text-text-muted text-sm">Checklist dan tanggung jawab Admin.</p>
+              <div className="bg-background rounded-lg p-4 border border-red-500/20">
+                <h4 className="text-red-400 font-semibold text-sm mb-3 flex items-center gap-2"><Flame className="w-4 h-4" /> Rutin Harian</h4>
+                <div className="space-y-2">
+                  {[
+                    { task: "Cek order baru", desc: "Tab Orders → filter Pending. Approve/reject bukti transfer.", time: "Setiap notif Telegram" },
+                    { task: "Assign order", desc: "Order confirmed → assign ke Lead/Worker available.", time: "Setelah payment" },
+                    { task: "Monitor progress", desc: "Tab Overview → active orders, pending, revenue.", time: "2-3x sehari" },
+                    { task: "Handle chat", desc: "Tab Orders → chat icon. Balas customer.", time: "Saat ada notif" },
+                    { task: "Respond Telegram", desc: "Konfirmasi/Tolak via inline keyboard bot.", time: "Real-time" },
+                    { task: "Cek SLA", desc: "Cron harian auto-check. Follow up order overdue.", time: "Auto + manual" },
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-start gap-3 text-xs">
+                      <CheckSquare2 className="w-3.5 h-3.5 text-red-400 shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <span className="text-text font-medium">{item.task}</span>
+                        <span className="text-text-muted"> — {item.desc}</span>
+                        <span className="text-accent/50 ml-1">({item.time})</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="bg-background rounded-lg p-4 border border-red-500/10">
+                <h4 className="text-red-300 font-semibold text-sm mb-3 flex items-center gap-2"><CalendarDays className="w-4 h-4" /> Mingguan / Bulanan</h4>
+                <div className="space-y-2">
+                  {[
+                    { task: "Analytics", desc: "Revenue trend, top packages, customer growth.", freq: "Mingguan" },
+                    { task: "Export CSV", desc: "Export orders dengan filter status/tanggal.", freq: "Mingguan" },
+                    { task: "Payroll", desc: "Generate komisi, review gaji, batch payout.", freq: "Bulanan" },
+                    { task: "Pricing", desc: "Review harga. Aktifkan Season Pricing.", freq: "Per season ML" },
+                    { task: "Promo", desc: "Buat/edit promo code, set discount, expiry.", freq: "Per campaign" },
+                    { task: "Reviews", desc: "Approve/reject testimonials. Cek worker reports.", freq: "Mingguan" },
+                    { task: "Staff", desc: "Tambah/hapus worker. Reset password. Set hierarchy.", freq: "Bulanan" },
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-start gap-3 text-xs">
+                      <CalendarDays className="w-3.5 h-3.5 text-red-300 shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <span className="text-text font-medium">{item.task}</span>
+                        <span className="text-text-muted"> — {item.desc}</span>
+                        <span className="text-accent/50 ml-1">[{item.freq}]</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ),
+        },
+        {
+          id: "sop-lead",
+          icon: UserCheck,
+          title: "Tugas Lead (Koordinator Tim)",
+          content: (
+            <div className="space-y-4">
+              <p className="text-text-muted text-sm">Lead mengelola worker dalam tim dan memastikan order selesai tepat waktu.</p>
+              <StepFlow steps={[
+                { title: "Cek Order Confirmed", desc: "Lead Dashboard → order status 'confirmed' (sudah bayar). Perhatikan rank dan package.", badge: "lead", page: "/admin/lead" },
+                { title: "Pilih Worker", desc: "Worker list (slider) → cek workload tiap worker. Pilih yang load rendah.", badge: "lead" },
+                { title: "Assign Order", desc: "Klik order → pilih worker → Assign. Worker dapat notif Telegram. Bisa Bulk Assign.", badge: "lead" },
+                { title: "Monitor Progress", desc: "Pantau status order per worker. Follow up yang lambat via Telegram/WA.", badge: "lead" },
+                { title: "Review Submissions", desc: "Cek screenshot, MVP, stats worker. Pastikan kualitas kerja.", badge: "lead" },
+                { title: "Handle Reassignment", desc: "Worker berhalangan → reassign ke worker lain dalam tim.", badge: "lead" },
+                { title: "Eskalasi", desc: "Masalah besar → lapor Admin (complain, worker non-responsif, overdue).", badge: "lead" },
+              ]} />
+              <div className="bg-background rounded-lg p-4 border border-blue-500/20">
+                <h4 className="text-blue-400 font-semibold text-sm mb-2">Tidak Bisa Dilakukan Lead:</h4>
+                <ul className="text-text-muted text-xs space-y-1 ml-4">
+                  {["Lihat worker tim lain", "Edit pricing", "Akses settings", "Proses payroll", "Export semua data", "Kelola staff"].map((item, i) => (
+                    <li key={i} className="flex items-center gap-2"><Ban className="w-3 h-3 text-red-400 shrink-0" /> {item}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          ),
+        },
+        {
+          id: "sop-worker",
+          icon: Wrench,
+          title: "Tugas Worker (Booster)",
+          content: (
+            <div className="space-y-4">
+              <p className="text-text-muted text-sm">Alur kerja worker dari dapat order sampai selesai.</p>
+              <StepFlow steps={[
+                { title: "Dapat Notif Order", desc: "Telegram 'Order baru di-assign'. Buka Worker Dashboard.", badge: "worker", page: "/admin/worker" },
+                { title: "Lihat Detail", desc: "Klik order → rank, package, credentials ML (decrypt). Catat data.", badge: "worker" },
+                { title: "Mulai Kerja", desc: "Klik Mulai → in_progress. Customer dapat WA 'Sedang dikerjakan'. SLA mulai.", badge: "worker" },
+                { title: "Push Rank", desc: "Login akun ML, push rank. JANGAN share credentials.", badge: "worker" },
+                { title: "Update Progress", desc: "Update % dan current rank. Customer lihat real-time di tracking.", badge: "worker" },
+                { title: "Submit Stats", desc: "Submit: stars, wins, MVP, Savage, Maniac, durasi. Upload screenshot.", badge: "worker" },
+                { title: "Selesaikan", desc: "Target tercapai → Selesaikan. Auto 100%. Customer notif 'Order Selesai 🏆'.", badge: "worker" },
+                { title: "Komisi", desc: "60% otomatis dicatat. Payout via Admin setiap bulan.", badge: "auto" },
+              ]} />
+              <div className="bg-background rounded-lg p-4 border border-yellow-500/20">
+                <h4 className="text-yellow-400 font-semibold text-sm mb-2 flex items-center gap-2"><AlertTriangle className="w-4 h-4" /> Aturan Worker</h4>
+                <ul className="text-text-muted text-xs space-y-1.5 ml-4">
+                  {[
+                    "Update progress minimal 2x sehari saat order aktif",
+                    "Screenshot WAJIB upload setiap 5-10 match",
+                    "Submission bisa edit/delete dalam 30 menit",
+                    "DILARANG share credentials customer",
+                    "Berhalangan → segera lapor Lead",
+                    "SLA: Express 24jam, Premium 48jam, Standard 72jam",
+                    "Rating rendah = turun di leaderboard",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span className="text-yellow-400 shrink-0">{"•"}</span> {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          ),
+        },
+        {
+          id: "sop-status-flow",
+          icon: Layers,
+          title: "Status Flow & Eskalasi",
+          content: (
+            <div className="space-y-4">
+              <p className="text-text-muted text-sm">Status order dan penanggung jawab tiap tahap.</p>
+              <div className="bg-background rounded-lg p-4 border border-white/10">
+                <h4 className="text-text font-semibold text-sm mb-3">Status Order Flow</h4>
+                <div className="space-y-0">
+                  {[
+                    { label: "Pending", color: "text-gray-400", border: "border-gray-500/20", who: "customer", action: "Menunggu pembayaran", next: "confirmed / cancelled" },
+                    { label: "Confirmed", color: "text-blue-400", border: "border-blue-500/20", who: "admin", action: "Payment verified → assign ke worker", next: "in_progress" },
+                    { label: "In Progress", color: "text-yellow-400", border: "border-yellow-500/20", who: "worker", action: "Dikerjakan, update progress", next: "completed" },
+                    { label: "Completed", color: "text-green-400", border: "border-green-500/20", who: "worker", action: "Target tercapai, komisi dicatat", next: "— (final)" },
+                    { label: "Cancelled", color: "text-red-400", border: "border-red-500/20", who: "admin", action: "Dibatalkan (refund jika perlu)", next: "— (final)" },
+                  ].map((item, i, arr) => (
+                    <div key={i}>
+                      <div className={`rounded-lg p-3 border ${item.border} bg-background`}>
+                        <div className="flex items-center justify-between flex-wrap gap-2">
+                          <div className="flex items-center gap-2">
+                            <span className={`font-bold text-sm ${item.color}`}>{item.label}</span>
+                            <RoleBadge role={item.who} />
+                          </div>
+                          <span className="text-text-muted text-[10px]">{"\u2192"} {item.next}</span>
+                        </div>
+                        <p className="text-text-muted text-xs mt-1">{item.action}</p>
+                      </div>
+                      {i < arr.length - 1 && <div className="flex justify-center py-1"><ChevronDown className="w-4 h-4 text-white/20" /></div>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="bg-background rounded-lg p-4 border border-red-500/10">
+                <h4 className="text-red-300 font-semibold text-sm mb-2 flex items-center gap-2"><AlertTriangle className="w-4 h-4" /> Eskalasi</h4>
+                <Table headers={["Situasi", "Dari", "Ke", "Aksi"]} rows={[
+                  ["Belum bayar > 24 jam", <RoleBadge key="a1" role="auto" />, <RoleBadge key="a2" role="admin" />, "WA follow-up payment"],
+                  ["Worker belum mulai > 6 jam", <RoleBadge key="b1" role="lead" />, <RoleBadge key="b2" role="worker" />, "Hubungi, reassign jika perlu"],
+                  ["Order overdue SLA", <RoleBadge key="c1" role="auto" />, <RoleBadge key="c2" role="admin" />, "Telegram alert + follow up"],
+                  ["Customer complain", <RoleBadge key="d1" role="customer" />, <RoleBadge key="d2" role="admin" />, "Cek chat, hub worker"],
+                  ["Worker non-responsif", <RoleBadge key="e1" role="lead" />, <RoleBadge key="e2" role="admin" />, "Reassign + warning"],
+                  ["Akun bermasalah", <RoleBadge key="f1" role="worker" />, <RoleBadge key="f2" role="lead" />, "Stop, lapor, tunggu instruksi"],
+                ]} />
+              </div>
+            </div>
+          ),
+        },
+        {
+          id: "sop-onboarding",
+          icon: Lightbulb,
+          title: "Onboarding Tim Baru",
+          content: (
+            <div className="space-y-4">
+              <p className="text-text-muted text-sm">Panduan staff baru bergabung ke tim ETNYX.</p>
+              <div className="bg-background rounded-lg p-4 border border-green-500/20">
+                <h4 className="text-green-400 font-semibold text-sm mb-3">Worker Baru</h4>
+                <StepFlow steps={[
+                  { title: "Admin buat akun", desc: "Tab Staff → tambah worker. Set nama, email, password, role, lead_id.", badge: "admin" },
+                  { title: "Login", desc: "/admin → email + password. Auto ke Worker Dashboard.", badge: "worker" },
+                  { title: "Baca SOP", desc: "/admin/docs → 'Tugas Worker' + 'Aturan Worker'.", badge: "worker" },
+                  { title: "Join Telegram", desc: "Minta link grup Worker dari Lead.", badge: "worker" },
+                  { title: "Test order", desc: "Lead assign test order. Coba full flow.", badge: "worker" },
+                ]} />
+              </div>
+              <div className="bg-background rounded-lg p-4 border border-blue-500/20">
+                <h4 className="text-blue-400 font-semibold text-sm mb-3">Lead Baru</h4>
+                <StepFlow steps={[
+                  { title: "Admin buat akun Lead", desc: "Tab Staff → role: lead. Worker di-set lead_id = ID lead.", badge: "admin" },
+                  { title: "Login", desc: "/admin → auto ke Lead Dashboard.", badge: "lead" },
+                  { title: "Baca SOP + Join Telegram", desc: "Docs → 'Tugas Lead'. Join grup Admin + Workers.", badge: "lead" },
+                  { title: "Latihan", desc: "Assign order, monitor, lihat submissions.", badge: "lead" },
+                ]} />
+              </div>
+              <InfoBox type="info">Semua staff bisa akses <Code>/admin/docs</Code>. Share link ini ke tim baru: <Code>etnyx.com/admin/docs</Code></InfoBox>
+            </div>
+          ),
+        },
+      ],
+    },
+
     // ===================== ROADMAP =====================
     {
       id: "roadmap",
@@ -2529,6 +2758,19 @@ function buildCategories(): DocCategory[] {
                     "Lead submissions view + worker showAllCompleted + admin assign order_logs",
                     "Season Pricing auto-scheduler: 3 fase (Early/Mid/End) dengan multiplier otomatis",
                     "Customer password reset via email token (tabel password_resets, migration v19)",
+                    "Analytics dashboard (revenue, packages, customers, ranks) + Leaderboard",
+                    "Invoice PDF + customer download dari dashboard",
+                    "Bulk order export CSV (filter status/tanggal)",
+                    "SLA tracking + auto-reminder cron harian + Telegram alert",
+                    "SEO JSON-LD structured data (LocalBusiness + AggregateRating)",
+                    "Customer order detail page + timeline + screenshot gallery",
+                    "Notification preferences (email/WA/push toggle per customer)",
+                    "Customer activity log (login, orders, profile changes)",
+                    "Enhanced health check endpoint (Supabase, Midtrans, Telegram, Email)",
+                    "Worker slider horizontal di Lead dashboard",
+                    "Automated testing: 38 unit tests (Vitest) + Playwright E2E setup",
+                    "404 custom pages, skeleton loading, theme consistency",
+                    "Comprehensive security audit + fixes (ads auth, stats query, URL bug)",
                   ].map((item, i) => (
                     <li key={i} className="flex items-start gap-2">
                       <span className="text-green-400 shrink-0">{"✓"}</span> {item}
@@ -2554,7 +2796,6 @@ function buildCategories(): DocCategory[] {
                     "WhatsApp Business API integration (upgrade dari Fonnte)",
                     "Bulk order import via CSV untuk admin",
                     "Order priority queue: express order otomatis muncul di atas daftar",
-                    "Notification preferences: customer bisa pilih channel (WA/email/push)",
                   ].map((item, i) => (
                     <li key={i} className="flex items-start gap-2">
                       <span className="text-yellow-400 shrink-0">{"○"}</span> {item}
