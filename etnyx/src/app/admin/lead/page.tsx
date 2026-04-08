@@ -480,10 +480,10 @@ export default function LeadDashboard() {
               return (
                 <div key={order.id} className="p-4 hover:bg-white/[0.02] transition-colors">
                   {/* Order Row */}
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-start sm:items-center gap-3">
                     {/* Checkbox for bulk select */}
                     {canSelect && (
-                      <button onClick={(e) => { e.stopPropagation(); toggleSelectOrder(order.id); }} className="shrink-0">
+                      <button onClick={(e) => { e.stopPropagation(); toggleSelectOrder(order.id); }} className="shrink-0 mt-1 sm:mt-0">
                         {selectedOrders.has(order.id)
                           ? <CheckSquare className="w-5 h-5 text-accent" />
                           : <Square className="w-5 h-5 text-text-muted hover:text-text" />}
@@ -500,13 +500,18 @@ export default function LeadDashboard() {
                         {order.is_express && <span className="px-1.5 py-0.5 rounded text-xs bg-orange-500/10 text-orange-400">Express</span>}
                         {order.is_premium && <span className="px-1.5 py-0.5 rounded text-xs bg-purple-500/10 text-purple-400">Premium</span>}
                       </div>
-                      <div className="flex items-center gap-2 mt-1 text-text-muted text-xs">
+                      <div className="flex items-center gap-2 mt-1 text-text-muted text-xs flex-wrap">
                         <span>{order.username}</span>
                         <span>•</span>
-                        <span>{order.current_rank === order.target_rank && order.package_title ? order.package_title : `${rankWithStar(order.current_rank, order.current_star)} → ${rankWithStar(order.target_rank, order.target_star)}`}</span>
+                        <span className="truncate">{order.current_rank === order.target_rank && order.package_title ? order.package_title : `${rankWithStar(order.current_rank, order.current_star)} → ${rankWithStar(order.target_rank, order.target_star)}`}</span>
+                      </div>
+                      {/* Price & date - shown inline on mobile */}
+                      <div className="flex items-center gap-2 mt-1.5 sm:hidden">
+                        <span className="text-text text-xs font-medium">{formatPrice(order.total_price)}</span>
+                        <span className="text-text-muted text-[10px]">{formatDate(order.created_at)}</span>
                       </div>
                     </div>
-                    <div className="text-right shrink-0">
+                    <div className="text-right shrink-0 hidden sm:block">
                       <p className="text-text text-sm font-medium">{formatPrice(order.total_price)}</p>
                       <p className="text-text-muted text-xs">{formatDate(order.created_at)}</p>
                     </div>
@@ -707,7 +712,7 @@ export default function LeadDashboard() {
                           ) : (
                             <>
                               {/* Aggregate Stats */}
-                              <div className="grid grid-cols-4 gap-2">
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                                 {[
                                   { label: "Match", value: submissions[order.id].reduce((s, x) => s + x.matches_played, 0), icon: Swords },
                                   { label: "Win", value: submissions[order.id].reduce((s, x) => s + x.win_count, 0), icon: Trophy },

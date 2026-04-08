@@ -517,9 +517,9 @@ export default function WorkerDashboard() {
             <div className="space-y-3">
               {pendingOrders.map(order => (
                 <div key={order.id} className="bg-surface rounded-xl border border-white/5 p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-text font-mono text-sm font-medium">{order.order_id}</span>
                         {order.is_express && <span className="px-1.5 py-0.5 rounded text-xs bg-orange-500/10 text-orange-400">Express</span>}
                       </div>
@@ -528,7 +528,7 @@ export default function WorkerDashboard() {
                       </p>
                       {order.hero_request && <p className="text-text-muted text-xs">Hero: {order.hero_request}</p>}
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 shrink-0">
                       <button
                         onClick={() => fetchCredentials(order.id)}
                         disabled={loadingCreds}
@@ -588,12 +588,12 @@ export default function WorkerDashboard() {
             </div>
             <div className="space-y-2">
               {(showAllCompleted ? completedOrders : completedOrders.slice(0, 5)).map(order => (
-                <div key={order.id} className="bg-surface rounded-xl border border-white/5 p-3 flex items-center justify-between">
-                  <div>
+                <div key={order.id} className="bg-surface rounded-xl border border-white/5 p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-3">
+                  <div className="min-w-0">
                     <span className="text-text font-mono text-sm">{order.order_id}</span>
                     <span className="text-text-muted text-xs ml-2">{order.current_rank === order.target_rank && order.package_title ? order.package_title : `${rankWithStar(order.current_rank, order.current_star)} → ${rankWithStar(order.target_rank, order.target_star)}`}</span>
                   </div>
-                  <span className="text-green-400 text-xs">{formatDate(order.updated_at)}</span>
+                  <span className="text-green-400 text-xs shrink-0">{formatDate(order.updated_at)}</span>
                 </div>
               ))}
             </div>
