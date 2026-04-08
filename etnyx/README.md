@@ -16,8 +16,8 @@ Platform jasa joki Mobile Legends profesional dengan sistem pembayaran ganda, ma
 
 ### 👥 Manajemen Tim (RBAC)
 - **Admin** - Full access, kelola semua
-- **Lead** - Kelola worker tim sendiri, assign order
-- **Worker** - Submit progress, upload screenshot
+- **Lead** - Kelola worker tim sendiri, assign order, bulk assign, view submissions (mobile responsive)
+- **Worker** - Submit progress, upload screenshot, edit/delete submission (30 menit), update rank progress (mobile responsive)
 
 ### 💰 Reward & Loyalty
 - **Tier System** - Bronze → Silver → Gold → Platinum
@@ -31,6 +31,9 @@ Platform jasa joki Mobile Legends profesional dengan sistem pembayaran ganda, ma
 
 ### 📊 Admin Dashboard
 - **CMS Sections** - Visibilitas section, Hero, Banner, FAQ, Tim, Sosial, Info Situs
+- **Analytics Dashboard** - Revenue trend (AreaChart), order stats, package breakdown (paginated), top customers, customer growth, rank pair analytics
+- **Worker Leaderboard** - Peringkat worker berdasarkan score, winrate, MVP, savage, rating. Podium top 3, sortable columns
+- **Invoice PDF** - Generate invoice PDF per order (pdf-lib), tersedia untuk admin & customer
 - **Tracking Pixels** - Meta Pixel, GA4, GTM, TikTok
 - **Integrasi** - Midtrans, Resend Email, Fonnte WA, Telegram Bot
 - **Rekening Transfer Manual** - Kelola rekening, upload QRIS
@@ -236,7 +239,10 @@ Dashboard → Orders → Klik "Lihat Bukti Transfer"
 | POST | `/api/admin/upload-qris` | Upload gambar QRIS |
 | GET | `/api/admin/stats` | Dashboard statistik |
 | GET | `/api/admin/chart-data` | Data grafik |
+| GET | `/api/admin/analytics` | Analytics dashboard (revenue, packages, customers, ranks) |
+| GET | `/api/admin/worker-leaderboard` | Worker performance leaderboard |
 | GET | `/api/admin/export` | Export data |
+| GET | `/api/invoice` | Generate invoice PDF/HTML |
 | CRUD | `/api/admin/testimonials` | Kelola testimoni |
 | CRUD | `/api/admin/portfolio` | Kelola portfolio |
 | CRUD | `/api/admin/promo-codes` | Kelola promo codes |
@@ -306,6 +312,8 @@ Jalankan di Supabase SQL Editor secara berurutan:
 | `supabase-schema-v16.sql` | v16: Lead-worker hierarchy |
 | `supabase-schema-v17.sql` | v17: Dual payment (manual + Midtrans) |
 | `supabase-schema-v18.sql` | v18: Star/division tracking (current_star, target_star) |
+| `supabase-schema-v19.sql` | v19: Password reset tokens table |
+| `supabase-schema-v20.sql` | v20: Seed 30 workers (15 per lead) |
 
 ---
 
@@ -343,10 +351,20 @@ Jalankan di Supabase SQL Editor secara berurutan:
 ## 🧪 Testing
 
 ```bash
+npm run test          # Vitest watch mode
+npm run test:run      # Single run
+npm run test:coverage # Coverage report
 npm run lint          # ESLint check
 npx tsc --noEmit     # TypeScript check
 npm run build         # Production build
 ```
+
+**Test Stack:** Vitest 4.1.3 + Testing Library + jsdom
+
+| Test File | Deskripsi |
+|-----------|----------|
+| `helpers.test.ts` | Helper/utility function tests |
+| `api/promo.test.ts` | Promo code API tests |
 
 ---
 
@@ -354,6 +372,15 @@ npm run build         # Production build
 
 | Hash | Deskripsi |
 |------|-----------|
+| `aa1e7ce` | Fix mobile responsive Lead & Worker dashboards |
+| `3d3cbd8` | Normalize Analytics tab theme to match dashboard |
+| `prev` | Fix delete button visibility for inactive staff |
+| `prev` | Worker Leaderboard tab (podium, sortable, performance score) |
+| `prev` | Analytics dashboard (revenue, packages, customers, ranks) |
+| `prev` | Invoice PDF generation (pdf-lib) |
+| `prev` | Automated testing setup (Vitest + Testing Library, 29 tests) |
+| `prev` | Hard-delete staff users (bukan soft-delete) |
+| `prev` | Seed 30 workers SQL (15 per lead) |
 | `12b845d` | Track page: timeline timestamps, review/report links, Express/Premium badges |
 | `77116d8` | Docs: update README star tracking, notification, recent commits |
 | `ec493e3` | Style: spasi harga-Manual badge, custom dropdown arrow |

@@ -231,22 +231,14 @@ export default function AnalyticsTab() {
                   const maxRev = packageStats[0]?.revenue || 1;
                   const globalIdx = (pkgPage - 1) * ITEMS_PER_PAGE + i;
                   return (
-                    <div key={pkg.name}>
-                      <div className="flex items-center justify-between mb-1">
-                        <div className="flex items-center gap-2">
-                          <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: BAR_COLORS[globalIdx % BAR_COLORS.length] }} />
-                          <p className="text-xs text-text font-medium truncate max-w-[200px]">{pkg.name}</p>
-                        </div>
-                        <div className="text-right">
-                          <span className="text-xs text-green-400 font-semibold">{formatRupiah(pkg.revenue)}</span>
-                          <span className="text-[10px] text-text-muted ml-2">{pkg.count}×</span>
-                        </div>
+                    <div key={pkg.name} className="flex items-center justify-between py-1">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: BAR_COLORS[globalIdx % BAR_COLORS.length] }} />
+                        <p className="text-xs text-text font-medium truncate">{pkg.name}</p>
                       </div>
-                      <div className="w-full bg-white/5 rounded-full h-1.5">
-                        <div
-                          className="h-1.5 rounded-full transition-all"
-                          style={{ width: `${(pkg.revenue / maxRev) * 100}%`, backgroundColor: BAR_COLORS[globalIdx % BAR_COLORS.length] }}
-                        />
+                      <div className="text-right shrink-0 ml-3">
+                        <span className="text-xs text-green-400 font-semibold">{formatRupiah(pkg.revenue)}</span>
+                        <span className="text-[10px] text-text-muted ml-2">{pkg.count}×</span>
                       </div>
                     </div>
                   );
