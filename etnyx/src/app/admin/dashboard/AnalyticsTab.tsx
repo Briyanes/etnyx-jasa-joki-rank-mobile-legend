@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import {
   TrendingUp, DollarSign, Users, ShoppingCart, Loader2,
-  BarChart3, Trophy, Target, Crown,
+  BarChart3, Trophy, Target, Crown, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { formatRupiah } from "@/utils/helpers";
 import dynamic from "next/dynamic";
@@ -12,14 +12,12 @@ const LineChart = dynamic(() => import("recharts").then((m) => m.LineChart), { s
 const Line = dynamic(() => import("recharts").then((m) => m.Line), { ssr: false });
 const BarChartRecharts = dynamic(() => import("recharts").then((m) => m.BarChart), { ssr: false });
 const BarRecharts = dynamic(() => import("recharts").then((m) => m.Bar), { ssr: false });
-const PieChart = dynamic(() => import("recharts").then((m) => m.PieChart), { ssr: false });
-const Pie = dynamic(() => import("recharts").then((m) => m.Pie), { ssr: false });
-const Cell = dynamic(() => import("recharts").then((m) => m.Cell), { ssr: false });
 const XAxis = dynamic(() => import("recharts").then((m) => m.XAxis), { ssr: false });
 const YAxis = dynamic(() => import("recharts").then((m) => m.YAxis), { ssr: false });
 const Tooltip = dynamic(() => import("recharts").then((m) => m.Tooltip), { ssr: false });
 const ResponsiveContainer = dynamic(() => import("recharts").then((m) => m.ResponsiveContainer), { ssr: false });
-const Legend = dynamic(() => import("recharts").then((m) => m.Legend), { ssr: false });
+
+const ITEMS_PER_PAGE = 10;
 
 interface AnalyticsData {
   summary: {
@@ -36,7 +34,7 @@ interface AnalyticsData {
   popularRanks: { pair: string; count: number; revenue: number }[];
 }
 
-const PIE_COLORS = ["#8b5cf6", "#06b6d4", "#f59e0b", "#ef4444", "#10b981"];
+const BAR_COLORS = ["#8b5cf6", "#06b6d4", "#f59e0b", "#ef4444", "#10b981"];
 const TIER_COLORS: Record<string, string> = {
   bronze: "text-orange-400",
   silver: "text-gray-300",
@@ -55,6 +53,7 @@ export default function AnalyticsTab() {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState(30);
+  const [pkgPage, setPkgPage] = useState(1);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -174,36 +173,65 @@ export default function AnalyticsTab() {
 
       {/* Package Breakdown + Customer Growth */}
       <div className="grid lg:grid-cols-2 gap-4">
-        {/* Package Revenue Pie */}
+        {/* Package Revenue Table */}
         <div className="bg-surface rounded-xl p-5 border border-white/5">
-          <h3 className="text-sm font-semibold text-text mb-3 flex items-center gap-2">
-            <Target className="w-4 h-4 text-yellow-400" /> Revenue by Package
-          </h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-text flex items-center gap-2">
+              <Target className="w-4 h-4 text-yellow-400" /> Revenue by Package
+            </h3>
+            {packageStats.length > ITEMS_PER_PAGE && (
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setPkgPage(Math.max(1, pkgPage - 1))}
+                  disabled={pkgPage === 1}
+                  className="p-1 rounded text-text-muted hover:text-text disabled:opacity-30 transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <span className="text-[10px] text-text-muted px-1">
+                  {pkgPage}/{Math.ceil(packageStats.length / ITEMS_PER_PAGE)}
+                </span>
+                <button
+                  onClick={() => setPkgPage(Math.min(Math.ceil(packageStats.length / ITEMS_PER_PAGE), pkgPage + 1))}
+                  disabled={pkgPage >= Math.ceil(packageStats.length / ITEMS_PER_PAGE)}
+                  className="p-1 rounded text-text-muted hover:text-text disabled:opacity-30 transition-colors"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+          </div>
           {packageStats.length > 0 ? (
-            <div className="flex items-center gap-4">
-              <div className="h-52 flex-1">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={packageStats} dataKey="revenue" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={(props) => `${props.name || ""} ${((props.percent ?? 0) * 100).toFixed(0)}%`} labelLine={false} fontSize={11}>
-                      {packageStats.map((_, i) => (
-                        <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip contentStyle={CHART_STYLE} formatter={(v) => formatRupiah(Number(v))} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="space-y-2">
-                {packageStats.map((pkg, i) => (
-                  <div key={pkg.name} className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
-                    <div>
-                      <p className="text-xs text-text font-medium">{pkg.name}</p>
-                      <p className="text-[10px] text-text-muted">{pkg.count} orders • {formatRupiah(pkg.revenue)}</p>
+            <div className="space-y-2">
+              {packageStats
+                .slice((pkgPage - 1) * ITEMS_PER_PAGE, pkgPage * ITEMS_PER_PAGE)
+                .map((pkg, i) => {
+                  const maxRev = packageStats[0]?.revenue || 1;
+                  const globalIdx = (pkgPage - 1) * ITEMS_PER_PAGE + i;
+                  return (
+                    <div key={pkg.name}>
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: BAR_COLORS[globalIdx % BAR_COLORS.length] }} />
+                          <p className="text-xs text-text font-medium truncate max-w-[200px]">{pkg.name}</p>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-xs text-green-400 font-semibold">{formatRupiah(pkg.revenue)}</span>
+                          <span className="text-[10px] text-text-muted ml-2">{pkg.count}×</span>
+                        </div>
+                      </div>
+                      <div className="w-full bg-white/5 rounded-full h-1.5">
+                        <div
+                          className="h-1.5 rounded-full transition-all"
+                          style={{ width: `${(pkg.revenue / maxRev) * 100}%`, backgroundColor: BAR_COLORS[globalIdx % BAR_COLORS.length] }}
+                        />
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  );
+                })}
+              <p className="text-[10px] text-text-muted text-right pt-1">
+                Showing {(pkgPage - 1) * ITEMS_PER_PAGE + 1}-{Math.min(pkgPage * ITEMS_PER_PAGE, packageStats.length)} of {packageStats.length}
+              </p>
             </div>
           ) : (
             <p className="text-text-muted text-sm text-center py-8">No data</p>
