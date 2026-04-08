@@ -1812,8 +1812,7 @@ function OrderPageContent() {
                 <label className="block text-sm text-text-muted mb-1.5 font-medium">
                   MASUKKAN ID DAN SERVER
                 </label>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  {/* User ID */}
+                <div className="flex gap-2">
                   <div className="flex-1">
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-sm font-bold">(</span>
@@ -1835,8 +1834,6 @@ function OrderPageContent() {
                       <span className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted text-sm font-bold">)</span>
                     </div>
                   </div>
-
-                  {/* Server ID */}
                   <div className="w-28 sm:w-36">
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-sm font-bold">(</span>
@@ -1858,13 +1855,11 @@ function OrderPageContent() {
                       <span className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted text-sm font-bold">)</span>
                     </div>
                   </div>
-
-                  {/* Cek Akun Button */}
                   <button
                     type="button"
                     onClick={handleCheckAccount}
                     disabled={accountCheckLoading || !form.userId || !form.serverId}
-                    className="w-full sm:w-auto px-4 py-2.5 bg-yellow-500 hover:bg-yellow-400 text-black font-bold rounded-xl text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+                    className="px-4 py-2.5 bg-yellow-500 hover:bg-yellow-400 text-black font-bold rounded-xl text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 whitespace-nowrap"
                   >
                     {accountCheckLoading ? (
                       <Loader2 className="w-4 h-4 animate-spin" />

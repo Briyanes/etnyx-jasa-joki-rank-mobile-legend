@@ -18,6 +18,8 @@ import SettingsTab from "./SettingsTab";
 import PayrollTab from "./PayrollTab";
 import ReportsTab from "./ReportsTab";
 import AdsTab from "./AdsTab";
+import AnalyticsTab from "./AnalyticsTab";
+import LeaderboardTab from "./LeaderboardTab";
 
 const LineChart = dynamic(() => import("recharts").then((mod) => mod.LineChart), { ssr: false });
 const Line = dynamic(() => import("recharts").then((mod) => mod.Line), { ssr: false });
@@ -156,11 +158,12 @@ interface PerStarTier {
   icon: string;
 }
 
-type TabType = "overview" | "orders" | "boosters" | "testimonials" | "portfolio" | "promo" | "customers" | "rewards" | "pricing" | "staff" | "reviews" | "payroll" | "reports" | "ads" | "settings";
+type TabType = "overview" | "analytics" | "orders" | "boosters" | "testimonials" | "portfolio" | "promo" | "customers" | "rewards" | "pricing" | "staff" | "leaderboard" | "reviews" | "payroll" | "reports" | "ads" | "settings";
 
 // ---- Tab Config ----
 const TAB_CONFIG: { id: TabType; label: string; icon: typeof BarChart3 }[] = [
   { id: "overview", label: "Overview", icon: Activity },
+  { id: "analytics", label: "Analytics", icon: TrendingUp },
   { id: "orders", label: "Orders", icon: ShoppingCart },
   { id: "pricing", label: "Pricing", icon: DollarSign },
   { id: "boosters", label: "Boosters", icon: Gamepad2 },
@@ -170,10 +173,11 @@ const TAB_CONFIG: { id: TabType; label: string; icon: typeof BarChart3 }[] = [
   { id: "customers", label: "Customers", icon: Users },
   { id: "rewards", label: "Rewards", icon: Gift },
   { id: "staff", label: "Staff", icon: Shield },
+  { id: "leaderboard", label: "Leaderboard", icon: Crown },
   { id: "payroll", label: "Payroll", icon: Wallet },
   { id: "reviews", label: "Reviews", icon: MessageCircle },
   { id: "reports", label: "Reports", icon: BarChart3 },
-  { id: "ads", label: "Ads", icon: TrendingUp },
+  { id: "ads", label: "Ads", icon: Flame },
   { id: "settings", label: "Settings", icon: Settings2 },
 ];
 
@@ -2420,6 +2424,16 @@ export default function AdminDashboard() {
           {/* ===== ADS PERFORMANCE TAB ===== */}
           {activeTab === "ads" && (
             <AdsTab />
+          )}
+
+          {/* ===== ANALYTICS TAB ===== */}
+          {activeTab === "analytics" && (
+            <AnalyticsTab />
+          )}
+
+          {/* ===== LEADERBOARD TAB ===== */}
+          {activeTab === "leaderboard" && (
+            <LeaderboardTab />
           )}
 
           {/* ===== SETTINGS TAB ===== */}

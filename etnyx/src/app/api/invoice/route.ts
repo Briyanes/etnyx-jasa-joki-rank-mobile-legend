@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import { verifyAdmin } from "@/lib/admin-auth";
 import { WHATSAPP_NUMBER } from "@/lib/constants";
+import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 
 // GET - Generate invoice HTML/PDF for an order
 export async function GET(request: NextRequest) {
@@ -219,20 +220,119 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // For PDF, return HTML with print instruction
-    // Client should use browser's print-to-PDF feature
-    return new NextResponse(invoiceHtml.replace("</head>", `
-  <script>
-    window.onload = function() {
-      window.print();
-      window.onafterprint = function() {
-        window.close();
-      }
+    // Generate real PDF using pdf-lib
+    const pdfDoc = await PDFDocument.create();
+    const page = pdfDoc.addPage([595, 842]); // A4
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    const { height } = page.getSize();
+
+    const primary = rgb(0.39, 0.4, 0.95); // #6366f1
+    const black = rgb(0, 0, 0);
+    const gray = rgb(0.4, 0.4, 0.4);
+    const green = rgb(0.02, 0.59, 0.41);
+    const white = rgb(1, 1, 1);
+
+    // Header background
+    page.drawRectangle({ x: 0, y: height - 120, width: 595, height: 120, color: primary });
+
+    // Header text
+    page.drawText("ETNYX", { x: 40, y: height - 45, size: 20, font: fontBold, color: white });
+    page.drawText("INVOICE", { x: 40, y: height - 75, size: 28, font: fontBold, color: white });
+    page.drawText(invoiceNumber, { x: 40, y: height - 95, size: 11, font, color: rgb(0.9, 0.9, 1) });
+
+    let y = height - 150;
+
+    // Billing info
+    page.drawText("DITAGIHKAN KEPADA", { x: 40, y, size: 8, font: fontBold, color: gray });
+    y -= 16;
+    page.drawText(order.customers?.name || order.customer_name || "Customer", { x: 40, y, size: 11, font: fontBold, color: black });
+    y -= 14;
+    page.drawText(order.customers?.email || "-", { x: 40, y, size: 9, font, color: gray });
+    y -= 13;
+    page.drawText(order.whatsapp || order.customers?.whatsapp || "-", { x: 40, y, size: 9, font, color: gray });
+
+    // Invoice details (right side)
+    const rx = 350;
+    let ry = height - 150;
+    page.drawText("DETAIL INVOICE", { x: rx, y: ry, size: 8, font: fontBold, color: gray });
+    ry -= 16;
+    page.drawText(`Tanggal: ${invoiceDate}`, { x: rx, y: ry, size: 9, font, color: black });
+    ry -= 14;
+    page.drawText(`Dibayar: ${paidDate}`, { x: rx, y: ry, size: 9, font, color: black });
+    ry -= 14;
+    const statusText = order.payment_status === "paid" ? "LUNAS" : order.payment_status === "unpaid" ? "BELUM BAYAR" : "PENDING";
+    const statusColor = order.payment_status === "paid" ? green : order.payment_status === "unpaid" ? rgb(0.86, 0.15, 0.15) : rgb(0.85, 0.47, 0.02);
+    page.drawText(`Status: ${statusText}`, { x: rx, y: ry, size: 9, font: fontBold, color: statusColor });
+
+    // Separator
+    y -= 40;
+    page.drawRectangle({ x: 40, y, width: 515, height: 1, color: rgb(0.9, 0.9, 0.9) });
+    y -= 25;
+
+    // Table header
+    page.drawRectangle({ x: 40, y: y - 5, width: 515, height: 22, color: rgb(0.97, 0.97, 0.97) });
+    page.drawText("DESKRIPSI", { x: 50, y, size: 8, font: fontBold, color: gray });
+    page.drawText("DETAIL", { x: 270, y, size: 8, font: fontBold, color: gray });
+    page.drawText("HARGA", { x: 480, y, size: 8, font: fontBold, color: gray });
+    y -= 28;
+
+    // Service row
+    page.drawText("Jasa Joki & Gendong ML", { x: 50, y, size: 10, font: fontBold, color: black });
+    y -= 14;
+    page.drawText("Push Rank Service", { x: 50, y, size: 8, font, color: gray });
+
+    const modeLabel = order.is_express && order.is_premium ? "Express Premium" : order.is_express ? "Express" : order.is_premium ? "Premium" : "Standard";
+    page.drawText(`${order.current_rank || "Warrior"} → ${order.target_rank || "Mythic"}`, { x: 270, y: y + 14, size: 9, font, color: black });
+    page.drawText(modeLabel, { x: 270, y, size: 8, font, color: gray });
+
+    const totalPrice = order.total_price || 0;
+    const promoDiscount = order.promo_discount || 0;
+    const fmtTotal = `Rp ${totalPrice.toLocaleString("id-ID")}`;
+    page.drawText(fmtTotal, { x: 460, y: y + 14, size: 10, font: fontBold, color: black });
+
+    y -= 20;
+    page.drawRectangle({ x: 40, y, width: 515, height: 1, color: rgb(0.9, 0.9, 0.9) });
+    y -= 20;
+
+    // Promo row
+    if (order.promo_code && promoDiscount > 0) {
+      page.drawText(`Promo Code: ${order.promo_code}`, { x: 50, y, size: 9, font, color: black });
+      page.drawText(`- Rp ${promoDiscount.toLocaleString("id-ID")}`, { x: 460, y, size: 10, font: fontBold, color: green });
+      y -= 20;
+      page.drawRectangle({ x: 40, y, width: 515, height: 1, color: rgb(0.9, 0.9, 0.9) });
+      y -= 20;
     }
-  </script>
-</head>`), {
+
+    // Total section
+    page.drawText("Subtotal", { x: 350, y, size: 9, font, color: gray });
+    page.drawText(`Rp ${totalPrice.toLocaleString("id-ID")}`, { x: 460, y, size: 9, font, color: black });
+    y -= 16;
+
+    if (promoDiscount > 0) {
+      page.drawText("Diskon", { x: 350, y, size: 9, font, color: gray });
+      page.drawText(`- Rp ${promoDiscount.toLocaleString("id-ID")}`, { x: 460, y, size: 9, font, color: green });
+      y -= 16;
+    }
+
+    // Grand total
+    page.drawRectangle({ x: 340, y: y - 2, width: 215, height: 1.5, color: primary });
+    y -= 20;
+    page.drawText("TOTAL", { x: 350, y, size: 12, font: fontBold, color: primary });
+    const grandTotal = totalPrice - promoDiscount;
+    page.drawText(`Rp ${grandTotal.toLocaleString("id-ID")}`, { x: 440, y, size: 12, font: fontBold, color: primary });
+
+    // Footer
+    y = 60;
+    page.drawRectangle({ x: 0, y: 0, width: 595, height: 80, color: rgb(0.97, 0.97, 0.97) });
+    page.drawText("Terima kasih telah menggunakan layanan ETNYX", { x: 160, y: 50, size: 10, font, color: gray });
+    page.drawText(`Pertanyaan? Hubungi via WhatsApp: ${WHATSAPP_NUMBER}`, { x: 155, y: 32, size: 9, font, color: gray });
+
+    const pdfBytes = await pdfDoc.save();
+    return new NextResponse(pdfBytes, {
       headers: {
-        "Content-Type": "text/html",
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `inline; filename="invoice-${order.order_id}.pdf"`,
       },
     });
   } catch (error) {
