@@ -63,3 +63,4 @@ Thumbs.db
 *.pem
 secrets/
 .secrets
+.env*.local
