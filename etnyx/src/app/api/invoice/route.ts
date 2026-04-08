@@ -329,7 +329,7 @@ export async function GET(request: NextRequest) {
     page.drawText(`Pertanyaan? Hubungi via WhatsApp: ${WHATSAPP_NUMBER}`, { x: 155, y: 32, size: 9, font, color: gray });
 
     const pdfBytes = await pdfDoc.save();
-    return new NextResponse(pdfBytes, {
+    return new NextResponse(Buffer.from(pdfBytes), {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `inline; filename="invoice-${order.order_id}.pdf"`,
