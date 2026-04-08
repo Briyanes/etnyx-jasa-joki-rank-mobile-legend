@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
   ShoppingCart, Users, LogOut, RefreshCw, Filter, Search,
-  ChevronDown, ChevronUp, UserPlus, Clock, CheckCircle, XCircle,
+  ChevronDown, ChevronUp, ChevronLeft, ChevronRight, UserPlus, Clock, CheckCircle, XCircle,
   AlertCircle, Loader2, Package, TrendingUp, Eye, MessageSquare,
   Send, RotateCcw, CheckSquare, Square, Star, Trophy, Swords, Target, Timer, Camera,
   Gamepad2, Flame, Zap,
@@ -378,27 +378,47 @@ export default function LeadDashboard() {
           </div>
         </div>
 
-        {/* Workers Overview */}
+        {/* Workers Overview - Horizontal Slider */}
         <div className="bg-surface rounded-xl border border-white/5 p-4">
           <h2 className="text-text font-semibold mb-3 flex items-center gap-2"><Users className="w-4 h-4 text-blue-400" /> Tim Worker ({workers.length})</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-            {workers.map(w => {
-              const workerActive = orders.filter(o => o.assigned_worker_id === w.id && o.status === "in_progress").length;
-              const workerCompleted = orders.filter(o => o.assigned_worker_id === w.id && o.status === "completed").length;
-              return (
-                <div key={w.id} className="bg-background rounded-lg p-3 border border-white/5 text-center">
-                  <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center mx-auto mb-2">
-                    <span className="text-accent font-bold text-sm">{w.name.charAt(0).toUpperCase()}</span>
+          <div className="relative group">
+            <button
+              onClick={() => {
+                const el = document.getElementById('worker-slider');
+                if (el) el.scrollBy({ left: -300, behavior: 'smooth' });
+              }}
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-background/90 border border-white/10 flex items-center justify-center text-muted hover:text-text hover:bg-surface transition-all opacity-0 group-hover:opacity-100 -ml-2 shadow-lg"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <div id="worker-slider" className="flex gap-3 overflow-x-auto scrollbar-hide scroll-smooth pb-2" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+              {workers.map(w => {
+                const workerActive = orders.filter(o => o.assigned_worker_id === w.id && o.status === "in_progress").length;
+                const workerCompleted = orders.filter(o => o.assigned_worker_id === w.id && o.status === "completed").length;
+                return (
+                  <div key={w.id} className="flex-shrink-0 w-[130px] bg-background rounded-lg p-3 border border-white/5 text-center">
+                    <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center mx-auto mb-2">
+                      <span className="text-accent font-bold text-sm">{w.name.charAt(0).toUpperCase()}</span>
+                    </div>
+                    <p className="text-text text-sm font-medium truncate">{w.name}</p>
+                    <p className="text-text-muted text-[10px] mt-1">{workerActive} aktif · {workerCompleted} selesai</p>
+                    {w.last_login_at && (
+                      <p className="text-text-muted text-[10px]">Login: {new Date(w.last_login_at).toLocaleDateString("id-ID", { day: "2-digit", month: "short" })}</p>
+                    )}
                   </div>
-                  <p className="text-text text-sm font-medium truncate">{w.name}</p>
-                  <p className="text-text-muted text-[10px] mt-1">{workerActive} aktif · {workerCompleted} selesai</p>
-                  {w.last_login_at && (
-                    <p className="text-text-muted text-[10px]">Login: {new Date(w.last_login_at).toLocaleDateString("id-ID", { day: "2-digit", month: "short" })}</p>
-                  )}
-                </div>
-              );
-            })}
-            {workers.length === 0 && <p className="text-text-muted text-sm col-span-full text-center py-4">Belum ada worker</p>}
+                );
+              })}
+              {workers.length === 0 && <p className="text-text-muted text-sm text-center py-4 w-full">Belum ada worker</p>}
+            </div>
+            <button
+              onClick={() => {
+                const el = document.getElementById('worker-slider');
+                if (el) el.scrollBy({ left: 300, behavior: 'smooth' });
+              }}
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-background/90 border border-white/10 flex items-center justify-center text-muted hover:text-text hover:bg-surface transition-all opacity-0 group-hover:opacity-100 -mr-2 shadow-lg"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
         </div>
 
