@@ -1,5 +1,6 @@
 "use client";
 
+import { toast, toastError, toastSuccess } from "@/components/ToastProvider";
 import { useEffect, useState, useCallback } from "react";
 import {
   Layout, Megaphone, HelpCircle, Users, Share2, Building,
@@ -34,8 +35,7 @@ interface TrackingPixels { metaPixelId: string; metaAccessToken: string; googleA
 interface SocialLinks { instagram: string; facebook: string; tiktok: string; youtube: string; whatsapp: string }
 interface SiteInfo { siteName: string; taglineId: string; taglineEn: string; supportEmail: string; companyName: string }
 interface IntegrationSettings {
-  midtransClientKey: string; midtransServerKey: string; midtransMerchantId: string; midtransIsProduction: boolean;
-  midtransPaymentChannels: Record<string, boolean>;
+  ipaymuApiKey: string; ipaymuVa: string; ipaymuIsProduction: boolean;
   resendApiKey: string; resendFromEmail: string;
   fonnteApiToken: string; fonnteDeviceId: string;
   telegramBotToken: string; telegramAdminGroupId: string; telegramWorkerGroupId: string; telegramReviewGroupId: string; telegramReportGroupId: string;
@@ -79,8 +79,7 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
   const [socialLinks, setSocialLinks] = useState<SocialLinks>({ instagram: "", facebook: "", tiktok: "", youtube: "", whatsapp: "" });
   const [siteInfo, setSiteInfo] = useState<SiteInfo>({ siteName: "", taglineId: "", taglineEn: "", supportEmail: "", companyName: "" });
   const [integrations, setIntegrations] = useState<IntegrationSettings>({
-    midtransClientKey: "", midtransServerKey: "", midtransMerchantId: "", midtransIsProduction: false,
-    midtransPaymentChannels: { bca: true, bni: true, mandiri: true, permata: false, gopay: true, shopeepay: true, dana: false, ovo: false, credit_card: true, qris: true, alfamart_indomaret: true },
+    ipaymuApiKey: "", ipaymuVa: "", ipaymuIsProduction: false,
     resendApiKey: "", resendFromEmail: "noreply@etnyx.com",
     fonnteApiToken: "", fonnteDeviceId: "",
     telegramBotToken: "", telegramAdminGroupId: "", telegramWorkerGroupId: "", telegramReviewGroupId: "", telegramReportGroupId: "",
@@ -142,8 +141,8 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
         body: JSON.stringify({ key, value }),
       });
       if (res.ok) { setCmsSaved(key); setTimeout(() => setCmsSaved(null), 2000); }
-      else alert("Gagal menyimpan. Coba lagi.");
-    } catch { alert("Gagal menyimpan. Coba lagi."); }
+      else toastError("Gagal menyimpan. Coba lagi.");
+    } catch { toastError("Gagal menyimpan. Coba lagi."); }
     finally { setCmsSaving(null); }
   };
 
@@ -473,36 +472,35 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
             <CmsSaveButton settingKey="integrations" value={integrations} />
           </div>
 
-          {/* Midtrans */}
+          {/* iPaymu */}
           <div className="bg-surface rounded-xl border border-white/5 p-6 space-y-5">
             <div>
-              <h3 className="text-text font-bold text-sm flex items-center gap-2"><CreditCard className="w-4 h-4 text-accent" /> Midtrans Payment Gateway</h3>
+              <h3 className="text-text font-bold text-sm flex items-center gap-2"><CreditCard className="w-4 h-4 text-accent" /> iPaymu Payment Gateway</h3>
               <p className="text-text-muted text-xs mt-0.5">Konfigurasi dan monitoring payment gateway</p>
             </div>
             <div className="bg-background rounded-lg p-4 border border-white/5">
               <p className="text-text-muted text-xs font-semibold mb-2 uppercase tracking-wider">Environment</p>
               <div className="flex gap-2">
-                <button onClick={() => setIntegrations({ ...integrations, midtransIsProduction: false })}
-                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${!integrations.midtransIsProduction ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30" : "bg-background border border-white/10 text-text-muted hover:text-text"}`}>
+                <button onClick={() => setIntegrations({ ...integrations, ipaymuIsProduction: false })}
+                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${!integrations.ipaymuIsProduction ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30" : "bg-background border border-white/10 text-text-muted hover:text-text"}`}>
                   Sandbox
                 </button>
-                <button onClick={() => setIntegrations({ ...integrations, midtransIsProduction: true })}
-                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${integrations.midtransIsProduction ? "bg-green-500/20 text-green-400 border border-green-500/30" : "bg-background border border-white/10 text-text-muted hover:text-text"}`}>
+                <button onClick={() => setIntegrations({ ...integrations, ipaymuIsProduction: true })}
+                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${integrations.ipaymuIsProduction ? "bg-green-500/20 text-green-400 border border-green-500/30" : "bg-background border border-white/10 text-text-muted hover:text-text"}`}>
                   Production
                 </button>
               </div>
-              {integrations.midtransIsProduction && (
+              {integrations.ipaymuIsProduction && (
                 <p className="text-yellow-400 text-xs mt-2 flex items-center gap-1">
                   <AlertTriangle className="w-3.5 h-3.5" /> Mode Production — transaksi menggunakan uang asli
                 </p>
               )}
             </div>
             <div className="bg-background rounded-lg p-4 border border-white/5 space-y-3">
-              <p className="text-text-muted text-xs font-semibold uppercase tracking-wider">API Keys</p>
+              <p className="text-text-muted text-xs font-semibold uppercase tracking-wider">API Credentials</p>
               {[
-                { label: "Merchant ID", value: integrations.midtransMerchantId, key: "midtransMerchantId", type: "text", placeholder: "G123456789" },
-                { label: "Server Key", value: integrations.midtransServerKey, key: "midtransServerKey", type: "password", placeholder: "Mid-server-xxx" },
-                { label: "Client Key", value: integrations.midtransClientKey, key: "midtransClientKey", type: "text", placeholder: integrations.midtransIsProduction ? "Mid-client-xxx" : "SB-Mid-client-xxx" },
+                { label: "Virtual Account (VA)", value: integrations.ipaymuVa, key: "ipaymuVa", type: "text", placeholder: "1179000899" },
+                { label: "API Key", value: integrations.ipaymuApiKey, key: "ipaymuApiKey", type: "password", placeholder: "QbGcoO0Qds9sQFDmY0MWg1Tq.xtuh1" },
               ].map((f) => (
                 <div key={f.key}>
                   <label className="block text-sm text-text-muted mb-1.5">{f.label}</label>
@@ -511,56 +509,34 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
                 </div>
               ))}
             </div>
-            <div className="bg-background rounded-lg p-4 border border-white/5 space-y-3">
-              <p className="text-text-muted text-xs font-semibold uppercase tracking-wider">Payment Channels</p>
-              {[
-                { label: "Bank Transfer", channels: [{ id: "bca", name: "BCA" }, { id: "bni", name: "BNI" }, { id: "mandiri", name: "MANDIRI" }, { id: "permata", name: "PERMATA" }] },
-                { label: "E-Wallet", channels: [{ id: "gopay", name: "GoPay" }, { id: "shopeepay", name: "ShopeePay" }, { id: "dana", name: "DANA" }, { id: "ovo", name: "OVO" }] },
-                { label: "Lainnya", channels: [{ id: "credit_card", name: "Credit Card" }, { id: "qris", name: "QRIS" }, { id: "alfamart_indomaret", name: "Alfamart / Indomaret" }] },
-              ].map((group) => (
-                <div key={group.label}>
-                  <p className="text-text-muted text-xs mb-2">{group.label}</p>
-                  <div className="flex flex-wrap gap-x-6 gap-y-2">
-                    {group.channels.map((ch) => (
-                      <label key={ch.id} className="flex items-center gap-2 cursor-pointer select-none">
-                        <input type="checkbox" checked={integrations.midtransPaymentChannels?.[ch.id] ?? false}
-                          onChange={(e) => setIntegrations({ ...integrations, midtransPaymentChannels: { ...integrations.midtransPaymentChannels, [ch.id]: e.target.checked } })}
-                          className="w-4 h-4 rounded border-white/20 bg-surface text-accent focus:ring-accent cursor-pointer" />
-                        <span className="text-text text-sm">{ch.name}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
             <div className="bg-background rounded-lg p-4 border border-white/5 space-y-2">
               <p className="text-text-muted text-xs font-semibold uppercase tracking-wider">Notification URL (Webhook)</p>
-              <p className="text-text-muted text-xs">Daftarkan URL ini di Midtrans Dashboard → Settings → Configuration → Notification URL</p>
+              <p className="text-text-muted text-xs">Daftarkan URL ini di iPaymu Dashboard → Integrasi → Notify URL</p>
               <div className="flex gap-2">
                 <input type="text" readOnly value={`${typeof window !== "undefined" ? window.location.origin : ""}/api/payment/notification`}
                   className="flex-1 bg-surface border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm font-mono focus:outline-none" />
-                <button onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/api/payment/notification`); alert("URL berhasil disalin!"); }}
+                <button onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/api/payment/notification`); toastSuccess("URL berhasil disalin!"); }}
                   className="px-4 py-2.5 rounded-lg bg-accent/20 text-accent text-sm font-semibold hover:bg-accent/30 transition-colors whitespace-nowrap flex items-center gap-1.5">
                   <Copy className="w-4 h-4" /> Salin
                 </button>
               </div>
               <p className="text-yellow-400/80 text-xs mt-1">
-                <AlertTriangle className="w-3.5 h-3.5 inline shrink-0" /> <strong>Penting:</strong> Setelah deploy ke production, copy URL di atas dan paste ke Midtrans Dashboard agar status pembayaran otomatis terupdate.
+                <AlertTriangle className="w-3.5 h-3.5 inline shrink-0" /> <strong>Penting:</strong> Setelah deploy ke production, copy URL di atas dan paste ke iPaymu Dashboard agar status pembayaran otomatis terupdate.
               </p>
             </div>
             <div className="flex items-center gap-3">
               <button onClick={async () => {
-                if (!integrations.midtransServerKey) { alert("Server Key belum diisi!"); return; }
+                if (!integrations.ipaymuApiKey || !integrations.ipaymuVa) { toast("API Key dan VA belum diisi!"); return; }
                 try {
-                  const res = await fetch("/api/payment/test-connection", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ serverKey: integrations.midtransServerKey, isProduction: integrations.midtransIsProduction }) });
+                  const res = await fetch("/api/payment/test-connection", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ apiKey: integrations.ipaymuApiKey, va: integrations.ipaymuVa, isProduction: integrations.ipaymuIsProduction }) });
                   const data = await res.json();
-                  alert(data.success ? "✅ Koneksi berhasil! Midtrans aktif dan siap menerima pembayaran." : `❌ Gagal: ${data.error}\n\nPastikan Server Key benar dan environment sesuai.`);
-                } catch (e) { alert(`❌ Error koneksi: ${e instanceof Error ? e.message : "Network error"}`); }
+                  toast(data.success ? "✅ Koneksi berhasil! iPaymu aktif dan siap menerima pembayaran." : `❌ Gagal: ${data.error}\n\nPastikan API Key dan VA benar dan environment sesuai.`);
+                } catch (e) { toast(`❌ Error koneksi: ${e instanceof Error ? e.message : "Network error"}`); }
               }} className="px-4 py-2.5 rounded-lg border border-white/10 text-text text-sm font-medium hover:bg-white/5 transition-colors flex items-center gap-2">
                 <Plug className="w-4 h-4" /> Test Connection
               </button>
               <p className="text-text-muted text-xs">
-                <BookOpen className="w-3 h-3 inline mr-1" /> Dapatkan credentials di <a href="https://dashboard.midtrans.com" target="_blank" rel="noopener" className="text-accent hover:underline">dashboard.midtrans.com</a>
+                <BookOpen className="w-3 h-3 inline mr-1" /> Dapatkan credentials di <a href="https://my.ipaymu.com" target="_blank" rel="noopener" className="text-accent hover:underline">my.ipaymu.com</a>
               </p>
             </div>
           </div>
@@ -649,7 +625,7 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
                                   <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
                                     const f = e.target.files?.[0];
                                     if (!f) return;
-                                    if (f.size > 5 * 1024 * 1024) { alert("Maks 5MB"); return; }
+                                    if (f.size > 5 * 1024 * 1024) { toastError("Maks 5MB"); return; }
                                     setQrisUploading(true);
                                     try {
                                       const formData = new FormData();
@@ -658,8 +634,8 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
                                       const data = await res.json();
                                       if (res.ok && data.url) {
                                         const updated = [...bankAccounts]; updated[bank._idx] = { ...updated[bank._idx], qris_image_url: data.url }; setBankAccounts(updated);
-                                      } else { alert(data.error || "Gagal upload"); }
-                                    } catch { alert("Gagal upload"); }
+                                      } else { toast(data.error || "Gagal upload"); }
+                                    } catch { toastError("Gagal upload"); }
                                     finally { setQrisUploading(false); }
                                   }} />
                                 </label>
@@ -803,7 +779,7 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
             <h3 className="text-sm font-semibold text-text mb-1">Site Configuration</h3>
             <p className="text-text-muted text-xs mb-4">Dikelola via environment variables.</p>
             <div className="space-y-2">
-              {["NEXT_PUBLIC_WHATSAPP_NUMBER", "ADMIN_EMAIL", "ENCRYPTION_KEY", "MIDTRANS_SERVER_KEY"].map((key) => (
+              {["NEXT_PUBLIC_WHATSAPP_NUMBER", "ADMIN_EMAIL", "ENCRYPTION_KEY", "IPAYMU_API_KEY", "IPAYMU_VA"].map((key) => (
                 <div key={key} className="flex justify-between items-center py-2 border-b border-white/5 last:border-0">
                   <span className="text-xs text-text-muted font-mono">{key}</span>
                   <CheckCircle className="w-3.5 h-3.5 text-green-400" />

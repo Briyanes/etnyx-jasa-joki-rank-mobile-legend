@@ -1,5 +1,6 @@
 "use client";
 
+import { toast } from "@/components/ToastProvider";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -583,14 +584,14 @@ export default function CustomerDashboard() {
                                 });
                                 const data = await res.json();
                                 if (data.success) {
-                                  alert(data.message);
+                                  toast(data.message);
                                   fetchData();
                                   fetchRewards();
                                 } else {
-                                  alert(data.error || t.redeemFail);
+                                  toast(data.error || t.redeemFail);
                                 }
                               } catch {
-                                alert(t.redeemFail);
+                                toast(t.redeemFail);
                               } finally {
                                 setRedeemingId(null);
                               }

@@ -34,13 +34,10 @@ Platform jasa joki Mobile Legends profesional dengan sistem pembayaran ganda, ma
 - **Analytics Dashboard** - Revenue trend (AreaChart), order stats, package breakdown (paginated), top customers, customer growth, rank pair analytics
 - **Worker Leaderboard** - Peringkat worker berdasarkan score, winrate, MVP, savage, rating. Podium top 3, sortable columns
 - **Invoice PDF** - Generate invoice PDF per order (pdf-lib), tersedia untuk admin & customer
-- **Bulk Export CSV** - Export orders ke CSV dengan filter status & tanggal, UTF-8 BOM untuk Excel
-- **SLA & Auto-Reminder** - Deadline otomatis (24h express, 48h premium, 72h standard), cron check harian, Telegram alert untuk order overdue
-- **Worker Slider** - Lead dashboard menampilkan worker dalam horizontal slider dengan navigasi panah
 - **Tracking Pixels** - Meta Pixel, GA4, GTM, TikTok
 - **Integrasi** - Midtrans, Resend Email, Fonnte WA, Telegram Bot
 - **Rekening Transfer Manual** - Kelola rekening, upload QRIS
-- **Health Check** - Enhanced `/api/health` cek Supabase, Midtrans, Telegram, Email dengan latency
+- **Export Data** - CSV/Excel
 - **Audit Log** - Semua aksi admin tercatat
 
 ### 🔔 Notifikasi
@@ -52,18 +49,7 @@ Platform jasa joki Mobile Legends profesional dengan sistem pembayaran ganda, ma
 - **Follow-Up Templates** - 7 template WA follow-up (payment, credentials, progress, dll)
 - **Separate Review & Report** - Link review dan report worker terpisah di WA order selesai
 
-### � Customer Portal
-- **Order Detail Page** - Detail lengkap order: status, progress, rank info, payment, worker submissions, screenshot gallery, timeline
-- **Invoice Download** - Customer bisa download invoice PDF langsung dari dashboard
-- **Notification Preferences** - Toggle 6 preferensi notifikasi (email/WA/push × order updates/promotions)
-- **Activity Log** - Riwayat aktivitas customer (login, order, profile update, dll) dengan IP & user agent
-
-### 🌐 SEO & Structured Data
-- **JSON-LD** - LocalBusiness structured data dengan AggregateRating dan AggregateOffer
-- **Sitemap** - Auto-generated sitemap.xml
-- **Robots.txt** - Optimized untuk search engines
-
-### �🔒 Security
+### 🔒 Security
 - **Enkripsi** - Credential order dienkripsi di database
 - **Rate Limiting** - Per-IP, strict untuk auth endpoints
 - **Input Sanitization** - XSS prevention
@@ -97,7 +83,7 @@ etnyx/
 ├── public/                    # Static assets, PWA, icons
 ├── src/
 │   ├── app/
-│   │   ├── api/              # 65+ API routes
+│   │   ├── api/              # 60+ API routes
 │   │   │   ├── admin/        # Admin CRUD (orders, settings, staff, rewards, payroll)
 │   │   │   ├── customer/     # Customer auth, orders, rewards
 │   │   │   ├── staff/        # Staff auth, orders, submissions
@@ -235,9 +221,8 @@ Dashboard → Orders → Klik "Lihat Bukti Transfer"
 |--------|-------|-----------|
 | POST | `/api/customer/auth` | Register/login |
 | POST | `/api/customer/order` | Buat order baru |
-| GET | `/api/customer/orders` | Daftar order customer || GET | `/api/customer/order-detail` | Detail order lengkap + submissions + timeline |
-| GET/PUT | `/api/customer/notification-preferences` | Preferensi notifikasi |
-| GET | `/api/customer/activity` | Activity log customer || GET/POST | `/api/customer/rewards` | Reward points & redeem |
+| GET | `/api/customer/orders` | Daftar order customer |
+| GET/POST | `/api/customer/rewards` | Reward points & redeem |
 
 ### Payment
 | Method | Route | Deskripsi |
@@ -257,10 +242,7 @@ Dashboard → Orders → Klik "Lihat Bukti Transfer"
 | GET | `/api/admin/analytics` | Analytics dashboard (revenue, packages, customers, ranks) |
 | GET | `/api/admin/worker-leaderboard` | Worker performance leaderboard |
 | GET | `/api/admin/export` | Export data |
-| GET | `/api/admin/export-orders` | Bulk export orders CSV (filter status/tanggal) |
 | GET | `/api/invoice` | Generate invoice PDF/HTML |
-| POST/GET | `/api/admin/sla-check` | SLA deadline check + auto-reminder |
-| GET | `/api/health` | Enhanced health check (Supabase, Midtrans, Telegram, Email) |
 | CRUD | `/api/admin/testimonials` | Kelola testimoni |
 | CRUD | `/api/admin/portfolio` | Kelola portfolio |
 | CRUD | `/api/admin/promo-codes` | Kelola promo codes |
@@ -278,7 +260,7 @@ Dashboard → Orders → Klik "Lihat Bukti Transfer"
 
 ---
 
-## 🗃️ Database (29+ Tables)
+## 🗃️ Database (27+ Tables)
 
 ### Core
 - `orders` - Order dengan payment_method, payment_status, encryption, current_star/target_star
@@ -306,8 +288,6 @@ Dashboard → Orders → Klik "Lihat Bukti Transfer"
 
 ### System
 - `admin_audit_log`, `push_subscriptions`
-- `notification_preferences` - Preferensi notifikasi per customer (email/WA/push)
-- `customer_activity_log` - Log aktivitas customer (action, IP, user agent)
 
 ---
 
@@ -334,7 +314,6 @@ Jalankan di Supabase SQL Editor secara berurutan:
 | `supabase-schema-v18.sql` | v18: Star/division tracking (current_star, target_star) |
 | `supabase-schema-v19.sql` | v19: Password reset tokens table |
 | `supabase-schema-v20.sql` | v20: Seed 30 workers (15 per lead) |
-| `supabase-schema-v21.sql` | v21: Notification preferences, customer activity log, SLA tracking |
 
 ---
 
@@ -386,25 +365,14 @@ npm run build         # Production build
 |-----------|----------|
 | `helpers.test.ts` | Helper/utility function tests |
 | `api/promo.test.ts` | Promo code API tests |
-| `validation.test.ts` | Input validation & sanitization |
-| `encryption.test.ts` | AES encryption tests |
-| `admin-auth.test.ts` | Admin authentication tests |
-| `notifications.test.ts` | Multi-channel notification tests |
-| `constants.test.ts` | Constants & config tests |
-| `activity-log.test.ts` | Customer activity log tests |
-
-**Total: 38 unit tests passing**
 
 ---
 
 ## 📝 Recent Commits
 
 | Hash | Deskripsi |
-|------|-----------|| `2f06669` | Fix cron schedule for Vercel Hobby plan |
-| `c853063` | Worker list horizontal slider di Lead dashboard |
-| `011bf40` | 8 fitur baru: order detail, invoice download, notif prefs, SLA, SEO, activity log, CSV export, health check |
-| `efe2c30` | Comprehensive improvements: tests, 404 pages, skeleton loading, theme, E2E |
-| `5d1b60b` | Remove unused empty files || `aa1e7ce` | Fix mobile responsive Lead & Worker dashboards |
+|------|-----------|
+| `aa1e7ce` | Fix mobile responsive Lead & Worker dashboards |
 | `3d3cbd8` | Normalize Analytics tab theme to match dashboard |
 | `prev` | Fix delete button visibility for inactive staff |
 | `prev` | Worker Leaderboard tab (podium, sortable, performance score) |

@@ -2,15 +2,36 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import { sanitizeInput, isValidRank, isValidPhone } from "@/lib/validation";
 import { encryptField, decryptField } from "@/lib/encryption";
+import crypto from "crypto";
 
 // Re-export for backward compatibility
 export { decryptField } from "@/lib/encryption";
 
-const MIDTRANS_SERVER_KEY = process.env.MIDTRANS_SERVER_KEY || "";
-const MIDTRANS_IS_PRODUCTION = process.env.MIDTRANS_IS_PRODUCTION === "true";
-const MIDTRANS_API_URL = MIDTRANS_IS_PRODUCTION
-  ? "https://app.midtrans.com/snap/v1/transactions"
-  : "https://app.sandbox.midtrans.com/snap/v1/transactions";
+const IPAYMU_API_KEY = process.env.IPAYMU_API_KEY || "";
+const IPAYMU_VA = process.env.IPAYMU_VA || "";
+const IPAYMU_IS_PRODUCTION = process.env.IPAYMU_IS_PRODUCTION === "true";
+
+function getIpaymuUrl(isProduction: boolean) {
+  return isProduction
+    ? "https://my.ipaymu.com/api/v2/payment"
+    : "https://sandbox.ipaymu.com/api/v2/payment";
+}
+
+function generateIpaymuSignature(body: object, va: string, apiKey: string): string {
+  const bodyHash = crypto.createHash("sha256").update(JSON.stringify(body)).digest("hex");
+  const stringToSign = `POST:${va}:${bodyHash}:${apiKey}`;
+  return crypto.createHmac("sha256", apiKey).update(stringToSign).digest("hex");
+}
+
+function getIpaymuTimestamp(): string {
+  const now = new Date();
+  return now.getFullYear().toString() +
+    String(now.getMonth() + 1).padStart(2, "0") +
+    String(now.getDate()).padStart(2, "0") +
+    String(now.getHours()).padStart(2, "0") +
+    String(now.getMinutes()).padStart(2, "0") +
+    String(now.getSeconds()).padStart(2, "0");
+}
 
 // Simple in-memory rate limiter
 const orderRateLimit = new Map<string, number[]>();
@@ -254,7 +275,7 @@ export async function POST(request: NextRequest) {
         gclid,
         ttclid,
         referrer_url: referrerUrl,
-        payment_method: body.paymentMethod === "manual_transfer" ? "manual_transfer" : "midtrans",
+        payment_method: body.paymentMethod === "manual_transfer" ? "manual_transfer" : "ipaymu",
       })
       .select("id, order_id, total_price")
       .single();
@@ -303,89 +324,85 @@ export async function POST(request: NextRequest) {
       if (refErr) console.error("Referral insert error:", refErr);
     }
 
-    // Create Midtrans payment (only for auto/midtrans payment method)
+    // Create iPaymu payment (only for auto/ipaymu payment method)
     let paymentUrl: string | undefined;
     const isManualTransfer = body.paymentMethod === "manual_transfer";
 
     if (!isManualTransfer) {
-    // Get Midtrans key: prefer database (admin dashboard) over env
-    let midtransKey = MIDTRANS_SERVER_KEY;
-    let midtransIsProduction = MIDTRANS_IS_PRODUCTION;
+    // Get iPaymu keys: prefer database (admin dashboard) over env
+    let ipaymuApiKey = IPAYMU_API_KEY;
+    let ipaymuVa = IPAYMU_VA;
+    let ipaymuIsProduction = IPAYMU_IS_PRODUCTION;
     try {
       const { data: intSettings } = await supabase
         .from("settings")
         .select("value")
         .eq("key", "integrations")
         .single();
-      if (intSettings?.value?.midtransServerKey) {
-        midtransKey = intSettings.value.midtransServerKey;
+      if (intSettings?.value?.ipaymuApiKey) {
+        ipaymuApiKey = intSettings.value.ipaymuApiKey;
       }
-      if (intSettings?.value?.midtransIsProduction !== undefined) {
-        midtransIsProduction = intSettings.value.midtransIsProduction;
+      if (intSettings?.value?.ipaymuVa) {
+        ipaymuVa = intSettings.value.ipaymuVa;
+      }
+      if (intSettings?.value?.ipaymuIsProduction !== undefined) {
+        ipaymuIsProduction = intSettings.value.ipaymuIsProduction;
       }
     } catch { /* fallback to env */ }
 
-    // Use dashboard setting; fallback to key prefix detection
-    const midtransApiUrl = midtransIsProduction
-      ? "https://app.midtrans.com/snap/v1/transactions"
-      : "https://app.sandbox.midtrans.com/snap/v1/transactions";
+    const ipaymuApiUrl = getIpaymuUrl(ipaymuIsProduction);
 
-    if (midtransKey) {
+    if (ipaymuApiKey && ipaymuVa) {
       try {
-        const midtransOrderId = `ETN-${orderId}-${Date.now()}`;
+        const ipaymuRefId = `ETN-${orderId}-${Date.now()}`;
 
-        const payload = {
-          transaction_details: {
-            order_id: midtransOrderId,
-            gross_amount: verifiedTotalPrice,
-          },
-          customer_details: {
-            first_name: sanitizedNickname,
-            email: sanitizedEmail || "customer@etnyx.com",
-            phone: `+62${cleanWhatsapp}`,
-          },
-          item_details: [
-            {
-              id: orderId,
-              price: verifiedTotalPrice,
-              quantity: 1,
-              name: `Joki ML: ${currentRank} → ${targetRank}`,
-            },
-          ],
-          callbacks: {
-            finish: `${process.env.NEXT_PUBLIC_SITE_URL || ""}/payment/success?order_id=${orderId}`,
-          },
+        const ipaymuBody = {
+          product: [`Joki ML: ${currentRank} → ${targetRank}`],
+          qty: ["1"],
+          price: [String(verifiedTotalPrice)],
+          amount: String(verifiedTotalPrice),
+          returnUrl: `${process.env.NEXT_PUBLIC_SITE_URL || ""}/payment/success?order_id=${orderId}`,
+          cancelUrl: `${process.env.NEXT_PUBLIC_SITE_URL || ""}/payment/success?order_id=${orderId}&transaction_status=cancel`,
+          notifyUrl: `${process.env.NEXT_PUBLIC_SITE_URL || ""}/api/payment/notification`,
+          referenceId: ipaymuRefId,
+          buyerName: sanitizedNickname,
+          buyerPhone: `+62${cleanWhatsapp}`,
+          buyerEmail: sanitizedEmail || "customer@etnyx.com",
         };
 
-        const auth = Buffer.from(`${midtransKey}:`).toString("base64");
-        const midtransRes = await fetch(midtransApiUrl, {
+        const signature = generateIpaymuSignature(ipaymuBody, ipaymuVa, ipaymuApiKey);
+
+        const ipaymuRes = await fetch(ipaymuApiUrl, {
           method: "POST",
           headers: {
+            Accept: "application/json",
             "Content-Type": "application/json",
-            Authorization: `Basic ${auth}`,
+            va: ipaymuVa,
+            signature,
+            timestamp: getIpaymuTimestamp(),
           },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(ipaymuBody),
         });
 
-        const midtransData = await midtransRes.json();
+        const ipaymuData = await ipaymuRes.json();
 
-        if (midtransRes.ok && midtransData.redirect_url) {
-          paymentUrl = midtransData.redirect_url;
+        if (ipaymuRes.ok && ipaymuData.Status === 200 && ipaymuData.Data?.Url) {
+          paymentUrl = ipaymuData.Data.Url;
 
           // Save payment info to order
           await supabase
             .from("orders")
             .update({
-              payment_token: midtransData.token,
-              payment_url: midtransData.redirect_url,
-              midtrans_order_id: midtransOrderId,
+              payment_token: ipaymuData.Data.SessionId || null,
+              payment_url: ipaymuData.Data.Url,
+              midtrans_order_id: ipaymuRefId,
             })
             .eq("id", order.id);
         } else {
-          console.error("Midtrans error:", midtransRes.status, JSON.stringify(midtransData));
+          console.error("iPaymu error:", ipaymuRes.status, JSON.stringify(ipaymuData));
         }
       } catch (e) {
-        console.error("Midtrans payment creation error:", e);
+        console.error("iPaymu payment creation error:", e);
         // Order still created, payment can be retried
       }
     }
@@ -447,7 +464,7 @@ export async function POST(request: NextRequest) {
         totalPrice: verifiedTotalPrice,
         discount: verifiedDiscount,
         paymentUrl,
-        paymentMethod: isManualTransfer ? "manual_transfer" : "midtrans",
+        paymentMethod: isManualTransfer ? "manual_transfer" : "ipaymu",
       },
       { status: 201 }
     );

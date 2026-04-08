@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAdmin } from "@/lib/admin-auth";
+import crypto from "crypto";
 
 export async function POST(req: NextRequest) {
   const admin = await verifyAdmin();
@@ -7,41 +8,51 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
   try {
-    const { serverKey, isProduction: isProd } = await req.json();
+    const { apiKey, va, isProduction: isProd } = await req.json();
 
-    if (!serverKey) {
-      return NextResponse.json({ success: false, error: "Server Key belum diisi" }, { status: 400 });
+    if (!apiKey || !va) {
+      return NextResponse.json({ success: false, error: "API Key dan VA belum diisi" }, { status: 400 });
     }
 
-    // Use explicit isProduction from dashboard; fallback to key prefix detection
-    const isProduction = isProd ?? !serverKey.startsWith("SB-");
-    const auth = Buffer.from(`${serverKey}:`).toString("base64");
+    const isProduction = isProd ?? false;
     const url = isProduction
-      ? "https://app.midtrans.com/snap/v1/transactions"
-      : "https://app.sandbox.midtrans.com/snap/v1/transactions";
+      ? "https://my.ipaymu.com/api/v2/balance"
+      : "https://sandbox.ipaymu.com/api/v2/balance";
+
+    const body = { account: va };
+    const bodyHash = crypto.createHash("sha256").update(JSON.stringify(body)).digest("hex");
+    const stringToSign = `POST:${va}:${bodyHash}:${apiKey}`;
+    const signature = crypto.createHmac("sha256", apiKey).update(stringToSign).digest("hex");
+
+    const now = new Date();
+    const timestamp = now.getFullYear().toString() +
+      String(now.getMonth() + 1).padStart(2, "0") +
+      String(now.getDate()).padStart(2, "0") +
+      String(now.getHours()).padStart(2, "0") +
+      String(now.getMinutes()).padStart(2, "0") +
+      String(now.getSeconds()).padStart(2, "0");
 
     const res = await fetch(url, {
       method: "POST",
       headers: {
+        Accept: "application/json",
         "Content-Type": "application/json",
-        Authorization: `Basic ${auth}`,
+        va,
+        signature,
+        timestamp,
       },
-      body: JSON.stringify({
-        transaction_details: { order_id: `TEST-${Date.now()}`, gross_amount: 10000 },
-        customer_details: { first_name: "Test", email: "test@test.com", phone: "+6281234567890" },
-        item_details: [{ id: "test", price: 10000, quantity: 1, name: "Test Connection" }],
-      }),
+      body: JSON.stringify(body),
     });
 
     const data = await res.json();
 
-    if (res.ok && data.redirect_url) {
+    if (res.ok && data.Status === 200) {
       return NextResponse.json({ success: true });
     }
 
     return NextResponse.json({
       success: false,
-      error: data.error_messages?.join(", ") || `HTTP ${res.status}`,
+      error: data.Message || `HTTP ${res.status}`,
     });
   } catch (e) {
     return NextResponse.json({

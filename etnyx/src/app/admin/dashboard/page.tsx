@@ -1,5 +1,6 @@
 "use client";
 
+import { toast, toastSuccess, toastError, toastWarning } from "@/components/ToastProvider";
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -399,10 +400,10 @@ export default function AdminDashboard() {
         ? { id: editStaff.id, name: staffForm.name, role: staffForm.role, phone: staffForm.phone || undefined, password: staffForm.password || undefined, lead_id: staffForm.role === "worker" ? (staffForm.lead_id || null) : null }
         : { email: staffForm.email, name: staffForm.name, password: staffForm.password, role: staffForm.role, phone: staffForm.phone || undefined, lead_id: staffForm.role === "worker" ? (staffForm.lead_id || null) : null };
       const res = await fetch("/api/staff/users", { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-      if (!res.ok) { const d = await res.json(); alert(d.error || "Gagal simpan staff"); return; }
+      if (!res.ok) { const d = await res.json(); toast(d.error || "Gagal simpan staff"); return; }
       setStaffModal(false); setEditStaff(null); setStaffForm({ email: "", name: "", password: "", role: "worker", phone: "", lead_id: "" });
       fetchStaffUsers();
-    } catch { alert("Network error"); }
+    } catch { toastError("Network error"); }
     setStaffSaving(false);
   };
   const handleDeactivateStaff = async (id: string) => {
@@ -441,12 +442,12 @@ export default function AdminDashboard() {
       const res = await fetch("/api/admin/orders", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: orderId, status: newStatus }) });
       const result = await res.json();
       if (!res.ok) {
-        alert(`Gagal update status: ${result.error || "Unknown error"}`);
+        toast(`Gagal update status: ${result.error || "Unknown error"}`);
         setStatusActionLoading(null);
         return;
       }
       if (result._notificationSent === false) {
-        alert(`⚠️ Status berhasil diubah ke ${newStatus}, tapi WA notifikasi GAGAL terkirim ke customer. Cek pengaturan Fonnte di Settings > Integrations.`);
+        toast(`⚠️ Status berhasil diubah ke ${newStatus}, tapi WA notifikasi GAGAL terkirim ke customer. Cek pengaturan Fonnte di Settings > Integrations.`);
       }
       fetchOrders(); fetchStats();
     } catch (e) { console.error(e); }
@@ -458,7 +459,7 @@ export default function AdminDashboard() {
       const res = await fetch(`/api/admin/orders/credentials?id=${orderId}`);
       if (!res.ok) throw new Error("Failed");
       setCredentials(await res.json());
-    } catch { alert("Gagal memuat credentials."); }
+    } catch { toastError("Gagal memuat credentials."); }
   };
 
   const sendFollowUp = async (orderId: string, action: string) => {
@@ -471,11 +472,11 @@ export default function AdminDashboard() {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        alert("✅ " + data.message);
+        toastSuccess("" + data.message);
       } else {
-        alert("⚠️ " + (data.message || data.error || "Gagal mengirim"));
+        toastWarning("" + (data.message || data.error || "Gagal mengirim"));
       }
-    } catch { alert("Network error"); }
+    } catch { toastError("Network error"); }
     setFollowUpLoading(null);
   };
 
@@ -494,11 +495,11 @@ export default function AdminDashboard() {
       });
       if (!res.ok) {
         const d = await res.json();
-        alert(d.error || "Gagal assign worker");
+        toast(d.error || "Gagal assign worker");
       } else {
         fetchOrders();
       }
-    } catch { alert("Network error"); }
+    } catch { toastError("Network error"); }
     setAssigningWorker(null);
   };
 
@@ -534,21 +535,21 @@ export default function AdminDashboard() {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        alert(`✅ Bukti transfer ${action === "approve" ? "diapprove" : "direject"}`);
+        toast(`✅ Bukti transfer ${action === "approve" ? "diapprove" : "direject"}`);
         // Refresh proofs
         setProofs(proofs.map(p => p.id === proofId ? { ...p, status: action === "approve" ? "approved" : "rejected" } : p));
         if (action === "approve") fetchOrders();
       } else {
-        alert("⚠️ " + (data.error || "Gagal"));
+        toastWarning("" + (data.error || "Gagal"));
       }
-    } catch { alert("Network error"); }
+    } catch { toastError("Network error"); }
     setProofActionLoading(null);
   };
 
   const copyOrderInfo = (o: Order) => {
     const text = `Order: ${o.order_id}\nCustomer: ${o.username}\nGame ID: ${o.game_id}\nRank: ${o.current_rank} → ${o.target_rank}\nStatus: ${o.status}\nProgress: ${o.progress}%\nWA: ${o.whatsapp || "-"}\nHarga: ${formatRupiah(o.total_price)}`;
     navigator.clipboard.writeText(text);
-    alert("📋 Info order disalin!");
+    toastSuccess("Info order disalin!");
   };
 
   // CRUD handlers
@@ -606,8 +607,8 @@ export default function AdminDashboard() {
         body: JSON.stringify({ key: "pricing_catalog", value: catalog }),
       });
       if (res.ok) { setPricingSaved(true); setTimeout(() => setPricingSaved(false), 2000); }
-      else alert("Gagal menyimpan pricing.");
-    } catch { alert("Gagal menyimpan pricing."); }
+      else toastError("Gagal menyimpan pricing.");
+    } catch { toastError("Gagal menyimpan pricing."); }
     finally { setPricingSaving(false); }
   };
 
@@ -619,8 +620,8 @@ export default function AdminDashboard() {
         body: JSON.stringify({ key: "perstar_pricing", value: tiers }),
       });
       if (res.ok) { setPricingSaved(true); setTimeout(() => setPricingSaved(false), 2000); }
-      else alert("Gagal menyimpan per star pricing.");
-    } catch { alert("Gagal menyimpan per star pricing."); }
+      else toastError("Gagal menyimpan per star pricing.");
+    } catch { toastError("Gagal menyimpan per star pricing."); }
     finally { setPricingSaving(false); }
   };
 
@@ -633,8 +634,8 @@ export default function AdminDashboard() {
   const saveEditPerStar = (tierId: string) => {
     const price = Math.max(1, parseInt(editPriceValue) || 0);
     const originalPrice = editOriginalPrice ? Math.max(0, parseInt(editOriginalPrice)) : undefined;
-    if (price <= 0) { alert("Harga harus lebih dari 0"); return; }
-    if (originalPrice && originalPrice < price) { alert("Harga asli harus lebih besar dari harga diskon"); return; }
+    if (price <= 0) { toast("Harga harus lebih dari 0"); return; }
+    if (originalPrice && originalPrice < price) { toast("Harga asli harus lebih besar dari harga diskon"); return; }
     const newTiers = perStarPricing.map(tier => {
       if (tier.id !== tierId) return tier;
       const discountPercent = originalPrice && originalPrice > price
@@ -655,8 +656,8 @@ export default function AdminDashboard() {
         body: JSON.stringify({ key: "gendong_pricing", value: tiers }),
       });
       if (res.ok) { setPricingSaved(true); setTimeout(() => setPricingSaved(false), 2000); }
-      else alert("Gagal menyimpan gendong pricing.");
-    } catch { alert("Gagal menyimpan gendong pricing."); }
+      else toastError("Gagal menyimpan gendong pricing.");
+    } catch { toastError("Gagal menyimpan gendong pricing."); }
     finally { setPricingSaving(false); }
   };
 
@@ -683,8 +684,8 @@ export default function AdminDashboard() {
         body: JSON.stringify({ key: "season_pricing", value: data }),
       });
       if (res.ok) { setSeasonSaved(true); setTimeout(() => setSeasonSaved(false), 2000); }
-      else alert("Gagal menyimpan season pricing.");
-    } catch { alert("Gagal menyimpan season pricing."); }
+      else toastError("Gagal menyimpan season pricing.");
+    } catch { toastError("Gagal menyimpan season pricing."); }
     finally { setSeasonSaving(false); }
   };
 
@@ -1480,7 +1481,7 @@ export default function AdminDashboard() {
                           const res = await fetch("/api/admin/settings?key=pricing_catalog");
                           const d = await res.json();
                           if (!d.value) {
-                            alert("Jalankan supabase-schema-v7.sql yang berisi default pricing_catalog terlebih dahulu, atau klik 'Import Default' di bawah.");
+                            toast("Jalankan supabase-schema-v7.sql yang berisi default pricing_catalog terlebih dahulu, atau klik 'Import Default' di bawah.");
                           }
                         }}
                         className="px-4 py-2 bg-accent/10 text-accent rounded-lg text-sm hover:bg-accent/20 transition"
@@ -2013,9 +2014,9 @@ export default function AdminDashboard() {
                               }).then(r => r.json()).then(d => {
                                 if (d.success) {
                                   setCustomers(prev => prev.map(x => x.id === c.id ? { ...x, reward_points: d.newBalance, reward_tier: d.newTier } : x));
-                                  alert(`Berhasil! Saldo baru: ${d.newBalance} poin (${d.newTier})`);
-                                } else alert("Gagal: " + (d.error || "Unknown error"));
-                              }).catch(() => alert("Gagal adjust poin"));
+                                  toast(`Berhasil! Saldo baru: ${d.newBalance} poin (${d.newTier})`);
+                                } else toast("Gagal: " + (d.error || "Unknown error"));
+                              }).catch(() => toastError("Gagal adjust poin"));
                             }}
                             className="p-1.5 rounded-lg hover:bg-white/5 text-text-muted hover:text-accent transition-colors"
                             title="Adjust Points"
@@ -2556,8 +2557,8 @@ export default function AdminDashboard() {
             <div className="flex gap-3 mt-5">
               <button onClick={() => setCatalogModal(false)} className="flex-1 px-3 py-2 border border-white/10 rounded-lg text-text-muted text-sm">Batal</button>
               <button onClick={async () => {
-                if (!catalogForm.name.trim()) return alert("Nama hadiah wajib diisi");
-                if (catalogForm.pointsCost < 1) return alert("Poin harus minimal 1");
+                if (!catalogForm.name.trim()) return toast("Nama hadiah wajib diisi");
+                if (catalogForm.pointsCost < 1) return toast("Poin harus minimal 1");
                 const body = {
                   name: catalogForm.name.trim(),
                   description: catalogForm.description.trim() || null,
@@ -2569,7 +2570,7 @@ export default function AdminDashboard() {
                 };
                 const method = editCatalogItem ? "PUT" : "POST";
                 const res = await fetch("/api/admin/rewards/catalog", { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-                if (res.ok) { fetchRewardsCatalog(); setCatalogModal(false); } else { const d = await res.json(); alert(d.error || "Gagal menyimpan"); }
+                if (res.ok) { fetchRewardsCatalog(); setCatalogModal(false); } else { const d = await res.json(); toast(d.error || "Gagal menyimpan"); }
               }} className="flex-1 gradient-primary px-3 py-2 rounded-lg text-white text-sm font-medium">
                 <Save className="w-4 h-4 inline mr-1" /> Simpan
               </button>
@@ -2726,10 +2727,10 @@ function PortfolioModal({ item, onSave, onClose }: { item: Portfolio | null; onS
       if (data.url) {
         setForm((prev) => ({ ...prev, image_after_url: data.url }));
       } else {
-        alert(data.error || "Upload gagal");
+        toast(data.error || "Upload gagal");
       }
     } catch {
-      alert("Upload gagal");
+      toastError("Upload gagal");
     } finally {
       setUploading(false);
     }

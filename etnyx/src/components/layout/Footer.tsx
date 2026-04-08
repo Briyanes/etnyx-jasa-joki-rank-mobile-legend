@@ -87,6 +87,7 @@ export default function Footer() {
   const legalLinks = [
     { href: "/terms", label: locale === "id" ? "Syarat & Ketentuan" : "Terms of Service" },
     { href: "/privacy", label: locale === "id" ? "Kebijakan Privasi" : "Privacy Policy" },
+    { href: "/refund-policy", label: locale === "id" ? "Kebijakan Refund" : "Refund Policy" },
   ];
 
   const socials = [
@@ -183,11 +184,24 @@ export default function Footer() {
           {/* Bottom divider with glow */}
           <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent mb-5 sm:mb-6" />
 
-          {/* Bottom bar */}
-          <div className="flex flex-col items-center gap-2 sm:gap-3">
-            <p className="text-text-muted/40 text-[10px] sm:text-xs tracking-wide">
+          {/* Address & Company Info */}
+          <div className="text-center mb-5 sm:mb-6 space-y-1">
+            <p className="text-text-muted/40 text-[10px] sm:text-xs tracking-wide font-medium">
               {siteInfo?.companyName || "PT Sumber Arto Moro Abadi Kreatif"}
             </p>
+            <p className="text-text-muted/30 text-[10px] sm:text-xs">
+              Jl. Kaliurang KM 5.5, Caturtunggal, Depok, Sleman, D.I. Yogyakarta 55281, Indonesia
+            </p>
+            <p className="text-text-muted/30 text-[10px] sm:text-xs">
+              Email: {siteInfo?.supportEmail || "support@etnyx.id"} • WhatsApp: +62 815-1514-1452
+            </p>
+          </div>
+
+          {/* Bottom divider */}
+          <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent mb-5 sm:mb-6" />
+
+          {/* Bottom bar */}
+          <div className="flex flex-col items-center gap-2 sm:gap-3">
             <div className="flex flex-col sm:flex-row items-center gap-1.5 sm:gap-6">
               <p className="text-text-muted/50 text-[10px] sm:text-xs">
                 © {currentYear} ETNYX. All rights reserved.

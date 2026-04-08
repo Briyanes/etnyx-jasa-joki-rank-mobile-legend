@@ -5,6 +5,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import TrackingPixels from "@/components/TrackingPixels";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import { ToastProvider } from "@/components/ToastProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -239,8 +240,10 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen bg-background text-text antialiased">
         <LanguageProvider>
-          {children}
-          <ThemeToggle />
+          <ToastProvider>
+            {children}
+            <ThemeToggle />
+          </ToastProvider>
         </LanguageProvider>
         <TrackingPixels />
         <ServiceWorkerRegister />

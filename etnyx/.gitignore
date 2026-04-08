@@ -40,6 +40,9 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 
+# docs (content strategy - managed in Notion)
+/docs/
+
 # vercel
 .vercel
 vercel-env.txt

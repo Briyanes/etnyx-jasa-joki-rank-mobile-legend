@@ -19,19 +19,21 @@ async function checkSupabase(): Promise<ServiceStatus> {
   }
 }
 
-async function checkMidtrans(): Promise<ServiceStatus> {
-  const serverKey = process.env.MIDTRANS_SERVER_KEY;
-  if (!serverKey) return { status: "error", error: "Not configured" };
+async function checkIpaymu(): Promise<ServiceStatus> {
+  const apiKey = process.env.IPAYMU_API_KEY;
+  const va = process.env.IPAYMU_VA;
+  if (!apiKey || !va) return { status: "error", error: "Not configured" };
 
   const start = Date.now();
   try {
-    const isProduction = process.env.MIDTRANS_IS_PRODUCTION === "true";
+    const isProduction = process.env.IPAYMU_IS_PRODUCTION === "true";
     const baseUrl = isProduction
-      ? "https://api.midtrans.com"
-      : "https://api.sandbox.midtrans.com";
+      ? "https://my.ipaymu.com"
+      : "https://sandbox.ipaymu.com";
 
-    const res = await fetch(`${baseUrl}/v2/ping`, {
-      headers: { Accept: "application/json" },
+    const res = await fetch(`${baseUrl}/api/v2/balance`, {
+      method: "POST",
+      headers: { Accept: "application/json", "Content-Type": "application/json" },
       signal: AbortSignal.timeout(5000),
     });
     return { status: res.ok ? "ok" : "error", latency_ms: Date.now() - start };
@@ -83,13 +85,13 @@ async function checkNotifications(): Promise<Record<string, ServiceStatus>> {
 export async function GET() {
   const start = Date.now();
 
-  const [supabase, midtrans, notifications] = await Promise.all([
+  const [supabase, ipaymu, notifications] = await Promise.all([
     checkSupabase(),
-    checkMidtrans(),
+    checkIpaymu(),
     checkNotifications(),
   ]);
 
-  const allOk = supabase.status === "ok" && midtrans.status === "ok";
+  const allOk = supabase.status === "ok" && ipaymu.status === "ok";
   const overallStatus = allOk ? "healthy" : "degraded";
 
   return NextResponse.json(
@@ -101,7 +103,7 @@ export async function GET() {
       uptime_check_ms: Date.now() - start,
       services: {
         supabase,
-        midtrans,
+        ipaymu,
         ...notifications,
       },
     },

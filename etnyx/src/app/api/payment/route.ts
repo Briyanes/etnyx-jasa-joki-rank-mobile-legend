@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
-import { sendNewOrderNotifications } from "@/lib/notifications";
+import crypto from "crypto";
 
-// Get Midtrans settings from database or env
-async function getMidtransSettings() {
+// Get iPaymu settings from database or env
+async function getIpaymuSettings() {
   try {
     const supabase = await createAdminClient();
     const { data } = await supabase
@@ -14,24 +14,42 @@ async function getMidtransSettings() {
     
     const settings = data?.value || {};
     return {
-      serverKey: settings.midtransServerKey || process.env.MIDTRANS_SERVER_KEY || "",
-      isProduction: settings.midtransIsProduction ?? (process.env.MIDTRANS_IS_PRODUCTION === "true"),
+      apiKey: settings.ipaymuApiKey || process.env.IPAYMU_API_KEY || "",
+      va: settings.ipaymuVa || process.env.IPAYMU_VA || "",
+      isProduction: settings.ipaymuIsProduction ?? (process.env.IPAYMU_IS_PRODUCTION === "true"),
     };
   } catch {
     return {
-      serverKey: process.env.MIDTRANS_SERVER_KEY || "",
-      isProduction: process.env.MIDTRANS_IS_PRODUCTION === "true",
+      apiKey: process.env.IPAYMU_API_KEY || "",
+      va: process.env.IPAYMU_VA || "",
+      isProduction: process.env.IPAYMU_IS_PRODUCTION === "true",
     };
   }
+}
+
+function generateSignature(body: object, va: string, apiKey: string): string {
+  const bodyHash = crypto.createHash("sha256").update(JSON.stringify(body)).digest("hex");
+  const stringToSign = `POST:${va}:${bodyHash}:${apiKey}`;
+  return crypto.createHmac("sha256", apiKey).update(stringToSign).digest("hex");
+}
+
+function getTimestamp(): string {
+  const now = new Date();
+  return now.getFullYear().toString() +
+    String(now.getMonth() + 1).padStart(2, "0") +
+    String(now.getDate()).padStart(2, "0") +
+    String(now.getHours()).padStart(2, "0") +
+    String(now.getMinutes()).padStart(2, "0") +
+    String(now.getSeconds()).padStart(2, "0");
 }
 
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createAdminClient();
     const body = await request.json();
-    const { orderId, amount, customerName, customerEmail, customerPhone, itemName } = body;
+    const { orderId, customerName, customerEmail, customerPhone, itemName } = body;
 
-    if (!orderId || !amount) {
+    if (!orderId) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
@@ -50,78 +68,64 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Order already processed" }, { status: 400 });
     }
 
-    // Get Midtrans settings
-    const midtrans = await getMidtransSettings();
-    const MIDTRANS_API_URL = midtrans.isProduction
-      ? "https://app.midtrans.com/snap/v1/transactions"
-      : "https://app.sandbox.midtrans.com/snap/v1/transactions";
+    // Get iPaymu settings
+    const ipaymu = await getIpaymuSettings();
+    const apiUrl = ipaymu.isProduction
+      ? "https://my.ipaymu.com/api/v2/payment"
+      : "https://sandbox.ipaymu.com/api/v2/payment";
 
-    // Use verified price from database, not client-supplied amount
-    const verifiedAmount = order.total_price || amount;
+    // Use verified price from database
+    const verifiedAmount = order.total_price;
+    const refId = `ETN-${orderId}-${Date.now()}`;
 
-    // Prepare Midtrans request
-    const transactionDetails = {
-      order_id: `ETN-${orderId}-${Date.now()}`,
-      gross_amount: verifiedAmount,
+    const ipaymuBody = {
+      product: [itemName || "Joki ML Service"],
+      qty: ["1"],
+      price: [String(verifiedAmount)],
+      amount: String(verifiedAmount),
+      returnUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/payment/success?order_id=${orderId}`,
+      cancelUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/payment/success?order_id=${orderId}&transaction_status=cancel`,
+      notifyUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/api/payment/notification`,
+      referenceId: refId,
+      buyerName: customerName || "Customer",
+      buyerPhone: customerPhone || "",
+      buyerEmail: customerEmail || "customer@email.com",
     };
 
-    const customerDetails = {
-      first_name: customerName || "Customer",
-      email: customerEmail || "customer@email.com",
-      phone: customerPhone || "",
-    };
+    const signature = generateSignature(ipaymuBody, ipaymu.va, ipaymu.apiKey);
 
-    const itemDetails = [
-      {
-        id: orderId,
-        price: verifiedAmount,
-        quantity: 1,
-        name: itemName || "Joki ML Service",
-      },
-    ];
-
-    const payload = {
-      transaction_details: transactionDetails,
-      customer_details: customerDetails,
-      item_details: itemDetails,
-      callbacks: {
-        finish: `${process.env.NEXT_PUBLIC_SITE_URL}/payment/success?order_id=${orderId}`,
-      },
-    };
-
-    // Create Midtrans transaction
-    const auth = Buffer.from(`${midtrans.serverKey}:`).toString("base64");
-
-    const response = await fetch(MIDTRANS_API_URL, {
+    const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
+        Accept: "application/json",
         "Content-Type": "application/json",
-        Authorization: `Basic ${auth}`,
+        va: ipaymu.va,
+        signature,
+        timestamp: getTimestamp(),
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(ipaymuBody),
     });
 
     const data = await response.json();
 
-    if (!response.ok) {
-      console.error("Midtrans error:", data);
+    if (!response.ok || data.Status !== 200 || !data.Data?.Url) {
+      console.error("iPaymu error:", data);
       return NextResponse.json({ error: "Payment initialization failed" }, { status: 500 });
     }
 
     // Save payment token to order
     await supabase
       .from("orders")
-      .update({ 
-        payment_token: data.token,
-        payment_url: data.redirect_url,
-        midtrans_order_id: transactionDetails.order_id
+      .update({
+        payment_token: data.Data.SessionId || null,
+        payment_url: data.Data.Url,
+        midtrans_order_id: refId,
       })
       .eq("id", order.id);
 
     return NextResponse.json({
       success: true,
-      token: data.token,
-      redirect_url: data.redirect_url,
+      redirect_url: data.Data.Url,
     });
   } catch (error) {
     console.error("Payment error:", error);

@@ -1,5 +1,6 @@
 "use client";
 
+import { toast, toastError } from "@/components/ToastProvider";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -243,9 +244,9 @@ export default function LeadDashboard() {
         await fetchOrders();
       } else {
         const data = await res.json();
-        alert(data.error || "Gagal assign order");
+        toast(data.error || "Gagal assign order");
       }
-    } catch { alert("Network error"); }
+    } catch { toastError("Network error"); }
     setAssignLoading(false);
   };
 
@@ -260,9 +261,9 @@ export default function LeadDashboard() {
       if (res.ok) await fetchOrders();
       else {
         const data = await res.json();
-        alert(data.error || "Gagal update status");
+        toast(data.error || "Gagal update status");
       }
-    } catch { alert("Network error"); }
+    } catch { toastError("Network error"); }
     setUpdatingStatus(null);
   };
 
@@ -280,7 +281,7 @@ export default function LeadDashboard() {
         if (res.ok) success++;
       } catch { /* continue */ }
     }
-    alert(`${success}/${selectedOrders.size} order berhasil di-assign`);
+    toast(`${success}/${selectedOrders.size} order berhasil di-assign`);
     setSelectedOrders(new Set());
     setBulkAssigning(false);
     setBulkWorker("");
@@ -302,7 +303,7 @@ export default function LeadDashboard() {
         setNewNote("");
         await fetchNotes(orderId);
       }
-    } catch { alert("Gagal kirim catatan"); }
+    } catch { toastError("Gagal kirim catatan"); }
     setNoteSending(false);
   };
 

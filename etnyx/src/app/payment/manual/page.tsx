@@ -1,5 +1,6 @@
 "use client";
 
+import { toastError } from "@/components/ToastProvider";
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -165,7 +166,7 @@ function ManualPaymentContent() {
     const f = e.target.files?.[0];
     if (!f) return;
     if (f.size > 5 * 1024 * 1024) {
-      alert("File terlalu besar. Maksimal 5MB.");
+      toastError("File terlalu besar. Maksimal 5MB.");
       return;
     }
     setFile(f);
@@ -195,12 +196,12 @@ function ManualPaymentContent() {
 
       const data = await res.json();
       if (!res.ok) {
-        alert(data.error || "Gagal upload bukti transfer");
+        toastError(data.error || "Gagal upload bukti transfer");
         return;
       }
       setUploaded(true);
     } catch {
-      alert("Gagal mengirim bukti. Coba lagi.");
+      toastError("Gagal mengirim bukti. Coba lagi.");
     } finally {
       setUploading(false);
     }

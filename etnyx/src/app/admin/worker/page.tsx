@@ -1,5 +1,6 @@
 "use client";
 
+import { toast, toastError } from "@/components/ToastProvider";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -182,9 +183,9 @@ export default function WorkerDashboard() {
         setCredentials(prev => ({ ...prev, [orderId]: data }));
         setShowCredentials(orderId);
       } else {
-        alert("Gagal load credentials");
+        toastError("Gagal load credentials");
       }
-    } catch { alert("Network error"); }
+    } catch { toastError("Network error"); }
     setLoadingCreds(false);
   };
 
@@ -209,7 +210,7 @@ export default function WorkerDashboard() {
         setNewNote("");
         await fetchNotes(orderId);
       }
-    } catch { alert("Gagal kirim catatan"); }
+    } catch { toastError("Gagal kirim catatan"); }
     setNoteSending(false);
   };
 
@@ -238,9 +239,9 @@ export default function WorkerDashboard() {
         await fetchOrders();
       } else {
         const data = await res.json();
-        alert(data.error || "Gagal edit submission");
+        toast(data.error || "Gagal edit submission");
       }
-    } catch { alert("Network error"); }
+    } catch { toastError("Network error"); }
     setEditLoading(false);
   };
 
@@ -254,9 +255,9 @@ export default function WorkerDashboard() {
         await fetchOrders();
       } else {
         const data = await res.json();
-        alert(data.error || "Gagal hapus submission");
+        toast(data.error || "Gagal hapus submission");
       }
-    } catch { alert("Network error"); }
+    } catch { toastError("Network error"); }
     setDeleteLoading(null);
   };
 
@@ -283,7 +284,7 @@ export default function WorkerDashboard() {
         body: JSON.stringify({ orderId, status: "in_progress" }),
       });
       if (res.ok) await fetchOrders();
-    } catch { alert("Gagal update status"); }
+    } catch { toastError("Gagal update status"); }
   };
 
   const handleUpdateProgress = async (orderId: string) => {
@@ -297,7 +298,7 @@ export default function WorkerDashboard() {
         setUpdatingProgress(null);
         await fetchOrders();
       }
-    } catch { alert("Gagal update progress"); }
+    } catch { toastError("Gagal update progress"); }
   };
 
   const handleCompleteOrder = async (orderId: string) => {
@@ -309,7 +310,7 @@ export default function WorkerDashboard() {
         body: JSON.stringify({ orderId, status: "completed", progress: 100 }),
       });
       if (res.ok) await fetchOrders();
-    } catch { alert("Gagal update status"); }
+    } catch { toastError("Gagal update status"); }
   };
 
   const handleUploadScreenshot = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -324,15 +325,15 @@ export default function WorkerDashboard() {
       if (res.ok && data.url) {
         setScreenshots(prev => [...prev, data.url]);
       } else {
-        alert(data.error || "Upload gagal");
+        toast(data.error || "Upload gagal");
       }
-    } catch { alert("Upload gagal"); }
+    } catch { toastError("Upload gagal"); }
     setUploading(false);
     if (fileRef.current) fileRef.current.value = "";
   };
 
   const handleSubmitResult = async (orderId: string) => {
-    if (form.matchesPlayed === 0) { alert("Isi jumlah match yang dimainkan"); return; }
+    if (form.matchesPlayed === 0) { toast("Isi jumlah match yang dimainkan"); return; }
     setSubmitting(true);
     try {
       const res = await fetch("/api/staff/submissions", {
@@ -359,9 +360,9 @@ export default function WorkerDashboard() {
         await fetchSubmissions(orderId);
       } else {
         const data = await res.json();
-        alert(data.error || "Gagal submit");
+        toast(data.error || "Gagal submit");
       }
-    } catch { alert("Network error"); }
+    } catch { toastError("Network error"); }
     setSubmitting(false);
   };
 

@@ -5,11 +5,11 @@ import { createServerSupabase } from "@/lib/supabase-server";
 export async function GET() {
   const supabase = await createServerSupabase();
 
-  let midtransEnabled = false;
+  let ipaymuEnabled = false;
 
   // Check env vars first
-  if (process.env.MIDTRANS_SERVER_KEY) {
-    midtransEnabled = true;
+  if (process.env.IPAYMU_API_KEY && process.env.IPAYMU_VA) {
+    ipaymuEnabled = true;
   }
 
   // Check database integrations (admin dashboard config overrides)
@@ -22,19 +22,19 @@ export async function GET() {
 
     if (data?.value) {
       const integrations = data.value;
-      // If server key is filled in dashboard, Midtrans is enabled
-      if (integrations.midtransServerKey) {
-        midtransEnabled = true;
+      // If API key and VA are filled in dashboard, iPaymu is enabled
+      if (integrations.ipaymuApiKey && integrations.ipaymuVa) {
+        ipaymuEnabled = true;
       }
       // If dashboard explicitly has empty keys, disable even if env has keys
-      if (integrations.midtransServerKey === "") {
-        midtransEnabled = false;
+      if (integrations.ipaymuApiKey === "" || integrations.ipaymuVa === "") {
+        ipaymuEnabled = false;
       }
     }
   } catch { /* no integrations setting yet */ }
 
   return NextResponse.json(
-    { midtransEnabled, manualTransferEnabled: true },
+    { ipaymuEnabled, manualTransferEnabled: true },
     { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } }
   );
 }

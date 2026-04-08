@@ -48,8 +48,8 @@ const nextConfig: NextConfig = {
               style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://www.googletagmanager.com;
               img-src 'self' data: https: blob:;
               font-src 'self' https://fonts.gstatic.com;
-              connect-src 'self' https://*.supabase.co wss://*.supabase.co https://wa.me https://app.midtrans.com https://app.sandbox.midtrans.com https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://www.googletagmanager.com https://www.facebook.com https://graph.facebook.com https://connect.facebook.net https://analytics.tiktok.com https://googleads.g.doubleclick.net;
-              frame-src https://app.midtrans.com https://app.sandbox.midtrans.com https://www.googletagmanager.com https://td.doubleclick.net;
+              connect-src 'self' https://*.supabase.co wss://*.supabase.co https://wa.me https://my.ipaymu.com https://sandbox.ipaymu.com https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://www.googletagmanager.com https://www.facebook.com https://graph.facebook.com https://connect.facebook.net https://analytics.tiktok.com https://googleads.g.doubleclick.net;
+              frame-src https://my.ipaymu.com https://sandbox.ipaymu.com https://www.googletagmanager.com https://td.doubleclick.net;
               frame-ancestors 'none';
               base-uri 'self';
               form-action 'self';

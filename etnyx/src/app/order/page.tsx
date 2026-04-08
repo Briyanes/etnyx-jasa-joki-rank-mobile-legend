@@ -1,5 +1,6 @@
 "use client";
 
+import { toast, toastError } from "@/components/ToastProvider";
 import { useState, useCallback, useEffect, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -462,8 +463,8 @@ function OrderPageContent() {
   const [promoMessage, setPromoMessage] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
   const [promoLoading, setPromoLoading] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<"midtrans" | "manual_transfer">("manual_transfer");
-  const [midtransEnabled, setMidtransEnabled] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"ipaymu" | "manual_transfer">("manual_transfer");
+  const [ipaymuEnabled, setIpaymuEnabled] = useState(false);
   const [tierDiscount, setTierDiscount] = useState(0);
   const [customerTier, setCustomerTier] = useState<string | null>(null);
   const [selectedPackage, setSelectedPackage] = useState<ProductPackage | null>(
@@ -601,7 +602,7 @@ function OrderPageContent() {
   useEffect(() => {
     fetch("/api/payment-methods")
       .then((res) => res.json())
-      .then((data) => { if (data.midtransEnabled) setMidtransEnabled(true); })
+      .then((data) => { if (data.ipaymuEnabled) setIpaymuEnabled(true); })
       .catch(() => {/* keep manual only */});
   }, []);
 
@@ -970,7 +971,7 @@ function OrderPageContent() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.error || "Gagal membuat order");
+        toast(data.error || "Gagal membuat order");
         return;
       }
 
@@ -983,7 +984,7 @@ function OrderPageContent() {
         paymentMethod: data.paymentMethod,
       });
 
-      // Auto-redirect to Midtrans payment page (not for manual transfer)
+      // Auto-redirect to iPaymu payment page (not for manual transfer)
       if (data.paymentUrl && data.paymentMethod !== "manual_transfer") {
         window.location.href = data.paymentUrl;
         return;
@@ -995,7 +996,7 @@ function OrderPageContent() {
         return;
       }
     } catch {
-      alert("Terjadi kesalahan, coba lagi.");
+      toastError("Terjadi kesalahan, coba lagi.");
     } finally {
       setIsSubmitting(false);
     }
@@ -1053,7 +1054,7 @@ function OrderPageContent() {
       );
     }
 
-    // No payment URL (Midtrans not configured) — show order success
+    // No payment URL (iPaymu not configured) — show order success
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="bg-surface rounded-3xl p-8 max-w-md w-full text-center border border-white/5">
@@ -2199,7 +2200,7 @@ function OrderPageContent() {
                 <div className="flex items-start gap-2 bg-accent/5 border border-accent/20 rounded-xl px-4 py-3">
                   <CreditCard className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
                   <p className="text-xs text-text-muted">
-                    Pembayaran dilakukan setelah konfirmasi order. Kami mendukung QRIS, Bank Transfer (BCA, BNI, Mandiri), GoPay, ShopeePay, dan lainnya melalui Midtrans.
+                    Pembayaran dilakukan setelah konfirmasi order. Kami mendukung QRIS, Bank Transfer (BCA, BNI, Mandiri), GoPay, ShopeePay, dan lainnya melalui iPaymu.
                   </p>
                 </div>
               </div>
@@ -2471,7 +2472,7 @@ function OrderPageContent() {
                   <p className="text-text-muted text-xs mb-3 uppercase tracking-wider">
                     Metode Pembayaran
                   </p>
-                  <div className={`grid grid-cols-1 ${midtransEnabled ? "sm:grid-cols-2" : ""} gap-3`}>
+                  <div className={`grid grid-cols-1 ${ipaymuEnabled ? "sm:grid-cols-2" : ""} gap-3`}>
                     <button
                       type="button"
                       onClick={() => setPaymentMethod("manual_transfer")}
@@ -2492,23 +2493,23 @@ function OrderPageContent() {
                         Bank (BCA, BRI, BNI, Mandiri, Jago), E-Wallet, QRIS
                       </p>
                     </button>
-                    {midtransEnabled && (
+                    {ipaymuEnabled && (
                     <button
                       type="button"
-                      onClick={() => setPaymentMethod("midtrans")}
+                      onClick={() => setPaymentMethod("ipaymu")}
                       className={`relative p-4 rounded-xl border-2 text-left transition-all ${
-                        paymentMethod === "midtrans"
+                        paymentMethod === "ipaymu"
                           ? "border-accent bg-accent/10"
                           : "border-white/10 hover:border-white/20"
                       }`}
                     >
-                      {paymentMethod === "midtrans" && (
+                      {paymentMethod === "ipaymu" && (
                         <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-accent flex items-center justify-center">
                           <Check className="w-3 h-3 text-white" />
                         </div>
                       )}
                       <Zap className="w-5 h-5 text-green-400 mb-2" />
-                      <p className="text-text font-semibold text-sm">Otomatis (Midtrans)</p>
+                      <p className="text-text font-semibold text-sm">Otomatis (iPaymu)</p>
                       <p className="text-text-muted text-xs mt-0.5">
                         QRIS, VA, GoPay, ShopeePay, Kartu Kredit
                       </p>

@@ -1,5 +1,6 @@
 "use client";
 
+import { toast, toastSuccess, toastError } from "@/components/ToastProvider";
 import { useEffect, useState, useCallback } from "react";
 import {
   DollarSign, Users, Clock, CheckCircle, Loader2, RefreshCw,
@@ -294,11 +295,11 @@ export default function PayrollTab() {
         }),
       });
       const data = await res.json();
-      alert(data.message || `Generated ${data.generated} commissions`);
+      toast(data.message || `Generated ${data.generated} commissions`);
       fetchCommissions();
       fetchOverview();
     } catch {
-      alert("Gagal generate komisi");
+      toastError("Gagal generate komisi");
     }
     setActionLoading(false);
   };
@@ -317,16 +318,16 @@ export default function PayrollTab() {
         }),
       });
       const data = await res.json();
-      alert(data.message || `Generated ${data.generated} salary records`);
+      toast(data.message || `Generated ${data.generated} salary records`);
       fetchSalaryRecords();
     } catch {
-      alert("Gagal generate gaji");
+      toastError("Gagal generate gaji");
     }
     setActionLoading(false);
   };
 
   const saveSalaryConfig = async () => {
-    if (!salaryForm.staffId || salaryForm.baseSalary <= 0) return alert("Isi data lengkap");
+    if (!salaryForm.staffId || salaryForm.baseSalary <= 0) return toast("Isi data lengkap");
     setActionLoading(true);
     try {
       const res = await fetch("/api/admin/payroll/salaries", {
@@ -343,14 +344,14 @@ export default function PayrollTab() {
       setSalaryForm({ staffId: "", baseSalary: 0, notes: "" });
       fetchSalaryConfigs();
     } catch {
-      alert("Gagal simpan gaji");
+      toastError("Gagal simpan gaji");
     }
     setActionLoading(false);
   };
 
   const createPayout = async () => {
     if (selectedCommissions.length === 0 && selectedSalaryRecords.length === 0) {
-      return alert("Pilih minimal 1 item");
+      return toast("Pilih minimal 1 item");
     }
     setActionLoading(true);
     try {
@@ -381,9 +382,9 @@ export default function PayrollTab() {
       fetchPayouts();
       fetchCommissions();
       fetchOverview();
-      alert("Payout created!");
+      toastSuccess("Payout created!");
     } catch {
-      alert("Gagal buat payout");
+      toastError("Gagal buat payout");
     }
     setActionLoading(false);
   };
@@ -409,14 +410,14 @@ export default function PayrollTab() {
       fetchPayouts();
       fetchOverview();
     } catch (err) {
-      alert(`Gagal ${action} payout: ${err instanceof Error ? err.message : "Unknown error"}`);
+      toast(`Gagal ${action} payout: ${err instanceof Error ? err.message : "Unknown error"}`);
     }
     setActionLoading(false);
   };
 
   const markPaidWithDetails = async () => {
     if (!showPaymentModal || !paymentForm.method) {
-      return alert("Pilih metode pembayaran");
+      return toast("Pilih metode pembayaran");
     }
     const selectedAccount = paymentAccounts.find(a => a.id === paymentForm.accountId);
     await updatePayoutStatus(showPaymentModal, "mark_paid", {
@@ -434,7 +435,7 @@ export default function PayrollTab() {
 
   const savePaymentAccount = async () => {
     if (!accountForm.staffId || !accountForm.method || !accountForm.accountName || !accountForm.accountNumber) {
-      return alert("Isi semua field");
+      return toast("Isi semua field");
     }
     setActionLoading(true);
     try {
@@ -455,7 +456,7 @@ export default function PayrollTab() {
       setAccountForm({ staffId: "", method: "", label: "", accountName: "", accountNumber: "", isPrimary: false });
       fetchPaymentAccounts();
     } catch {
-      alert("Gagal simpan akun pembayaran");
+      toastError("Gagal simpan akun pembayaran");
     }
     setActionLoading(false);
   };
@@ -472,7 +473,7 @@ export default function PayrollTab() {
       if (!res.ok) throw new Error();
       fetchPaymentAccounts();
     } catch {
-      alert("Gagal hapus akun");
+      toastError("Gagal hapus akun");
     }
     setActionLoading(false);
   };
@@ -487,9 +488,9 @@ export default function PayrollTab() {
       });
       if (!res.ok) throw new Error();
       fetchSettings();
-      alert("Saved!");
+      toastSuccess("Saved!");
     } catch {
-      alert("Gagal simpan");
+      toastError("Gagal simpan");
     }
     setActionLoading(false);
   };

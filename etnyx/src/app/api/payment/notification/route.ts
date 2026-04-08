@@ -4,8 +4,8 @@ import crypto from "crypto";
 import { sendPaymentConfirmedWA, notifyWorkerConfirmedOrder } from "@/lib/notifications";
 import { sendMetaCAPI } from "@/lib/meta-capi";
 
-// Get Midtrans server key from settings or env
-async function getMidtransServerKey(): Promise<string> {
+// Get iPaymu settings from DB or env
+async function getIpaymuSettings(): Promise<{ apiKey: string; va: string; isProduction: boolean }> {
   try {
     const supabase = await createAdminClient();
     const { data } = await supabase
@@ -14,19 +14,56 @@ async function getMidtransServerKey(): Promise<string> {
       .eq("key", "integrations")
       .single();
     
-    return data?.value?.midtransServerKey || process.env.MIDTRANS_SERVER_KEY || "";
+    return {
+      apiKey: data?.value?.ipaymuApiKey || process.env.IPAYMU_API_KEY || "",
+      va: data?.value?.ipaymuVa || process.env.IPAYMU_VA || "",
+      isProduction: data?.value?.ipaymuIsProduction ?? (process.env.IPAYMU_IS_PRODUCTION === "true"),
+    };
   } catch {
-    return process.env.MIDTRANS_SERVER_KEY || "";
+    return {
+      apiKey: process.env.IPAYMU_API_KEY || "",
+      va: process.env.IPAYMU_VA || "",
+      isProduction: process.env.IPAYMU_IS_PRODUCTION === "true",
+    };
   }
 }
 
-// Verify Midtrans signature
-function verifySignature(orderId: string, statusCode: string, grossAmount: string, signatureKey: string, serverKey: string): boolean {
-  const hash = crypto
-    .createHash("sha512")
-    .update(`${orderId}${statusCode}${grossAmount}${serverKey}`)
-    .digest("hex");
-  return hash === signatureKey;
+// Verify iPaymu callback by checking transaction status via API
+async function verifyIpaymuTransaction(trxId: string | number, settings: { apiKey: string; va: string; isProduction: boolean }): Promise<Record<string, unknown> | null> {
+  const url = settings.isProduction
+    ? "https://my.ipaymu.com/api/v2/transaction"
+    : "https://sandbox.ipaymu.com/api/v2/transaction";
+
+  const body = { transactionId: String(trxId) };
+  const bodyHash = crypto.createHash("sha256").update(JSON.stringify(body)).digest("hex");
+  const stringToSign = `POST:${settings.va}:${bodyHash}:${settings.apiKey}`;
+  const signature = crypto.createHmac("sha256", settings.apiKey).update(stringToSign).digest("hex");
+
+  const now = new Date();
+  const timestamp = now.getFullYear().toString() +
+    String(now.getMonth() + 1).padStart(2, "0") +
+    String(now.getDate()).padStart(2, "0") +
+    String(now.getHours()).padStart(2, "0") +
+    String(now.getMinutes()).padStart(2, "0") +
+    String(now.getSeconds()).padStart(2, "0");
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      va: settings.va,
+      signature,
+      timestamp,
+    },
+    body: JSON.stringify(body),
+  });
+
+  const data = await res.json();
+  if (res.ok && data.Status === 200 && data.Data) {
+    return data.Data as Record<string, unknown>;
+  }
+  return null;
 }
 
 // GET handler for URL verification
@@ -38,85 +75,81 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const {
-      order_id,
+      trx_id,
+      sid,
+      reference_id,
       status_code,
-      gross_amount,
-      signature_key,
-      transaction_status,
-      fraud_status,
-      payment_type,
+      status,
+      via,
     } = body;
 
-    // Reject requests missing required fields
-    if (!order_id || !signature_key || !status_code || gross_amount === undefined) {
+    // iPaymu sends: trx_id, sid, reference_id, status_code, status, via, channel, amount
+    if (!trx_id && !reference_id) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // Validate gross_amount is a valid number string
-    if (typeof gross_amount !== "string" || isNaN(parseFloat(gross_amount)) || parseFloat(gross_amount) < 0) {
-      return NextResponse.json({ error: "Invalid gross_amount" }, { status: 400 });
-    }
+    const settings = await getIpaymuSettings();
 
-    const serverKey = await getMidtransServerKey();
-
-    // Verify signature
-    if (!verifySignature(order_id, status_code, gross_amount, signature_key, serverKey)) {
-      console.error("Invalid signature for order:", order_id);
-      return NextResponse.json({ error: "Invalid signature" }, { status: 403 });
+    // Verify transaction with iPaymu API (server-side check)
+    const verifiedTrx = await verifyIpaymuTransaction(trx_id, settings);
+    if (!verifiedTrx) {
+      console.error("iPaymu transaction verification failed for trx_id:", trx_id);
+      return NextResponse.json({ error: "Transaction verification failed" }, { status: 403 });
     }
 
     const supabase = await createAdminClient();
 
-    // Find order by Midtrans order ID
+    // Find order by reference ID (stored in midtrans_order_id field)
+    const refId = reference_id || String(verifiedTrx.ReferenceId || "");
     const { data: order, error } = await supabase
       .from("orders")
       .select("*")
-      .eq("midtrans_order_id", order_id)
+      .eq("midtrans_order_id", refId)
       .single();
 
     if (error || !order) {
-      console.error("Order not found for Midtrans ID:", order_id);
+      console.error("Order not found for iPaymu ref:", refId);
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    // Idempotency: skip if order already processed to this state
-    if (order.payment_status === "paid" && (transaction_status === "capture" || transaction_status === "settlement")) {
+    // Determine payment status from iPaymu status_code
+    // iPaymu status_code: 1 = success, 0 = pending, -1 = expired/failed
+    const ipaymuStatusCode = Number(verifiedTrx.StatusCode ?? status_code);
+    const ipaymuStatus = String(verifiedTrx.Status ?? status ?? "").toLowerCase();
+
+    // Idempotency: skip if order already paid
+    if (order.payment_status === "paid" && ipaymuStatusCode === 1) {
       return NextResponse.json({ success: true, message: "Already processed" });
     }
 
-    // Determine payment status
     let paymentStatus = "pending";
     let orderStatus = order.status;
 
-    if (transaction_status === "capture" || transaction_status === "settlement") {
-      if (fraud_status === "accept" || !fraud_status) {
-        // Verify payment amount matches order total
-        const paidAmount = parseFloat(gross_amount);
-        if (paidAmount < order.total_price) {
-          console.error(`Amount mismatch for ${order_id}: paid ${paidAmount}, expected ${order.total_price}`);
-          paymentStatus = "underpaid";
-          // Don't auto-confirm — admin must review
-        } else {
-          paymentStatus = "paid";
-          orderStatus = "confirmed"; // Auto-confirm when paid correct amount
-        }
+    if (ipaymuStatusCode === 1 || ipaymuStatus === "berhasil" || ipaymuStatus === "success") {
+      // Verify payment amount
+      const paidAmount = Number(verifiedTrx.Amount ?? body.amount ?? 0);
+      if (paidAmount < order.total_price) {
+        console.error(`Amount mismatch for ${refId}: paid ${paidAmount}, expected ${order.total_price}`);
+        paymentStatus = "underpaid";
       } else {
-        paymentStatus = "challenge";
+        paymentStatus = "paid";
+        orderStatus = "confirmed";
       }
-    } else if (transaction_status === "pending") {
+    } else if (ipaymuStatusCode === 0 || ipaymuStatus === "pending") {
       paymentStatus = "pending";
-    } else if (transaction_status === "deny" || transaction_status === "cancel" || transaction_status === "expire") {
+    } else {
+      // -1 or other = expired/failed/canceled
       paymentStatus = "failed";
-    } else if (transaction_status === "refund") {
-      paymentStatus = "refunded";
     }
+
+    const paymentType = String(via || verifiedTrx.Channel || verifiedTrx.Via || "ipaymu");
 
     // Update order
     await supabase
       .from("orders")
       .update({
         payment_status: paymentStatus,
-        payment_type: payment_type,
+        payment_type: paymentType,
         status: orderStatus,
         paid_at: paymentStatus === "paid" ? new Date().toISOString() : null,
         confirmed_at: paymentStatus === "paid" ? new Date().toISOString() : undefined,
