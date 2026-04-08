@@ -11,7 +11,7 @@ import {
   ShoppingCart, DollarSign, Clock, Activity, Loader2, AlertTriangle,
   Plus, Pencil, Trash2, Save, Search, Filter, RefreshCw, LogOut,
   MessageCircle, Send, BookOpen, Copy, Gift, Wallet, CalendarDays,
-  Flame, Target, Lightbulb, Ban, HelpCircle,
+  Flame, Target, Lightbulb, Ban, HelpCircle, Menu,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import SettingsTab from "./SettingsTab";
@@ -218,6 +218,7 @@ export default function AdminDashboard() {
   const [editItem, setEditItem] = useState<Testimonial | Portfolio | PromoCode | Booster | null>(null);
   const [credentials, setCredentials] = useState<{ order_id: string; account_login: string | null; account_password: string | null } | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [followUpLoading, setFollowUpLoading] = useState<string | null>(null);
   const [statusActionLoading, setStatusActionLoading] = useState<string | null>(null);
   const [searchDebounce, setSearchDebounce] = useState<ReturnType<typeof setTimeout> | null>(null);
@@ -778,8 +779,13 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-background flex">
+      {/* Mobile overlay */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 bg-black/50 z-30 md:hidden" onClick={() => setMobileMenuOpen(false)} />
+      )}
+
       {/* ===== SIDEBAR ===== */}
-      <aside className={`${sidebarOpen ? "w-56" : "w-16"} bg-surface border-r border-white/5 flex flex-col transition-all duration-200 fixed h-screen z-30`}>
+      <aside className={`${sidebarOpen ? "w-56" : "w-16"} bg-surface border-r border-white/5 flex flex-col transition-all duration-200 fixed h-screen z-40 ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}>
         {/* Logo */}
         <div className="p-4 border-b border-white/5">
           <button onClick={() => setSidebarOpen(!sidebarOpen)} className="flex items-center gap-3 w-full">
@@ -812,7 +818,7 @@ export default function AdminDashboard() {
             return (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => { setActiveTab(tab.id); setMobileMenuOpen(false); }}
               className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-all ${
                 activeTab === tab.id
                   ? "text-accent bg-accent/10 border-r-2 border-accent"
@@ -851,15 +857,20 @@ export default function AdminDashboard() {
       </aside>
 
       {/* ===== MAIN ===== */}
-      <div className={`flex-1 ${sidebarOpen ? "ml-56" : "ml-16"} transition-all duration-200`}>
+      <div className={`flex-1 ${sidebarOpen ? "md:ml-56" : "md:ml-16"} transition-all duration-200`}>
         {/* Topbar */}
         <header className="sticky top-0 z-20 bg-background/80 backdrop-blur-xl border-b border-white/5">
-          <div className="px-6 py-3 flex items-center justify-between">
-            <div>
-              <h1 className="text-lg font-bold text-text capitalize">{activeTab === "overview" ? "Dashboard" : activeTab}</h1>
-              <p className="text-xs text-text-muted">
-                {new Date().toLocaleDateString("id-ID", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
-              </p>
+          <div className="px-4 md:px-6 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button onClick={() => setMobileMenuOpen(true)} className="p-2 rounded-lg text-text-muted hover:text-text md:hidden">
+                <Menu className="w-5 h-5" />
+              </button>
+              <div>
+                <h1 className="text-lg font-bold text-text capitalize">{activeTab === "overview" ? "Dashboard" : activeTab}</h1>
+                <p className="text-xs text-text-muted hidden sm:block">
+                  {new Date().toLocaleDateString("id-ID", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+                </p>
+              </div>
             </div>
             <div className="flex items-center gap-3">
               <Link href="/" target="_blank" className="text-xs text-text-muted hover:text-accent flex items-center gap-1 transition-colors">

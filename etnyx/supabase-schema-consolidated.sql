@@ -10,6 +10,14 @@
 --   v10 = Reward system (catalog, transactions, redemptions, referrals)
 --   v11 = Admin audit log
 --   v12 = Reviews & worker reports
+--   v13 = Payroll system (commissions, salaries, payouts)
+--   v14 = Staff payment accounts
+--   v15 = Ad spend tracking
+--   v16 = Lead-worker hierarchy (lead_id on staff_users)
+--   v17 = Dual payment (manual transfer + Midtrans)
+--   v18 = Star/division tracking (current_star, target_star)
+--   v19 = Password reset tokens table
+--   v20 = Seed 30 workers (15 per lead) - data migration
 -- ============================================================
 
 -- ============ ORDERS ============
