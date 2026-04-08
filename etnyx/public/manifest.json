@@ -59,19 +59,5 @@
       "purpose": "maskable any"
     }
   ],
-  "categories": ["games", "entertainment"],
-  "screenshots": [
-    {
-      "src": "/screenshots/desktop.jpg",
-      "sizes": "1280x720",
-      "type": "image/jpeg",
-      "form_factor": "wide"
-    },
-    {
-      "src": "/screenshots/mobile.jpg",
-      "sizes": "640x1136",
-      "type": "image/jpeg",
-      "form_factor": "narrow"
-    }
-  ]
+  "categories": ["games", "entertainment"]
 }

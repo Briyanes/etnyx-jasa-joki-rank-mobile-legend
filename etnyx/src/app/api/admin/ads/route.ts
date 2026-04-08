@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
+import { verifyAdmin } from "@/lib/admin-auth";
 
 // GET: Fetch ad spend entries + order attribution stats
 export async function GET(request: NextRequest) {
+  const auth = await verifyAdmin();
+  if (!auth.authenticated) return auth.error!;
   try {
     const supabase = await createAdminClient();
     const url = new URL(request.url);
@@ -74,6 +77,8 @@ export async function GET(request: NextRequest) {
 
 // POST: Add ad spend entry
 export async function POST(request: NextRequest) {
+  const auth = await verifyAdmin();
+  if (!auth.authenticated) return auth.error!;
   try {
     const supabase = await createAdminClient();
     const body = await request.json();
@@ -116,6 +121,8 @@ export async function POST(request: NextRequest) {
 
 // DELETE: Remove ad spend entry
 export async function DELETE(request: NextRequest) {
+  const auth = await verifyAdmin();
+  if (!auth.authenticated) return auth.error!;
   try {
     const supabase = await createAdminClient();
     const url = new URL(request.url);
