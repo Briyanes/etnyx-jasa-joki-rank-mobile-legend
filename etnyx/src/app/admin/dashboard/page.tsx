@@ -2207,8 +2207,8 @@ export default function AdminDashboard() {
                           <div className="flex items-center justify-center gap-2">
                             <button onClick={() => { setEditStaff(u); setStaffForm({ email: u.email, name: u.name, password: "", role: u.role, phone: u.phone || "", lead_id: u.lead_id || "" }); setStaffModal(true); }}
                               className="p-1.5 text-text-muted hover:text-accent transition-colors"><Pencil className="w-3.5 h-3.5" /></button>
-                            {u.is_active && u.role !== "admin" && (
-                              <button onClick={() => handleDeactivateStaff(u.id)}
+                            {u.role !== "admin" && (
+                              <button onClick={() => { if (confirm(`Hapus ${u.name}?`)) handleDeactivateStaff(u.id); }}
                                 className="p-1.5 text-text-muted hover:text-red-400 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
                             )}
                           </div>
