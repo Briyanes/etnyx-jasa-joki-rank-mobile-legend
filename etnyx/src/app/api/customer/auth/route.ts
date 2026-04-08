@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase-server";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
+import { logCustomerActivity } from "@/lib/activity-log";
 
 function getJwtSecret() {
   if (!process.env.JWT_SECRET) {
@@ -104,6 +105,9 @@ export async function POST(request: Request) {
         path: "/",
       });
 
+      // Log activity
+      logCustomerActivity(customer.id, "register", { email: customer.email }, request);
+
       return NextResponse.json({ 
         success: true, 
         customer: {
@@ -156,6 +160,9 @@ export async function POST(request: Request) {
         maxAge: 60 * 60 * 24 * 7,
         path: "/",
       });
+
+      // Log activity
+      logCustomerActivity(customer.id, "login", { email: customer.email }, request);
 
       return NextResponse.json({ 
         success: true, 

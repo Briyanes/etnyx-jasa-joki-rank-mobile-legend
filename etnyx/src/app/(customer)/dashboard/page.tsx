@@ -6,6 +6,7 @@ import Link from "next/link";
 import { formatRupiah } from "@/utils/helpers";
 import { siteConfig } from "@/lib/constants";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Download } from "lucide-react";
 
 interface Customer {
   id: string;
@@ -65,6 +66,15 @@ interface Order {
   created_at: string;
 }
 
+interface NotificationPrefs {
+  email_order_updates: boolean;
+  email_promotions: boolean;
+  whatsapp_order_updates: boolean;
+  whatsapp_promotions: boolean;
+  push_order_updates: boolean;
+  push_promotions: boolean;
+}
+
 const rankLabels: Record<string, string> = {
   warrior: "Warrior",
   elite: "Elite",
@@ -101,6 +111,10 @@ export default function CustomerDashboard() {
   const [profileForm, setProfileForm] = useState({ name: "", whatsapp: "", currentPassword: "", newPassword: "" });
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileMsg, setProfileMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [notifPrefs, setNotifPrefs] = useState<NotificationPrefs | null>(null);
+  const [notifSaving, setNotifSaving] = useState(false);
+  const [activityLogs, setActivityLogs] = useState<{ action: string; details: Record<string, unknown>; created_at: string }[]>([]);
+  const [activityLoading, setActivityLoading] = useState(false);
 
   const t = locale === "id" ? {
     hello: "Halo",
@@ -411,9 +425,16 @@ export default function CustomerDashboard() {
                         )}
                       </div>
                     </div>
-                    <div className="mt-4 pt-4 border-t border-surface/50 flex justify-end">
+                    <div className="mt-4 pt-4 border-t border-surface/50 flex items-center justify-between">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); window.open(`/api/invoice?orderId=${order.order_id}&format=pdf`, '_blank'); }}
+                        className="flex items-center gap-1.5 text-xs text-muted hover:text-text transition-colors"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        Invoice
+                      </button>
                       <Link
-                        href={`/track?id=${order.order_id}`}
+                        href={`/dashboard/order?id=${order.order_id}`}
                         className="text-sm text-primary hover:underline"
                       >
                         {t.viewDetail}
@@ -842,6 +863,114 @@ export default function CustomerDashboard() {
                     </button>
                   </div>
                 </form>
+              )}
+            </div>
+
+            {/* Notification Preferences */}
+            <div className="bg-surface rounded-xl p-6 border border-surface/50">
+              <h3 className="font-bold text-text mb-4">🔔 Notifikasi</h3>
+              {!notifPrefs ? (
+                <button
+                  onClick={async () => {
+                    const res = await fetch("/api/customer/notification-preferences");
+                    if (res.ok) {
+                      const data = await res.json();
+                      setNotifPrefs(data.preferences);
+                    }
+                  }}
+                  className="w-full px-4 py-2.5 bg-primary/10 text-primary font-medium rounded-lg hover:bg-primary/20 transition-colors text-sm"
+                >
+                  Atur Preferensi Notifikasi
+                </button>
+              ) : (
+                <div className="space-y-4">
+                  {([
+                    { key: "email_order_updates", label: "Email - Update Order", desc: "Status order, pembayaran, selesai" },
+                    { key: "email_promotions", label: "Email - Promo", desc: "Diskon & penawaran spesial" },
+                    { key: "whatsapp_order_updates", label: "WhatsApp - Update Order", desc: "Notifikasi via WhatsApp" },
+                    { key: "whatsapp_promotions", label: "WhatsApp - Promo", desc: "Info promo via WhatsApp" },
+                    { key: "push_order_updates", label: "Push - Update Order", desc: "Notifikasi browser" },
+                    { key: "push_promotions", label: "Push - Promo", desc: "Promo via browser" },
+                  ] as const).map((item) => (
+                    <div key={item.key} className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-text">{item.label}</p>
+                        <p className="text-xs text-muted">{item.desc}</p>
+                      </div>
+                      <button
+                        disabled={notifSaving}
+                        onClick={async () => {
+                          setNotifSaving(true);
+                          const newVal = !notifPrefs[item.key];
+                          setNotifPrefs({ ...notifPrefs, [item.key]: newVal });
+                          await fetch("/api/customer/notification-preferences", {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ [item.key]: newVal }),
+                          });
+                          setNotifSaving(false);
+                        }}
+                        className={`relative w-10 h-6 rounded-full transition-colors ${
+                          notifPrefs[item.key] ? "bg-primary" : "bg-white/10"
+                        }`}
+                      >
+                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
+                          notifPrefs[item.key] ? "translate-x-4" : ""
+                        }`} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Activity Log */}
+            <div className="bg-surface rounded-xl p-6 border border-surface/50">
+              <h3 className="font-bold text-text mb-4">📋 Aktivitas Akun</h3>
+              {activityLogs.length === 0 && !activityLoading ? (
+                <button
+                  onClick={async () => {
+                    setActivityLoading(true);
+                    const res = await fetch("/api/customer/activity");
+                    if (res.ok) {
+                      const data = await res.json();
+                      setActivityLogs(data.logs || []);
+                    }
+                    setActivityLoading(false);
+                  }}
+                  className="w-full px-4 py-2.5 bg-primary/10 text-primary font-medium rounded-lg hover:bg-primary/20 transition-colors text-sm"
+                >
+                  Lihat Riwayat Aktivitas
+                </button>
+              ) : activityLoading ? (
+                <div className="flex justify-center py-4">
+                  <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
+                </div>
+              ) : (
+                <div className="space-y-3 max-h-64 overflow-y-auto">
+                  {activityLogs.map((log, i) => {
+                    const actionLabels: Record<string, string> = {
+                      login: "🔑 Login",
+                      register: "✨ Registrasi",
+                      logout: "🚪 Logout",
+                      profile_update: "✏️ Update Profil",
+                      password_change: "🔒 Ganti Password",
+                      order_created: "🛒 Order Dibuat",
+                      reward_redeemed: "🎁 Redeem Reward",
+                    };
+                    return (
+                      <div key={i} className="flex items-center justify-between py-2 border-b border-surface/30 last:border-0">
+                        <div>
+                          <p className="text-sm text-text">{actionLabels[log.action] || log.action}</p>
+                          <p className="text-xs text-muted">
+                            {new Date(log.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {activityLogs.length === 0 && <p className="text-sm text-muted text-center py-2">Belum ada aktivitas</p>}
+                </div>
               )}
             </div>
           </div>

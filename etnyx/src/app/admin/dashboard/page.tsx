@@ -11,7 +11,7 @@ import {
   ShoppingCart, DollarSign, Clock, Activity, Loader2, AlertTriangle,
   Plus, Pencil, Trash2, Save, Search, Filter, RefreshCw, LogOut,
   MessageCircle, Send, BookOpen, Copy, Gift, Wallet, CalendarDays,
-  Flame, Target, Lightbulb, Ban, HelpCircle, Menu,
+  Flame, Target, Lightbulb, Ban, HelpCircle, Menu, FileDown,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import SettingsTab from "./SettingsTab";
@@ -877,9 +877,22 @@ export default function AdminDashboard() {
                 <Eye className="w-3.5 h-3.5" /> Lihat Website
               </Link>
               {activeTab === "orders" && (
-                <button onClick={() => fetchOrders()} className="p-2 rounded-lg bg-surface hover:bg-white/10 text-text-muted transition-colors">
-                  <RefreshCw className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      const params = new URLSearchParams();
+                      if (statusFilter !== "all") params.set("status", statusFilter);
+                      window.open(`/api/admin/export-orders?${params.toString()}`, "_blank");
+                    }}
+                    className="p-2 rounded-lg bg-surface hover:bg-white/10 text-text-muted transition-colors"
+                    title="Export CSV"
+                  >
+                    <FileDown className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => fetchOrders()} className="p-2 rounded-lg bg-surface hover:bg-white/10 text-text-muted transition-colors">
+                    <RefreshCw className="w-4 h-4" />
+                  </button>
+                </div>
               )}
             </div>
           </div>
