@@ -127,7 +127,7 @@ export async function PUT(request: NextRequest) {
   return NextResponse.json({ success: true });
 }
 
-// DELETE /api/staff/users — Deactivate staff user (admin only)
+// DELETE /api/staff/users — Hard delete staff user (admin only)
 export async function DELETE(request: NextRequest) {
   const { authenticated, error } = await verifyStaff(["admin"]);
   if (!authenticated) return error;
@@ -138,13 +138,13 @@ export async function DELETE(request: NextRequest) {
   }
 
   const supabase = await createAdminClient();
-  const { error: deactivateError } = await supabase
+  const { error: deleteError } = await supabase
     .from("staff_users")
-    .update({ is_active: false, updated_at: new Date().toISOString() })
+    .delete()
     .eq("id", id);
 
-  if (deactivateError) {
-    return NextResponse.json({ error: "Gagal deactivate user" }, { status: 500 });
+  if (deleteError) {
+    return NextResponse.json({ error: "Gagal menghapus user" }, { status: 500 });
   }
 
   return NextResponse.json({ success: true });
