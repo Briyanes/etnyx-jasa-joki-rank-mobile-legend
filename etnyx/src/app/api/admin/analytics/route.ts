@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
-    // Parallel: revenue trend, package breakdown, top customers, customer growth
+    // Parallel: revenue trend, package breakdown, top customers, customer growth, rank pairs
     const [revenueRes, packagesRes, topCustomersRes, customerGrowthRes, rankPairsRes] = await Promise.all([
       // 1. Daily revenue + orders (last N days)
       supabase
@@ -48,6 +48,7 @@ export async function GET(request: NextRequest) {
         .from("orders")
         .select("current_rank, target_rank, total_price")
         .in("status", ["completed", "in_progress", "confirmed"]),
+
     ]);
 
     // Process revenue trend
