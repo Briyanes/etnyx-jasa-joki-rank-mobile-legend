@@ -141,7 +141,7 @@ export default function AnalyticsTab() {
                 <LineChart data={revenueTrend}>
                   <XAxis dataKey="date" stroke="#6b7280" fontSize={10} interval={Math.max(0, Math.floor(revenueTrend.length / 8))} />
                   <YAxis stroke="#6b7280" fontSize={10} tickFormatter={(v: number) => `${(v / 1000000).toFixed(1)}M`} />
-                  <Tooltip contentStyle={CHART_STYLE} formatter={(v: number) => formatRupiah(v)} />
+                  <Tooltip contentStyle={CHART_STYLE} formatter={(v) => formatRupiah(Number(v))} />
                   <Line type="monotone" dataKey="revenue" stroke="#8b5cf6" strokeWidth={2} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
@@ -189,7 +189,7 @@ export default function AnalyticsTab() {
                         <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip contentStyle={CHART_STYLE} formatter={(v: number) => formatRupiah(v)} />
+                    <Tooltip contentStyle={CHART_STYLE} formatter={(v) => formatRupiah(Number(v))} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
