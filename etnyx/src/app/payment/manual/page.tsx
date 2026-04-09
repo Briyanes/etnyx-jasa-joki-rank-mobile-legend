@@ -7,6 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { formatRupiah } from "@/utils/helpers";
+import { WHATSAPP_BOT_NUMBER } from "@/lib/constants";
 import {
   Copy,
   Check,
@@ -24,6 +25,7 @@ import {
   Smartphone,
   Building2,
   Banknote,
+  MessageCircle,
   type LucideIcon,
 } from "lucide-react";
 
@@ -314,6 +316,29 @@ function ManualPaymentContent() {
             <p className="gradient-text text-3xl font-bold tracking-tight">{formatRupiah(order.total_price)}</p>
           </div>
         </div>
+
+        {/* Activate WA Notifications */}
+        <a
+          href={`https://wa.me/${WHATSAPP_BOT_NUMBER}?text=${encodeURIComponent(`Aktifkan notifikasi order ${order.order_id}`)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-3 bg-green-500/10 border border-green-500/20 rounded-xl px-4 py-3 hover:bg-green-500/15 transition-colors group"
+        >
+          <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
+            <MessageCircle className="w-5 h-5 text-green-400" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-green-400 font-semibold text-sm">
+              {locale === "id" ? "Aktifkan Notifikasi WhatsApp" : "Activate WhatsApp Notifications"}
+            </p>
+            <p className="text-text-muted text-[11px] leading-tight mt-0.5">
+              {locale === "id"
+                ? "Klik untuk mengaktifkan notifikasi otomatis. Link dalam pesan akan bisa diklik."
+                : "Tap to enable auto notifications. Links in messages will be clickable."}
+            </p>
+          </div>
+          <svg className="w-4 h-4 text-green-400/60 flex-shrink-0 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+        </a>
 
         {/* Steps */}
         <div className="flex items-center justify-between text-xs text-text-muted bg-surface rounded-xl border border-white/5 p-3">
