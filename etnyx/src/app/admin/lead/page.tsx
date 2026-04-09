@@ -182,7 +182,10 @@ export default function LeadDashboard() {
     try {
       const res = await fetch("/api/staff/users");
       const data = await res.json();
-      setWorkers((data.users || []).filter((u: Worker) => u.is_active));
+      const active = (data.users || []).filter((u: Worker) => u.is_active);
+      // Deduplicate by id (safety net for duplicate DB records)
+      const seen = new Set<string>();
+      setWorkers(active.filter((u: Worker) => { if (seen.has(u.id)) return false; seen.add(u.id); return true; }));
     } catch (e) { console.error(e); }
   }, []);
 
