@@ -256,10 +256,10 @@ function buildCategories(): DocCategory[] {
                 { title: "Customer Isi Form Order", desc: "Pilih rank awal ke tujuan, package (Paket/Per-Star/Gendong), credentials akun ML. Apply promo/referral code.", badge: "customer", page: "/order" },
                 { title: "Pilih Metode Bayar", desc: "2 opsi: Transfer Manual (BCA, BRI, BNI, Mandiri, Jago, DANA, GoPay, OVO, ShopeePay, LinkAja, QRIS) atau iPaymu Auto (VA, QRIS, GoPay, ShopeePay, CC).", badge: "customer", page: "/order (step 3)" },
                 { title: "A) Transfer Manual", desc: "Auto-redirect ke /payment/manual — lihat daftar rekening + upload bukti transfer. Admin approve/reject bukti.", badge: "customer", page: "/payment/manual" },
-                { title: "B) iPaymu Auto", desc: "Payment URL di-generate, customer bayar via popup/redirect. Webhook otomatis confirm.", badge: "customer", page: "iPaymu" },
-                { title: "Pembayaran Dikonfirmasi", desc: "Manual: admin approve bukti. iPaymu: webhook auto-confirm. Status: confirmed, payment: paid. WA 'Pembayaran Dikonfirmasi' + Telegram ke Worker Group.", badge: "auto", page: "/api/payment/notification" },
+                { title: "B) iPaymu Auto", desc: "Payment URL di-generate, customer bayar via popup/redirect. Webhook otomatis confirm. Jika iPaymu gagal/trouble, otomatis fallback ke manual transfer + WA dikirim ke customer dengan info rekening & link upload bukti.", badge: "customer", page: "iPaymu" },
+                { title: "Pembayaran Dikonfirmasi", desc: "Manual: admin cek bukti transfer + cek credential login → klik Konfirmasi Bayar. iPaymu: webhook auto-confirm. Status: confirmed, payment: paid. WA 'Pembayaran Dikonfirmasi' + Telegram ke Worker Group.", badge: "auto", page: "/api/payment/notification" },
                 { title: "Multi-Channel Notifikasi", desc: "Telegram ke Admin Group (dengan tombol Konfirmasi/Tolak), WhatsApp 'Pembayaran Dikonfirmasi' ke customer, Telegram ke Worker Group.", badge: "auto" },
-                { title: "Lead/Admin Assign Order", desc: "Buka Lead Dashboard, pilih worker, Assign. Worker dapat notif Telegram. Atau konfirmasi langsung dari Telegram bot.", badge: "lead", page: "/admin/lead" },
+                { title: "Lead/Admin Assign Order", desc: "Buka Lead Dashboard, pilih worker, Assign. Worker dapat notif Telegram. PENTING: Worker hanya bisa di-assign setelah pembayaran dikonfirmasi (payment_status = paid).", badge: "lead", page: "/admin/lead" },
                 { title: "Worker Mulai Kerja", desc: "Worker buka dashboard, klik Mulai, status in_progress. WA 'Sedang Dikerjakan' ke customer. Push rank customer.", badge: "worker", page: "/admin/worker" },
                 { title: "Worker Update Progress", desc: "Update progress %, current rank. Customer bisa lihat real-time di /track.", badge: "worker" },
                 { title: "Worker Submit Hasil", desc: "Input: stars gained, MVP, savage, maniac, wins, durasi. Upload screenshot. Customer bisa lihat langsung di /track.", badge: "worker" },
@@ -267,10 +267,13 @@ function buildCategories(): DocCategory[] {
                 { title: "Customer Review", desc: "Customer dapat link review via WA/Email, rating service & worker, bisa report. Auto-create testimonial jika rating 4-5 bintang.", badge: "customer", page: "/review" },
               ]} />
               <InfoBox type="info">
-                <strong>Dual Payment:</strong> Transfer Manual muncul di /payment/manual setelah order dibuat. iPaymu Auto muncul jika Server Key dikonfigurasi di Settings &rarr; Integrations.
+                <strong>Dual Payment:</strong> Transfer Manual muncul di /payment/manual setelah order dibuat. iPaymu Auto muncul jika API Key dikonfigurasi di Settings &rarr; Integrations. Jika iPaymu gagal/trouble saat order dibuat, otomatis fallback ke manual transfer dan WA follow-up dikirim ke customer.
               </InfoBox>
               <InfoBox type="warning">
                 <strong>Status Flow:</strong> pending &rarr; confirmed (bayar dikonfirmasi) &rarr; in_progress (dikerjakan) &rarr; completed (selesai). Admin bisa cancel kapan saja.
+              </InfoBox>
+              <InfoBox type="success">
+                <strong>Worker Assignment Lock:</strong> Worker hanya bisa di-assign setelah pembayaran dikonfirmasi. Dropdown assign worker otomatis disabled untuk order yang belum paid.
               </InfoBox>
             </div>
           ),
@@ -579,8 +582,9 @@ function buildCategories(): DocCategory[] {
               <div className="bg-background rounded-lg p-4 border border-yellow-500/20">
                 <h4 className="text-yellow-400 font-semibold text-sm mb-3">{"PENDING"} &mdash; Menunggu Bayar</h4>
                 <Table headers={["Tombol", "Warna", "Aksi", "WA ke Customer"]} rows={[
-                  ["Lihat Bukti Transfer", "Kuning", "Buka modal bukti transfer (hanya jika transfer manual)", "—"],
-                  ["Konfirmasi Bayar", "Hijau", "Status → confirmed, payment → paid", "\"Pembayaran Dikonfirmasi\" + link track"],
+                  ["Lihat Bukti Transfer", "Kuning", "Buka modal bukti transfer (hanya muncul untuk transfer manual)", "—"],
+                  ["Konfirmasi Bayar", "Hijau", "Status → confirmed, payment → paid. Hanya muncul untuk order MANUAL TRANSFER. Order iPaymu otomatis di-confirm via webhook.", "\"Pembayaran Dikonfirmasi\" + link track"],
+                  ["Menunggu iPaymu", "Biru", "Label status untuk order iPaymu yang belum dibayar. Tidak bisa diklik — menunggu webhook otomatis.", "—"],
                   ["Follow Up Bayar", "Biru", "Kirim WA reminder bayar", "\"Reminder pembayaran\" + rekening + link upload bukti"],
                   ["Cancel", "Merah", "Status → cancelled", "\"Order Dibatalkan\" + info hubungi kami"],
                 ]} />
@@ -630,7 +634,10 @@ function buildCategories(): DocCategory[] {
               </div>
 
               <InfoBox type="warning">
-                <strong>Urutan penting!</strong> Selalu lihat bukti transfer dulu sebelum klik Konfirmasi Bayar. Jangan konfirmasi tanpa verifikasi bukti transfer.
+                <strong>Urutan penting!</strong> Untuk order manual transfer: Lihat bukti transfer + cek credential login dulu sebelum klik Konfirmasi Bayar. Jangan konfirmasi tanpa verifikasi. Untuk order iPaymu: konfirmasi otomatis via webhook, tidak perlu manual.
+              </InfoBox>
+              <InfoBox type="info">
+                <strong>Assign Worker:</strong> Dropdown assign worker otomatis disabled/terkunci sampai pembayaran dikonfirmasi (payment_status = paid). Ini berlaku untuk semua metode pembayaran.
               </InfoBox>
 
               <div className="bg-background rounded-lg p-4 border border-accent/20 mt-4">
@@ -650,7 +657,7 @@ function buildCategories(): DocCategory[] {
                   ["Kirim Notif Selesai", "Ya", "Ya", "—"],
                   ["Reopen Order", "Ya", "—", "—"],
                   ["Reaktivasi", "Ya", "—", "—"],
-                  ["Assign Worker", "Ya", "Ya", "—"],
+                  ["Assign Worker (hanya setelah paid)", "Ya", "Ya", "—"],
                   ["WA Manual", "Ya", "Ya", "Ya"],
                   ["Copy Info", "Ya", "Ya", "Ya"],
                 ]} />
@@ -1618,8 +1625,10 @@ function buildCategories(): DocCategory[] {
                 { q: "Customer bilang belum terima WA notifikasi?", a: "Cek Fonnte API token di Settings > Integrations. Cek nomor WA customer sudah benar (format 628xxx). Test via POST /api/admin/test-notifications." },
                 { q: "Telegram bot tidak merespon command?", a: "Cek bot token di Settings > Integrations. Pastikan webhook terdaftar: buka /api/telegram/webhook?action=register. Cek bot sudah ditambahkan ke grup." },
                 { q: "Link di WA tidak bisa diklik (tidak biru)?", a: "Pastikan URL ada di baris sendiri (tidak nempel emoji/teks lain). URL harus punya trailing slash sebelum query params, contoh: /track/?id=xxx bukan /track?id=xxx." },
-                { q: "iPaymu payment tidak auto-confirm?", a: "Cek Server Key di Settings > Integrations. Pastikan Notification URL di iPaymu Dashboard mengarah ke /api/payment/notification. Cek environment (Sandbox vs Production)." },
+                { q: "iPaymu payment tidak auto-confirm?", a: "Cek API Key & VA di Settings > Integrations. Pastikan Notification URL di iPaymu Dashboard mengarah ke /api/payment/notification. Cek environment (Sandbox vs Production). Jika iPaymu down saat order dibuat, sistem otomatis fallback ke manual transfer + kirim WA ke customer." },
                 { q: "Worker tidak bisa lihat order?", a: "Pastikan order sudah di-assign ke worker tersebut. Worker hanya bisa lihat order yang ditugaskan via lead/admin." },
+                { q: "Tidak bisa assign worker?", a: "Worker hanya bisa di-assign setelah pembayaran dikonfirmasi (payment_status = paid). Pastikan order sudah dibayar dan dikonfirmasi terlebih dahulu." },
+                { q: "Tombol Konfirmasi Bayar tidak muncul?", a: "Tombol Konfirmasi Bayar hanya muncul untuk order dengan metode manual transfer. Order iPaymu dikonfirmasi otomatis via webhook — tidak perlu konfirmasi manual." },
                 { q: "Commission tidak muncul setelah order selesai?", a: "Komisi auto-generate saat status diubah ke completed DAN ada assigned_worker_id. Cek di Payroll > Commissions." },
                 { q: "Customer tidak bisa bayar via iPaymu?", a: "Cek iPaymu API Key & Client Key sudah benar dan aktif. Toggle Sandbox/Production sesuai environment." },
                 { q: "Bagaimana reset password staff?", a: "Admin bisa reset lewat Staff tab > Edit > isi password baru. Atau staff bisa via halaman login > Lupa Password (email reset link via Resend)." },
