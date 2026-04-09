@@ -220,7 +220,7 @@ function buildCategories(): DocCategory[] {
                   </div>
                   <p className="text-text-muted text-xs mb-2">Booster &mdash; mengerjakan order yang ditugaskan.</p>
                   <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
-                    <li>Lihat <strong>hanya</strong> order yang di-assign ke dia</li>
+                    <li>Lihat <strong>hanya</strong> order yang di-assign ke dia (via tabel <Code>order_assignments</Code>)</li>
                     <li>Mulai/update progress/selesaikan order</li>
                     <li>Submit hasil match + upload screenshot</li>
                     <li>Lihat credentials akun customer (terenkripsi AES-256)</li>
@@ -259,8 +259,8 @@ function buildCategories(): DocCategory[] {
                 { title: "B) iPaymu Auto", desc: "Payment URL di-generate, customer bayar via popup/redirect. Webhook otomatis confirm. Jika iPaymu gagal/trouble, otomatis fallback ke manual transfer + WA dikirim ke customer dengan info rekening & link upload bukti.", badge: "customer", page: "iPaymu" },
                 { title: "Pembayaran Dikonfirmasi", desc: "Manual: admin cek bukti transfer + cek credential login → klik Konfirmasi Bayar. iPaymu: webhook auto-confirm. Status: confirmed, payment: paid. WA 'Pembayaran Dikonfirmasi' + Telegram ke Worker Group.", badge: "auto", page: "/api/payment/notification" },
                 { title: "Multi-Channel Notifikasi", desc: "Telegram ke Admin Group (dengan tombol Konfirmasi/Tolak), WhatsApp 'Pembayaran Dikonfirmasi' ke customer, Telegram ke Worker Group.", badge: "auto" },
-                { title: "Lead/Admin Assign Order", desc: "Buka Lead Dashboard, pilih worker, Assign. Worker dapat notif Telegram. PENTING: Worker hanya bisa di-assign setelah pembayaran dikonfirmasi (payment_status = paid).", badge: "lead", page: "/admin/lead" },
-                { title: "Worker Mulai Kerja", desc: "Worker buka dashboard, klik Mulai, status in_progress. WA 'Sedang Dikerjakan' ke customer. Push rank customer.", badge: "worker", page: "/admin/worker" },
+                { title: "Lead/Admin Assign Order", desc: "Lead: buka Lead Dashboard → pilih worker → Assign. Otomatis buat record di order_assignments, set status in_progress, dan kirim Telegram ke Worker Group. Admin: bisa assign dari Admin Dashboard (buat order_assignments + Telegram, auto in_progress jika status confirmed). PENTING: Worker hanya bisa di-assign setelah pembayaran dikonfirmasi (payment_status = paid).", badge: "lead", page: "/admin/lead" },
+                { title: "Worker Mulai Kerja", desc: "Worker buka dashboard, lihat order yang di-assign (via tabel order_assignments). Jika status sudah in_progress (dari Lead assign), langsung kerjakan. WA 'Sedang Dikerjakan' otomatis terkirim saat status berubah ke in_progress.", badge: "worker", page: "/admin/worker" },
                 { title: "Worker Update Progress", desc: "Update progress %, current rank. Customer bisa lihat real-time di /track.", badge: "worker" },
                 { title: "Worker Submit Hasil", desc: "Input: stars gained, MVP, savage, maniac, wins, durasi. Upload screenshot. Customer bisa lihat langsung di /track.", badge: "worker" },
                 { title: "Worker Selesai", desc: "Klik Selesai, status completed. Auto-generate commission. Telegram notif ke admin. WA 'Order Selesai' + link review ke customer.", badge: "worker" },
@@ -637,7 +637,7 @@ function buildCategories(): DocCategory[] {
                 <strong>Urutan penting!</strong> Untuk order manual transfer: Lihat bukti transfer + cek credential login dulu sebelum klik Konfirmasi Bayar. Jangan konfirmasi tanpa verifikasi. Untuk order iPaymu: konfirmasi otomatis via webhook, tidak perlu manual.
               </InfoBox>
               <InfoBox type="info">
-                <strong>Assign Worker:</strong> Dropdown assign worker otomatis disabled/terkunci sampai pembayaran dikonfirmasi (payment_status = paid). Ini berlaku untuk semua metode pembayaran.
+                <strong>Assign Worker:</strong> Dropdown assign hanya aktif setelah pembayaran dikonfirmasi (payment_status = paid). Saat admin/lead assign worker: otomatis buat record <Code>order_assignments</Code> (supaya worker bisa lihat di dashboard-nya) + kirim Telegram ke Worker Group. Lead assign otomatis set status ke in_progress. Admin assign otomatis set in_progress jika status confirmed. Konfirmasi pembayaran bersifat idempotent &mdash; jika sudah paid, notifikasi tidak dikirim ulang.
               </InfoBox>
 
               <div className="bg-background rounded-lg p-4 border border-accent/20 mt-4">
@@ -1179,7 +1179,7 @@ function buildCategories(): DocCategory[] {
                 </div>
                 <Table headers={["Transisi", "Trigger", "Aksi Otomatis"]} rows={[
                   [<span key="t1" className="whitespace-nowrap"><strong className="text-yellow-400">pending</strong> → <strong className="text-blue-400">confirmed</strong></span>, "Bayar via iPaymu / Admin konfirmasi", <ul key="a1" className="list-disc ml-3 space-y-0.5"><li>Telegram ke Admin Group (+ tombol Assign)</li><li>WhatsApp ke customer (konfirmasi bayar)</li><li>Email ke customer (invoice)</li><li>Reward points dicatat (pending)</li></ul>],
-                  [<span key="t2" className="whitespace-nowrap"><strong className="text-blue-400">confirmed</strong> → <strong className="text-accent">in_progress</strong></span>, "Worker klik Mulai / Admin assign", <ul key="a2" className="list-disc ml-3 space-y-0.5"><li>Telegram ke Worker Group</li><li>WhatsApp ke customer (order mulai dikerjakan)</li><li>Customer bisa track via /track</li></ul>],
+                  [<span key="t2" className="whitespace-nowrap"><strong className="text-blue-400">confirmed</strong> → <strong className="text-accent">in_progress</strong></span>, "Lead assign worker (auto) / Admin assign (auto jika confirmed) / Worker klik Mulai", <ul key="a2" className="list-disc ml-3 space-y-0.5"><li>WhatsApp ke customer (order mulai dikerjakan)</li><li>Customer bisa track via /track</li><li><em>Note: Telegram ke Worker Group dikirim saat ASSIGN, bukan saat status in_progress</em></li></ul>],
                   [<span key="t3" className="whitespace-nowrap"><strong className="text-accent">in_progress</strong> → <strong className="text-green-400">completed</strong></span>, "Worker klik Selesai / Admin set", <ul key="a3" className="list-disc ml-3 space-y-0.5"><li>WhatsApp ke customer (selesai + link review)</li><li>Telegram ke Admin Group</li><li><strong>Auto-generate commission</strong> (60% × total_price)</li><li><strong>Award reward points</strong> ke customer (1 poin/Rp10K)</li><li><strong>Referral bonus</strong> jika ada referrer (poin ke referrer)</li><li>Commission period: bi-weekly (tgl 1-15 atau 16-akhir)</li></ul>],
                   [<span key="t4" className="whitespace-nowrap">Semua → <strong className="text-red-400">cancelled</strong></span>, "Admin cancel", <ul key="a4" className="list-disc ml-3 space-y-0.5"><li>WhatsApp ke customer (order dibatalkan)</li><li>Telegram ke Admin Group</li></ul>],
                 ]} />
@@ -1626,7 +1626,7 @@ function buildCategories(): DocCategory[] {
                 { q: "Telegram bot tidak merespon command?", a: "Cek bot token di Settings > Integrations. Pastikan webhook terdaftar: buka /api/telegram/webhook?action=register. Cek bot sudah ditambahkan ke grup." },
                 { q: "Link di WA tidak bisa diklik (tidak biru)?", a: "Pastikan URL ada di baris sendiri (tidak nempel emoji/teks lain). URL harus punya trailing slash sebelum query params, contoh: /track/?id=xxx bukan /track?id=xxx." },
                 { q: "iPaymu payment tidak auto-confirm?", a: "Cek API Key & VA di Settings > Integrations. Pastikan Notification URL di iPaymu Dashboard mengarah ke /api/payment/notification. Cek environment (Sandbox vs Production). Jika iPaymu down saat order dibuat, sistem otomatis fallback ke manual transfer + kirim WA ke customer." },
-                { q: "Worker tidak bisa lihat order?", a: "Pastikan order sudah di-assign ke worker tersebut. Worker hanya bisa lihat order yang ditugaskan via lead/admin." },
+                { q: "Worker tidak bisa lihat order?", a: "Worker hanya bisa lihat order yang memiliki record di tabel order_assignments (assigned_to = worker ID). Pastikan order sudah di-assign via Lead Dashboard atau Admin Dashboard. Tanpa record assignment, order tidak muncul di dashboard worker." },
                 { q: "Tidak bisa assign worker?", a: "Worker hanya bisa di-assign setelah pembayaran dikonfirmasi (payment_status = paid). Pastikan order sudah dibayar dan dikonfirmasi terlebih dahulu." },
                 { q: "Tombol Konfirmasi Bayar tidak muncul?", a: "Tombol Konfirmasi Bayar hanya muncul untuk order dengan metode manual transfer. Order iPaymu dikonfirmasi otomatis via webhook — tidak perlu konfirmasi manual." },
                 { q: "Commission tidak muncul setelah order selesai?", a: "Komisi auto-generate saat status diubah ke completed DAN ada assigned_worker_id. Cek di Payroll > Commissions." },
@@ -2119,7 +2119,7 @@ function buildCategories(): DocCategory[] {
                   [<strong key="2" className="text-text">order_logs</strong>, "Audit trail", "order_id, action, old_value, new_value, created_by"],
                   [<strong key="3" className="text-text">customers</strong>, "Data pelanggan", "email, name, whatsapp, referral_code, reward_points, reward_tier"],
                   [<strong key="4" className="text-text">staff_users</strong>, "Users internal (RBAC)", "email, name, password_hash, role (admin/lead/worker)"],
-                  [<strong key="5" className="text-text">order_assignments</strong>, "Assignment order ke worker", "order_id, assigned_to, assigned_by"],
+                  [<strong key="5" className="text-text">order_assignments</strong>, "Assignment order ke worker (worker hanya bisa lihat order yang punya record di tabel ini)", "order_id, assigned_to, assigned_by, status, assigned_at, notes"],
                   [<strong key="6" className="text-text">worker_submissions</strong>, "Hasil kerja booster", "order_id, worker_id, stars_gained, mvp_count, screenshots"],
                   [<strong key="7" className="text-text">settings</strong>, "Konfigurasi key-value", "key (string), value (JSONB)"],
                 ]} />
