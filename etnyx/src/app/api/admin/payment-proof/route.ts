@@ -72,51 +72,55 @@ export async function POST(request: NextRequest) {
         })
         .eq("id", proofId);
 
-      // Update order status
+      // Only update order if not already paid (idempotency — prevents double notifications if admin also clicked "Konfirmasi Bayar")
       const order = proof.orders;
-      await supabase
-        .from("orders")
-        .update({
-          payment_status: "paid",
-          status: "confirmed",
-          paid_at: new Date().toISOString(),
-          confirmed_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", order.id);
+      const alreadyPaid = order.payment_status === "paid" && order.status === "confirmed";
 
-      // Log
-      await supabase.from("order_logs").insert({
-        order_id: order.id,
-        action: "payment_confirmed",
-        new_value: "paid",
-        notes: `Manual transfer approved by ${auth.user!.email}`,
-        created_by: auth.user!.email,
-      });
+      if (!alreadyPaid) {
+        await supabase
+          .from("orders")
+          .update({
+            payment_status: "paid",
+            status: "confirmed",
+            paid_at: new Date().toISOString(),
+            confirmed_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", order.id);
 
-      // Send notifications
-      try {
-        const { sendPaymentConfirmedWA, notifyWorkerConfirmedOrder } = await import("@/lib/notifications");
-        const orderData = {
-          order_id: order.order_id,
-          username: order.username,
-          current_rank: order.current_rank,
-          target_rank: order.target_rank,
-          package: order.package,
-          price: order.total_price,
-          whatsapp: order.whatsapp,
-          email: order.customer_email,
-          status: "confirmed",
-          is_express: order.is_express,
-          is_premium: order.is_premium,
-          notes: order.notes,
-        };
-        // WA to customer: "Pembayaran Dikonfirmasi"
-        await sendPaymentConfirmedWA(orderData);
-        // Telegram to worker group: order ready to be assigned
-        await notifyWorkerConfirmedOrder(orderData);
-      } catch (e) {
-        console.error("Notification error:", e);
+        // Log
+        await supabase.from("order_logs").insert({
+          order_id: order.id,
+          action: "payment_confirmed",
+          new_value: "paid",
+          notes: `Manual transfer approved by ${auth.user!.email}`,
+          created_by: auth.user!.email,
+        });
+
+        // Send notifications only if order wasn't already confirmed
+        try {
+          const { sendPaymentConfirmedWA, notifyWorkerConfirmedOrder } = await import("@/lib/notifications");
+          const orderData = {
+            order_id: order.order_id,
+            username: order.username,
+            current_rank: order.current_rank,
+            target_rank: order.target_rank,
+            package: order.package,
+            price: order.total_price,
+            whatsapp: order.whatsapp,
+            email: order.customer_email,
+            status: "confirmed",
+            is_express: order.is_express,
+            is_premium: order.is_premium,
+            notes: order.notes,
+          };
+          // WA to customer: "Pembayaran Dikonfirmasi"
+          await sendPaymentConfirmedWA(orderData);
+          // Telegram to worker group: order ready to be assigned
+          await notifyWorkerConfirmedOrder(orderData);
+        } catch (e) {
+          console.error("Notification error:", e);
+        }
       }
 
       return NextResponse.json({ success: true, action: "approved" });

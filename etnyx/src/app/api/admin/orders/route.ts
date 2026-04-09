@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import { verifyAdmin } from "@/lib/admin-auth";
 import { sanitizeInput, isValidRank } from "@/lib/validation";
-import { sendNewOrderNotifications, sendOrderConfirmedNotifications, sendOrderCompletedNotifications, sendOrderStartedWA, sendOrderCancelledWA } from "@/lib/notifications";
+import { sendNewOrderNotifications, sendOrderConfirmedNotifications, sendOrderCompletedNotifications, sendOrderStartedWA, sendOrderCancelledWA, sendTelegramMessage } from "@/lib/notifications";
 import { logAdminAction } from "@/lib/audit-log";
 
 export async function GET(request: Request) {
@@ -192,6 +192,29 @@ export async function PATCH(request: Request) {
       );
     }
 
+    // Verify worker exists and is active when assigning
+    if (updates.assigned_worker_id && updates.assigned_worker_id !== currentOrder?.assigned_worker_id) {
+      const { data: workerCheck } = await supabase
+        .from("staff_users")
+        .select("id, name, role, is_active")
+        .eq("id", updates.assigned_worker_id as string)
+        .eq("role", "worker")
+        .eq("is_active", true)
+        .single();
+
+      if (!workerCheck) {
+        return NextResponse.json(
+          { error: "Worker tidak ditemukan atau tidak aktif" },
+          { status: 404 }
+        );
+      }
+
+      // Auto-set status to in_progress when assigning worker (if currently confirmed)
+      if (previousStatus === "confirmed" && !updates.status) {
+        updates.status = "in_progress";
+      }
+    }
+
     // Validate status transitions
     if (updates.status && updates.status !== previousStatus) {
       const validTransitions: Record<string, string[]> = {
@@ -213,8 +236,11 @@ export async function PATCH(request: Request) {
     // Auto-set timestamps on status transitions
     if (updates.status === "confirmed" && previousStatus !== "confirmed") {
       updates.confirmed_at = new Date().toISOString();
-      updates.payment_status = "paid";
-      if (!updates.paid_at) updates.paid_at = new Date().toISOString();
+      // Only set payment_status if not already paid (idempotency — prevents double notifications from proof approval + status change)
+      if (currentOrder?.payment_status !== "paid") {
+        updates.payment_status = "paid";
+        if (!updates.paid_at) updates.paid_at = new Date().toISOString();
+      }
     }
     if (updates.status === "completed" && previousStatus !== "completed") {
       updates.completed_at = new Date().toISOString();
@@ -252,13 +278,45 @@ export async function PATCH(request: Request) {
       });
     }
 
-    // Log worker assignment to order_logs
+    // Handle worker assignment: create order_assignments record + Telegram notification
     if (updates.assigned_worker_id && updates.assigned_worker_id !== currentOrder?.assigned_worker_id) {
       const { data: worker } = await supabase
         .from("staff_users")
         .select("name")
         .eq("id", updates.assigned_worker_id as string)
         .single();
+
+      // Create order_assignments record (so worker can see it in their dashboard)
+      // First check if there's already an active assignment
+      const { data: existingAssignment } = await supabase
+        .from("order_assignments")
+        .select("id")
+        .eq("order_id", id)
+        .in("status", ["assigned", "in_progress"])
+        .single();
+
+      if (existingAssignment) {
+        // Update existing assignment to the new worker
+        await supabase
+          .from("order_assignments")
+          .update({
+            assigned_to: updates.assigned_worker_id as string,
+            assigned_by: auth.user!.email,
+            status: "assigned",
+            assigned_at: new Date().toISOString(),
+          })
+          .eq("id", existingAssignment.id);
+      } else {
+        // Create new assignment
+        await supabase.from("order_assignments").insert({
+          order_id: id,
+          assigned_to: updates.assigned_worker_id as string,
+          assigned_by: auth.user!.email,
+          status: "assigned",
+        });
+      }
+
+      // Log to order_logs
       await supabase.from("order_logs").insert({
         order_id: id,
         action: "assigned",
@@ -266,6 +324,22 @@ export async function PATCH(request: Request) {
         notes: `Assigned by admin (${auth.user!.email})`,
         created_by: auth.user!.email,
       });
+
+      // Notify worker via Telegram
+      try {
+        const { data: settings } = await supabase
+          .from("settings")
+          .select("value")
+          .eq("key", "integrations")
+          .single();
+        const integrations = settings?.value || {};
+        if (integrations.telegramBotToken && integrations.telegramWorkerGroupId) {
+          const msg = `📢 <b>ORDER BARU DITUGASKAN</b>\n\nWorker: <b>${worker?.name || "Unknown"}</b>\nOrder: <b>${data.order_id}</b>\n\nSegera kerjakan!`;
+          await sendTelegramMessage(integrations.telegramWorkerGroupId, msg, integrations.telegramBotToken);
+        }
+      } catch (e) {
+        console.error(`[assign] Telegram notification failed for ${data.order_id}:`, e);
+      }
     }
 
     // Send notifications based on status change

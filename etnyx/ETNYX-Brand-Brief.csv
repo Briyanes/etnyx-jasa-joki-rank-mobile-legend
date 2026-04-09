@@ -1,0 +1,149 @@
+SECTION,ITEM,DETAIL,CONTOH / KETERANGAN
+
+=== 1. TENTANG BRAND ===,,,
+Brand,Nama Brand,ETNYX (baca: ET-NIX),
+Brand,Industri,Jasa Joki & Gendong Mobile Legends,
+Brand,Tagline Utama,Push Rank Tanpa Main,
+Brand,Tagline Pendukung,"Tinggal order, booster kami yang push rank kamu.",
+Brand,Handle,@etnyx_ml,Semua platform
+Brand,Website,etnyx.id,
+
+=== 2. BRAND PERSONALITY ===,,,
+Personality,Santai & Friendly,"Bicara kayak teman, bukan sales","Duduk santai, booster kami yang kerja"
+Personality,Percaya Diri,"Yakin sama kualitas, tanpa arogan",Belum ada yang kena banned
+Personality,Youth/Gen-Z Vibes,Relatable ke anak muda & gamers,"Pakai bahasa sehari-hari, slang gaming"
+Personality,Supportive,"Bantu player, bukan menggurui","Kamu tinggal order, sisanya kami yang handle"
+Personality,Profesional tapi Asik,"Serius soal kualitas, tapi delivery-nya fun","Desain premium, copy santai"
+Personality,Brand BUKAN,Bukan formal/kaku,Bukan "Kami menawarkan layanan..."
+Personality,Brand BUKAN,Bukan flexing berlebihan,
+Personality,Brand BUKAN,Bukan clickbait/scam vibes,
+Personality,Brand BUKAN,Bukan toxic/merendahkan player rank rendah,
+
+=== 3. TONE OF VOICE ===,,,
+Tone,Rumus,Casual + Confident + Helpful,
+Tone - Platform,Instagram Feed,Clean & informative,Mythic dalam 3 hari? Bisa banget.
+Tone - Platform,Instagram Story,Fun & interaktif,"Rank kamu sekarang apa? 👇 Poll"
+Tone - Platform,TikTok,Entertaining & relatable,POV: kamu order joki terus bangun udah Mythic 💀
+Tone - Platform,YouTube,Educational & showcase,"Gameplay highlights, tips, before-after"
+Tone - Platform,WhatsApp/Chat,Ramah & responsif,Halo kak! Ada yang bisa dibantu?
+Tone - Jangan,❌,Bahasa terlalu formal,Dengan hormat...
+Tone - Jangan,❌,CAPSLOCK berlebihan,
+Tone - Jangan,❌,Emoji spam,Max 2-3 per caption
+Tone - Jangan,❌,Menjatuhkan kompetitor,
+Tone - Boleh,✅,Bahasa Indonesia santai campur English,
+Tone - Boleh,✅,Humor ringan,"Self-deprecating, relatable memes"
+Tone - Boleh,✅,Istilah gaming,"push rank, feed, carry, savage, MVP"
+Tone - Boleh,✅,Emoji relevan,⚡🎮🔥💎🛡️⭐
+
+=== 4. COLOR PALETTE ===,,,
+Color - Primary,Accent (Turquoise),#2DD4BF,"CTA button, highlight, gradient utama"
+Color - Primary,Primary (Teal),#7FA8A3,"Elemen pendukung, teks aktif"
+Color - Primary,Dark BG,#0F1419,Background utama
+Color - Primary,Surface,#151B22,"Card, panel"
+Color - Primary,Text,#E6F1EF,Teks utama (di dark bg)
+Color - Primary,Text Muted,#9CA3AF,Teks sekunder
+Color - Status,Green,#22C55E,"Sukses, confirmed, online"
+Color - Status,Amber,#F59E0B,"Warning, pending"
+Color - Status,Red,#EF4444,"Error, cancelled"
+Color - Status,Purple,#A855F7,"Premium, promo"
+Color - Gradient,Primary Gradient,from #2DD4BF to #7FA8A3,Turquoise → Teal
+Color - Gradient,Hover Glow,"rgba(45, 212, 191, 0.15)",
+Color - Light Mode,BG,#F8FAFC,
+Color - Light Mode,Surface,#FFFFFF,
+Color - Light Mode,Text,#1E293B,
+Color - Light Mode,Accent,#14B8A6,
+
+=== 5. TYPOGRAPHY ===,,,
+Font,Headline,Inter Bold/ExtraBold (700-800),"Judul konten, thumbnail text"
+Font,Body Text,Inter Regular (400),"Caption, deskripsi"
+Font,Small/Label,Inter Medium (500),"Tag, badge, keterangan kecil"
+Font,Download,https://fonts.google.com/specimen/Inter,
+Font,Alternatif,Poppins atau Montserrat,Untuk thumbnail/reels variasi
+
+=== 6. LOGO USAGE ===,,,
+Logo,etnyx-logo-header.webp,Header website,Thumbnail horizontal
+Logo,etnyx-logo-mobile.webp,Profile picture,Reels/Stories
+Logo,logo-circle.webp,Watermark/avatar,Favicon
+Logo,circle-landscape.webp,Footer/about section,Horizontal
+Logo,"Letter variants (e,t,n,y,x)",Animasi,Motion graphic
+Logo - Aturan,✅,Gunakan di atas background gelap,Dark preferred
+Logo - Aturan,✅,Beri clear space minimal 20%,Di semua sisi logo
+Logo - Aturan,❌,Jangan stretch/rotate/ubah warna,
+Logo - Aturan,❌,Jangan taruh di background ramai,Tanpa overlay
+
+=== 7. TARGET AUDIENCE ===,,,
+Demografi,Usia,13-35 tahun,
+Demografi,Gender,"Dominan laki-laki (70-80%), tapi inklusif",
+Demografi,Lokasi,Indonesia (utama) / Southeast Asia,
+Demografi,Device,Mobile-first (90%+ via HP),
+Psikografi,Busy Player,"Kerja/sekolah, ga sempat grind",Mau rank naik tanpa effort
+Psikografi,Casual Gamer,"Main santai, mager push sendiri",Flexing rank ke teman
+Psikografi,Competitive,"Ambisi tinggi, mau belajar",Pakai gendong buat belajar strategi
+Psikografi,New Player,"Baru main ML, pengen cepat naik",Shortcut ke rank atas
+Pain Points,1,Capek stuck di rank yang sama,
+Pain Points,2,Teammate random bikin lose streak,
+Pain Points,3,Ga ada waktu buat push rank,
+Pain Points,4,Takut akun kena banned,
+Pain Points,5,Jasa joki lain mahal / ga trusted,
+
+=== 8. CONTENT PILLARS ===,,,
+Pilar,Showcase & Proof,30%,"Before/after rank, screenshot hasil, testimoni, review"
+Pilar,Educational/Tips,25%,"Tips push rank, hero guide, meta update, build recommendation"
+Pilar,Entertainment,25%,"Meme ML, POV relatable, gameplay highlight, savage/maniac clip"
+Pilar,Promo & CTA,20%,"Diskon, promo code, flash sale, bundle package, referral program"
+
+=== 9. VISUAL STYLE GUIDE ===,,,
+Visual - Feed IG,Layout,"Clean, minimalis, banyak darkspace",
+Visual - Feed IG,Background,Dark (#0F1419) atau gradient gelap,
+Visual - Feed IG,Accent Pop,Turquoise (#2DD4BF),Highlight/CTA
+Visual - Feed IG,Konsistensi,Template seragam dengan grid harmonis,
+Visual - Stories/Reels,Opening,"1-2 detik hook, teks besar, motion",
+Visual - Stories/Reels,Font,"Bold, besar, readable di mobile",
+Visual - Stories/Reels,Warna Teks,Putih di dark bg / Turquoise untuk emphasis,
+Visual - Stories/Reels,Durasi,15-30 detik (Reels) / 3-5 slide (Stories),
+Visual - Thumbnail YT,Style,"High contrast, dark bg, character ML + teks besar",
+Visual - Thumbnail YT,Font,Bold Inter/Poppins max 5-7 kata,
+Visual - Thumbnail YT,Warna,Dark + Turquoise accent + glow effect,
+Visual - Watermark,Logo,logo-circle.webp opacity 30-50%,Pojok kanan bawah
+Visual - Watermark,Ukuran,5-8% dari total area konten,
+
+=== 10. HASHTAG STRATEGY ===,,,
+Hashtag - Wajib,Brand,#ETNYX #EtnyxML,
+Hashtag - Wajib,Brand,#PushRankTanpaMain #JokiMLTerpercaya,
+Hashtag - Konten,Joki,#JokiML #JokiMobileLegends #JokiRank #JokiMLBB,
+Hashtag - Konten,Game,#MobileLegends #MLBB #MobileLegendsBangBang,
+Hashtag - Konten,Rank,#PushRank #JokiMythic #JokiLegend #GendongML,
+Hashtag - Konten,Tips,#TipsML #MetaML #HeroML #GameplayML,
+Hashtag - Trending,Seasonal,#MPL #M6 #MSC #515Party #MLBBUpdate #PatchML,Sesuaikan event
+
+=== 11. DO's & DON'Ts ===,,,
+DO,✅,Selalu cantumkan CTA,"Link bio, WA, order link"
+DO,✅,Pakai testimoni real,"Screenshot WA, review asli"
+DO,✅,Tunjukkan proses,"Progress tracking, before/after"
+DO,✅,Engage di comment & DM,< 5 menit response
+DO,✅,Konsisten posting,Minimal 4-5x/minggu
+DO,✅,Bahasa relatable,Sesuai target audience
+DON'T,❌,Konten orang lain tanpa credit,
+DON'T,❌,Merendahkan rank rendah,
+DON'T,❌,Over-promise,Kecuali memang bisa
+DON'T,❌,Share data customer tanpa izin,
+DON'T,❌,Bahas hack/cheat/ilegal,
+DON'T,❌,Visual murahan,"Low-res, Comic Sans, warna norak"
+
+=== 12. BRAND ASSETS ===,,,
+Asset,Logo (semua varian),✅ Ready,/public/logo/
+Asset,Favicon & PWA Icons,✅ Ready,/public/icons/
+Asset,Color Palette,✅ Documented,Brief ini
+Asset,Font (Inter),✅ Ready,Google Fonts
+Asset,OG Image (1200×630),✅ Ready,/public/og-image.jpg
+Asset,Template Instagram,❌ Belum,Perlu dibuat
+Asset,Template Stories,❌ Belum,Perlu dibuat
+Asset,Template Thumbnail,❌ Belum,Perlu dibuat
+Asset,Brand Guideline PDF,❌ Belum,Perlu dibuat
+Asset,Motion/Intro Video,❌ Belum,Perlu dibuat
+
+=== 13. CONTOH CAPTION ===,,,
+Caption - Showcase,Judul,⚡ Dari Epic ke Mythic dalam 2 hari!,"Customer ini order paket Express dan booster kami langsung gas. Hasilnya? 48 jam Mythic. 🔥 Mau kayak gini juga? Link di bio! #ETNYX #JokiML #PushRankTanpaMain"
+Caption - Educational,Judul,🎮 3 Hero Meta Season 35,"1. Valentina — Burst mage, skill steal GG. 2. Arlott — Fighter anti-tank. 3. Joy — Assassin susah di-counter. Kalau males grind, tinggal order aja di ETNYX 😏 #TipsML #MetaML #ETNYX"
+Caption - Entertainment,Judul,"POV: Order joki sebelum tidur, bangun udah Mythic 💀✨",Booster kami emang beda. Link di bio! #ETNYX #JokiML #Relatable
+Caption - Promo,Judul,🎁 PROMO MINGGU INI!,"Diskon 15% semua paket Push Rank! Pakai kode: PUSH15. ⚡ Order sekarang sebelum slot habis! 🔗 etnyx.id/order #ETNYX #PromoJokiML #Diskon"

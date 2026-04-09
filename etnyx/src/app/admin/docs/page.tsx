@@ -2254,7 +2254,7 @@ function buildCategories(): DocCategory[] {
                   { title: "Frontend POST ke /api/customer/order", desc: "Kirim data order + payment_method: ipaymu" },
                   { title: "Backend generate Payment URL", desc: "Via snap.createTransaction() — return snap_url" },
                   { title: "Customer bayar via popup/redirect", desc: "VA, QRIS, GoPay, ShopeePay, Kartu Kredit" },
-                  { title: "Webhook auto-confirm", desc: "iPaymu POST ke /api/payment/notification — SHA-512 signature verification", page: "/api/payment/notification" },
+                  { title: "Webhook auto-confirm", desc: "iPaymu POST ke /api/payment/notification — SHA-256 HMAC signature verification", page: "/api/payment/notification" },
                   { title: "Status update + notifikasi", desc: "Order confirmed + paid, WA 'Pembayaran Dikonfirmasi', Telegram Worker Group" },
                 ]} />
                 <InfoBox type="info">
@@ -2332,7 +2332,7 @@ function buildCategories(): DocCategory[] {
                 ["RLS", "Supabase", "Row Level Security on all tables"],
                 ["Headers", "CSP, HSTS, X-Frame", "next.config.ts — whitelist tracking domains"],
                 ["Audit", "logAdminAction()", "Admin actions logged to admin_audit_log"],
-                ["Signature", "SHA-512", "iPaymu payment webhook verification"],
+                ["Signature", "SHA-256 HMAC", "iPaymu payment webhook verification"],
               ]} />
               <div className="bg-background rounded-lg p-4 border border-white/5">
                 <h4 className="text-text font-medium text-sm mb-3">🔐 Credential Encryption (AES-256-GCM)</h4>
