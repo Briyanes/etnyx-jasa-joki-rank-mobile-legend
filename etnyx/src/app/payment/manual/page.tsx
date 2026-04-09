@@ -346,11 +346,58 @@ function ManualPaymentContent() {
             const items = bankAccounts.filter(b => b.is_active && (b.account_number || b.qris_image_url) && (b.category || "bank") === group.key);
             if (items.length === 0) return null;
             const GroupIcon = group.icon;
+
+            // E-Wallet compact mode: if all items share the same number, show as icon grid
+            const allSameNumber = group.key === "ewallet" && items.length > 1 && items.every(b => b.account_number === items[0].account_number);
+
             return (
               <div key={group.key} className="mb-3 last:mb-0">
                 <p className={`text-[10px] font-bold mb-2 uppercase tracking-widest flex items-center gap-1.5 ${group.color}`}>
                   <GroupIcon className="w-3 h-3" /> {group.label}
                 </p>
+
+                {allSameNumber ? (
+                  /* Compact e-wallet: icon grid + shared number */
+                  <div className="bg-background rounded-xl p-3 space-y-3">
+                    <div className="flex flex-wrap gap-2 justify-center">
+                      {items.map((bank, i) => {
+                        const iconInfo = PAYMENT_ICONS[bank.bank];
+                        return (
+                          <div key={i} className="flex flex-col items-center gap-1 w-14">
+                            {bank.logo ? (
+                              <Image src={bank.logo} alt={bank.bank} width={36} height={36} className="w-9 h-9 object-contain rounded-lg" />
+                            ) : iconInfo ? (
+                              <div className={`w-9 h-9 rounded-lg ${iconInfo.bg} flex items-center justify-center`}>
+                                {(() => { const Icon = iconInfo.icon; return <Icon className={`w-4 h-4 ${iconInfo.text}`} />; })()}
+                              </div>
+                            ) : (
+                              <div className="w-9 h-9 rounded-lg bg-accent/20 flex items-center justify-center">
+                                <CreditCard className="w-4 h-4 text-accent" />
+                              </div>
+                            )}
+                            <span className="text-text-muted text-[9px] text-center leading-tight">{bank.bank}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="flex items-center justify-between gap-2 bg-surface rounded-lg px-3 py-2">
+                      <div className="min-w-0">
+                        <p className="text-accent font-mono font-bold text-sm">{items[0].account_number}</p>
+                        {items[0].account_name && <p className="text-text-muted text-[10px]">a.n. {items[0].account_name}</p>}
+                      </div>
+                      <button
+                        onClick={() => handleCopy(items[0].account_number, "ewallet-shared")}
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-accent/10 text-accent text-[10px] font-semibold hover:bg-accent/20 transition-colors flex-shrink-0"
+                      >
+                        {copiedAccount === "ewallet-shared" ? (
+                          <><Check className="w-3.5 h-3.5" /> {t.copySuccess}</>
+                        ) : (
+                          <><Copy className="w-3.5 h-3.5" /> {t.copy}</>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
                 <div className="space-y-2">
                   {items.map((bank, i) => (
                     <div
@@ -416,6 +463,7 @@ function ManualPaymentContent() {
                     </div>
                   ))}
                 </div>
+                )}
               </div>
             );
           })}
