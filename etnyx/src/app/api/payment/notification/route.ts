@@ -117,8 +117,8 @@ export async function POST(request: NextRequest) {
     const ipaymuStatusCode = Number(verifiedTrx.StatusCode ?? status_code);
     const ipaymuStatus = String(verifiedTrx.Status ?? status ?? "").toLowerCase();
 
-    // Idempotency: skip if order already paid
-    if (order.payment_status === "paid" && ipaymuStatusCode === 1) {
+    // Idempotency: skip if order already paid (prevent stale webhooks from overwriting)
+    if (order.payment_status === "paid") {
       return NextResponse.json({ success: true, message: "Already processed" });
     }
 

@@ -92,6 +92,7 @@ export async function POST(request: Request) {
         name: customer.name 
       })
         .setProtectedHeader({ alg: "HS256" })
+        .setIssuedAt()
         .setExpirationTime("7d")
         .sign(getJwtSecret());
 
@@ -148,6 +149,7 @@ export async function POST(request: Request) {
         name: customer.name 
       })
         .setProtectedHeader({ alg: "HS256" })
+        .setIssuedAt()
         .setExpirationTime("7d")
         .sign(getJwtSecret());
 

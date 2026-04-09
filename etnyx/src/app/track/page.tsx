@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -203,16 +203,8 @@ function TrackOrderContent() {
     cancelled: { label: txt.status.cancelled, color: "text-red-400", icon: <XCircle className="w-4 h-4" /> },
   };
 
-  // Auto-track from URL params (?id= or ?order_id=)
-  useEffect(() => {
-    const idParam = (searchParams.get("id") || searchParams.get("order_id") || "").replace(/\/+$/, "");
-    if (idParam) {
-      setOrderId(idParam);
-      trackOrder(idParam);
-    }
-  }, [searchParams]);
-
-  const trackOrder = async (id: string) => {
+  // Track order function
+  const trackOrder = useCallback(async (id: string) => {
     if (!id.trim()) return;
     setLoading(true);
     setError("");
@@ -233,7 +225,16 @@ function TrackOrderContent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [txt.orderNotFound]);
+
+  // Auto-track from URL params (?id= or ?order_id=)
+  useEffect(() => {
+    const idParam = (searchParams.get("id") || searchParams.get("order_id") || "").replace(/\/+$/, "");
+    if (idParam) {
+      setOrderId(idParam);
+      trackOrder(idParam);
+    }
+  }, [searchParams, trackOrder]);
 
   const handleTrack = async (e: React.FormEvent) => {
     e.preventDefault();

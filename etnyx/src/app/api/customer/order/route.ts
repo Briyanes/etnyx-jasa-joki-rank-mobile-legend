@@ -302,7 +302,11 @@ export async function POST(request: NextRequest) {
           .single();
         if (promoCheck?.max_uses && promoCheck.used_count > promoCheck.max_uses) {
           // Revert: decrement back and remove discount from order
-          await supabase.rpc("increment_promo_used_count", { p_promo_id: promoId });
+          const { error: decErr } = await supabase.rpc("decrement_promo_used_count", { p_promo_id: promoId });
+          if (decErr) {
+            // Fallback: direct update if RPC doesn't exist
+            await supabase.from("promo_codes").update({ used_count: promoCheck.max_uses }).eq("id", promoId);
+          }
           await supabase.from("orders").update({
             promo_code: null,
             promo_discount: 0,

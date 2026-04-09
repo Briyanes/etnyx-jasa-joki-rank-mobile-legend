@@ -112,6 +112,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Pembayaran belum dikonfirmasi. Assign worker hanya bisa setelah pembayaran dikonfirmasi." }, { status: 400 });
   }
 
+  // Only allow assignment if order is in confirmed status (not pending/cancelled)
+  if (orderCheck.status !== "confirmed" && orderCheck.status !== "in_progress") {
+    return NextResponse.json({ error: `Order status '${orderCheck.status}' tidak bisa di-assign. Order harus dalam status 'confirmed' terlebih dahulu.` }, { status: 400 });
+  }
+
   // Verify worker exists and is active
   const { data: worker } = await supabase
     .from("staff_users")

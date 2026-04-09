@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import { verifyAdmin } from "@/lib/admin-auth";
+import { sanitizeInput } from "@/lib/validation";
 
 // GET: Fetch payment proof for an order (admin only)
 export async function GET(request: NextRequest) {
@@ -132,7 +133,7 @@ export async function POST(request: NextRequest) {
           status: "rejected",
           reviewed_by: auth.user!.email,
           reviewed_at: new Date().toISOString(),
-          reject_reason: rejectReason ? String(rejectReason).slice(0, 500) : null,
+          reject_reason: rejectReason ? sanitizeInput(String(rejectReason)).slice(0, 500) : null,
         })
         .eq("id", proofId);
 

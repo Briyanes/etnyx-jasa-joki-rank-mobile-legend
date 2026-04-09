@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Star, AlertTriangle, Send, ExternalLink, CheckCircle, Loader2, MessageCircle } from "lucide-react";
 import Image from "next/image";
@@ -154,6 +154,14 @@ function formatRank(rank: string) {
 }
 
 export default function ReviewPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-accent" /></div>}>
+      <ReviewPageContent />
+    </Suspense>
+  );
+}
+
+function ReviewPageContent() {
   const searchParams = useSearchParams();
   const orderId = (searchParams.get("id") || searchParams.get("orderId") || "").replace(/\/+$/, "");
   const token = searchParams.get("token") || "";
