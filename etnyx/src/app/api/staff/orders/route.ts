@@ -97,6 +97,21 @@ export async function POST(request: NextRequest) {
 
   const supabase = await createAdminClient();
 
+  // Verify order exists and payment is confirmed before allowing assignment
+  const { data: orderCheck } = await supabase
+    .from("orders")
+    .select("id, payment_status, status")
+    .eq("id", orderId)
+    .single();
+
+  if (!orderCheck) {
+    return NextResponse.json({ error: "Order tidak ditemukan" }, { status: 404 });
+  }
+
+  if (orderCheck.payment_status !== "paid") {
+    return NextResponse.json({ error: "Pembayaran belum dikonfirmasi. Assign worker hanya bisa setelah pembayaran dikonfirmasi." }, { status: 400 });
+  }
+
   // Verify worker exists and is active
   const { data: worker } = await supabase
     .from("staff_users")

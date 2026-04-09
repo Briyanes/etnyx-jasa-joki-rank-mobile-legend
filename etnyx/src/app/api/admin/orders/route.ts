@@ -144,6 +144,7 @@ const ALLOWED_UPDATE_FIELDS = [
   "current_progress_rank",
   "notes",
   "assigned_booster",
+  "assigned_worker_id",
   "is_express",
   "is_premium",
 ] as const;
@@ -182,6 +183,14 @@ export async function PATCH(request: Request) {
       .single();
 
     const previousStatus = currentOrder?.status;
+
+    // Block worker assignment if payment not confirmed
+    if (updates.assigned_worker_id && currentOrder?.payment_status !== "paid") {
+      return NextResponse.json(
+        { error: "Pembayaran belum dikonfirmasi. Assign worker hanya bisa setelah pembayaran dikonfirmasi." },
+        { status: 400 }
+      );
+    }
 
     // Validate status transitions
     if (updates.status && updates.status !== previousStatus) {

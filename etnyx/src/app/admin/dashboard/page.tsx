@@ -1125,15 +1125,18 @@ export default function AdminDashboard() {
                           <td className="px-4 py-3">
                             <span className="text-xs font-medium text-text">{formatRupiah(o.total_price)}</span>
                             {o.promo_discount > 0 && <p className="text-[10px] text-green-400">-{formatRupiah(o.promo_discount)}</p>}
-                            {o.payment_method === "manual_transfer" && (
+                            {o.payment_method === "manual_transfer" ? (
                               <span className="inline-block mt-1.5 px-1.5 py-0.5 rounded text-[9px] font-medium bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">Manual</span>
+                            ) : (
+                              <span className="inline-block mt-1.5 px-1.5 py-0.5 rounded text-[9px] font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">iPaymu</span>
                             )}
                           </td>
                           <td className="px-4 py-3">
                             <select
                               value={o.assigned_worker_id || ""}
                               onChange={(e) => assignWorker(o.id, e.target.value || null)}
-                              disabled={assigningWorker === o.id}
+                              disabled={assigningWorker === o.id || o.payment_status !== "paid"}
+                              title={o.payment_status !== "paid" ? "Pembayaran belum dikonfirmasi" : "Assign worker"}
                               className="bg-background border border-white/10 rounded-lg px-2 py-1.5 text-xs text-text focus:border-accent focus:outline-none min-w-[100px] disabled:opacity-50"
                             >
                               <option value="">— Belum —</option>
@@ -1165,11 +1168,18 @@ export default function AdminDashboard() {
                                     <Eye className="w-3 h-3" /> Lihat Bukti
                                   </button>
                                 )}
-                                <button onClick={() => updateOrderStatus(o.id, "confirmed")}
-                                  disabled={statusActionLoading === `${o.id}-confirmed`}
-                                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors w-full disabled:opacity-50">
-                                  {statusActionLoading === `${o.id}-confirmed` ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />} Konfirmasi Bayar
-                                </button>
+                                {o.payment_method === "manual_transfer" && (
+                                  <button onClick={() => updateOrderStatus(o.id, "confirmed")}
+                                    disabled={statusActionLoading === `${o.id}-confirmed`}
+                                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors w-full disabled:opacity-50">
+                                    {statusActionLoading === `${o.id}-confirmed` ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />} Konfirmasi Bayar
+                                  </button>
+                                )}
+                                {o.payment_method !== "manual_transfer" && (
+                                  <span className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-blue-500/10 text-blue-400 w-full">
+                                    ⏳ Menunggu pembayaran iPaymu
+                                  </span>
+                                )}
                                 <div className="flex gap-1">
                                   {o.whatsapp && (
                                     <button onClick={() => sendFollowUp(o.id, "follow_up_payment")}
