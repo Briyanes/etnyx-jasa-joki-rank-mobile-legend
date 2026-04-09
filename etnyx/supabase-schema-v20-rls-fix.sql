@@ -26,10 +26,10 @@ ALTER TABLE IF EXISTS reviews ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Service role full access on reviews" ON reviews;
 CREATE POLICY "Service role full access on reviews" ON reviews
   FOR ALL USING (true) WITH CHECK (true);
--- Allow public read for approved reviews
+-- Allow public read for visible reviews
 DROP POLICY IF EXISTS "Public can read approved reviews" ON reviews;
 CREATE POLICY "Public can read approved reviews" ON reviews
-  FOR SELECT USING (status = 'approved');
+  FOR SELECT USING (is_visible = true);
 
 -- 5. portfolio (LOW — contains portfolio items)
 ALTER TABLE IF EXISTS portfolio ENABLE ROW LEVEL SECURITY;
@@ -39,7 +39,7 @@ CREATE POLICY "Service role full access on portfolio" ON portfolio
 -- Allow public read for active portfolio items
 DROP POLICY IF EXISTS "Public can read active portfolio" ON portfolio;
 CREATE POLICY "Public can read active portfolio" ON portfolio
-  FOR SELECT USING (is_active = true);
+  FOR SELECT USING (is_visible = true);
 
 -- 6. push_subscriptions (LOW — contains push notification subscriptions)
 ALTER TABLE IF EXISTS push_subscriptions ENABLE ROW LEVEL SECURITY;
