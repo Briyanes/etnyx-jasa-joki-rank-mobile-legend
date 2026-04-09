@@ -33,7 +33,7 @@ interface FAQItem { question: string; answer: string }
 interface SectionVisibility { hero: boolean; pricing: boolean; whyChooseUs: boolean; teamShowcase: boolean; testimonials: boolean; portfolio: boolean; tracking: boolean; faq: boolean; cta: boolean }
 interface TrackingPixels { metaPixelId: string; metaAccessToken: string; googleAdsId: string; googleAdsConversionLabel: string; googleAnalyticsId: string; gtmId: string; tiktokPixelId: string; isMetaEnabled: boolean; isGoogleAdsEnabled: boolean; isGoogleAnalyticsEnabled: boolean; isGtmEnabled: boolean; isTiktokEnabled: boolean }
 interface SocialLinks { instagram: string; facebook: string; tiktok: string; youtube: string; whatsapp: string }
-interface SiteInfo { siteName: string; taglineId: string; taglineEn: string; supportEmail: string; companyName: string }
+interface SiteInfo { siteName: string; taglineId: string; taglineEn: string; supportEmail: string; companyName: string; address: string; phone: string }
 interface IntegrationSettings {
   ipaymuApiKey: string; ipaymuVa: string; ipaymuIsProduction: boolean;
   resendApiKey: string; resendFromEmail: string;
@@ -77,7 +77,7 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
   const [sectionVisibility, setSectionVisibility] = useState<SectionVisibility>({ hero: true, pricing: true, whyChooseUs: true, teamShowcase: true, testimonials: true, portfolio: true, tracking: true, faq: true, cta: true });
   const [trackingPixels, setTrackingPixels] = useState<TrackingPixels>({ metaPixelId: "", metaAccessToken: "", googleAdsId: "", googleAdsConversionLabel: "", googleAnalyticsId: "", gtmId: "", tiktokPixelId: "", isMetaEnabled: false, isGoogleAdsEnabled: false, isGoogleAnalyticsEnabled: false, isGtmEnabled: false, isTiktokEnabled: false });
   const [socialLinks, setSocialLinks] = useState<SocialLinks>({ instagram: "", facebook: "", tiktok: "", youtube: "", whatsapp: "" });
-  const [siteInfo, setSiteInfo] = useState<SiteInfo>({ siteName: "", taglineId: "", taglineEn: "", supportEmail: "", companyName: "" });
+  const [siteInfo, setSiteInfo] = useState<SiteInfo>({ siteName: "", taglineId: "", taglineEn: "", supportEmail: "", companyName: "", address: "", phone: "" });
   const [integrations, setIntegrations] = useState<IntegrationSettings>({
     ipaymuApiKey: "", ipaymuVa: "", ipaymuIsProduction: false,
     resendApiKey: "", resendFromEmail: "noreply@etnyx.com",
@@ -389,6 +389,16 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
               <label className="block text-sm text-text-muted mb-1.5">Email Support</label>
               <input type="email" value={siteInfo.supportEmail} onChange={(e) => setSiteInfo({ ...siteInfo, supportEmail: e.target.value })}
                 className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none" />
+            </div>
+            <div>
+              <label className="block text-sm text-text-muted mb-1.5">No. Telepon / WhatsApp</label>
+              <input type="text" value={siteInfo.phone} onChange={(e) => setSiteInfo({ ...siteInfo, phone: e.target.value })} placeholder="+62 815-1514-1452"
+                className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none" />
+            </div>
+            <div>
+              <label className="block text-sm text-text-muted mb-1.5">Alamat Perusahaan</label>
+              <textarea value={siteInfo.address} onChange={(e) => setSiteInfo({ ...siteInfo, address: e.target.value })} rows={2} placeholder="Jl. Kaliurang KM 5.5, Caturtunggal, Depok, Sleman, D.I. Yogyakarta 55281, Indonesia"
+                className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none resize-none" />
             </div>
             <div>
               <label className="block text-sm text-text-muted mb-1.5">Tagline (Bahasa Indonesia)</label>

@@ -43,7 +43,7 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   const [socialLinks, setSocialLinks] = useState<{ instagram: string; facebook: string; tiktok: string; youtube: string; whatsapp: string } | null>(null);
-  const [siteInfo, setSiteInfo] = useState<{ supportEmail: string; companyName: string } | null>(null);
+  const [siteInfo, setSiteInfo] = useState<{ supportEmail: string; companyName: string; address: string; phone: string } | null>(null);
 
   useEffect(() => {
     fetch("/api/settings?keys=social_links,site_info")
@@ -190,10 +190,10 @@ export default function Footer() {
               {siteInfo?.companyName || "PT Sumber Arto Moro Abadi Kreatif"}
             </p>
             <p className="text-text-muted/30 text-[10px] sm:text-xs">
-              Jl. Kaliurang KM 5.5, Caturtunggal, Depok, Sleman, D.I. Yogyakarta 55281, Indonesia
+              {siteInfo?.address || "Jl. Kaliurang KM 5.5, Caturtunggal, Depok, Sleman, D.I. Yogyakarta 55281, Indonesia"}
             </p>
             <p className="text-text-muted/30 text-[10px] sm:text-xs">
-              Email: {siteInfo?.supportEmail || "support@etnyx.id"} • WhatsApp: +62 815-1514-1452
+              Email: {siteInfo?.supportEmail || "support@etnyx.id"} • WhatsApp: {siteInfo?.phone || "+62 815-1514-1452"}
             </p>
           </div>
 
