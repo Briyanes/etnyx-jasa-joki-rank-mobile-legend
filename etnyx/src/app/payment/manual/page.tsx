@@ -506,13 +506,29 @@ function ManualPaymentContent() {
               </div>
               <div>
                 <label className="text-text-muted text-[10px] block mb-1">{t.senderBank}</label>
-                <input
-                  type="text"
+                <select
                   value={senderBank}
                   onChange={(e) => setSenderBank(e.target.value)}
-                  placeholder="BCA, BNI, dll"
-                  className="w-full bg-background border border-white/10 rounded-xl px-3 py-2.5 text-text text-sm focus:border-accent outline-none"
-                />
+                  className="w-full bg-background border border-white/10 rounded-xl px-3 py-2.5 text-text text-sm focus:border-accent outline-none appearance-none"
+                >
+                  <option value="" className="bg-background text-text-muted">{locale === "id" ? "Pilih bank..." : "Select bank..."}</option>
+                  {Array.from(new Set(["BCA", "BRI", "BNI", "Mandiri", "Jago", "DANA", "GoPay", "OVO", "ShopeePay", "LinkAja", ...bankAccounts.filter(b => b.is_active).map(b => b.bank)])).map(name => (
+                    <option key={name} value={name} className="bg-background text-text">{name}</option>
+                  ))}
+                  <option value="__other__" className="bg-background text-text">{locale === "id" ? "Lainnya..." : "Other..."}</option>
+                </select>
+                {senderBank === "__other__" && (
+                  <input
+                    type="text"
+                    onChange={(e) => {
+                      if (e.target.value) setSenderBank(e.target.value);
+                    }}
+                    onBlur={(e) => { if (!e.target.value) setSenderBank(""); }}
+                    placeholder={locale === "id" ? "Ketik nama bank" : "Type bank name"}
+                    autoFocus
+                    className="w-full bg-background border border-white/10 rounded-xl px-3 py-2.5 text-text text-sm focus:border-accent outline-none mt-1.5"
+                  />
+                )}
               </div>
             </div>
 
