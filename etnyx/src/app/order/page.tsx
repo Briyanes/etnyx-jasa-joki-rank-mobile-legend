@@ -2335,13 +2335,13 @@ function OrderPageContent() {
                 )}
 
                 {/* Account Info */}
-                <div className="bg-background rounded-xl p-4">
+                <div className="bg-background rounded-xl p-4 overflow-hidden">
                   <p className="text-text-muted text-xs mb-3 uppercase tracking-wider">
                     Data Akun
                   </p>
-                  <div className="grid grid-cols-2 gap-y-2 text-sm">
+                  <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
                     <span className="text-text-muted">Nickname</span>
-                    <span className="text-text font-medium">{form.nickname || "-"}</span>
+                    <span className="text-text font-medium break-all">{form.nickname || "-"}</span>
                     <span className="text-text-muted">User ID</span>
                     <span className="text-text font-medium">
                       {form.userId || "-"}{form.serverId ? ` (${form.serverId})` : ""}
@@ -2354,13 +2354,13 @@ function OrderPageContent() {
                     {form.heroRequest && (
                       <>
                         <span className="text-text-muted">Hero Request</span>
-                        <span className="text-text font-medium">{form.heroRequest}</span>
+                        <span className="text-text font-medium break-all">{form.heroRequest}</span>
                       </>
                     )}
                     {form.notes && (
                       <>
                         <span className="text-text-muted">Catatan</span>
-                        <span className="text-text font-medium">{form.notes}</span>
+                        <span className="text-text font-medium break-all">{form.notes}</span>
                       </>
                     )}
                   </div>
@@ -2388,15 +2388,15 @@ function OrderPageContent() {
                 )}
 
                 {/* Contact */}
-                <div className="bg-background rounded-xl p-4">
+                <div className="bg-background rounded-xl p-4 overflow-hidden">
                   <p className="text-text-muted text-xs mb-3 uppercase tracking-wider">
                     Kontak
                   </p>
-                  <div className="grid grid-cols-2 gap-y-2 text-sm">
+                  <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
                     <span className="text-text-muted">WhatsApp</span>
-                    <span className="text-text font-medium">+62{form.whatsapp}</span>
+                    <span className="text-text font-medium truncate">+62{form.whatsapp}</span>
                     <span className="text-text-muted">Email</span>
-                    <span className="text-text font-medium">{form.email || "-"}</span>
+                    <span className="text-text font-medium break-all">{form.email || "-"}</span>
                   </div>
                 </div>
 
