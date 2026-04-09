@@ -1,6 +1,13 @@
 import { createAdminClient } from "./supabase-server";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.com";
+const WA_OFFICIAL = "6281515141452";
+
+/** Disclaimer footer for bot-sent WA messages */
+function waDisclaimer(orderId: string): string {
+  const csLink = `https://wa.me/${WA_OFFICIAL}?text=${encodeURIComponent(`Halo min, saya mau tanya soal order ${orderId}`)}`;
+  return `\n\n---\n⚠️ _Pesan ini dikirim otomatis, jangan balas pesan ini._\nHubungi CS kami di sini:\n${csLink}`;
+}
 
 // ============ Types ============
 interface OrderData {
@@ -402,7 +409,7 @@ Order kamu akan segera diproses oleh tim booster kami. Kamu akan menerima notifi
 
 Terima kasih sudah mempercayai *ETNYX*!
 
-_ETNYX - Push Rank, Tanpa Main_
+_ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 `.trim();
 
   return sendWhatsAppMessage(order.whatsapp, message);
@@ -458,9 +465,9 @@ Silakan selesaikan pembayaran untuk memproses order kamu.
 Bayar & upload bukti di sini:
 ${SITE_URL}/payment/manual/?order_id=${order.order_id}
 
-Butuh bantuan? Balas pesan ini!
+Butuh bantuan? Hubungi CS kami via link di bawah.
 
-_ETNYX - Push Rank, Tanpa Main_
+_ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 `.trim();
 
   return sendWhatsAppMessage(order.whatsapp, message, `${SITE_URL}/payment/manual/?order_id=${order.order_id}`);
@@ -482,7 +489,7 @@ ${SITE_URL}/track/?id=${order.order_id}
 
 Jangan login ke akun selama proses joki ya!
 
-_ETNYX - Push Rank, Tanpa Main_
+_ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 `.trim();
 
   return sendWhatsAppMessage(order.whatsapp, message, `${SITE_URL}/track/?id=${order.order_id}`);
@@ -514,7 +521,7 @@ ${reportLink}
 
 Terima kasih sudah menggunakan *ETNYX*!
 
-_ETNYX - Push Rank, Tanpa Main_
+_ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 `.trim();
 
   return sendWhatsAppMessage(order.whatsapp, message, reviewLink);
@@ -531,9 +538,9 @@ Halo, order kamu telah dibatalkan.
 *Order ID:* ${order.order_id}
 *Username:* ${order.username}
 
-Jika kamu merasa ini adalah kesalahan atau ingin order ulang, silakan hubungi kami.
+Jika kamu merasa ini adalah kesalahan atau ingin order ulang, silakan hubungi kami via link di bawah.
 
-_ETNYX - Push Rank, Tanpa Main_
+_ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 `.trim();
 
   return sendWhatsAppMessage(order.whatsapp, message);
