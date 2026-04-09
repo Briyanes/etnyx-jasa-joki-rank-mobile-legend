@@ -2236,8 +2236,8 @@ function buildCategories(): DocCategory[] {
                 <h4 className="text-green-400 font-semibold text-sm mb-3">Transfer Manual</h4>
                 <StepFlow steps={[
                   { title: "Customer pilih Transfer Manual", desc: "Di form order step 3, pilih 'Transfer Manual'.", page: "/order (step 3)" },
-                  { title: "Auto-redirect ke halaman bayar", desc: "Setelah submit, auto-redirect ke /payment/manual?order_id=XXX. Tampil daftar rekening aktif.", page: "/payment/manual" },
-                  { title: "Customer transfer & upload bukti", desc: "Transfer ke salah satu rekening, upload foto bukti via form upload.", badge: "customer" },
+                  { title: "Auto-redirect ke halaman bayar", desc: "Setelah submit, auto-redirect ke /payment/manual?order_id=XXX. Bank ditampilkan per-card, e-wallet dengan nomor sama ditampilkan compact (icon grid + 1 nomor).", page: "/payment/manual" },
+                  { title: "Customer transfer & upload bukti", desc: "Transfer ke salah satu rekening, isi nama pengirim + pilih bank pengirim (dropdown) + upload foto bukti.", badge: "customer" },
                   { title: "Admin approve/reject bukti", desc: "Di dashboard Orders tab, admin review bukti transfer lalu approve atau reject.", badge: "admin" },
                   { title: "WA Pembayaran Dikonfirmasi", desc: "Setelah approve: status confirmed + paid, WA ke customer + Telegram ke Worker Group.", badge: "auto" },
                 ]} />
@@ -2861,6 +2861,46 @@ function buildCategories(): DocCategory[] {
           content: (
             <div className="space-y-4">
               <p className="text-text-muted text-sm">Riwayat update fitur, perbaikan bug, dan perubahan workflow. Diurutkan dari yang terbaru.</p>
+
+              <div className="bg-background rounded-lg p-4 border border-accent/20">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-accent/10 text-accent font-medium">v2.7</span>
+                  <h4 className="text-accent font-semibold text-sm">9-10 April 2026 (UI Polish &amp; Tracking)</h4>
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">Transfer Manual UI Improvements</h5>
+                    <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
+                      <li><strong className="text-text">Compact E-Wallet Grid</strong> &mdash; Jika semua e-wallet nomornya sama, ditampilkan sebagai icon grid + 1 nomor &amp; tombol Salin (bukan 5 card terpisah)</li>
+                      <li><strong className="text-text">Bank Pengirim Dropdown</strong> &mdash; Field &quot;Bank Pengirim&quot; sekarang dropdown (BCA, BRI, BNI, Mandiri, dll) + opsi &quot;Lainnya&quot; untuk input manual</li>
+                      <li>List bank otomatis termasuk bank dari konfigurasi admin</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">Customer Tracking — Hasil Boosting</h5>
+                    <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
+                      <li><strong className="text-text">Screenshot Visible</strong> &mdash; Customer sekarang bisa lihat screenshot hasil boosting di halaman /track</li>
+                      <li>Stats agregat: Stars, MVP, Savage, Maniac, Winrate, Durasi</li>
+                      <li>Per-sesi: detail match/win/bintang + screenshot gallery</li>
+                      <li>Data sensitif (worker_id, notes, credentials) tetap disembunyikan</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">Order Page Mobile Fix</h5>
+                    <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
+                      <li><strong className="text-text">2-baris layout</strong> &mdash; User ID + Server ID di baris 1, tombol Cek Akun full-width di baris 2 (mobile)</li>
+                      <li><strong className="text-text">Overflow fix</strong> &mdash; Email panjang, nickname, hero request, catatan tidak keluar card di konfirmasi step</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">Staff &amp; Lead Fixes</h5>
+                    <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
+                      <li><strong className="text-text">Worker Deduplicate</strong> &mdash; Frontend safety net + SQL cleanup script untuk hapus worker duplikat dari seed data</li>
+                      <li><strong className="text-text">UNIQUE constraint</strong> &mdash; <Code>staff_users(name, role, lead_id)</Code> mencegah duplikat di masa depan</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
 
               <div className="bg-background rounded-lg p-4 border border-accent/20">
                 <div className="flex items-center gap-2 mb-3">
