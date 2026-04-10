@@ -10,6 +10,7 @@ declare global {
     gtag?: (...args: any[]) => void;
     ttq?: { track: (...args: any[]) => void };
     dataLayer?: any[];
+    __GADS_CONVERSION_LABEL?: string;
   }
 }
 
@@ -38,13 +39,16 @@ export function trackPurchase({ orderId, value, currency = "IDR" }: ConversionDa
       value,
       currency,
     });
-    // Also fire Google Ads conversion (if conversion label exists it'll be picked up by gtag)
-    window.gtag("event", "conversion", {
-      send_to: undefined, // will auto-resolve to configured Google Ads ID
-      transaction_id: orderId,
-      value,
-      currency,
-    });
+    // Also fire Google Ads conversion with proper send_to label
+    const conversionLabel = window.__GADS_CONVERSION_LABEL;
+    if (conversionLabel) {
+      window.gtag("event", "conversion", {
+        send_to: conversionLabel,
+        transaction_id: orderId,
+        value,
+        currency,
+      });
+    }
   }
 
   // TikTok Pixel — CompletePayment

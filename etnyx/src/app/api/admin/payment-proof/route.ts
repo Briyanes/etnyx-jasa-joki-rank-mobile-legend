@@ -119,6 +119,32 @@ export async function POST(request: NextRequest) {
           await sendPaymentConfirmedWA(orderData);
           // Telegram to worker group: order ready to be assigned
           await notifyWorkerConfirmedOrder(orderData);
+
+          // Fire Meta CAPI Purchase for manual transfer (attribution)
+          try {
+            const { sendMetaCAPI } = await import("@/lib/meta-capi");
+            const { data: pixelSettings } = await supabase
+              .from("settings")
+              .select("value")
+              .eq("key", "tracking_pixels")
+              .single();
+            if (pixelSettings?.value) {
+              await sendMetaCAPI(
+                {
+                  eventName: "Purchase",
+                  eventId: `purchase_manual_${order.order_id}`,
+                  value: order.total_price || 0,
+                  currency: "IDR",
+                  email: order.customer_email,
+                  phone: order.whatsapp,
+                  orderId: order.order_id,
+                },
+                pixelSettings.value
+              );
+            }
+          } catch (e) {
+            console.error("Meta CAPI error (manual):", e);
+          }
         } catch (e) {
           console.error("Notification error:", e);
         }

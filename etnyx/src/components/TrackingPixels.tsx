@@ -90,6 +90,7 @@ export default function TrackingPixels() {
                 function gtag(){dataLayer.push(arguments);}
                 gtag('js', new Date());
                 gtag('config', '${pixels.googleAdsId.replace(/[^A-Za-z0-9-]/g, "")}');
+                ${pixels.googleAdsConversionLabel ? `window.__GADS_CONVERSION_LABEL = '${pixels.googleAdsId.replace(/[^A-Za-z0-9-]/g, "")}/${pixels.googleAdsConversionLabel.replace(/[^A-Za-z0-9_-]/g, "")}';` : ""}
               `,
             }}
           />
