@@ -5,9 +5,9 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
-  LogOut, RefreshCw, CheckCircle, Clock, Play, Upload, Send,
+  LogOut, RefreshCw, CheckCircle, Clock, Play,
   Star, Trophy, Swords, Target, Timer, Camera, ChevronDown, ChevronUp,
-  TrendingUp, Package, Loader2, Key, Edit3, Trash2, MessageSquare,
+  TrendingUp, Package, Loader2, Key, MessageSquare, Send,
 } from "lucide-react";
 
 interface Order {
@@ -96,17 +96,8 @@ export default function WorkerDashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [showAllCompleted, setShowAllCompleted] = useState(false);
 
-  // Submission form
-  const [submittingOrder, setSubmittingOrder] = useState<string | null>(null);
+  // Submissions (read-only)
   const [submissions, setSubmissions] = useState<Record<string, Submission[]>>({});
-  const [form, setForm] = useState({
-    starsGained: 0, mvpCount: 0, savageCount: 0, maniacCount: 0,
-    matchesPlayed: 0, winCount: 0, durationMinutes: 0, notes: "",
-  });
-  const [screenshots, setScreenshots] = useState<string[]>([]);
-  const [uploading, setUploading] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
 
   // Progress update
   const [updatingProgress, setUpdatingProgress] = useState<string | null>(null);
@@ -123,15 +114,6 @@ export default function WorkerDashboard() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [newNote, setNewNote] = useState("");
   const [noteSending, setNoteSending] = useState(false);
-
-  // Edit submission
-  const [editingSubmission, setEditingSubmission] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState({
-    starsGained: 0, mvpCount: 0, savageCount: 0, maniacCount: 0,
-    matchesPlayed: 0, winCount: 0, durationMinutes: 0, notes: "",
-  });
-  const [editLoading, setEditLoading] = useState(false);
-  const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
 
   const checkAuth = useCallback(async () => {
     try {
@@ -223,57 +205,6 @@ export default function WorkerDashboard() {
     setNoteSending(false);
   };
 
-  const handleEditSubmission = async (submissionId: string) => {
-    setEditLoading(true);
-    try {
-      const res = await fetch("/api/staff/submissions", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          submissionId,
-          starsGained: editForm.starsGained,
-          mvpCount: editForm.mvpCount,
-          savageCount: editForm.savageCount,
-          maniacCount: editForm.maniacCount,
-          matchesPlayed: editForm.matchesPlayed,
-          winCount: editForm.winCount,
-          durationMinutes: editForm.durationMinutes,
-          notes: editForm.notes || undefined,
-        }),
-      });
-      if (res.ok) {
-        setEditingSubmission(null);
-        // Fetch submissions for the order that had this submission
-        for (const oid of Object.keys(submissions)) await fetchSubmissions(oid);
-        await fetchOrders();
-      } else {
-        const data = await res.json();
-        toast(data.error || "Gagal edit submission");
-      }
-    } catch { toastError("Network error"); }
-    setEditLoading(false);
-  };
-
-  const handleDeleteSubmission = async (submissionId: string, orderId: string) => {
-    if (!confirm("Yakin hapus submission ini?")) return;
-    setDeleteLoading(submissionId);
-    try {
-      const res = await fetch(`/api/staff/submissions?submissionId=${submissionId}`, { method: "DELETE" });
-      if (res.ok) {
-        await fetchSubmissions(orderId);
-        await fetchOrders();
-      } else {
-        const data = await res.json();
-        toast(data.error || "Gagal hapus submission");
-      }
-    } catch { toastError("Network error"); }
-    setDeleteLoading(null);
-  };
-
-  const isWithin30Min = (date: string) => {
-    return (Date.now() - new Date(date).getTime()) < 30 * 60 * 1000;
-  };
-
   const handleRefresh = async () => {
     setRefreshing(true);
     await fetchOrders();
@@ -320,59 +251,6 @@ export default function WorkerDashboard() {
       });
       if (res.ok) await fetchOrders();
     } catch { toastError("Gagal update status"); }
-  };
-
-  const handleUploadScreenshot = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch("/api/staff/upload", { method: "POST", body: formData });
-      const data = await res.json();
-      if (res.ok && data.url) {
-        setScreenshots(prev => [...prev, data.url]);
-      } else {
-        toast(data.error || "Upload gagal");
-      }
-    } catch { toastError("Upload gagal"); }
-    setUploading(false);
-    if (fileRef.current) fileRef.current.value = "";
-  };
-
-  const handleSubmitResult = async (orderId: string) => {
-    if (form.matchesPlayed === 0) { toast("Isi jumlah match yang dimainkan"); return; }
-    setSubmitting(true);
-    try {
-      const res = await fetch("/api/staff/submissions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          orderId,
-          starsGained: form.starsGained,
-          mvpCount: form.mvpCount,
-          savageCount: form.savageCount,
-          maniacCount: form.maniacCount,
-          matchesPlayed: form.matchesPlayed,
-          winCount: form.winCount,
-          durationMinutes: form.durationMinutes,
-          screenshots,
-          notes: form.notes || undefined,
-        }),
-      });
-      if (res.ok) {
-        setSubmittingOrder(null);
-        setForm({ starsGained: 0, mvpCount: 0, savageCount: 0, maniacCount: 0, matchesPlayed: 0, winCount: 0, durationMinutes: 0, notes: "" });
-        setScreenshots([]);
-        await fetchOrders();
-        await fetchSubmissions(orderId);
-      } else {
-        const data = await res.json();
-        toast(data.error || "Gagal submit");
-      }
-    } catch { toastError("Network error"); }
-    setSubmitting(false);
   };
 
   const formatDate = (d: string) => new Date(d).toLocaleDateString("id-ID", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
@@ -454,18 +332,6 @@ export default function WorkerDashboard() {
                     if (next) fetchSubmissions(order.id);
                   }}
                   submissions={submissions[order.id] || []}
-                  isSubmitting={submittingOrder === order.id}
-                  onStartSubmission={() => setSubmittingOrder(order.id)}
-                  onCancelSubmission={() => { setSubmittingOrder(null); setScreenshots([]); }}
-                  form={form}
-                  setForm={setForm}
-                  screenshots={screenshots}
-                  uploading={uploading}
-                  submitting={submitting}
-                  fileRef={fileRef}
-                  onUpload={handleUploadScreenshot}
-                  onRemoveScreenshot={(i) => setScreenshots(prev => prev.filter((_, idx) => idx !== i))}
-                  onSubmitResult={() => handleSubmitResult(order.id)}
                   onComplete={() => handleCompleteOrder(order.id)}
                   updatingProgress={updatingProgress === order.id}
                   onToggleProgress={() => {
@@ -495,23 +361,6 @@ export default function WorkerDashboard() {
                   noteSending={noteSending}
                   onToggleNotes={() => { setNotesOrder(notesOrder === order.id ? null : order.id); if (notesOrder !== order.id) fetchNotes(order.id); }}
                   onAddNote={() => handleAddNote(order.id)}
-                  editingSubmission={editingSubmission}
-                  editForm={editForm}
-                  setEditForm={setEditForm}
-                  editLoading={editLoading}
-                  onStartEdit={(s: Submission) => {
-                    setEditingSubmission(s.id);
-                    setEditForm({
-                      starsGained: s.stars_gained, mvpCount: s.mvp_count, savageCount: s.savage_count,
-                      maniacCount: s.maniac_count, matchesPlayed: s.matches_played, winCount: s.win_count,
-                      durationMinutes: s.duration_minutes, notes: s.notes || "",
-                    });
-                  }}
-                  onCancelEdit={() => setEditingSubmission(null)}
-                  onSaveEdit={(id: string) => handleEditSubmission(id)}
-                  onDeleteSubmission={(id: string) => handleDeleteSubmission(id, order.id)}
-                  deleteLoading={deleteLoading}
-                  isWithin30Min={isWithin30Min}
                 />
               ))}
             </div>
@@ -629,18 +478,6 @@ interface OrderCardProps {
   expanded: boolean;
   onToggle: () => void;
   submissions: Submission[];
-  isSubmitting: boolean;
-  onStartSubmission: () => void;
-  onCancelSubmission: () => void;
-  form: { starsGained: number; mvpCount: number; savageCount: number; maniacCount: number; matchesPlayed: number; winCount: number; durationMinutes: number; notes: string };
-  setForm: (f: typeof OrderCard extends never ? never : OrderCardProps["form"] | ((prev: OrderCardProps["form"]) => OrderCardProps["form"])) => void;
-  screenshots: string[];
-  uploading: boolean;
-  submitting: boolean;
-  fileRef: React.RefObject<HTMLInputElement | null>;
-  onUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onRemoveScreenshot: (i: number) => void;
-  onSubmitResult: () => void;
   onComplete: () => void;
   updatingProgress: boolean;
   onToggleProgress: () => void;
@@ -664,30 +501,15 @@ interface OrderCardProps {
   noteSending: boolean;
   onToggleNotes: () => void;
   onAddNote: () => void;
-  // Edit/Delete submission
-  editingSubmission: string | null;
-  editForm: { starsGained: number; mvpCount: number; savageCount: number; maniacCount: number; matchesPlayed: number; winCount: number; durationMinutes: number; notes: string };
-  setEditForm: (f: OrderCardProps["editForm"] | ((prev: OrderCardProps["editForm"]) => OrderCardProps["editForm"])) => void;
-  editLoading: boolean;
-  onStartEdit: (s: Submission) => void;
-  onCancelEdit: () => void;
-  onSaveEdit: (id: string) => void;
-  onDeleteSubmission: (id: string) => void;
-  deleteLoading: string | null;
-  isWithin30Min: (date: string) => boolean;
 }
 
 function OrderCard({
   order, expanded, onToggle, submissions,
-  isSubmitting, onStartSubmission, onCancelSubmission,
-  form, setForm, screenshots, uploading, submitting, fileRef,
-  onUpload, onRemoveScreenshot, onSubmitResult, onComplete,
+  onComplete,
   updatingProgress, onToggleProgress, progressValue, setProgressValue,
   progressRank, setProgressRank, onUpdateProgress,
   credentials, showCredentials, loadingCreds, onFetchCredentials, onHideCredentials,
   notesOrder, notes, newNote, setNewNote, noteSending, onToggleNotes, onAddNote,
-  editingSubmission, editForm, setEditForm, editLoading, onStartEdit, onCancelEdit, onSaveEdit,
-  onDeleteSubmission, deleteLoading, isWithin30Min,
 }: OrderCardProps) {
   return (
     <div className="bg-surface rounded-xl border border-accent/20 overflow-hidden">
@@ -739,9 +561,6 @@ function OrderCard({
             </button>
             <button onClick={onToggleProgress} className="flex items-center gap-1.5 px-3 py-1.5 bg-accent/10 text-accent rounded-lg text-sm hover:bg-accent/20 transition-colors">
               <TrendingUp className="w-3.5 h-3.5" /> Update Progress
-            </button>
-            <button onClick={onStartSubmission} className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 text-blue-400 rounded-lg text-sm hover:bg-blue-500/20 transition-colors">
-              <Send className="w-3.5 h-3.5" /> Submit Hasil
             </button>
             <button onClick={onToggleNotes} className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-500/10 text-purple-400 rounded-lg text-sm hover:bg-purple-500/20 transition-colors">
               <MessageSquare className="w-3.5 h-3.5" /> Catatan
@@ -807,155 +626,16 @@ function OrderCard({
             </div>
           )}
 
-          {/* Submit Result Form */}
-          {isSubmitting && (
-            <div className="bg-background rounded-lg p-4 space-y-4">
-              <h4 className="text-text font-medium text-sm">Submit Hasil Match</h4>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div>
-                  <label className="text-text-muted text-xs flex items-center gap-1"><Star className="w-3 h-3" /> Stars</label>
-                  <input type="number" min={0} value={form.starsGained} onChange={(e) => setForm(p => ({ ...p, starsGained: Number(e.target.value) }))}
-                    className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm mt-1 focus:border-accent focus:outline-none" />
-                </div>
-                <div>
-                  <label className="text-text-muted text-xs flex items-center gap-1"><Trophy className="w-3 h-3" /> MVP</label>
-                  <input type="number" min={0} value={form.mvpCount} onChange={(e) => setForm(p => ({ ...p, mvpCount: Number(e.target.value) }))}
-                    className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm mt-1 focus:border-accent focus:outline-none" />
-                </div>
-                <div>
-                  <label className="text-text-muted text-xs flex items-center gap-1"><Swords className="w-3 h-3" /> Savage</label>
-                  <input type="number" min={0} value={form.savageCount} onChange={(e) => setForm(p => ({ ...p, savageCount: Number(e.target.value) }))}
-                    className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm mt-1 focus:border-accent focus:outline-none" />
-                </div>
-                <div>
-                  <label className="text-text-muted text-xs flex items-center gap-1"><Target className="w-3 h-3" /> Maniac</label>
-                  <input type="number" min={0} value={form.maniacCount} onChange={(e) => setForm(p => ({ ...p, maniacCount: Number(e.target.value) }))}
-                    className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm mt-1 focus:border-accent focus:outline-none" />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="text-text-muted text-xs flex items-center gap-1"><Swords className="w-3 h-3" /> Matches</label>
-                  <input type="number" min={0} value={form.matchesPlayed} onChange={(e) => setForm(p => ({ ...p, matchesPlayed: Number(e.target.value) }))}
-                    className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm mt-1 focus:border-accent focus:outline-none" />
-                </div>
-                <div>
-                  <label className="text-text-muted text-xs flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Wins</label>
-                  <input type="number" min={0} value={form.winCount} onChange={(e) => setForm(p => ({ ...p, winCount: Number(e.target.value) }))}
-                    className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm mt-1 focus:border-accent focus:outline-none" />
-                </div>
-                <div>
-                  <label className="text-text-muted text-xs flex items-center gap-1"><Timer className="w-3 h-3" /> Menit</label>
-                  <input type="number" min={0} value={form.durationMinutes} onChange={(e) => setForm(p => ({ ...p, durationMinutes: Number(e.target.value) }))}
-                    className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm mt-1 focus:border-accent focus:outline-none" />
-                </div>
-              </div>
-
-              {/* Screenshots */}
-              <div>
-                <label className="text-text-muted text-xs flex items-center gap-1 mb-2"><Camera className="w-3 h-3" /> Screenshots</label>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {screenshots.map((url, i) => (
-                    <div key={i} className="relative w-16 h-16 rounded-lg overflow-hidden border border-white/10">
-                      <img src={url} alt="" className="w-full h-full object-cover" />
-                      <button onClick={() => onRemoveScreenshot(i)} className="absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-xs flex items-center justify-center rounded-bl">×</button>
-                    </div>
-                  ))}
-                </div>
-                <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={onUpload} className="hidden" />
-                <button
-                  onClick={() => fileRef.current?.click()}
-                  disabled={uploading}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-white/10 rounded-lg text-text-muted text-sm hover:text-text transition-colors disabled:opacity-50"
-                >
-                  {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
-                  {uploading ? "Uploading..." : "Upload Screenshot"}
-                </button>
-              </div>
-
-              {/* Notes */}
-              <div>
-                <label className="text-text-muted text-xs">Catatan</label>
-                <textarea
-                  value={form.notes}
-                  onChange={(e) => setForm(p => ({ ...p, notes: e.target.value }))}
-                  rows={2}
-                  placeholder="Catatan tambahan..."
-                  className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm mt-1 focus:border-accent focus:outline-none resize-none"
-                />
-              </div>
-
-              <div className="flex gap-2">
-                <button onClick={onSubmitResult} disabled={submitting} className="flex items-center gap-1.5 px-4 py-2 gradient-primary rounded-lg text-white text-sm font-medium hover:opacity-90 disabled:opacity-50">
-                  {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                  {submitting ? "Mengirim..." : "Submit"}
-                </button>
-                <button onClick={onCancelSubmission} className="px-4 py-2 bg-surface border border-white/10 rounded-lg text-text-muted text-sm">Batal</button>
-              </div>
-            </div>
-          )}
-
-          {/* Previous Submissions */}
+          {/* Previous Submissions (read-only) */}
           {submissions.length > 0 && (
             <div>
               <h4 className="text-text-muted text-xs font-medium mb-2">Riwayat Submission</h4>
               <div className="space-y-2">
                 {submissions.map(s => (
                   <div key={s.id} className="bg-background rounded-lg p-3 text-xs">
-                    {editingSubmission === s.id ? (
-                      /* Edit Submission Form */
-                      <div className="space-y-3">
-                        <h5 className="text-text font-medium text-xs">Edit Submission</h5>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                          <div>
-                            <label className="text-text-muted text-[10px]">Stars</label>
-                            <input type="number" min={0} value={editForm.starsGained} onChange={(e) => setEditForm(p => ({ ...p, starsGained: Number(e.target.value) }))}
-                              className="w-full bg-surface border border-white/10 rounded px-2 py-1 text-text text-xs focus:border-accent focus:outline-none" />
-                          </div>
-                          <div>
-                            <label className="text-text-muted text-[10px]">Matches</label>
-                            <input type="number" min={0} value={editForm.matchesPlayed} onChange={(e) => setEditForm(p => ({ ...p, matchesPlayed: Number(e.target.value) }))}
-                              className="w-full bg-surface border border-white/10 rounded px-2 py-1 text-text text-xs focus:border-accent focus:outline-none" />
-                          </div>
-                          <div>
-                            <label className="text-text-muted text-[10px]">Wins</label>
-                            <input type="number" min={0} value={editForm.winCount} onChange={(e) => setEditForm(p => ({ ...p, winCount: Number(e.target.value) }))}
-                              className="w-full bg-surface border border-white/10 rounded px-2 py-1 text-text text-xs focus:border-accent focus:outline-none" />
-                          </div>
-                          <div>
-                            <label className="text-text-muted text-[10px]">MVP</label>
-                            <input type="number" min={0} value={editForm.mvpCount} onChange={(e) => setEditForm(p => ({ ...p, mvpCount: Number(e.target.value) }))}
-                              className="w-full bg-surface border border-white/10 rounded px-2 py-1 text-text text-xs focus:border-accent focus:outline-none" />
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <button onClick={() => onSaveEdit(s.id)} disabled={editLoading}
-                            className="px-3 py-1 gradient-primary rounded text-white text-xs font-medium disabled:opacity-50 flex items-center gap-1">
-                            {editLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />} Simpan
-                          </button>
-                          <button onClick={onCancelEdit} className="px-3 py-1 bg-surface border border-white/10 rounded text-text-muted text-xs">Batal</button>
-                        </div>
-                      </div>
-                    ) : (
-                      /* View Submission */
-                      <>
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-text-muted">{new Date(s.submitted_at).toLocaleDateString("id-ID", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-accent font-medium">+{s.stars_gained} ★</span>
-                            {isWithin30Min(s.submitted_at) && (
-                              <>
-                                <button onClick={() => onStartEdit(s)} className="text-blue-400 hover:text-blue-300 transition-colors" title="Edit">
-                                  <Edit3 className="w-3.5 h-3.5" />
-                                </button>
-                                <button onClick={() => onDeleteSubmission(s.id)} disabled={deleteLoading === s.id} className="text-red-400 hover:text-red-300 transition-colors" title="Hapus">
-                                  {deleteLoading === s.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
-                                </button>
-                              </>
-                            )}
-                          </div>
+                          <span className="text-accent font-medium">+{s.stars_gained} ★</span>
                         </div>
                         <div className="flex gap-3 text-text-muted">
                           <span>{s.matches_played} match</span>
@@ -972,8 +652,6 @@ function OrderCard({
                             ))}
                           </div>
                         )}
-                      </>
-                    )}
                   </div>
                 ))}
               </div>

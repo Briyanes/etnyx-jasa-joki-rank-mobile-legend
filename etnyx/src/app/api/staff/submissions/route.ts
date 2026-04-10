@@ -32,9 +32,9 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ submissions: data || [] });
 }
 
-// POST /api/staff/submissions — Submit work result (worker only)
+// POST /api/staff/submissions — Submit work result (worker or lead)
 export async function POST(request: NextRequest) {
-  const { authenticated, user, error } = await verifyStaff(["worker"]);
+  const { authenticated, user, error } = await verifyStaff(["worker", "lead"]);
   if (!authenticated || !user) return error;
 
   const body = await request.json();
@@ -68,24 +68,43 @@ export async function POST(request: NextRequest) {
 
   const supabase = await createAdminClient();
 
-  // Verify worker is assigned to this order
-  const { data: assignment } = await supabase
-    .from("order_assignments")
-    .select("id")
-    .eq("order_id", orderId)
-    .eq("assigned_to", user.id)
-    .in("status", ["assigned", "in_progress"])
-    .single();
+  let workerId = user.id;
 
-  if (!assignment) {
-    return NextResponse.json({ error: "Order tidak ditugaskan ke kamu" }, { status: 403 });
+  if (user.role === "worker") {
+    // Verify worker is assigned to this order
+    const { data: assignment } = await supabase
+      .from("order_assignments")
+      .select("id")
+      .eq("order_id", orderId)
+      .eq("assigned_to", user.id)
+      .in("status", ["assigned", "in_progress"])
+      .single();
+
+    if (!assignment) {
+      return NextResponse.json({ error: "Order tidak ditugaskan ke kamu" }, { status: 403 });
+    }
+  } else {
+    // Lead: get the assigned worker for this order
+    const { data: assignment } = await supabase
+      .from("order_assignments")
+      .select("assigned_to")
+      .eq("order_id", orderId)
+      .in("status", ["assigned", "in_progress"])
+      .order("assigned_at", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (assignment) {
+      workerId = assignment.assigned_to;
+    }
+    // If no assignment, workerId stays as lead's id (fallback)
   }
 
   const { data: submission, error: insertError } = await supabase
     .from("worker_submissions")
     .insert({
       order_id: orderId,
-      worker_id: user.id,
+      worker_id: workerId,
       stars_gained: starsGained || 0,
       mvp_count: mvpCount || 0,
       savage_count: savageCount || 0,
@@ -115,9 +134,9 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ success: true, submission }, { status: 201 });
 }
 
-// PUT /api/staff/submissions — Edit a submission (worker only, within 30 min)
+// PUT /api/staff/submissions — Edit a submission (worker within 30 min, or lead)
 export async function PUT(request: NextRequest) {
-  const { authenticated, user, error } = await verifyStaff(["worker"]);
+  const { authenticated, user, error } = await verifyStaff(["worker", "lead"]);
   if (!authenticated || !user) return error;
 
   const body = await request.json();
@@ -129,21 +148,29 @@ export async function PUT(request: NextRequest) {
 
   const supabase = await createAdminClient();
 
-  // Verify ownership and time limit (30 minutes)
-  const { data: sub } = await supabase
+  // Verify submission exists
+  const subQuery = supabase
     .from("worker_submissions")
     .select("id, worker_id, submitted_at, stars_gained, order_id")
-    .eq("id", id)
-    .eq("worker_id", user.id)
-    .single();
+    .eq("id", id);
+
+  // Workers can only edit their own submissions
+  if (user.role === "worker") {
+    subQuery.eq("worker_id", user.id);
+  }
+
+  const { data: sub } = await subQuery.single();
 
   if (!sub) {
     return NextResponse.json({ error: "Submission tidak ditemukan" }, { status: 404 });
   }
 
-  const minutesSinceSubmit = (Date.now() - new Date(sub.submitted_at).getTime()) / (1000 * 60);
-  if (minutesSinceSubmit > 30) {
-    return NextResponse.json({ error: "Submission hanya bisa diedit dalam 30 menit setelah submit" }, { status: 403 });
+  // Workers have 30-min time limit; leads can edit anytime
+  if (user.role === "worker") {
+    const minutesSinceSubmit = (Date.now() - new Date(sub.submitted_at).getTime()) / (1000 * 60);
+    if (minutesSinceSubmit > 30) {
+      return NextResponse.json({ error: "Submission hanya bisa diedit dalam 30 menit setelah submit" }, { status: 403 });
+    }
   }
 
   const updates: Record<string, unknown> = {};
@@ -179,9 +206,9 @@ export async function PUT(request: NextRequest) {
   return NextResponse.json({ success: true });
 }
 
-// DELETE /api/staff/submissions — Delete a submission (worker within 30 min, or admin)
+// DELETE /api/staff/submissions — Delete a submission (worker within 30 min, lead, or admin)
 export async function DELETE(request: NextRequest) {
-  const { authenticated, user, error } = await verifyStaff(["worker", "admin"]);
+  const { authenticated, user, error } = await verifyStaff(["worker", "lead", "admin"]);
   if (!authenticated || !user) return error;
 
   const { id } = await request.json();
@@ -201,7 +228,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "Submission tidak ditemukan" }, { status: 404 });
   }
 
-  // Workers can only delete their own within 30 min
+  // Workers can only delete their own within 30 min; leads can delete anytime
   if (user.role === "worker") {
     if (sub.worker_id !== user.id) {
       return NextResponse.json({ error: "Bukan submission kamu" }, { status: 403 });

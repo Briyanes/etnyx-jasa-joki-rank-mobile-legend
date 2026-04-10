@@ -9,7 +9,7 @@ import {
   ChevronDown, ChevronUp, ChevronLeft, ChevronRight, UserPlus, Clock, CheckCircle, XCircle,
   AlertCircle, Loader2, Package, TrendingUp, Eye, MessageSquare,
   Send, RotateCcw, CheckSquare, Square, Star, Trophy, Swords, Target, Timer, Camera,
-  Gamepad2, Flame, Zap,
+  Gamepad2, Flame, Zap, Upload, Edit3, Trash2,
 } from "lucide-react";
 
 interface Order {
@@ -141,6 +141,20 @@ export default function LeadDashboard() {
   // Submissions
   const [submissionsOrder, setSubmissionsOrder] = useState<string | null>(null);
   const [submissions, setSubmissions] = useState<Record<string, Submission[]>>({});
+
+  // Submission form (lead submits on behalf of worker)
+  const [submittingOrder, setSubmittingOrder] = useState<string | null>(null);
+  const [form, setForm] = useState({ starsGained: 0, mvpCount: 0, savageCount: 0, maniacCount: 0, matchesPlayed: 0, winCount: 0, durationMinutes: 0, notes: "" });
+  const [screenshots, setScreenshots] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const fileRef = useRef<HTMLInputElement | null>(null);
+
+  // Edit/Delete submission
+  const [editingSubmission, setEditingSubmission] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({ starsGained: 0, mvpCount: 0, savageCount: 0, maniacCount: 0, matchesPlayed: 0, winCount: 0, durationMinutes: 0, notes: "" });
+  const [editLoading, setEditLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
 
   const checkAuth = useCallback(async () => {
     try {
@@ -326,6 +340,112 @@ export default function LeadDashboard() {
       if (next.has(id)) next.delete(id); else next.add(id);
       return next;
     });
+  };
+
+  // Screenshot upload
+  const handleUploadScreenshot = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/staff/upload", { method: "POST", body: formData });
+      const data = await res.json();
+      if (res.ok && data.url) {
+        setScreenshots(prev => [...prev, data.url]);
+      } else {
+        toast(data.error || "Upload gagal");
+      }
+    } catch { toastError("Upload gagal"); }
+    setUploading(false);
+    if (fileRef.current) fileRef.current.value = "";
+  };
+
+  // Submit result (lead submits on behalf of worker)
+  const handleSubmitResult = async (orderId: string) => {
+    if (form.matchesPlayed === 0) { toast("Isi jumlah match yang dimainkan"); return; }
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/staff/submissions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId,
+          starsGained: form.starsGained,
+          mvpCount: form.mvpCount,
+          savageCount: form.savageCount,
+          maniacCount: form.maniacCount,
+          matchesPlayed: form.matchesPlayed,
+          winCount: form.winCount,
+          durationMinutes: form.durationMinutes,
+          screenshots,
+          notes: form.notes || undefined,
+        }),
+      });
+      if (res.ok) {
+        setSubmittingOrder(null);
+        setForm({ starsGained: 0, mvpCount: 0, savageCount: 0, maniacCount: 0, matchesPlayed: 0, winCount: 0, durationMinutes: 0, notes: "" });
+        setScreenshots([]);
+        await fetchOrders();
+        await fetchSubmissions(orderId);
+      } else {
+        const data = await res.json();
+        toast(data.error || "Gagal submit");
+      }
+    } catch { toastError("Network error"); }
+    setSubmitting(false);
+  };
+
+  // Edit submission
+  const handleEditSubmission = async (submissionId: string) => {
+    setEditLoading(true);
+    try {
+      const res = await fetch("/api/staff/submissions", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: submissionId,
+          starsGained: editForm.starsGained,
+          mvpCount: editForm.mvpCount,
+          savageCount: editForm.savageCount,
+          maniacCount: editForm.maniacCount,
+          matchesPlayed: editForm.matchesPlayed,
+          winCount: editForm.winCount,
+          durationMinutes: editForm.durationMinutes,
+          notes: editForm.notes || undefined,
+        }),
+      });
+      if (res.ok) {
+        setEditingSubmission(null);
+        // Refresh submissions for the current expanded order
+        if (submissionsOrder) await fetchSubmissions(submissionsOrder);
+      } else {
+        const data = await res.json();
+        toast(data.error || "Gagal update");
+      }
+    } catch { toastError("Network error"); }
+    setEditLoading(false);
+  };
+
+  // Delete submission
+  const handleDeleteSubmission = async (submissionId: string, orderId: string) => {
+    if (!confirm("Yakin hapus submission ini?")) return;
+    setDeleteLoading(submissionId);
+    try {
+      const res = await fetch("/api/staff/submissions", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: submissionId }),
+      });
+      if (res.ok) {
+        await fetchSubmissions(orderId);
+      } else {
+        const data = await res.json();
+        toast(data.error || "Gagal hapus");
+      }
+    } catch { toastError("Network error"); }
+    setDeleteLoading(null);
   };
 
   const formatPrice = (n: number) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(n);
@@ -661,6 +781,16 @@ export default function LeadDashboard() {
                           </button>
                         )}
 
+                        {/* Submit Hasil (lead inputs on behalf of worker) */}
+                        {order.assigned_worker_id && order.status === "in_progress" && (
+                          <button
+                            onClick={() => setSubmittingOrder(submittingOrder === order.id ? null : order.id)}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-accent/10 text-accent rounded-lg text-xs hover:bg-accent/20 transition-colors"
+                          >
+                            <Send className="w-3.5 h-3.5" /> Submit Hasil
+                          </button>
+                        )}
+
                         {/* WhatsApp */}
                         {order.whatsapp && (
                           <a href={`https://wa.me/${order.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer"
@@ -735,6 +865,99 @@ export default function LeadDashboard() {
                         </div>
                       )}
 
+                      {/* Submit Result Form (Lead) */}
+                      {submittingOrder === order.id && (
+                        <div className="bg-background rounded-lg p-4 space-y-4">
+                          <h4 className="text-text font-medium text-sm flex items-center gap-2">
+                            <Send className="w-4 h-4 text-accent" /> Submit Hasil Match
+                          </h4>
+
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <div>
+                              <label className="text-text-muted text-xs flex items-center gap-1"><Star className="w-3 h-3" /> Stars</label>
+                              <input type="number" min={0} value={form.starsGained} onChange={(e) => setForm(p => ({ ...p, starsGained: Number(e.target.value) }))}
+                                className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm mt-1 focus:border-accent focus:outline-none" />
+                            </div>
+                            <div>
+                              <label className="text-text-muted text-xs flex items-center gap-1"><Trophy className="w-3 h-3" /> MVP</label>
+                              <input type="number" min={0} value={form.mvpCount} onChange={(e) => setForm(p => ({ ...p, mvpCount: Number(e.target.value) }))}
+                                className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm mt-1 focus:border-accent focus:outline-none" />
+                            </div>
+                            <div>
+                              <label className="text-text-muted text-xs flex items-center gap-1"><Swords className="w-3 h-3" /> Savage</label>
+                              <input type="number" min={0} value={form.savageCount} onChange={(e) => setForm(p => ({ ...p, savageCount: Number(e.target.value) }))}
+                                className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm mt-1 focus:border-accent focus:outline-none" />
+                            </div>
+                            <div>
+                              <label className="text-text-muted text-xs flex items-center gap-1"><Target className="w-3 h-3" /> Maniac</label>
+                              <input type="number" min={0} value={form.maniacCount} onChange={(e) => setForm(p => ({ ...p, maniacCount: Number(e.target.value) }))}
+                                className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm mt-1 focus:border-accent focus:outline-none" />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-3 gap-3">
+                            <div>
+                              <label className="text-text-muted text-xs flex items-center gap-1"><Swords className="w-3 h-3" /> Matches</label>
+                              <input type="number" min={0} value={form.matchesPlayed} onChange={(e) => setForm(p => ({ ...p, matchesPlayed: Number(e.target.value) }))}
+                                className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm mt-1 focus:border-accent focus:outline-none" />
+                            </div>
+                            <div>
+                              <label className="text-text-muted text-xs flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Wins</label>
+                              <input type="number" min={0} value={form.winCount} onChange={(e) => setForm(p => ({ ...p, winCount: Number(e.target.value) }))}
+                                className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm mt-1 focus:border-accent focus:outline-none" />
+                            </div>
+                            <div>
+                              <label className="text-text-muted text-xs flex items-center gap-1"><Timer className="w-3 h-3" /> Menit</label>
+                              <input type="number" min={0} value={form.durationMinutes} onChange={(e) => setForm(p => ({ ...p, durationMinutes: Number(e.target.value) }))}
+                                className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm mt-1 focus:border-accent focus:outline-none" />
+                            </div>
+                          </div>
+
+                          {/* Screenshots */}
+                          <div>
+                            <label className="text-text-muted text-xs flex items-center gap-1 mb-2"><Camera className="w-3 h-3" /> Screenshots</label>
+                            <div className="flex flex-wrap gap-2 mb-2">
+                              {screenshots.map((url, i) => (
+                                <div key={i} className="relative w-16 h-16 rounded-lg overflow-hidden border border-white/10">
+                                  <img src={url} alt="" className="w-full h-full object-cover" />
+                                  <button onClick={() => setScreenshots(prev => prev.filter((_, idx) => idx !== i))} className="absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-xs flex items-center justify-center rounded-bl">×</button>
+                                </div>
+                              ))}
+                            </div>
+                            <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleUploadScreenshot} className="hidden" />
+                            <button
+                              onClick={() => fileRef.current?.click()}
+                              disabled={uploading}
+                              className="flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-white/10 rounded-lg text-text-muted text-sm hover:text-text transition-colors disabled:opacity-50"
+                            >
+                              {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                              {uploading ? "Uploading..." : "Upload Screenshot"}
+                            </button>
+                          </div>
+
+                          {/* Notes */}
+                          <div>
+                            <label className="text-text-muted text-xs">Catatan</label>
+                            <textarea
+                              value={form.notes}
+                              onChange={(e) => setForm(p => ({ ...p, notes: e.target.value }))}
+                              rows={2}
+                              placeholder="Catatan tambahan..."
+                              className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm mt-1 focus:border-accent focus:outline-none resize-none"
+                            />
+                          </div>
+
+                          <div className="flex gap-2">
+                            <button onClick={() => handleSubmitResult(order.id)} disabled={submitting} className="flex items-center gap-1.5 px-4 py-2 gradient-primary rounded-lg text-white text-sm font-medium hover:opacity-90 disabled:opacity-50">
+                              {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                              {submitting ? "Mengirim..." : "Submit"}
+                            </button>
+                            <button onClick={() => { setSubmittingOrder(null); setScreenshots([]); setForm({ starsGained: 0, mvpCount: 0, savageCount: 0, maniacCount: 0, matchesPlayed: 0, winCount: 0, durationMinutes: 0, notes: "" }); }}
+                              className="px-4 py-2 bg-surface border border-white/10 rounded-lg text-text-muted text-sm">Batal</button>
+                          </div>
+                        </div>
+                      )}
+
                       {/* Submissions Panel */}
                       {submissionsOrder === order.id && (
                         <div className="bg-background rounded-lg p-4 space-y-3">
@@ -778,9 +1001,62 @@ export default function LeadDashboard() {
                               <div className="space-y-2 max-h-60 overflow-y-auto">
                                 {submissions[order.id].map((sub, idx) => (
                                   <div key={sub.id} className="bg-surface rounded-lg p-2.5 text-xs">
+                                    {editingSubmission === sub.id ? (
+                                      /* Edit Submission Form */
+                                      <div className="space-y-3">
+                                        <h5 className="text-text font-medium text-xs">Edit Submission</h5>
+                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                          <div>
+                                            <label className="text-text-muted text-[10px]">Stars</label>
+                                            <input type="number" min={0} value={editForm.starsGained} onChange={(e) => setEditForm(p => ({ ...p, starsGained: Number(e.target.value) }))}
+                                              className="w-full bg-background border border-white/10 rounded px-2 py-1 text-text text-xs focus:border-accent focus:outline-none" />
+                                          </div>
+                                          <div>
+                                            <label className="text-text-muted text-[10px]">Matches</label>
+                                            <input type="number" min={0} value={editForm.matchesPlayed} onChange={(e) => setEditForm(p => ({ ...p, matchesPlayed: Number(e.target.value) }))}
+                                              className="w-full bg-background border border-white/10 rounded px-2 py-1 text-text text-xs focus:border-accent focus:outline-none" />
+                                          </div>
+                                          <div>
+                                            <label className="text-text-muted text-[10px]">Wins</label>
+                                            <input type="number" min={0} value={editForm.winCount} onChange={(e) => setEditForm(p => ({ ...p, winCount: Number(e.target.value) }))}
+                                              className="w-full bg-background border border-white/10 rounded px-2 py-1 text-text text-xs focus:border-accent focus:outline-none" />
+                                          </div>
+                                          <div>
+                                            <label className="text-text-muted text-[10px]">MVP</label>
+                                            <input type="number" min={0} value={editForm.mvpCount} onChange={(e) => setEditForm(p => ({ ...p, mvpCount: Number(e.target.value) }))}
+                                              className="w-full bg-background border border-white/10 rounded px-2 py-1 text-text text-xs focus:border-accent focus:outline-none" />
+                                          </div>
+                                        </div>
+                                        <div className="flex gap-2">
+                                          <button onClick={() => handleEditSubmission(sub.id)} disabled={editLoading}
+                                            className="px-3 py-1 gradient-primary rounded text-white text-xs font-medium disabled:opacity-50 flex items-center gap-1">
+                                            {editLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />} Simpan
+                                          </button>
+                                          <button onClick={() => setEditingSubmission(null)} className="px-3 py-1 bg-background border border-white/10 rounded text-text-muted text-xs">Batal</button>
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      /* View Submission */
+                                      <>
                                     <div className="flex items-center justify-between mb-1">
                                       <span className="text-text font-medium">Sesi {idx + 1}</span>
+                                          <div className="flex items-center gap-2">
                                       <span className="text-text-muted">{new Date(sub.submitted_at).toLocaleDateString("id-ID", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                                            <button onClick={() => {
+                                              setEditingSubmission(sub.id);
+                                              setEditForm({
+                                                starsGained: sub.stars_gained, mvpCount: sub.mvp_count, savageCount: sub.savage_count,
+                                                maniacCount: sub.maniac_count, matchesPlayed: sub.matches_played, winCount: sub.win_count,
+                                                durationMinutes: sub.duration_minutes, notes: "",
+                                              });
+                                            }} className="text-blue-400 hover:text-blue-300 transition-colors" title="Edit">
+                                              <Edit3 className="w-3.5 h-3.5" />
+                                            </button>
+                                            <button onClick={() => handleDeleteSubmission(sub.id, order.id)} disabled={deleteLoading === sub.id}
+                                              className="text-red-400 hover:text-red-300 transition-colors" title="Hapus">
+                                              {deleteLoading === sub.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                                            </button>
+                                          </div>
                                     </div>
                                     <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-text-muted">
                                       <span><Star className="w-3 h-3 inline mr-0.5" />{sub.stars_gained} bintang</span>
@@ -800,6 +1076,8 @@ export default function LeadDashboard() {
                                           </a>
                                         ))}
                                       </div>
+                                    )}
+                                      </>
                                     )}
                                   </div>
                                 ))}
