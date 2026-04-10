@@ -2,6 +2,7 @@
 
 import { toast, toastError, toastSuccess } from "@/components/ToastProvider";
 import { useEffect, useState, useCallback } from "react";
+import Image from "next/image";
 import {
   Layout, Megaphone, HelpCircle, Users, Share2, Building,
   BarChart3, Zap, Settings2, Eye, EyeOff, Plus, Trash2,
@@ -24,6 +25,22 @@ const BANK_ICONS: Record<string, { icon: LucideIcon; color: string }> = {
   ShopeePay: { icon: Smartphone, color: "text-orange-400" },
   LinkAja: { icon: Wallet, color: "text-red-400" },
   QRIS: { icon: QrCode, color: "text-indigo-400" },
+};
+
+// Static logo mapping
+const PAYMENT_LOGOS: Record<string, string> = {
+  BCA: "/logo/payment/bank-central-asia(bca)-logo.png",
+  BRI: "/logo/payment/bank-rakyat-indonesia-(bri)-logo.png",
+  BNI: "/logo/payment/bank-negara-indonesia-(bni)-logo.png",
+  Mandiri: "/logo/payment/bank-mandiri.png",
+  Jago: "/logo/payment/bank-jago-logo.png",
+  Jenius: "/logo/payment/jenius-logo.png",
+  DANA: "/logo/payment/dana-logo.png",
+  GoPay: "/logo/payment/gopay-logo.png",
+  OVO: "/logo/payment/ovo-logo.png",
+  ShopeePay: "/logo/payment/shopeepay-logo.png",
+  LinkAja: "/logo/payment/linkaja-logo.png",
+  QRIS: "/logo/payment/qris-logo.png",
 };
 
 // ---- Types ----
@@ -582,6 +599,10 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               {(() => {
+                                const logo = PAYMENT_LOGOS[bank.bank];
+                                if (logo) {
+                                  return <Image src={logo} alt={bank.bank} width={20} height={20} className="w-5 h-5 object-contain" />;
+                                }
                                 const bi = BANK_ICONS[bank.bank];
                                 if (bi) {
                                   const BIcon = bi.icon;

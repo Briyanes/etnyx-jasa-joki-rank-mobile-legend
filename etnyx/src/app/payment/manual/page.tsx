@@ -54,6 +54,22 @@ const PAYMENT_ICONS: Record<string, { icon: LucideIcon; bg: string; text: string
   QRIS: { icon: QrCode, bg: "bg-indigo-500/20", text: "text-indigo-400" },
 };
 
+// Static logo mapping — /public/logo/payment/
+const PAYMENT_LOGOS: Record<string, string> = {
+  BCA: "/logo/payment/bank-central-asia(bca)-logo.png",
+  BRI: "/logo/payment/bank-rakyat-indonesia-(bri)-logo.png",
+  BNI: "/logo/payment/bank-negara-indonesia-(bni)-logo.png",
+  Mandiri: "/logo/payment/bank-mandiri.png",
+  Jago: "/logo/payment/bank-jago-logo.png",
+  Jenius: "/logo/payment/jenius-logo.png",
+  DANA: "/logo/payment/dana-logo.png",
+  GoPay: "/logo/payment/gopay-logo.png",
+  OVO: "/logo/payment/ovo-logo.png",
+  ShopeePay: "/logo/payment/shopeepay-logo.png",
+  LinkAja: "/logo/payment/linkaja-logo.png",
+  QRIS: "/logo/payment/qris-logo.png",
+};
+
 interface OrderInfo {
   order_id: string;
   total_price: number;
@@ -386,11 +402,12 @@ function ManualPaymentContent() {
                   <div className="bg-background rounded-xl p-3 space-y-3">
                     <div className="flex flex-wrap gap-2 justify-center">
                       {items.map((bank, i) => {
+                        const logo = PAYMENT_LOGOS[bank.bank] || bank.logo;
                         const iconInfo = PAYMENT_ICONS[bank.bank];
                         return (
                           <div key={i} className="flex flex-col items-center gap-1 w-14">
-                            {bank.logo ? (
-                              <Image src={bank.logo} alt={bank.bank} width={36} height={36} className="w-9 h-9 object-contain rounded-lg" />
+                            {logo ? (
+                              <Image src={logo} alt={bank.bank} width={36} height={36} className="w-9 h-9 object-contain rounded-lg" />
                             ) : iconInfo ? (
                               <div className={`w-9 h-9 rounded-lg ${iconInfo.bg} flex items-center justify-center`}>
                                 {(() => { const Icon = iconInfo.icon; return <Icon className={`w-4 h-4 ${iconInfo.text}`} />; })()}
@@ -449,9 +466,10 @@ function ManualPaymentContent() {
                         <div className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2.5 min-w-0">
                             {(() => {
+                              const logo = PAYMENT_LOGOS[bank.bank] || bank.logo;
                               const iconInfo = PAYMENT_ICONS[bank.bank];
-                              if (bank.logo) {
-                                return <Image src={bank.logo} alt={bank.bank} width={36} height={36} className="w-9 h-9 object-contain rounded-lg flex-shrink-0" />;
+                              if (logo) {
+                                return <Image src={logo} alt={bank.bank} width={36} height={36} className="w-9 h-9 object-contain rounded-lg flex-shrink-0" />;
                               }
                               if (iconInfo) {
                                 const Icon = iconInfo.icon;
