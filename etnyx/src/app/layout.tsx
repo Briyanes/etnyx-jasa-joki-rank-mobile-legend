@@ -161,6 +161,9 @@ export default function RootLayout({
         {/* DNS Prefetch */}
         <link rel="dns-prefetch" href="https://wa.me" />
         
+        {/* Facebook Domain Verification */}
+        <meta name="facebook-domain-verification" content="lc7h8fhnpx6blgcweft4hgiv388jnq" />
+        
         {/* Additional SEO Meta Tags */}
         <meta name="geo.region" content="ID" />
         <meta name="geo.placename" content="Indonesia" />
