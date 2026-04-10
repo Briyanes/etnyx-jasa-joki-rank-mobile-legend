@@ -420,6 +420,16 @@ export default function AdminDashboard() {
     })();
   }, [checkAuth, fetchStats, fetchOrders, fetchChartData]);
 
+  // Auto-refresh polling every 30 seconds
+  useEffect(() => {
+    if (loading) return;
+    const interval = setInterval(() => {
+      fetchStats();
+      fetchOrders();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [loading, fetchStats, fetchOrders]);
+
   useEffect(() => {
     if (loading) return;
     if (activeTab === "orders") { fetchOrders(); fetchStaffUsers(); }

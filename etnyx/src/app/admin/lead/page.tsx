@@ -220,6 +220,16 @@ export default function LeadDashboard() {
     if (!loading) fetchOrders();
   }, [statusFilter, debouncedSearch, loading, fetchOrders]);
 
+  // Auto-refresh polling every 30 seconds
+  useEffect(() => {
+    if (loading) return;
+    const interval = setInterval(() => {
+      fetchOrders();
+      fetchWorkers();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [loading, fetchOrders, fetchWorkers]);
+
   const handleRefresh = async () => {
     setRefreshing(true);
     await Promise.all([fetchOrders(), fetchWorkers()]);

@@ -173,6 +173,15 @@ export default function WorkerDashboard() {
     })();
   }, [checkAuth, fetchOrders]);
 
+  // Auto-refresh polling every 30 seconds
+  useEffect(() => {
+    if (loading) return;
+    const interval = setInterval(() => {
+      fetchOrders();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [loading, fetchOrders]);
+
   const fetchCredentials = async (orderId: string) => {
     if (credentials[orderId]) { setShowCredentials(orderId); return; }
     setLoadingCreds(true);
