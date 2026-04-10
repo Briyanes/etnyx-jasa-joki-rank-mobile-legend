@@ -257,10 +257,11 @@ function buildCategories(): DocCategory[] {
                 { title: "Pilih Metode Bayar", desc: "2 opsi: Transfer Manual (BCA, BRI, BNI, Mandiri, Jago, DANA, GoPay, OVO, ShopeePay, LinkAja, QRIS) atau iPaymu Auto (VA, QRIS, GoPay, ShopeePay, CC).", badge: "customer", page: "/order (step 3)" },
                 { title: "A) Transfer Manual", desc: "Auto-redirect ke /payment/manual — lihat daftar rekening + upload bukti transfer. Admin approve/reject bukti.", badge: "customer", page: "/payment/manual" },
                 { title: "B) iPaymu Auto", desc: "Payment URL di-generate, customer bayar via popup/redirect. Webhook otomatis confirm. Jika iPaymu gagal/trouble, otomatis fallback ke manual transfer + WA dikirim ke customer dengan info rekening & link upload bukti.", badge: "customer", page: "iPaymu" },
-                { title: "Pembayaran Dikonfirmasi", desc: "Manual: admin cek bukti transfer + cek credential login → klik Konfirmasi Bayar. iPaymu: webhook auto-confirm. Status: confirmed, payment: paid. WA 'Pembayaran Dikonfirmasi' + Telegram ke Worker Group.", badge: "auto", page: "/api/payment/notification" },
+                { title: "Pembayaran Dikonfirmasi", desc: "Manual: admin klik '1. Lihat Bukti' → cek transfer masuk → klik '2. Konfirmasi Bayar'. iPaymu: webhook auto-confirm. Status: confirmed, payment: paid. WA 'Pembayaran Dikonfirmasi' + Telegram ke Worker Group.", badge: "auto", page: "/api/payment/notification" },
                 { title: "Multi-Channel Notifikasi", desc: "Telegram ke Admin Group (dengan tombol Konfirmasi/Tolak), WhatsApp 'Pembayaran Dikonfirmasi' ke customer, Telegram ke Worker Group.", badge: "auto" },
-                { title: "Lead/Admin Assign Order", desc: "Lead: buka Lead Dashboard → pilih worker → Assign. Otomatis buat record di order_assignments, set status in_progress, dan kirim Telegram ke Worker Group. Admin: bisa assign dari Admin Dashboard (buat order_assignments + Telegram, auto in_progress jika status confirmed). PENTING: Worker hanya bisa di-assign setelah pembayaran dikonfirmasi (payment_status = paid).", badge: "lead", page: "/admin/lead" },
-                { title: "Worker Mulai Kerja", desc: "Worker buka dashboard, lihat order yang di-assign (via tabel order_assignments). Jika status sudah in_progress (dari Lead assign), langsung kerjakan. WA 'Sedang Dikerjakan' otomatis terkirim saat status berubah ke in_progress.", badge: "worker", page: "/admin/worker" },
+                { title: "Admin Cek Credential & Mulai Kerjakan", desc: "Admin klik '3. Cek Credentials' → login akun ML client → pastikan bisa login. Jika tidak bisa login: follow up manual via WA. Jika berhasil login → logout → klik '4. Mulai Kerjakan'. Status: in_progress. Order muncul di Lead Dashboard.", badge: "admin", page: "/admin/dashboard" },
+                { title: "Lead Assign Order ke Worker", desc: "Lead: buka Lead Dashboard → order yang status in_progress muncul → pilih worker → Assign. PENTING: Lead hanya bisa assign order yang sudah 'Mulai Kerjakan' oleh admin (status in_progress). Order confirmed TIDAK muncul tombol assign di Lead Dashboard.", badge: "lead", page: "/admin/lead" },
+                { title: "Worker Mulai Kerja", desc: "Worker buka dashboard, lihat order yang di-assign (via tabel order_assignments). Status sudah in_progress (admin klik 'Mulai Kerjakan' + Lead assign). WA 'Sedang Dikerjakan' otomatis terkirim saat admin klik '4. Mulai Kerjakan'.", badge: "worker", page: "/admin/worker" },
                 { title: "Worker Update Progress", desc: "Update progress %, current rank. Customer bisa lihat real-time di /track.", badge: "worker" },
                 { title: "Worker Submit Hasil", desc: "Input: stars gained, MVP, savage, maniac, wins, durasi. Upload screenshot. Customer bisa lihat langsung di /track.", badge: "worker" },
                 { title: "Worker Selesai", desc: "Klik Selesai, status completed. Auto-generate commission. Telegram notif ke admin. WA 'Order Selesai' + link review ke customer.", badge: "worker" },
@@ -273,7 +274,7 @@ function buildCategories(): DocCategory[] {
                 <strong>Status Flow:</strong> pending &rarr; confirmed (bayar dikonfirmasi) &rarr; in_progress (dikerjakan) &rarr; completed (selesai). Admin bisa cancel kapan saja.
               </InfoBox>
               <InfoBox type="success">
-                <strong>Worker Assignment Lock:</strong> Worker hanya bisa di-assign setelah pembayaran dikonfirmasi. Dropdown assign worker otomatis disabled untuk order yang belum paid.
+                <strong>Worker Assignment Lock:</strong> Lead hanya bisa assign order yang sudah status <Code>in_progress</Code> (admin sudah cek credentials &amp; klik &quot;4. Mulai Kerjakan&quot;). Admin bisa assign dari status confirmed atau in_progress.
               </InfoBox>
             </div>
           ),
@@ -582,8 +583,8 @@ function buildCategories(): DocCategory[] {
               <div className="bg-background rounded-lg p-4 border border-yellow-500/20">
                 <h4 className="text-yellow-400 font-semibold text-sm mb-3">{"PENDING"} &mdash; Menunggu Bayar</h4>
                 <Table headers={["Tombol", "Warna", "Aksi", "WA ke Customer"]} rows={[
-                  ["Lihat Bukti Transfer", "Kuning", "Buka modal bukti transfer (hanya muncul untuk transfer manual)", "—"],
-                  ["Konfirmasi Bayar", "Hijau", "Status → confirmed, payment → paid. Hanya muncul untuk order MANUAL TRANSFER. Order iPaymu otomatis di-confirm via webhook.", "\"Pembayaran Dikonfirmasi\" + link track"],
+                  ["1. Lihat Bukti", "Kuning", "Buka modal bukti transfer (hanya muncul untuk transfer manual)", "—"],
+                  ["2. Konfirmasi Bayar", "Hijau", "Status → confirmed, payment → paid. Hanya muncul untuk order MANUAL TRANSFER. Order iPaymu otomatis di-confirm via webhook.", "\"Pembayaran Dikonfirmasi\" + link track"],
                   ["Menunggu iPaymu", "Biru", "Label status untuk order iPaymu yang belum dibayar. Tidak bisa diklik — menunggu webhook otomatis.", "—"],
                   ["Follow Up Bayar", "Biru", "Kirim WA reminder bayar", "\"Reminder pembayaran\" + rekening + link upload bukti"],
                   ["Cancel", "Merah", "Status → cancelled", "\"Order Dibatalkan\" + info hubungi kami"],
@@ -593,17 +594,17 @@ function buildCategories(): DocCategory[] {
               <div className="bg-background rounded-lg p-4 border border-blue-500/20">
                 <h4 className="text-blue-400 font-semibold text-sm mb-3">{"CONFIRMED"} &mdash; Sudah Bayar</h4>
                 <Table headers={["Tombol", "Warna", "Aksi", "WA ke Customer"]} rows={[
-                  ["Mulai Kerjakan", "Accent", "Status → in_progress", "\"Sedang Dikerjakan\" + link track"],
-                  ["Credentials", "Kuning", "Lihat akun ML customer (AES-256 encrypted)", "—"],
-                  ["Minta Credentials", "Biru", "Kirim WA minta data login akun ML", "\"Minta data login\" + instruksi"],
+                  ["3. Cek Credentials", "Kuning", "Lihat akun ML customer (AES-256 encrypted) — login dulu, pastikan bisa masuk", "—"],
+                  ["Follow Up Credentials", "Biru", "Kirim WA minta data login akun ML (jika credential salah)", "\"Minta data login\" + instruksi"],
+                  ["4. Mulai Kerjakan", "Accent", "Status → in_progress. Order muncul di Lead Dashboard untuk di-assign ke worker.", "\"Sedang Dikerjakan\" + link track"],
                 ]} />
               </div>
 
               <div className="bg-background rounded-lg p-4 border border-accent/20">
                 <h4 className="text-accent font-semibold text-sm mb-3">{"IN PROGRESS"} &mdash; Sedang Dikerjakan</h4>
                 <Table headers={["Tombol", "Warna", "Aksi", "WA ke Customer"]} rows={[
-                  ["Selesaikan", "Hijau", "Status → completed + auto commission 60%", "\"Order Selesai\" + link review + warning worker"],
                   ["Credentials", "Kuning", "Lihat akun ML customer", "—"],
+                  ["5. Selesaikan", "Hijau", "Status → completed + auto commission 60%", "\"Order Selesai\" + link review + warning worker"],
                   ["Update Progress WA", "Biru", "Kirim WA update progress %", "\"Update progress\" + % + link track"],
                 ]} />
               </div>
@@ -634,30 +635,31 @@ function buildCategories(): DocCategory[] {
               </div>
 
               <InfoBox type="warning">
-                <strong>Urutan penting!</strong> Untuk order manual transfer: Lihat bukti transfer + cek credential login dulu sebelum klik Konfirmasi Bayar. Jangan konfirmasi tanpa verifikasi. Untuk order iPaymu: konfirmasi otomatis via webhook, tidak perlu manual.
+                <strong>Urutan penting!</strong> Untuk order manual transfer: 1. Lihat Bukti → 2. Konfirmasi Bayar → 3. Cek Credentials (login akun ML) → 4. Mulai Kerjakan. Jangan skip langkah! Untuk order iPaymu: langsung dari 3. Cek Credentials → 4. Mulai Kerjakan (step 1-2 otomatis via webhook). Lead baru bisa assign worker setelah admin klik &quot;4. Mulai Kerjakan&quot;.
               </InfoBox>
               <InfoBox type="info">
-                <strong>Assign Worker:</strong> Dropdown assign hanya aktif setelah pembayaran dikonfirmasi (payment_status = paid). Saat admin/lead assign worker: otomatis buat record <Code>order_assignments</Code> (supaya worker bisa lihat di dashboard-nya) + kirim Telegram ke Worker Group. Lead assign otomatis set status ke in_progress. Admin assign otomatis set in_progress jika status confirmed. Konfirmasi pembayaran bersifat idempotent &mdash; jika sudah paid, notifikasi tidak dikirim ulang.
+                <strong>Assign Worker:</strong> Lead hanya bisa assign order yang sudah status <Code>in_progress</Code> (admin sudah klik &quot;4. Mulai Kerjakan&quot;). Order <Code>confirmed</Code> TIDAK bisa di-assign oleh Lead — harus tunggu admin cek credentials &amp; klik Mulai Kerjakan dulu. Admin tetap bisa assign dari confirmed.
               </InfoBox>
 
               <div className="bg-background rounded-lg p-4 border border-accent/20 mt-4">
                 <h4 className="text-accent font-semibold text-sm mb-3">Akses Tombol per Role</h4>
                 <p className="text-text-muted text-xs mb-3">Berikut tombol yang bisa diklik oleh masing-masing role. Tombol di luar akses role tidak muncul di dashboard.</p>
                 <Table headers={["Tombol / Aksi", "Admin", "Lead", "Worker"]} rows={[
-                  ["Lihat Bukti Transfer", "Ya", "Ya", "—"],
-                  ["Konfirmasi Bayar", "Ya", "Ya", "—"],
-                  ["Follow Up Bayar", "Ya", "Ya", "—"],
+                  ["1. Lihat Bukti Transfer", "Ya", "—", "—"],
+                  ["2. Konfirmasi Bayar", "Ya", "—", "—"],
+                  ["Follow Up Bayar", "Ya", "—", "—"],
                   ["Cancel Order", "Ya", "—", "—"],
-                  ["Mulai Kerjakan", "Ya", "Ya", "—"],
+                  ["3. Cek Credentials", "Ya", "—", "—"],
+                  ["4. Mulai Kerjakan", "Ya", "—", "—"],
                   ["Credentials (lihat)", "Ya", "Ya", "Ya"],
                   ["Minta Credentials", "Ya", "Ya", "—"],
-                  ["Selesaikan Order", "Ya", "Ya", "Ya"],
+                  ["5. Selesaikan Order", "Ya", "Ya", "Ya"],
                   ["Update Progress WA", "Ya", "Ya", "—"],
                   ["Minta Review", "Ya", "Ya", "—"],
                   ["Kirim Notif Selesai", "Ya", "Ya", "—"],
                   ["Reopen Order", "Ya", "—", "—"],
                   ["Reaktivasi", "Ya", "—", "—"],
-                  ["Assign Worker (hanya setelah paid)", "Ya", "Ya", "—"],
+                  ["Assign Worker (Lead: hanya in_progress)", "Ya", "Ya (hanya in_progress)", "—"],
                   ["WA Manual", "Ya", "Ya", "Ya"],
                   ["Copy Info", "Ya", "Ya", "Ya"],
                 ]} />
@@ -682,9 +684,10 @@ function buildCategories(): DocCategory[] {
                   {[
                     "Cek Telegram — ada ORDER BARU atau BUKTI TRANSFER BARU semalam?",
                     "Buka Dashboard > Orders — filter status 'pending'. Verifikasi bukti transfer yang masuk",
-                    "Konfirmasi pembayaran yang sudah valid (Lihat Bukti > Konfirmasi Bayar)",
-                    "Cek apakah ada order confirmed yang belum di-assign ke worker",
-                    "Pastikan Lead sudah assign order — jika belum, assign sendiri atau hubungi Lead",
+                    "Konfirmasi pembayaran yang sudah valid (1. Lihat Bukti → 2. Konfirmasi Bayar)",
+                    "Cek credential login akun ML (3. Cek Credentials) — pastikan bisa login",
+                    "Jika credential ok → klik 4. Mulai Kerjakan → order masuk ke Lead Dashboard",
+                    "Pastikan Lead sudah assign order in_progress ke worker",
                   ].map((item, i) => (
                     <li key={i} className="flex items-start gap-2 text-text-muted text-xs">
                       <span className="w-5 h-5 rounded bg-red-500/10 text-red-400 flex items-center justify-center text-[10px] font-bold shrink-0">{i + 1}</span>
@@ -1035,7 +1038,7 @@ function buildCategories(): DocCategory[] {
                 <h4 className="text-text font-medium text-sm mb-3">Inline Keyboard Actions</h4>
                 <Table headers={["Trigger", "Tombol", "Aksi"]} rows={[
                   ["Order baru masuk", "Konfirmasi / Tolak", "Update status langsung + kirim notif ke worker"],
-                  ["Order dikonfirmasi", "Mulai Kerjakan / Detail", "Set in_progress atau lihat detail lengkap"],
+                  ["Order dikonfirmasi", "Cek Credentials / Detail", "Admin cek credential + klik Mulai Kerjakan (set in_progress) atau lihat detail"],
                   ["Review masuk", "Show / Hide", "Toggle visibility review"],
                   ["Worker report", "Resolved / Dismiss", "Set status report"],
                   ["Detail order", "Konfirmasi / Tolak / Start", "Context-appropriate actions per status"],
