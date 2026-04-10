@@ -452,7 +452,7 @@ export default function LeadDashboard() {
   const formatDate = (d: string) => new Date(d).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
   // Stats
-  const unassigned = orders.filter(o => !o.assigned_worker_id && o.status !== "cancelled" && o.status !== "completed");
+  const unassigned = orders.filter(o => !o.assigned_worker_id && o.status === "in_progress");
   const inProgress = orders.filter(o => o.status === "in_progress");
   const completed = orders.filter(o => o.status === "completed");
 
@@ -800,8 +800,8 @@ export default function LeadDashboard() {
                         )}
                       </div>
 
-                      {/* Assign / Reassign */}
-                      {((!assignedWorker && order.status !== "cancelled") || assignedWorker) && (
+                      {/* Assign / Reassign — only for in_progress orders (admin must click "Mulai Kerjakan" first) */}
+                      {order.status === "in_progress" && ((!assignedWorker) || assignedWorker) && (
                         <div>
                           {!isAssigning ? (
                             <button

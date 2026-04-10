@@ -1175,14 +1175,14 @@ export default function AdminDashboard() {
                                 {o.payment_method === "manual_transfer" && (
                                   <button onClick={() => openProofModal(o.id, o.order_id)}
                                     className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 transition-colors w-full">
-                                    <Eye className="w-3 h-3" /> Lihat Bukti
+                                    <Eye className="w-3 h-3" /> 1. Lihat Bukti
                                   </button>
                                 )}
                                 {o.payment_method === "manual_transfer" && (
                                   <button onClick={() => updateOrderStatus(o.id, "confirmed")}
                                     disabled={statusActionLoading === `${o.id}-confirmed`}
                                     className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors w-full disabled:opacity-50">
-                                    {statusActionLoading === `${o.id}-confirmed` ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />} Konfirmasi Bayar
+                                    {statusActionLoading === `${o.id}-confirmed` ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />} 2. Konfirmasi Bayar
                                   </button>
                                 )}
                                 {o.payment_method !== "manual_transfer" && (
@@ -1208,34 +1208,34 @@ export default function AdminDashboard() {
 
                               {/* === CONFIRMED === */}
                               {o.status === "confirmed" && (<>
-                                <button onClick={() => updateOrderStatus(o.id, "in_progress")}
-                                  disabled={statusActionLoading === `${o.id}-in_progress`}
-                                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-accent/10 text-accent hover:bg-accent/20 transition-colors w-full disabled:opacity-50">
-                                  {statusActionLoading === `${o.id}-in_progress` ? <Loader2 className="w-3 h-3 animate-spin" /> : <TrendingUp className="w-3 h-3" />} Mulai Kerjakan
-                                </button>
                                 <button onClick={() => viewCredentials(o.id)}
                                   className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 transition-colors w-full">
-                                  🔑 Credentials
+                                  🔑 3. Cek Credentials
                                 </button>
                                 {o.whatsapp && (
                                   <button onClick={() => sendFollowUp(o.id, "follow_up_credentials")}
                                     disabled={followUpLoading === `${o.id}-follow_up_credentials`}
                                     className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[9px] font-medium bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors w-full disabled:opacity-50">
-                                    {followUpLoading === `${o.id}-follow_up_credentials` ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <MessageCircle className="w-2.5 h-2.5" />} Minta Credentials
+                                    {followUpLoading === `${o.id}-follow_up_credentials` ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <MessageCircle className="w-2.5 h-2.5" />} Follow Up Credentials
                                   </button>
                                 )}
+                                <button onClick={() => updateOrderStatus(o.id, "in_progress")}
+                                  disabled={statusActionLoading === `${o.id}-in_progress`}
+                                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-accent/10 text-accent hover:bg-accent/20 transition-colors w-full disabled:opacity-50">
+                                  {statusActionLoading === `${o.id}-in_progress` ? <Loader2 className="w-3 h-3 animate-spin" /> : <TrendingUp className="w-3 h-3" />} 4. Mulai Kerjakan
+                                </button>
                               </>)}
 
                               {/* === IN PROGRESS === */}
                               {o.status === "in_progress" && (<>
-                                <button onClick={() => updateOrderStatus(o.id, "completed")}
-                                  disabled={statusActionLoading === `${o.id}-completed`}
-                                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors w-full disabled:opacity-50">
-                                  {statusActionLoading === `${o.id}-completed` ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />} Selesaikan
-                                </button>
                                 <button onClick={() => viewCredentials(o.id)}
                                   className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 transition-colors w-full">
                                   🔑 Credentials
+                                </button>
+                                <button onClick={() => updateOrderStatus(o.id, "completed")}
+                                  disabled={statusActionLoading === `${o.id}-completed`}
+                                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors w-full disabled:opacity-50">
+                                  {statusActionLoading === `${o.id}-completed` ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />} 5. Selesaikan
                                 </button>
                                 {o.whatsapp && (
                                   <button onClick={() => sendFollowUp(o.id, "follow_up_progress")}

@@ -112,9 +112,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Pembayaran belum dikonfirmasi. Assign worker hanya bisa setelah pembayaran dikonfirmasi." }, { status: 400 });
   }
 
-  // Only allow assignment if order is in confirmed status (not pending/cancelled)
-  if (orderCheck.status !== "confirmed" && orderCheck.status !== "in_progress") {
-    return NextResponse.json({ error: `Order status '${orderCheck.status}' tidak bisa di-assign. Order harus dalam status 'confirmed' terlebih dahulu.` }, { status: 400 });
+  // Lead can only assign orders in 'in_progress' (admin already clicked "Mulai Kerjakan")
+  // Admin can assign from 'confirmed' or 'in_progress'
+  if (user.role === "lead") {
+    if (orderCheck.status !== "in_progress") {
+      return NextResponse.json({ error: "Order belum bisa di-assign. Admin harus klik 'Mulai Kerjakan' terlebih dahulu." }, { status: 400 });
+    }
+  } else {
+    if (orderCheck.status !== "confirmed" && orderCheck.status !== "in_progress") {
+      return NextResponse.json({ error: `Order status '${orderCheck.status}' tidak bisa di-assign. Order harus dalam status 'confirmed' terlebih dahulu.` }, { status: 400 });
+    }
   }
 
   // Verify worker exists and is active
