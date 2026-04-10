@@ -1,0 +1,991 @@
+<!--
+  ETNYX Team Sync Presentation — v2
+  Data source: docs/notion/ (1-brand-strategy, 2-content-calendar, 3-copywriting-scripts, 4-video-production, 5-sales-closing, 6-performance-analytics) + content-strategy-etnyx.md
+  Last updated: 2026
+-->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ETNYX — Team Sync Presentation v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #60A5FA;
+    --secondary: #A78BFA;
+    --bg: #0A0A1A;
+    --text: #F8FAFC;
+    --success: #4ADE80;
+    --warning: #FACC15;
+    --danger: #F87171;
+    --gradient: linear-gradient(135deg, #60A5FA, #A78BFA);
+    --glass: rgba(255,255,255,0.06);
+    --glass-border: rgba(255,255,255,0.1);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:100%; height:100%; overflow:hidden; background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; }
+
+  /* ---- Slide container ---- */
+  .deck { position:relative; width:100%; height:100%; }
+  .slide {
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; justify-content:center; align-items:center;
+    padding:3rem 4rem;
+    opacity:0; pointer-events:none;
+    transition:opacity .45s ease, transform .45s ease;
+    transform:translateX(40px);
+    overflow-y:auto;
+  }
+  .slide.active { opacity:1; pointer-events:auto; transform:translateX(0); }
+
+  /* ---- Progress bar ---- */
+  #progress { position:fixed; top:0; left:0; height:3px; background:var(--gradient); transition:width .3s; z-index:100; }
+
+  /* ---- Slide number ---- */
+  #slide-num { position:fixed; bottom:1.2rem; right:1.5rem; font-size:.85rem; color:rgba(255,255,255,.35); z-index:100; font-weight:600; }
+
+  /* ---- Typography ---- */
+  h1 { font-size:2.8rem; font-weight:900; background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:.5rem; text-align:center; text-transform:uppercase; }
+  h2 { font-size:1.9rem; font-weight:700; color:var(--primary); margin-bottom:1.2rem; text-align:center; }
+  h3 { font-size:1.25rem; font-weight:700; color:var(--secondary); margin-bottom:.6rem; }
+  p, li { font-size:1rem; line-height:1.65; font-weight:500; color:rgba(255,255,255,.85); }
+  .subtitle { font-size:1.15rem; color:rgba(255,255,255,.55); text-align:center; margin-bottom:1.5rem; font-weight:500; }
+
+  /* ---- Cards / grid ---- */
+  .grid { display:grid; gap:1rem; width:100%; max-width:1100px; }
+  .g2 { grid-template-columns:1fr 1fr; }
+  .g3 { grid-template-columns:1fr 1fr 1fr; }
+  .g4 { grid-template-columns:1fr 1fr 1fr 1fr; }
+  .card {
+    background:var(--glass); border:1px solid var(--glass-border);
+    border-radius:12px; padding:1.1rem 1.3rem;
+  }
+  .card .icon { font-size:1.6rem; margin-bottom:.4rem; }
+  .card .label { font-weight:700; font-size:.95rem; margin-bottom:.3rem; }
+  .card .desc { font-size:.82rem; color:rgba(255,255,255,.6); line-height:1.45; }
+
+  /* ---- Badge ---- */
+  .badge {
+    display:inline-block; padding:.25rem .7rem; border-radius:6px;
+    font-size:.75rem; font-weight:600; text-transform:uppercase;
+  }
+  .badge-blue { background:rgba(96,165,250,.15); color:var(--primary); }
+  .badge-purple { background:rgba(167,139,250,.15); color:var(--secondary); }
+  .badge-green { background:rgba(74,222,128,.15); color:var(--success); }
+  .badge-amber { background:rgba(250,204,21,.15); color:var(--warning); }
+  .badge-red { background:rgba(248,113,113,.15); color:var(--danger); }
+
+  /* ---- Table ---- */
+  table { width:100%; max-width:1100px; border-collapse:collapse; font-size:.85rem; }
+  th { background:rgba(96,165,250,.12); color:var(--primary); font-weight:700; text-align:left; padding:.55rem .7rem; }
+  td { padding:.5rem .7rem; border-bottom:1px solid rgba(255,255,255,.06); color:rgba(255,255,255,.8); }
+  tr:hover td { background:rgba(255,255,255,.03); }
+
+  /* ---- Flow diagram ---- */
+  .flow { display:flex; align-items:center; gap:.3rem; flex-wrap:wrap; justify-content:center; margin:1rem 0; }
+  .flow-step {
+    background:var(--glass); border:1px solid var(--glass-border);
+    padding:.5rem .9rem; border-radius:8px; font-size:.8rem; font-weight:600;
+    white-space:nowrap;
+  }
+  .flow-arrow { color:var(--primary); font-size:1rem; }
+
+  /* ---- Stat box ---- */
+  .stat-row { display:flex; gap:1.2rem; justify-content:center; flex-wrap:wrap; margin:1rem 0; }
+  .stat-box { text-align:center; }
+  .stat-box .num { font-size:2rem; font-weight:900; background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .stat-box .lbl { font-size:.8rem; color:rgba(255,255,255,.5); font-weight:600; }
+
+  /* ---- Quote ---- */
+  .quote {
+    border-left:3px solid var(--primary); padding:.6rem 1rem;
+    background:rgba(96,165,250,.06); border-radius:0 8px 8px 0;
+    font-style:italic; font-size:.95rem; color:rgba(255,255,255,.7);
+    max-width:800px; margin:.8rem auto;
+  }
+
+  /* ---- Scrollable content ---- */
+  .scroll-content { max-height:calc(100vh - 10rem); overflow-y:auto; width:100%; max-width:1100px; padding-right:.5rem; }
+  .scroll-content::-webkit-scrollbar { width:4px; }
+  .scroll-content::-webkit-scrollbar-thumb { background:rgba(255,255,255,.15); border-radius:4px; }
+
+  /* ---- Keyboard hint ---- */
+  .hint { position:fixed; bottom:1.2rem; left:1.5rem; font-size:.75rem; color:rgba(255,255,255,.25); z-index:100; }
+
+  /* ---- Responsive ---- */
+  @media (max-width:768px) {
+    .slide { padding:1.5rem 1.2rem; }
+    h1 { font-size:1.8rem; }
+    h2 { font-size:1.4rem; }
+    .g2,.g3,.g4 { grid-template-columns:1fr; }
+    table { font-size:.75rem; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+<div id="slide-num"></div>
+<div class="hint">← → Arrow keys / Swipe / Click</div>
+
+<div class="deck">
+
+<!-- ==================== SLIDE 1: Title ==================== -->
+<div class="slide active">
+  <h1>ETNYX Team Sync</h1>
+  <p class="subtitle">Sistem, Alur Order, Strategi Konten & Pembagian Tugas</p>
+  <div class="stat-row" style="margin-top:1.5rem;">
+    <div class="stat-box"><div class="num">2.847+</div><div class="lbl">Order Selesai</div></div>
+    <div class="stat-box"><div class="num">4.8⭐</div><div class="lbl">Avg Rating</div></div>
+    <div class="stat-box"><div class="num">0</div><div class="lbl">Akun Bermasalah</div></div>
+  </div>
+  <div class="quote" style="margin-top:1.5rem;">
+    "ETNYX — Jasa Joki Mobile Legends dengan sistem profesional. Akun kamu dienkripsi, progress bisa dilacak real-time, dan dikerjakan booster berpengalaman. Bukan joki biasa — ini sistem."
+  </div>
+</div>
+
+<!-- ==================== SLIDE 2: Agenda ==================== -->
+<div class="slide">
+  <h2>📋 Agenda</h2>
+  <div class="grid g2">
+    <div class="card"><div class="icon">🎯</div><div class="label">Brand & USP</div><div class="desc">Positioning, 8 USP, Tone of Voice</div></div>
+    <div class="card"><div class="icon">🏗️</div><div class="label">Architecture</div><div class="desc">Tech stack & infrastruktur</div></div>
+    <div class="card"><div class="icon">👥</div><div class="label">Team Roles</div><div class="desc">Admin, Lead, Worker, Customer</div></div>
+    <div class="card"><div class="icon">📦</div><div class="label">Order Flow</div><div class="desc">Alur lengkap order → selesai</div></div>
+    <div class="card"><div class="icon">💳</div><div class="label">Payment</div><div class="desc">Auto (Midtrans) + Manual (11 metode)</div></div>
+    <div class="card"><div class="icon">🔔</div><div class="label">Notifications</div><div class="desc">WA + Telegram + Email otomatis</div></div>
+    <div class="card"><div class="icon">📱</div><div class="label">Content & Calendar</div><div class="desc">5 pilar, posting schedule, weekly theme</div></div>
+    <div class="card"><div class="icon">💬</div><div class="label">WA Closing</div><div class="desc">Funnel, scripts, objection handling</div></div>
+    <div class="card"><div class="icon">📊</div><div class="label">KPI & Analytics</div><div class="desc">Target 3 bulan, content KPIs</div></div>
+    <div class="card"><div class="icon">🎬</div><div class="label">Video Production</div><div class="desc">Visual branding, editing rules</div></div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 3: Brand Positioning & USP ==================== -->
+<div class="slide">
+  <h2>🎯 Brand Positioning & USP</h2>
+  <div class="quote">"Joki ML paling sistematis &amp; aman se-Indonesia."</div>
+  <div class="scroll-content">
+    <h3 style="margin-top:1rem;">8 Unique Selling Points</h3>
+    <table>
+      <tr><th>#</th><th>USP</th><th>Kenapa Penting</th></tr>
+      <tr><td>1</td><td><strong>Tracking Real-Time</strong></td><td>Customer pantau progress 24/7</td></tr>
+      <tr><td>2</td><td><strong>Enkripsi AES-256</strong></td><td>Password military-grade, bukan plain text</td></tr>
+      <tr><td>3</td><td><strong>Sistem Assign Profesional</strong></td><td>Ada Lead coordinator, bukan random</td></tr>
+      <tr><td>4</td><td><strong>Multi-Channel Notif</strong></td><td>WA + Telegram + Email otomatis</td></tr>
+      <tr><td>5</td><td><strong>Invoice &amp; Bukti Kerja</strong></td><td>Screenshot progress + invoice PDF</td></tr>
+      <tr><td>6</td><td><strong>Garansi Keamanan</strong></td><td>Worker terverifikasi, 0 akun bermasalah</td></tr>
+      <tr><td>7</td><td><strong>Dual Payment</strong></td><td>Transfer manual (11 metode) + Midtrans otomatis</td></tr>
+      <tr><td>8</td><td><strong>Reward &amp; Referral</strong></td><td>Invite teman → diskon, naik tier → benefit</td></tr>
+    </table>
+
+    <h3 style="margin-top:1rem;">Tone of Voice</h3>
+    <div class="grid g4" style="margin-top:.5rem;">
+      <div class="card"><div class="label">Dominant</div><div class="desc">"Kita ga perlu janji manis. Bukti kerja yang bicara."</div></div>
+      <div class="card"><div class="label">Confident</div><div class="desc">"Mythic? Itu urusan kita. Kamu tinggal duduk manis."</div></div>
+      <div class="card"><div class="label">Persuasive</div><div class="desc">"2.847 order selesai. Rata-rata 4.8⭐. Bukan omong doang."</div></div>
+      <div class="card"><div class="label">Relatable Gamer</div><div class="desc">"Capek carry tim tapi tetep kalah? Kita paham bro."</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 4: Psychological Triggers ==================== -->
+<div class="slide">
+  <h2>🧠 Psychological Triggers</h2>
+  <p class="subtitle">4 tombol emosi yang dipakai di semua konten &amp; copywriting</p>
+  <div class="grid g2">
+    <div class="card">
+      <div class="icon">😰</div>
+      <div class="label" style="color:var(--danger);">FEAR</div>
+      <div class="desc">"Stuck di Epic? Kalau ga naik sekarang, season reset tinggal 2 minggu. Balik ke Grandmaster."</div>
+      <div class="desc" style="margin-top:.3rem; font-size:.75rem;">Triggers: season reset, rank stuck, star hilang karena tim random, takut joki abal-abal</div>
+    </div>
+    <div class="card">
+      <div class="icon">🔥</div>
+      <div class="label" style="color:var(--warning);">DESIRE</div>
+      <div class="desc">"Bayangkan buka ML, rank kamu udah Mythic. Temen-temen nanya 'gimana caranya?'"</div>
+      <div class="desc" style="margin-top:.3rem; font-size:.75rem;">Triggers: flex rank Mythic, winstreak panjang, badge Mythical Glory</div>
+    </div>
+    <div class="card">
+      <div class="icon">😤</div>
+      <div class="label" style="color:var(--secondary);">FRUSTRATION</div>
+      <div class="desc">"Lagi promos Mythic, dapet marksman no damage. Tank AFK. Support beli Blade of Despair."</div>
+      <div class="desc" style="margin-top:.3rem; font-size:.75rem;">Triggers: tim feeder/AFK/toxic, lose streak, solo queue nightmare</div>
+    </div>
+    <div class="card">
+      <div class="icon">⏰</div>
+      <div class="label" style="color:var(--primary);">URGENCY</div>
+      <div class="desc">"Slot booster tinggal 3 hari ini. Season reset 14 hari lagi."</div>
+      <div class="desc" style="margin-top:.3rem; font-size:.75rem;">Triggers: slot terbatas (real scarcity), season deadline, promo terbatas, harga naik</div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 5: Architecture ==================== -->
+<div class="slide">
+  <h2>🏗️ Tech Architecture</h2>
+  <p class="subtitle">Stack &amp; infrastruktur platform ETNYX</p>
+  <div class="grid g3">
+    <div class="card"><div class="icon">⚡</div><div class="label">Next.js (App Router)</div><div class="desc">Frontend + API routes, SSR, TypeScript</div></div>
+    <div class="card"><div class="icon">🗄️</div><div class="label">Supabase</div><div class="desc">PostgreSQL + Auth + Realtime + RLS</div></div>
+    <div class="card"><div class="icon">🚀</div><div class="label">Vercel</div><div class="desc">Hosting, edge functions, CI/CD auto</div></div>
+    <div class="card"><div class="icon">💳</div><div class="label">Midtrans</div><div class="desc">Payment gateway — QRIS, VA, e-wallet, CC</div></div>
+    <div class="card"><div class="icon">🔒</div><div class="label">AES-256 Encryption</div><div class="desc">Enkripsi credentials akun customer</div></div>
+    <div class="card"><div class="icon">📲</div><div class="label">WA + TG + Email</div><div class="desc">Multi-channel notifikasi otomatis</div></div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 6: Team Roles ==================== -->
+<div class="slide">
+  <h2>👥 Team Roles</h2>
+  <div class="grid g4">
+    <div class="card" style="border-top:3px solid var(--primary);">
+      <div class="icon">🛡️</div>
+      <div class="label">Admin / Owner</div>
+      <div class="desc">
+        • Kelola semua order<br>
+        • Verifikasi payment manual<br>
+        • Assign worker<br>
+        • Manage workers &amp; settings<br>
+        • Monitor dashboard analytics
+      </div>
+    </div>
+    <div class="card" style="border-top:3px solid var(--secondary);">
+      <div class="icon">⭐</div>
+      <div class="label">Lead Coordinator</div>
+      <div class="desc">
+        • Koordinasi worker<br>
+        • Quality assurance<br>
+        • Eskalasi masalah<br>
+        • Performance review<br>
+        • Reporting ke admin
+      </div>
+    </div>
+    <div class="card" style="border-top:3px solid var(--success);">
+      <div class="icon">🎮</div>
+      <div class="label">Worker / Booster</div>
+      <div class="desc">
+        • Push rank customer<br>
+        • Upload screenshot progress<br>
+        • Update status order<br>
+        • Patuhi SOP keamanan<br>
+        • Jaga win rate &amp; attitude
+      </div>
+    </div>
+    <div class="card" style="border-top:3px solid var(--warning);">
+      <div class="icon">👤</div>
+      <div class="label">Customer</div>
+      <div class="desc">
+        • Order via website<br>
+        • Track progress real-time<br>
+        • Terima notifikasi update<br>
+        • Kasih review setelah selesai<br>
+        • Referral &amp; reward
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 7: Order Flow — Big Picture ==================== -->
+<div class="slide">
+  <h2>📦 Order Flow — Big Picture</h2>
+  <div class="flow">
+    <div class="flow-step" style="border-color:var(--primary);">🌐 Customer Order</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">💳 Payment</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">✅ Verified</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step" style="border-color:var(--secondary);">📋 Assign Worker</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step" style="border-color:var(--success);">🎮 Push Rank</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">📸 Screenshot</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step" style="border-color:var(--warning);">🏆 Done</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">⭐ Review</div>
+  </div>
+
+  <h3 style="margin-top:1.5rem;">Payment Paths</h3>
+  <div class="grid g2" style="margin-top:.5rem;">
+    <div class="card">
+      <div class="label" style="color:var(--success);">Auto Payment (Midtrans)</div>
+      <div class="desc">
+        QRIS, Virtual Account, GoPay, OVO, ShopeePay, dll.<br>
+        → Otomatis verified → langsung proses
+      </div>
+    </div>
+    <div class="card">
+      <div class="label" style="color:var(--warning);">Manual Transfer</div>
+      <div class="desc">
+        11 metode: BCA, BRI, BNI, Mandiri, CIMB, BSI, Jago, SeaBank, GoPay, OVO, DANA.<br>
+        → Upload bukti → Admin verify → proses
+      </div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:1rem;">Status Flow</h3>
+  <div class="flow">
+    <div class="flow-step"><span class="badge badge-amber">Pending</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><span class="badge badge-blue">Confirmed</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><span class="badge badge-purple">Assigned</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><span class="badge badge-blue">In Progress</span></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step"><span class="badge badge-green">Completed</span></div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 8: Order Detail ==================== -->
+<div class="slide">
+  <h2>🎮 Order Modes & Reward</h2>
+  <div class="grid g3">
+    <div class="card" style="border-top:3px solid var(--primary);">
+      <div class="icon">🎯</div>
+      <div class="label">Normal</div>
+      <div class="desc">Push rank standar. Dikerjakan saat slot tersedia. Estimasi sesuai jarak rank.</div>
+    </div>
+    <div class="card" style="border-top:3px solid var(--warning);">
+      <div class="icon">⚡</div>
+      <div class="label">Express</div>
+      <div class="desc">Prioritas tinggi. Dikerjakan segera. Lebih cepat selesai, harga premium.</div>
+    </div>
+    <div class="card" style="border-top:3px solid var(--success);">
+      <div class="icon">👥</div>
+      <div class="label">Duo (Mabar)</div>
+      <div class="desc">Bermain bareng booster. Customer tetap main, rank naik bareng. Fun + belajar.</div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:1.5rem;">Reward & Referral System</h3>
+  <div class="grid g2" style="margin-top:.5rem;">
+    <div class="card">
+      <div class="label">🎁 Referral</div>
+      <div class="desc">Invite teman → dapat diskon. Teman juga dapat cashback. Win-win.</div>
+    </div>
+    <div class="card">
+      <div class="label">💎 Tier Benefits</div>
+      <div class="desc">Naik tier berdasarkan total order → unlock benefit lebih (diskon, prioritas slot).</div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 9: Notifications ==================== -->
+<div class="slide">
+  <h2>🔔 Notification System</h2>
+  <p class="subtitle">Multi-channel: WhatsApp + Telegram + Email — otomatis</p>
+  <table>
+    <tr><th>Event</th><th>Trigger</th><th>Channel</th></tr>
+    <tr><td>Order Created</td><td>Customer submit order</td><td>WA + Email</td></tr>
+    <tr><td>Payment Confirmed</td><td>Auto verify / admin verify</td><td>WA + Email</td></tr>
+    <tr><td>Worker Assigned</td><td>Admin/Lead assign worker</td><td>WA + TG</td></tr>
+    <tr><td>Progress Update</td><td>Worker upload screenshot / update</td><td>WA + Email</td></tr>
+    <tr><td>Order Completed</td><td>Worker selesai push</td><td>WA + Email + TG</td></tr>
+    <tr><td>Review Request</td><td>Auto setelah completed</td><td>WA</td></tr>
+    <tr><td>Promo / Follow-up</td><td>Repeat customer retarget</td><td>WA</td></tr>
+  </table>
+  <div class="quote" style="margin-top:1rem;">Customer selalu informed di setiap stage. Transparansi = trust.</div>
+</div>
+
+<!-- ==================== SLIDE 10: Admin Tasks ==================== -->
+<div class="slide">
+  <h2>🛡️ Admin Tasks</h2>
+  <div class="scroll-content">
+    <div class="grid g2">
+      <div class="card">
+        <div class="label">📋 Order Management</div>
+        <div class="desc">
+          • Lihat semua order (filter status, tanggal)<br>
+          • Update status order<br>
+          • Lihat detail order + credentials (decrypted)<br>
+          • Handle komplain / eskalasi
+        </div>
+      </div>
+      <div class="card">
+        <div class="label">💳 Payment Verification</div>
+        <div class="desc">
+          • Review bukti transfer manual<br>
+          • Approve / reject pembayaran<br>
+          • Otomatis untuk Midtrans (callback)<br>
+          • Rekonsiliasi harian
+        </div>
+      </div>
+      <div class="card">
+        <div class="label">👷 Worker Management</div>
+        <div class="desc">
+          • Assign order ke worker<br>
+          • Monitor performance worker<br>
+          • Manage worker list (add/remove)<br>
+          • Set komisi &amp; payout
+        </div>
+      </div>
+      <div class="card">
+        <div class="label">⚙️ Settings & Config</div>
+        <div class="desc">
+          • Pricing tabel (per rank pair)<br>
+          • Payment methods toggle<br>
+          • Promo codes<br>
+          • Notification templates<br>
+          • Site settings (maintenance, etc)
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 11: Lead Tasks ==================== -->
+<div class="slide">
+  <h2>⭐ Lead Coordinator Tasks</h2>
+  <div class="grid g2">
+    <div class="card">
+      <div class="label">📌 Koordinasi Worker</div>
+      <div class="desc">
+        • Bantu admin assign order ke worker yang tepat<br>
+        • Pastikan worker kapasitas &amp; rank sesuai<br>
+        • Rotasi worker supaya ga overload<br>
+        • Handle replacement kalau worker ga perform
+      </div>
+    </div>
+    <div class="card">
+      <div class="label">✅ Quality Assurance</div>
+      <div class="desc">
+        • Review screenshot progress worker<br>
+        • Cek win rate &amp; kualitas gameplay<br>
+        • Pastikan SOP keamanan dipatuhi<br>
+        • Spot-check akun customer aman
+      </div>
+    </div>
+    <div class="card">
+      <div class="label">📊 Reporting</div>
+      <div class="desc">
+        • Laporan harian: order aktif, worker aktif<br>
+        • Laporan mingguan: completed, issues<br>
+        • Eskalasi masalah ke admin
+      </div>
+    </div>
+    <div class="card">
+      <div class="label">🤝 Support</div>
+      <div class="desc">
+        • Bantu customer kalau ada concern<br>
+        • Mediasi worker-customer issue<br>
+        • Follow up order yang terlambat<br>
+        • Training worker baru
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 12: Worker Tasks ==================== -->
+<div class="slide">
+  <h2>🎮 Worker / Booster Tasks</h2>
+  <div class="grid g2">
+    <div class="card">
+      <div class="label">🏆 Push Rank</div>
+      <div class="desc">
+        • Login akun customer (credentials terenkripsi)<br>
+        • Push rank sesuai target order<br>
+        • Mainkan hero favorit customer (jika diminta)<br>
+        • Patuhi jam bermain yang diizinkan
+      </div>
+    </div>
+    <div class="card">
+      <div class="label">📸 Progress Update</div>
+      <div class="desc">
+        • Upload screenshot tiap milestone<br>
+        • Update star count di dashboard<br>
+        • Lapor kalau ada kendala (lose streak, maintenance)<br>
+        • Notif otomatis ke customer setiap update
+      </div>
+    </div>
+    <div class="card">
+      <div class="label">🔒 SOP Keamanan</div>
+      <div class="desc">
+        • Login via secondary device (bukan emulator yang bisa kena ban)<br>
+        • VPN lokasi sama dengan customer<br>
+        • Play pattern natural (bukan bot)<br>
+        • JANGAN akses email / data lain di akun customer
+      </div>
+    </div>
+    <div class="card">
+      <div class="label">💰 Komisi</div>
+      <div class="desc">
+        • Komisi per order selesai<br>
+        • Bonus kalau win rate tinggi<br>
+        • Transparan — bisa lihat earning di dashboard<br>
+        • Payout sesuai jadwal
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 13: Content Strategy & Pillars ==================== -->
+<div class="slide">
+  <h2>📱 Content Strategy & Pillars</h2>
+  <div class="scroll-content">
+    <h3>Customer Journey → Content Mapping</h3>
+    <div class="flow" style="margin:.5rem 0;">
+      <div class="flow-step" style="border-color:var(--primary);"><strong>Awareness 40%</strong><br><span style="font-size:.7rem;">"Gue relate" → Follow/Save</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:var(--secondary);"><strong>Consideration 35%</strong><br><span style="font-size:.7rem;">"Ada solusi" → Profile Visit/DM</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:var(--success);"><strong>Conversion 25%</strong><br><span style="font-size:.7rem;">"Gue mau order" → WA → Order</span></div>
+    </div>
+
+    <h3 style="margin-top:1rem;">5 Content Pillars</h3>
+    <table>
+      <tr><th>#</th><th>Pillar</th><th>Funnel</th><th>Ratio</th><th>Goal</th></tr>
+      <tr><td>1</td><td>😤 <strong>PROBLEM</strong></td><td>Awareness</td><td>20%</td><td>Relate, trigger pain</td></tr>
+      <tr><td>2</td><td>😂 <strong>ENTERTAINMENT</strong></td><td>Awareness</td><td>20%</td><td>Viral, reach, shares</td></tr>
+      <tr><td>3</td><td>📚 <strong>EDUCATION</strong></td><td>Consideration</td><td>20%</td><td>Trust, authority</td></tr>
+      <tr><td>4</td><td>🏆 <strong>PROOF</strong></td><td>Consider→Convert</td><td>25%</td><td>Credibility</td></tr>
+      <tr><td>5</td><td>💰 <strong>SELLING</strong></td><td>Conversion</td><td>15%</td><td>CTA, order, revenue</td></tr>
+    </table>
+
+    <h3 style="margin-top:1rem;">Posting Schedule</h3>
+    <table>
+      <tr><th>Platform</th><th>Frequency</th><th>Best Time</th></tr>
+      <tr><td>TikTok</td><td>2-3x / hari</td><td>11:00, 16:00, 20:00</td></tr>
+      <tr><td>IG Reels</td><td>1x / hari</td><td>12:00 atau 19:00</td></tr>
+      <tr><td>IG Story</td><td>3-5x / hari</td><td>Sepanjang hari</td></tr>
+      <tr><td>IG Feed/Carousel</td><td>3x / minggu</td><td>12:00 atau 18:00</td></tr>
+      <tr><td>YT Shorts</td><td>1x / hari (repurpose)</td><td>14:00 atau 20:00</td></tr>
+      <tr><td>WA Status</td><td>2-3x / hari</td><td>09:00, 15:00, 21:00</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 14: Content Calendar ==================== -->
+<div class="slide">
+  <h2>📅 Content Calendar — Weekly Themes</h2>
+  <div class="scroll-content">
+    <h3>4-Week Monthly Rotation</h3>
+    <div class="grid g4" style="margin:.5rem 0;">
+      <div class="card" style="border-top:3px solid var(--danger);">
+        <div class="label">Week 1 — PAIN</div>
+        <div class="desc">Problem, frustration, relatable. "Bikin relate dulu."</div>
+      </div>
+      <div class="card" style="border-top:3px solid var(--primary);">
+        <div class="label">Week 2 — TRUST</div>
+        <div class="desc">Proof, testimoni, behind the scene. "Buktiin."</div>
+      </div>
+      <div class="card" style="border-top:3px solid var(--success);">
+        <div class="label">Week 3 — VALUE</div>
+        <div class="desc">Edukasi, tips, meta analysis. "Kasih ilmu."</div>
+      </div>
+      <div class="card" style="border-top:3px solid var(--warning);">
+        <div class="label">Week 4 — PUSH</div>
+        <div class="desc">Promo, urgency, selling. "Closing time."</div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:1rem;">Minimum Content Types</h3>
+    <table>
+      <tr><th>Content Type</th><th>Min Frequency</th><th>Platform</th></tr>
+      <tr><td>How to Order</td><td>2x / bulan</td><td>TikTok + IG Carousel</td></tr>
+      <tr><td>Testimoni Chat</td><td>3x / minggu</td><td>TikTok + IG Story</td></tr>
+      <tr><td>Testimoni Video</td><td>1x / minggu</td><td>TikTok + IG Reels</td></tr>
+      <tr><td>Before-After Rank</td><td>3x / minggu</td><td>TikTok + IG</td></tr>
+      <tr><td>Gameplay Proof</td><td>2x / minggu</td><td>TikTok + Shorts</td></tr>
+      <tr><td>Edukasi ML Ringan</td><td>3x / minggu</td><td>TikTok + IG Carousel</td></tr>
+      <tr><td>Meme Relatable</td><td>2x / minggu</td><td>TikTok + IG</td></tr>
+      <tr><td>Promo / Urgency</td><td>2x / minggu</td><td>IG Story + TikTok</td></tr>
+      <tr><td>Behind the Scenes</td><td>1x / minggu</td><td>TikTok + IG</td></tr>
+      <tr><td>FAQ</td><td>2x / bulan</td><td>TikTok + IG Carousel</td></tr>
+    </table>
+
+    <h3 style="margin-top:1rem;">Scaling (Month 2+)</h3>
+    <div class="desc" style="font-size:.85rem; color:rgba(255,255,255,.7);">
+      Double down format yang perform → 3x TikTok/hari → Introduce recurring series (Push Rank Diary 2x/minggu, Booster's Pick 1x/minggu, Customer Story 1x/minggu) → Mulai collab creators.
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 15: Copywriting & Hooks ==================== -->
+<div class="slide">
+  <h2>✍️ Copywriting System</h2>
+  <div class="scroll-content">
+    <h3>Video Structure Formula</h3>
+    <div class="flow" style="margin:.5rem 0;">
+      <div class="flow-step" style="border-color:var(--danger);"><strong>HOOK</strong> 0-3s</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><strong>PROBLEM</strong> 3-8s</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:var(--primary);"><strong>SOLUTION</strong> 8-15s</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:var(--success);"><strong>PROOF</strong> 15-25s</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:var(--warning);"><strong>CTA</strong> 25-30s</div>
+    </div>
+
+    <h3 style="margin-top:1rem;">Hook Examples (from 15 templates)</h3>
+    <table>
+      <tr><th>#</th><th>Hook</th><th>Pillar</th></tr>
+      <tr><td>1</td><td>"Kalau kamu still stuck di [rank], ini yang harus kamu tau..."</td><td>Problem</td></tr>
+      <tr><td>2</td><td>"[Angka] order selesai. Dan ini yang mereka semua bilang."</td><td>Proof</td></tr>
+      <tr><td>5</td><td>"Ini bedanya [rank A] sama [rank B] menurut booster."</td><td>Education</td></tr>
+      <tr><td>8</td><td>"Customer ini ragu. Sekarang udah order ke-[angka]."</td><td>Proof</td></tr>
+      <tr><td>11</td><td>"Season reset tinggal [X] hari. Rank kamu gimana?"</td><td>Urgency</td></tr>
+      <tr><td>14</td><td>"Mau push sendiri berminggu-minggu atau 2 hari selesai?"</td><td>Selling</td></tr>
+    </table>
+
+    <h3 style="margin-top:1rem;">CTA Types</h3>
+    <div class="grid g2" style="margin:.5rem 0;">
+      <div class="card">
+        <div class="label">Soft CTA (Awareness)</div>
+        <div class="desc">
+          "Follow buat tips ML 🎮"<br>
+          "Save video ini 📌"<br>
+          "Comment rank kamu 👇"<br>
+          "Share ke temen 🔗"
+        </div>
+      </div>
+      <div class="card">
+        <div class="label">Hard CTA (Conversion)</div>
+        <div class="desc">
+          "Chat sekarang — link di bio 📲"<br>
+          "DM 'JOKI' buat info harga 💬"<br>
+          "Slot terbatas. Grab sekarang ⏰"<br>
+          "Order sekarang, besok udah Mythic 🏆"
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 16: WA Closing System ==================== -->
+<div class="slide">
+  <h2>💬 WhatsApp Closing System</h2>
+  <div class="scroll-content">
+    <h3>Sales Funnel Flow — Target: 30% DM → Order</h3>
+    <div class="flow" style="margin:.5rem 0; font-size:.8rem;">
+      <div class="flow-step">Konten Viral</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">DM "rank"/"order"</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Auto-reply + Kualifikasi</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Pricing + Social Proof</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Handle Objection</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step" style="border-color:var(--success);">Closing</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Transfer</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Assign Worker</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">Done → Review</div>
+    </div>
+    <p style="font-size:.8rem; color:var(--warning); text-align:center; margin:.5rem 0;">⚠️ WA Reply SLA: &lt; 5 menit (prime time)</p>
+
+    <h3 style="margin-top:.8rem;">4 Objection Handlers</h3>
+    <div class="grid g2" style="margin:.5rem 0;">
+      <div class="card">
+        <div class="label" style="color:var(--danger);">💸 "Mahal"</div>
+        <div class="desc">Bandingin push sendiri 2-3 bulan vs ETNYX [X] hari. Per hari = lebih murah dari skin. + diskon aktif → hold slot.</div>
+      </div>
+      <div class="card">
+        <div class="label" style="color:var(--danger);">🔒 "Takut Akun Kena Ban"</div>
+        <div class="desc">Secondary device, VPN lokasi sama, play pattern natural, garansi 100% aman. 2.847+ order, 0 banned. Refer ke testimoni IG.</div>
+      </div>
+      <div class="card">
+        <div class="label" style="color:var(--warning);">🤔 "Pikir-Pikir Dulu"</div>
+        <div class="desc">Harga berlaku hari ini, slot bisa full, season reset mendekat. Tawarkan hold slot + harga 2 jam.</div>
+      </div>
+      <div class="card">
+        <div class="label" style="color:var(--primary);">🛡️ "Garansi Gimana?"</div>
+        <div class="desc">Bintang turun = gratis push ulang. Target ga tercapai = refund sebagian. Akun masalah = tanggung jawab penuh. Tracking real-time.</div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:.8rem;">Anti-Ghost Follow-Up</h3>
+    <table>
+      <tr><th>Timing</th><th>Action</th></tr>
+      <tr><td>+2 jam</td><td>"Masih tertarik push rank? Aku bantu jawab pertanyaan!"</td></tr>
+      <tr><td>+24 jam</td><td>"Reminder — promo [X]% masih berlaku hari ini."</td></tr>
+      <tr><td>+3 hari</td><td>"Semoga push rank lancar! Kalau butuh bantuan, ETNYX siap." → max 3x follow-up</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 17: KPI & Analytics ==================== -->
+<div class="slide">
+  <h2>📊 KPI & Analytics</h2>
+  <div class="scroll-content">
+    <h3>Primary KPIs — 3 Month Targets</h3>
+    <table>
+      <tr><th>Metric</th><th>Month 1</th><th>Month 2</th><th>Month 3</th></tr>
+      <tr><td><strong>Total Order</strong></td><td>30</td><td>75</td><td>150</td></tr>
+      <tr><td><strong>Revenue</strong></td><td>Rp 15jt</td><td>Rp 45jt</td><td>Rp 100jt</td></tr>
+      <tr><td><strong>Customer Repeat</strong></td><td>10%</td><td>20%</td><td>30%</td></tr>
+      <tr><td><strong>WA Conversion</strong></td><td>20%</td><td>30%</td><td>40%</td></tr>
+      <tr><td><strong>Avg Rating</strong></td><td>4.5</td><td>4.7</td><td>4.9</td></tr>
+    </table>
+
+    <h3 style="margin-top:1rem;">Content KPIs</h3>
+    <table>
+      <tr><th>Metric</th><th style="color:var(--text);">Good</th><th style="color:var(--success);">Great</th><th style="color:var(--warning);">Viral</th></tr>
+      <tr><td>Views/video</td><td>1K</td><td>10K</td><td>100K+</td></tr>
+      <tr><td>Engagement rate</td><td>3%</td><td>8%</td><td>15%+</td></tr>
+      <tr><td>Watch time avg</td><td>50%</td><td>70%</td><td>85%+</td></tr>
+      <tr><td>Profile visit</td><td>2%</td><td>5%</td><td>10%+</td></tr>
+      <tr><td>DM from content</td><td>1/video</td><td>5/video</td><td>20+/video</td></tr>
+      <tr><td>Follower growth</td><td>50/week</td><td>200/week</td><td>1K+/week</td></tr>
+    </table>
+
+    <h3 style="margin-top:1rem;">Scaling Strategy</h3>
+    <div class="grid g3" style="margin:.5rem 0;">
+      <div class="card" style="border-top:3px solid var(--primary);">
+        <div class="label">Month 1: TEST</div>
+        <div class="desc">Find winning formats, test hooks, measure engagement</div>
+      </div>
+      <div class="card" style="border-top:3px solid var(--success);">
+        <div class="label">Month 2: SCALE</div>
+        <div class="desc">Double down winners, 3x TikTok/hari, start collab</div>
+      </div>
+      <div class="card" style="border-top:3px solid var(--warning);">
+        <div class="label">Month 3: DOMINATE</div>
+        <div class="desc">Paid + organic + UGC + collab, Spark Ads for viral content</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 18: Video Production ==================== -->
+<div class="slide">
+  <h2>🎬 Video Production & Visual</h2>
+  <div class="scroll-content">
+    <h3>Brand Color Palette</h3>
+    <div class="grid g4" style="margin:.5rem 0;">
+      <div class="card" style="text-align:center;">
+        <div style="width:40px;height:40px;background:#60A5FA;border-radius:8px;margin:0 auto .4rem;"></div>
+        <div class="label">Electric Blue</div>
+        <div class="desc">#60A5FA — Primary</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div style="width:40px;height:40px;background:#A78BFA;border-radius:8px;margin:0 auto .4rem;"></div>
+        <div class="label">Neon Purple</div>
+        <div class="desc">#A78BFA — Secondary</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div style="width:40px;height:40px;background:#0A0A1A;border-radius:8px;margin:0 auto .4rem;border:1px solid rgba(255,255,255,.2);"></div>
+        <div class="label">Dark Navy</div>
+        <div class="desc">#0A0A1A — Background</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div style="width:40px;height:40px;background:linear-gradient(135deg,#60A5FA,#A78BFA);border-radius:8px;margin:0 auto .4rem;"></div>
+        <div class="label">Gradient</div>
+        <div class="desc">Blue → Purple</div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:.8rem;">Font System — Inter</h3>
+    <table>
+      <tr><th>Usage</th><th>Weight</th><th>Style</th></tr>
+      <tr><td>Judul / Hook</td><td>Inter Black (900)</td><td>All caps, bold, drop shadow</td></tr>
+      <tr><td>Subtitle</td><td>Inter Bold (700)</td><td>Sentence case, background box</td></tr>
+      <tr><td>Body text</td><td>Inter Medium (500)</td><td>Clean, readable</td></tr>
+      <tr><td>Badge / Label</td><td>Inter SemiBold (600)</td><td>Uppercase, small</td></tr>
+    </table>
+
+    <h3 style="margin-top:.8rem;">Editing Rules</h3>
+    <div class="grid g2" style="margin:.5rem 0;">
+      <div class="card">
+        <div class="label">⚡ Pacing & Cuts</div>
+        <div class="desc">
+          Fast cut, max 3 detik per shot<br>
+          Hard cut dominan, slide untuk before-after<br>
+          Dynamic zoom in (1.5x-2x) tiap poin penting<br>
+          B-Roll gameplay insert tiap 5-7 detik
+        </div>
+      </div>
+      <div class="card">
+        <div class="label">🎵 SFX & Music</div>
+        <div class="desc">
+          Boom/Impact — poin penting<br>
+          Ding — reveal, Cash register — promo<br>
+          Background low volume, gaming/electronic vibe<br>
+          Motion text sinkron voiceover
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:.8rem;">Duration Guidelines</h3>
+    <div class="grid g3" style="margin:.5rem 0;">
+      <div class="card" style="text-align:center;"><div class="label">TikTok</div><div class="desc">15-45 detik</div></div>
+      <div class="card" style="text-align:center;"><div class="label">IG Reels / Shorts</div><div class="desc">30-60 detik</div></div>
+      <div class="card" style="text-align:center;"><div class="label">Subtitle</div><div class="desc">Max 2 baris, pop-in per word</div></div>
+    </div>
+
+    <h3 style="margin-top:.8rem;">Production Workflow (4 jam/hari → 3-5 konten)</h3>
+    <div class="flow" style="font-size:.8rem;">
+      <div class="flow-step">09:00 Ideation (30m)</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">09:30 Scripting (30m)</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">10:00 Recording (60m)</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">11:00 Editing (120m)</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">13:00 Scheduling (30m)</div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 19: SOP & Rules ==================== -->
+<div class="slide">
+  <h2>📜 SOP & Key Rules</h2>
+  <div class="scroll-content">
+    <div class="grid g2">
+      <div class="card">
+        <div class="label" style="color:var(--danger);">🚫 Larangan Worker</div>
+        <div class="desc">
+          • Jangan akses email / data lain di akun customer<br>
+          • Jangan share credentials ke siapapun<br>
+          • Jangan pakai emulator yang terdeteksi<br>
+          • Jangan push di luar jam yang diizinkan<br>
+          • Jangan toxic / flame di game
+        </div>
+      </div>
+      <div class="card">
+        <div class="label" style="color:var(--success);">✅ Wajib Worker</div>
+        <div class="desc">
+          • Login via secondary device<br>
+          • VPN lokasi sesuai customer<br>
+          • Screenshot setiap milestone<br>
+          • Update progress di dashboard<br>
+          • Lapor kendala ke Lead segera
+        </div>
+      </div>
+      <div class="card">
+        <div class="label" style="color:var(--primary);">📲 WA Reply Rules</div>
+        <div class="desc">
+          • Reply &lt; 5 menit (prime time)<br>
+          • Selalu tanya nama &amp; rank<br>
+          • Kasih harga SETELAH kualifikasi<br>
+          • Max 3x follow-up kalau no reply<br>
+          • Tone: ramah, casual, profesional
+        </div>
+      </div>
+      <div class="card">
+        <div class="label" style="color:var(--secondary);">📊 Content Rules</div>
+        <div class="desc">
+          • Warna konsisten (dark bg, blue/purple accent)<br>
+          • Logo watermark di setiap post<br>
+          • Typography konsisten (Inter font)<br>
+          • Tidak ada foto random<br>
+          • Repost max 2x per konten (edit hook dulu)
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:1rem;">Content Scaling Rules</h3>
+    <table>
+      <tr><th>Trigger</th><th>Action</th></tr>
+      <tr><td>Video &gt; 50K views</td><td>Buat 3 variasi konten serupa</td></tr>
+      <tr><td>Video &gt; 100K views</td><td>Boost dengan Spark Ads</td></tr>
+      <tr><td>Video &gt; 500K views</td><td>Buat series (Part 1, 2, 3...)</td></tr>
+      <tr><td>Hook perform &gt; 70% retention</td><td>Pakai di 5 konten lain</td></tr>
+      <tr><td>Competitor viral</td><td>Buat versi lebih baik dalam 24 jam</td></tr>
+    </table>
+
+    <h3 style="margin-top:1rem;">Sales Scaling Rules</h3>
+    <table>
+      <tr><th>Trigger</th><th>Action</th></tr>
+      <tr><td>WA conversion &gt; 40%</td><td>Tambah traffic (ads)</td></tr>
+      <tr><td>DM &gt; 50/hari</td><td>Tambah admin CS</td></tr>
+      <tr><td>Repeat order &gt; 30%</td><td>Launch loyalty program</td></tr>
+      <tr><td>Revenue &gt; Rp 50jt/bulan</td><td>Hire dedicated editor</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ==================== SLIDE 20: Summary ==================== -->
+<div class="slide">
+  <h2>🏁 Summary & Action Items</h2>
+  <div class="scroll-content">
+    <div class="grid g2">
+      <div class="card" style="border-left:3px solid var(--primary);">
+        <div class="label">🎯 Key Takeaways</div>
+        <div class="desc">
+          • ETNYX = platform joki <strong>paling sistematis</strong> (tracking, enkripsi, assign terstruktur)<br>
+          • 8 USP yang membedakan dari kompetitor<br>
+          • Order flow fully automated (payment → assign → push → notify → review)<br>
+          • Content strategy: 5 pilar, 4-week rotation, 6+ platform<br>
+          • WA closing: 7-step funnel, target 30% DM → Order<br>
+          • 3-month scaling: TEST → SCALE → DOMINATE
+        </div>
+      </div>
+      <div class="card" style="border-left:3px solid var(--success);">
+        <div class="label">✅ Action Items</div>
+        <div class="desc">
+          <strong>Admin:</strong> Monitor dashboard, verify payments, assign workers cepat<br>
+          <strong>Lead:</strong> Koordinasi worker, QA, laporan harian/mingguan<br>
+          <strong>Worker:</strong> Patuhi SOP keamanan, update progress, jaga win rate<br>
+          <strong>Content:</strong> Follow calendar, 4 jam produksi/hari, posting konsisten<br>
+          <strong>Sales:</strong> Reply WA &lt; 5 menit, follow script, max 3x follow-up<br>
+          <strong>All:</strong> Jaga brand consistency (warna, font, tone)
+        </div>
+      </div>
+    </div>
+
+    <div class="quote" style="margin-top:1.5rem; text-align:center; font-style:normal; font-weight:700; font-size:1.1rem;">
+      "Kita ga perlu janji manis. Bukti kerja yang bicara." 🎮
+    </div>
+
+    <div style="text-align:center; margin-top:1.5rem;">
+      <span class="badge badge-blue" style="font-size:.85rem; padding:.4rem 1rem;">Bio: 🎮 Jasa Joki ML #1 Indonesia ⚡ Cepat • Aman • Terenkripsi 📊 2.847+ Order | ⭐ 4.8 Rating</span>
+    </div>
+  </div>
+</div>
+
+</div><!-- /deck -->
+
+<script>
+(function(){
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let cur = 0;
+
+  function go(n){
+    if(n<0||n>=total) return;
+    slides[cur].classList.remove('active');
+    cur = n;
+    slides[cur].classList.add('active');
+    document.getElementById('progress').style.width = ((cur+1)/total*100)+'%';
+    document.getElementById('slide-num').textContent = (cur+1)+' / '+total;
+  }
+
+  go(0);
+
+  // Keyboard
+  document.addEventListener('keydown', e=>{
+    if(e.key==='ArrowRight'||e.key===' ') go(cur+1);
+    else if(e.key==='ArrowLeft') go(cur-1);
+    else if(e.key==='Home') go(0);
+    else if(e.key==='End') go(total-1);
+  });
+
+  // Click (left half = prev, right half = next)
+  document.addEventListener('click', e=>{
+    if(e.target.closest('a,button,input,select,textarea')) return;
+    if(e.clientX < window.innerWidth/2) go(cur-1);
+    else go(cur+1);
+  });
+
+  // Touch / swipe
+  let tx=0;
+  document.addEventListener('touchstart', e=>{ tx=e.changedTouches[0].clientX; });
+  document.addEventListener('touchend', e=>{
+    const dx = e.changedTouches[0].clientX - tx;
+    if(Math.abs(dx)>50){ dx<0 ? go(cur+1) : go(cur-1); }
+  });
+})();
+</script>
+</body>
+</html>
