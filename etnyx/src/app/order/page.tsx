@@ -866,22 +866,23 @@ function OrderPageContent() {
     }
   }, [searchParams, catalog]);
 
-  // Calculate base price based on order mode
+  // Raw item price (before season/express/premium)
+  const rawItemPrice = (() => {
+    if (orderMode === "paket" && selectedPackage) return selectedPackage.price;
+    if (orderMode === "perstar" && selectedStarRank) return selectedStarRank.price * starQuantity;
+    if (orderMode === "gendong" && selectedGendongRank) return selectedGendongRank.price * gendongQuantity;
+    return 0;
+  })();
+  // Calculate base price based on order mode (with all multipliers)
   const basePrice = (() => {
-    let price = 0;
-    if (orderMode === "paket" && selectedPackage) {
-      price = selectedPackage.price;
-    } else if (orderMode === "perstar" && selectedStarRank) {
-      price = selectedStarRank.price * starQuantity;
-    } else if (orderMode === "gendong" && selectedGendongRank) {
-      price = selectedGendongRank.price * gendongQuantity;
-    }
-    // Apply season multiplier
+    let price = rawItemPrice;
     if (seasonMultiplier !== 1) price *= seasonMultiplier;
     if (form.isExpress) price *= 1.2;
     if (form.isPremium) price *= 1.3;
     return Math.round(price);
   })();
+  // Season-adjusted price (before express/premium, for display)
+  const seasonAdjustedPrice = Math.round(rawItemPrice * seasonMultiplier);
   // Calculate tier discount based on base price (before promo)
   const tierDiscountAmount = (() => {
     if (!customerTier || customerTier === "bronze") return 0;
@@ -1157,8 +1158,8 @@ function OrderPageContent() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          currentRank: selectedPackage?.currentRank || form.currentRank,
-          targetRank: selectedPackage?.targetRank || form.targetRank,
+          currentRank: orderMode === "paket" ? (selectedPackage?.currentRank || form.currentRank) : (orderMode === "perstar" ? (selectedStarRank?.id || form.currentRank) : (selectedGendongRank?.id || form.currentRank)),
+          targetRank: orderMode === "paket" ? (selectedPackage?.targetRank || form.targetRank) : (orderMode === "perstar" ? (selectedStarRank?.id || form.targetRank) : (selectedGendongRank?.id || form.targetRank)),
           currentStar: orderMode === "paket" && RANKS_WITH_STARS.includes(selectedPackage?.currentRank || form.currentRank) ? currentStar : null,
           targetStar: orderMode === "paket" && RANKS_WITH_STARS.includes(selectedPackage?.targetRank || form.targetRank) ? targetStar : null,
           packageTitle: selectedPackage?.title || (orderMode === "gendong" ? `Gendong ${selectedGendongRank?.name} x${gendongQuantity} ${selectedGendongRank?.id === "grading" ? "match" : "star"}` : undefined),
@@ -2151,7 +2152,7 @@ function OrderPageContent() {
                           inputMode="numeric"
                           value={form.userId}
                           onChange={(e) => {
-                            updateForm({ userId: e.target.value.replace(/\D/g, "") });
+                            updateForm({ userId: e.target.value.replace(/\D/g, ""), nickname: "" });
                             setAccountCheckResult(null);
                             setAccountCheckError("");
                           }}
@@ -2172,7 +2173,7 @@ function OrderPageContent() {
                           inputMode="numeric"
                           value={form.serverId}
                           onChange={(e) => {
-                            updateForm({ serverId: e.target.value.replace(/\D/g, "") });
+                            updateForm({ serverId: e.target.value.replace(/\D/g, ""), nickname: "" });
                             setAccountCheckResult(null);
                             setAccountCheckError("");
                           }}
@@ -2528,6 +2529,7 @@ function OrderPageContent() {
                         onChange={(e) => {
                           updateForm({ promoCode: e.target.value.toUpperCase() });
                           setPromoApplied(false);
+                          setPromoDiscount(0);
                           setPromoMessage("");
                         }}
                         placeholder={t.promoPlaceholder}
@@ -2572,16 +2574,22 @@ function OrderPageContent() {
                         <span>{formatRupiah(selectedPackage.price)}</span>
                       </div>
                     ) : null}
+                    {seasonMultiplier !== 1 && (
+                      <div className={`flex justify-between ${seasonMultiplier > 1 ? "text-yellow-400/80" : "text-green-400"}`}>
+                        <span>{seasonLabel || "Season"} ({seasonMultiplier > 1 ? `+${Math.round((seasonMultiplier - 1) * 100)}%` : `-${Math.round((1 - seasonMultiplier) * 100)}%`})</span>
+                        <span>{seasonMultiplier > 1 ? "+" : "-"}{formatRupiah(Math.abs(Math.round(rawItemPrice * (seasonMultiplier - 1))))}</span>
+                      </div>
+                    )}
                     {form.isExpress && (
                       <div className="flex justify-between text-yellow-400/80">
                         <span>{t.expressAddon}</span>
-                        <span>+{formatRupiah(Math.round(basePrice * 0.2))}</span>
+                        <span>+{formatRupiah(Math.round(seasonAdjustedPrice * 0.2))}</span>
                       </div>
                     )}
                     {form.isPremium && (
                       <div className="flex justify-between text-yellow-400/80">
                         <span>{t.premiumAddon}</span>
-                        <span>+{formatRupiah(Math.round(basePrice * (form.isExpress ? 1.2 : 1) * 0.3))}</span>
+                        <span>+{formatRupiah(Math.round(seasonAdjustedPrice * (form.isExpress ? 1.2 : 1) * 0.3))}</span>
                       </div>
                     )}
                     {promoDiscount > 0 && (
@@ -2687,13 +2695,6 @@ function OrderPageContent() {
                     <p className="text-text-muted text-xs mb-2 uppercase tracking-wider">
                       Tier & Jumlah {selectedStarRank.id === "grading" ? "Match" : "Bintang"}
                     </p>
-                    {/* Rank Flow */}
-                    <div className="flex items-center gap-2 mb-3 text-xs">
-                      <Image src={rankIcons[form.currentRank]} alt="" width={20} height={20} className="w-5 h-5 object-contain" />
-                      <span className="text-text-muted">{RANK_LIST.find(r => r.id === form.currentRank)?.label}{RANKS_WITH_STARS.includes(form.currentRank) ? ` ${getDivisionOptions(form.currentRank).find(s => s.value === currentStar)?.label || ""}` : ""}</span>
-                      <ArrowRight className="w-3 h-3 text-accent" />
-                      <span className="text-yellow-400 font-medium flex items-center gap-1">{selectedStarRank.name} +{starQuantity}{selectedStarRank.id === "grading" ? " match" : <><Star className="w-3 h-3" /></>}</span>
-                    </div>
                     <div className="flex items-center gap-3">
                       <Image
                         src={selectedStarRank.icon}
@@ -2723,13 +2724,6 @@ function OrderPageContent() {
                     <p className="text-text-muted text-xs mb-2 uppercase tracking-wider">
                       Duo Boost &mdash; Tier & Jumlah {selectedGendongRank.id === "grading" ? "Match" : "Bintang"}
                     </p>
-                    {/* Rank Flow */}
-                    <div className="flex items-center gap-2 mb-3 text-xs">
-                      <Image src={rankIcons[form.currentRank]} alt="" width={20} height={20} className="w-5 h-5 object-contain" />
-                      <span className="text-text-muted">{RANK_LIST.find(r => r.id === form.currentRank)?.label}{RANKS_WITH_STARS.includes(form.currentRank) ? ` ${getDivisionOptions(form.currentRank).find(s => s.value === currentStar)?.label || ""}` : ""}</span>
-                      <ArrowRight className="w-3 h-3 text-accent" />
-                      <span className="text-yellow-400 font-medium flex items-center gap-1">{selectedGendongRank.name} +{gendongQuantity}{selectedGendongRank.id === "grading" ? " match" : <><Star className="w-3 h-3" /></>}</span>
-                    </div>
                     <div className="flex items-center gap-3">
                       <Image
                         src={selectedGendongRank.icon}
@@ -2859,14 +2853,14 @@ function OrderPageContent() {
                       {seasonMultiplier !== 1 && (
                         <div className={`flex justify-between ${seasonMultiplier > 1 ? "text-yellow-400" : "text-green-400"}`}>
                           <span>{seasonLabel || "Season Pricing"} ({seasonMultiplier > 1 ? `+${Math.round((seasonMultiplier - 1) * 100)}%` : `-${Math.round((1 - seasonMultiplier) * 100)}%`})</span>
-                          <span>{seasonMultiplier > 1 ? "+" : "-"}{formatRupiah(Math.abs(Math.round(basePrice - basePrice / seasonMultiplier)))}</span>
+                          <span>{seasonMultiplier > 1 ? "+" : "-"}{formatRupiah(Math.abs(Math.round(rawItemPrice * (seasonMultiplier - 1))))}</span>
                         </div>
                       )}
                       {form.isExpress && (
                         <div className="flex justify-between text-text-muted">
                           <span>Express (+20%)</span>
                           <span>
-                            +{formatRupiah(Math.round(basePrice * 0.2))}
+                            +{formatRupiah(Math.round(seasonAdjustedPrice * 0.2))}
                           </span>
                         </div>
                       )}
@@ -2875,7 +2869,7 @@ function OrderPageContent() {
                           <span>Premium (+30%)</span>
                           <span>
                             +{formatRupiah(
-                              Math.round(basePrice * (form.isExpress ? 1.2 : 1) * 0.3)
+                              Math.round(seasonAdjustedPrice * (form.isExpress ? 1.2 : 1) * 0.3)
                             )}
                           </span>
                         </div>
