@@ -283,6 +283,53 @@ function getDivisionOptions(rankId: string): { value: number; label: string }[] 
   return options;
 }
 
+// Calculate total stars between current rank+division and target rank+division
+function calculateTotalStars(
+  currentRank: string, currentDiv: number,
+  targetRank: string, targetDiv: number
+): number {
+  const ci = RANK_ORDER.indexOf(currentRank);
+  const ti = RANK_ORDER.indexOf(targetRank);
+  if (ci < 0 || ti < 0 || ci >= ti) {
+    // Same rank: calculate within-rank stars
+    if (ci === ti && RANKS_WITH_STARS.includes(currentRank)) {
+      const cfg = RANK_DIVISION_CONFIG[currentRank];
+      if (cfg && currentDiv > targetDiv) {
+        // Higher div number = lower tier (V is lowest, I is highest)
+        return (currentDiv - targetDiv) * cfg.starsPerDiv;
+      }
+    }
+    return 0;
+  }
+
+  let stars = 0;
+  // Stars remaining in current rank (from current division to I)
+  if (RANKS_WITH_STARS.includes(currentRank)) {
+    const cfg = RANK_DIVISION_CONFIG[currentRank];
+    if (cfg) stars += currentDiv * cfg.starsPerDiv;
+  }
+  // Full ranks in between
+  for (let i = ci + 1; i < ti; i++) {
+    const rank = RANK_ORDER[i];
+    const cfg = RANK_DIVISION_CONFIG[rank];
+    if (cfg) {
+      stars += cfg.divisions * cfg.starsPerDiv;
+    } else {
+      // Mythic tiers without divisions count as ~25 stars each
+      stars += 25;
+    }
+  }
+  // Stars needed in target rank (from max division to target division)
+  if (RANKS_WITH_STARS.includes(targetRank)) {
+    const cfg = RANK_DIVISION_CONFIG[targetRank];
+    if (cfg) {
+      // Target division: e.g. if target is Legend V(5), need 0 extra. Legend I(1) need (divisions-1)*starsPerDiv
+      stars += (cfg.divisions - targetDiv) * cfg.starsPerDiv;
+    }
+  }
+  return stars;
+}
+
 // Fallback static options (max 5 divisions) — used if no rank selected yet
 const STAR_OPTIONS = [
   { value: 5, label: "V" },
@@ -1535,6 +1582,25 @@ function OrderPageContent() {
                     </div>
                   </div>
 
+                  {/* Star Summary Card */}
+                  {(() => {
+                    const totalStars = calculateTotalStars(form.currentRank, currentStar, form.targetRank, targetStar);
+                    if (totalStars <= 0) return null;
+                    return (
+                      <div className="flex items-center justify-between p-3 mb-4 bg-accent/5 border border-accent/20 rounded-xl">
+                        <div className="flex items-center gap-2">
+                          <Star className="w-4 h-4 text-yellow-400" />
+                          <span className="text-text text-sm font-medium">
+                            {locale === "id" ? "Total Bintang" : "Total Stars"}
+                          </span>
+                        </div>
+                        <span className="text-yellow-400 font-bold text-lg">
+                          {totalStars} ⭐
+                        </span>
+                      </div>
+                    );
+                  })()}
+
                   {/* Hitung Harga Button */}
                   <button
                     onClick={() => { setShowPackages(true); setSelectedPackage(null); }}
@@ -1769,6 +1835,13 @@ function OrderPageContent() {
                           </div>
                         </div>
                       </div>
+                      {/* Star breakdown */}
+                      <div className="flex items-center justify-center gap-2 mt-3 pt-3 border-t border-white/5 text-xs text-text-muted">
+                        <Star className="w-3 h-3 text-yellow-400" />
+                        <span>
+                          {starQuantity} {selectedStarRank.id === "grading" ? "Match" : (locale === "id" ? "Bintang" : "Stars")} × {formatRupiah(selectedStarRank.price)} = <span className="text-yellow-400 font-semibold">{formatRupiah(selectedStarRank.price * starQuantity)}</span>
+                        </span>
+                      </div>
                     </div>
                   )}
                 </>
@@ -1900,6 +1973,13 @@ function OrderPageContent() {
                             </p>
                           </div>
                         </div>
+                      </div>
+                      {/* Star breakdown */}
+                      <div className="flex items-center justify-center gap-2 mt-3 pt-3 border-t border-white/5 text-xs text-text-muted">
+                        <Star className="w-3 h-3 text-yellow-400" />
+                        <span>
+                          {gendongQuantity} {selectedGendongRank.id === "grading" ? "Match" : (locale === "id" ? "Bintang" : "Stars")} × {formatRupiah(selectedGendongRank.price)} = <span className="text-yellow-400 font-semibold">{formatRupiah(selectedGendongRank.price * gendongQuantity)}</span>
+                        </span>
                       </div>
                     </div>
                   )}
