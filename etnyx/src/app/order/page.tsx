@@ -41,6 +41,9 @@ import {
   ShieldCheck,
   MapPin,
   Target,
+  Wand2,
+  TreePine,
+  Coins,
 } from "lucide-react";
 import { FaFacebook, FaGoogle, FaTiktok, FaVk, FaApple, FaGamepad } from "react-icons/fa";
 import type { IconType } from "react-icons";
@@ -80,12 +83,20 @@ const LOGIN_METHODS: { id: LoginMethod; name: string; Icon: IconType; color: str
 ];
 
 // ML Roles for Gendong mode (client picks their preferred role)
+const ML_ROLE_ICONS: Record<string, React.ReactNode> = {
+  exp: <Swords className="w-5 h-5" />,
+  roam: <Shield className="w-5 h-5" />,
+  mid: <Wand2 className="w-5 h-5" />,
+  jungler: <TreePine className="w-5 h-5" />,
+  gold: <Coins className="w-5 h-5" />,
+};
+
 const DEFAULT_ML_ROLES = [
-  { id: "exp", name: "EXP Laner", emoji: "⚔️", disabled: false },
-  { id: "roam", name: "Roamer", emoji: "🛡️", disabled: false },
-  { id: "mid", name: "Mid Laner", emoji: "🔮", disabled: false },
-  { id: "jungler", name: "Jungler", emoji: "🌿", disabled: true },
-  { id: "gold", name: "Gold Laner", emoji: "💰", disabled: true },
+  { id: "exp", name: "EXP Laner", disabled: false },
+  { id: "roam", name: "Roamer", disabled: false },
+  { id: "mid", name: "Mid Laner", disabled: false },
+  { id: "jungler", name: "Jungler", disabled: true },
+  { id: "gold", name: "Gold Laner", disabled: true },
 ];
 
 // Default play schedule options
@@ -1151,8 +1162,8 @@ function OrderPageContent() {
         body: JSON.stringify({
           currentRank: selectedPackage?.currentRank || form.currentRank,
           targetRank: selectedPackage?.targetRank || form.targetRank,
-          currentStar: RANKS_WITH_STARS.includes(selectedPackage?.currentRank || form.currentRank) ? currentStar : null,
-          targetStar: RANKS_WITH_STARS.includes(selectedPackage?.targetRank || form.targetRank) ? targetStar : null,
+          currentStar: orderMode === "paket" && RANKS_WITH_STARS.includes(selectedPackage?.currentRank || form.currentRank) ? currentStar : null,
+          targetStar: orderMode === "paket" && RANKS_WITH_STARS.includes(selectedPackage?.targetRank || form.targetRank) ? targetStar : null,
           packageTitle: selectedPackage?.title || (orderMode === "gendong" ? `Gendong ${selectedGendongRank?.name} x${gendongQuantity} ${selectedGendongRank?.id === "grading" ? "match" : "star"}` : undefined),
           orderType: orderMode,
           loginMethod: orderMode === "gendong" ? undefined : form.loginMethod,
@@ -1424,6 +1435,8 @@ function OrderPageContent() {
                     setOrderMode("paket");
                     setSelectedStarRank(null);
                     setStarQuantity(3);
+                    setSelectedPackage(null);
+                    setShowPackages(false);
                   }}
                   className={`w-full sm:w-auto py-3 px-4 rounded-lg text-base font-semibold transition-all ${
                     orderMode === "paket"
@@ -1439,6 +1452,9 @@ function OrderPageContent() {
                   onClick={() => {
                     setOrderMode("perstar");
                     setSelectedPackage(null);
+                    setShowPackages(false);
+                    setSelectedStarRank(null);
+                    setStarQuantity(3);
                   }}
                   className={`w-full sm:w-auto py-3 px-4 rounded-lg text-base font-semibold transition-all ${
                     orderMode === "perstar"
@@ -1454,6 +1470,7 @@ function OrderPageContent() {
                   onClick={() => {
                     setOrderMode("gendong");
                     setSelectedPackage(null);
+                    setShowPackages(false);
                     setSelectedStarRank(null);
                     setStarQuantity(3);
                   }}
@@ -2306,7 +2323,7 @@ function OrderPageContent() {
                               : "bg-background border border-white/10 text-text-muted hover:border-white/20"
                           }`}
                         >
-                          <span className="text-lg">{role.emoji}</span>
+                          <span className="text-lg">{ML_ROLE_ICONS[role.id]}</span>
                           <span>{role.name}</span>
                           {isDisabled && <span className="text-[9px] text-red-400/70">Booster</span>}
                         </button>
@@ -2679,6 +2696,13 @@ function OrderPageContent() {
                     <p className="text-text-muted text-xs mb-2 uppercase tracking-wider">
                       Tier & Jumlah {selectedStarRank.id === "grading" ? "Match" : "Bintang"}
                     </p>
+                    {/* Rank Flow */}
+                    <div className="flex items-center gap-2 mb-3 text-xs">
+                      <Image src={rankIcons[form.currentRank]} alt="" width={20} height={20} className="w-5 h-5 object-contain" />
+                      <span className="text-text-muted">{RANK_LIST.find(r => r.id === form.currentRank)?.label}{RANKS_WITH_STARS.includes(form.currentRank) ? ` ${getDivisionOptions(form.currentRank).find(s => s.value === currentStar)?.label || ""}` : ""}</span>
+                      <ArrowRight className="w-3 h-3 text-accent" />
+                      <span className="text-yellow-400 font-medium">{selectedStarRank.name} +{starQuantity}{selectedStarRank.id === "grading" ? " match" : " ⭐"}</span>
+                    </div>
                     <div className="flex items-center gap-3">
                       <Image
                         src={selectedStarRank.icon}
@@ -2708,6 +2732,13 @@ function OrderPageContent() {
                     <p className="text-text-muted text-xs mb-2 uppercase tracking-wider">
                       Duo Boost &mdash; Tier & Jumlah {selectedGendongRank.id === "grading" ? "Match" : "Bintang"}
                     </p>
+                    {/* Rank Flow */}
+                    <div className="flex items-center gap-2 mb-3 text-xs">
+                      <Image src={rankIcons[form.currentRank]} alt="" width={20} height={20} className="w-5 h-5 object-contain" />
+                      <span className="text-text-muted">{RANK_LIST.find(r => r.id === form.currentRank)?.label}{RANKS_WITH_STARS.includes(form.currentRank) ? ` ${getDivisionOptions(form.currentRank).find(s => s.value === currentStar)?.label || ""}` : ""}</span>
+                      <ArrowRight className="w-3 h-3 text-accent" />
+                      <span className="text-yellow-400 font-medium">{selectedGendongRank.name} +{gendongQuantity}{selectedGendongRank.id === "grading" ? " match" : " ⭐"}</span>
+                    </div>
                     <div className="flex items-center gap-3">
                       <Image
                         src={selectedGendongRank.icon}
@@ -2756,7 +2787,7 @@ function OrderPageContent() {
                     <>
                     <span className="text-text-muted">Role</span>
                     <span className="text-text font-medium">
-                      {gendongRoles.find(r => r.id === form.preferredRole)?.emoji} {gendongRoles.find(r => r.id === form.preferredRole)?.name || "-"}
+                      {ML_ROLE_ICONS[form.preferredRole]} {gendongRoles.find(r => r.id === form.preferredRole)?.name || "-"}
                     </span>
                     <span className="text-text-muted">Jadwal</span>
                     <span className="text-text font-medium break-all">{scheduleOptions.find(s => s.id === form.playSchedule)?.label || form.playSchedule || "-"}</span>
