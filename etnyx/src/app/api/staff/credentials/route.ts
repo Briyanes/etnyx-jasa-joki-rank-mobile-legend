@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
         .select("id")
         .eq("order_id", orderId)
         .eq("assigned_to", auth.user.id)
-        .in("status", ["assigned", "in_progress"])
+        .eq("status", "in_progress")
         .single();
 
       if (!assignment) {

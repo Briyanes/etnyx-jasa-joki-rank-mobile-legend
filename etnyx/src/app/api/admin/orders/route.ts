@@ -376,7 +376,6 @@ export async function PATCH(request: Request) {
       if (updates.status === "in_progress") {
         try {
           notificationSent = await sendOrderStartedWA(orderData);
-          console.log(`[in_progress] WA sent for ${data.order_id}: ${notificationSent}, phone: ${data.whatsapp}`);
         } catch (e) { console.error(`[in_progress] Notification failed for ${data.order_id}:`, e); }
       }
 
@@ -392,7 +391,6 @@ export async function PATCH(request: Request) {
         try {
           await sendOrderCompletedNotifications(orderData);
           notificationSent = true;
-          console.log(`[completed] Notifications sent for ${data.order_id}, WA: ${data.whatsapp}`);
         } catch (err) { console.error(`[completed] Notification failed for ${data.order_id}:`, err); }
 
         // Award reward points to linked customer (idempotent check)

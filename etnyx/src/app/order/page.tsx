@@ -663,6 +663,7 @@ function OrderPageContent() {
   const t = translations[locale as keyof typeof translations] || translations.id;
   const [catalog, setCatalog] = useState<PackageCategory[]>(DEFAULT_CATALOG);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [orderResult, setOrderResult] = useState<{
     orderId: string;
     paymentUrl?: string;
@@ -1054,6 +1055,7 @@ function OrderPageContent() {
               form.playSchedule &&
               form.whatsapp &&
               form.whatsapp.length >= 9 &&
+              form.whatsapp.length <= 13 &&
               form.whatsapp.startsWith("8") &&
               isValidEmail(form.email)
             );
@@ -1065,6 +1067,7 @@ function OrderPageContent() {
             form.accountPassword &&
             form.whatsapp &&
             form.whatsapp.length >= 9 &&
+            form.whatsapp.length <= 13 &&
             form.whatsapp.startsWith("8") &&
             isValidEmail(form.email)
           );
@@ -1196,8 +1199,10 @@ function OrderPageContent() {
       : (form.accountLogin && form.accountPassword)) &&
     form.whatsapp &&
     form.whatsapp.length >= 9 &&
+    form.whatsapp.length <= 13 &&
     form.whatsapp.startsWith("8") &&
-    isValidEmail(form.email);
+    isValidEmail(form.email) &&
+    termsAccepted;
 
   const handleSubmitOrder = useCallback(async () => {
     if (!canSubmit) return;
@@ -1534,6 +1539,13 @@ function OrderPageContent() {
                   {t.modeGendong}
                 </button>
               </div>
+              <p className="text-text-muted text-xs mb-4 -mt-3 px-1">
+                {orderMode === "paket"
+                  ? (locale === "id" ? "Pilih paket rank — booster login ke akunmu dan push rank." : "Choose a rank package — booster logs into your account and pushes rank.")
+                  : orderMode === "perstar"
+                  ? (locale === "id" ? "Bayar per bintang — fleksibel sesuai kebutuhan." : "Pay per star — flexible according to your needs.")
+                  : (locale === "id" ? "Main bareng booster — tanpa share akun, kamu tetap bermain." : "Play together with booster — no account sharing, you keep playing.")}
+              </p>
 
               {/* ===== Rank Awalmu (PAKET only) ===== */}
               {orderMode === "paket" && (
@@ -1596,7 +1608,7 @@ function OrderPageContent() {
                       ))}
                     </select>
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                      <Image src={rankIcons[form.currentRank]} alt="" width={24} height={24} className="w-6 h-6 object-contain" />
+                      <Image src={rankIcons[form.currentRank] || "/icons-tier/warrior.webp"} alt="" width={24} height={24} className="w-6 h-6 object-contain" />
                     </div>
                   </div>
                   {/* Mythic Star Input */}
@@ -1715,7 +1727,7 @@ function OrderPageContent() {
                           ))}
                       </select>
                       <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                        <Image src={rankIcons[form.targetRank]} alt="" width={24} height={24} className="w-6 h-6 object-contain" />
+                        <Image src={rankIcons[form.targetRank] || "/icons-tier/warrior.webp"} alt="" width={24} height={24} className="w-6 h-6 object-contain" />
                       </div>
                     </div>
                   </div>
@@ -1723,7 +1735,7 @@ function OrderPageContent() {
                   {/* Selected Rank Flow Display */}
                   <div className="flex items-center justify-center gap-3 mb-4 p-3 bg-background rounded-xl border border-white/5">
                     <div className="flex items-center gap-2">
-                      <Image src={rankIcons[form.currentRank]} alt="" width={28} height={28} className="w-7 h-7 object-contain" />
+                      <Image src={rankIcons[form.currentRank] || "/icons-tier/warrior.webp"} alt="" width={28} height={28} className="w-7 h-7 object-contain" />
                       <span className="text-text text-sm font-medium">
                         {RANK_LIST.find(r => r.id === form.currentRank)?.label}
                         {RANKS_WITH_STARS.includes(form.currentRank) && <span className="text-text-muted ml-1">{getDivisionOptions(form.currentRank).find(s => s.value === currentStar)?.label}</span>}
@@ -1731,7 +1743,7 @@ function OrderPageContent() {
                     </div>
                     <ArrowRight className="w-4 h-4 text-accent flex-shrink-0" />
                     <div className="flex items-center gap-2">
-                      <Image src={rankIcons[form.targetRank]} alt="" width={28} height={28} className="w-7 h-7 object-contain" />
+                      <Image src={rankIcons[form.targetRank] || "/icons-tier/warrior.webp"} alt="" width={28} height={28} className="w-7 h-7 object-contain" />
                       <span className="text-yellow-400 text-sm font-bold">
                         {RANK_LIST.find(r => r.id === form.targetRank)?.label}
                         {RANKS_WITH_STARS.includes(form.targetRank) && <span className="text-yellow-300 ml-1">{getDivisionOptions(form.targetRank).find(s => s.value === targetStar)?.label}</span>}
@@ -2274,10 +2286,11 @@ function OrderPageContent() {
               <div className="grid sm:grid-cols-2 gap-4">
                 {/* Nickname */}
                 <div>
-                  <label className="block text-sm text-text-muted mb-1.5">
+                  <label htmlFor="order-nickname" className="block text-sm text-text-muted mb-1.5">
                     {t.labelNickname} <span className="text-error">*</span>
                   </label>
                   <input
+                    id="order-nickname"
                     type="text"
                     value={form.nickname}
                     onChange={(e) => updateForm({ nickname: e.target.value })}
@@ -2294,10 +2307,11 @@ function OrderPageContent() {
                 {/* Email / No HP — Hide for Gendong */}
                 {orderMode !== "gendong" && (
                 <div>
-                  <label className="block text-sm text-text-muted mb-1.5">
+                  <label htmlFor="order-account-login" className="block text-sm text-text-muted mb-1.5">
                     {t.labelAccountLogin} <span className="text-error">*</span>
                   </label>
                   <input
+                    id="order-account-login"
                     type="text"
                     value={form.accountLogin}
                     onChange={(e) =>
@@ -2319,10 +2333,11 @@ function OrderPageContent() {
               {/* Password — Hide for Gendong */}
               {orderMode !== "gendong" && (
               <div>
-                <label className="block text-sm text-text-muted mb-1.5">
+                <label htmlFor="order-password" className="block text-sm text-text-muted mb-1.5">
                   {t.labelPassword} <span className="text-error">*</span>
                 </label>
                 <input
+                  id="order-password"
                   type="password"
                   value={form.accountPassword}
                   onChange={(e) =>
@@ -2367,7 +2382,7 @@ function OrderPageContent() {
                         >
                           <span className="text-lg">{ML_ROLE_ICONS[role.id]}</span>
                           <span>{role.name}</span>
-                          {isDisabled && <span className="text-[9px] text-red-400/70">Booster</span>}
+                          {isDisabled && <span className="text-[9px] text-red-400/70">Khusus Booster</span>}
                         </button>
                       );
                     })}
@@ -2415,10 +2430,11 @@ function OrderPageContent() {
 
               {/* Hero Request */}
               <div>
-                <label className="block text-sm text-text-muted mb-1.5">
+                <label htmlFor="order-hero" className="block text-sm text-text-muted mb-1.5">
                   {t.labelHero}
                 </label>
                 <input
+                  id="order-hero"
                   type="text"
                   value={form.heroRequest}
                   onChange={(e) =>
@@ -2431,10 +2447,11 @@ function OrderPageContent() {
 
               {/* Notes */}
               <div>
-                <label className="block text-sm text-text-muted mb-1.5">
+                <label htmlFor="order-notes" className="block text-sm text-text-muted mb-1.5">
                   {t.labelNotes}
                 </label>
                 <textarea
+                  id="order-notes"
                   value={form.notes}
                   onChange={(e) => updateForm({ notes: e.target.value })}
                   placeholder={t.placeholderNotes}
@@ -2453,7 +2470,7 @@ function OrderPageContent() {
 
               {/* WhatsApp */}
               <div>
-                <label className="block text-sm text-text-muted mb-1.5">
+                <label htmlFor="order-whatsapp" className="block text-sm text-text-muted mb-1.5">
                   {t.labelWhatsapp} <span className="text-error">*</span>
                 </label>
                 <div className="flex">
@@ -2461,6 +2478,7 @@ function OrderPageContent() {
                     <Phone className="w-3.5 h-3.5" /> +62
                   </span>
                   <input
+                    id="order-whatsapp"
                     type="tel"
                     value={form.whatsapp}
                     onChange={(e) => {
@@ -2472,23 +2490,24 @@ function OrderPageContent() {
                     onBlur={() => markTouched("whatsapp")}
                     placeholder="8123456789"
                     className={`flex-1 bg-background border rounded-r-xl px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none transition-colors ${
-                      touched.whatsapp && (!form.whatsapp || form.whatsapp.length < 9 || !form.whatsapp.startsWith("8")) ? "border-red-500" : "border-white/10"
+                      touched.whatsapp && (!form.whatsapp || form.whatsapp.length < 9 || form.whatsapp.length > 13 || !form.whatsapp.startsWith("8")) ? "border-red-500" : "border-white/10"
                     }`}
                   />
                 </div>
-                {touched.whatsapp && (!form.whatsapp || form.whatsapp.length < 9 || !form.whatsapp.startsWith("8")) && (
+                {touched.whatsapp && (!form.whatsapp || form.whatsapp.length < 9 || form.whatsapp.length > 13 || !form.whatsapp.startsWith("8")) && (
                   <p className="text-red-400 text-xs mt-1">
-                    {form.whatsapp && !form.whatsapp.startsWith("8") ? "Nomor harus diawali 8 (contoh: 812xxx)" : t.required}
+                    {form.whatsapp && !form.whatsapp.startsWith("8") ? "Nomor harus diawali 8 (contoh: 812xxx)" : form.whatsapp && form.whatsapp.length > 13 ? "Nomor terlalu panjang (maks 13 digit)" : t.required}
                   </p>
                 )}
               </div>
 
               {/* Email */}
               <div>
-                <label className="block text-sm text-text-muted mb-1.5">
+                <label htmlFor="order-email" className="block text-sm text-text-muted mb-1.5">
                   {t.labelEmail}
                 </label>
                 <input
+                  id="order-email"
                   type="email"
                   value={form.email}
                   onChange={(e) => updateForm({ email: e.target.value })}
@@ -2996,6 +3015,21 @@ function OrderPageContent() {
                     )}
                   </div>
                 </div>
+
+                {/* Terms acceptance */}
+                <label className="flex items-start gap-3 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                    className="mt-0.5 w-4 h-4 rounded border-white/20 accent-accent cursor-pointer"
+                  />
+                  <span className="text-xs text-text-muted">
+                    {locale === "id"
+                      ? <>Saya menyetujui <Link href="/terms" target="_blank" className="text-accent underline underline-offset-2">syarat &amp; ketentuan</Link> layanan ETNYX.</>
+                      : <>I agree to the <Link href="/terms" target="_blank" className="text-accent underline underline-offset-2">terms &amp; conditions</Link> of ETNYX services.</>}
+                  </span>
+                </label>
 
                 {/* Trust */}
                 <div className="flex items-start gap-2 bg-green-500/5 border border-green-500/20 rounded-xl px-4 py-3">
