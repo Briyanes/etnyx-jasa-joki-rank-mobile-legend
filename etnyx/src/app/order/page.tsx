@@ -1068,7 +1068,7 @@ function OrderPageContent() {
       }
       setSlideDirection("right");
       setCurrentStep((s) => s + 1);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      setTimeout(() => document.getElementById("order-step")?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
     }
   }, [currentStep, canProceedStep, orderMode, selectedStarRank, starQuantity, selectedGendongRank, gendongQuantity]);
 
@@ -1076,7 +1076,7 @@ function OrderPageContent() {
     if (currentStep > 1) {
       setSlideDirection("left");
       setCurrentStep((s) => s - 1);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      setTimeout(() => document.getElementById("order-step")?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
     }
   }, [currentStep]);
 
@@ -1408,6 +1408,7 @@ function OrderPageContent() {
 
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div
+          id="order-step"
           key={currentStep}
           className={`transition-all duration-300 ${
             slideDirection === "right"
