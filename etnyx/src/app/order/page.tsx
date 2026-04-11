@@ -57,6 +57,9 @@ interface OrderForm {
   promoCode: string;
   whatsapp: string;
   email: string;
+  // Gendong-specific
+  preferredRole: string;
+  playSchedule: string;
 }
 
 // Login method options with brand icons
@@ -67,6 +70,15 @@ const LOGIN_METHODS: { id: LoginMethod; name: string; Icon: IconType; color: str
   { id: "tiktok", name: "TikTok", Icon: FaTiktok, color: "#000000" },
   { id: "vk", name: "VK", Icon: FaVk, color: "#4A76A8" },
   { id: "apple", name: "Apple ID", Icon: FaApple, color: "#A2AAAD" },
+];
+
+// ML Roles for Gendong mode (client picks their preferred role)
+const ML_ROLES = [
+  { id: "exp", name: "EXP Laner", emoji: "⚔️" },
+  { id: "roam", name: "Roamer", emoji: "🛡️" },
+  { id: "mid", name: "Mid Laner", emoji: "🔮" },
+  { id: "jungler", name: "Jungler", emoji: "🌿", disabled: true },
+  { id: "gold", name: "Gold Laner", emoji: "💰", disabled: true },
 ];
 
 // Product catalog types
@@ -315,6 +327,14 @@ const translations = {
     heroDesc: "Jika tidak diisi, pilot akan bermain hero terbaik mereka",
     labelNotes: "Catatan Untuk Penjoki",
     placeholderNotes: "Catatan khusus (opsional)",
+    // Gendong-specific Step 2
+    gendongDataTitle: "Data Akun & Jadwal Mabar",
+    labelPreferredRole: "Role yang Kamu Mainkan",
+    preferredRoleHint: "Jungler & Gold Lane khusus booster",
+    labelPlaySchedule: "Jadwal Main",
+    placeholderPlaySchedule: "Contoh: Senin-Jumat, jam 20:00-23:00",
+    playScheduleHint: "Worker akan menyesuaikan jadwal kamu",
+    gendongNoLoginHint: "Mode Gendong tidak perlu login akun — kamu main bareng booster pakai akun sendiri",
     // Step 3
     optionsPromo: "Opsi & Promo",
     addons: "Add-ons",
@@ -411,6 +431,14 @@ const translations = {
     heroDesc: "If empty, pilot will play their best heroes",
     labelNotes: "Notes for Booster",
     placeholderNotes: "Special notes (optional)",
+    // Gendong-specific Step 2
+    gendongDataTitle: "Account Data & Mabar Schedule",
+    labelPreferredRole: "Your Preferred Role",
+    preferredRoleHint: "Jungler & Gold Lane are reserved for the booster",
+    labelPlaySchedule: "Play Schedule",
+    placeholderPlaySchedule: "E.g. Mon-Fri, 8PM-11PM",
+    playScheduleHint: "Worker will adjust to your schedule",
+    gendongNoLoginHint: "Gendong mode doesn't need account login — you play together with the booster on your own account",
     // Step 3
     optionsPromo: "Options & Promo",
     addons: "Add-ons",
@@ -551,6 +579,8 @@ function OrderPageContent() {
     promoCode: "",
     whatsapp: "",
     email: "",
+    preferredRole: "",
+    playSchedule: "",
   });
 
   // Fetch pricing catalog from CMS, merge rankKey from defaults
@@ -838,6 +868,19 @@ function OrderPageContent() {
             return !!(selectedStarRank && starQuantity >= pMin);
           }
         case 2:
+          if (orderMode === "gendong") {
+            // Gendong: no login credentials needed, but need role + schedule
+            return !!(
+              form.userId &&
+              form.nickname &&
+              form.preferredRole &&
+              form.playSchedule &&
+              form.whatsapp &&
+              form.whatsapp.length >= 9 &&
+              form.whatsapp.startsWith("8") &&
+              isValidEmail(form.email)
+            );
+          }
           return !!(
             form.userId &&
             form.nickname &&
@@ -971,8 +1014,9 @@ function OrderPageContent() {
     (selectedPackage || (orderMode === "perstar" && selectedStarRank) || (orderMode === "gendong" && selectedGendongRank)) &&
     form.userId &&
     form.nickname &&
-    form.accountLogin &&
-    form.accountPassword &&
+    (orderMode === "gendong"
+      ? (form.preferredRole && form.playSchedule)
+      : (form.accountLogin && form.accountPassword)) &&
     form.whatsapp &&
     form.whatsapp.length >= 9 &&
     form.whatsapp.startsWith("8") &&
@@ -993,13 +1037,17 @@ function OrderPageContent() {
           targetStar: RANKS_WITH_STARS.includes(selectedPackage?.targetRank || form.targetRank) ? targetStar : null,
           packageTitle: selectedPackage?.title || (orderMode === "gendong" ? `Gendong ${selectedGendongRank?.name} x${gendongQuantity} ${selectedGendongRank?.id === "grading" ? "match" : "star"}` : undefined),
           orderType: orderMode,
-          loginMethod: form.loginMethod,
+          loginMethod: orderMode === "gendong" ? undefined : form.loginMethod,
           userId: form.serverId ? `${form.userId}(${form.serverId})` : form.userId,
           nickname: form.nickname,
-          accountLogin: form.accountLogin,
-          accountPassword: form.accountPassword,
+          accountLogin: orderMode === "gendong" ? undefined : form.accountLogin,
+          accountPassword: orderMode === "gendong" ? undefined : form.accountPassword,
+          preferredRole: orderMode === "gendong" ? form.preferredRole : undefined,
+          playSchedule: orderMode === "gendong" ? form.playSchedule : undefined,
           heroRequest: form.heroRequest,
-          notes: form.notes,
+          notes: orderMode === "gendong" 
+            ? [form.notes, `Role: ${ML_ROLES.find(r => r.id === form.preferredRole)?.name || form.preferredRole}`, `Jadwal: ${form.playSchedule}`].filter(Boolean).join(" | ")
+            : form.notes,
           isExpress: form.isExpress,
           isPremium: form.isPremium,
           promoCode: promoApplied ? form.promoCode : undefined,
@@ -1830,10 +1878,19 @@ function OrderPageContent() {
               <span className="w-7 h-7 rounded-full gradient-primary flex items-center justify-center text-white text-sm font-bold">
                 2
               </span>
-              <h2 className="font-bold text-text">{t.accountData}</h2>
+              <h2 className="font-bold text-text">{orderMode === "gendong" ? t.gendongDataTitle : t.accountData}</h2>
             </div>
             <div className="p-5 space-y-4">
-              {/* Login Method Dropdown */}
+              {/* Gendong info banner */}
+              {orderMode === "gendong" && (
+                <div className="flex items-start gap-2 px-3 py-2.5 bg-purple-500/10 border border-purple-500/30 rounded-xl">
+                  <Users className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+                  <p className="text-purple-300 text-xs">{t.gendongNoLoginHint}</p>
+                </div>
+              )}
+
+              {/* Login Method Dropdown — Hide for Gendong */}
+              {orderMode !== "gendong" && (
               <div>
                 <label className="block text-sm text-text-muted mb-2 font-medium">
                   {t.loginMethod}
@@ -1862,6 +1919,7 @@ function OrderPageContent() {
                   })}
                 </div>
               </div>
+              )}
 
               {/* User ID + Server ID + Cek Akun */}
               <div>
@@ -1967,7 +2025,8 @@ function OrderPageContent() {
                     <p className="text-red-400 text-xs mt-1">{t.required}</p>
                   )}
                 </div>
-                {/* Email / No HP */}
+                {/* Email / No HP — Hide for Gendong */}
+                {orderMode !== "gendong" && (
                 <div>
                   <label className="block text-sm text-text-muted mb-1.5">
                     {t.labelAccountLogin} <span className="text-error">*</span>
@@ -1988,9 +2047,11 @@ function OrderPageContent() {
                     <p className="text-red-400 text-xs mt-1">{t.required}</p>
                   )}
                 </div>
+                )}
               </div>
 
-              {/* Password */}
+              {/* Password — Hide for Gendong */}
+              {orderMode !== "gendong" && (
               <div>
                 <label className="block text-sm text-text-muted mb-1.5">
                   {t.labelPassword} <span className="text-error">*</span>
@@ -2011,6 +2072,66 @@ function OrderPageContent() {
                   <p className="text-red-400 text-xs mt-1">{t.required}</p>
                 )}
               </div>
+              )}
+
+              {/* Gendong-specific: Preferred Role + Play Schedule */}
+              {orderMode === "gendong" && (
+              <>
+                <div>
+                  <label className="block text-sm text-text-muted mb-2 font-medium">
+                    {t.labelPreferredRole} <span className="text-error">*</span>
+                  </label>
+                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                    {ML_ROLES.map((role) => {
+                      const isSelected = form.preferredRole === role.id;
+                      const isDisabled = role.disabled;
+                      return (
+                        <button
+                          key={role.id}
+                          onClick={() => !isDisabled && updateForm({ preferredRole: role.id })}
+                          disabled={isDisabled}
+                          className={`px-3 py-2.5 rounded-xl text-xs font-medium transition-all flex flex-col items-center gap-1.5 ${
+                            isDisabled
+                              ? "bg-background/50 border border-white/5 text-text-muted/40 cursor-not-allowed opacity-50"
+                              : isSelected
+                              ? "gradient-primary text-white shadow-lg"
+                              : "bg-background border border-white/10 text-text-muted hover:border-white/20"
+                          }`}
+                        >
+                          <span className="text-lg">{role.emoji}</span>
+                          <span>{role.name}</span>
+                          {isDisabled && <span className="text-[9px] text-red-400/70">Booster</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-text-muted text-xs mt-1.5">{t.preferredRoleHint}</p>
+                  {touched.preferredRole && !form.preferredRole && (
+                    <p className="text-red-400 text-xs mt-1">{t.required}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm text-text-muted mb-1.5">
+                    {t.labelPlaySchedule} <span className="text-error">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={form.playSchedule}
+                    onChange={(e) => updateForm({ playSchedule: e.target.value })}
+                    onBlur={() => markTouched("playSchedule")}
+                    placeholder={t.placeholderPlaySchedule}
+                    className={`w-full bg-background border rounded-xl px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none transition-colors ${
+                      touched.playSchedule && !form.playSchedule ? "border-red-500" : "border-white/10"
+                    }`}
+                  />
+                  <p className="text-text-muted text-xs mt-1">{t.playScheduleHint}</p>
+                  {touched.playSchedule && !form.playSchedule && (
+                    <p className="text-red-400 text-xs mt-1">{t.required}</p>
+                  )}
+                </div>
+              </>
+              )}
 
               {/* Hero Request */}
               <div>
@@ -2392,7 +2513,7 @@ function OrderPageContent() {
                 {/* Account Info */}
                 <div className="bg-background rounded-xl p-4 overflow-hidden">
                   <p className="text-text-muted text-xs mb-3 uppercase tracking-wider">
-                    Data Akun
+                    {orderMode === "gendong" ? "Data Akun & Jadwal Mabar" : "Data Akun"}
                   </p>
                   <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
                     <span className="text-text-muted">Nickname</span>
@@ -2402,10 +2523,24 @@ function OrderPageContent() {
                       {form.userId || "-"}{form.serverId ? ` (${form.serverId})` : ""}
                       {accountCheckResult?.verified && <Check className="w-3.5 h-3.5 text-green-400 inline ml-1" />}
                     </span>
+                    {orderMode !== "gendong" && (
+                    <>
                     <span className="text-text-muted">Login Via</span>
                     <span className="text-text font-medium">
                       {LOGIN_METHODS.find(m => m.id === form.loginMethod)?.name || form.loginMethod}
                     </span>
+                    </>
+                    )}
+                    {orderMode === "gendong" && (
+                    <>
+                    <span className="text-text-muted">Role</span>
+                    <span className="text-text font-medium">
+                      {ML_ROLES.find(r => r.id === form.preferredRole)?.emoji} {ML_ROLES.find(r => r.id === form.preferredRole)?.name || "-"}
+                    </span>
+                    <span className="text-text-muted">Jadwal</span>
+                    <span className="text-text font-medium break-all">{form.playSchedule || "-"}</span>
+                    </>
+                    )}
                     {form.heroRequest && (
                       <>
                         <span className="text-text-muted">Hero Request</span>
