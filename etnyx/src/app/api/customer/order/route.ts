@@ -90,9 +90,18 @@ export async function POST(request: NextRequest) {
       totalPrice,
     } = body;
 
-    if (!currentRank || !targetRank || !nickname || !accountLogin || !accountPassword || !whatsapp) {
+    const isGendong = body.orderType === "gendong";
+
+    if (!currentRank || !targetRank || !nickname || !whatsapp) {
       return NextResponse.json(
         { error: "Data wajib belum lengkap" },
+        { status: 400 }
+      );
+    }
+    // For non-gendong: require login credentials
+    if (!isGendong && (!accountLogin || !accountPassword)) {
+      return NextResponse.json(
+        { error: "Data login akun wajib diisi" },
         { status: 400 }
       );
     }
@@ -129,7 +138,7 @@ export async function POST(request: NextRequest) {
 
     // Sanitize inputs
     const sanitizedNickname = sanitizeInput(nickname);
-    const sanitizedLogin = sanitizeInput(accountLogin);
+    const sanitizedLogin = accountLogin ? sanitizeInput(accountLogin) : null;
     const sanitizedHero = body.heroRequest
       ? sanitizeInput(body.heroRequest)
       : null;
@@ -140,9 +149,9 @@ export async function POST(request: NextRequest) {
       ? sanitizeInput(body.packageTitle)
       : null;
 
-    // Encrypt sensitive credentials
-    const encryptedPassword = encryptField(accountPassword);
-    const encryptedLogin = encryptField(sanitizedLogin);
+    // Encrypt sensitive credentials (skip for gendong/mabar - no login needed)
+    const encryptedPassword = accountPassword ? encryptField(accountPassword) : null;
+    const encryptedLogin = sanitizedLogin ? encryptField(sanitizedLogin) : null;
 
     // Generate order ID
     const orderId = `ETX-${Date.now().toString(36).toUpperCase()}${crypto.randomUUID().slice(0, 4).toUpperCase()}`;
@@ -262,7 +271,7 @@ export async function POST(request: NextRequest) {
         account_password: encryptedPassword,
         hero_request: sanitizedHero,
         notes: sanitizedNotes,
-        login_method: body.loginMethod || "userid",
+        login_method: isGendong ? null : (body.loginMethod || "userid"),
         customer_email: sanitizedEmail,
         promo_code: verifiedPromoCode,
         promo_discount: verifiedDiscount,

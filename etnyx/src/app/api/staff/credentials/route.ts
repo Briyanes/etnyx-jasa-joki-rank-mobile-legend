@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
 
     const { data, error } = await supabase
       .from("orders")
-      .select("order_id, account_login, account_password, login_method")
+      .select("order_id, account_login, account_password, login_method, package_title, notes")
       .eq("id", orderId)
       .single();
 
@@ -41,11 +41,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
+    const isGendong = data.package_title?.includes("Gendong") || data.package_title?.includes("Duo Boost");
+
     return NextResponse.json({
       order_id: data.order_id,
       login_method: data.login_method,
       account_login: data.account_login ? decryptField(data.account_login) : null,
       account_password: data.account_password ? decryptField(data.account_password) : null,
+      is_gendong: !!isGendong,
+      notes: isGendong ? data.notes : null,
     });
   } catch (error) {
     console.error("Credentials fetch error:", error);

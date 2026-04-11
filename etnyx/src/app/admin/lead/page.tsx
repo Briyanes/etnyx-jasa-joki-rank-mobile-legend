@@ -707,8 +707,8 @@ export default function LeadDashboard() {
                           <p className="text-text capitalize">{order.package}</p>
                         </div>
                         <div>
-                          <span className="text-text-muted text-xs">Login Method</span>
-                          <p className="text-text capitalize">{order.login_method || "-"}</p>
+                          <span className="text-text-muted text-xs">{order.package_title?.includes("Gendong") || order.package_title?.includes("Duo Boost") ? "Mode" : "Login Method"}</span>
+                          <p className="text-text capitalize">{order.package_title?.includes("Gendong") || order.package_title?.includes("Duo Boost") ? "Gendong / Mabar" : (order.login_method || "-")}</p>
                         </div>
                         <div>
                           <span className="text-text-muted text-xs">Progress</span>

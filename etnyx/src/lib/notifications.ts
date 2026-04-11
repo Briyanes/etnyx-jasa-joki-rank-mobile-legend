@@ -476,6 +476,8 @@ _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 export async function sendOrderStartedWA(order: OrderData): Promise<boolean> {
   if (!order.whatsapp) return false;
 
+  const isGendong = order.package_title?.includes("Gendong") || order.package_title?.includes("Duo Boost");
+
   const message = `
 *Order Sedang Dikerjakan!*
 
@@ -487,7 +489,7 @@ Halo! Order kamu sudah dikonfirmasi dan sedang dalam pengerjaan oleh booster kam
 Kamu bisa track progress di sini:
 ${SITE_URL}/track/?id=${order.order_id}
 
-Jangan login ke akun selama proses joki ya!
+${isGendong ? "Booster kami akan menghubungi kamu untuk jadwal mabar." : "Jangan login ke akun selama proses joki ya!"}
 
 _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 `.trim();
@@ -502,6 +504,8 @@ export async function sendOrderCompletedWA(order: OrderData): Promise<boolean> {
   const reviewLink = `${siteUrl}/review/?id=${order.order_id}`;
   const reportLink = `${siteUrl}/review/?id=${order.order_id}&report=1`;
 
+  const isGendong = order.package_title?.includes("Gendong") || order.package_title?.includes("Duo Boost");
+
   const message = `
 *Order Selesai!*
 
@@ -510,7 +514,7 @@ Yeay! Order kamu sudah selesai dikerjakan.
 *Order ID:* ${order.order_id}
 *Rank Akhir:* ${formatTargetDisplay(order)}
 
-Silakan cek akun kamu dan ganti password untuk keamanan.
+${isGendong ? "Terima kasih sudah mabar bersama booster kami!" : "Silakan cek akun kamu dan ganti password untuk keamanan."}
 
 *Bantu kami dengan review yuk!*
 ${reviewLink}

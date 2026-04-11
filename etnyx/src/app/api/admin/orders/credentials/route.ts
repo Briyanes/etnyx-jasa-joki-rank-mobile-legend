@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
 
     const { data, error } = await supabase
       .from("orders")
-      .select("id, order_id, account_login, account_password")
+      .select("id, order_id, account_login, account_password, package_title, notes")
       .eq("id", orderId)
       .single();
 
@@ -27,11 +27,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
+    const isGendong = data.package_title?.includes("Gendong") || data.package_title?.includes("Duo Boost");
+
     // Decrypt sensitive fields
     const credentials = {
       order_id: data.order_id,
       account_login: data.account_login ? decryptField(data.account_login) : null,
       account_password: data.account_password ? decryptField(data.account_password) : null,
+      is_gendong: !!isGendong,
+      notes: isGendong ? data.notes : null,
     };
 
     logAdminAction({

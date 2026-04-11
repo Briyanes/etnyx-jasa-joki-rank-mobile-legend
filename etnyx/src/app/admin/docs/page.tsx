@@ -253,13 +253,13 @@ function buildCategories(): DocCategory[] {
           content: (
             <div className="space-y-4">
               <StepFlow steps={[
-                { title: "Customer Isi Form Order", desc: "Pilih rank awal ke tujuan, package (Paket/Per-Star/Gendong), credentials akun ML. Apply promo/referral code.", badge: "customer", page: "/order" },
+                { title: "Customer Isi Form Order", desc: "Pilih rank awal ke tujuan, package (Paket/Per-Star/Gendong). Mode Paket/Per Star: isi credentials akun ML. Mode Gendong: pilih Preferred Role + Jadwal Main (tanpa login). Apply promo/referral code.", badge: "customer", page: "/order" },
                 { title: "Pilih Metode Bayar", desc: "2 opsi: Transfer Manual (BCA, BRI, BNI, Mandiri, Jago, DANA, GoPay, OVO, ShopeePay, LinkAja, QRIS) atau iPaymu Auto (VA, QRIS, GoPay, ShopeePay, CC).", badge: "customer", page: "/order (step 3)" },
                 { title: "A) Transfer Manual", desc: "Auto-redirect ke /payment/manual — lihat daftar rekening + upload bukti transfer. Admin approve/reject bukti.", badge: "customer", page: "/payment/manual" },
                 { title: "B) iPaymu Auto", desc: "Payment URL di-generate, customer bayar via popup/redirect. Webhook otomatis confirm. Jika iPaymu gagal/trouble, otomatis fallback ke manual transfer + WA dikirim ke customer dengan info rekening & link upload bukti.", badge: "customer", page: "iPaymu" },
                 { title: "Pembayaran Dikonfirmasi", desc: "Manual: admin klik '1. Lihat Bukti' → cek transfer masuk → klik '2. Konfirmasi Bayar'. iPaymu: webhook auto-confirm. Status: confirmed, payment: paid. WA 'Pembayaran Dikonfirmasi' + Telegram ke Worker Group.", badge: "auto", page: "/api/payment/notification" },
                 { title: "Multi-Channel Notifikasi", desc: "Telegram ke Admin Group (dengan tombol Konfirmasi/Tolak), WhatsApp 'Pembayaran Dikonfirmasi' ke customer, Telegram ke Worker Group.", badge: "auto" },
-                { title: "Admin Cek Credential & Mulai Kerjakan", desc: "Admin klik '3. Cek Credentials' → login akun ML client → pastikan bisa login. Jika tidak bisa login: follow up manual via WA. Jika berhasil login → logout → klik '4. Mulai Kerjakan'. Status: in_progress. Order muncul di Lead Dashboard.", badge: "admin", page: "/admin/dashboard" },
+                { title: "Admin Cek Credential & Mulai Kerjakan", desc: "Mode Paket/Per Star: Admin klik '3. Cek Credentials' → login akun ML client → pastikan bisa login. Jika gagal: follow up via WA. Berhasil → logout → klik '4. Mulai Kerjakan'. Mode Gendong: Tombol credentials di-hidden, langsung klik '3. Mulai Kerjakan'. Status: in_progress.", badge: "admin", page: "/admin/dashboard" },
                 { title: "Lead Assign Order ke Worker", desc: "Lead: buka Lead Dashboard → order yang status in_progress muncul → pilih worker → Assign. PENTING: Lead hanya bisa assign order yang sudah 'Mulai Kerjakan' oleh admin (status in_progress). Order confirmed TIDAK muncul tombol assign di Lead Dashboard.", badge: "lead", page: "/admin/lead" },
                 { title: "Worker Mulai Kerja", desc: "Worker buka dashboard, lihat order yang di-assign (via tabel order_assignments). Status sudah in_progress (admin klik 'Mulai Kerjakan' + Lead assign). WA 'Sedang Dikerjakan' otomatis terkirim saat admin klik '4. Mulai Kerjakan'.", badge: "worker", page: "/admin/worker" },
                 { title: "Worker Update Progress", desc: "Update progress %, current rank. Customer bisa lihat real-time di /track.", badge: "worker" },
@@ -594,9 +594,9 @@ function buildCategories(): DocCategory[] {
               <div className="bg-background rounded-lg p-4 border border-blue-500/20">
                 <h4 className="text-blue-400 font-semibold text-sm mb-3">{"CONFIRMED"} &mdash; Sudah Bayar</h4>
                 <Table headers={["Tombol", "Warna", "Aksi", "WA ke Customer"]} rows={[
-                  ["3. Cek Credentials", "Kuning", "Lihat akun ML customer (AES-256 encrypted) — login dulu, pastikan bisa masuk", "—"],
-                  ["Follow Up Credentials", "Biru", "Kirim WA minta data login akun ML (jika credential salah)", "\"Minta data login\" + instruksi"],
-                  ["4. Mulai Kerjakan", "Accent", "Status → in_progress. Order muncul di Lead Dashboard untuk di-assign ke worker.", "\"Sedang Dikerjakan\" + link track"],
+                  ["3. Cek Credentials", "Kuning", "Lihat akun ML customer (AES-256 encrypted) — login dulu, pastikan bisa masuk. Hidden untuk order Gendong.", "—"],
+                  ["Follow Up Credentials", "Biru", "Kirim WA minta data login akun ML (jika credential salah). Hidden untuk order Gendong.", "\"Minta data login\" / \"Jadwal mabar\""],
+                  ["3/4. Mulai Kerjakan", "Accent", "Status → in_progress. Gendong: langsung step 3. Paket/Per Star: step 4 (setelah cek credentials).", "\"Sedang Dikerjakan\" + link track"],
                 ]} />
               </div>
 
@@ -635,7 +635,7 @@ function buildCategories(): DocCategory[] {
               </div>
 
               <InfoBox type="warning">
-                <strong>Urutan penting!</strong> Untuk order manual transfer: 1. Lihat Bukti → 2. Konfirmasi Bayar → 3. Cek Credentials (login akun ML) → 4. Mulai Kerjakan. Jangan skip langkah! Untuk order iPaymu: langsung dari 3. Cek Credentials → 4. Mulai Kerjakan (step 1-2 otomatis via webhook). Lead baru bisa assign worker setelah admin klik &quot;4. Mulai Kerjakan&quot;.
+                <strong>Urutan penting!</strong> Untuk order Paket/Per Star (manual transfer): 1. Lihat Bukti → 2. Konfirmasi Bayar → 3. Cek Credentials → 4. Mulai Kerjakan. Untuk iPaymu: langsung dari 3. Cek Credentials → 4. Mulai Kerjakan (step 1-2 otomatis). <strong>Untuk order Gendong:</strong> Tombol credentials di-hidden, langsung 1. Lihat Bukti → 2. Konfirmasi Bayar → 3. Mulai Kerjakan. Lead baru bisa assign worker setelah admin klik &quot;Mulai Kerjakan&quot;.
               </InfoBox>
               <InfoBox type="info">
                 <strong>Assign Worker:</strong> Lead hanya bisa assign order yang sudah status <Code>in_progress</Code> (admin sudah klik &quot;4. Mulai Kerjakan&quot;). Order <Code>confirmed</Code> TIDAK bisa di-assign oleh Lead — harus tunggu admin cek credentials &amp; klik Mulai Kerjakan dulu. Admin tetap bisa assign dari confirmed.
@@ -1313,7 +1313,7 @@ function buildCategories(): DocCategory[] {
                   </div>
                   <div className="rounded-lg border border-purple-500/20 p-3">
                     <h5 className="text-purple-400 font-semibold text-sm mb-1">Joki Gendong</h5>
-                    <p className="text-text-muted text-[11px]">Duo — main bareng booster. Per bintang, harga lebih tinggi. Customer tetap bermain pakai akun sendiri.</p>
+                    <p className="text-text-muted text-[11px]">Duo — main bareng booster. Per bintang, harga lebih tinggi. Customer tetap bermain pakai akun sendiri. <strong className="text-purple-300">Tidak perlu login akun</strong> — yang diisi: Preferred Role + Jadwal Main.</p>
                   </div>
                 </div>
               </div>
@@ -1330,16 +1330,21 @@ function buildCategories(): DocCategory[] {
               <div className="bg-background rounded-lg p-4 border border-white/5">
                 <h4 className="text-text font-medium text-sm mb-3">Step 2: Data Akun &amp; Kontak</h4>
                 <Table headers={["Field", "Validasi", "Keterangan"]} rows={[
-                  ["Login Method", "Wajib pilih 1", "6 opsi: Moonton, Facebook, Google, TikTok, VK, Apple"],
+                  ["Login Method", "Wajib (Paket/Per Star saja)", "6 opsi: Moonton, Facebook, Google, TikTok, VK, Apple. Hidden di mode Gendong."],
                   ["User ID", "Numerik, 3-15 digit", "User ID dari profil ML"],
                   ["Server ID", "Numerik, 3-6 digit", "Zone/Server ID ML"],
                   ["Cek Akun", "Tombol verifikasi", "Hit API → tampilkan nickname. WAJIB verifikasi sebelum lanjut."],
                   ["Nickname", "Wajib", "Auto-fill dari Cek Akun atau manual input"],
-                  ["Email/No HP", "Wajib", "Email atau nomor HP untuk login akun ML"],
-                  ["Password", "Wajib", "Password akun ML (dienkripsi AES-256 saat disimpan)"],
+                  ["Email/No HP", "Wajib (Paket/Per Star saja)", "Email atau nomor HP untuk login akun ML. Hidden di mode Gendong."],
+                  ["Password", "Wajib (Paket/Per Star saja)", "Password akun ML (dienkripsi AES-256 saat disimpan). Hidden di mode Gendong."],
+                  ["Preferred Role", "Wajib (Gendong saja)", "Pilih role customer: EXP Laner, Roamer, Mid Laner. Jungler & Gold Laner disabled (untuk booster)."],
+                  ["Jadwal Main", "Wajib (Gendong saja)", "Jadwal bermain customer (contoh: Malam jam 8-10)."],
                   ["Request Hero", "Opsional, min 3", "Daftar hero yang diminta (pisah koma)"],
                   ["Catatan", "Opsional", "Pesan khusus ke penjoki"],
                 ]} />
+                <InfoBox type="info">
+                  <strong>Mode Gendong:</strong> Tidak memerlukan login akun ML. Customer bermain sendiri, booster bermain party. Yang dibutuhkan hanya Preferred Role + Jadwal Main. Login Method, Email/Password otomatis hidden.
+                </InfoBox>
                 <InfoBox type="info">
                   <strong>Keamanan:</strong> Credentials (email + password akun ML) langsung dienkripsi AES-256-GCM saat order dibuat. Hanya worker yang ditugaskan bisa decrypt.
                 </InfoBox>
@@ -2293,7 +2298,7 @@ function buildCategories(): DocCategory[] {
                 </div>
                 <div className="bg-background rounded-lg p-3 border border-white/5">
                   <h4 className="text-text font-medium text-sm mb-1">Gendong</h4>
-                  <p className="text-text-muted text-[11px]">Duo &mdash; main bareng booster.</p>
+                  <p className="text-text-muted text-[11px]">Duo &mdash; main bareng booster. Customer pilih role &amp; jadwal main. Tidak perlu serah akun.</p>
                 </div>
               </div>
               <Table headers={["Modifier", "Multiplier", "Keterangan"]} rows={[
@@ -2512,7 +2517,7 @@ function buildCategories(): DocCategory[] {
               <p className="text-text-muted text-sm">Perjalanan customer dari awal order sampai selesai dan review.</p>
               <StepFlow steps={[
                 { title: "Buka Website & Pilih Layanan", desc: "Customer buka etnyx.com → scroll ke section layanan atau langsung klik 'Order Sekarang'. Pilih mode: Paket, Per-Star, atau Gendong.", badge: "customer", page: "/" },
-                { title: "Isi Form Order", desc: "Pilih rank awal → rank tujuan. Isi credentials akun ML (User ID, Server ID, Password). Cek akun via 'Cek Akun'. Apply promo/referral code.", badge: "customer", page: "/order" },
+                { title: "Isi Form Order", desc: "Pilih rank awal → rank tujuan. Mode Paket/Per Star: Isi credentials akun ML (User ID, Server ID, Password). Mode Gendong: Pilih Preferred Role + Jadwal Main (tanpa login akun). Cek akun via 'Cek Akun'. Apply promo/referral code.", badge: "customer", page: "/order" },
                 { title: "Pilih & Bayar", desc: "Transfer Manual (11 rekening) atau iPaymu Auto. Manual → upload bukti. iPaymu → popup otomatis.", badge: "customer", page: "/payment/manual" },
                 { title: "Upload Bukti (Manual)", desc: "Upload foto bukti transfer + nama pengirim. Tunggu admin approve.", badge: "customer" },
                 { title: "Pembayaran Dikonfirmasi", desc: "Notif WA 'Pembayaran Dikonfirmasi ✅'. Order masuk antrian. Bisa track di /track.", badge: "auto" },

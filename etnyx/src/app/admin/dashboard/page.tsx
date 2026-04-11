@@ -1120,7 +1120,7 @@ export default function AdminDashboard() {
                           </td>
                           <td className="px-4 py-3">
                             <p className="text-text text-xs font-medium">{o.username}</p>
-                            <p className="text-text-muted text-[10px]">{o.login_method === "moonton" ? "Moonton" : `ID: ${o.game_id}`}</p>
+                            <p className="text-text-muted text-[10px]">{o.login_method === "moonton" ? "Moonton" : o.package_title?.includes("Gendong") || o.package_title?.includes("Duo Boost") ? "Gendong/Mabar" : `ID: ${o.game_id}`}</p>
                             {o.whatsapp && <p className="text-text-muted text-[10px]">{o.whatsapp}</p>}
                           </td>
                           <td className="px-4 py-3">
@@ -1208,6 +1208,7 @@ export default function AdminDashboard() {
 
                               {/* === CONFIRMED === */}
                               {o.status === "confirmed" && (<>
+                                {!(o.package_title?.includes("Gendong") || o.package_title?.includes("Duo Boost")) && (<>
                                 <button onClick={() => viewCredentials(o.id)}
                                   className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 transition-colors w-full">
                                   🔑 3. Cek Credentials
@@ -1219,23 +1220,26 @@ export default function AdminDashboard() {
                                     {followUpLoading === `${o.id}-follow_up_credentials` ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <MessageCircle className="w-2.5 h-2.5" />} Follow Up Credentials
                                   </button>
                                 )}
+                                </>)}
                                 <button onClick={() => updateOrderStatus(o.id, "in_progress")}
                                   disabled={statusActionLoading === `${o.id}-in_progress`}
                                   className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-accent/10 text-accent hover:bg-accent/20 transition-colors w-full disabled:opacity-50">
-                                  {statusActionLoading === `${o.id}-in_progress` ? <Loader2 className="w-3 h-3 animate-spin" /> : <TrendingUp className="w-3 h-3" />} 4. Mulai Kerjakan
+                                  {statusActionLoading === `${o.id}-in_progress` ? <Loader2 className="w-3 h-3 animate-spin" /> : <TrendingUp className="w-3 h-3" />} {o.package_title?.includes("Gendong") || o.package_title?.includes("Duo Boost") ? "3" : "4"}. Mulai Kerjakan
                                 </button>
                               </>)}
 
                               {/* === IN PROGRESS === */}
                               {o.status === "in_progress" && (<>
+                                {!(o.package_title?.includes("Gendong") || o.package_title?.includes("Duo Boost")) && (
                                 <button onClick={() => viewCredentials(o.id)}
                                   className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 transition-colors w-full">
                                   🔑 Credentials
                                 </button>
+                                )}
                                 <button onClick={() => updateOrderStatus(o.id, "completed")}
                                   disabled={statusActionLoading === `${o.id}-completed`}
                                   className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors w-full disabled:opacity-50">
-                                  {statusActionLoading === `${o.id}-completed` ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />} 5. Selesaikan
+                                  {statusActionLoading === `${o.id}-completed` ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />} {o.package_title?.includes("Gendong") || o.package_title?.includes("Duo Boost") ? "4" : "5"}. Selesaikan
                                 </button>
                                 {o.whatsapp && (
                                   <button onClick={() => sendFollowUp(o.id, "follow_up_progress")}

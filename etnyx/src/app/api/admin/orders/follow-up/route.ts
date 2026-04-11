@@ -89,14 +89,20 @@ export async function POST(request: NextRequest) {
       }
 
       case "follow_up_credentials": {
-        message = `Halo kak!\n\nPembayaran kamu sudah dikonfirmasi.\n\n*Order ID:* ${order.order_id}\n\nKami butuh *data login akun ML* kamu untuk mulai proses boosting:\n\n1. Email/No HP Moonton\n2. Password akun\n\n*Penting:* Jangan login ke akun selama proses joki ya!\n\nKirim data login kamu ke CS kami via link di bawah.\n\n_ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}`;
+        const isGendong = order.package_title?.includes("Gendong") || order.package_title?.includes("Duo Boost");
+        if (isGendong) {
+          message = `Halo kak!\n\nPembayaran kamu sudah dikonfirmasi.\n\n*Order ID:* ${order.order_id}\n\nOrder *Gendong/Mabar* kamu akan segera diproses. Booster kami akan menghubungi kamu untuk menentukan jadwal mabar.\n\nMohon pastikan kamu siap bermain sesuai jadwal yang sudah disepakati ya!\n\n_ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}`;
+        } else {
+          message = `Halo kak!\n\nPembayaran kamu sudah dikonfirmasi.\n\n*Order ID:* ${order.order_id}\n\nKami butuh *data login akun ML* kamu untuk mulai proses boosting:\n\n1. Email/No HP Moonton\n2. Password akun\n\n*Penting:* Jangan login ke akun selama proses joki ya!\n\nKirim data login kamu ke CS kami via link di bawah.\n\n_ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}`;
+        }
         sent = await sendWhatsAppMessage(order.whatsapp, message);
         break;
       }
 
       case "follow_up_progress": {
         const progress = order.progress || 0;
-        message = `Halo kak!\n\nUpdate progress order kamu:\n\n*Order ID:* ${order.order_id}\n*Progress:* ${progress}%\n*Target:* ${targetDisplay}\n\nBooster kami sedang mengerjakan order kamu. Estimasi selesai dalam waktu dekat!\n\nJangan login ke akun selama proses ya!\n\nTrack order di sini:\n${siteConfig.url}/track/?id=${order.order_id}\n\n_ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}`;
+        const isGendongProgress = order.package_title?.includes("Gendong") || order.package_title?.includes("Duo Boost");
+        message = `Halo kak!\n\nUpdate progress order kamu:\n\n*Order ID:* ${order.order_id}\n*Progress:* ${progress}%\n*Target:* ${targetDisplay}\n\nBooster kami sedang mengerjakan order kamu. Estimasi selesai dalam waktu dekat!\n\n${isGendongProgress ? "Pastikan kamu siap bermain sesuai jadwal mabar ya!" : "Jangan login ke akun selama proses ya!"}\n\nTrack order di sini:\n${siteConfig.url}/track/?id=${order.order_id}\n\n_ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}`;
         sent = await sendWhatsAppMessage(order.whatsapp, message, `${siteConfig.url}/track/?id=${order.order_id}`);
         break;
       }

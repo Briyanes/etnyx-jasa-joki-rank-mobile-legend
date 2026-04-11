@@ -54,6 +54,8 @@ interface Credentials {
   login_method: string | null;
   account_login: string | null;
   account_password: string | null;
+  is_gendong?: boolean;
+  notes?: string | null;
 }
 
 interface Note {
@@ -388,6 +390,7 @@ export default function WorkerDashboard() {
                       {order.hero_request && <p className="text-text-muted text-xs">Hero: {order.hero_request}</p>}
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
+                      {!(order.package_title?.includes("Gendong") || order.package_title?.includes("Duo Boost")) && (
                       <button
                         onClick={() => fetchCredentials(order.id)}
                         disabled={loadingCreds}
@@ -395,6 +398,7 @@ export default function WorkerDashboard() {
                       >
                         {loadingCreds ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Key className="w-3.5 h-3.5" />} Credentials
                       </button>
+                      )}
                       <button
                         onClick={() => handleStartOrder(order.id)}
                         className="flex items-center gap-1.5 px-3 py-1.5 gradient-primary rounded-lg text-white text-sm font-medium hover:opacity-90 transition-opacity"
@@ -407,9 +411,15 @@ export default function WorkerDashboard() {
                   {showCredentials === order.id && credentials[order.id] && (
                     <div className="mt-3 pt-3 border-t border-white/5 bg-background rounded-lg p-3 space-y-2">
                       <div className="flex items-center justify-between">
-                        <h4 className="text-text font-medium text-xs flex items-center gap-1"><Key className="w-3 h-3 text-yellow-400" /> Login Credentials</h4>
+                        <h4 className="text-text font-medium text-xs flex items-center gap-1"><Key className="w-3 h-3 text-yellow-400" /> {credentials[order.id].is_gendong ? "Info Mabar" : "Login Credentials"}</h4>
                         <button onClick={() => setShowCredentials(null)} className="text-text-muted text-xs hover:text-text">Tutup</button>
                       </div>
+                      {credentials[order.id].is_gendong ? (
+                        <div>
+                          <p className="text-purple-400 text-xs font-medium">🎮 Order Gendong / Mabar — Tidak perlu login akun</p>
+                          {credentials[order.id].notes && <p className="text-text text-xs mt-1 whitespace-pre-line">{credentials[order.id].notes}</p>}
+                        </div>
+                      ) : (<>
                       {credentials[order.id].login_method && (
                         <div><span className="text-text-muted text-xs">Method:</span><span className="text-text text-xs ml-2 capitalize">{credentials[order.id].login_method}</span></div>
                       )}
@@ -421,6 +431,7 @@ export default function WorkerDashboard() {
                         <span className="text-text-muted text-xs">Password:</span>
                         <p className="bg-surface rounded px-2 py-1 font-mono text-xs text-text break-all mt-0.5">{credentials[order.id].account_password || <span className="text-text-muted italic">N/A</span>}</p>
                       </div>
+                      </>)}
                     </div>
                   )}
                 </div>
@@ -556,9 +567,11 @@ function OrderCard({
 
           {/* Action Buttons */}
           <div className="flex flex-wrap gap-2">
+            {!(order.package_title?.includes("Gendong") || order.package_title?.includes("Duo Boost")) && (
             <button onClick={onFetchCredentials} disabled={loadingCreds} className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-500/10 text-yellow-400 rounded-lg text-sm hover:bg-yellow-500/20 transition-colors disabled:opacity-50">
               {loadingCreds ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Key className="w-3.5 h-3.5" />} Credentials
             </button>
+            )}
             <button onClick={onToggleProgress} className="flex items-center gap-1.5 px-3 py-1.5 bg-accent/10 text-accent rounded-lg text-sm hover:bg-accent/20 transition-colors">
               <TrendingUp className="w-3.5 h-3.5" /> Update Progress
             </button>
@@ -574,9 +587,15 @@ function OrderCard({
           {showCredentials && credentials && (
             <div className="bg-background rounded-lg p-3 space-y-2">
               <div className="flex items-center justify-between">
-                <h4 className="text-text font-medium text-xs flex items-center gap-1"><Key className="w-3 h-3 text-yellow-400" /> Login Credentials</h4>
+                <h4 className="text-text font-medium text-xs flex items-center gap-1"><Key className="w-3 h-3 text-yellow-400" /> {credentials.is_gendong ? "Info Mabar" : "Login Credentials"}</h4>
                 <button onClick={onHideCredentials} className="text-text-muted text-xs hover:text-text">Tutup</button>
               </div>
+              {credentials.is_gendong ? (
+                <div>
+                  <p className="text-purple-400 text-xs font-medium">🎮 Order Gendong / Mabar — Tidak perlu login akun</p>
+                  {credentials.notes && <p className="text-text text-xs mt-1 whitespace-pre-line">{credentials.notes}</p>}
+                </div>
+              ) : (<>
               {credentials.login_method && (
                 <div><span className="text-text-muted text-xs">Method:</span><span className="text-text text-xs ml-2 capitalize">{credentials.login_method}</span></div>
               )}
@@ -588,6 +607,7 @@ function OrderCard({
                 <span className="text-text-muted text-xs">Password:</span>
                 <p className="bg-surface rounded px-2 py-1 font-mono text-xs text-text break-all mt-0.5">{credentials.account_password || <span className="text-text-muted italic">N/A</span>}</p>
               </div>
+              </>)}
             </div>
           )}
 
