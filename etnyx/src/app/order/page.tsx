@@ -174,29 +174,30 @@ interface PerStarRank {
   originalPrice?: number;
   discountPercent?: number;
   icon: string;
+  maxStars: number;
 }
 
 const PER_STAR_RANKS: PerStarRank[] = [
-  { id: "grandmaster", name: "Grand Master", price: 5000, originalPrice: 6000, discountPercent: 17, icon: "/icons-tier/Grandmaster.webp" },
-  { id: "epic", name: "Epic", price: 6500, originalPrice: 8000, discountPercent: 19, icon: "/icons-tier/Epic.webp" },
-  { id: "legend", name: "Legend", price: 7500, originalPrice: 9000, discountPercent: 17, icon: "/icons-tier/Legend.webp" },
-  { id: "mythic", name: "Mythic", price: 18000, originalPrice: 20000, discountPercent: 10, icon: "/icons-tier/Mythic.webp" },
-  { id: "grading", name: "Mythic Grading", price: 20000, originalPrice: 22000, discountPercent: 9, icon: "/icons-tier/Mythic.webp" },
-  { id: "honor", name: "Mythic Honor", price: 21000, originalPrice: 23000, discountPercent: 9, icon: "/icons-tier/Mythical_Honor.webp" },
-  { id: "glory", name: "Mythic Glory", price: 26000, originalPrice: 28000, discountPercent: 7, icon: "/icons-tier/Mythical_Glory.webp" },
-  { id: "immortal", name: "Mythic Immortal", price: 31000, originalPrice: 33000, discountPercent: 6, icon: "/icons-tier/Mythical_Immortal.webp" },
+  { id: "grandmaster", name: "Grand Master", price: 5000, originalPrice: 6000, discountPercent: 17, icon: "/icons-tier/Grandmaster.webp", maxStars: 5 },
+  { id: "epic", name: "Epic", price: 6500, originalPrice: 8000, discountPercent: 19, icon: "/icons-tier/Epic.webp", maxStars: 5 },
+  { id: "legend", name: "Legend", price: 7500, originalPrice: 9000, discountPercent: 17, icon: "/icons-tier/Legend.webp", maxStars: 5 },
+  { id: "mythic", name: "Mythic", price: 18000, originalPrice: 20000, discountPercent: 10, icon: "/icons-tier/Mythic.webp", maxStars: 25 },
+  { id: "grading", name: "Mythic Grading", price: 20000, originalPrice: 22000, discountPercent: 9, icon: "/icons-tier/Mythic.webp", maxStars: 25 },
+  { id: "honor", name: "Mythic Honor", price: 21000, originalPrice: 23000, discountPercent: 9, icon: "/icons-tier/Mythical_Honor.webp", maxStars: 25 },
+  { id: "glory", name: "Mythic Glory", price: 26000, originalPrice: 28000, discountPercent: 7, icon: "/icons-tier/Mythical_Glory.webp", maxStars: 50 },
+  { id: "immortal", name: "Mythic Immortal", price: 31000, originalPrice: 33000, discountPercent: 6, icon: "/icons-tier/Mythical_Immortal.webp", maxStars: 100 },
 ];
 
 // Gendong (duo boost) per-star pricing
 const GENDONG_RANKS: PerStarRank[] = [
-  { id: "grandmaster", name: "Grand Master", price: 9000, originalPrice: 11000, discountPercent: 18, icon: "/icons-tier/Grandmaster.webp" },
-  { id: "epic", name: "Epic", price: 10000, originalPrice: 12000, discountPercent: 17, icon: "/icons-tier/Epic.webp" },
-  { id: "legend", name: "Legend", price: 11000, originalPrice: 13000, discountPercent: 15, icon: "/icons-tier/Legend.webp" },
-  { id: "mythic", name: "Mythic", price: 21000, originalPrice: 24000, discountPercent: 13, icon: "/icons-tier/Mythic.webp" },
-  { id: "grading", name: "Mythic Grading", price: 23000, originalPrice: 26000, discountPercent: 12, icon: "/icons-tier/Mythic.webp" },
-  { id: "honor", name: "Mythic Honor", price: 25000, originalPrice: 28000, discountPercent: 11, icon: "/icons-tier/Mythical_Honor.webp" },
-  { id: "glory", name: "Mythic Glory", price: 30000, originalPrice: 34000, discountPercent: 12, icon: "/icons-tier/Mythical_Glory.webp" },
-  { id: "immortal", name: "Mythic Immortal", price: 35000, originalPrice: 40000, discountPercent: 13, icon: "/icons-tier/Mythical_Immortal.webp" },
+  { id: "grandmaster", name: "Grand Master", price: 9000, originalPrice: 11000, discountPercent: 18, icon: "/icons-tier/Grandmaster.webp", maxStars: 5 },
+  { id: "epic", name: "Epic", price: 10000, originalPrice: 12000, discountPercent: 17, icon: "/icons-tier/Epic.webp", maxStars: 5 },
+  { id: "legend", name: "Legend", price: 11000, originalPrice: 13000, discountPercent: 15, icon: "/icons-tier/Legend.webp", maxStars: 5 },
+  { id: "mythic", name: "Mythic", price: 21000, originalPrice: 24000, discountPercent: 13, icon: "/icons-tier/Mythic.webp", maxStars: 25 },
+  { id: "grading", name: "Mythic Grading", price: 23000, originalPrice: 26000, discountPercent: 12, icon: "/icons-tier/Mythic.webp", maxStars: 25 },
+  { id: "honor", name: "Mythic Honor", price: 25000, originalPrice: 28000, discountPercent: 11, icon: "/icons-tier/Mythical_Honor.webp", maxStars: 25 },
+  { id: "glory", name: "Mythic Glory", price: 30000, originalPrice: 34000, discountPercent: 12, icon: "/icons-tier/Mythical_Glory.webp", maxStars: 50 },
+  { id: "immortal", name: "Mythic Immortal", price: 35000, originalPrice: 40000, discountPercent: 13, icon: "/icons-tier/Mythical_Immortal.webp", maxStars: 100 },
 ];
 
 // Rank tier icon images
@@ -229,8 +230,32 @@ const RANK_LIST = [
   { id: "mythicimmortal", label: "Mythic Immortal" },
 ];
 const RANK_ORDER = RANK_LIST.map((r) => r.id);
-// Ranks that have subdivisions (V, IV, III, II, I)
+// Ranks that have subdivisions (divisions)
 const RANKS_WITH_STARS = ["warrior", "elite", "master", "grandmaster", "epic", "legend"];
+
+// Rank config: divisions count and stars per division (based on ML actual system)
+const RANK_DIVISION_CONFIG: Record<string, { divisions: number; starsPerDiv: number }> = {
+  warrior: { divisions: 3, starsPerDiv: 3 },       // III, II, I — 3 bintang per divisi
+  elite: { divisions: 3, starsPerDiv: 4 },          // III, II, I — 4 bintang per divisi
+  master: { divisions: 4, starsPerDiv: 4 },         // IV, III, II, I — 4 bintang per divisi
+  grandmaster: { divisions: 5, starsPerDiv: 5 },    // V, IV, III, II, I — 5 bintang per divisi
+  epic: { divisions: 5, starsPerDiv: 5 },           // V, IV, III, II, I — 5 bintang per divisi
+  legend: { divisions: 5, starsPerDiv: 5 },         // V, IV, III, II, I — 5 bintang per divisi
+};
+
+// Get division options based on rank (dynamic)
+function getDivisionOptions(rankId: string): { value: number; label: string }[] {
+  const config = RANK_DIVISION_CONFIG[rankId];
+  if (!config) return [];
+  const labels = ["I", "II", "III", "IV", "V"];
+  const options: { value: number; label: string }[] = [];
+  for (let i = config.divisions; i >= 1; i--) {
+    options.push({ value: i, label: labels[i - 1] });
+  }
+  return options;
+}
+
+// Fallback static options (max 5 divisions) — used if no rank selected yet
 const STAR_OPTIONS = [
   { value: 5, label: "V" },
   { value: 4, label: "IV" },
@@ -492,8 +517,8 @@ function OrderPageContent() {
   const [seasonMultiplier, setSeasonMultiplier] = useState(1);
   const [seasonLabel, setSeasonLabel] = useState("");
   // Rank selector for paket mode
-  const [currentStar, setCurrentStar] = useState(5); // V=5, IV=4, III=3, II=2, I=1
-  const [targetStar, setTargetStar] = useState(5);
+  const [currentStar, setCurrentStar] = useState(3); // Warrior default: III=3
+  const [targetStar, setTargetStar] = useState(3);
   const [showPackages, setShowPackages] = useState(false);
 
   // Account verification (Cek Akun)
@@ -578,10 +603,15 @@ function OrderPageContent() {
       .then((res) => res.json())
       .then((data) => {
         if (data.perstar_pricing && Array.isArray(data.perstar_pricing) && data.perstar_pricing.length > 0) {
-          setPerStarRanks(data.perstar_pricing);
+          // Ensure maxStars from defaults if CMS doesn't include it
+          const defaultMaxStars: Record<string, number> = {};
+          for (const r of PER_STAR_RANKS) defaultMaxStars[r.id] = r.maxStars;
+          setPerStarRanks(data.perstar_pricing.map((r: PerStarRank) => ({ ...r, maxStars: r.maxStars || defaultMaxStars[r.id] || 100 })));
         }
         if (data.gendong_pricing && Array.isArray(data.gendong_pricing) && data.gendong_pricing.length > 0) {
-          setGendongRanks(data.gendong_pricing);
+          const defaultMaxStars: Record<string, number> = {};
+          for (const r of GENDONG_RANKS) defaultMaxStars[r.id] = r.maxStars;
+          setGendongRanks(data.gendong_pricing.map((r: PerStarRank) => ({ ...r, maxStars: r.maxStars || defaultMaxStars[r.id] || 100 })));
         }
         // Determine active season multiplier
         if (data.season_pricing && data.season_pricing.isEnabled && Array.isArray(data.season_pricing.phases)) {
@@ -736,6 +766,10 @@ function OrderPageContent() {
     setSelectedStarRank(rank);
     setStarQuantity(3); // Reset to minimum
   }, []);
+
+  // Max stars for current per-star selection
+  const perStarMax = selectedStarRank?.maxStars ?? 100;
+  const gendongMax = selectedGendongRank?.maxStars ?? 100;
 
   // Proceed from per-star selection
   const handleProceedPerStar = useCallback(() => {
@@ -1283,8 +1317,13 @@ function OrderPageContent() {
                               const nextRank = RANK_ORDER[ci + 1];
                               if (nextRank) updateForm({ currentRank: val, targetRank: nextRank as RankTier });
                             }
-                            // Reset star to V if rank doesn't have stars
-                            if (!RANKS_WITH_STARS.includes(val)) setCurrentStar(5);
+                            // Reset star to max division if rank has fewer divisions
+                            if (!RANKS_WITH_STARS.includes(val)) {
+                              setCurrentStar(5);
+                            } else {
+                              const maxDiv = RANK_DIVISION_CONFIG[val]?.divisions ?? 5;
+                              if (currentStar > maxDiv) setCurrentStar(maxDiv);
+                            }
                           }}
                           className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 text-text text-sm font-medium appearance-none cursor-pointer focus:border-accent focus:outline-none transition-colors pr-10"
                         >
@@ -1299,7 +1338,7 @@ function OrderPageContent() {
                       {/* Star Selector */}
                       <div className="flex gap-1">
                         {RANKS_WITH_STARS.includes(form.currentRank) ? (
-                          STAR_OPTIONS.map((s) => (
+                          getDivisionOptions(form.currentRank).map((s) => (
                             <button
                               key={s.value}
                               onClick={() => { setCurrentStar(s.value); setSelectedPackage(null); setShowPackages(false); }}
@@ -1337,7 +1376,12 @@ function OrderPageContent() {
                             updateForm({ targetRank: val });
                             setSelectedPackage(null);
                             setShowPackages(false);
-                            if (!RANKS_WITH_STARS.includes(val)) setTargetStar(5);
+                            if (!RANKS_WITH_STARS.includes(val)) {
+                              setTargetStar(5);
+                            } else {
+                              const maxDiv = RANK_DIVISION_CONFIG[val]?.divisions ?? 5;
+                              if (targetStar > maxDiv) setTargetStar(maxDiv);
+                            }
                           }}
                           className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 text-text text-sm font-medium appearance-none cursor-pointer focus:border-accent focus:outline-none transition-colors pr-10"
                         >
@@ -1352,7 +1396,7 @@ function OrderPageContent() {
                       {/* Star Selector */}
                       <div className="flex gap-1">
                         {RANKS_WITH_STARS.includes(form.targetRank) ? (
-                          STAR_OPTIONS.map((s) => (
+                          getDivisionOptions(form.targetRank).map((s) => (
                             <button
                               key={s.value}
                               onClick={() => { setTargetStar(s.value); setSelectedPackage(null); setShowPackages(false); }}
@@ -1381,7 +1425,7 @@ function OrderPageContent() {
                       <Image src={rankIcons[form.currentRank]} alt="" width={28} height={28} className="w-7 h-7 object-contain" />
                       <span className="text-text text-sm font-medium">
                         {RANK_LIST.find(r => r.id === form.currentRank)?.label}
-                        {RANKS_WITH_STARS.includes(form.currentRank) && <span className="text-text-muted ml-1">{STAR_OPTIONS.find(s => s.value === currentStar)?.label}</span>}
+                        {RANKS_WITH_STARS.includes(form.currentRank) && <span className="text-text-muted ml-1">{getDivisionOptions(form.currentRank).find(s => s.value === currentStar)?.label}</span>}
                       </span>
                     </div>
                     <ArrowRight className="w-4 h-4 text-accent flex-shrink-0" />
@@ -1389,7 +1433,7 @@ function OrderPageContent() {
                       <Image src={rankIcons[form.targetRank]} alt="" width={28} height={28} className="w-7 h-7 object-contain" />
                       <span className="text-yellow-400 text-sm font-bold">
                         {RANK_LIST.find(r => r.id === form.targetRank)?.label}
-                        {RANKS_WITH_STARS.includes(form.targetRank) && <span className="text-yellow-300 ml-1">{STAR_OPTIONS.find(s => s.value === targetStar)?.label}</span>}
+                        {RANKS_WITH_STARS.includes(form.targetRank) && <span className="text-yellow-300 ml-1">{getDivisionOptions(form.targetRank).find(s => s.value === targetStar)?.label}</span>}
                       </span>
                     </div>
                   </div>
@@ -1603,21 +1647,21 @@ function OrderPageContent() {
                                 value={starQuantity}
                                 onChange={(e) => {
                                   const val = parseInt(e.target.value) || 3;
-                                  setStarQuantity(Math.max(3, Math.min(100, val)));
+                                  setStarQuantity(Math.max(3, Math.min(perStarMax, val)));
                                 }}
                                 min={3}
-                                max={100}
+                                max={perStarMax}
                                 className="w-16 h-8 text-center bg-slate-800 text-white rounded-lg border border-white/10 focus:outline-none focus:border-accent"
                               />
                               <button
-                                onClick={() => setStarQuantity(q => Math.min(100, q + 1))}
-                                disabled={starQuantity >= 100}
+                                onClick={() => setStarQuantity(q => Math.min(perStarMax, q + 1))}
+                                disabled={starQuantity >= perStarMax}
                                 className="w-8 h-8 rounded-lg bg-slate-700 text-white flex items-center justify-center hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
                               >
                                 <Plus className="w-4 h-4" />
                               </button>
                             </div>
-                            <p className="text-text-muted text-[10px] mt-1">{t.minStars}</p>
+                            <p className="text-text-muted text-[10px] mt-1">Min 3 &bull; Max {perStarMax} ⭐</p>
                           </div>
                           
                           <div className="text-right">
@@ -1645,7 +1689,7 @@ function OrderPageContent() {
                         return (
                           <button
                             key={rank.id}
-                            onClick={() => setSelectedGendongRank(rank)}
+                            onClick={() => { setSelectedGendongRank(rank); setGendongQuantity(3); }}
                             className={`relative text-left rounded-xl border-2 transition-all duration-200 hover:scale-[1.02] overflow-hidden flex flex-col ${
                               isSelected
                                 ? "border-yellow-400 shadow-lg shadow-yellow-400/20"
@@ -1735,21 +1779,21 @@ function OrderPageContent() {
                                 value={gendongQuantity}
                                 onChange={(e) => {
                                   const val = parseInt(e.target.value) || 3;
-                                  setGendongQuantity(Math.max(3, Math.min(100, val)));
+                                  setGendongQuantity(Math.max(3, Math.min(gendongMax, val)));
                                 }}
                                 min={3}
-                                max={100}
+                                max={gendongMax}
                                 className="w-16 h-8 text-center bg-slate-800 text-white rounded-lg border border-white/10 focus:outline-none focus:border-accent"
                               />
                               <button
-                                onClick={() => setGendongQuantity(q => Math.min(100, q + 1))}
-                                disabled={gendongQuantity >= 100}
+                                onClick={() => setGendongQuantity(q => Math.min(gendongMax, q + 1))}
+                                disabled={gendongQuantity >= gendongMax}
                                 className="w-8 h-8 rounded-lg bg-slate-700 text-white flex items-center justify-center hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
                               >
                                 <Plus className="w-4 h-4" />
                               </button>
                             </div>
-                            <p className="text-text-muted text-[10px] mt-1">{t.minStars}</p>
+                            <p className="text-text-muted text-[10px] mt-1">Min 3 &bull; Max {gendongMax} ⭐</p>
                           </div>
                           
                           <div className="text-right">
