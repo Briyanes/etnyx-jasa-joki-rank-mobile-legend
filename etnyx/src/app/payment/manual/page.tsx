@@ -13,7 +13,7 @@ import {
   Check,
   Upload,
   Loader2,
-  ArrowLeft,
+  ChevronLeft,
   CreditCard,
   Clock,
   AlertTriangle,
@@ -26,6 +26,8 @@ import {
   Building2,
   Banknote,
   MessageCircle,
+  Shield,
+  Zap,
   type LucideIcon,
 } from "lucide-react";
 
@@ -77,6 +79,19 @@ interface OrderInfo {
   payment_status: string;
   payment_method: string;
   username: string;
+}
+
+function LangToggle() {
+  const { locale, setLocale } = useLanguage();
+  return (
+    <button
+      onClick={() => setLocale(locale === "id" ? "en" : "id")}
+      className="flex items-center gap-1 px-2 py-1 rounded-lg bg-surface border border-white/10 text-text text-xs hover:bg-white/5 transition-colors"
+    >
+      <span>{locale === "id" ? "🇮🇩" : "🇺🇸"}</span>
+      <span className="font-medium">{locale.toUpperCase()}</span>
+    </button>
+  );
 }
 
 function ManualPaymentContent() {
@@ -305,14 +320,42 @@ function ManualPaymentContent() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="glass border-b border-white/5 sticky top-0 z-50">
-        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
-          <Link href="/" className="text-text-muted hover:text-text transition-colors">
-            <ArrowLeft className="w-5 h-5" />
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+          <Link
+            href="/"
+            className="flex items-center gap-2 text-text-muted hover:text-text transition-colors"
+          >
+            <ChevronLeft className="w-5 h-5" />
+            <Image
+              src="/logo/circle-landscape.webp"
+              alt="ETNYX"
+              width={100}
+              height={28}
+              className="h-6 w-auto"
+            />
           </Link>
-          <CreditCard className="w-5 h-5 text-accent" />
-          <h1 className="text-text font-bold">{t.title}</h1>
+          <div className="flex items-center gap-3 sm:gap-4 text-xs text-text-muted">
+            <span className="flex items-center gap-1.5 hidden sm:flex">
+              <Shield className="w-3.5 h-3.5 text-success" /> {locale === "id" ? "Aman" : "Safe"}
+            </span>
+            <span className="flex items-center gap-1.5 hidden sm:flex">
+              <Zap className="w-3.5 h-3.5 text-yellow-400" /> {locale === "id" ? "Cepat" : "Fast"}
+            </span>
+            <span className="flex items-center gap-1.5 hidden sm:flex">
+              <MessageCircle className="w-3.5 h-3.5 text-accent" /> 24/7
+            </span>
+            <LangToggle />
+          </div>
         </div>
       </header>
+
+      {/* Page Title Bar */}
+      <div className="border-b border-white/5 bg-surface/30">
+        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-2">
+          <CreditCard className="w-4 h-4 text-accent" />
+          <h1 className="text-text font-bold text-sm">{t.title}</h1>
+        </div>
+      </div>
 
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
         {/* Order Info */}
@@ -407,14 +450,16 @@ function ManualPaymentContent() {
                         return (
                           <div key={i} className="flex flex-col items-center gap-1 w-14">
                             {logo ? (
-                              <Image src={logo} alt={bank.bank} width={36} height={36} className="w-9 h-9 object-contain rounded-lg" />
+                              <div className="w-10 h-10 rounded-xl bg-white border border-white/20 flex items-center justify-center flex-shrink-0">
+                                <Image src={logo} alt={bank.bank} width={28} height={28} className="w-7 h-7 object-contain" />
+                              </div>
                             ) : iconInfo ? (
-                              <div className={`w-9 h-9 rounded-lg ${iconInfo.bg} flex items-center justify-center`}>
-                                {(() => { const Icon = iconInfo.icon; return <Icon className={`w-4 h-4 ${iconInfo.text}`} />; })()}
+                              <div className={`w-10 h-10 rounded-xl ${iconInfo.bg} border border-white/10 flex items-center justify-center`}>
+                                {(() => { const Icon = iconInfo.icon; return <Icon className={`w-5 h-5 ${iconInfo.text}`} />; })()}
                               </div>
                             ) : (
-                              <div className="w-9 h-9 rounded-lg bg-accent/20 flex items-center justify-center">
-                                <CreditCard className="w-4 h-4 text-accent" />
+                              <div className="w-10 h-10 rounded-xl bg-accent/20 border border-white/10 flex items-center justify-center">
+                                <CreditCard className="w-5 h-5 text-accent" />
                               </div>
                             )}
                             <span className="text-text-muted text-[9px] text-center leading-tight">{bank.bank}</span>
@@ -469,19 +514,23 @@ function ManualPaymentContent() {
                               const logo = PAYMENT_LOGOS[bank.bank] || bank.logo;
                               const iconInfo = PAYMENT_ICONS[bank.bank];
                               if (logo) {
-                                return <Image src={logo} alt={bank.bank} width={36} height={36} className="w-9 h-9 object-contain rounded-lg flex-shrink-0" />;
+                                return (
+                                  <div className="w-10 h-10 rounded-xl bg-white border border-white/20 flex items-center justify-center flex-shrink-0">
+                                    <Image src={logo} alt={bank.bank} width={28} height={28} className="w-7 h-7 object-contain" />
+                                  </div>
+                                );
                               }
                               if (iconInfo) {
                                 const Icon = iconInfo.icon;
                                 return (
-                                  <div className={`w-9 h-9 rounded-lg ${iconInfo.bg} flex items-center justify-center flex-shrink-0`}>
-                                    <Icon className={`w-4 h-4 ${iconInfo.text}`} />
+                                  <div className={`w-10 h-10 rounded-xl ${iconInfo.bg} border border-white/10 flex items-center justify-center flex-shrink-0`}>
+                                    <Icon className={`w-5 h-5 ${iconInfo.text}`} />
                                   </div>
                                 );
                               }
                               return (
-                                <div className="w-9 h-9 rounded-lg bg-accent/20 flex items-center justify-center flex-shrink-0">
-                                  <CreditCard className="w-4 h-4 text-accent" />
+                                <div className="w-10 h-10 rounded-xl bg-accent/20 border border-white/10 flex items-center justify-center flex-shrink-0">
+                                  <CreditCard className="w-5 h-5 text-accent" />
                                 </div>
                               );
                             })()}
