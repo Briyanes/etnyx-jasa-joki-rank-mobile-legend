@@ -1593,13 +1593,13 @@ function OrderPageContent() {
               {orderMode === "paket" && (
                 <>
                   {/* Rank Tujuanmu */}
-                  <div className="mb-5">
+                  <div className="mb-5 p-4 bg-background rounded-xl border border-white/5">
                     <label className="block text-sm text-text font-bold mb-2">
-                      {locale === "id" ? "Rank Tujuanmu" : "Your Target Rank"}
+                      {locale === "id" ? "🎯 Rank Tujuanmu" : "🎯 Your Target Rank"}
                     </label>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col gap-2">
                       {/* Tier Dropdown */}
-                      <div className="flex-1 relative">
+                      <div className="relative">
                         <select
                           value={form.targetRank}
                           onChange={(e) => {
@@ -1614,7 +1614,7 @@ function OrderPageContent() {
                               if (targetStar > maxDiv) setTargetStar(maxDiv);
                             }
                           }}
-                          className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 text-text text-sm font-medium appearance-none cursor-pointer focus:border-accent focus:outline-none transition-colors pr-10"
+                          className="w-full bg-surface border border-white/10 rounded-xl px-4 py-3 text-text text-sm font-medium appearance-none cursor-pointer focus:border-accent focus:outline-none transition-colors pr-10"
                         >
                           {RANK_LIST.filter((rank) => RANK_ORDER.indexOf(rank.id) > RANK_ORDER.indexOf(form.currentRank)).map((rank) => (
                             <option key={rank.id} value={rank.id}>{rank.label}</option>
@@ -1624,29 +1624,29 @@ function OrderPageContent() {
                           <Image src={rankIcons[form.targetRank]} alt="" width={24} height={24} className="w-6 h-6 object-contain" />
                         </div>
                       </div>
-                      {/* Star Selector */}
-                      <div className="flex gap-1">
-                        {RANKS_WITH_STARS.includes(form.targetRank) ? (
-                          getDivisionOptions(form.targetRank).map((s) => (
+                      {/* Division Selector */}
+                      {RANKS_WITH_STARS.includes(form.targetRank) ? (
+                        <div className="flex gap-1.5">
+                          {getDivisionOptions(form.targetRank).map((s) => (
                             <button
                               key={s.value}
                               onClick={() => { setTargetStar(s.value); setSelectedPackage(null); setShowPackages(false); }}
-                              className={`w-10 h-12 rounded-lg text-xs font-bold transition-all flex flex-col items-center justify-center gap-0.5 ${
+                              className={`flex-1 h-10 rounded-lg text-xs font-bold transition-all flex flex-col items-center justify-center gap-0.5 ${
                                 targetStar === s.value
                                   ? "bg-yellow-400/20 border-2 border-yellow-400 text-yellow-400 shadow-lg"
-                                  : "bg-background border border-white/10 text-text-muted hover:border-white/20"
+                                  : "bg-surface border border-white/10 text-text-muted hover:border-white/20"
                               }`}
                             >
                               <Star className="w-3 h-3" />
                               <span>{s.label}</span>
                             </button>
-                          ))
-                        ) : (
-                          <div className="flex items-center px-3 bg-background/50 rounded-lg border border-white/5 text-text-muted text-xs">
-                            —
-                          </div>
-                        )}
-                      </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex items-center px-3 py-2 bg-surface/50 rounded-lg border border-white/5 text-text-muted text-xs">
+                          —
+                        </div>
+                      )}
                     </div>
                   </div>
 
