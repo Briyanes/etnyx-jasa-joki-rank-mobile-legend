@@ -85,7 +85,7 @@ function rankWithStar(rank: string, star?: number | null): string {
   return label;
 }
 
-const RANKS_ORDER = ["warrior", "elite", "master", "grandmaster", "epic", "legend", "mythic", "mythicgrading", "mythichonor", "mythicglory", "mythicimmortal"];
+const RANKS_ORDER = ["warrior", "elite", "master", "grandmaster", "epic", "legend", "mythicgrading", "mythic", "mythichonor", "mythicglory", "mythicimmortal"];
 
 export default function WorkerDashboard() {
   const router = useRouter();

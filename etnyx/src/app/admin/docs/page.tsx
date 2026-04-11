@@ -563,8 +563,8 @@ function buildCategories(): DocCategory[] {
               </div>
               <Table headers={["Mode", "Cara Hitung Base Price"]} rows={[
                 ["Paket", "Harga tetap per paket (Rp X dari pricing_catalog)"],
-                ["Per Star", "Harga per bintang tier × jumlah star. Contoh: Epic = Rp 8.000/star × 15 star = Rp 120.000"],
-                ["Gendong", "Harga per bintang tier × jumlah star (lebih mahal dari Per Star karena duo)"],
+                ["Per Star", "Harga per bintang tier × jumlah star. Contoh: Epic = Rp 8.000/star × 15 star = Rp 120.000. Khusus Mythic Grading: per match (10 placement match, min 1)"],
+                ["Gendong", "Harga per bintang tier × jumlah star (lebih mahal karena duo). Khusus Mythic Grading: per match"],
               ]} />
               <InfoBox type="warning">
                 <strong>Di halaman order &amp; homepage:</strong> Jika season pricing aktif, semua harga yang ditampilkan sudah dikalikan multiplier fase aktif. Customer melihat harga final, bukan harga dasar.
@@ -1309,7 +1309,7 @@ function buildCategories(): DocCategory[] {
                   </div>
                   <div className="rounded-lg border border-green-500/20 p-3">
                     <h5 className="text-green-400 font-semibold text-sm mb-1">Joki Per Bintang</h5>
-                    <p className="text-text-muted text-[11px]">Pilih rank + jumlah bintang (min 3). Harga per bintang beda tiap tier. Lebih fleksibel.</p>
+                    <p className="text-text-muted text-[11px]">Pilih rank + jumlah bintang (min 3). Harga per bintang beda tiap tier. Khusus Mythic Grading: per match (min 1, max 10).</p>
                   </div>
                   <div className="rounded-lg border border-purple-500/20 p-3">
                     <h5 className="text-purple-400 font-semibold text-sm mb-1">Joki Gendong</h5>
@@ -1322,7 +1322,7 @@ function buildCategories(): DocCategory[] {
                 <ul className="text-text-muted text-xs space-y-1 ml-4 list-disc">
                   <li>Tab selector untuk pilih mode (Paket/Per Star/Gendong)</li>
                   <li><strong>Paket:</strong> Carousel kategori → klik paket → auto-show harga + rank</li>
-                  <li><strong>Per Star/Gendong:</strong> Dropdown rank → input jumlah bintang (min 3) → harga dihitung otomatis</li>
+                  <li><strong>Per Star/Gendong:</strong> Dropdown rank → input jumlah bintang (min 3, Mythic Grading: min 1 match) → harga dihitung otomatis</li>
                   <li>Harga sudah termasuk season multiplier jika season pricing aktif</li>
                   <li>Badge diskon jika ada promo harga di catalog</li>
                 </ul>
