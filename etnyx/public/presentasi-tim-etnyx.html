@@ -191,7 +191,7 @@
     <div class="card">
       <h3>Integrasi</h3>
       <ul class="small" style="margin: 8px 0 0 0; padding-left: 16px;">
-        <li>Midtrans (Payment Gateway)</li>
+        <li>iPaymu (Payment Gateway)</li>
         <li>Telegram Bot (4 grup)</li>
         <li>WhatsApp (Fonnte)</li>
         <li>Email (Resend) + Web Push</li>
@@ -217,7 +217,7 @@
       <h3 style="color:#4ade80;">💰 Payment</h3>
       <ul class="small" style="padding-left: 14px;">
         <li>Transfer Manual (11 metode)</li>
-        <li>Midtrans Auto (QRIS, VA, dll)</li>
+        <li>iPaymu Auto (QRIS, VA, dll)</li>
         <li>Webhook auto-confirm</li>
         <li>Verifikasi bukti transfer</li>
       </ul>
@@ -264,7 +264,7 @@
 <!-- ======================== SLIDE 5: ALUR ORDER ======================== -->
 <section>
   <h2>🔄 Alur Order &mdash; Customer Journey</h2>
-  <p class="small" style="margin-bottom: 12px;">12 langkah dari order sampai review</p>
+  <p class="small" style="margin-bottom: 12px;">13 langkah dari order sampai review</p>
 
   <div style="text-align: center; margin-bottom: 16px; line-height: 2.2;">
     <span class="flow-step">🌐 Buka Website</span><span class="flow-arrow">→</span>
@@ -272,9 +272,10 @@
     <span class="flow-step">💳 Bayar</span><span class="flow-arrow">→</span>
     <span class="flow-step">✅ Konfirmasi</span><span class="flow-arrow">→</span>
     <span class="flow-step">📱 Notif</span><span class="flow-arrow">→</span>
-    <span class="flow-step">👤 Assign</span><span class="flow-arrow">→</span><br>
+    <span class="flow-step">🔑 Cek Credential</span><span class="flow-arrow">→</span><br>
+    <span class="flow-step">▶️ Mulai Kerjakan</span><span class="flow-arrow">→</span>
+    <span class="flow-step">👤 Assign</span><span class="flow-arrow">→</span>
     <span class="flow-step">🎮 Dikerjakan</span><span class="flow-arrow">→</span>
-    <span class="flow-step">📈 Progress</span><span class="flow-arrow">→</span>
     <span class="flow-step">📸 Submit</span><span class="flow-arrow">→</span>
     <span class="flow-step">🏆 Selesai</span><span class="flow-arrow">→</span>
     <span class="flow-step">⭐ Review</span>
@@ -291,16 +292,17 @@
     <tbody>
       <tr><td>1</td><td>Buka Website</td><td><span class="badge badge-blue">Customer</span></td><td>Browse layanan, klik "Order Sekarang"</td></tr>
       <tr><td>2</td><td>Isi Form Order</td><td><span class="badge badge-blue">Customer</span></td><td>Pilih rank, isi credentials, verify akun ML, apply promo</td></tr>
-      <tr><td>3</td><td>Pilih Pembayaran</td><td><span class="badge badge-blue">Customer</span></td><td>Transfer Manual ATAU Midtrans Otomatis</td></tr>
-      <tr><td>4</td><td>Bayar</td><td><span class="badge badge-blue">Customer</span></td><td>Transfer + upload bukti / Bayar via Midtrans popup</td></tr>
-      <tr><td>5</td><td>Konfirmasi</td><td><span class="badge badge-orange">System</span></td><td>Manual: Admin approve. Midtrans: auto webhook</td></tr>
+      <tr><td>3</td><td>Pilih Pembayaran</td><td><span class="badge badge-blue">Customer</span></td><td>Transfer Manual ATAU iPaymu Otomatis</td></tr>
+      <tr><td>4</td><td>Bayar</td><td><span class="badge badge-blue">Customer</span></td><td>Transfer + upload bukti / Bayar via iPaymu</td></tr>
+      <tr><td>5</td><td>Konfirmasi Bayar</td><td><span class="badge badge-orange">Admin</span></td><td>Manual: Admin 1. Lihat Bukti → 2. Konfirmasi Bayar. iPaymu: auto webhook</td></tr>
       <tr><td>6</td><td>Notifikasi</td><td><span class="badge badge-orange">System</span></td><td>Telegram Admin + WA Customer + Telegram Workers</td></tr>
-      <tr><td>7</td><td>Assign Worker</td><td><span class="badge badge-yellow">Lead</span></td><td>Dashboard → pilih worker → assign</td></tr>
-      <tr><td>8</td><td>Mulai Kerja</td><td><span class="badge badge-green">Worker</span></td><td>Klik "Mulai" → status: in_progress</td></tr>
-      <tr><td>9</td><td>Progress</td><td><span class="badge badge-green">Worker</span></td><td>Update %, rank saat ini. Customer track real-time</td></tr>
-      <tr><td>10</td><td>Submit Hasil</td><td><span class="badge badge-green">Worker</span></td><td>Stars, MVP, Savage, Wins + screenshot (wajib)</td></tr>
-      <tr><td>11</td><td>Selesai</td><td><span class="badge badge-green">Worker</span></td><td>Klik "Selesai" → komisi 60% auto → WA completion</td></tr>
-      <tr><td>12</td><td>Review</td><td><span class="badge badge-blue">Customer</span></td><td>Rating 1-5⭐, review otomatis jadi testimonial jika 4-5⭐</td></tr>
+      <tr><td>7</td><td>Cek Credentials</td><td><span class="badge badge-orange">Admin</span></td><td>3. Cek Credentials → login akun ML → pastikan bisa login</td></tr>
+      <tr><td>8</td><td>Mulai Kerjakan</td><td><span class="badge badge-orange">Admin</span></td><td>4. Mulai Kerjakan → status: in_progress. Order muncul di Lead Dashboard</td></tr>
+      <tr><td>9</td><td>Assign Worker</td><td><span class="badge badge-yellow">Lead</span></td><td>Lead Dashboard → pilih worker → assign (hanya order in_progress)</td></tr>
+      <tr><td>10</td><td>Dikerjakan</td><td><span class="badge badge-green">Worker</span></td><td>Worker lihat order assigned, update progress %. Customer track real-time</td></tr>
+      <tr><td>11</td><td>Submit Hasil</td><td><span class="badge badge-yellow">Lead</span></td><td>Lead submit: Stars, MVP, Savage, Wins + screenshot wajib</td></tr>
+      <tr><td>12</td><td>Selesaikan</td><td><span class="badge badge-orange">Admin</span></td><td>Admin 5. Selesaikan → komisi 60% auto → WA completion</td></tr>
+      <tr><td>13</td><td>Review</td><td><span class="badge badge-blue">Customer</span></td><td>Rating 1-5⭐, review otomatis jadi testimonial jika 4-5⭐</td></tr>
     </tbody>
   </table>
 </section>
@@ -373,15 +375,15 @@
       </ul>
     </div>
     <div class="card card-blue">
-      <h3 style="color:#60a5fa;">Midtrans Otomatis</h3>
-      <p class="small" style="margin: 8px 0 4px;"><strong>Jika server key dikonfigurasi:</strong></p>
+      <h3 style="color:#60a5fa;">iPaymu Otomatis</h3>
+      <p class="small" style="margin: 8px 0 4px;"><strong>Jika API Key dikonfigurasi:</strong></p>
       <ul class="small" style="padding-left: 14px; margin: 0;">
         <li>QRIS, Virtual Account, GoPay</li>
         <li>ShopeePay, Kartu Kredit/Debit</li>
       </ul>
       <p class="small" style="margin: 10px 0 4px;"><strong>Flow:</strong></p>
       <ul class="small" style="padding-left: 14px; margin: 0;">
-        <li>Customer pilih Midtrans → Snap popup</li>
+        <li>Customer pilih iPaymu → redirect ke payment page</li>
         <li>Bayar → webhook auto-confirm</li>
         <li>Order otomatis: paid + confirmed</li>
         <li>Notif Telegram + WA langsung</li>
@@ -439,8 +441,8 @@
       <thead><tr><th>Role</th><th>Akses</th><th>Tidak Bisa</th></tr></thead>
       <tbody>
         <tr><td><strong class="orange">Admin</strong></td><td>Semua fitur, pricing, payroll, settings, analytics</td><td>—</td></tr>
-        <tr><td><strong class="yellow">Lead</strong></td><td>Assign order ke tim sendiri, monitor progress</td><td>Pricing, payroll, settings, CMS</td></tr>
-        <tr><td><strong class="green">Worker</strong></td><td>Lihat order assigned, update progress, submit hasil</td><td>Lihat order lain, edit data selain submission</td></tr>
+        <tr><td><strong class="yellow">Lead</strong></td><td>Assign order in_progress ke tim sendiri, submit hasil, monitor progress</td><td>Pricing, payroll, settings, CMS, konfirmasi bayar</td></tr>
+        <tr><td><strong class="green">Worker</strong></td><td>Lihat order assigned, update progress, lapor ke Lead</td><td>Lihat order lain, submit hasil, edit data</td></tr>
       </tbody>
     </table>
   </div>
@@ -455,8 +457,9 @@
       <ul class="small" style="padding-left: 14px;">
         <li>Cek Telegram (order baru, bukti transfer)</li>
         <li>Dashboard → Orders → filter pending</li>
-        <li>Verifikasi bukti transfer → Approve</li>
-        <li>Pastikan order confirmed sudah di-assign</li>
+        <li>1. Lihat Bukti → 2. Konfirmasi Bayar</li>
+        <li>3. Cek Credentials → 4. Mulai Kerjakan</li>
+        <li>Pastikan Lead assign order in_progress</li>
       </ul>
     </div>
     <div class="card card-yellow">
@@ -513,7 +516,7 @@
       <ul class="small" style="padding-left: 14px;">
         <li>Login Lead Dashboard</li>
         <li>Cek Telegram → order baru</li>
-        <li>Distribusi order ke worker available</li>
+        <li>Distribusi order <strong>in_progress</strong> ke worker</li>
         <li>Cek workload distribution</li>
       </ul>
     </div>
@@ -522,6 +525,7 @@
       <ul class="small" style="padding-left: 14px;">
         <li>Monitor progress in_progress</li>
         <li>Follow-up worker lambat via Telegram</li>
+        <li>Submit hasil match (screenshot wajib)</li>
         <li>Kirim WA progress ke customer jika perlu</li>
       </ul>
     </div>
@@ -539,7 +543,7 @@
     <div class="card card-green">
       <h3 style="color:#4ade80; font-size: 0.85em;">✅ Aturan Lead</h3>
       <ul class="small" style="padding-left: 14px;">
-        <li>Assign ASAP setelah confirmed (&lt; 30 menit)</li>
+        <li>Assign ASAP setelah in_progress (&lt; 30 menit)</li>
         <li>Distribusi order merata antar worker</li>
         <li>Max 3 order aktif per worker</li>
         <li>Gunakan Bulk Assign untuk banyak order</li>
@@ -570,11 +574,10 @@
       <tr><td>1</td><td><strong>Login</strong></td><td>/admin → auto ke Worker Dashboard</td></tr>
       <tr><td>2</td><td><strong>Lihat Order</strong></td><td>3 kategori: Menunggu, Aktif, Selesai</td></tr>
       <tr><td>3</td><td><strong>Cek Credentials</strong></td><td>Lihat akun (encrypted AES-256, hanya worker assigned)</td></tr>
-      <tr><td>4</td><td><strong>Mulai Order</strong></td><td>Klik "Mulai" → status: in_progress, WA ke customer</td></tr>
+      <tr><td>4</td><td><strong>Kerjakan Order</strong></td><td>Order sudah in_progress (admin sudah klik Mulai Kerjakan)</td></tr>
       <tr><td>5</td><td><strong>Update Progress</strong></td><td>Slider 0-100% + rank saat ini (customer bisa track)</td></tr>
-      <tr><td>6</td><td><strong>Submit Hasil</strong></td><td>Stars, MVP, Savage, Maniac, Wins, Duration + <span class="red">screenshot WAJIB</span></td></tr>
-      <tr><td>7</td><td><strong>Selesai</strong></td><td>Klik "Selesai" → komisi 60% auto → WA ke customer + review link</td></tr>
-      <tr><td>8</td><td><strong>Logout ML</strong></td><td>Logout dari akun ML customer setelah selesai</td></tr>
+      <tr><td>6</td><td><strong>Lapor ke Lead</strong></td><td>Lapor hasil ke Lead untuk di-submit (screenshot wajib)</td></tr>
+      <tr><td>7</td><td><strong>Logout ML</strong></td><td>Logout dari akun ML customer setelah selesai</td></tr>
     </tbody>
   </table>
 
@@ -584,7 +587,7 @@
       <ul class="small" style="padding-left: 14px;">
         <li>Cek credentials login OK sebelum mulai</li>
         <li>Update progress % setiap beberapa match</li>
-        <li>Upload screenshot setiap sesi (wajib)</li>
+        <li>Lapor hasil ke Lead untuk di-submit</li>
         <li>Report masalah akun segera ke Lead/Admin</li>
       </ul>
     </div>
@@ -594,7 +597,7 @@
         <li>Login dari device berbeda (risiko ban akun)</li>
         <li>Lihat order worker lain</li>
         <li>Edit submission setelah 30 menit</li>
-        <li>Skip upload screenshot</li>
+        <li>Skip lapor hasil ke Lead</li>
       </ul>
     </div>
   </div>
@@ -686,7 +689,7 @@
         <li>Playwright E2E setup</li>
         <li>19 security fixes (mass assignment, IDOR, dll)</li>
         <li>Webhook idempotency + amount verification</li>
-        <li>Health check endpoint (Supabase, Midtrans, Telegram, Email)</li>
+        <li>Health check endpoint (Supabase, iPaymu, Telegram, Email)</li>
       </ul>
     </div>
   </div>
@@ -701,7 +704,7 @@
       <h3 style="color:#4ade80; font-size: 0.8em;">📦 Order &amp; Payment</h3>
       <ul class="small" style="padding-left: 12px; font-size: 0.85em;">
         <li>3 mode order + promo + referral</li>
-        <li>Dual payment (Manual + Midtrans)</li>
+        <li>Dual payment (Manual + iPaymu)</li>
         <li>Invoice PDF + CSV export</li>
         <li>Season Pricing auto-scheduler</li>
       </ul>
@@ -777,9 +780,10 @@
     <div class="card card-orange">
       <h3 style="color:#fb923c;">👑 Admin</h3>
       <ul class="small" style="padding-left: 14px;">
-        <li>Verifikasi payment &lt; 1 jam</li>
+        <li>1. Lihat Bukti → 2. Konfirmasi (&lt; 1 jam)</li>
+        <li>3. Cek Credentials → 4. Mulai Kerjakan</li>
         <li>Follow-up pending &gt; 6 jam</li>
-        <li>Approve reviews dalam 24 jam</li>
+        <li>5. Selesaikan order + approve reviews</li>
         <li>Bayar komisi bi-weekly</li>
         <li>Monitor P&amp;L + ROAS</li>
       </ul>
@@ -787,8 +791,9 @@
     <div class="card card-yellow">
       <h3 style="color:#facc15;">🔵 Lead</h3>
       <ul class="small" style="padding-left: 14px;">
-        <li>Assign &lt; 30 menit setelah confirmed</li>
+        <li>Assign &lt; 30 menit setelah in_progress</li>
         <li>Max 3 order aktif per worker</li>
+        <li>Submit hasil match (screenshot wajib)</li>
         <li>Distribusi merata</li>
         <li>Eskalasi ke Admin jika stuck &gt; 24 jam</li>
       </ul>
@@ -798,7 +803,7 @@
       <ul class="small" style="padding-left: 14px;">
         <li>Cek credentials sebelum mulai</li>
         <li>Update progress setiap sesi</li>
-        <li>Screenshot WAJIB setiap submit</li>
+        <li>Lapor hasil ke Lead (Lead submit)</li>
         <li>Jangan login dari device lain</li>
         <li>Logout ML setelah selesai</li>
       </ul>

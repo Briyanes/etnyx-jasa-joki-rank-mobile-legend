@@ -2400,7 +2400,7 @@ function buildCategories(): DocCategory[] {
                 ["ADMIN_PASSWORD_HASH", "Ya", "Bcrypt hash"],
                 ["ENCRYPTION_KEY", "Ya", "AES-256 key (32 char)"],
                 ["NEXT_PUBLIC_SITE_URL", "Ya", "Production URL"],
-                ["MIDTRANS_SERVER_KEY", "Opsional", "Bisa set dari Dashboard"],
+                ["IPAYMU_API_KEY", "Opsional", "Bisa set dari Dashboard"],
                 ["RESEND_API_KEY", "Opsional", "Bisa set dari Dashboard"],
                 ["FONNTE_API_TOKEN", "Opsional", "Bisa set dari Dashboard"],
                 ["PUBLIC_VAPID_KEY", "Opsional", "Web push"],
