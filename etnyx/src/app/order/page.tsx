@@ -181,8 +181,8 @@ const PER_STAR_RANKS: PerStarRank[] = [
   { id: "grandmaster", name: "Grand Master", price: 5000, originalPrice: 6000, discountPercent: 17, icon: "/icons-tier/Grandmaster.webp", maxStars: 25 },
   { id: "epic", name: "Epic", price: 6500, originalPrice: 8000, discountPercent: 19, icon: "/icons-tier/Epic.webp", maxStars: 25 },
   { id: "legend", name: "Legend", price: 7500, originalPrice: 9000, discountPercent: 17, icon: "/icons-tier/Legend.webp", maxStars: 25 },
+  { id: "grading", name: "Mythic Grading", price: 20000, originalPrice: 22000, discountPercent: 9, icon: "/icons-tier/Mythic.webp", maxStars: 10 },
   { id: "mythic", name: "Mythic", price: 18000, originalPrice: 20000, discountPercent: 10, icon: "/icons-tier/Mythic.webp", maxStars: 25 },
-  { id: "grading", name: "Mythic Grading", price: 20000, originalPrice: 22000, discountPercent: 9, icon: "/icons-tier/Mythic.webp", maxStars: 25 },
   { id: "honor", name: "Mythic Honor", price: 21000, originalPrice: 23000, discountPercent: 9, icon: "/icons-tier/Mythical_Honor.webp", maxStars: 25 },
   { id: "glory", name: "Mythic Glory", price: 26000, originalPrice: 28000, discountPercent: 7, icon: "/icons-tier/Mythical_Glory.webp", maxStars: 50 },
   { id: "immortal", name: "Mythic Immortal", price: 31000, originalPrice: 33000, discountPercent: 6, icon: "/icons-tier/Mythical_Immortal.webp", maxStars: 100 },
@@ -193,8 +193,8 @@ const GENDONG_RANKS: PerStarRank[] = [
   { id: "grandmaster", name: "Grand Master", price: 9000, originalPrice: 11000, discountPercent: 18, icon: "/icons-tier/Grandmaster.webp", maxStars: 25 },
   { id: "epic", name: "Epic", price: 10000, originalPrice: 12000, discountPercent: 17, icon: "/icons-tier/Epic.webp", maxStars: 25 },
   { id: "legend", name: "Legend", price: 11000, originalPrice: 13000, discountPercent: 15, icon: "/icons-tier/Legend.webp", maxStars: 25 },
+  { id: "grading", name: "Mythic Grading", price: 23000, originalPrice: 26000, discountPercent: 12, icon: "/icons-tier/Mythic.webp", maxStars: 10 },
   { id: "mythic", name: "Mythic", price: 21000, originalPrice: 24000, discountPercent: 13, icon: "/icons-tier/Mythic.webp", maxStars: 25 },
-  { id: "grading", name: "Mythic Grading", price: 23000, originalPrice: 26000, discountPercent: 12, icon: "/icons-tier/Mythic.webp", maxStars: 25 },
   { id: "honor", name: "Mythic Honor", price: 25000, originalPrice: 28000, discountPercent: 11, icon: "/icons-tier/Mythical_Honor.webp", maxStars: 25 },
   { id: "glory", name: "Mythic Glory", price: 30000, originalPrice: 34000, discountPercent: 12, icon: "/icons-tier/Mythical_Glory.webp", maxStars: 50 },
   { id: "immortal", name: "Mythic Immortal", price: 35000, originalPrice: 40000, discountPercent: 13, icon: "/icons-tier/Mythical_Immortal.webp", maxStars: 100 },
@@ -223,8 +223,8 @@ const RANK_LIST = [
   { id: "grandmaster", label: "Grand Master" },
   { id: "epic", label: "Epic" },
   { id: "legend", label: "Legend" },
-  { id: "mythic", label: "Mythic" },
   { id: "mythicgrading", label: "Mythic Grading" },
+  { id: "mythic", label: "Mythic" },
   { id: "mythichonor", label: "Mythic Honor" },
   { id: "mythicglory", label: "Mythic Glory" },
   { id: "mythicimmortal", label: "Mythic Immortal" },
@@ -764,18 +764,25 @@ function OrderPageContent() {
   // Handle per-star rank selection
   const handleSelectStarRank = useCallback((rank: PerStarRank) => {
     setSelectedStarRank(rank);
-    setStarQuantity(3); // Reset to minimum
+    setStarQuantity(rank.id === "grading" ? 1 : 3); // Grading min 1, others min 3
   }, []);
 
   // Max stars for current per-star selection
   const perStarMax = selectedStarRank?.maxStars ?? 100;
   const gendongMax = selectedGendongRank?.maxStars ?? 100;
 
+  // Unit label: "Match" for grading, "Star" for others
+  const perStarUnit = selectedStarRank?.id === "grading" ? "Match" : "Star";
+  const gendongUnit = selectedGendongRank?.id === "grading" ? "Match" : "Star";
+  const perStarMin = selectedStarRank?.id === "grading" ? 1 : 3;
+  const gendongMin = selectedGendongRank?.id === "grading" ? 1 : 3;
+
   // Proceed from per-star selection
   const handleProceedPerStar = useCallback(() => {
-    if (selectedStarRank && starQuantity >= 3) {
+    if (selectedStarRank && starQuantity >= perStarMin) {
       const price = selectedStarRank.price * starQuantity;
-      const title = `${selectedStarRank.name} × ${starQuantity} Star`;
+      const unit = selectedStarRank.id === "grading" ? "Match" : "Star";
+      const title = `${selectedStarRank.name} × ${starQuantity} ${unit}`;
       // Create a virtual package for the order flow
       setSelectedPackage({
         id: `perstar-${selectedStarRank.id}-${starQuantity}`,
@@ -793,7 +800,7 @@ function OrderPageContent() {
         window.scrollTo({ top: 0, behavior: "smooth" });
       }, 400);
     }
-  }, [selectedStarRank, starQuantity]);
+  }, [selectedStarRank, starQuantity, perStarMin]);
 
   const handleSelectPackage = useCallback(
     (pkg: ProductPackage) => {
@@ -819,14 +826,16 @@ function OrderPageContent() {
       switch (step) {
         case 1:
           // For paket mode, need selected package
-          // For perstar mode, need selected rank AND quantity >= 3
-          // For gendong mode, need selected gendong rank AND quantity >= 3
+          // For perstar mode, need selected rank AND quantity >= min
+          // For gendong mode, need selected gendong rank AND quantity >= min
           if (orderMode === "paket") {
             return !!selectedPackage;
           } else if (orderMode === "gendong") {
-            return !!(selectedGendongRank && gendongQuantity >= 3);
+            const gMin = selectedGendongRank?.id === "grading" ? 1 : 3;
+            return !!(selectedGendongRank && gendongQuantity >= gMin);
           } else {
-            return !!(selectedStarRank && starQuantity >= 3);
+            const pMin = selectedStarRank?.id === "grading" ? 1 : 3;
+            return !!(selectedStarRank && starQuantity >= pMin);
           }
         case 2:
           return !!(
@@ -861,7 +870,8 @@ function OrderPageContent() {
       // For per-star mode on step 1, create virtual package first
       if (currentStep === 1 && orderMode === "perstar" && selectedStarRank) {
         const price = selectedStarRank.price * starQuantity;
-        const title = `${selectedStarRank.name} × ${starQuantity} Star`;
+        const unit = selectedStarRank.id === "grading" ? "Match" : "Star";
+        const title = `${selectedStarRank.name} × ${starQuantity} ${unit}`;
         setSelectedPackage({
           id: `perstar-${selectedStarRank.id}-${starQuantity}`,
           title,
@@ -875,7 +885,8 @@ function OrderPageContent() {
       // For gendong mode on step 1, create virtual package first
       if (currentStep === 1 && orderMode === "gendong" && selectedGendongRank) {
         const price = selectedGendongRank.price * gendongQuantity;
-        const title = `Duo Boost ${selectedGendongRank.name} × ${gendongQuantity} Star`;
+        const gUnit = selectedGendongRank.id === "grading" ? "Match" : "Star";
+        const title = `Duo Boost ${selectedGendongRank.name} × ${gendongQuantity} ${gUnit}`;
         setSelectedPackage({
           id: `gendong-${selectedGendongRank.id}-${gendongQuantity}`,
           title,
@@ -980,7 +991,7 @@ function OrderPageContent() {
           targetRank: selectedPackage?.targetRank || form.targetRank,
           currentStar: RANKS_WITH_STARS.includes(selectedPackage?.currentRank || form.currentRank) ? currentStar : null,
           targetStar: RANKS_WITH_STARS.includes(selectedPackage?.targetRank || form.targetRank) ? targetStar : null,
-          packageTitle: selectedPackage?.title || (orderMode === "gendong" ? `Gendong ${selectedGendongRank?.name} x${gendongQuantity} star` : undefined),
+          packageTitle: selectedPackage?.title || (orderMode === "gendong" ? `Gendong ${selectedGendongRank?.name} x${gendongQuantity} ${selectedGendongRank?.id === "grading" ? "match" : "star"}` : undefined),
           orderType: orderMode,
           loginMethod: form.loginMethod,
           userId: form.serverId ? `${form.userId}(${form.serverId})` : form.userId,
@@ -1557,7 +1568,7 @@ function OrderPageContent() {
                         return (
                           <button
                             key={rank.id}
-                            onClick={() => setSelectedStarRank(rank)}
+                            onClick={() => { setSelectedStarRank(rank); setStarQuantity(rank.id === "grading" ? 1 : 3); }}
                             className={`relative text-left rounded-xl border-2 transition-all duration-200 hover:scale-[1.02] overflow-hidden flex flex-col ${
                               isSelected
                                 ? "border-yellow-400 shadow-lg shadow-yellow-400/20"
@@ -1579,7 +1590,7 @@ function OrderPageContent() {
                                 <div>
                                   <p className="text-yellow-400 font-bold text-lg leading-tight">
                                     {formatRupiah(rank.price)}
-                                    <span className="text-text-muted text-xs font-normal ml-1">{t.perStar}</span>
+                                    <span className="text-text-muted text-xs font-normal ml-1">{rank.id === "grading" ? "/ Match" : t.perStar}</span>
                                   </p>
                                   {rank.originalPrice && (
                                     <p className="text-red-400/70 text-xs line-through">
@@ -1626,18 +1637,18 @@ function OrderPageContent() {
                           <div>
                             <p className="text-text font-semibold">{selectedStarRank.name}</p>
                             <p className="text-text-muted text-sm">
-                              {formatRupiah(selectedStarRank.price)} {t.perStar}
+                              {formatRupiah(selectedStarRank.price)} {selectedStarRank.id === "grading" ? "/ Match" : t.perStar}
                             </p>
                           </div>
                         </div>
                         
                         <div className="flex items-center gap-4">
                           <div>
-                            <p className="text-text-muted text-xs mb-1">{t.starQuantity}</p>
+                            <p className="text-text-muted text-xs mb-1">{selectedStarRank.id === "grading" ? "Jumlah Match" : t.starQuantity}</p>
                             <div className="flex items-center gap-2">
                               <button
-                                onClick={() => setStarQuantity(q => Math.max(3, q - 1))}
-                                disabled={starQuantity <= 3}
+                                onClick={() => setStarQuantity(q => Math.max(perStarMin, q - 1))}
+                                disabled={starQuantity <= perStarMin}
                                 className="w-8 h-8 rounded-lg bg-slate-700 text-white flex items-center justify-center hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
                               >
                                 <Minus className="w-4 h-4" />
@@ -1646,10 +1657,10 @@ function OrderPageContent() {
                                 type="number"
                                 value={starQuantity}
                                 onChange={(e) => {
-                                  const val = parseInt(e.target.value) || 3;
-                                  setStarQuantity(Math.max(3, Math.min(perStarMax, val)));
+                                  const val = parseInt(e.target.value) || perStarMin;
+                                  setStarQuantity(Math.max(perStarMin, Math.min(perStarMax, val)));
                                 }}
-                                min={3}
+                                min={perStarMin}
                                 max={perStarMax}
                                 className="w-16 h-8 text-center bg-slate-800 text-white rounded-lg border border-white/10 focus:outline-none focus:border-accent"
                               />
@@ -1661,7 +1672,7 @@ function OrderPageContent() {
                                 <Plus className="w-4 h-4" />
                               </button>
                             </div>
-                            <p className="text-text-muted text-[10px] mt-1">Min 3 &bull; Max {perStarMax} ⭐</p>
+                            <p className="text-text-muted text-[10px] mt-1">Min {perStarMin} &bull; Max {perStarMax} {selectedStarRank.id === "grading" ? "Match" : "⭐"}</p>
                           </div>
                           
                           <div className="text-right">
@@ -1689,7 +1700,7 @@ function OrderPageContent() {
                         return (
                           <button
                             key={rank.id}
-                            onClick={() => { setSelectedGendongRank(rank); setGendongQuantity(3); }}
+                            onClick={() => { setSelectedGendongRank(rank); setGendongQuantity(rank.id === "grading" ? 1 : 3); }}
                             className={`relative text-left rounded-xl border-2 transition-all duration-200 hover:scale-[1.02] overflow-hidden flex flex-col ${
                               isSelected
                                 ? "border-yellow-400 shadow-lg shadow-yellow-400/20"
@@ -1711,7 +1722,7 @@ function OrderPageContent() {
                                 <div>
                                   <p className="text-yellow-400 font-bold text-lg leading-tight">
                                     {formatRupiah(rank.price)}
-                                    <span className="text-text-muted text-xs font-normal ml-1">{t.perStar}</span>
+                                    <span className="text-text-muted text-xs font-normal ml-1">{rank.id === "grading" ? "/ Match" : t.perStar}</span>
                                   </p>
                                   {rank.originalPrice && (
                                     <p className="text-red-400/70 text-xs line-through">
@@ -1758,18 +1769,18 @@ function OrderPageContent() {
                           <div>
                             <p className="text-text font-semibold">{selectedGendongRank.name}</p>
                             <p className="text-text-muted text-sm">
-                              {formatRupiah(selectedGendongRank.price)} {t.perStar}
+                              {formatRupiah(selectedGendongRank.price)} {selectedGendongRank.id === "grading" ? "/ Match" : t.perStar}
                             </p>
                           </div>
                         </div>
                         
                         <div className="flex items-center gap-4">
                           <div>
-                            <p className="text-text-muted text-xs mb-1">{t.starQuantity}</p>
+                            <p className="text-text-muted text-xs mb-1">{selectedGendongRank.id === "grading" ? "Jumlah Match" : t.starQuantity}</p>
                             <div className="flex items-center gap-2">
                               <button
-                                onClick={() => setGendongQuantity(q => Math.max(3, q - 1))}
-                                disabled={gendongQuantity <= 3}
+                                onClick={() => setGendongQuantity(q => Math.max(gendongMin, q - 1))}
+                                disabled={gendongQuantity <= gendongMin}
                                 className="w-8 h-8 rounded-lg bg-slate-700 text-white flex items-center justify-center hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
                               >
                                 <Minus className="w-4 h-4" />
@@ -1778,10 +1789,10 @@ function OrderPageContent() {
                                 type="number"
                                 value={gendongQuantity}
                                 onChange={(e) => {
-                                  const val = parseInt(e.target.value) || 3;
-                                  setGendongQuantity(Math.max(3, Math.min(gendongMax, val)));
+                                  const val = parseInt(e.target.value) || gendongMin;
+                                  setGendongQuantity(Math.max(gendongMin, Math.min(gendongMax, val)));
                                 }}
-                                min={3}
+                                min={gendongMin}
                                 max={gendongMax}
                                 className="w-16 h-8 text-center bg-slate-800 text-white rounded-lg border border-white/10 focus:outline-none focus:border-accent"
                               />
@@ -1793,7 +1804,7 @@ function OrderPageContent() {
                                 <Plus className="w-4 h-4" />
                               </button>
                             </div>
-                            <p className="text-text-muted text-[10px] mt-1">Min 3 &bull; Max {gendongMax} ⭐</p>
+                            <p className="text-text-muted text-[10px] mt-1">Min {gendongMin} &bull; Max {gendongMax} {selectedGendongRank.id === "grading" ? "Match" : "⭐"}</p>
                           </div>
                           
                           <div className="text-right">
@@ -2324,7 +2335,7 @@ function OrderPageContent() {
                 {orderMode === "perstar" && selectedStarRank && (
                   <div className="bg-background rounded-xl p-4">
                     <p className="text-text-muted text-xs mb-2 uppercase tracking-wider">
-                      Tier & Jumlah Bintang
+                      Tier & Jumlah {selectedStarRank.id === "grading" ? "Match" : "Bintang"}
                     </p>
                     <div className="flex items-center gap-3">
                       <Image
@@ -2339,7 +2350,7 @@ function OrderPageContent() {
                           {selectedStarRank.name}
                         </p>
                         <p className="text-text-muted text-xs">
-                          {starQuantity} Bintang × {formatRupiah(selectedStarRank.price)}/star
+                          {starQuantity} {selectedStarRank.id === "grading" ? "Match" : "Bintang"} × {formatRupiah(selectedStarRank.price)}/{selectedStarRank.id === "grading" ? "match" : "star"}
                         </p>
                         <p className="text-yellow-400 font-bold text-lg">
                           {formatRupiah(selectedStarRank.price * starQuantity)}
@@ -2353,7 +2364,7 @@ function OrderPageContent() {
                 {orderMode === "gendong" && selectedGendongRank && (
                   <div className="bg-background rounded-xl p-4">
                     <p className="text-text-muted text-xs mb-2 uppercase tracking-wider">
-                      Duo Boost &mdash; Tier & Jumlah Bintang
+                      Duo Boost &mdash; Tier & Jumlah {selectedGendongRank.id === "grading" ? "Match" : "Bintang"}
                     </p>
                     <div className="flex items-center gap-3">
                       <Image
@@ -2368,7 +2379,7 @@ function OrderPageContent() {
                           {selectedGendongRank.name}
                         </p>
                         <p className="text-text-muted text-xs">
-                          {gendongQuantity} Bintang × {formatRupiah(selectedGendongRank.price)}/star
+                          {gendongQuantity} {selectedGendongRank.id === "grading" ? "Match" : "Bintang"} × {formatRupiah(selectedGendongRank.price)}/{selectedGendongRank.id === "grading" ? "match" : "star"}
                         </p>
                         <p className="text-yellow-400 font-bold text-lg">
                           {formatRupiah(selectedGendongRank.price * gendongQuantity)}
