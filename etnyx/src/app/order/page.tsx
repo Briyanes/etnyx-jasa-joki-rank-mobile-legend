@@ -973,12 +973,6 @@ function OrderPageContent() {
       });
       // Fire AddToCart conversion event
       trackAddToCart({ value: pkg.price, contentName: pkg.title });
-      // Auto-advance to step 2 after 400ms
-      setTimeout(() => {
-        setSlideDirection("right");
-        setCurrentStep(2);
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }, 400);
     },
     [updateForm]
   );
