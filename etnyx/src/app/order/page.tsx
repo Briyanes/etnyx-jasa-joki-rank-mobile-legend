@@ -355,8 +355,11 @@ function calculateTotalStars(
     if (cfg) {
       stars += cfg.divisions * cfg.starsPerDiv;
     } else {
-      // Mythic tiers without divisions count as ~25 stars each
-      stars += 25;
+      // Mythic tiers: use actual star range from config
+      const mythicCfg = MYTHIC_STAR_CONFIG[rank];
+      if (mythicCfg) {
+        stars += mythicCfg.max - mythicCfg.min;
+      }
     }
   }
   // Stars needed in target rank (from max division to target division)
@@ -1486,7 +1489,8 @@ function OrderPageContent() {
                 </button>
               </div>
 
-              {/* ===== SHARED: Rank Awalmu ===== */}
+              {/* ===== Rank Awalmu (PAKET only) ===== */}
+              {orderMode === "paket" && (
               <div className="mb-5 p-4 bg-background rounded-xl border border-white/5">
                 <label className="block text-sm text-text font-bold mb-2">
                   <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-red-400" />{locale === "id" ? "Rank Awalmu Sekarang" : "Your Current Rank"}</span>
@@ -1620,6 +1624,7 @@ function OrderPageContent() {
                   </p>
                 )}
               </div>
+              )}
 
               {/* PAKET MODE */}
               {orderMode === "paket" && (
@@ -1722,7 +1727,15 @@ function OrderPageContent() {
                       pkg.currentRank === form.currentRank && pkg.targetRank === form.targetRank
                     );
                     const nearbyPkgs = matchingPkgs.length === 0
-                      ? catalog.flatMap(cat => cat.packages).filter(pkg => pkg.currentRank === form.currentRank)
+                      ? catalog.flatMap(cat => cat.packages).filter(pkg => {
+                        // Show packages that overlap with selected range
+                        const pkgCi = RANK_ORDER.indexOf(pkg.currentRank);
+                        const pkgTi = RANK_ORDER.indexOf(pkg.targetRank);
+                        const ci = RANK_ORDER.indexOf(form.currentRank);
+                        const ti = RANK_ORDER.indexOf(form.targetRank);
+                        // Package must cover at least part of the customer's requested range
+                        return pkgCi <= ci && pkgTi >= ti;
+                      })
                       : [];
                     const pkgsToShow = matchingPkgs.length > 0 ? matchingPkgs : nearbyPkgs;
 
@@ -1744,7 +1757,7 @@ function OrderPageContent() {
                       <>
                         {matchingPkgs.length === 0 && nearbyPkgs.length > 0 && (
                           <p className="text-text-muted text-xs mb-3">
-                            {locale === "id" ? "Paket exact tidak ditemukan. Menampilkan paket dari rank awal yang sama:" : "Exact match not found. Showing packages from same starting rank:"}
+                            {locale === "id" ? "Paket exact tidak ditemukan. Paket terdekat yang mencakup rank pilihanmu:" : "Exact match not found. Nearest packages covering your rank range:"}
                           </p>
                         )}
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
