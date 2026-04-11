@@ -1565,33 +1565,6 @@ function OrderPageContent() {
                     </div>
                   )}
                 </div>
-                {/* Star within division (for Warrior-Legend) */}
-                {RANKS_WITH_STARS.includes(form.currentRank) && (() => {
-                  const starsPerDiv = RANK_DIVISION_CONFIG[form.currentRank]?.starsPerDiv ?? 5;
-                  return (
-                    <div className="mt-3 flex items-center gap-3">
-                      <span className="text-text-muted text-xs whitespace-nowrap">
-                        {locale === "id" ? "Bintang di divisi:" : "Stars in division:"}
-                      </span>
-                      <div className="flex gap-1">
-                        {Array.from({ length: starsPerDiv }, (_, i) => i + 1).map((s) => (
-                          <button
-                            key={s}
-                            onClick={() => setCurrentDivisionStar(s)}
-                            className={`w-8 h-8 rounded-lg text-xs font-bold transition-all flex items-center justify-center ${
-                              currentDivisionStar === s
-                                ? "bg-yellow-400/20 border-2 border-yellow-400 text-yellow-400"
-                                : "bg-surface border border-white/10 text-text-muted hover:border-white/20"
-                            }`}
-                          >
-                            {s}
-                          </button>
-                        ))}
-                      </div>
-                      <span className="text-text-muted text-[10px]">/ {starsPerDiv} ⭐</span>
-                    </div>
-                  );
-                })()}
                 {/* Mythic tier hint */}
                 {MYTHIC_STAR_CONFIG[form.currentRank] && (
                   <p className="text-text-muted text-[10px] mt-2">
