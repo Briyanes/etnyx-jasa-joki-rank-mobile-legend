@@ -1694,12 +1694,9 @@ function OrderPageContent() {
                     if (totalStars <= 0) return null;
                     return (
                       <div className="flex items-center justify-between p-3 mb-4 bg-accent/5 border border-accent/20 rounded-xl">
-                        <div className="flex items-center gap-2">
-                          <Star className="w-4 h-4 text-yellow-400" />
-                          <span className="text-text text-sm font-medium">
-                            {locale === "id" ? "Total Bintang" : "Total Stars"}
-                          </span>
-                        </div>
+                        <span className="text-text text-sm font-medium">
+                          {locale === "id" ? "Total Bintang" : "Total Stars"}
+                        </span>
                         <span className="text-yellow-400 font-bold text-lg flex items-center gap-1">
                           {totalStars} <Star className="w-4 h-4" />
                         </span>
