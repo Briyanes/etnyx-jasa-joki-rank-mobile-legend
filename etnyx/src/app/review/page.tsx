@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Star, AlertTriangle, Send, ExternalLink, CheckCircle, Loader2, MessageCircle } from "lucide-react";
+import { Star, AlertTriangle, Send, ExternalLink, CheckCircle, Loader2, MessageCircle, Gift } from "lucide-react";
 import Image from "next/image";
 
 const translations = {
@@ -297,8 +297,8 @@ function ReviewPageContent() {
           <p className="text-text-muted">{t.successDesc}</p>
 
           {/* Skin reward notice */}
-          <div className="bg-accent/10 border border-accent/20 rounded-xl p-4 text-sm text-accent">
-            🎁 {t.skinReward}
+          <div className="bg-accent/10 border border-accent/20 rounded-xl p-4 text-sm text-accent flex items-center gap-2">
+            <Gift className="w-4 h-4 flex-shrink-0" /> {t.skinReward}
           </div>
 
           {/* Google Maps CTA */}

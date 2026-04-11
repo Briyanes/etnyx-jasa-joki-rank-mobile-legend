@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createAdminClient();
 
-    // Find order by reference ID (stored in midtrans_order_id field)
+    // Find order by reference ID (legacy column name: midtrans_order_id, now used for iPaymu ref)
     const refId = reference_id || String(verifiedTrx.ReferenceId || "");
     const { data: order, error } = await supabase
       .from("orders")

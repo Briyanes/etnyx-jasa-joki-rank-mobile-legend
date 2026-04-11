@@ -7,7 +7,7 @@ import Link from "next/link";
 import { formatRupiah } from "@/utils/helpers";
 import { siteConfig } from "@/lib/constants";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Download } from "lucide-react";
+import { Download, Gem, Medal, Trophy, Award, Bell, ClipboardList, Key, Sparkles, LogIn, Pencil, Lock, ShoppingCart, Gift } from "lucide-react";
 
 interface Customer {
   id: string;
@@ -460,9 +460,9 @@ export default function CustomerDashboard() {
                 "bg-amber-700/20 text-amber-600"
               }`}>
                 <span className="text-lg">
-                  {customer?.reward_tier === "platinum" ? "💎" :
-                   customer?.reward_tier === "gold" ? "🥇" :
-                   customer?.reward_tier === "silver" ? "🥈" : "🥉"}
+                  {customer?.reward_tier === "platinum" ? <Gem className="w-5 h-5" /> :
+                   customer?.reward_tier === "gold" ? <Trophy className="w-5 h-5" /> :
+                   customer?.reward_tier === "silver" ? <Medal className="w-5 h-5" /> : <Award className="w-5 h-5" />}
                 </span>
                 {(customer?.reward_tier || "bronze").charAt(0).toUpperCase() + (customer?.reward_tier || "bronze").slice(1)} Member
               </div>
@@ -528,10 +528,10 @@ export default function CustomerDashboard() {
               <div className="mt-4 pt-4 border-t border-surface/50">
                 <p className="text-xs text-muted mb-2">{t.tierBenefits}</p>
                 <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="flex items-center gap-2"><span>🥉</span> Bronze — 0%</div>
-                  <div className="flex items-center gap-2"><span>🥈</span> Silver — 3%</div>
-                  <div className="flex items-center gap-2"><span>🥇</span> Gold — 5%</div>
-                  <div className="flex items-center gap-2"><span>💎</span> Platinum — 8%</div>
+                  <div className="flex items-center gap-2"><Award className="w-3 h-3 text-amber-600" /> Bronze — 0%</div>
+                  <div className="flex items-center gap-2"><Medal className="w-3 h-3 text-gray-300" /> Silver — 3%</div>
+                  <div className="flex items-center gap-2"><Trophy className="w-3 h-3 text-yellow-400" /> Gold — 5%</div>
+                  <div className="flex items-center gap-2"><Gem className="w-3 h-3 text-gray-200" /> Platinum — 8%</div>
                 </div>
               </div>
             </div>
@@ -548,7 +548,7 @@ export default function CustomerDashboard() {
                   {catalogItems.map((item) => {
                     const canAfford = (customer?.reward_points || 0) >= item.points_cost;
                     const outOfStock = item.stock !== null && item.stock <= 0;
-                    const categoryEmoji = item.category === "skin" ? "🎨" : item.category === "starlight" ? "⭐" : item.category === "diamond" ? "💎" : item.category === "discount" ? "🏷️" : "🎁";
+                    const categoryEmoji = item.category === "skin" ? "Skin" : item.category === "starlight" ? "Star" : item.category === "diamond" ? "Gem" : item.category === "discount" ? "Tag" : "Gift";
 
                     return (
                       <div key={item.id} className={`rounded-xl border p-4 transition-all ${
@@ -869,7 +869,7 @@ export default function CustomerDashboard() {
 
             {/* Notification Preferences */}
             <div className="bg-surface rounded-xl p-6 border border-surface/50">
-              <h3 className="font-bold text-text mb-4">🔔 Notifikasi</h3>
+              <h3 className="font-bold text-text mb-4 flex items-center gap-2"><Bell className="w-4 h-4 text-accent" /> Notifikasi</h3>
               {!notifPrefs ? (
                 <button
                   onClick={async () => {
@@ -927,7 +927,7 @@ export default function CustomerDashboard() {
 
             {/* Activity Log */}
             <div className="bg-surface rounded-xl p-6 border border-surface/50">
-              <h3 className="font-bold text-text mb-4">📋 Aktivitas Akun</h3>
+              <h3 className="font-bold text-text mb-4 flex items-center gap-2"><ClipboardList className="w-4 h-4 text-accent" /> Aktivitas Akun</h3>
               {activityLogs.length === 0 && !activityLoading ? (
                 <button
                   onClick={async () => {
@@ -951,13 +951,13 @@ export default function CustomerDashboard() {
                 <div className="space-y-3 max-h-64 overflow-y-auto">
                   {activityLogs.map((log, i) => {
                     const actionLabels: Record<string, string> = {
-                      login: "🔑 Login",
-                      register: "✨ Registrasi",
-                      logout: "🚪 Logout",
-                      profile_update: "✏️ Update Profil",
-                      password_change: "🔒 Ganti Password",
-                      order_created: "🛒 Order Dibuat",
-                      reward_redeemed: "🎁 Redeem Reward",
+                      login: "Login",
+                      register: "Registrasi",
+                      logout: "Logout",
+                      profile_update: "Update Profil",
+                      password_change: "Ganti Password",
+                      order_created: "Order Dibuat",
+                      reward_redeemed: "Redeem Reward",
                     };
                     return (
                       <div key={i} className="flex items-center justify-between py-2 border-b border-surface/30 last:border-0">

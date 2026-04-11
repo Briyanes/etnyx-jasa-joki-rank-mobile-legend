@@ -2019,10 +2019,10 @@ function buildCategories(): DocCategory[] {
         {
           id: "api",
           icon: Server,
-          title: "API Routes (65+)",
+          title: "API Routes (75+)",
           content: (
             <div className="space-y-4">
-              <p className="text-text-muted text-sm">65+ API routes. Auth via JWT cookie (HTTPOnly). Rate limited via middleware.</p>
+              <p className="text-text-muted text-sm">75+ API routes. Auth via JWT cookie (HTTPOnly). Rate limited via middleware.</p>
               <div className="bg-background rounded-lg p-3 border border-white/5">
                 <h4 className="text-text font-medium text-sm mb-2">{"Admin API"} <Code>/api/admin/*</Code></h4>
                 <Table headers={["Endpoint", "Methods", "Deskripsi"]} rows={[
@@ -2047,6 +2047,12 @@ function buildCategories(): DocCategory[] {
                   ["/api/admin/upload", "POST", "File upload to Supabase Storage"],
                   ["/api/admin/ads", "GET/POST/DELETE", "Ad spend CRUD + attribution stats (ROAS, CPA)"],
                   ["/api/admin/test-notifications", "POST", "Test notification channels"],
+                  ["/api/admin/analytics", "GET", "Analytics data (trend, funnel)"],
+                  ["/api/admin/export-orders", "GET", "Export orders CSV (legacy)"],
+                  ["/api/admin/notify", "POST", "Send notification to customer"],
+                  ["/api/admin/sla-check", "GET", "SLA compliance check"],
+                  ["/api/admin/upload-qris", "POST", "Upload QRIS image"],
+                  ["/api/admin/worker-leaderboard", "GET", "Worker performance leaderboard"],
                 ]} />
               </div>
               <div className="bg-background rounded-lg p-3 border border-white/5">
@@ -2085,6 +2091,9 @@ function buildCategories(): DocCategory[] {
                   ["/api/customer/rewards/catalog", "GET/POST", "Browse + redeem catalog"],
                   ["/api/customer/profile", "GET/PATCH", "Get/update profile (name, whatsapp, password)"],
                   ["/api/customer/password-reset", "POST", "Request + reset password via email token"],
+                  ["/api/customer/activity", "GET", "Activity log (login/order/review history)"],
+                  ["/api/customer/notification-preferences", "GET/PUT", "Notification channel preferences"],
+                  ["/api/customer/order-detail", "GET", "Single order detail (with chat, progress)"],
                 ]} />
               </div>
               <div className="bg-background rounded-lg p-3 border border-white/5">
@@ -2108,6 +2117,8 @@ function buildCategories(): DocCategory[] {
                   ["/api/push/subscribe", "POST", "Save push subscription"],
                   ["/api/push/send", "POST", "Send push notification (admin)"],
                   ["/api/check-account", "POST", "Cek akun ML (User ID + Server ID → Nickname)"],
+                  ["/api/payment-methods", "GET", "Available payment methods (iPaymu channels)"],
+                  ["/api/boosters", "GET", "Public booster list (for order form)"],
                 ]} />
               </div>
             </div>

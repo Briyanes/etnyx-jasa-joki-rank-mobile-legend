@@ -7,7 +7,7 @@ import Image from "next/image";
 import {
   LogOut, RefreshCw, CheckCircle, Clock, Play,
   Star, Trophy, Swords, Target, Timer, Camera, ChevronDown, ChevronUp,
-  TrendingUp, Package, Loader2, Key, MessageSquare, Send,
+  TrendingUp, Package, Loader2, Key, MessageSquare, Send, Gamepad2,
 } from "lucide-react";
 
 interface Order {
@@ -416,7 +416,7 @@ export default function WorkerDashboard() {
                       </div>
                       {credentials[order.id].is_gendong ? (
                         <div>
-                          <p className="text-purple-400 text-xs font-medium">🎮 Order Gendong / Mabar — Tidak perlu login akun</p>
+                          <p className="text-purple-400 text-xs font-medium"><Gamepad2 className="w-3.5 h-3.5 inline mr-1" /> Order Gendong / Mabar — Tidak perlu login akun</p>
                           {credentials[order.id].notes && <p className="text-text text-xs mt-1 whitespace-pre-line">{credentials[order.id].notes}</p>}
                         </div>
                       ) : (<>
@@ -592,7 +592,7 @@ function OrderCard({
               </div>
               {credentials.is_gendong ? (
                 <div>
-                  <p className="text-purple-400 text-xs font-medium">🎮 Order Gendong / Mabar — Tidak perlu login akun</p>
+                  <p className="text-purple-400 text-xs font-medium"><Gamepad2 className="w-3.5 h-3.5 inline mr-1" /> Order Gendong / Mabar — Tidak perlu login akun</p>
                   {credentials.notes && <p className="text-text text-xs mt-1 whitespace-pre-line">{credentials.notes}</p>}
                 </div>
               ) : (<>
