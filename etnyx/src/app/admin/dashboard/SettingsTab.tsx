@@ -9,6 +9,7 @@ import {
   Save, Loader2, CheckCircle, ChevronUp, ChevronDown, Download,
   CreditCard, Mail, MessageCircle, Send, BookOpen, AlertTriangle, Copy, Plug, Upload,
   Landmark, Wallet, QrCode, Smartphone, Building2, Banknote,
+  Swords, CalendarClock, Gamepad2,
   type LucideIcon,
 } from "lucide-react";
 
@@ -58,7 +59,7 @@ interface IntegrationSettings {
   telegramBotToken: string; telegramAdminGroupId: string; telegramWorkerGroupId: string; telegramReviewGroupId: string; telegramReportGroupId: string;
 }
 
-type SettingsSubTab = "cms-sections" | "hero" | "banner" | "faq" | "team" | "social" | "site" | "pixels" | "integrations" | "general";
+type SettingsSubTab = "cms-sections" | "hero" | "banner" | "faq" | "team" | "social" | "site" | "pixels" | "integrations" | "gendong" | "general";
 
 const SETTINGS_TABS: { id: SettingsSubTab; label: string; icon: typeof Layout }[] = [
   { id: "cms-sections", label: "Visibilitas", icon: Layout },
@@ -70,6 +71,7 @@ const SETTINGS_TABS: { id: SettingsSubTab; label: string; icon: typeof Layout }[
   { id: "site", label: "Info Situs", icon: Building },
   { id: "pixels", label: "Pixels", icon: BarChart3 },
   { id: "integrations", label: "Integrasi", icon: Zap },
+  { id: "gendong", label: "Gendong", icon: Gamepad2 },
   { id: "general", label: "General", icon: Settings2 },
 ];
 
@@ -117,6 +119,24 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
   const [bankAccounts, setBankAccounts] = useState(DEFAULT_BANK_ACCOUNTS);
   const [qrisUploading, setQrisUploading] = useState(false);
 
+  // Gendong settings
+  const [gendongRoles, setGendongRoles] = useState<{ id: string; name: string; emoji: string; disabled: boolean }[]>([
+    { id: "exp", name: "EXP Laner", emoji: "⚔️", disabled: false },
+    { id: "roam", name: "Roamer", emoji: "🛡️", disabled: false },
+    { id: "mid", name: "Mid Laner", emoji: "🔮", disabled: false },
+    { id: "jungler", name: "Jungler", emoji: "🌿", disabled: true },
+    { id: "gold", name: "Gold Laner", emoji: "💰", disabled: true },
+  ]);
+  const [gendongSchedules, setGendongSchedules] = useState<{ id: string; label: string }[]>([
+    { id: "pagi", label: "Pagi (08:00-12:00)" },
+    { id: "siang", label: "Siang (12:00-16:00)" },
+    { id: "sore", label: "Sore (16:00-19:00)" },
+    { id: "malam", label: "Malam (19:00-22:00)" },
+    { id: "larut", label: "Larut Malam (22:00-02:00)" },
+    { id: "weekend", label: "Weekend Seharian" },
+    { id: "flexible", label: "Fleksibel (Kapan Saja)" },
+  ]);
+
   const fetchSettings = useCallback(async () => {
     try {
       const res = await fetch("/api/admin/settings");
@@ -130,6 +150,11 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
       if (settings.social_links) setSocialLinks(settings.social_links);
       if (settings.site_info) setSiteInfo(settings.site_info);
       if (settings.integrations) setIntegrations(settings.integrations);
+      if (settings.gendong_settings) {
+        const gs = settings.gendong_settings;
+        if (gs.roles && Array.isArray(gs.roles)) setGendongRoles(gs.roles);
+        if (gs.schedules && Array.isArray(gs.schedules)) setGendongSchedules(gs.schedules);
+      }
       if (settings.bank_accounts && Array.isArray(settings.bank_accounts)) {
         // Merge with defaults, maintain correct order (bank → ewallet → qris)
         const saved = settings.bank_accounts as typeof DEFAULT_BANK_ACCOUNTS;
@@ -800,6 +825,114 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
               <p>4. Cari &quot;chat&quot;:{`{`}&quot;id&quot;: -100xxx...{`}`}</p>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Gendong Settings */}
+      {settingsSubTab === "gendong" && (
+        <div className="max-w-2xl space-y-4">
+          {/* Roles */}
+          <div className="bg-surface rounded-xl p-5 border border-white/5">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-sm font-semibold text-text flex items-center gap-2"><Swords className="w-4 h-4 text-purple-400" /> Role Picker</h3>
+                <p className="text-text-muted text-xs mt-0.5">Atur role yang bisa dipilih customer di form gendong. Role dengan toggle off = &quot;khusus booster&quot;.</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              {gendongRoles.map((role, idx) => (
+                <div key={role.id} className="flex items-center gap-3 bg-background rounded-lg px-3 py-2 border border-white/5">
+                  <span className="text-lg">{role.emoji}</span>
+                  <input
+                    value={role.emoji}
+                    onChange={(e) => {
+                      const updated = [...gendongRoles];
+                      updated[idx] = { ...updated[idx], emoji: e.target.value };
+                      setGendongRoles(updated);
+                    }}
+                    className="w-12 bg-transparent border border-white/10 rounded px-2 py-1 text-center text-sm"
+                    maxLength={4}
+                  />
+                  <input
+                    value={role.name}
+                    onChange={(e) => {
+                      const updated = [...gendongRoles];
+                      updated[idx] = { ...updated[idx], name: e.target.value };
+                      setGendongRoles(updated);
+                    }}
+                    className="flex-1 bg-transparent border border-white/10 rounded px-3 py-1 text-text text-sm"
+                  />
+                  <label className="flex items-center gap-1.5 text-xs text-text-muted cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={!role.disabled}
+                      onChange={() => {
+                        const updated = [...gendongRoles];
+                        updated[idx] = { ...updated[idx], disabled: !updated[idx].disabled };
+                        setGendongRoles(updated);
+                      }}
+                      className="accent-[var(--accent)]"
+                    />
+                    {role.disabled ? "Booster Only" : "Customer"}
+                  </label>
+                  <button
+                    onClick={() => setGendongRoles(gendongRoles.filter((_, i) => i !== idx))}
+                    className="text-red-400/60 hover:text-red-400 transition-colors"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={() => setGendongRoles([...gendongRoles, { id: `role_${Date.now()}`, name: "", emoji: "🎯", disabled: false }])}
+              className="mt-2 flex items-center gap-1.5 text-xs text-accent hover:text-accent/80 transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5" /> Tambah Role
+            </button>
+          </div>
+
+          {/* Schedules */}
+          <div className="bg-surface rounded-xl p-5 border border-white/5">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-sm font-semibold text-text flex items-center gap-2"><CalendarClock className="w-4 h-4 text-purple-400" /> Jadwal Main (Dropdown)</h3>
+                <p className="text-text-muted text-xs mt-0.5">Opsi jadwal yang muncul di dropdown form gendong.</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              {gendongSchedules.map((sched, idx) => (
+                <div key={sched.id} className="flex items-center gap-3 bg-background rounded-lg px-3 py-2 border border-white/5">
+                  <span className="text-text-muted text-xs w-6 text-center">{idx + 1}.</span>
+                  <input
+                    value={sched.label}
+                    onChange={(e) => {
+                      const updated = [...gendongSchedules];
+                      updated[idx] = { ...updated[idx], label: e.target.value };
+                      setGendongSchedules(updated);
+                    }}
+                    className="flex-1 bg-transparent border border-white/10 rounded px-3 py-1 text-text text-sm"
+                    placeholder="Label jadwal"
+                  />
+                  <button
+                    onClick={() => setGendongSchedules(gendongSchedules.filter((_, i) => i !== idx))}
+                    className="text-red-400/60 hover:text-red-400 transition-colors"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={() => setGendongSchedules([...gendongSchedules, { id: `sched_${Date.now()}`, label: "" }])}
+              className="mt-2 flex items-center gap-1.5 text-xs text-accent hover:text-accent/80 transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5" /> Tambah Jadwal
+            </button>
+          </div>
+
+          {/* Save */}
+          <CmsSaveButton settingKey="gendong_settings" value={{ roles: gendongRoles, schedules: gendongSchedules }} />
         </div>
       )}
 

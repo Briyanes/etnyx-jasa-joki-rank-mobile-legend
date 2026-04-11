@@ -34,6 +34,11 @@ import {
   ArrowRight,
   Search,
   Sparkles,
+  Swords,
+  Clock,
+  CalendarClock,
+  ChevronDown,
+  ShieldCheck,
 } from "lucide-react";
 import { FaFacebook, FaGoogle, FaTiktok, FaVk, FaApple, FaGamepad } from "react-icons/fa";
 import type { IconType } from "react-icons";
@@ -73,12 +78,23 @@ const LOGIN_METHODS: { id: LoginMethod; name: string; Icon: IconType; color: str
 ];
 
 // ML Roles for Gendong mode (client picks their preferred role)
-const ML_ROLES = [
-  { id: "exp", name: "EXP Laner", emoji: "⚔️" },
-  { id: "roam", name: "Roamer", emoji: "🛡️" },
-  { id: "mid", name: "Mid Laner", emoji: "🔮" },
+const DEFAULT_ML_ROLES = [
+  { id: "exp", name: "EXP Laner", emoji: "⚔️", disabled: false },
+  { id: "roam", name: "Roamer", emoji: "🛡️", disabled: false },
+  { id: "mid", name: "Mid Laner", emoji: "🔮", disabled: false },
   { id: "jungler", name: "Jungler", emoji: "🌿", disabled: true },
   { id: "gold", name: "Gold Laner", emoji: "💰", disabled: true },
+];
+
+// Default play schedule options
+const DEFAULT_SCHEDULE_OPTIONS = [
+  { id: "pagi", label: "Pagi (08:00-12:00)" },
+  { id: "siang", label: "Siang (12:00-16:00)" },
+  { id: "sore", label: "Sore (16:00-19:00)" },
+  { id: "malam", label: "Malam (19:00-22:00)" },
+  { id: "larut", label: "Larut Malam (22:00-02:00)" },
+  { id: "weekend", label: "Weekend Seharian" },
+  { id: "flexible", label: "Fleksibel (Kapan Saja)" },
 ];
 
 // Product catalog types
@@ -332,7 +348,7 @@ const translations = {
     labelPreferredRole: "Role yang Kamu Mainkan",
     preferredRoleHint: "Jungler & Gold Lane khusus booster",
     labelPlaySchedule: "Jadwal Main",
-    placeholderPlaySchedule: "Contoh: Senin-Jumat, jam 20:00-23:00",
+    placeholderPlaySchedule: "Pilih jadwal main kamu",
     playScheduleHint: "Worker akan menyesuaikan jadwal kamu",
     gendongNoLoginHint: "Mode Gendong tidak perlu login akun — kamu main bareng booster pakai akun sendiri",
     // Step 3
@@ -436,7 +452,7 @@ const translations = {
     labelPreferredRole: "Your Preferred Role",
     preferredRoleHint: "Jungler & Gold Lane are reserved for the booster",
     labelPlaySchedule: "Play Schedule",
-    placeholderPlaySchedule: "E.g. Mon-Fri, 8PM-11PM",
+    placeholderPlaySchedule: "Select your play schedule",
     playScheduleHint: "Worker will adjust to your schedule",
     gendongNoLoginHint: "Gendong mode doesn't need account login — you play together with the booster on your own account",
     // Step 3
@@ -582,6 +598,28 @@ function OrderPageContent() {
     preferredRole: "",
     playSchedule: "",
   });
+
+  // Gendong settings from CMS
+  const [gendongRoles, setGendongRoles] = useState(DEFAULT_ML_ROLES);
+  const [scheduleOptions, setScheduleOptions] = useState(DEFAULT_SCHEDULE_OPTIONS);
+
+  // Fetch gendong settings from CMS
+  useEffect(() => {
+    fetch("/api/settings?keys=gendong_settings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.gendong_settings) {
+          const s = data.gendong_settings;
+          if (s.roles && Array.isArray(s.roles) && s.roles.length > 0) {
+            setGendongRoles(s.roles);
+          }
+          if (s.schedules && Array.isArray(s.schedules) && s.schedules.length > 0) {
+            setScheduleOptions(s.schedules);
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Fetch pricing catalog from CMS, merge rankKey from defaults
   useEffect(() => {
@@ -1046,7 +1084,7 @@ function OrderPageContent() {
           playSchedule: orderMode === "gendong" ? form.playSchedule : undefined,
           heroRequest: form.heroRequest,
           notes: orderMode === "gendong" 
-            ? [form.notes, `Role: ${ML_ROLES.find(r => r.id === form.preferredRole)?.name || form.preferredRole}`, `Jadwal: ${form.playSchedule}`].filter(Boolean).join(" | ")
+            ? [form.notes, `Role: ${gendongRoles.find(r => r.id === form.preferredRole)?.name || form.preferredRole}`, `Jadwal: ${scheduleOptions.find(s => s.id === form.playSchedule)?.label || form.playSchedule}`].filter(Boolean).join(" | ")
             : form.notes,
           isExpress: form.isExpress,
           isPremium: form.isPremium,
@@ -1884,7 +1922,7 @@ function OrderPageContent() {
               {/* Gendong info banner */}
               {orderMode === "gendong" && (
                 <div className="flex items-start gap-2 px-3 py-2.5 bg-purple-500/10 border border-purple-500/30 rounded-xl">
-                  <Users className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+                  <Gamepad2 className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
                   <p className="text-purple-300 text-xs">{t.gendongNoLoginHint}</p>
                 </div>
               )}
@@ -2078,11 +2116,12 @@ function OrderPageContent() {
               {orderMode === "gendong" && (
               <>
                 <div>
-                  <label className="block text-sm text-text-muted mb-2 font-medium">
+                  <label className="block text-sm text-text-muted mb-2 font-medium flex items-center gap-1.5">
+                    <Swords className="w-4 h-4 text-purple-400" />
                     {t.labelPreferredRole} <span className="text-error">*</span>
                   </label>
                   <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
-                    {ML_ROLES.map((role) => {
+                    {gendongRoles.map((role) => {
                       const isSelected = form.preferredRole === role.id;
                       const isDisabled = role.disabled;
                       return (
@@ -2105,27 +2144,40 @@ function OrderPageContent() {
                       );
                     })}
                   </div>
-                  <p className="text-text-muted text-xs mt-1.5">{t.preferredRoleHint}</p>
+                  <p className="text-text-muted text-xs mt-1.5 flex items-center gap-1">
+                    <ShieldCheck className="w-3 h-3 text-text-muted/60" />
+                    {t.preferredRoleHint}
+                  </p>
                   {touched.preferredRole && !form.preferredRole && (
                     <p className="text-red-400 text-xs mt-1">{t.required}</p>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-sm text-text-muted mb-1.5">
+                  <label className="block text-sm text-text-muted mb-1.5 font-medium flex items-center gap-1.5">
+                    <CalendarClock className="w-4 h-4 text-purple-400" />
                     {t.labelPlaySchedule} <span className="text-error">*</span>
                   </label>
-                  <input
-                    type="text"
-                    value={form.playSchedule}
-                    onChange={(e) => updateForm({ playSchedule: e.target.value })}
-                    onBlur={() => markTouched("playSchedule")}
-                    placeholder={t.placeholderPlaySchedule}
-                    className={`w-full bg-background border rounded-xl px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none transition-colors ${
-                      touched.playSchedule && !form.playSchedule ? "border-red-500" : "border-white/10"
-                    }`}
-                  />
-                  <p className="text-text-muted text-xs mt-1">{t.playScheduleHint}</p>
+                  <div className="relative">
+                    <select
+                      value={form.playSchedule}
+                      onChange={(e) => updateForm({ playSchedule: e.target.value })}
+                      onBlur={() => markTouched("playSchedule")}
+                      className={`w-full bg-background border rounded-xl px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none transition-colors appearance-none pr-10 ${
+                        touched.playSchedule && !form.playSchedule ? "border-red-500" : "border-white/10"
+                      } ${!form.playSchedule ? "text-text-muted" : ""}`}
+                    >
+                      <option value="" disabled>{t.placeholderPlaySchedule}</option>
+                      {scheduleOptions.map((opt) => (
+                        <option key={opt.id} value={opt.id}>{opt.label}</option>
+                      ))}
+                    </select>
+                    <ChevronDown className="w-4 h-4 text-text-muted absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
+                  <p className="text-text-muted text-xs mt-1 flex items-center gap-1">
+                    <Clock className="w-3 h-3 text-text-muted/60" />
+                    {t.playScheduleHint}
+                  </p>
                   {touched.playSchedule && !form.playSchedule && (
                     <p className="text-red-400 text-xs mt-1">{t.required}</p>
                   )}
@@ -2535,10 +2587,10 @@ function OrderPageContent() {
                     <>
                     <span className="text-text-muted">Role</span>
                     <span className="text-text font-medium">
-                      {ML_ROLES.find(r => r.id === form.preferredRole)?.emoji} {ML_ROLES.find(r => r.id === form.preferredRole)?.name || "-"}
+                      {gendongRoles.find(r => r.id === form.preferredRole)?.emoji} {gendongRoles.find(r => r.id === form.preferredRole)?.name || "-"}
                     </span>
                     <span className="text-text-muted">Jadwal</span>
-                    <span className="text-text font-medium break-all">{form.playSchedule || "-"}</span>
+                    <span className="text-text font-medium break-all">{scheduleOptions.find(s => s.id === form.playSchedule)?.label || form.playSchedule || "-"}</span>
                     </>
                     )}
                     {form.heroRequest && (
