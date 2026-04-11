@@ -244,6 +244,14 @@ export default function AdminDashboard() {
   const [activePricingCat, setActivePricingCat] = useState("");
   const [pricingMode, setPricingMode] = useState<"paket" | "perstar" | "gendong">("paket");
   const [gendongPricing, setGendongPricing] = useState<PerStarTier[]>([]);
+  // Add/Edit package state
+  const [showAddPkg, setShowAddPkg] = useState(false);
+  const [addPkgForm, setAddPkgForm] = useState({ title: "", price: "", originalPrice: "", currentRank: "warrior", targetRank: "epic" });
+  const [editPkgTitle, setEditPkgTitle] = useState<string | null>(null);
+  const [editPkgTitleValue, setEditPkgTitleValue] = useState("");
+  // Add category state
+  const [showAddCat, setShowAddCat] = useState(false);
+  const [addCatForm, setAddCatForm] = useState({ title: "" });
   // Season pricing state
   interface SeasonPhase { id: string; label: string; multiplier: number; startDate: string }
   interface SeasonPricing { isEnabled: boolean; seasonName: string; phases: SeasonPhase[] }
@@ -730,6 +738,77 @@ export default function AdminDashboard() {
     });
     setPricingCatalog(newCatalog);
     setEditingPriceId(null);
+    savePricingCatalog(newCatalog);
+  };
+
+  // Add new package to active category
+  const addPackageToCategory = (catId: string) => {
+    const price = Math.max(1, parseInt(addPkgForm.price) || 0);
+    const originalPrice = addPkgForm.originalPrice ? Math.max(0, parseInt(addPkgForm.originalPrice)) : undefined;
+    if (!addPkgForm.title.trim()) { toast("Nama paket harus diisi"); return; }
+    if (price <= 0) { toast("Harga harus lebih dari 0"); return; }
+    const id = addPkgForm.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+$/, "");
+    const discountPercent = originalPrice && originalPrice > price ? Math.round(((originalPrice - price) / originalPrice) * 100) : undefined;
+    const newPkg: PricingPackage = {
+      id,
+      title: addPkgForm.title.trim(),
+      price,
+      originalPrice,
+      discountPercent,
+      rankKey: addPkgForm.currentRank,
+      currentRank: addPkgForm.currentRank,
+      targetRank: addPkgForm.targetRank,
+    };
+    const newCatalog = pricingCatalog.map(cat => cat.id !== catId ? cat : { ...cat, packages: [...cat.packages, newPkg] });
+    setPricingCatalog(newCatalog);
+    savePricingCatalog(newCatalog);
+    setShowAddPkg(false);
+    setAddPkgForm({ title: "", price: "", originalPrice: "", currentRank: "warrior", targetRank: "epic" });
+  };
+
+  // Delete package from category
+  const deletePackage = (catId: string, pkgId: string) => {
+    const newCatalog = pricingCatalog.map(cat => cat.id !== catId ? cat : { ...cat, packages: cat.packages.filter(p => p.id !== pkgId) });
+    setPricingCatalog(newCatalog);
+    savePricingCatalog(newCatalog);
+  };
+
+  // Update package title
+  const saveEditPkgTitle = (catId: string, pkgId: string) => {
+    if (!editPkgTitleValue.trim()) { toast("Nama paket harus diisi"); return; }
+    const newCatalog = pricingCatalog.map(cat => cat.id !== catId ? cat : { ...cat, packages: cat.packages.map(p => p.id !== pkgId ? p : { ...p, title: editPkgTitleValue.trim() }) });
+    setPricingCatalog(newCatalog);
+    setEditPkgTitle(null);
+    savePricingCatalog(newCatalog);
+  };
+
+  // Add new category
+  const addCategory = () => {
+    if (!addCatForm.title.trim()) { toast("Nama kategori harus diisi"); return; }
+    const id = `paket-${addCatForm.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+$/, "")}`;
+    const newCat: PricingCategory = { id, title: addCatForm.title.trim(), packages: [] };
+    const newCatalog = [...pricingCatalog, newCat];
+    setPricingCatalog(newCatalog);
+    savePricingCatalog(newCatalog);
+    setActivePricingCat(id);
+    setShowAddCat(false);
+    setAddCatForm({ title: "" });
+  };
+
+  // Delete category
+  const deleteCategory = (catId: string) => {
+    const cat = pricingCatalog.find(c => c.id === catId);
+    if (cat && cat.packages.length > 0) { toast(`Hapus semua ${cat.packages.length} paket di kategori ini dulu`); return; }
+    const newCatalog = pricingCatalog.filter(c => c.id !== catId);
+    setPricingCatalog(newCatalog);
+    savePricingCatalog(newCatalog);
+    if (activePricingCat === catId && newCatalog.length > 0) setActivePricingCat(newCatalog[0].id);
+  };
+
+  // Update category title
+  const updateCategoryTitle = (catId: string, newTitle: string) => {
+    const newCatalog = pricingCatalog.map(cat => cat.id !== catId ? cat : { ...cat, title: newTitle });
+    setPricingCatalog(newCatalog);
     savePricingCatalog(newCatalog);
   };
 
@@ -1516,7 +1595,7 @@ export default function AdminDashboard() {
                   ) : (
                     <>
                       {/* Category tabs */}
-                      <div className="flex gap-2 overflow-x-auto pb-1">
+                      <div className="flex gap-2 overflow-x-auto pb-1 items-center">
                         {pricingCatalog.map((cat) => (
                           <button
                             key={cat.id}
@@ -1531,14 +1610,41 @@ export default function AdminDashboard() {
                             <span className="ml-1.5 opacity-60">({cat.packages.length})</span>
                           </button>
                         ))}
+                        <button
+                          onClick={() => setShowAddCat(true)}
+                          className="px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap border border-dashed border-accent/30 text-accent hover:bg-accent/10 transition-all flex items-center gap-1"
+                        >
+                          <Plus className="w-3 h-3" /> Kategori
+                        </button>
                       </div>
+
+                      {/* Add Category Modal */}
+                      {showAddCat && (
+                        <div className="bg-surface rounded-xl border border-accent/20 p-4 space-y-3">
+                          <h4 className="text-sm font-semibold text-text">Tambah Kategori Baru</h4>
+                          <input type="text" value={addCatForm.title} onChange={(e) => setAddCatForm({ title: e.target.value })}
+                            placeholder="Nama kategori, mis: Paket Spesial" className="w-full sm:w-80 bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-sm focus:border-accent focus:outline-none" />
+                          <div className="flex gap-2">
+                            <button onClick={addCategory} className="px-4 py-2 gradient-primary rounded-lg text-white text-xs font-medium">Tambah</button>
+                            <button onClick={() => setShowAddCat(false)} className="px-4 py-2 bg-white/5 rounded-lg text-text-muted text-xs">Batal</button>
+                          </div>
+                        </div>
+                      )}
 
                       {/* Package list */}
                       {pricingCatalog.filter(c => c.id === activePricingCat).map((cat) => (
                         <div key={cat.id} className="bg-surface rounded-xl border border-white/5 overflow-hidden">
                           <div className="px-4 py-3 bg-white/[0.02] border-b border-white/5 flex items-center justify-between">
                             <h3 className="text-sm font-semibold text-text">{cat.title}</h3>
-                            <span className="text-xs text-text-muted">{cat.packages.length} paket</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-text-muted">{cat.packages.length} paket</span>
+                              {cat.packages.length === 0 && (
+                                <button onClick={() => { if (confirm(`Hapus kategori "${cat.title}"?`)) deleteCategory(cat.id); }}
+                                  className="p-1 rounded bg-red-500/10 text-red-400 hover:bg-red-500/20 transition" title="Hapus kategori">
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              )}
+                            </div>
                           </div>
                           <table className="w-full text-sm">
                             <thead>
@@ -1555,7 +1661,17 @@ export default function AdminDashboard() {
                               {cat.packages.map((pkg) => (
                                 <tr key={pkg.id} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
                                   <td className="px-4 py-2.5">
-                                    <span className="text-text text-xs font-medium">{pkg.title}</span>
+                                    {editPkgTitle === pkg.id ? (
+                                      <div className="flex items-center gap-1">
+                                        <input type="text" value={editPkgTitleValue} onChange={(e) => setEditPkgTitleValue(e.target.value)}
+                                          className="w-40 bg-background border border-accent/50 rounded px-2 py-1 text-xs text-text focus:outline-none" autoFocus
+                                          onKeyDown={(e) => { if (e.key === "Enter") saveEditPkgTitle(cat.id, pkg.id); if (e.key === "Escape") setEditPkgTitle(null); }} />
+                                        <button onClick={() => saveEditPkgTitle(cat.id, pkg.id)} className="p-0.5 rounded bg-green-500/20 text-green-400"><CheckCircle className="w-3 h-3" /></button>
+                                        <button onClick={() => setEditPkgTitle(null)} className="p-0.5 rounded bg-red-500/20 text-red-400"><XCircle className="w-3 h-3" /></button>
+                                      </div>
+                                    ) : (
+                                      <span className="text-text text-xs font-medium cursor-pointer hover:text-accent transition" onClick={() => { setEditPkgTitle(pkg.id); setEditPkgTitleValue(pkg.title); }}>{pkg.title}</span>
+                                    )}
                                   </td>
                                   <td className="px-4 py-2.5">
                                     <span className="text-accent text-xs">{rankLabel(pkg.currentRank)} → {rankLabel(pkg.targetRank)}</span>
@@ -1602,15 +1718,77 @@ export default function AdminDashboard() {
                                         </button>
                                       </div>
                                     ) : (
-                                      <button onClick={() => startEditPrice(pkg)} className="p-1 rounded bg-accent/10 text-accent hover:bg-accent/20 transition">
-                                        <Pencil className="w-3.5 h-3.5" />
-                                      </button>
+                                      <div className="flex items-center justify-center gap-1">
+                                        <button onClick={() => startEditPrice(pkg)} className="p-1 rounded bg-accent/10 text-accent hover:bg-accent/20 transition" title="Edit harga">
+                                          <Pencil className="w-3.5 h-3.5" />
+                                        </button>
+                                        <button onClick={() => { if (confirm(`Hapus paket "${pkg.title}"?`)) deletePackage(cat.id, pkg.id); }}
+                                          className="p-1 rounded bg-red-500/10 text-red-400 hover:bg-red-500/20 transition" title="Hapus paket">
+                                          <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
+                                      </div>
                                     )}
                                   </td>
                                 </tr>
                               ))}
                             </tbody>
                           </table>
+                          {/* Add Package Button / Form */}
+                          {showAddPkg && activePricingCat === cat.id ? (
+                            <div className="p-4 border-t border-white/5 bg-white/[0.02] space-y-3">
+                              <h4 className="text-xs font-semibold text-text">Tambah Paket Baru</h4>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                                <div>
+                                  <label className="block text-[10px] text-text-muted mb-1">Nama Paket</label>
+                                  <input type="text" value={addPkgForm.title} onChange={(e) => setAddPkgForm(f => ({ ...f, title: e.target.value }))}
+                                    placeholder="GM V - Mythic Honor" className="w-full bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-xs focus:border-accent focus:outline-none" />
+                                </div>
+                                <div>
+                                  <label className="block text-[10px] text-text-muted mb-1">Rank Awal</label>
+                                  <select value={addPkgForm.currentRank} onChange={(e) => setAddPkgForm(f => ({ ...f, currentRank: e.target.value }))}
+                                    className="w-full bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-xs focus:border-accent focus:outline-none">
+                                    {RANKS.map(r => <option key={r} value={r}>{rankLabel(r)}</option>)}
+                                    <option value="mythicgrading">Mythic Grading</option>
+                                    <option value="mythichonor">Mythic Honor</option>
+                                    <option value="mythicimmortal">Mythic Immortal</option>
+                                  </select>
+                                </div>
+                                <div>
+                                  <label className="block text-[10px] text-text-muted mb-1">Rank Tujuan</label>
+                                  <select value={addPkgForm.targetRank} onChange={(e) => setAddPkgForm(f => ({ ...f, targetRank: e.target.value }))}
+                                    className="w-full bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-xs focus:border-accent focus:outline-none">
+                                    {RANKS.map(r => <option key={r} value={r}>{rankLabel(r)}</option>)}
+                                    <option value="mythicgrading">Mythic Grading</option>
+                                    <option value="mythichonor">Mythic Honor</option>
+                                    <option value="mythicimmortal">Mythic Immortal</option>
+                                  </select>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div>
+                                    <label className="block text-[10px] text-text-muted mb-1">Harga</label>
+                                    <input type="number" value={addPkgForm.price} onChange={(e) => setAddPkgForm(f => ({ ...f, price: e.target.value }))}
+                                      placeholder="125000" className="w-full bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-xs focus:border-accent focus:outline-none" />
+                                  </div>
+                                  <div>
+                                    <label className="block text-[10px] text-text-muted mb-1">Harga Coret</label>
+                                    <input type="number" value={addPkgForm.originalPrice} onChange={(e) => setAddPkgForm(f => ({ ...f, originalPrice: e.target.value }))}
+                                      placeholder="Opsional" className="w-full bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-xs focus:border-accent focus:outline-none" />
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex gap-2">
+                                <button onClick={() => addPackageToCategory(cat.id)} className="px-4 py-2 gradient-primary rounded-lg text-white text-xs font-medium">Tambah Paket</button>
+                                <button onClick={() => setShowAddPkg(false)} className="px-4 py-2 bg-white/5 rounded-lg text-text-muted text-xs">Batal</button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="p-3 border-t border-white/5">
+                              <button onClick={() => { setShowAddPkg(true); setAddPkgForm({ title: "", price: "", originalPrice: "", currentRank: "warrior", targetRank: "epic" }); }}
+                                className="flex items-center gap-1.5 text-xs text-accent hover:text-accent/80 transition">
+                                <Plus className="w-3.5 h-3.5" /> Tambah Paket
+                              </button>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </>

@@ -779,12 +779,12 @@ function OrderPageContent() {
       .then((res) => res.json())
       .then((data) => {
         if (data.pricing_catalog && Array.isArray(data.pricing_catalog) && data.pricing_catalog.length > 0) {
-          // Ensure rankKey is always from DEFAULT_CATALOG (code is source of truth for icons)
+          // Merge: use prices from DB, rankKey from defaults where available, otherwise use pkg.currentRank
           const merged = data.pricing_catalog.map((cat: PackageCategory) => ({
             ...cat,
             packages: cat.packages.map((pkg: ProductPackage) => ({
               ...pkg,
-              rankKey: defaultRankKeys[pkg.id] || pkg.rankKey,
+              rankKey: defaultRankKeys[pkg.id] || pkg.rankKey || pkg.currentRank,
             })),
           }));
           setCatalog(merged);
