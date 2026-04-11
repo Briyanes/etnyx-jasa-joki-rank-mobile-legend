@@ -295,7 +295,8 @@ function getDivisionOptions(rankId: string): { value: number; label: string }[] 
 // Calculate total stars between current rank+division and target rank+division
 function calculateTotalStars(
   currentRank: string, currentDiv: number,
-  targetRank: string, targetDiv: number
+  targetRank: string, targetDiv: number,
+  divisionStar: number = 0
 ): number {
   const ci = RANK_ORDER.indexOf(currentRank);
   const ti = RANK_ORDER.indexOf(targetRank);
@@ -305,7 +306,7 @@ function calculateTotalStars(
       const cfg = RANK_DIVISION_CONFIG[currentRank];
       if (cfg && currentDiv > targetDiv) {
         // Higher div number = lower tier (V is lowest, I is highest)
-        return (currentDiv - targetDiv) * cfg.starsPerDiv;
+        return (currentDiv - targetDiv) * cfg.starsPerDiv - divisionStar;
       }
     }
     return 0;
@@ -315,7 +316,7 @@ function calculateTotalStars(
   // Stars remaining in current rank (from current division to I)
   if (RANKS_WITH_STARS.includes(currentRank)) {
     const cfg = RANK_DIVISION_CONFIG[currentRank];
-    if (cfg) stars += currentDiv * cfg.starsPerDiv;
+    if (cfg) stars += currentDiv * cfg.starsPerDiv - divisionStar;
   }
   // Full ranks in between
   for (let i = ci + 1; i < ti; i++) {
@@ -620,6 +621,8 @@ function OrderPageContent() {
   const [currentStar, setCurrentStar] = useState(3); // Division: Warrior default III=3
   const [targetStar, setTargetStar] = useState(3);
   const [showPackages, setShowPackages] = useState(false);
+  // Star within current division (e.g. Epic II star 3/5)
+  const [currentDivisionStar, setCurrentDivisionStar] = useState(1);
   // Mythic+ star count for current rank
   const [currentMythicStars, setCurrentMythicStars] = useState(0);
 
@@ -1470,6 +1473,7 @@ function OrderPageContent() {
                           if (nextRank) updateForm({ currentRank: val, targetRank: nextRank as RankTier });
                         }
                         // Reset division/stars
+                        setCurrentDivisionStar(1);
                         if (RANKS_WITH_STARS.includes(val)) {
                           const maxDiv = RANK_DIVISION_CONFIG[val]?.divisions ?? 5;
                           if (currentStar > maxDiv) setCurrentStar(maxDiv);
@@ -1497,7 +1501,7 @@ function OrderPageContent() {
                       {getDivisionOptions(form.currentRank).map((s) => (
                         <button
                           key={s.value}
-                          onClick={() => { setCurrentStar(s.value); setSelectedPackage(null); setShowPackages(false); }}
+                          onClick={() => { setCurrentStar(s.value); setCurrentDivisionStar(1); setSelectedPackage(null); setShowPackages(false); }}
                           className={`w-10 h-12 rounded-lg text-xs font-bold transition-all flex flex-col items-center justify-center gap-0.5 ${
                             currentStar === s.value
                               ? "gradient-primary text-white shadow-lg"
@@ -1547,6 +1551,33 @@ function OrderPageContent() {
                     </div>
                   )}
                 </div>
+                {/* Star within division (for Warrior-Legend) */}
+                {RANKS_WITH_STARS.includes(form.currentRank) && (() => {
+                  const starsPerDiv = RANK_DIVISION_CONFIG[form.currentRank]?.starsPerDiv ?? 5;
+                  return (
+                    <div className="mt-3 flex items-center gap-3">
+                      <span className="text-text-muted text-xs whitespace-nowrap">
+                        {locale === "id" ? "Bintang di divisi:" : "Stars in division:"}
+                      </span>
+                      <div className="flex gap-1">
+                        {Array.from({ length: starsPerDiv }, (_, i) => i + 1).map((s) => (
+                          <button
+                            key={s}
+                            onClick={() => setCurrentDivisionStar(s)}
+                            className={`w-8 h-8 rounded-lg text-xs font-bold transition-all flex items-center justify-center ${
+                              currentDivisionStar === s
+                                ? "bg-yellow-400/20 border-2 border-yellow-400 text-yellow-400"
+                                : "bg-surface border border-white/10 text-text-muted hover:border-white/20"
+                            }`}
+                          >
+                            {s}
+                          </button>
+                        ))}
+                      </div>
+                      <span className="text-text-muted text-[10px]">/ {starsPerDiv} ⭐</span>
+                    </div>
+                  );
+                })()}
                 {/* Mythic tier hint */}
                 {MYTHIC_STAR_CONFIG[form.currentRank] && (
                   <p className="text-text-muted text-[10px] mt-2">
@@ -1640,7 +1671,7 @@ function OrderPageContent() {
 
                   {/* Star Summary Card */}
                   {(() => {
-                    const totalStars = calculateTotalStars(form.currentRank, currentStar, form.targetRank, targetStar);
+                    const totalStars = calculateTotalStars(form.currentRank, currentStar, form.targetRank, targetStar, RANKS_WITH_STARS.includes(form.currentRank) ? currentDivisionStar : 0);
                     if (totalStars <= 0) return null;
                     return (
                       <div className="flex items-center justify-between p-3 mb-4 bg-accent/5 border border-accent/20 rounded-xl">
