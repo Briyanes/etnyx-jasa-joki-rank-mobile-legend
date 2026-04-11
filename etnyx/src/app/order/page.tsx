@@ -39,6 +39,8 @@ import {
   CalendarClock,
   ChevronDown,
   ShieldCheck,
+  MapPin,
+  Target,
 } from "lucide-react";
 import { FaFacebook, FaGoogle, FaTiktok, FaVk, FaApple, FaGamepad } from "react-icons/fa";
 import type { IconType } from "react-icons";
@@ -1470,7 +1472,7 @@ function OrderPageContent() {
               {/* ===== SHARED: Rank Awalmu ===== */}
               <div className="mb-5 p-4 bg-background rounded-xl border border-white/5">
                 <label className="block text-sm text-text font-bold mb-2">
-                  {locale === "id" ? "📍 Rank Awalmu Sekarang" : "📍 Your Current Rank"}
+                  <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-red-400" />{locale === "id" ? "Rank Awalmu Sekarang" : "Your Current Rank"}</span>
                 </label>
                 <div className="flex flex-col gap-2">
                   {/* Tier+Division Combined Dropdown */}
@@ -1608,7 +1610,7 @@ function OrderPageContent() {
                   {/* Rank Tujuanmu */}
                   <div className="mb-5 p-4 bg-background rounded-xl border border-white/5">
                     <label className="block text-sm text-text font-bold mb-2">
-                      {locale === "id" ? "🎯 Rank Tujuanmu" : "🎯 Your Target Rank"}
+                      <span className="flex items-center gap-1.5"><Target className="w-4 h-4 text-accent" />{locale === "id" ? "Rank Tujuanmu" : "Your Target Rank"}</span>
                     </label>
                     <div className="relative">
                       <select
