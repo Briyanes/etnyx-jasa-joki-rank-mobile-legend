@@ -271,6 +271,15 @@ const RANK_DIVISION_CONFIG: Record<string, { divisions: number; starsPerDiv: num
   legend: { divisions: 5, starsPerDiv: 5 },         // V, IV, III, II, I — 5 bintang per divisi
 };
 
+// Mythic+ star ranges
+const MYTHIC_STAR_CONFIG: Record<string, { min: number; max: number; label: string }> = {
+  mythicgrading: { min: 0, max: 10, label: "Match" },
+  mythic: { min: 0, max: 25, label: "⭐" },
+  mythichonor: { min: 25, max: 49, label: "⭐" },
+  mythicglory: { min: 50, max: 99, label: "⭐" },
+  mythicimmortal: { min: 100, max: 999, label: "⭐" },
+};
+
 // Get division options based on rank (dynamic)
 function getDivisionOptions(rankId: string): { value: number; label: string }[] {
   const config = RANK_DIVISION_CONFIG[rankId];
@@ -608,9 +617,11 @@ function OrderPageContent() {
   const [seasonMultiplier, setSeasonMultiplier] = useState(1);
   const [seasonLabel, setSeasonLabel] = useState("");
   // Rank selector for paket mode
-  const [currentStar, setCurrentStar] = useState(3); // Warrior default: III=3
+  const [currentStar, setCurrentStar] = useState(3); // Division: Warrior default III=3
   const [targetStar, setTargetStar] = useState(3);
   const [showPackages, setShowPackages] = useState(false);
+  // Mythic+ star count for current rank
+  const [currentMythicStars, setCurrentMythicStars] = useState(0);
 
   // Account verification (Cek Akun)
   const [accountCheckLoading, setAccountCheckLoading] = useState(false);
@@ -1436,75 +1447,120 @@ function OrderPageContent() {
                 </button>
               </div>
 
+              {/* ===== SHARED: Rank Awalmu ===== */}
+              <div className="mb-5 p-4 bg-background rounded-xl border border-white/5">
+                <label className="block text-sm text-text font-bold mb-2">
+                  {locale === "id" ? "📍 Rank Awalmu Sekarang" : "📍 Your Current Rank"}
+                </label>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  {/* Tier Dropdown */}
+                  <div className="flex-1 relative">
+                    <select
+                      value={form.currentRank}
+                      onChange={(e) => {
+                        const val = e.target.value as RankTier;
+                        updateForm({ currentRank: val });
+                        setSelectedPackage(null);
+                        setShowPackages(false);
+                        // Auto-reset target if current >= target
+                        const ci = RANK_ORDER.indexOf(val);
+                        const ti = RANK_ORDER.indexOf(form.targetRank);
+                        if (ci >= ti) {
+                          const nextRank = RANK_ORDER[ci + 1];
+                          if (nextRank) updateForm({ currentRank: val, targetRank: nextRank as RankTier });
+                        }
+                        // Reset division/stars
+                        if (RANKS_WITH_STARS.includes(val)) {
+                          const maxDiv = RANK_DIVISION_CONFIG[val]?.divisions ?? 5;
+                          if (currentStar > maxDiv) setCurrentStar(maxDiv);
+                        } else {
+                          setCurrentStar(5);
+                          // Reset mythic stars to min of that tier
+                          const mythicCfg = MYTHIC_STAR_CONFIG[val];
+                          if (mythicCfg) setCurrentMythicStars(mythicCfg.min);
+                          else setCurrentMythicStars(0);
+                        }
+                      }}
+                      className="w-full bg-surface border border-white/10 rounded-xl px-4 py-3 text-text text-sm font-medium appearance-none cursor-pointer focus:border-accent focus:outline-none transition-colors pr-10"
+                    >
+                      {RANK_LIST.map((rank) => (
+                        <option key={rank.id} value={rank.id}>{rank.label}</option>
+                      ))}
+                    </select>
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                      <Image src={rankIcons[form.currentRank]} alt="" width={24} height={24} className="w-6 h-6 object-contain" />
+                    </div>
+                  </div>
+                  {/* Division Selector (Warrior-Legend) OR Mythic Star Input */}
+                  {RANKS_WITH_STARS.includes(form.currentRank) ? (
+                    <div className="flex gap-1">
+                      {getDivisionOptions(form.currentRank).map((s) => (
+                        <button
+                          key={s.value}
+                          onClick={() => { setCurrentStar(s.value); setSelectedPackage(null); setShowPackages(false); }}
+                          className={`w-10 h-12 rounded-lg text-xs font-bold transition-all flex flex-col items-center justify-center gap-0.5 ${
+                            currentStar === s.value
+                              ? "gradient-primary text-white shadow-lg"
+                              : "bg-surface border border-white/10 text-text-muted hover:border-white/20"
+                          }`}
+                        >
+                          <Star className="w-3 h-3" />
+                          <span>{s.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  ) : MYTHIC_STAR_CONFIG[form.currentRank] ? (
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => setCurrentMythicStars(s => Math.max(MYTHIC_STAR_CONFIG[form.currentRank].min, s - 1))}
+                          disabled={currentMythicStars <= MYTHIC_STAR_CONFIG[form.currentRank].min}
+                          className="w-8 h-8 rounded-lg bg-surface border border-white/10 text-white flex items-center justify-center hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          <Minus className="w-3.5 h-3.5" />
+                        </button>
+                        <input
+                          type="number"
+                          value={currentMythicStars}
+                          onChange={(e) => {
+                            const v = parseInt(e.target.value) || MYTHIC_STAR_CONFIG[form.currentRank].min;
+                            const cfg = MYTHIC_STAR_CONFIG[form.currentRank];
+                            setCurrentMythicStars(Math.max(cfg.min, Math.min(cfg.max, v)));
+                          }}
+                          className="w-16 h-10 text-center bg-surface text-text rounded-lg border border-white/10 focus:outline-none focus:border-accent text-sm font-bold"
+                        />
+                        <button
+                          onClick={() => setCurrentMythicStars(s => Math.min(MYTHIC_STAR_CONFIG[form.currentRank].max, s + 1))}
+                          disabled={currentMythicStars >= MYTHIC_STAR_CONFIG[form.currentRank].max}
+                          className="w-8 h-8 rounded-lg bg-surface border border-white/10 text-white flex items-center justify-center hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      <span className="text-text-muted text-xs whitespace-nowrap">
+                        {MYTHIC_STAR_CONFIG[form.currentRank].label}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center px-3 bg-surface/50 rounded-lg border border-white/5 text-text-muted text-xs">
+                      —
+                    </div>
+                  )}
+                </div>
+                {/* Mythic tier hint */}
+                {MYTHIC_STAR_CONFIG[form.currentRank] && (
+                  <p className="text-text-muted text-[10px] mt-2">
+                    {form.currentRank === "mythicgrading"
+                      ? (locale === "id" ? `Berapa match Mythic Grading yang sudah dimainkan (0-${MYTHIC_STAR_CONFIG[form.currentRank].max})` : `How many Mythic Grading matches played (0-${MYTHIC_STAR_CONFIG[form.currentRank].max})`)
+                      : (locale === "id" ? `${RANK_LIST.find(r => r.id === form.currentRank)?.label}: ${MYTHIC_STAR_CONFIG[form.currentRank].min}-${MYTHIC_STAR_CONFIG[form.currentRank].max} bintang` : `${RANK_LIST.find(r => r.id === form.currentRank)?.label}: ${MYTHIC_STAR_CONFIG[form.currentRank].min}-${MYTHIC_STAR_CONFIG[form.currentRank].max} stars`)
+                    }
+                  </p>
+                )}
+              </div>
+
               {/* PAKET MODE */}
               {orderMode === "paket" && (
                 <>
-                  {/* Rank Awalmu */}
-                  <div className="mb-4">
-                    <label className="block text-sm text-text font-bold mb-2">
-                      {locale === "id" ? "Rank Awalmu" : "Your Current Rank"}
-                    </label>
-                    <div className="flex gap-2">
-                      {/* Tier Dropdown */}
-                      <div className="flex-1 relative">
-                        <select
-                          value={form.currentRank}
-                          onChange={(e) => {
-                            const val = e.target.value as RankTier;
-                            updateForm({ currentRank: val });
-                            setSelectedPackage(null);
-                            setShowPackages(false);
-                            // Auto-reset target if current >= target
-                            const ci = RANK_ORDER.indexOf(val);
-                            const ti = RANK_ORDER.indexOf(form.targetRank);
-                            if (ci >= ti) {
-                              const nextRank = RANK_ORDER[ci + 1];
-                              if (nextRank) updateForm({ currentRank: val, targetRank: nextRank as RankTier });
-                            }
-                            // Reset star to max division if rank has fewer divisions
-                            if (!RANKS_WITH_STARS.includes(val)) {
-                              setCurrentStar(5);
-                            } else {
-                              const maxDiv = RANK_DIVISION_CONFIG[val]?.divisions ?? 5;
-                              if (currentStar > maxDiv) setCurrentStar(maxDiv);
-                            }
-                          }}
-                          className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 text-text text-sm font-medium appearance-none cursor-pointer focus:border-accent focus:outline-none transition-colors pr-10"
-                        >
-                          {RANK_LIST.map((rank) => (
-                            <option key={rank.id} value={rank.id}>{rank.label}</option>
-                          ))}
-                        </select>
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                          <Image src={rankIcons[form.currentRank]} alt="" width={24} height={24} className="w-6 h-6 object-contain" />
-                        </div>
-                      </div>
-                      {/* Star Selector */}
-                      <div className="flex gap-1">
-                        {RANKS_WITH_STARS.includes(form.currentRank) ? (
-                          getDivisionOptions(form.currentRank).map((s) => (
-                            <button
-                              key={s.value}
-                              onClick={() => { setCurrentStar(s.value); setSelectedPackage(null); setShowPackages(false); }}
-                              className={`w-10 h-12 rounded-lg text-xs font-bold transition-all flex flex-col items-center justify-center gap-0.5 ${
-                                currentStar === s.value
-                                  ? "gradient-primary text-white shadow-lg"
-                                  : "bg-background border border-white/10 text-text-muted hover:border-white/20"
-                              }`}
-                            >
-                              <Star className="w-3 h-3" />
-                              <span>{s.label}</span>
-                            </button>
-                          ))
-                        ) : (
-                          <div className="flex items-center px-3 bg-background/50 rounded-lg border border-white/5 text-text-muted text-xs">
-                            —
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
                   {/* Rank Tujuanmu */}
                   <div className="mb-5">
                     <label className="block text-sm text-text font-bold mb-2">
