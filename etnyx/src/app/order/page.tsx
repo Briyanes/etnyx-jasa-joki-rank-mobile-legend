@@ -287,10 +287,10 @@ const RANK_DIVISION_CONFIG: Record<string, { divisions: number; starsPerDiv: num
 // Mythic+ star ranges
 const MYTHIC_STAR_CONFIG: Record<string, { min: number; max: number; label: string }> = {
   mythicgrading: { min: 0, max: 10, label: "Match" },
-  mythic: { min: 0, max: 25, label: "⭐" },
-  mythichonor: { min: 25, max: 49, label: "⭐" },
-  mythicglory: { min: 50, max: 99, label: "⭐" },
-  mythicimmortal: { min: 100, max: 999, label: "⭐" },
+  mythic: { min: 0, max: 25, label: "Stars" },
+  mythichonor: { min: 25, max: 49, label: "Stars" },
+  mythicglory: { min: 50, max: 99, label: "Stars" },
+  mythicimmortal: { min: 100, max: 999, label: "Stars" },
 };
 
 // Get division options based on rank (dynamic)
@@ -1577,8 +1577,8 @@ function OrderPageContent() {
                           <Plus className="w-3.5 h-3.5" />
                         </button>
                       </div>
-                      <span className="text-text-muted text-xs whitespace-nowrap">
-                        {MYTHIC_STAR_CONFIG[form.currentRank].label}
+                      <span className="text-text-muted text-xs whitespace-nowrap flex items-center gap-1">
+                        {MYTHIC_STAR_CONFIG[form.currentRank].label === "Match" ? "Match" : <><Star className="w-3 h-3 text-yellow-400" /> Stars</>}
                       </span>
                     </div>
                   )}
@@ -1700,8 +1700,8 @@ function OrderPageContent() {
                             {locale === "id" ? "Total Bintang" : "Total Stars"}
                           </span>
                         </div>
-                        <span className="text-yellow-400 font-bold text-lg">
-                          {totalStars} ⭐
+                        <span className="text-yellow-400 font-bold text-lg flex items-center gap-1">
+                          {totalStars} <Star className="w-4 h-4" />
                         </span>
                       </div>
                     );
@@ -1938,7 +1938,7 @@ function OrderPageContent() {
                                 <Plus className="w-4 h-4" />
                               </button>
                             </div>
-                            <p className="text-text-muted text-[10px] mt-1">Min {perStarMin} &bull; Max {perStarMax} {selectedStarRank.id === "grading" ? "Match" : "⭐"}</p>
+                            <p className="text-text-muted text-[10px] mt-1 flex items-center gap-1">Min {perStarMin} &bull; Max {perStarMax} {selectedStarRank.id === "grading" ? "Match" : <Star className="w-3 h-3 text-yellow-400" />}</p>
                           </div>
                           
                           <div className="text-right">
@@ -1948,13 +1948,6 @@ function OrderPageContent() {
                             </p>
                           </div>
                         </div>
-                      </div>
-                      {/* Star breakdown */}
-                      <div className="flex items-center justify-center gap-2 mt-3 pt-3 border-t border-white/5 text-xs text-text-muted">
-                        <Star className="w-3 h-3 text-yellow-400" />
-                        <span>
-                          {starQuantity} {selectedStarRank.id === "grading" ? "Match" : (locale === "id" ? "Bintang" : "Stars")} × {formatRupiah(selectedStarRank.price)} = <span className="text-yellow-400 font-semibold">{formatRupiah(selectedStarRank.price * starQuantity)}</span>
-                        </span>
                       </div>
                     </div>
                   )}
@@ -2077,7 +2070,7 @@ function OrderPageContent() {
                                 <Plus className="w-4 h-4" />
                               </button>
                             </div>
-                            <p className="text-text-muted text-[10px] mt-1">Min {gendongMin} &bull; Max {gendongMax} {selectedGendongRank.id === "grading" ? "Match" : "⭐"}</p>
+                            <p className="text-text-muted text-[10px] mt-1 flex items-center gap-1">Min {gendongMin} &bull; Max {gendongMax} {selectedGendongRank.id === "grading" ? "Match" : <Star className="w-3 h-3 text-yellow-400" />}</p>
                           </div>
                           
                           <div className="text-right">
@@ -2087,13 +2080,6 @@ function OrderPageContent() {
                             </p>
                           </div>
                         </div>
-                      </div>
-                      {/* Star breakdown */}
-                      <div className="flex items-center justify-center gap-2 mt-3 pt-3 border-t border-white/5 text-xs text-text-muted">
-                        <Star className="w-3 h-3 text-yellow-400" />
-                        <span>
-                          {gendongQuantity} {selectedGendongRank.id === "grading" ? "Match" : (locale === "id" ? "Bintang" : "Stars")} × {formatRupiah(selectedGendongRank.price)} = <span className="text-yellow-400 font-semibold">{formatRupiah(selectedGendongRank.price * gendongQuantity)}</span>
-                        </span>
                       </div>
                     </div>
                   )}
@@ -2709,7 +2695,7 @@ function OrderPageContent() {
                       <Image src={rankIcons[form.currentRank]} alt="" width={20} height={20} className="w-5 h-5 object-contain" />
                       <span className="text-text-muted">{RANK_LIST.find(r => r.id === form.currentRank)?.label}{RANKS_WITH_STARS.includes(form.currentRank) ? ` ${getDivisionOptions(form.currentRank).find(s => s.value === currentStar)?.label || ""}` : ""}</span>
                       <ArrowRight className="w-3 h-3 text-accent" />
-                      <span className="text-yellow-400 font-medium">{selectedStarRank.name} +{starQuantity}{selectedStarRank.id === "grading" ? " match" : " ⭐"}</span>
+                      <span className="text-yellow-400 font-medium flex items-center gap-1">{selectedStarRank.name} +{starQuantity}{selectedStarRank.id === "grading" ? " match" : <><Star className="w-3 h-3" /></>}</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <Image
@@ -2745,7 +2731,7 @@ function OrderPageContent() {
                       <Image src={rankIcons[form.currentRank]} alt="" width={20} height={20} className="w-5 h-5 object-contain" />
                       <span className="text-text-muted">{RANK_LIST.find(r => r.id === form.currentRank)?.label}{RANKS_WITH_STARS.includes(form.currentRank) ? ` ${getDivisionOptions(form.currentRank).find(s => s.value === currentStar)?.label || ""}` : ""}</span>
                       <ArrowRight className="w-3 h-3 text-accent" />
-                      <span className="text-yellow-400 font-medium">{selectedGendongRank.name} +{gendongQuantity}{selectedGendongRank.id === "grading" ? " match" : " ⭐"}</span>
+                      <span className="text-yellow-400 font-medium flex items-center gap-1">{selectedGendongRank.name} +{gendongQuantity}{selectedGendongRank.id === "grading" ? " match" : <><Star className="w-3 h-3" /></>}</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <Image
