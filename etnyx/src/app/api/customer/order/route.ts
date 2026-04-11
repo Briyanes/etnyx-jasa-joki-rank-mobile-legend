@@ -370,7 +370,7 @@ export async function POST(request: NextRequest) {
         const ipaymuRefId = `ETN-${orderId}-${Date.now()}`;
 
         const ipaymuBody = {
-          product: [`Joki ML: ${currentRank} → ${targetRank}`],
+          product: [`Joki ML: ${currentRank} to ${targetRank}`],
           qty: ["1"],
           price: [String(verifiedTotalPrice)],
           amount: String(verifiedTotalPrice),
@@ -412,7 +412,7 @@ export async function POST(request: NextRequest) {
             })
             .eq("id", order.id);
         } else {
-          console.error("iPaymu error:", ipaymuRes.status, JSON.stringify(ipaymuData));
+          console.error("iPaymu error:", ipaymuRes.status, JSON.stringify(ipaymuData), "URL:", ipaymuApiUrl, "VA:", ipaymuVa?.slice(0,6) + "...");
           // iPaymu failed — fallback to manual transfer
           await supabase
             .from("orders")
@@ -520,7 +520,8 @@ export async function POST(request: NextRequest) {
         totalPrice: verifiedTotalPrice,
         discount: verifiedDiscount,
         paymentUrl,
-        paymentMethod: isManualTransfer ? "manual_transfer" : "ipaymu",
+        paymentMethod: isManualTransfer || (!isManualTransfer && !paymentUrl) ? "manual_transfer" : "ipaymu",
+        ipaymuFailed: !isManualTransfer && !paymentUrl,
       },
       { status: 201 }
     );

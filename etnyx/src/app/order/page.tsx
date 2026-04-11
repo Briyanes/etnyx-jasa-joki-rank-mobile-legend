@@ -1259,14 +1259,17 @@ function OrderPageContent() {
         paymentMethod: data.paymentMethod,
       });
 
-      // Auto-redirect to iPaymu payment page (not for manual transfer)
+      // Auto-redirect to iPaymu payment page
       if (data.paymentUrl && data.paymentMethod !== "manual_transfer") {
         window.location.href = data.paymentUrl;
         return;
       }
 
-      // Auto-redirect to manual payment page
+      // Redirect to manual payment (either chosen or iPaymu fallback)
       if (data.paymentMethod === "manual_transfer") {
+        if (data.ipaymuFailed) {
+          toast("Pembayaran otomatis sedang gangguan, dialihkan ke transfer manual.");
+        }
         window.location.href = `/payment/manual?order_id=${data.orderId}`;
         return;
       }
