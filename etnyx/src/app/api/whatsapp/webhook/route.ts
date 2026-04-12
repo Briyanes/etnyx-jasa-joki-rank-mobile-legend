@@ -35,12 +35,16 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 
+  // Check env var first (for initial setup before DB is configured)
+  const envVerifyToken = process.env.WHATSAPP_VERIFY_TOKEN;
   const settings = await getMetaWASettings();
-  if (!settings.verifyToken) {
+  const verifyToken = settings.verifyToken || envVerifyToken;
+
+  if (!verifyToken) {
     return NextResponse.json({ error: "Webhook not configured" }, { status: 503 });
   }
 
-  if (token !== settings.verifyToken) {
+  if (token !== verifyToken) {
     return NextResponse.json({ error: "Verification failed" }, { status: 403 });
   }
 
