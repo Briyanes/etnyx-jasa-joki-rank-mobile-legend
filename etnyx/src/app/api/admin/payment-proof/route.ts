@@ -63,22 +63,30 @@ export async function POST(request: NextRequest) {
     }
 
     if (action === "approve") {
-      // Update proof status
-      await supabase
+      // Atomic: only approve if still pending
+      const { data: updatedProof, error: proofUpdateErr } = await supabase
         .from("payment_proofs")
         .update({
           status: "approved",
           reviewed_by: auth.user!.email,
           reviewed_at: new Date().toISOString(),
         })
-        .eq("id", proofId);
+        .eq("id", proofId)
+        .eq("status", "pending")
+        .select("id")
+        .single();
+
+      if (proofUpdateErr || !updatedProof) {
+        return NextResponse.json({ error: "Proof sudah diproses" }, { status: 409 });
+      }
 
       // Only update order if not already paid (idempotency — prevents double notifications if admin also clicked "Konfirmasi Bayar")
       const order = proof.orders;
       const alreadyPaid = order.payment_status === "paid" && order.status === "confirmed";
 
       if (!alreadyPaid) {
-        await supabase
+        // Atomic: only update if not already confirmed
+        const { data: updatedOrder } = await supabase
           .from("orders")
           .update({
             payment_status: "paid",
@@ -87,7 +95,14 @@ export async function POST(request: NextRequest) {
             confirmed_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           })
-          .eq("id", order.id);
+          .eq("id", order.id)
+          .neq("payment_status", "paid")
+          .select("id")
+          .single();
+
+        if (!updatedOrder) {
+          return NextResponse.json({ success: true, message: "Proof approved, order already confirmed" });
+        }
 
         // Log
         await supabase.from("order_logs").insert({

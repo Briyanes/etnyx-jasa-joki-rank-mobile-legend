@@ -116,10 +116,23 @@ export async function POST(request: NextRequest) {
       .from("payment_proofs")
       .select("id")
       .eq("order_id", order.id)
+      .eq("status", "pending")
       .limit(1);
 
     if (existingProof && existingProof.length > 0) {
-      return NextResponse.json({ error: "Bukti pembayaran sudah diupload sebelumnya" }, { status: 409 });
+      return NextResponse.json({ error: "Bukti pembayaran sudah diupload dan sedang direview" }, { status: 409 });
+    }
+
+    // Also check for approved proof
+    const { data: approvedProof } = await supabase
+      .from("payment_proofs")
+      .select("id")
+      .eq("order_id", order.id)
+      .eq("status", "approved")
+      .limit(1);
+
+    if (approvedProof && approvedProof.length > 0) {
+      return NextResponse.json({ error: "Pembayaran sudah dikonfirmasi" }, { status: 409 });
     }
 
     // Upload file to Supabase Storage

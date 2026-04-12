@@ -33,7 +33,10 @@ export function encryptField(text: string): string {
 
 export function decryptField(encryptedText: string): string {
   const [ivHex, authTagHex, encrypted] = encryptedText.split(":");
-  if (!ivHex || !authTagHex || !encrypted) return encryptedText; // Not encrypted (legacy)
+  if (!ivHex || !authTagHex || !encrypted) {
+    console.warn("[SECURITY] decryptField: input not in encrypted format, returning as-is");
+    return encryptedText; // Not encrypted (legacy plain text)
+  }
   const iv = Buffer.from(ivHex, "hex");
   const authTag = Buffer.from(authTagHex, "hex");
 

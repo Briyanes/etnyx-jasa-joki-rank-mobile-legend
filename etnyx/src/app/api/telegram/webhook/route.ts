@@ -502,13 +502,16 @@ async function handleConfirmOrder(callbackId: string, chatId: number, messageId:
     return answerCallback(callbackId, `Order sudah ${order.status}`);
   }
 
-  const { error: updateErr } = await supabase
+  const { data: updatedRow, error: updateErr } = await supabase
     .from("orders")
     .update({ status: "confirmed", confirmed_at: new Date().toISOString(), updated_at: new Date().toISOString() })
-    .eq("id", orderId);
+    .eq("id", orderId)
+    .eq("status", "pending")
+    .select("id")
+    .single();
 
-  if (updateErr) {
-    return answerCallback(callbackId, "Gagal mengkonfirmasi order");
+  if (updateErr || !updatedRow) {
+    return answerCallback(callbackId, "Order sudah dikonfirmasi oleh admin lain");
   }
 
   // Send payment confirmed notifications
@@ -575,13 +578,16 @@ async function handleRejectOrder(callbackId: string, chatId: number, messageId: 
     return answerCallback(callbackId, "Order sudah dibatalkan");
   }
 
-  const { error: updateErr } = await supabase
+  const { data: updatedRow, error: updateErr } = await supabase
     .from("orders")
     .update({ status: "cancelled", updated_at: new Date().toISOString() })
-    .eq("id", orderId);
+    .eq("id", orderId)
+    .neq("status", "cancelled")
+    .select("id")
+    .single();
 
-  if (updateErr) {
-    return answerCallback(callbackId, "Gagal membatalkan order");
+  if (updateErr || !updatedRow) {
+    return answerCallback(callbackId, "Order sudah dibatalkan");
   }
 
   // Send cancellation notification to customer
@@ -635,13 +641,16 @@ async function handleStartOrder(callbackId: string, chatId: number, messageId: n
     return answerCallback(callbackId, `Status order: ${order.status}`);
   }
 
-  const { error: updateErr } = await supabase
+  const { data: updatedRow, error: updateErr } = await supabase
     .from("orders")
     .update({ status: "in_progress", updated_at: new Date().toISOString() })
-    .eq("id", orderId);
+    .eq("id", orderId)
+    .eq("status", "confirmed")
+    .select("id")
+    .single();
 
-  if (updateErr) {
-    return answerCallback(callbackId, "Gagal update status");
+  if (updateErr || !updatedRow) {
+    return answerCallback(callbackId, "Order sudah dimulai oleh admin lain");
   }
 
   // Send started notification to customer
@@ -701,13 +710,16 @@ async function handleCompleteOrder(callbackId: string, chatId: number, messageId
     return answerCallback(callbackId, `Status order: ${order.status}`);
   }
 
-  const { error: updateErr } = await supabase
+  const { data: updatedRow, error: updateErr } = await supabase
     .from("orders")
     .update({ status: "completed", completed_at: new Date().toISOString(), updated_at: new Date().toISOString() })
-    .eq("id", orderId);
+    .eq("id", orderId)
+    .eq("status", "in_progress")
+    .select("id")
+    .single();
 
-  if (updateErr) {
-    return answerCallback(callbackId, "Gagal menyelesaikan order");
+  if (updateErr || !updatedRow) {
+    return answerCallback(callbackId, "Order sudah diselesaikan");
   }
 
   // Send completed notifications to customer + admin

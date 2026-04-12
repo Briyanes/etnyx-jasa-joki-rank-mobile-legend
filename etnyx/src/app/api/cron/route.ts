@@ -141,10 +141,24 @@ _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 
     let cancelled = 0;
     for (const order of staleOrders || []) {
-      await supabase
+      // Skip if payment proof exists (customer already paid, waiting admin review)
+      const { count: proofCount } = await supabase
+        .from("payment_proofs")
+        .select("id", { count: "exact", head: true })
+        .eq("order_id", order.id);
+
+      if ((proofCount || 0) > 0) continue;
+
+      // Atomic: only cancel if still pending
+      const { data: updated } = await supabase
         .from("orders")
         .update({ status: "cancelled", updated_at: new Date().toISOString() })
-        .eq("id", order.id);
+        .eq("id", order.id)
+        .eq("status", "pending")
+        .select("id")
+        .single();
+
+      if (!updated) continue;
 
       // Notify customer via WA
       if (order.whatsapp) {
