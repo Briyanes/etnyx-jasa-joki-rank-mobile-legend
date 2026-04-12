@@ -93,7 +93,7 @@ export default function Navbar({ hiddenSections }: NavbarProps) {
   }, []);
 
   return (
-    <nav className="glass border-b border-white/5">
+    <nav className="glass border-b border-white/5" aria-label="Main navigation">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}

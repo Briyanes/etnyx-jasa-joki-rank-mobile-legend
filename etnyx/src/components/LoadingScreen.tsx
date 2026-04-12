@@ -26,7 +26,7 @@ export default function LoadingScreen() {
     // Hide loading screen after animation
     const hideTimer = setTimeout(() => {
       setIsLoading(false);
-    }, 1500);
+    }, 800);
 
     return () => {
       clearInterval(progressTimer);
