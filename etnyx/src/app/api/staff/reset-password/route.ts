@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     const { data: settingsData } = await supabase.from("settings").select("value").eq("key", "integrations").single();
     const settings = settingsData?.value || {};
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
     const resetUrl = `${baseUrl}/admin?reset=${token}`;
 
     if (settings.resendApiKey) {
