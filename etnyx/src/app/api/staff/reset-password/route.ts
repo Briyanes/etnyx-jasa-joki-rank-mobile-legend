@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
           subject: "Reset Password - ETNYX Staff",
           html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-              <h2 style="color: #6366f1;">Reset Password 🔑</h2>
+              <h2 style="color: #6366f1;">Reset Password</h2>
               <p>Halo <strong>${user.name}</strong>,</p>
               <p>Kamu meminta reset password untuk akun staff ETNYX. Klik tombol di bawah:</p>
               <div style="text-align: center; margin: 30px 0;">

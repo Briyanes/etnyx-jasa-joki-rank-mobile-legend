@@ -30,9 +30,9 @@ interface WorkerStats {
 type SortKey = "score" | "totalCompleted" | "winRate" | "avgRating" | "totalMVP" | "totalSavage";
 
 const PODIUM_STYLES = [
-  { bg: "bg-yellow-500/10", border: "border-yellow-500/30", icon: Crown, color: "text-yellow-400", medal: "🥇" },
-  { bg: "bg-gray-400/10", border: "border-gray-400/30", icon: Medal, color: "text-gray-300", medal: "🥈" },
-  { bg: "bg-orange-500/10", border: "border-orange-500/30", icon: Award, color: "text-orange-400", medal: "🥉" },
+  { bg: "bg-yellow-500/10", border: "border-yellow-500/30", icon: Crown, color: "text-yellow-400", medal: "#1" },
+  { bg: "bg-gray-400/10", border: "border-gray-400/30", icon: Medal, color: "text-gray-300", medal: "#2" },
+  { bg: "bg-orange-500/10", border: "border-orange-500/30", icon: Award, color: "text-orange-400", medal: "#3" },
 ];
 
 export default function LeaderboardTab() {

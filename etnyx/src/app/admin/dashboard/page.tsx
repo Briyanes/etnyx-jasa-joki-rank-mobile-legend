@@ -13,6 +13,7 @@ import {
   Plus, Pencil, Trash2, Save, Search, Filter, RefreshCw, LogOut,
   MessageCircle, Send, BookOpen, Copy, Gift, Wallet, CalendarDays,
   Flame, Target, Lightbulb, Ban, HelpCircle, Menu, FileDown,
+  KeyRound, Check, X,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import SettingsTab from "./SettingsTab";
@@ -1266,7 +1267,7 @@ export default function AdminDashboard() {
                                 )}
                                 {o.payment_method !== "manual_transfer" && (
                                   <span className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-blue-500/10 text-blue-400 w-full">
-                                    ⏳ Menunggu pembayaran iPaymu
+                                    <Clock className="w-3 h-3" /> Menunggu pembayaran iPaymu
                                   </span>
                                 )}
                                 <div className="flex gap-1">
@@ -1290,7 +1291,7 @@ export default function AdminDashboard() {
                                 {!(o.package_title?.includes("Gendong") || o.package_title?.includes("Duo Boost")) && (<>
                                 <button onClick={() => viewCredentials(o.id)}
                                   className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 transition-colors w-full">
-                                  🔑 3. Cek Credentials
+                                  <KeyRound className="w-3 h-3" /> 3. Cek Credentials
                                 </button>
                                 {o.whatsapp && (
                                   <button onClick={() => sendFollowUp(o.id, "follow_up_credentials")}
@@ -1312,7 +1313,7 @@ export default function AdminDashboard() {
                                 {!(o.package_title?.includes("Gendong") || o.package_title?.includes("Duo Boost")) && (
                                 <button onClick={() => viewCredentials(o.id)}
                                   className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20 transition-colors w-full">
-                                  🔑 Credentials
+                                  <KeyRound className="w-3 h-3" /> Credentials
                                 </button>
                                 )}
                                 <button onClick={() => updateOrderStatus(o.id, "completed")}
@@ -2040,7 +2041,7 @@ export default function AdminDashboard() {
                         <td className="px-4 py-3 text-text-muted text-xs max-w-[200px] truncate">{t.comment}</td>
                         <td className="px-4 py-3">
                           <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${t.is_visible ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>{t.is_visible ? "Visible" : "Hidden"}</span>
-                          {t.is_featured && <span className="ml-1 px-2 py-0.5 rounded text-[10px] bg-purple-500/20 text-purple-400">★</span>}
+                          {t.is_featured && <span className="ml-1 px-2 py-0.5 rounded text-[10px] bg-purple-500/20 text-purple-400"><Star className="w-3 h-3 inline fill-purple-400" /></span>}
                         </td>
                         <td className="px-4 py-3">
                           <button onClick={() => { setEditItem(t); setShowModal("testimonial"); }} className="text-accent text-xs mr-2 hover:underline">Edit</button>
@@ -2844,14 +2845,14 @@ export default function AdminDashboard() {
                             disabled={proofActionLoading === proof.id}
                             className="px-3 py-1.5 rounded-lg text-xs font-medium bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors disabled:opacity-50"
                           >
-                            {proofActionLoading === proof.id ? "..." : "✓ Approve"}
+                            {proofActionLoading === proof.id ? "..." : <><Check className="w-3 h-3 inline" /> Approve</>}
                           </button>
                           <button
                             onClick={() => handleProofAction(proof.id, "reject")}
                             disabled={proofActionLoading === proof.id}
                             className="px-3 py-1.5 rounded-lg text-xs font-medium bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors disabled:opacity-50"
                           >
-                            ✗ Reject
+                            <X className="w-3 h-3 inline" /> Reject
                           </button>
                         </div>
                       )}

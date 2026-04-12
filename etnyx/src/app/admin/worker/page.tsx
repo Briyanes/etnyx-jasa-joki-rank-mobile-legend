@@ -655,7 +655,7 @@ function OrderCard({
                   <div key={s.id} className="bg-background rounded-lg p-3 text-xs">
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-text-muted">{new Date(s.submitted_at).toLocaleDateString("id-ID", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
-                          <span className="text-accent font-medium">+{s.stars_gained} ★</span>
+                          <span className="text-accent font-medium">+{s.stars_gained} <Star className="w-3 h-3 inline fill-accent" /></span>
                         </div>
                         <div className="flex gap-3 text-text-muted">
                           <span>{s.matches_played} match</span>

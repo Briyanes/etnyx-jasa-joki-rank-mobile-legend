@@ -24,7 +24,7 @@ export async function sendVerificationEmail(
       subject: `Verifikasi Email - ${SITE_NAME}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h2 style="color: #6366f1;">Halo ${name}! 👋</h2>
+          <h2 style="color: #6366f1;">Halo ${name}!</h2>
           <p>Terima kasih sudah mendaftar di <strong>${SITE_NAME}</strong>.</p>
           <p>Klik tombol di bawah untuk memverifikasi email kamu:</p>
           <div style="text-align: center; margin: 30px 0;">
@@ -64,7 +64,7 @@ export async function sendPasswordResetEmail(
       subject: `Reset Password - ${SITE_NAME}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h2 style="color: #6366f1;">Reset Password 🔐</h2>
+          <h2 style="color: #6366f1;">Reset Password</h2>
           <p>Halo <strong>${name}</strong>,</p>
           <p>Kamu meminta reset password untuk akun ${SITE_NAME}.</p>
           <p>Klik tombol di bawah untuk membuat password baru:</p>

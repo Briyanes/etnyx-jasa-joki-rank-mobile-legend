@@ -13,7 +13,7 @@ import {
   Megaphone, Target, MousePointerClick, MessageCircle,
   Clock, FileText, AlertTriangle, HelpCircle, Rocket,
   Flame, CheckSquare2, Ban, CalendarDays, ShieldCheck,
-  Lightbulb,
+  Lightbulb, Check, XIcon,
 } from "lucide-react";
 
 // --- Reusable Components ---
@@ -780,7 +780,7 @@ function buildCategories(): DocCategory[] {
                     "Respon cepat di Telegram — customer & tim expect fast response",
                   ].map((item, i) => (
                     <li key={i} className="flex items-start gap-2">
-                      <span className="text-green-400 shrink-0">{"✓"}</span> {item}
+                      <Check className="w-3.5 h-3.5 text-green-400 shrink-0" /> {item}
                     </li>
                   ))}
                 </ul>
@@ -800,7 +800,7 @@ function buildCategories(): DocCategory[] {
                     "Jangan hapus order data — cancel saja (untuk audit trail)",
                   ].map((item, i) => (
                     <li key={i} className="flex items-start gap-2">
-                      <span className="text-red-400 shrink-0">{"✗"}</span> {item}
+                      <XIcon className="w-3.5 h-3.5 text-red-400 shrink-0" /> {item}
                     </li>
                   ))}
                 </ul>
@@ -1776,7 +1776,7 @@ function buildCategories(): DocCategory[] {
                     "Respon cepat via Telegram — customer expect fast service",
                   ].map((item, i) => (
                     <li key={i} className="flex items-start gap-2">
-                      <span className="text-green-400 shrink-0">{"✓"}</span> {item}
+                      <Check className="w-3.5 h-3.5 text-green-400 shrink-0" /> {item}
                     </li>
                   ))}
                 </ul>
@@ -1795,7 +1795,7 @@ function buildCategories(): DocCategory[] {
                     "Jangan hapus notes yang ditulis staff lain",
                   ].map((item, i) => (
                     <li key={i} className="flex items-start gap-2">
-                      <span className="text-red-400 shrink-0">{"✗"}</span> {item}
+                      <XIcon className="w-3.5 h-3.5 text-red-400 shrink-0" /> {item}
                     </li>
                   ))}
                 </ul>
@@ -2354,7 +2354,7 @@ function buildCategories(): DocCategory[] {
                 ["Signature", "SHA-256 HMAC", "iPaymu payment webhook verification"],
               ]} />
               <div className="bg-background rounded-lg p-4 border border-white/5">
-                <h4 className="text-text font-medium text-sm mb-3">🔐 Credential Encryption (AES-256-GCM)</h4>
+                <h4 className="text-text font-medium text-sm mb-3 flex items-center gap-2"><Lock className="w-4 h-4" /> Credential Encryption (AES-256-GCM)</h4>
                 <p className="text-text-muted text-xs mb-3">Akun game ML (login + password) dienkripsi sebelum disimpan di database.</p>
                 <StepFlow steps={[
                   { title: "Key Derivation", desc: "ENCRYPTION_KEY (env var, min 16 char) → SHA-256 hash → 32-byte key" },
@@ -2801,7 +2801,7 @@ function buildCategories(): DocCategory[] {
                     "Comprehensive security audit + fixes (ads auth, stats query, URL bug)",
                   ].map((item, i) => (
                     <li key={i} className="flex items-start gap-2">
-                      <span className="text-green-400 shrink-0">{"✓"}</span> {item}
+                      <Check className="w-3.5 h-3.5 text-green-400 shrink-0" /> {item}
                     </li>
                   ))}
                 </ul>

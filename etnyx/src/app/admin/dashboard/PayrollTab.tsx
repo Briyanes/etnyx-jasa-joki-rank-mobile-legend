@@ -1030,7 +1030,7 @@ export default function PayrollTab() {
               <ArrowRight className="w-4 h-4" />
               <span className="bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded">Approved</span>
               <ArrowRight className="w-4 h-4" />
-              <span className="bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded flex items-center gap-1"><CreditCard className="w-3 h-3" /> Transfer Manual ✓</span>
+              <span className="bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded flex items-center gap-1"><CreditCard className="w-3 h-3" /> Transfer Manual <CheckCircle className="w-3 h-3" /></span>
             </div>
             <div className="mt-3 text-sm text-gray-500">
               <p>• <strong>Worker:</strong> Komisi per order ({((settings.commission?.worker_rate ?? 0.6) * 100).toFixed(0)}%) — payout setiap 2 minggu (tgl 1 & 16)</p>

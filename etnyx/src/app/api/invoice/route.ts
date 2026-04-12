@@ -123,7 +123,7 @@ export async function GET(request: NextRequest) {
 <body>
   <div class="invoice">
     <div class="header">
-      <div class="logo">🎮 ETNYX</div>
+      <div class="logo">ETNYX</div>
       <h1>INVOICE</h1>
       <p>${invoiceNumber}</p>
     </div>
@@ -161,7 +161,7 @@ export async function GET(request: NextRequest) {
             <td>
               ${order.current_rank || "Warrior"} → ${order.target_rank || "Mythic"}<br>
               <span style="color: #666; font-size: 13px;">
-                ${order.is_express && order.is_premium ? '⚡👑 Express Premium' : order.is_express ? '⚡ Express' : order.is_premium ? '👑 Premium' : '🎯 Standard'}
+                ${order.is_express && order.is_premium ? 'Express Premium' : order.is_express ? 'Express' : order.is_premium ? 'Premium' : 'Standard'}
               </span>
             </td>
             <td class="price">Rp ${(order.total_price || 0).toLocaleString("id-ID")}</td>
