@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -36,6 +36,8 @@ const translations = {
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || "/dashboard";
   const { locale } = useLanguage();
   const t = translations[locale as keyof typeof translations] || translations.id;
   const [email, setEmail] = useState("");
@@ -62,7 +64,7 @@ export default function LoginPage() {
         return;
       }
 
-      router.push("/dashboard");
+      router.push(redirectTo);
     } catch {
       setError(t.errorGeneric);
     } finally {
