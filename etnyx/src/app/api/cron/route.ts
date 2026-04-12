@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
-import { sendWhatsAppMessage, waDisclaimer, getNotificationPreferences } from "@/lib/notifications";
+import { sendWhatsAppMessage, sendOrderCancelledWA, sendTelegramMessage, waDisclaimer, getNotificationPreferences } from "@/lib/notifications";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.com";
 
@@ -128,6 +128,81 @@ _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
   } catch (error) {
     console.error("Review request cron error:", error);
     results.reviewRequests = { error: String(error) };
+  }
+
+  // 3. Auto-cancel pending orders > 72h without payment
+  try {
+    const cutoff72h = new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString();
+    const { data: staleOrders } = await supabase
+      .from("orders")
+      .select("id, order_id, username, whatsapp, total_price, current_rank, target_rank, current_star, target_star, package, package_title, price:total_price, email, status")
+      .eq("status", "pending")
+      .lt("created_at", cutoff72h);
+
+    let cancelled = 0;
+    for (const order of staleOrders || []) {
+      await supabase
+        .from("orders")
+        .update({ status: "cancelled", updated_at: new Date().toISOString() })
+        .eq("id", order.id);
+
+      // Notify customer via WA
+      if (order.whatsapp) {
+        await sendOrderCancelledWA(order);
+      }
+      cancelled++;
+    }
+    results.autoCancelPending = { total: staleOrders?.length || 0, cancelled };
+  } catch (error) {
+    console.error("Auto-cancel pending cron error:", error);
+    results.autoCancelPending = { error: String(error) };
+  }
+
+  // 4. Auto-expire promo codes past expiry date
+  try {
+    const now = new Date().toISOString();
+    const { data: expiredPromos, count } = await supabase
+      .from("promo_codes")
+      .update({ is_active: false })
+      .eq("is_active", true)
+      .lt("expires_at", now)
+      .select("code");
+
+    results.expiredPromos = { disabled: expiredPromos?.length || count || 0 };
+  } catch (error) {
+    console.error("Auto-expire promos cron error:", error);
+    results.expiredPromos = { error: String(error) };
+  }
+
+  // 5. Alert admin for stale in_progress orders > 14 days
+  try {
+    const cutoff14d = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+    const { data: staleInProgress } = await supabase
+      .from("orders")
+      .select("order_id, username, assigned_worker_id, updated_at")
+      .eq("status", "in_progress")
+      .lt("updated_at", cutoff14d);
+
+    if (staleInProgress && staleInProgress.length > 0) {
+      const { data: settings } = await supabase
+        .from("settings")
+        .select("value")
+        .eq("key", "integrations")
+        .single();
+
+      const adminChatId = settings?.value?.telegramAdminGroupId;
+      if (adminChatId) {
+        const lines = staleInProgress.map(
+          (o) => `• ${o.order_id} — ${o.username} (last update: ${new Date(o.updated_at).toLocaleDateString("id-ID")})`
+        );
+        const message = `⚠️ *STALE ORDERS ALERT*\n\n${staleInProgress.length} order in_progress lebih dari 14 hari tanpa update:\n\n${lines.join("\n")}\n\nCek & follow up segera!`;
+        await sendTelegramMessage(adminChatId, message);
+      }
+    }
+    results.staleInProgress = { count: staleInProgress?.length || 0 };
+  } catch (error) {
+    console.error("Stale in_progress cron error:", error);
+    results.staleInProgress = { error: String(error) };
   }
 
   return NextResponse.json({ ok: true, results });
