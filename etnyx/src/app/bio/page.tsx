@@ -206,7 +206,7 @@ export default function BioPage() {
         <div className="flex items-center justify-center gap-2 mb-6">
           <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-[10px] font-semibold">
             <Zap className="w-3 h-3" />
-            {t.startFrom} Rp 5K
+            {t.startFrom} Rp 4K
           </div>
           <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-[10px] font-semibold">
             <Star className="w-3 h-3" />
