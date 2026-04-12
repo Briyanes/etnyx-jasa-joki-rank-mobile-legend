@@ -40,6 +40,10 @@ interface IntegrationSettings {
   telegramWorkerGroupId?: string;
   telegramReviewGroupId?: string;
   telegramReportGroupId?: string;
+  metaWaPhoneNumberId?: string;
+  metaWaAccessToken?: string;
+  metaWaVerifyToken?: string;
+  metaWaEnabled?: boolean;
 }
 
 // ============ Helper: Get Integration Settings ============
@@ -373,28 +377,71 @@ ${report.report_detail ? `\n<b>Detail:</b> ${report.report_detail}` : ""}
   return true;
 }
 
-// ============ WHATSAPP (Fonnte) ============
-export async function sendWhatsAppMessage(
+// ============ WHATSAPP (Meta Cloud API + Fonnte fallback) ============
+
+function normalizePhone(phone: string): string {
+  let normalized = phone.replace(/\D/g, "");
+  if (normalized.startsWith("0")) {
+    normalized = "62" + normalized.slice(1);
+  }
+  if (!normalized.startsWith("62")) {
+    normalized = "62" + normalized;
+  }
+  return normalized;
+}
+
+async function sendWhatsAppMeta(
   phone: string,
   message: string,
-  url?: string
+  settings: IntegrationSettings
 ): Promise<boolean> {
-  const settings = await getIntegrationSettings();
-  const token = settings.fonnteApiToken;
-
-  if (!token || !phone) {
-    console.warn("Fonnte not configured or no phone number");
+  if (!settings.metaWaEnabled || !settings.metaWaAccessToken || !settings.metaWaPhoneNumberId) {
     return false;
   }
 
-  // Normalize phone number
-  let normalizedPhone = phone.replace(/\D/g, "");
-  if (normalizedPhone.startsWith("0")) {
-    normalizedPhone = "62" + normalizedPhone.slice(1);
+  const normalizedPhone = normalizePhone(phone);
+
+  try {
+    const res = await fetch(
+      `https://graph.facebook.com/v21.0/${settings.metaWaPhoneNumberId}/messages`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${settings.metaWaAccessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messaging_product: "whatsapp",
+          recipient_type: "individual",
+          to: normalizedPhone,
+          type: "text",
+          text: { preview_url: true, body: message },
+        }),
+      }
+    );
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      console.error("Meta WA error:", err);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error("Meta WA failed:", error);
+    return false;
   }
-  if (!normalizedPhone.startsWith("62")) {
-    normalizedPhone = "62" + normalizedPhone;
-  }
+}
+
+async function sendWhatsAppFonnte(
+  phone: string,
+  message: string,
+  url: string | undefined,
+  settings: IntegrationSettings
+): Promise<boolean> {
+  const token = settings.fonnteApiToken;
+  if (!token) return false;
+
+  const normalizedPhone = normalizePhone(phone);
 
   try {
     const body: Record<string, string> = {
@@ -402,8 +449,6 @@ export async function sendWhatsAppMessage(
       message: message,
       countryCode: "62",
     };
-    // Fonnte `url` parameter creates a clickable link preview card
-    // that is always tappable even without prior conversation
     if (url) {
       body.url = url;
     }
@@ -424,9 +469,26 @@ export async function sendWhatsAppMessage(
     }
     return true;
   } catch (error) {
-    console.error("Failed to send WhatsApp message:", error);
+    console.error("Fonnte WA failed:", error);
     return false;
   }
+}
+
+export async function sendWhatsAppMessage(
+  phone: string,
+  message: string,
+  url?: string
+): Promise<boolean> {
+  if (!phone) return false;
+
+  const settings = await getIntegrationSettings();
+
+  // Try Meta Cloud API first (official, free tier)
+  const metaSent = await sendWhatsAppMeta(phone, message, settings);
+  if (metaSent) return true;
+
+  // Fallback to Fonnte
+  return sendWhatsAppFonnte(phone, message, url, settings);
 }
 
 export async function sendPaymentConfirmedWA(order: OrderData): Promise<boolean> {

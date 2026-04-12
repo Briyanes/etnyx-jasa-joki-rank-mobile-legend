@@ -56,6 +56,7 @@ interface IntegrationSettings {
   ipaymuApiKey: string; ipaymuVa: string; ipaymuIsProduction: boolean;
   resendApiKey: string; resendFromEmail: string;
   fonnteApiToken: string; fonnteDeviceId: string;
+  metaWaPhoneNumberId: string; metaWaAccessToken: string; metaWaVerifyToken: string; metaWaEnabled: boolean;
   telegramBotToken: string; telegramAdminGroupId: string; telegramWorkerGroupId: string; telegramReviewGroupId: string; telegramReportGroupId: string;
 }
 
@@ -101,6 +102,7 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
     ipaymuApiKey: "", ipaymuVa: "", ipaymuIsProduction: false,
     resendApiKey: "", resendFromEmail: "noreply@etnyx.com",
     fonnteApiToken: "", fonnteDeviceId: "",
+    metaWaPhoneNumberId: "", metaWaAccessToken: "", metaWaVerifyToken: "", metaWaEnabled: false,
     telegramBotToken: "", telegramAdminGroupId: "", telegramWorkerGroupId: "", telegramReviewGroupId: "", telegramReportGroupId: "",
   });
   const DEFAULT_BANK_ACCOUNTS: { bank: string; category: string; account_number: string; account_name: string; is_active: boolean; qris_image_url?: string }[] = [
@@ -763,8 +765,8 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
           {/* Fonnte */}
           <div className="bg-surface rounded-xl border border-white/5 p-6 space-y-4">
             <div>
-              <h3 className="text-text font-bold text-sm flex items-center gap-2"><MessageCircle className="w-4 h-4 text-accent" /> Fonnte (WhatsApp API)</h3>
-              <p className="text-text-muted text-xs mt-0.5">Kirim notifikasi order via WhatsApp</p>
+              <h3 className="text-text font-bold text-sm flex items-center gap-2"><MessageCircle className="w-4 h-4 text-accent" /> Fonnte (WhatsApp Fallback)</h3>
+              <p className="text-text-muted text-xs mt-0.5">Backup jika Meta Cloud API tidak aktif</p>
             </div>
             <div>
               <label className="block text-sm text-text-muted mb-1.5">API Token</label>
@@ -777,6 +779,43 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
                 placeholder="628xxxxxxxxxx" className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
             </div>
             <p className="text-text-muted text-xs"><BookOpen className="w-3 h-3 inline mr-1" /> Dapatkan Token di <a href="https://md.fonnte.com/api" target="_blank" rel="noopener" className="text-accent hover:underline">md.fonnte.com</a></p>
+          </div>
+
+          {/* Meta WhatsApp Cloud API */}
+          <div className="bg-surface rounded-xl border border-white/5 p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-text font-bold text-sm flex items-center gap-2"><MessageCircle className="w-4 h-4 text-green-400" /> Meta WhatsApp Cloud API</h3>
+                <p className="text-text-muted text-xs mt-0.5">API resmi WhatsApp (1000 percakapan gratis/bulan)</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" checked={integrations.metaWaEnabled} onChange={(e) => setIntegrations({ ...integrations, metaWaEnabled: e.target.checked })} className="sr-only peer" />
+                <div className="w-9 h-5 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500" />
+              </label>
+            </div>
+            <div>
+              <label className="block text-sm text-text-muted mb-1.5">Phone Number ID</label>
+              <input type="text" value={integrations.metaWaPhoneNumberId} onChange={(e) => setIntegrations({ ...integrations, metaWaPhoneNumberId: e.target.value })}
+                placeholder="1234567890" className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
+              <p className="text-text-muted text-xs mt-1">Dari WhatsApp Manager → Phone Numbers</p>
+            </div>
+            <div>
+              <label className="block text-sm text-text-muted mb-1.5">Access Token (Permanent)</label>
+              <input type="password" value={integrations.metaWaAccessToken} onChange={(e) => setIntegrations({ ...integrations, metaWaAccessToken: e.target.value })}
+                placeholder="EAAxxxxxxx..." className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
+              <p className="text-text-muted text-xs mt-1">System User Token dari Meta Business Settings</p>
+            </div>
+            <div>
+              <label className="block text-sm text-text-muted mb-1.5">Webhook Verify Token</label>
+              <input type="text" value={integrations.metaWaVerifyToken} onChange={(e) => setIntegrations({ ...integrations, metaWaVerifyToken: e.target.value })}
+                placeholder="etnyx-wa-verify-2026" className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
+              <p className="text-text-muted text-xs mt-1">Token untuk verifikasi webhook (buat sendiri, contoh: etnyx-wa-verify-2026)</p>
+            </div>
+            <div className="bg-background/50 rounded-lg p-3 space-y-1">
+              <p className="text-text-muted text-xs font-medium">Webhook URL (paste di Meta App Dashboard):</p>
+              <code className="text-accent text-xs break-all">{typeof window !== 'undefined' ? `${window.location.origin}/api/whatsapp/webhook` : '/api/whatsapp/webhook'}</code>
+            </div>
+            <p className="text-text-muted text-xs"><BookOpen className="w-3 h-3 inline mr-1" /> Setup di <a href="https://business.facebook.com/latest/whatsapp_manager" target="_blank" rel="noopener" className="text-accent hover:underline">Meta WhatsApp Manager</a></p>
           </div>
 
           {/* Telegram */}
