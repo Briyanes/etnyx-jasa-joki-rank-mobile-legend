@@ -302,6 +302,7 @@ export async function POST(request: NextRequest) {
     // Recalculate final price server-side (never trust client totalPrice with discount)
     // Tier discount: look up customer tier by email or whatsapp
     let verifiedTierDiscount = 0;
+    let verifiedTierName: string | null = null;
     if (sanitizedEmail || cleanWhatsapp) {
       try {
         let customerQuery = supabase.from("customers").select("reward_tier");
@@ -314,6 +315,7 @@ export async function POST(request: NextRequest) {
         if (cust?.reward_tier) {
           const tierDiscountPct = cust.reward_tier === "platinum" ? 8 : cust.reward_tier === "gold" ? 5 : cust.reward_tier === "silver" ? 3 : 0;
           verifiedTierDiscount = Math.round(totalPrice * tierDiscountPct / 100);
+          if (verifiedTierDiscount > 0) verifiedTierName = cust.reward_tier;
         }
       } catch { /* not a member or not found */ }
     }
@@ -348,6 +350,8 @@ export async function POST(request: NextRequest) {
         customer_email: sanitizedEmail,
         promo_code: verifiedPromoCode,
         promo_discount: verifiedDiscount,
+        tier_discount: verifiedTierDiscount,
+        tier_name: verifiedTierName,
         utm_source: utmSource,
         utm_medium: utmMedium,
         utm_campaign: utmCampaign,
@@ -370,31 +374,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Increment promo used_count if promo was applied (atomic via RPC)
+    // Atomic promo usage: increment only if used_count < max_uses
     if (promoId) {
-      const { error: rpcErr } = await supabase.rpc("increment_promo_used_count", { p_promo_id: promoId });
+      const { data: promoUsed, error: rpcErr } = await supabase.rpc("try_use_promo_code", { p_promo_id: promoId });
       if (rpcErr) {
-        console.error("Failed to increment promo used_count:", rpcErr);
-      } else {
-        // Post-increment check: if used_count now exceeds max_uses, the promo was over-used (race condition)
-        const { data: promoCheck } = await supabase
-          .from("promo_codes")
-          .select("used_count, max_uses")
-          .eq("id", promoId)
-          .single();
-        if (promoCheck?.max_uses && promoCheck.used_count > promoCheck.max_uses) {
-          // Revert: decrement back and remove discount from order
-          const { error: decErr } = await supabase.rpc("decrement_promo_used_count", { p_promo_id: promoId });
-          if (decErr) {
-            // Fallback: direct update if RPC doesn't exist
-            await supabase.from("promo_codes").update({ used_count: promoCheck.max_uses }).eq("id", promoId);
-          }
-          await supabase.from("orders").update({
-            promo_code: null,
-            promo_discount: 0,
-            total_price: verifiedBasePrice,
-          }).eq("id", order.id);
-        }
+        console.error("Failed to use promo code:", rpcErr);
+      }
+      if (!promoUsed) {
+        // Promo exhausted (race condition: another user used the last slot)
+        await supabase.from("orders").update({
+          promo_code: null,
+          promo_discount: 0,
+          total_price: verifiedBasePrice - verifiedTierDiscount,
+        }).eq("id", order.id);
       }
     }
 

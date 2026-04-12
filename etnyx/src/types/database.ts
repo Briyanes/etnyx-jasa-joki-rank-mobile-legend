@@ -31,6 +31,8 @@ export interface Order {
   booster_notes?: string;
   promo_code?: string;
   promo_discount?: number;
+  tier_discount?: number;
+  tier_name?: string | null;
   account_login?: string;
   account_password?: string;
   hero_request?: string;

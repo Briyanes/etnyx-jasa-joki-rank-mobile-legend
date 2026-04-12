@@ -174,6 +174,14 @@ export async function GET(request: NextRequest) {
             <td class="price" style="color: #059669;">- Rp ${(order.promo_discount || 0).toLocaleString("id-ID")}</td>
           </tr>
           ` : ''}
+          ${(order.tier_discount || 0) > 0 ? `
+          <tr>
+            <td colspan="2">
+              <strong>Tier ${(order.tier_name || '').charAt(0).toUpperCase() + (order.tier_name || '').slice(1)} Discount</strong>
+            </td>
+            <td class="price" style="color: #059669;">- Rp ${(order.tier_discount || 0).toLocaleString("id-ID")}</td>
+          </tr>
+          ` : ''}
         </tbody>
       </table>
       
@@ -182,15 +190,15 @@ export async function GET(request: NextRequest) {
           <span>Subtotal</span>
           <span>Rp ${(order.total_price || 0).toLocaleString("id-ID")}</span>
         </div>
-        ${(order.promo_discount || 0) > 0 ? `
+        ${(order.promo_discount || 0) > 0 || (order.tier_discount || 0) > 0 ? `
         <div class="total-row">
           <span>Diskon</span>
-          <span style="color: #059669;">- Rp ${(order.promo_discount || 0).toLocaleString("id-ID")}</span>
+          <span style="color: #059669;">- Rp ${((order.promo_discount || 0) + (order.tier_discount || 0)).toLocaleString("id-ID")}</span>
         </div>
         ` : ''}
         <div class="total-row grand">
           <span>Total</span>
-          <span>Rp ${((order.total_price || 0) - (order.promo_discount || 0)).toLocaleString("id-ID")}</span>
+          <span>Rp ${((order.total_price || 0) - (order.promo_discount || 0) - (order.tier_discount || 0)).toLocaleString("id-ID")}</span>
         </div>
       </div>
     </div>
@@ -288,6 +296,7 @@ export async function GET(request: NextRequest) {
 
     const totalPrice = order.total_price || 0;
     const promoDiscount = order.promo_discount || 0;
+    const tierDiscount = order.tier_discount || 0;
     const fmtTotal = `Rp ${totalPrice.toLocaleString("id-ID")}`;
     page.drawText(fmtTotal, { x: 460, y: y + 14, size: 10, font: fontBold, color: black });
 
@@ -304,14 +313,25 @@ export async function GET(request: NextRequest) {
       y -= 20;
     }
 
+    // Tier discount row
+    if (tierDiscount > 0) {
+      const tierLabel = order.tier_name ? `Tier ${order.tier_name.charAt(0).toUpperCase() + order.tier_name.slice(1)} Discount` : 'Tier Discount';
+      page.drawText(tierLabel, { x: 50, y, size: 9, font, color: black });
+      page.drawText(`- Rp ${tierDiscount.toLocaleString("id-ID")}`, { x: 460, y, size: 10, font: fontBold, color: green });
+      y -= 20;
+      page.drawRectangle({ x: 40, y, width: 515, height: 1, color: rgb(0.9, 0.9, 0.9) });
+      y -= 20;
+    }
+
     // Total section
     page.drawText("Subtotal", { x: 350, y, size: 9, font, color: gray });
     page.drawText(`Rp ${totalPrice.toLocaleString("id-ID")}`, { x: 460, y, size: 9, font, color: black });
     y -= 16;
 
-    if (promoDiscount > 0) {
+    if (promoDiscount > 0 || tierDiscount > 0) {
+      const totalDiscount = promoDiscount + tierDiscount;
       page.drawText("Diskon", { x: 350, y, size: 9, font, color: gray });
-      page.drawText(`- Rp ${promoDiscount.toLocaleString("id-ID")}`, { x: 460, y, size: 9, font, color: green });
+      page.drawText(`- Rp ${totalDiscount.toLocaleString("id-ID")}`, { x: 460, y, size: 9, font, color: green });
       y -= 16;
     }
 
@@ -319,7 +339,7 @@ export async function GET(request: NextRequest) {
     page.drawRectangle({ x: 340, y: y - 2, width: 215, height: 1.5, color: primary });
     y -= 20;
     page.drawText("TOTAL", { x: 350, y, size: 12, font: fontBold, color: primary });
-    const grandTotal = totalPrice - promoDiscount;
+    const grandTotal = totalPrice - promoDiscount - tierDiscount;
     page.drawText(`Rp ${grandTotal.toLocaleString("id-ID")}`, { x: 440, y, size: 12, font: fontBold, color: primary });
 
     // Footer
