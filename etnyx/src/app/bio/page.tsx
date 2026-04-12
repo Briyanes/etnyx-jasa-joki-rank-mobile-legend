@@ -144,7 +144,7 @@ export default function BioPage() {
     },
     { href: "/login", icon: LogIn, title: t.loginTitle, desc: t.loginDesc },
     { href: "/dashboard", icon: Gift, title: t.rewardsTitle, desc: t.rewardsDesc },
-    { href: "/#testimonials", icon: Star, title: t.reviewsTitle, desc: t.reviewsDesc },
+    { href: "/reviews", icon: Star, title: t.reviewsTitle, desc: t.reviewsDesc },
     { href: "/faq", icon: HelpCircle, title: t.faqTitle, desc: t.faqDesc },
     { href: "/", icon: ExternalLink, title: t.websiteTitle, desc: t.websiteDesc },
   ];
