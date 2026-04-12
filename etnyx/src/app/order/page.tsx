@@ -1611,7 +1611,7 @@ function OrderPageContent() {
                       ))}
                     </select>
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                      <Image src={rankIcons[form.currentRank] || "/icons-tier/warrior.webp"} alt="" width={24} height={24} className="w-6 h-6 object-contain" />
+                      <Image src={rankIcons[form.currentRank] || "/icons-tier/warrior.webp"} alt={`Rank ${form.currentRank}`} width={24} height={24} className="w-6 h-6 object-contain" />
                     </div>
                   </div>
                   {/* Mythic Star Input */}
@@ -1730,7 +1730,7 @@ function OrderPageContent() {
                           ))}
                       </select>
                       <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                        <Image src={rankIcons[form.targetRank] || "/icons-tier/warrior.webp"} alt="" width={24} height={24} className="w-6 h-6 object-contain" />
+                        <Image src={rankIcons[form.targetRank] || "/icons-tier/warrior.webp"} alt={`Rank ${form.targetRank}`} width={24} height={24} className="w-6 h-6 object-contain" />
                       </div>
                     </div>
                   </div>
@@ -1738,7 +1738,7 @@ function OrderPageContent() {
                   {/* Selected Rank Flow Display */}
                   <div className="flex items-center justify-center gap-3 mb-4 p-3 bg-background rounded-xl border border-white/5">
                     <div className="flex items-center gap-2">
-                      <Image src={rankIcons[form.currentRank] || "/icons-tier/warrior.webp"} alt="" width={28} height={28} className="w-7 h-7 object-contain" />
+                      <Image src={rankIcons[form.currentRank] || "/icons-tier/warrior.webp"} alt={`Rank ${form.currentRank}`} width={28} height={28} className="w-7 h-7 object-contain" />
                       <span className="text-text text-sm font-medium">
                         {RANK_LIST.find(r => r.id === form.currentRank)?.label}
                         {RANKS_WITH_STARS.includes(form.currentRank) && <span className="text-text-muted ml-1">{getDivisionOptions(form.currentRank).find(s => s.value === currentStar)?.label}</span>}
@@ -1746,7 +1746,7 @@ function OrderPageContent() {
                     </div>
                     <ArrowRight className="w-4 h-4 text-accent flex-shrink-0" />
                     <div className="flex items-center gap-2">
-                      <Image src={rankIcons[form.targetRank] || "/icons-tier/warrior.webp"} alt="" width={28} height={28} className="w-7 h-7 object-contain" />
+                      <Image src={rankIcons[form.targetRank] || "/icons-tier/warrior.webp"} alt={`Rank ${form.targetRank}`} width={28} height={28} className="w-7 h-7 object-contain" />
                       <span className="text-yellow-400 text-sm font-bold">
                         {RANK_LIST.find(r => r.id === form.targetRank)?.label}
                         {RANKS_WITH_STARS.includes(form.targetRank) && <span className="text-yellow-300 ml-1">{getDivisionOptions(form.targetRank).find(s => s.value === targetStar)?.label}</span>}
@@ -1834,9 +1834,9 @@ function OrderPageContent() {
                                 <div className="p-4 bg-gradient-to-br from-slate-700/80 to-slate-800/80 flex-1">
                                   <p className="text-white text-sm font-semibold mb-2">{pkg.title}</p>
                                   <div className="flex items-center gap-2 mb-2">
-                                    <Image src={rankIcons[pkg.currentRank] || rankIcons[pkg.rankKey]} alt="" width={20} height={20} className="w-5 h-5 object-contain" />
+                                    <Image src={rankIcons[pkg.currentRank] || rankIcons[pkg.rankKey]} alt={`Rank ${pkg.currentRank}`} width={20} height={20} className="w-5 h-5 object-contain" />
                                     <ArrowRight className="w-3 h-3 text-text-muted" />
-                                    <Image src={rankIcons[pkg.targetRank] || rankIcons[pkg.rankKey]} alt="" width={20} height={20} className="w-5 h-5 object-contain" />
+                                    <Image src={rankIcons[pkg.targetRank] || rankIcons[pkg.rankKey]} alt={`Rank ${pkg.targetRank}`} width={20} height={20} className="w-5 h-5 object-contain" />
                                   </div>
                                   <div>
                                     <p className="text-yellow-400 font-bold text-lg leading-tight">{formatRupiah(pkg.price)}</p>
@@ -1870,9 +1870,9 @@ function OrderPageContent() {
                     <div className="mt-5 p-4 bg-background rounded-xl border border-accent/30 flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="flex items-center gap-1.5">
-                          <Image src={rankIcons[selectedPackage.currentRank] || rankIcons[selectedPackage.rankKey]} alt="" width={28} height={28} className="w-7 h-7 object-contain" />
+                          <Image src={rankIcons[selectedPackage.currentRank] || rankIcons[selectedPackage.rankKey]} alt={`Rank ${selectedPackage.currentRank}`} width={28} height={28} className="w-7 h-7 object-contain" />
                           <ArrowRight className="w-3.5 h-3.5 text-accent" />
-                          <Image src={rankIcons[selectedPackage.targetRank] || rankIcons[selectedPackage.rankKey]} alt="" width={28} height={28} className="w-7 h-7 object-contain" />
+                          <Image src={rankIcons[selectedPackage.targetRank] || rankIcons[selectedPackage.rankKey]} alt={`Rank ${selectedPackage.targetRank}`} width={28} height={28} className="w-7 h-7 object-contain" />
                         </div>
                         <div>
                           <p className="text-text font-semibold text-sm">{selectedPackage.title}</p>
@@ -2742,9 +2742,9 @@ function OrderPageContent() {
                     </p>
                     <div className="flex items-center gap-3">
                       <div className="flex items-center gap-1.5 flex-shrink-0">
-                        <Image src={rankIcons[selectedPackage.currentRank] || rankIcons[selectedPackage.rankKey]} alt="" width={36} height={36} className="w-9 h-9 object-contain drop-shadow-lg" />
+                        <Image src={rankIcons[selectedPackage.currentRank] || rankIcons[selectedPackage.rankKey]} alt={`Rank ${selectedPackage.currentRank}`} width={36} height={36} className="w-9 h-9 object-contain drop-shadow-lg" />
                         <ArrowRight className="w-4 h-4 text-accent" />
-                        <Image src={rankIcons[selectedPackage.targetRank] || rankIcons[selectedPackage.rankKey]} alt="" width={36} height={36} className="w-9 h-9 object-contain drop-shadow-lg" />
+                        <Image src={rankIcons[selectedPackage.targetRank] || rankIcons[selectedPackage.rankKey]} alt={`Rank ${selectedPackage.targetRank}`} width={36} height={36} className="w-9 h-9 object-contain drop-shadow-lg" />
                       </div>
                       <div className="flex-1">
                         <p className="text-text font-semibold">
