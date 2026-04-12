@@ -1,10 +1,11 @@
 import { createAdminClient } from "./supabase-server";
+import { WHATSAPP_NUMBER } from "./constants";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.com";
-const WA_OFFICIAL = "6281515141452";
+const WA_OFFICIAL = WHATSAPP_NUMBER;
 
 /** Disclaimer footer for bot-sent WA messages */
-function waDisclaimer(orderId: string): string {
+export function waDisclaimer(orderId: string): string {
   const csLink = `https://wa.me/${WA_OFFICIAL}?text=${encodeURIComponent(`Halo min, saya mau tanya soal order ${orderId}`)}`;
   return `\n\n---\n⚠️ _Pesan ini dikirim otomatis, jangan balas pesan ini._\nHubungi CS kami di sini:\n${csLink}`;
 }
@@ -99,6 +100,41 @@ function formatTargetDisplay(order: OrderData): string {
     return order.package_title;
   }
   return formatRank(order.target_rank, order.target_star);
+}
+
+// ============ Notification Preferences ============
+export async function getNotificationPreferences(whatsapp: string): Promise<{
+  whatsapp_order_updates: boolean;
+  whatsapp_promotions: boolean;
+  email_order_updates: boolean;
+  email_promotions: boolean;
+}> {
+  const defaults = {
+    whatsapp_order_updates: true,
+    whatsapp_promotions: false,
+    email_order_updates: true,
+    email_promotions: true,
+  };
+  try {
+    const supabase = await createAdminClient();
+    // Find customer by phone
+    const { data: customer } = await supabase
+      .from("customers")
+      .select("id")
+      .eq("whatsapp", whatsapp)
+      .single();
+    if (!customer) return defaults;
+
+    const { data: prefs } = await supabase
+      .from("notification_preferences")
+      .select("whatsapp_order_updates, whatsapp_promotions, email_order_updates, email_promotions")
+      .eq("customer_id", customer.id)
+      .single();
+    if (!prefs) return defaults;
+    return { ...defaults, ...prefs };
+  } catch {
+    return defaults;
+  }
 }
 
 // ============ TELEGRAM ============

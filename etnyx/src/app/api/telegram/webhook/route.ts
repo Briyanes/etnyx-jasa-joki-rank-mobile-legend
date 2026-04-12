@@ -460,6 +460,12 @@ async function handleCallback(query: CallbackQuery) {
     return handleStartOrder(query.id, chatId, messageId, orderId, userName);
   }
 
+  // ---- COMPLETE ORDER ----
+  if (data.startsWith("complete:")) {
+    const orderId = data.split(":")[1];
+    return handleCompleteOrder(query.id, chatId, messageId, orderId, userName);
+  }
+
   // ---- TOGGLE REVIEW VISIBILITY ----
   if (data.startsWith("review_toggle:")) {
     const parts = data.split(":");
@@ -571,11 +577,30 @@ async function handleRejectOrder(callbackId: string, chatId: number, messageId: 
 
   const { error: updateErr } = await supabase
     .from("orders")
-    .update({ status: "cancelled" })
+    .update({ status: "cancelled", updated_at: new Date().toISOString() })
     .eq("id", orderId);
 
   if (updateErr) {
     return answerCallback(callbackId, "Gagal membatalkan order");
+  }
+
+  // Send cancellation notification to customer
+  try {
+    const { sendOrderCancelledWA } = await import("@/lib/notifications");
+    const orderData = {
+      order_id: order.order_id,
+      username: order.username,
+      current_rank: order.current_rank,
+      target_rank: order.target_rank,
+      package: order.package,
+      price: order.total_price,
+      whatsapp: order.whatsapp,
+      email: order.customer_email,
+      status: "cancelled" as const,
+    };
+    sendOrderCancelledWA(orderData).catch(console.error);
+  } catch {
+    // non-blocking
   }
 
   const updated = `
@@ -612,11 +637,31 @@ async function handleStartOrder(callbackId: string, chatId: number, messageId: n
 
   const { error: updateErr } = await supabase
     .from("orders")
-    .update({ status: "in_progress" })
+    .update({ status: "in_progress", updated_at: new Date().toISOString() })
     .eq("id", orderId);
 
   if (updateErr) {
     return answerCallback(callbackId, "Gagal update status");
+  }
+
+  // Send started notification to customer
+  try {
+    const { sendOrderStartedWA } = await import("@/lib/notifications");
+    const orderData = {
+      order_id: order.order_id,
+      username: order.username,
+      current_rank: order.current_rank,
+      target_rank: order.target_rank,
+      package: order.package,
+      package_title: order.package_title || order.package,
+      price: order.total_price,
+      whatsapp: order.whatsapp,
+      email: order.customer_email,
+      status: "in_progress" as const,
+    };
+    sendOrderStartedWA(orderData).catch(console.error);
+  } catch {
+    // non-blocking
   }
 
   const updated = `
@@ -632,10 +677,80 @@ Dimulai oleh <b>${userName}</b>
 
   await editMessage(chatId, messageId, updated, {
     inline_keyboard: [
+      [{ text: "✅ Selesaikan", callback_data: `complete:${orderId}` }],
       [{ text: "Detail", callback_data: `detail:${orderId}` }],
     ],
   });
   return answerCallback(callbackId, "Order dimulai!");
+}
+
+async function handleCompleteOrder(callbackId: string, chatId: number, messageId: number, orderId: string, userName: string) {
+  const supabase = await createAdminClient();
+
+  const { data: order, error } = await supabase
+    .from("orders")
+    .select("*")
+    .eq("id", orderId)
+    .single();
+
+  if (error || !order) {
+    return answerCallback(callbackId, "Order tidak ditemukan");
+  }
+
+  if (order.status !== "in_progress") {
+    return answerCallback(callbackId, `Status order: ${order.status}`);
+  }
+
+  const { error: updateErr } = await supabase
+    .from("orders")
+    .update({ status: "completed", completed_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+    .eq("id", orderId);
+
+  if (updateErr) {
+    return answerCallback(callbackId, "Gagal menyelesaikan order");
+  }
+
+  // Send completed notifications to customer + admin
+  try {
+    const { sendOrderCompletedWA, notifyAdminOrderCompleted } = await import("@/lib/notifications");
+    const orderData = {
+      order_id: order.order_id,
+      username: order.username,
+      current_rank: order.current_rank,
+      target_rank: order.target_rank,
+      package: order.package,
+      package_title: order.package_title || order.package,
+      price: order.total_price,
+      whatsapp: order.whatsapp,
+      email: order.customer_email,
+      status: "completed" as const,
+      assigned_worker_name: order.assigned_worker_name,
+    };
+    Promise.allSettled([
+      sendOrderCompletedWA(orderData),
+      notifyAdminOrderCompleted(orderData),
+    ]).catch(console.error);
+  } catch {
+    // non-blocking
+  }
+
+  const updated = `
+✅ <b>ORDER SELESAI!</b>
+
+<b>Order:</b> ${order.order_id}
+<b>Username:</b> ${order.username}
+${formatRank(order.current_rank)} → ${formatRank(order.target_rank)}
+${formatRupiah(order.total_price)}
+
+Diselesaikan oleh <b>${userName}</b>
+`.trim();
+
+  await editMessage(chatId, messageId, updated, {
+    inline_keyboard: [
+      [{ text: "Detail", callback_data: `detail:${orderId}` }],
+    ],
+  });
+  return answerCallback(callbackId, "Order selesai!");
 }
 
 async function handleOrderDetail(callbackId: string, chatId: number, orderId: string) {
@@ -660,6 +775,7 @@ async function handleOrderDetail(callbackId: string, chatId: number, orderId: st
 <b>Status:</b> ${statusLabel[order.status] || order.status}
 
 <b>Username:</b> ${order.username}
+<b>Game ID:</b> ${order.game_user_id || "-"}(${order.game_server_id || "-"})
 <b>WhatsApp:</b> ${order.whatsapp || "-"}
 <b>Email:</b> ${order.email || "-"}
 
@@ -687,6 +803,9 @@ ${order.assigned_worker_name ? `<b>Worker:</b> ${order.assigned_worker_name}` : 
   }
   if (order.status === "confirmed") {
     buttons.push([{ text: "Mulai Kerjakan", callback_data: `start:${orderId}` }]);
+  }
+  if (order.status === "in_progress") {
+    buttons.push([{ text: "✅ Selesaikan", callback_data: `complete:${orderId}` }]);
   }
 
   await reply(chatId, msg, buttons.length > 0 ? { reply_markup: { inline_keyboard: buttons } } : undefined);
@@ -744,6 +863,21 @@ export async function POST(request: Request) {
     }
 
     const update: TelegramUpdate = await request.json();
+
+    // Restrict bot to authorized groups only
+    const chatId = update.callback_query?.message?.chat?.id ?? update.message?.chat?.id;
+    if (chatId) {
+      const settings = await getSettings();
+      const authorizedChats = [
+        settings.telegramAdminGroupId,
+        settings.telegramWorkerGroupId,
+        settings.telegramReviewGroupId,
+        settings.telegramReportGroupId,
+      ].filter(Boolean).map(Number);
+      if (authorizedChats.length > 0 && !authorizedChats.includes(chatId)) {
+        return NextResponse.json({ ok: true }); // silently ignore
+      }
+    }
 
     // Handle callback queries (button clicks)
     if (update.callback_query) {

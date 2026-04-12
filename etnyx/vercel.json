@@ -18,6 +18,10 @@
     {
       "path": "/api/admin/sla-check",
       "schedule": "0 17 * * *"
+    },
+    {
+      "path": "/api/cron",
+      "schedule": "0 9 * * *"
     }
   ]
 }

@@ -7,13 +7,8 @@ import {
   sendWhatsAppMessage,
   sendOrderCompletedWA,
   sendOrderStartedWA,
+  waDisclaimer,
 } from "@/lib/notifications";
-
-const WA_OFFICIAL = "6281515141452";
-function waDisclaimer(orderId: string): string {
-  const csLink = `https://wa.me/${WA_OFFICIAL}?text=${encodeURIComponent(`Halo min, saya mau tanya soal order ${orderId}`)}`;
-  return `\n\n---\n⚠️ _Pesan ini dikirim otomatis, jangan balas pesan ini._\nHubungi CS kami di sini:\n${csLink}`;
-}
 
 // POST /api/admin/orders/follow-up — Send follow-up messages
 export async function POST(request: NextRequest) {

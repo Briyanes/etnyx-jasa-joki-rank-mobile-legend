@@ -315,12 +315,12 @@ export default function CustomerDashboard() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-surface rounded-xl p-4 border border-surface/50">
             <p className="text-muted text-sm">{t.totalOrder}</p>
-            <p className="text-2xl font-bold text-text">{orders.length}</p>
+            <p className="text-2xl font-bold text-text">{orders.filter(o => o.status !== "cancelled").length}</p>
           </div>
           <div className="bg-surface rounded-xl p-4 border border-surface/50">
             <p className="text-muted text-sm">{t.totalSpent}</p>
             <p className="text-xl font-bold text-primary">
-              {formatRupiah(orders.reduce((sum, o) => sum + o.total_price, 0))}
+              {formatRupiah(orders.filter(o => o.status !== "cancelled").reduce((sum, o) => sum + o.total_price, 0))}
             </p>
           </div>
           <div className="bg-surface rounded-xl p-4 border border-surface/50">
