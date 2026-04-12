@@ -3,6 +3,7 @@ import { MetadataRoute } from "next";
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.com";
   const now = new Date();
+  const staticDate = new Date("2025-01-01");
 
   return [
     {
@@ -25,45 +26,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${baseUrl}/login`,
-      lastModified: now,
+      lastModified: staticDate,
       changeFrequency: "monthly",
       priority: 0.7,
     },
     {
       url: `${baseUrl}/register`,
-      lastModified: now,
+      lastModified: staticDate,
       changeFrequency: "monthly",
       priority: 0.7,
     },
     {
-      url: `${baseUrl}/review`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.6,
-    },
-    {
       url: `${baseUrl}/bio`,
-      lastModified: now,
+      lastModified: staticDate,
       changeFrequency: "monthly",
       priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/terms`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.3,
-    },
-    {
-      url: `${baseUrl}/privacy`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.3,
-    },
-    {
-      url: `${baseUrl}/refund-policy`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.3,
     },
     {
       url: `${baseUrl}/reviews`,
@@ -73,9 +50,27 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${baseUrl}/faq`,
-      lastModified: now,
+      lastModified: staticDate,
       changeFrequency: "monthly",
       priority: 0.4,
+    },
+    {
+      url: `${baseUrl}/terms`,
+      lastModified: staticDate,
+      changeFrequency: "monthly",
+      priority: 0.3,
+    },
+    {
+      url: `${baseUrl}/privacy`,
+      lastModified: staticDate,
+      changeFrequency: "monthly",
+      priority: 0.3,
+    },
+    {
+      url: `${baseUrl}/refund-policy`,
+      lastModified: staticDate,
+      changeFrequency: "monthly",
+      priority: 0.3,
     },
   ];
 }

@@ -3,12 +3,14 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { formatRupiah } from "@/utils/helpers";
 import {
   ArrowLeft, Clock, CheckCircle, Rocket, XCircle, Download, Trophy,
   Star, Swords, Target, Timer, Camera, Crown, Package, CreditCard,
   Calendar, User, Shield, Zap, ChevronDown, ChevronUp,
 } from "lucide-react";
+import { rankLabels } from "@/lib/constants";
 
 interface Submission {
   id: string;
@@ -61,12 +63,6 @@ interface OrderDetail {
   submissions: Submission[];
   status_logs: StatusLog[];
 }
-
-const rankLabels: Record<string, string> = {
-  warrior: "Warrior", elite: "Elite", master: "Master", grandmaster: "Grandmaster",
-  epic: "Epic", legend: "Legend", mythic: "Mythic", mythicgrading: "Mythic Grading",
-  mythichonor: "Mythic Honor", mythicglory: "Mythic Glory", mythicimmortal: "Mythic Immortal",
-};
 
 const STAR_LABELS: Record<number, string> = { 5: "V", 4: "IV", 3: "III", 2: "II", 1: "I" };
 
@@ -438,7 +434,7 @@ function OrderDetailContent() {
                           <div className="flex gap-2 overflow-x-auto">
                             {sub.screenshots.map((url, si) => (
                               <a key={si} href={url} target="_blank" rel="noopener noreferrer" className="flex-shrink-0">
-                                <img src={url} alt={`Screenshot ${si + 1}`} className="w-20 h-20 rounded-lg object-cover border border-surface/50" />
+                                <Image src={url} alt={`Screenshot ${si + 1}`} width={80} height={80} unoptimized className="w-20 h-20 rounded-lg object-cover border border-surface/50" />
                               </a>
                             ))}
                           </div>

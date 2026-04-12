@@ -7,19 +7,22 @@ import { ArrowLeft, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-function FAQItem({ question, answer }: { question: string; answer: string }) {
+function FAQItem({ question, answer, id }: { question: string; answer: string; id: string }) {
   const [open, setOpen] = useState(false);
+  const panelId = `faq-panel-${id}`;
   return (
     <div className="border border-white/10 rounded-xl overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
+        aria-expanded={open}
+        aria-controls={panelId}
         className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-white/5 transition-colors"
       >
         <span className="text-text font-medium text-sm pr-4">{question}</span>
         <ChevronDown className={`w-4 h-4 text-text-muted flex-shrink-0 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
       {open && (
-        <div className="px-5 pb-4 text-text-muted text-sm leading-relaxed">
+        <div id={panelId} role="region" className="px-5 pb-4 text-text-muted text-sm leading-relaxed">
           {answer}
         </div>
       )}
@@ -46,7 +49,7 @@ export default function FAQPage() {
 
           <div className="space-y-3">
             {t.items.map((item, i) => (
-              <FAQItem key={i} question={item.q} answer={item.a} />
+              <FAQItem key={i} id={String(i)} question={item.q} answer={item.a} />
             ))}
           </div>
 

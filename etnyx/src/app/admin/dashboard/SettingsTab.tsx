@@ -670,7 +670,7 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
                               <label className="block text-xs text-text-muted mb-1.5">Gambar QR Code</label>
                               {bank.qris_image_url ? (
                                 <div className="relative inline-block">
-                                  <img src={bank.qris_image_url} alt="QRIS" className="w-40 h-40 object-contain rounded-lg border border-white/10 bg-white p-2" />
+                                  <Image src={bank.qris_image_url} alt="QRIS" width={160} height={160} unoptimized className="w-40 h-40 object-contain rounded-lg border border-white/10 bg-white p-2" />
                                   <button onClick={() => { const updated = [...bankAccounts]; updated[bank._idx] = { ...updated[bank._idx], qris_image_url: "" }; setBankAccounts(updated); }}
                                     className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600">×</button>
                                 </div>

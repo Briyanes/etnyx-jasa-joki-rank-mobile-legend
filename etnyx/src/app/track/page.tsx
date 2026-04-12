@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Clock, CheckCircle, Rocket, XCircle, Check, ChevronLeft, Shield, Zap, MessageCircle, Loader2, Trophy, Star, Swords, Target, Timer, Camera, Crown, ExternalLink } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { WHATSAPP_NUMBER } from "@/lib/constants";
+import { WHATSAPP_NUMBER, rankLabels } from "@/lib/constants";
 import { ReactNode } from "react";
 
 interface Submission {
@@ -47,20 +47,6 @@ interface OrderData {
   submissions: Submission[];
   status_logs: StatusLog[];
 }
-
-const rankLabels: Record<string, string> = {
-  warrior: "Warrior",
-  elite: "Elite",
-  master: "Master",
-  grandmaster: "Grandmaster",
-  epic: "Epic",
-  legend: "Legend",
-  mythic: "Mythic",
-  mythicgrading: "Mythic Grading",
-  mythichonor: "Mythic Honor",
-  mythicglory: "Mythic Glory",
-  mythicimmortal: "Mythic Immortal",
-};
 
 const STAR_LABELS: Record<number, string> = { 5: "V", 4: "IV", 3: "III", 2: "II", 1: "I" };
 function rankWithStar(rank: string, star?: number | null): string {

@@ -919,7 +919,7 @@ export default function LeadDashboard() {
                             <div className="flex flex-wrap gap-2 mb-2">
                               {screenshots.map((url, i) => (
                                 <div key={i} className="relative w-16 h-16 rounded-lg overflow-hidden border border-white/10">
-                                  <img src={url} alt="" className="w-full h-full object-cover" />
+                                  <Image src={url} alt="" width={64} height={64} unoptimized className="w-full h-full object-cover" />
                                   <button onClick={() => setScreenshots(prev => prev.filter((_, idx) => idx !== i))} className="absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-xs flex items-center justify-center rounded-bl">×</button>
                                 </div>
                               ))}
@@ -1072,7 +1072,7 @@ export default function LeadDashboard() {
                                         {sub.screenshots.map((ss, si) => (
                                           <a key={si} href={ss} target="_blank" rel="noopener noreferrer"
                                             className="flex-shrink-0 w-16 h-16 rounded border border-white/10 overflow-hidden hover:border-accent transition-colors">
-                                            <img src={ss} alt={`Screenshot ${si + 1}`} className="w-full h-full object-cover" />
+                                            <Image src={ss} alt={`Screenshot ${si + 1}`} width={64} height={64} unoptimized className="w-full h-full object-cover" />
                                           </a>
                                         ))}
                                       </div>

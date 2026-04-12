@@ -499,7 +499,7 @@ function ManualPaymentContent() {
                             <span className="text-text font-bold">Scan QRIS</span>
                           </div>
                           <div className="bg-white rounded-xl p-4 inline-block mx-auto">
-                            <img src={bank.qris_image_url} alt="QRIS Code" className="w-52 h-52 object-contain" />
+                            <Image src={bank.qris_image_url} alt="QRIS Code" width={208} height={208} unoptimized className="w-52 h-52 object-contain" />
                           </div>
                           <p className="text-text-muted text-xs">
                             {locale === "id" ? "Scan QR code di atas menggunakan aplikasi banking/e-wallet kamu" : "Scan the QR code above using your banking/e-wallet app"}

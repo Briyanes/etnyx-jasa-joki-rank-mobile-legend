@@ -129,6 +129,7 @@ export default function RegisterPage() {
               <input
                 id="name"
                 type="text"
+                autoComplete="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder={t.namePlaceholder}
@@ -145,6 +146,7 @@ export default function RegisterPage() {
               <input
                 id="email"
                 type="email"
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="nama@email.com"
@@ -161,6 +163,7 @@ export default function RegisterPage() {
               <input
                 id="whatsapp"
                 type="tel"
+                autoComplete="tel"
                 value={whatsapp}
                 onChange={(e) => setWhatsapp(e.target.value)}
                 placeholder="628xxxxxxxxxx"
@@ -176,6 +179,7 @@ export default function RegisterPage() {
               <input
                 id="password"
                 type="password"
+                autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder={t.passwordPlaceholder}
@@ -192,6 +196,7 @@ export default function RegisterPage() {
               <input
                 id="confirmPassword"
                 type="password"
+                autoComplete="new-password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder={t.confirmPlaceholder}

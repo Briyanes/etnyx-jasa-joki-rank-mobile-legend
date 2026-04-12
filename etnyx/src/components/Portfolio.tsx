@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { WHATSAPP_NUMBER } from "@/lib/constants";
+import { WHATSAPP_NUMBER, rankLabels } from "@/lib/constants";
 import CardCarousel from "@/components/CardCarousel";
 
 interface PortfolioItem {
@@ -15,20 +15,6 @@ interface PortfolioItem {
   image_after_url: string | null;
   description: string | null;
 }
-
-const rankLabels: Record<string, string> = {
-  warrior: "Warrior",
-  elite: "Elite",
-  master: "Master",
-  grandmaster: "Grandmaster",
-  epic: "Epic",
-  legend: "Legend",
-  mythic: "Mythic",
-  mythicgrading: "Mythic Grading",
-  mythichonor: "Mythic Honor",
-  mythicglory: "Mythic Glory",
-  mythicimmortal: "Mythic Immortal",
-};
 
 const rankIcons: Record<string, string> = {
   warrior: "/icons-tier/Warrior.webp",
@@ -178,10 +164,12 @@ export default function Portfolio() {
               {/* Image or Placeholder */}
               <div className="relative aspect-video bg-gradient-to-br from-primary/20 to-accent/20">
                 {item.image_after_url ? (
-                  <img
+                  <Image
                     src={item.image_after_url}
                     alt={item.title}
-                    loading="lazy"
+                    width={400}
+                    height={225}
+                    unoptimized
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 ) : (
@@ -294,9 +282,12 @@ export default function Portfolio() {
               {/* Screenshot Image */}
               {selectedItem.image_after_url && (
                 <div className="mb-6 rounded-xl overflow-hidden border border-white/10">
-                  <img
+                  <Image
                     src={selectedItem.image_after_url}
                     alt={selectedItem.title}
+                    width={800}
+                    height={450}
+                    unoptimized
                     className="w-full h-auto"
                   />
                 </div>

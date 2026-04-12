@@ -2070,7 +2070,7 @@ export default function AdminDashboard() {
                     {/* Image preview */}
                     {p.image_after_url ? (
                       <div className="aspect-video relative">
-                        <img src={p.image_after_url} alt={p.title} className="w-full h-full object-cover" />
+                        <Image src={p.image_after_url} alt={p.title} width={400} height={225} unoptimized className="w-full h-full object-cover" />
                       </div>
                     ) : (
                       <div className="aspect-video bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center">
@@ -2803,7 +2803,7 @@ export default function AdminDashboard() {
                   <div key={proof.id} className="bg-background rounded-xl p-4 border border-white/5 space-y-3">
                     {/* Proof Image */}
                     <a href={proof.image_url} target="_blank" rel="noopener noreferrer">
-                      <img src={proof.image_url} alt="Bukti Transfer" className="w-full max-h-72 object-contain rounded-lg bg-white/5 cursor-pointer hover:opacity-90 transition-opacity" />
+                      <Image src={proof.image_url} alt="Bukti Transfer" width={400} height={288} unoptimized className="w-full max-h-72 object-contain rounded-lg bg-white/5 cursor-pointer hover:opacity-90 transition-opacity" />
                     </a>
 
                     {/* Info */}
@@ -2959,7 +2959,7 @@ function PortfolioModal({ item, onSave, onClose }: { item: Portfolio | null; onS
             <label className="block text-text text-xs font-medium mb-1.5">Screenshot Hasil Push Rank</label>
             {form.image_after_url && (
               <div className="relative mb-2 rounded-lg overflow-hidden border border-white/10">
-                <img src={form.image_after_url} alt="Preview" className="w-full h-32 object-cover" />
+                <Image src={form.image_after_url} alt="Preview" width={400} height={128} unoptimized className="w-full h-32 object-cover" />
                 <button
                   type="button"
                   onClick={() => setForm({ ...form, image_after_url: "" })}

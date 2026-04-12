@@ -6,6 +6,8 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { ArrowLeft, Star, Shield, CheckCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
+import { rankLabels } from "@/lib/constants";
 
 interface Testimonial {
   id: string;
@@ -18,17 +20,6 @@ interface Testimonial {
   is_featured: boolean;
   created_at: string;
 }
-
-const rankLabels: Record<string, string> = {
-  warrior: "Warrior",
-  elite: "Elite",
-  master: "Master",
-  grandmaster: "Grandmaster",
-  epic: "Epic",
-  legend: "Legend",
-  mythic: "Mythic",
-  mythicglory: "Mythic Glory",
-};
 
 const t = {
   id: {
@@ -164,10 +155,12 @@ export default function ReviewsPage() {
                   {/* Header */}
                   <div className="flex items-center gap-3 mb-3">
                     {review.avatar_url ? (
-                      <img
+                      <Image
                         src={review.avatar_url}
                         alt={review.name}
-                        loading="lazy"
+                        width={40}
+                        height={40}
+                        unoptimized
                         className="w-10 h-10 rounded-full object-cover"
                       />
                     ) : (

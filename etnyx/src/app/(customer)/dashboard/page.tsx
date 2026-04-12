@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { formatRupiah } from "@/utils/helpers";
-import { siteConfig } from "@/lib/constants";
+import { siteConfig, rankLabels } from "@/lib/constants";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Download, Gem, Medal, Trophy, Award, Bell, ClipboardList, Key, Sparkles, LogIn, Pencil, Lock, ShoppingCart, Gift } from "lucide-react";
 
@@ -75,17 +75,6 @@ interface NotificationPrefs {
   push_order_updates: boolean;
   push_promotions: boolean;
 }
-
-const rankLabels: Record<string, string> = {
-  warrior: "Warrior",
-  elite: "Elite",
-  master: "Master",
-  grandmaster: "Grandmaster",
-  epic: "Epic",
-  legend: "Legend",
-  mythic: "Mythic",
-  mythicglory: "Mythic Glory",
-};
 
 const statusConfig: Record<string, { label: string; color: string }> = {
   pending: { label: "Pending", color: "bg-yellow-500/20 text-yellow-400" },

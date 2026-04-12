@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { WHATSAPP_NUMBER } from "@/lib/constants";
 import { 
@@ -220,33 +221,40 @@ export default function BioPage() {
 
         {/* Links */}
         <div className="flex flex-col gap-3 mb-8">
-          {links.map((link) => (
-            <a
-              key={link.title}
-              href={link.href}
-              {...(link.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-              className={`group relative flex items-center gap-4 rounded-xl border p-4 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] ${
-                link.accent
-                  ? "bg-accent/10 border-accent/30 hover:bg-accent/20 hover:border-accent/50 hover:shadow-[0_0_30px_rgba(var(--color-accent-rgb,0,255,200),0.15)]"
-                  : "bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/20"
-              }`}
-            >
-              <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${
-                link.accent ? "bg-accent/20 text-accent" : "bg-white/5 text-text-muted group-hover:text-accent"
-              } transition-colors`}>
-                <link.icon className="w-5 h-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className={`font-semibold text-sm ${link.accent ? "text-accent" : "text-text"}`}>
-                  {link.title}
-                </p>
-                <p className="text-text-muted text-xs truncate">{link.desc}</p>
-              </div>
-              {link.external && (
-                <ExternalLink className="w-4 h-4 text-text-muted flex-shrink-0" />
-              )}
-            </a>
-          ))}
+          {links.map((link) => {
+            const className = `group relative flex items-center gap-4 rounded-xl border p-4 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] ${
+              link.accent
+                ? "bg-accent/10 border-accent/30 hover:bg-accent/20 hover:border-accent/50 hover:shadow-[0_0_30px_rgba(var(--color-accent-rgb,0,255,200),0.15)]"
+                : "bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/20"
+            }`;
+            const content = (
+              <>
+                <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${
+                  link.accent ? "bg-accent/20 text-accent" : "bg-white/5 text-text-muted group-hover:text-accent"
+                } transition-colors`}>
+                  <link.icon className="w-5 h-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className={`font-semibold text-sm ${link.accent ? "text-accent" : "text-text"}`}>
+                    {link.title}
+                  </p>
+                  <p className="text-text-muted text-xs truncate">{link.desc}</p>
+                </div>
+                {link.external && (
+                  <ExternalLink className="w-4 h-4 text-text-muted flex-shrink-0" />
+                )}
+              </>
+            );
+            return link.external ? (
+              <a key={link.title} href={link.href} target="_blank" rel="noopener noreferrer" className={className}>
+                {content}
+              </a>
+            ) : (
+              <Link key={link.title} href={link.href} className={className}>
+                {content}
+              </Link>
+            );
+          })}
         </div>
 
         {/* Social Links */}
@@ -273,11 +281,11 @@ export default function BioPage() {
           <div className="h-px w-24 mx-auto bg-gradient-to-r from-transparent via-white/10 to-transparent mb-4" />
           <p className="text-text-muted text-xs mb-2">{t.footer}</p>
           <div className="flex items-center justify-center gap-3 text-text-muted text-[10px] mb-2">
-            <a href="/terms" className="hover:text-accent transition-colors">{t.terms}</a>
+            <Link href="/terms" className="hover:text-accent transition-colors">{t.terms}</Link>
             <span className="w-0.5 h-0.5 rounded-full bg-white/20" />
-            <a href="/privacy" className="hover:text-accent transition-colors">{t.privacy}</a>
+            <Link href="/privacy" className="hover:text-accent transition-colors">{t.privacy}</Link>
             <span className="w-0.5 h-0.5 rounded-full bg-white/20" />
-            <a href="/refund-policy" className="hover:text-accent transition-colors">{t.refund}</a>
+            <Link href="/refund-policy" className="hover:text-accent transition-colors">{t.refund}</Link>
           </div>
           <p className="text-text-muted text-[10px]">
             © {new Date().getFullYear()} ETNYX

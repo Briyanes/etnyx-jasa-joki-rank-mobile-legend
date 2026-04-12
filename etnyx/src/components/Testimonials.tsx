@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { useLanguage } from "@/contexts/LanguageContext";
 import CardCarousel from "@/components/CardCarousel";
+import { rankLabels } from "@/lib/constants";
 
 interface Testimonial {
   id: string;
@@ -14,17 +16,6 @@ interface Testimonial {
   comment: string;
   is_featured: boolean;
 }
-
-const rankLabels: Record<string, string> = {
-  warrior: "Warrior",
-  elite: "Elite",
-  master: "Master",
-  grandmaster: "Grandmaster",
-  epic: "Epic",
-  legend: "Legend",
-  mythic: "Mythic",
-  mythicglory: "Mythic Glory",
-};
 
 // Static testimonials for initial load
 const staticTestimonials: Testimonial[] = [
@@ -196,10 +187,12 @@ export default function Testimonials() {
               {/* Header */}
               <div className="flex items-center gap-4 mb-4">
                 {testimonial.avatar_url ? (
-                  <img
+                  <Image
                     src={testimonial.avatar_url}
                     alt={testimonial.name}
-                    loading="lazy"
+                    width={48}
+                    height={48}
+                    unoptimized
                     className="w-12 h-12 rounded-full object-cover"
                   />
                 ) : (

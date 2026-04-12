@@ -14,6 +14,10 @@ export const rankOptions: RankOption[] = [
   { value: "mythicimmortal", label: "Mythic Immortal", order: 11 },
 ];
 
+export const rankLabels: Record<string, string> = Object.fromEntries(
+  rankOptions.map((r) => [r.value, r.label])
+);
+
 export const faqItems: FAQItem[] = [
   {
     question: "Apakah aman dan tidak akan di-banned?",

@@ -667,7 +667,7 @@ function OrderCard({
                           <div className="flex gap-1 mt-2">
                             {s.screenshots.map((url, i) => (
                               <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded overflow-hidden border border-white/10">
-                                <img src={url} alt="" className="w-full h-full object-cover" />
+                                <Image src={url} alt="" width={40} height={40} unoptimized className="w-full h-full object-cover" />
                               </a>
                             ))}
                           </div>

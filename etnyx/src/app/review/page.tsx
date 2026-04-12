@@ -118,11 +118,14 @@ function StarRating({
 
   return (
     <div className="flex flex-col items-center gap-2">
-      <div className="flex gap-1">
+      <div className="flex gap-1" role="radiogroup" aria-label="Rating">
         {[1, 2, 3, 4, 5].map((star) => (
           <button
             key={star}
             type="button"
+            role="radio"
+            aria-checked={value === star}
+            aria-label={`${star} star${star > 1 ? "s" : ""}`}
             onClick={() => onChange(star)}
             onMouseEnter={() => setHover(star)}
             onMouseLeave={() => setHover(0)}
