@@ -7,7 +7,7 @@ import { WHATSAPP_NUMBER } from "@/lib/constants";
 import { 
   ShoppingCart, Search, MessageCircle,
   ExternalLink, Gift, User,
-  MapPin, Clock, Star, Shield, Zap, BookOpen, Pencil,
+  MapPin, Clock, Star, Shield, Zap, BookOpen,
   HelpCircle, LogIn
 } from "lucide-react";
 
@@ -142,10 +142,9 @@ export default function BioPage() {
       href: `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(locale === "id" ? "Halo kak, mau tanya soal joki ML" : "Hi, I want to ask about ML boosting")}`,
       icon: MessageCircle, title: t.chatTitle, desc: t.chatDesc, external: true,
     },
-    { href: "/dashboard", icon: Gift, title: t.rewardsTitle, desc: t.rewardsDesc },
     { href: "/login", icon: LogIn, title: t.loginTitle, desc: t.loginDesc },
-    { href: "/#testimonials", icon: BookOpen, title: t.reviewsTitle, desc: t.reviewsDesc },
-    { href: "/review", icon: Pencil, title: t.writeReviewTitle, desc: t.writeReviewDesc },
+    { href: "/dashboard", icon: Gift, title: t.rewardsTitle, desc: t.rewardsDesc },
+    { href: "/#testimonials", icon: Star, title: t.reviewsTitle, desc: t.reviewsDesc },
     { href: "/faq", icon: HelpCircle, title: t.faqTitle, desc: t.faqDesc },
     { href: "/", icon: ExternalLink, title: t.websiteTitle, desc: t.websiteDesc },
   ];
