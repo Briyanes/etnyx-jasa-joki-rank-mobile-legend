@@ -18,7 +18,7 @@ import CTASection from "@/components/sections/CTASection";
 import BackToTop from "@/components/BackToTop";
 import { createAdminClient } from "@/lib/supabase-server";
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60; // ISR: revalidate every 60 seconds
 
 interface SectionVisibility {
   hero: boolean;
@@ -56,26 +56,20 @@ export default async function Home() {
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "LocalBusiness",
+    "@type": "ProfessionalService",
     name: "ETNYX - Jasa Joki & Gendong Mobile Legends",
     description: "Platform jasa joki & gendong Mobile Legends terpercaya di Indonesia. Push rank cepat, aman, tanpa banned.",
     url: "https://etnyx.com",
-    logo: "https://etnyx.com/logo/etnyx-logo.png",
+    logo: "https://etnyx.com/logo/etnyx-logo-header.webp",
     image: "https://etnyx.com/og-image.jpg",
-    priceRange: "Rp 10.000 - Rp 500.000",
+    priceRange: "Rp 4.000 - Rp 2.895.089",
     address: { "@type": "PostalAddress", addressCountry: "ID" },
     sameAs: ["https://instagram.com/etnyx_ml", "https://tiktok.com/@etnyx_ml"],
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: "4.9",
-      reviewCount: "500",
-      bestRating: "5",
-    },
     offers: {
       "@type": "AggregateOffer",
       priceCurrency: "IDR",
-      lowPrice: "10000",
-      highPrice: "500000",
+      lowPrice: "4000",
+      highPrice: "2895089",
       offerCount: "30",
     },
   };

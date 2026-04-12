@@ -588,7 +588,7 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
                 <Plug className="w-4 h-4" /> Test Connection
               </button>
               <p className="text-text-muted text-xs">
-                <BookOpen className="w-3 h-3 inline mr-1" /> Dapatkan credentials di <a href="https://my.ipaymu.com" target="_blank" rel="noopener" className="text-accent hover:underline">my.ipaymu.com</a>
+                <BookOpen className="w-3 h-3 inline mr-1" /> Dapatkan credentials di <a href="https://my.ipaymu.com" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">my.ipaymu.com</a>
               </p>
             </div>
           </div>

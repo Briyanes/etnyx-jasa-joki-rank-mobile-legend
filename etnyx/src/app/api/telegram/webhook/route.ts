@@ -734,7 +734,15 @@ async function handleReportStatus(callbackId: string, chatId: number, messageId:
 // ============ WEBHOOK ENDPOINT ============
 export async function POST(request: Request) {
   try {
-    // Verify it's from Telegram (check bot token in URL or use secret)
+    // Verify request is from Telegram using secret token header
+    const secretToken = process.env.TELEGRAM_WEBHOOK_SECRET;
+    if (secretToken) {
+      const headerToken = request.headers.get("x-telegram-bot-api-secret-token");
+      if (headerToken !== secretToken) {
+        return NextResponse.json({ ok: false }, { status: 403 });
+      }
+    }
+
     const update: TelegramUpdate = await request.json();
 
     // Handle callback queries (button clicks)
@@ -775,13 +783,15 @@ export async function GET(request: Request) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.com";
   const webhookUrl = `${siteUrl}/api/telegram/webhook`;
 
-  // Set webhook
+  // Set webhook with secret token for verification
+  const webhookSecret = process.env.TELEGRAM_WEBHOOK_SECRET;
   const res = await fetch(`https://api.telegram.org/bot${token}/setWebhook`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       url: webhookUrl,
       allowed_updates: ["message", "callback_query"],
+      ...(webhookSecret && { secret_token: webhookSecret }),
     }),
   });
   const data = await res.json();

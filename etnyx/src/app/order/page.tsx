@@ -3029,8 +3029,8 @@ function OrderPageContent() {
                   />
                   <span className="text-xs text-text-muted">
                     {locale === "id"
-                      ? <>Saya menyetujui <Link href="/terms" target="_blank" className="text-accent underline underline-offset-2">syarat &amp; ketentuan</Link> layanan ETNYX.</>
-                      : <>I agree to the <Link href="/terms" target="_blank" className="text-accent underline underline-offset-2">terms &amp; conditions</Link> of ETNYX services.</>}
+                      ? <>Saya menyetujui <Link href="/terms" target="_blank" rel="noopener noreferrer" className="text-accent underline underline-offset-2">syarat &amp; ketentuan</Link> layanan ETNYX.</>
+                      : <>I agree to the <Link href="/terms" target="_blank" rel="noopener noreferrer" className="text-accent underline underline-offset-2">terms &amp; conditions</Link> of ETNYX services.</>}
                   </span>
                 </label>
 

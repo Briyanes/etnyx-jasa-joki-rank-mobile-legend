@@ -15,7 +15,8 @@ async function checkSupabase(): Promise<ServiceStatus> {
     if (error) throw error;
     return { status: "ok", latency_ms: Date.now() - start };
   } catch (e) {
-    return { status: "error", latency_ms: Date.now() - start, error: String(e) };
+    console.error("Health check - Supabase error:", e);
+    return { status: "error", latency_ms: Date.now() - start, error: "Database connection failed" };
   }
 }
 
@@ -38,7 +39,8 @@ async function checkIpaymu(): Promise<ServiceStatus> {
     });
     return { status: res.ok ? "ok" : "error", latency_ms: Date.now() - start };
   } catch (e) {
-    return { status: "error", latency_ms: Date.now() - start, error: String(e) };
+    console.error("Health check - iPaymu error:", e);
+    return { status: "error", latency_ms: Date.now() - start, error: "Payment service unreachable" };
   }
 }
 
@@ -76,7 +78,8 @@ async function checkNotifications(): Promise<Record<string, ServiceStatus>> {
       results.whatsapp = { status: "error", error: "Not configured" };
     }
   } catch (e) {
-    results.telegram = { status: "error", error: String(e) };
+    console.error("Health check - notifications error:", e);
+    results.telegram = { status: "error", error: "Notification check failed" };
   }
 
   return results;

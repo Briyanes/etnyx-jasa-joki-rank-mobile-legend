@@ -42,7 +42,8 @@ export async function GET() {
       .order("created_at", { ascending: false });
 
     if (customer.whatsapp) {
-      ordersQuery = ordersQuery.or(`customer_id.eq.${customer.id},whatsapp.eq.${customer.whatsapp.replace(/[^0-9+]/g, "")}`);
+      const cleanWhatsapp = customer.whatsapp.replace(/[^0-9+]/g, "");
+      ordersQuery = ordersQuery.or(`customer_id.eq.${customer.id},whatsapp.eq.${cleanWhatsapp}`);
     } else {
       ordersQuery = ordersQuery.eq("customer_id", customer.id);
     }

@@ -77,14 +77,21 @@ export async function PUT(request: NextRequest) {
   try {
     const supabase = await createAdminClient();
     const body = await request.json();
-    const { id, ...updates } = body;
+    const { id } = body;
+
+    // Whitelist allowed fields to prevent mass assignment
+    const allowedFields = ["code", "discount_type", "discount_value", "min_order", "max_uses", "is_active", "expires_at"] as const;
+    const updates: Record<string, unknown> = {};
+    for (const field of allowedFields) {
+      if (field in body) updates[field] = body[field];
+    }
 
     // Convert expires_at to proper format
     if (updates.expires_at) {
-      updates.expires_at = new Date(updates.expires_at).toISOString();
+      updates.expires_at = new Date(updates.expires_at as string).toISOString();
     }
     if (updates.code) {
-      updates.code = updates.code.toUpperCase();
+      updates.code = (updates.code as string).toUpperCase();
     }
 
     const { data, error } = await supabase

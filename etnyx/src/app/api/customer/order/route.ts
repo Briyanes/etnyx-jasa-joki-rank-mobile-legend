@@ -51,6 +51,65 @@ function checkRateLimit(ip: string): boolean {
   return true;
 }
 
+// Server-side pricing for per-star and gendong modes (must match frontend)
+const SERVER_PER_STAR_PRICES: Record<string, number> = {
+  grandmaster: 5000, epic: 6500, legend: 7500, grading: 20000,
+  mythic: 18000, honor: 21000, glory: 26000, immortal: 31000,
+};
+const SERVER_GENDONG_PRICES: Record<string, number> = {
+  grandmaster: 9000, epic: 10000, legend: 11000, grading: 23000,
+  mythic: 21000, honor: 25000, glory: 30000, immortal: 35000,
+};
+
+// Known package prices (id → price) for paket mode validation
+const SERVER_PACKAGE_PRICES: Record<string, number> = {
+  "rush5-epic": 32000, "rush5-legend": 37000, "rush9-epic": 58000, "rush9-legend": 68000,
+  "rush5-mythic": 95000, "rush5-honor": 105000, "rush5-glory": 130000,
+  "rush9-mythic": 171000, "rush9-honor": 189000, "rush9-glory": 234000,
+  "warrior3-elite3": 25089, "warrior3-master4": 70089, "warrior3-gm5": 149089,
+  "warrior3-epic5": 282089, "warrior3-legend5": 459089,
+  "warrior1-mythic": 645089, "warrior2-mythic": 653089, "warrior3-mythic": 660089,
+  "elite3-master4": 45089, "elite3-gm5": 123089, "elite3-epic5": 259089,
+  "elite3-legend5": 435089, "elite1-mythic": 605089, "elite2-mythic": 620089, "elite3-mythic": 635089,
+  "master4-gm5": 78089, "master4-epic5": 213089, "master4-legend5": 389089,
+  "master1-mythic": 533089, "master2-mythic": 550089, "master3-mythic": 570089, "master4-mythic": 590089,
+  "gm5-epic5": 125000, "gm5-legend5": 312589,
+  "gm1-mythic": 425089, "gm2-mythic": 450089, "gm3-mythic": 475089,
+  "gm4-mythic": 500089, "gm5-mythic": 525089, "gm5-honor": 945089,
+  "gm5-glory": 1520089, "gm5-immortal": 2895089,
+  "epic5-legend5": 175089, "epic1-mythic": 235089, "epic2-mythic": 270089,
+  "epic3-mythic": 305089, "epic4-mythic": 340089, "epic5-mythic": 375089,
+  "epic5-honor": 795089, "epic5-glory": 1370089, "epic5-immortal": 2745089,
+  "legend1-mythic": 50089, "legend2-mythic": 88089, "legend3-mythic": 125089,
+  "legend4-mythic": 163089, "legend5-mythic": 200089, "legend5-honor": 620089,
+  "legend5-glory": 1195089, "legend5-immortal": 2570089,
+  "mythic-grading": 210089, "mythic-honor": 420089, "mythic-glory": 995089, "mythic-immortal": 2370089,
+  "honor-glory": 575089, "honor-immortal": 1950089,
+  "glory-immortal": 1375089,
+};
+
+function calculateServerPrice(body: Record<string, unknown>): number | null {
+  const orderType = String(body.orderType || "");
+  const isGendong = orderType === "gendong";
+
+  if (orderType === "perstar" || isGendong) {
+    const rankId = String(body.perStarRankId || "");
+    const starQty = Number(body.starQuantity || 0);
+    const priceMap = isGendong ? SERVER_GENDONG_PRICES : SERVER_PER_STAR_PRICES;
+    const pricePerStar = priceMap[rankId];
+    if (!pricePerStar || starQty < 1 || starQty > 100) return null;
+    return pricePerStar * starQty;
+  }
+
+  if (orderType === "paket") {
+    const packageId = String(body.packageId || "");
+    const price = SERVER_PACKAGE_PRICES[packageId];
+    return price ?? null;
+  }
+
+  return null;
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Rate limit
@@ -134,6 +193,20 @@ export async function POST(request: NextRequest) {
         { error: "Harga tidak valid" },
         { status: 400 }
       );
+    }
+
+    // Server-side price verification: recalculate from order params
+    const serverBasePrice = calculateServerPrice(body);
+    if (serverBasePrice !== null) {
+      // Allow 1% tolerance for rounding, but reject large manipulations
+      const tolerance = Math.max(serverBasePrice * 0.01, 100);
+      if (Math.abs(totalPrice - serverBasePrice) > tolerance) {
+        console.warn(`Price mismatch: client=${totalPrice}, server=${serverBasePrice}, order=${body.orderType}/${body.packageId || body.perStarRankId}`);
+        return NextResponse.json(
+          { error: "Harga tidak sesuai. Silakan refresh halaman dan coba lagi." },
+          { status: 400 }
+        );
+      }
     }
 
     // Sanitize inputs

@@ -62,7 +62,18 @@ export async function PUT(request: NextRequest) {
   try {
     const supabase = await createAdminClient();
     const body = await request.json();
-    const { id, ...updates } = body;
+    const { id } = body;
+
+    // Whitelist allowed fields to prevent mass assignment
+    const allowedFields = ["name", "is_active", "total_orders", "total_stars", "win_rate", "specialization", "avatar_url"] as const;
+    const updates: Record<string, unknown> = {};
+    for (const field of allowedFields) {
+      if (field in body) {
+        updates[field] = field === "name" || field === "specialization" 
+          ? sanitizeInput(String(body[field])) 
+          : body[field];
+      }
+    }
 
     const { data, error } = await supabase
       .from("boosters")

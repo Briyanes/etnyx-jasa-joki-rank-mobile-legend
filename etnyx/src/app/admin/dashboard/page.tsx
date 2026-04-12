@@ -963,7 +963,7 @@ export default function AdminDashboard() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Link href="/" target="_blank" className="text-xs text-text-muted hover:text-accent flex items-center gap-1 transition-colors">
+              <Link href="/" target="_blank" rel="noopener noreferrer" className="text-xs text-text-muted hover:text-accent flex items-center gap-1 transition-colors">
                 <Eye className="w-3.5 h-3.5" /> Lihat Website
               </Link>
               {activeTab === "orders" && (
