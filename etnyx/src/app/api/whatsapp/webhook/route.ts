@@ -266,7 +266,7 @@ async function sendCSInfo(
 
 Untuk bantuan lebih lanjut, silakan hubungi CS kami:
 
-💬 *WhatsApp CS:* wa.me/6281515141452
+💬 *WhatsApp CS:* wa.me/6281515141540
 🌐 *Website:* ${SITE_URL}
 📧 *Email:* support@etnyx.com
 

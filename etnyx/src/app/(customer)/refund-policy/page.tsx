@@ -43,7 +43,7 @@ export default function RefundPolicyPage() {
             </h2>
             <div className="text-text-muted text-sm space-y-2">
               <p>Email: <a href="mailto:support@etnyx.id" className="text-accent hover:underline">support@etnyx.id</a></p>
-              <p>WhatsApp: <a href="https://wa.me/6281515141452" className="text-accent hover:underline">+62 815-1514-1452</a></p>
+              <p>WhatsApp: <a href="https://wa.me/6281515141540" className="text-accent hover:underline">+62 815-1514-1540</a></p>
               <p>{locale === "id" ? "Jam operasional: Senin–Minggu, 08.00–23.00 WIB" : "Operating hours: Monday–Sunday, 08:00–23:00 WIB (GMT+7)"}</p>
             </div>
           </div>

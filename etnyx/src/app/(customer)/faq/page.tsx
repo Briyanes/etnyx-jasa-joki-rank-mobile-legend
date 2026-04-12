@@ -57,7 +57,7 @@ export default function FAQPage() {
             <p className="text-text font-semibold mb-2">{t.stillHaveQuestions}</p>
             <p className="text-text-muted text-sm mb-4">{t.contactUs}</p>
             <a
-              href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "6281414131321"}`}
+              href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "6281515141540"}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-6 py-3 gradient-primary rounded-xl text-white font-semibold text-sm hover:opacity-90 transition-opacity"
