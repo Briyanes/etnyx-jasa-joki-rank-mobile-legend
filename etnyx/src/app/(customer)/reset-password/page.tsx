@@ -3,10 +3,60 @@
 import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
+
+const translations = {
+  id: {
+    titleReset: "Buat Password Baru",
+    titleRequest: "Reset Password",
+    successReset: "Password berhasil direset! Silakan login dengan password baru.",
+    successRequest: "Link reset password sudah dikirim ke email kamu (jika terdaftar). Cek inbox dan folder spam.",
+    newPassword: "Password Baru",
+    confirmPassword: "Konfirmasi Password",
+    minChars: "Minimal 6 karakter",
+    repeatPassword: "Ulangi password",
+    errorMismatch: "Password tidak sama",
+    errorMinLength: "Password minimal 6 karakter",
+    errorGeneric: "Terjadi kesalahan. Coba lagi.",
+    login: "Login",
+    resetBtn: "Reset Password",
+    sending: "Mengirim...",
+    loading: "Loading...",
+    emailLabel: "Email",
+    emailPlaceholder: "nama@email.com",
+    emailDesc: "Masukkan email yang terdaftar untuk menerima link reset password.",
+    sendLink: "Kirim Link Reset",
+    backToLogin: "← Kembali ke Login",
+  },
+  en: {
+    titleReset: "Create New Password",
+    titleRequest: "Reset Password",
+    successReset: "Password has been reset! Please login with your new password.",
+    successRequest: "Reset link has been sent to your email (if registered). Check inbox and spam folder.",
+    newPassword: "New Password",
+    confirmPassword: "Confirm Password",
+    minChars: "Minimum 6 characters",
+    repeatPassword: "Repeat password",
+    errorMismatch: "Passwords don't match",
+    errorMinLength: "Password must be at least 6 characters",
+    errorGeneric: "Something went wrong. Try again.",
+    login: "Login",
+    resetBtn: "Reset Password",
+    sending: "Sending...",
+    loading: "Loading...",
+    emailLabel: "Email",
+    emailPlaceholder: "name@email.com",
+    emailDesc: "Enter your registered email to receive a password reset link.",
+    sendLink: "Send Reset Link",
+    backToLogin: "← Back to Login",
+  },
+};
 
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
+  const { locale } = useLanguage();
+  const t = translations[locale as keyof typeof translations] || translations.id;
 
   const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -32,9 +82,9 @@ function ResetPasswordForm() {
         setError(data.error);
         return;
       }
-      setSuccess("Link reset password sudah dikirim ke email kamu (jika terdaftar). Cek inbox dan folder spam.");
+      setSuccess(t.successRequest);
     } catch {
-      setError("Terjadi kesalahan. Coba lagi.");
+      setError(t.errorGeneric);
     } finally {
       setLoading(false);
     }
@@ -43,11 +93,11 @@ function ResetPasswordForm() {
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      setError("Password tidak sama");
+      setError(t.errorMismatch);
       return;
     }
     if (newPassword.length < 6) {
-      setError("Password minimal 6 karakter");
+      setError(t.errorMinLength);
       return;
     }
 
@@ -66,9 +116,9 @@ function ResetPasswordForm() {
         setError(data.error);
         return;
       }
-      setSuccess("Password berhasil direset! Silakan login dengan password baru.");
+      setSuccess(t.successReset);
     } catch {
-      setError("Terjadi kesalahan. Coba lagi.");
+      setError(t.errorGeneric);
     } finally {
       setLoading(false);
     }
@@ -79,7 +129,7 @@ function ResetPasswordForm() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="text-3xl font-bold text-primary">ETNYX</Link>
-          <p className="text-muted mt-2">{token ? "Buat Password Baru" : "Reset Password"}</p>
+          <p className="text-muted mt-2">{token ? t.titleReset : t.titleRequest}</p>
         </div>
 
         <div className="bg-surface rounded-2xl p-6 md:p-8 border border-surface/50">
@@ -92,30 +142,30 @@ function ResetPasswordForm() {
                 href="/login"
                 className="block w-full py-3 bg-primary hover:bg-primary/90 text-background font-semibold rounded-xl transition-all text-center"
               >
-                Login
+                {t.login}
               </Link>
             </div>
           ) : token ? (
             <form onSubmit={handleResetPassword} className="space-y-5">
               <div>
-                <label className="block text-sm text-muted mb-2">Password Baru</label>
+                <label className="block text-sm text-muted mb-2">{t.newPassword}</label>
                 <input
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Minimal 6 karakter"
+                  placeholder={t.minChars}
                   required
                   minLength={6}
                   className="w-full px-4 py-3 bg-background border border-surface/50 rounded-xl text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
                 />
               </div>
               <div>
-                <label className="block text-sm text-muted mb-2">Konfirmasi Password</label>
+                <label className="block text-sm text-muted mb-2">{t.confirmPassword}</label>
                 <input
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Ulangi password"
+                  placeholder={t.repeatPassword}
                   required
                   className="w-full px-4 py-3 bg-background border border-surface/50 rounded-xl text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
                 />
@@ -128,19 +178,19 @@ function ResetPasswordForm() {
                 disabled={loading}
                 className="w-full py-3 bg-primary hover:bg-primary/90 text-background font-semibold rounded-xl transition-all disabled:opacity-50"
               >
-                {loading ? "Loading..." : "Reset Password"}
+                {loading ? t.loading : t.resetBtn}
               </button>
             </form>
           ) : (
             <form onSubmit={handleRequestReset} className="space-y-5">
-              <p className="text-muted text-sm">Masukkan email yang terdaftar untuk menerima link reset password.</p>
+              <p className="text-muted text-sm">{t.emailDesc}</p>
               <div>
-                <label className="block text-sm text-muted mb-2">Email</label>
+                <label className="block text-sm text-muted mb-2">{t.emailLabel}</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="nama@email.com"
+                  placeholder={t.emailPlaceholder}
                   required
                   className="w-full px-4 py-3 bg-background border border-surface/50 rounded-xl text-text placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
                 />
@@ -153,13 +203,13 @@ function ResetPasswordForm() {
                 disabled={loading}
                 className="w-full py-3 bg-primary hover:bg-primary/90 text-background font-semibold rounded-xl transition-all disabled:opacity-50"
               >
-                {loading ? "Mengirim..." : "Kirim Link Reset"}
+                {loading ? t.sending : t.sendLink}
               </button>
             </form>
           )}
 
           <p className="text-center text-muted text-sm mt-6">
-            <Link href="/login" className="text-primary hover:underline">← Kembali ke Login</Link>
+            <Link href="/login" className="text-primary hover:underline">{t.backToLogin}</Link>
           </p>
         </div>
       </div>

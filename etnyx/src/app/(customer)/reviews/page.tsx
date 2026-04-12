@@ -68,6 +68,7 @@ export default function ReviewsPage() {
   const txt = t[locale as keyof typeof t] || t.id;
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
+  const [orderCount, setOrderCount] = useState<number | null>(null);
 
   useEffect(() => {
     fetch("/api/testimonials")
@@ -77,6 +78,13 @@ export default function ReviewsPage() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
+
+    fetch("/api/stats/orders")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.count) setOrderCount(data.count);
+      })
+      .catch(() => {});
   }, []);
 
   const avgRating =
@@ -119,7 +127,7 @@ export default function ReviewsPage() {
           {/* Stats */}
           <div className="grid grid-cols-3 gap-3 mb-8">
             <div className="bg-surface rounded-xl border border-white/10 p-4 text-center">
-              <p className="text-2xl font-bold text-accent">2.847+</p>
+              <p className="text-2xl font-bold text-accent">{orderCount ? `${orderCount.toLocaleString("id-ID")}+` : "..."}</p>
               <p className="text-text-muted text-xs mt-1">{txt.stats.totalOrders}</p>
             </div>
             <div className="bg-surface rounded-xl border border-white/10 p-4 text-center">

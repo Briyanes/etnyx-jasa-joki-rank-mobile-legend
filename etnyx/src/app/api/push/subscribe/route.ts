@@ -12,11 +12,24 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createAdminClient();
 
+    // Validate customerId if provided — must be a real customer
+    let validCustomerId: string | null = null;
+    if (customerId) {
+      const { data: customer } = await supabase
+        .from("customers")
+        .select("id")
+        .eq("id", customerId)
+        .single();
+      if (customer) {
+        validCustomerId = customer.id;
+      }
+    }
+
     // Upsert subscription (update if endpoint exists, insert if new)
     const { error } = await supabase
       .from("push_subscriptions")
       .upsert({
-        customer_id: customerId || null,
+        customer_id: validCustomerId,
         endpoint: subscription.endpoint,
         keys_p256dh: subscription.keys?.p256dh || "",
         keys_auth: subscription.keys?.auth || "",
