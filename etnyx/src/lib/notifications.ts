@@ -491,8 +491,70 @@ export async function sendWhatsAppMessage(
   return sendWhatsAppFonnte(phone, message, url, settings);
 }
 
+// Send Meta WA template message (for business-initiated conversations)
+async function sendWhatsAppTemplate(
+  phone: string,
+  templateName: string,
+  params: string[],
+  settings?: IntegrationSettings
+): Promise<boolean> {
+  const s = settings || await getIntegrationSettings();
+  if (!s.metaWaEnabled || !s.metaWaAccessToken || !s.metaWaPhoneNumberId) {
+    return false;
+  }
+
+  const normalizedPhone = normalizePhone(phone);
+
+  const components: Record<string, unknown>[] = [];
+  if (params.length > 0) {
+    components.push({
+      type: "body",
+      parameters: params.map(p => ({ type: "text", text: p })),
+    });
+  }
+
+  try {
+    const res = await fetch(
+      `https://graph.facebook.com/v21.0/${s.metaWaPhoneNumberId}/messages`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${s.metaWaAccessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messaging_product: "whatsapp",
+          to: normalizedPhone,
+          type: "template",
+          template: {
+            name: templateName,
+            language: { code: "id" },
+            components,
+          },
+        }),
+      }
+    );
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      console.error(`Meta WA template "${templateName}" error:`, err);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error(`Meta WA template "${templateName}" failed:`, error);
+    return false;
+  }
+}
+
 export async function sendPaymentConfirmedWA(order: OrderData): Promise<boolean> {
   if (!order.whatsapp) return false;
+
+  // Try Meta template first
+  const templateSent = await sendWhatsAppTemplate(order.whatsapp, "payment_confirmed", [
+    order.order_id, formatRankDisplay(order), formatRupiah(order.price),
+  ]);
+  if (templateSent) return true;
 
   const message = `
 *Pembayaran Dikonfirmasi!*
@@ -545,6 +607,12 @@ export async function sendPaymentConfirmedEmail(order: OrderData): Promise<boole
 export async function sendOrderConfirmationWA(order: OrderData): Promise<boolean> {
   if (!order.whatsapp) return false;
 
+  // Try Meta template first
+  const templateSent = await sendWhatsAppTemplate(order.whatsapp, "order_confirmation", [
+    order.order_id, formatRankDisplay(order), formatRupiah(order.price),
+  ]);
+  if (templateSent) return true;
+
   const message = `
 Halo!
 
@@ -574,6 +642,12 @@ _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 export async function sendOrderStartedWA(order: OrderData): Promise<boolean> {
   if (!order.whatsapp) return false;
 
+  // Try Meta template first
+  const templateSent = await sendWhatsAppTemplate(order.whatsapp, "order_started", [
+    order.order_id, formatTargetDisplay(order),
+  ]);
+  if (templateSent) return true;
+
   const isGendong = order.package_title?.includes("Gendong") || order.package_title?.includes("Duo Boost");
 
   const message = `
@@ -597,6 +671,12 @@ _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 
 export async function sendOrderCompletedWA(order: OrderData): Promise<boolean> {
   if (!order.whatsapp) return false;
+
+  // Try Meta template first
+  const templateSent = await sendWhatsAppTemplate(order.whatsapp, "order_completed", [
+    order.order_id, formatTargetDisplay(order),
+  ]);
+  if (templateSent) return true;
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.com";
   const reviewLink = `${siteUrl}/review/?id=${order.order_id}`;
@@ -631,6 +711,12 @@ _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 
 export async function sendOrderCancelledWA(order: OrderData): Promise<boolean> {
   if (!order.whatsapp) return false;
+
+  // Try Meta template first
+  const templateSent = await sendWhatsAppTemplate(order.whatsapp, "order_cancelled", [
+    order.order_id, order.username,
+  ]);
+  if (templateSent) return true;
 
   const message = `
 *Order Dibatalkan*
