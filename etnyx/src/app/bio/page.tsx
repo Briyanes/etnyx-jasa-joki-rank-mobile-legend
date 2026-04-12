@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { WHATSAPP_NUMBER } from "@/lib/constants";
 import { 
   ShoppingCart, Search, MessageCircle,
   ExternalLink, Gift, User,
-  MapPin, Clock, Star, Shield, Zap, BookOpen, Pencil
+  MapPin, Clock, Star, Shield, Zap, BookOpen, Pencil,
+  HelpCircle, LogIn
 } from "lucide-react";
 
 const translations = {
@@ -19,21 +21,26 @@ const translations = {
     trackDesc: "Cek progress order kamu",
     chatTitle: "Chat WhatsApp",
     chatDesc: "Tanya langsung ke CS kami",
-    rewardsTitle: "Member Rewards",
-    rewardsDesc: "Cek poin & tukar hadiah",
-    dashboardTitle: "Dashboard",
-    dashboardDesc: "Kelola pesanan & akun kamu",
+    rewardsTitle: "Dashboard & Rewards",
+    rewardsDesc: "Kelola pesanan, poin & tukar hadiah",
     websiteTitle: "Website Utama",
     websiteDesc: "etnyx.com",
     reviewsTitle: "Lihat Review",
     reviewsDesc: "Baca review dari customer lain",
     writeReviewTitle: "Tulis Review",
     writeReviewDesc: "Berikan review & dapatkan skin gratis",
+    faqTitle: "FAQ",
+    faqDesc: "Pertanyaan yang sering ditanyakan",
+    loginTitle: "Login / Daftar",
+    loginDesc: "Masuk atau buat akun baru",
     followUs: "Follow Us",
     startFrom: "Mulai dari",
     rating: "Rating",
     safe: "Aman 100%",
     footer: "Jasa joki rank ML terpercaya #1 di Indonesia",
+    terms: "Syarat & Ketentuan",
+    privacy: "Kebijakan Privasi",
+    refund: "Kebijakan Refund",
   },
   en: {
     subtitle: "Mobile Legends Boosting Service",
@@ -44,21 +51,26 @@ const translations = {
     trackDesc: "Check your order progress",
     chatTitle: "Chat WhatsApp",
     chatDesc: "Ask our CS directly",
-    rewardsTitle: "Member Rewards",
-    rewardsDesc: "Check points & redeem prizes",
-    dashboardTitle: "Dashboard",
-    dashboardDesc: "Manage orders & account",
+    rewardsTitle: "Dashboard & Rewards",
+    rewardsDesc: "Manage orders, points & redeem prizes",
     websiteTitle: "Main Website",
     websiteDesc: "etnyx.com",
     reviewsTitle: "See Reviews",
     reviewsDesc: "Read reviews from other customers",
     writeReviewTitle: "Write Review",
     writeReviewDesc: "Leave a review & get a free skin",
+    faqTitle: "FAQ",
+    faqDesc: "Frequently asked questions",
+    loginTitle: "Login / Register",
+    loginDesc: "Sign in or create an account",
     followUs: "Follow Us",
     startFrom: "Start from",
     rating: "Rating",
     safe: "100% Safe",
     footer: "#1 Trusted ML rank boosting service in Indonesia",
+    terms: "Terms of Service",
+    privacy: "Privacy Policy",
+    refund: "Refund Policy",
   },
 };
 
@@ -127,13 +139,14 @@ export default function BioPage() {
     { href: "/order", icon: ShoppingCart, title: t.orderTitle, desc: t.orderDesc, accent: true },
     { href: "/track", icon: Search, title: t.trackTitle, desc: t.trackDesc },
     {
-      href: `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "6281515141452"}?text=${encodeURIComponent(locale === "id" ? "Halo kak, mau tanya soal joki ML" : "Hi, I want to ask about ML boosting")}`,
+      href: `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(locale === "id" ? "Halo kak, mau tanya soal joki ML" : "Hi, I want to ask about ML boosting")}`,
       icon: MessageCircle, title: t.chatTitle, desc: t.chatDesc, external: true,
     },
     { href: "/dashboard", icon: Gift, title: t.rewardsTitle, desc: t.rewardsDesc },
-    { href: "/dashboard", icon: User, title: t.dashboardTitle, desc: t.dashboardDesc },
+    { href: "/login", icon: LogIn, title: t.loginTitle, desc: t.loginDesc },
     { href: "/#testimonials", icon: BookOpen, title: t.reviewsTitle, desc: t.reviewsDesc },
     { href: "/review", icon: Pencil, title: t.writeReviewTitle, desc: t.writeReviewDesc },
+    { href: "/faq", icon: HelpCircle, title: t.faqTitle, desc: t.faqDesc },
     { href: "/", icon: ExternalLink, title: t.websiteTitle, desc: t.websiteDesc },
   ];
 
@@ -259,6 +272,14 @@ export default function BioPage() {
         {/* Footer */}
         <div className="text-center">
           <div className="h-px w-24 mx-auto bg-gradient-to-r from-transparent via-white/10 to-transparent mb-4" />
+          <p className="text-text-muted text-xs mb-2">{t.footer}</p>
+          <div className="flex items-center justify-center gap-3 text-text-muted text-[10px] mb-2">
+            <a href="/terms" className="hover:text-accent transition-colors">{t.terms}</a>
+            <span className="w-0.5 h-0.5 rounded-full bg-white/20" />
+            <a href="/privacy" className="hover:text-accent transition-colors">{t.privacy}</a>
+            <span className="w-0.5 h-0.5 rounded-full bg-white/20" />
+            <a href="/refund-policy" className="hover:text-accent transition-colors">{t.refund}</a>
+          </div>
           <p className="text-text-muted text-[10px]">
             © {new Date().getFullYear()} ETNYX
           </p>
