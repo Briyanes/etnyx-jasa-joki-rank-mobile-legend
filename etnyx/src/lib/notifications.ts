@@ -590,6 +590,7 @@ Terima kasih sudah mempercayai *ETNYX*!
 _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 `.trim();
 
+  // payment_confirmed buttons: [0] = URL (Track Order), [1] = URL (Chat CS)
   const templateButtons: Record<string, unknown>[] = [
     {
       type: "button",
@@ -673,7 +674,7 @@ Butuh bantuan? Hubungi CS kami via link di bawah.
 _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 `.trim();
 
-  // Template buttons: [0] = URL (payment link), [1] = Phone (CS)
+  // Template buttons: [0] = URL (payment link), [1] = URL (Chat CS via redirect)
   const templateButtons: Record<string, unknown>[] = [
     {
       type: "button",
@@ -721,6 +722,7 @@ ${isGendong ? "Booster kami akan menghubungi kamu untuk jadwal mabar." : "Jangan
 _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 `.trim();
 
+  // order_started buttons: [0] = URL (Track Order), [1] = URL (Chat CS)
   const templateButtons: Record<string, unknown>[] = [
     {
       type: "button",
@@ -776,6 +778,7 @@ Terima kasih sudah menggunakan *ETNYX*!
 _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 `.trim();
 
+  // order_completed buttons: [0] = URL (Review), [1] = URL (Report), [2] = URL (Chat CS)
   const templateButtons: Record<string, unknown>[] = [
     {
       type: "button",
@@ -823,6 +826,7 @@ Jika kamu merasa ini adalah kesalahan atau ingin order ulang, silakan hubungi ka
 _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 `.trim();
 
+  // order_cancelled button: [0] = URL (Chat CS)
   const templateButtons: Record<string, unknown>[] = [
     {
       type: "button",
