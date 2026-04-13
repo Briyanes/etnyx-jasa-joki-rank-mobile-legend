@@ -75,7 +75,11 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  // 2. Try sending test message via Meta
+  // 2. Try sending test message via Meta (only if phone provided)
+  if (!phone) {
+    return NextResponse.json({ error: "Missing ?phone= parameter for direct test" }, { status: 400 });
+  }
+
   let metaResult: { success: boolean; error?: unknown } = { success: false };
   if (settings.metaWaEnabled && settings.metaWaAccessToken && settings.metaWaPhoneNumberId) {
     try {
