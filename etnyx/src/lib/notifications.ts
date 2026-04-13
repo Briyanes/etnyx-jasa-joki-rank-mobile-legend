@@ -499,14 +499,42 @@ export async function sendWhatsAppMessage(
   const settings = await getIntegrationSettings();
   console.log(`WA send: phone=${phone}, metaEnabled=${settings.metaWaEnabled}, hasToken=${!!settings.metaWaAccessToken}, phoneNumId=${settings.metaWaPhoneNumberId || 'none'}, hasFonnte=${!!settings.fonnteApiToken}`);
 
-  // Try Meta Cloud API first (official)
+  // Try Meta Cloud API first
   const metaSent = await sendWhatsAppMeta(phone, message, settings);
   if (metaSent) return true;
 
   // Fallback to Fonnte
+  console.log(`WA send: Meta failed, trying Fonnte for ${phone}`);
   const fonnteSent = await sendWhatsAppFonnte(phone, message, url, settings);
   if (!fonnteSent) {
     console.error(`WA send FAILED: both Meta and Fonnte failed for ${phone}`);
+  }
+  return fonnteSent;
+}
+
+// Business-initiated WA: try template → Fonnte fallback (skip Meta text - requires 24h window)
+async function sendBusinessWA(
+  phone: string,
+  templateName: string,
+  templateParams: string[],
+  fallbackMessage: string,
+  fallbackUrl?: string
+): Promise<boolean> {
+  if (!phone) return false;
+
+  const settings = await getIntegrationSettings();
+  console.log(`WA business: phone=${phone}, template=${templateName}, metaEnabled=${settings.metaWaEnabled}, hasFonnte=${!!settings.fonnteApiToken}`);
+
+  // 1. Try Meta template (works for business-initiated, no 24h window needed)
+  const templateSent = await sendWhatsAppTemplate(phone, templateName, templateParams, settings);
+  if (templateSent) return true;
+
+  // 2. Skip Meta text (requires 24h conversation window, will fail for new customers)
+  // 3. Fallback directly to Fonnte
+  console.log(`WA business: template "${templateName}" failed, trying Fonnte for ${phone}`);
+  const fonnteSent = await sendWhatsAppFonnte(phone, fallbackMessage, fallbackUrl, settings);
+  if (!fonnteSent) {
+    console.error(`WA business FAILED: template + Fonnte both failed for ${phone}`);
   }
   return fonnteSent;
 }
@@ -571,12 +599,6 @@ async function sendWhatsAppTemplate(
 export async function sendPaymentConfirmedWA(order: OrderData): Promise<boolean> {
   if (!order.whatsapp) return false;
 
-  // Try Meta template first
-  const templateSent = await sendWhatsAppTemplate(order.whatsapp, "payment_confirmed", [
-    order.order_id, formatRankDisplay(order), formatRupiah(order.price),
-  ]);
-  if (templateSent) return true;
-
   const message = `
 *Pembayaran Dikonfirmasi!*
 
@@ -593,7 +615,12 @@ Terima kasih sudah mempercayai *ETNYX*!
 _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 `.trim();
 
-  return sendWhatsAppMessage(order.whatsapp, message);
+  return sendBusinessWA(
+    order.whatsapp,
+    "payment_confirmed",
+    [order.order_id, formatRankDisplay(order), formatRupiah(order.price)],
+    message
+  );
 }
 
 export async function sendPaymentConfirmedEmail(order: OrderData): Promise<boolean> {
@@ -628,12 +655,6 @@ export async function sendPaymentConfirmedEmail(order: OrderData): Promise<boole
 export async function sendOrderConfirmationWA(order: OrderData): Promise<boolean> {
   if (!order.whatsapp) return false;
 
-  // Try Meta template first
-  const templateSent = await sendWhatsAppTemplate(order.whatsapp, "order_confirmation", [
-    order.order_id, formatRankDisplay(order), formatRupiah(order.price),
-  ]);
-  if (templateSent) return true;
-
   const message = `
 Halo!
 
@@ -657,17 +678,17 @@ Butuh bantuan? Hubungi CS kami via link di bawah.
 _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 `.trim();
 
-  return sendWhatsAppMessage(order.whatsapp, message, `${SITE_URL}/payment/manual/?order_id=${order.order_id}`);
+  return sendBusinessWA(
+    order.whatsapp,
+    "order_confirmation",
+    [order.order_id, formatRankDisplay(order), formatRupiah(order.price)],
+    message,
+    `${SITE_URL}/payment/manual/?order_id=${order.order_id}`
+  );
 }
 
 export async function sendOrderStartedWA(order: OrderData): Promise<boolean> {
   if (!order.whatsapp) return false;
-
-  // Try Meta template first
-  const templateSent = await sendWhatsAppTemplate(order.whatsapp, "order_started", [
-    order.order_id, formatTargetDisplay(order),
-  ]);
-  if (templateSent) return true;
 
   const isGendong = order.package_title?.includes("Gendong") || order.package_title?.includes("Duo Boost");
 
@@ -687,17 +708,17 @@ ${isGendong ? "Booster kami akan menghubungi kamu untuk jadwal mabar." : "Jangan
 _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 `.trim();
 
-  return sendWhatsAppMessage(order.whatsapp, message, `${SITE_URL}/track/?id=${order.order_id}`);
+  return sendBusinessWA(
+    order.whatsapp,
+    "order_started",
+    [order.order_id, formatTargetDisplay(order)],
+    message,
+    `${SITE_URL}/track/?id=${order.order_id}`
+  );
 }
 
 export async function sendOrderCompletedWA(order: OrderData): Promise<boolean> {
   if (!order.whatsapp) return false;
-
-  // Try Meta template first
-  const templateSent = await sendWhatsAppTemplate(order.whatsapp, "order_completed", [
-    order.order_id, formatTargetDisplay(order),
-  ]);
-  if (templateSent) return true;
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.com";
   const reviewLink = `${siteUrl}/review/?id=${order.order_id}`;
@@ -727,17 +748,17 @@ Terima kasih sudah menggunakan *ETNYX*!
 _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 `.trim();
 
-  return sendWhatsAppMessage(order.whatsapp, message, reviewLink);
+  return sendBusinessWA(
+    order.whatsapp,
+    "order_completed",
+    [order.order_id, formatTargetDisplay(order)],
+    message,
+    reviewLink
+  );
 }
 
 export async function sendOrderCancelledWA(order: OrderData): Promise<boolean> {
   if (!order.whatsapp) return false;
-
-  // Try Meta template first
-  const templateSent = await sendWhatsAppTemplate(order.whatsapp, "order_cancelled", [
-    order.order_id, order.username,
-  ]);
-  if (templateSent) return true;
 
   const message = `
 *Order Dibatalkan*
@@ -752,7 +773,12 @@ Jika kamu merasa ini adalah kesalahan atau ingin order ulang, silakan hubungi ka
 _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 `.trim();
 
-  return sendWhatsAppMessage(order.whatsapp, message);
+  return sendBusinessWA(
+    order.whatsapp,
+    "order_cancelled",
+    [order.order_id, order.username],
+    message
+  );
 }
 
 // ============ EMAIL (Resend) ============
