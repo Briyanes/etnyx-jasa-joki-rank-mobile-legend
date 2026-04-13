@@ -8,9 +8,11 @@ export async function GET(request: NextRequest) {
   const phone = searchParams.get("phone");
   const authHeader = request.headers.get("authorization");
 
-  // Simple auth: must match CRON_SECRET
+  // Simple auth: must match CRON_SECRET or JWT_SECRET
   const cronSecret = process.env.CRON_SECRET;
-  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+  const jwtSecret = process.env.JWT_SECRET;
+  const token = authHeader?.replace("Bearer ", "");
+  if (!token || (token !== cronSecret && token !== jwtSecret)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
