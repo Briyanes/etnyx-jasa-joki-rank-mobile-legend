@@ -82,10 +82,49 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Missing ?phone= parameter for direct test" }, { status: 400 });
   }
 
-  let metaResult: { success: boolean; error?: unknown } = { success: false };
+  const template = searchParams.get("template"); // e.g. ?template=hello_world or ?template=order_confirmation
+
+  let metaResult: Record<string, unknown> = { success: false };
   if (settings.metaWaEnabled && settings.metaWaAccessToken && settings.metaWaPhoneNumberId) {
     try {
       const normalizedPhone = phone.replace(/\D/g, "").replace(/^0/, "62");
+      
+      // Build message payload
+      let messagePayload: Record<string, unknown>;
+      if (template) {
+        // Template test mode
+        messagePayload = {
+          messaging_product: "whatsapp",
+          to: normalizedPhone,
+          type: "template",
+          template: {
+            name: template,
+            language: { code: template === "hello_world" ? "en_US" : "id" },
+            ...(template !== "hello_world" ? {
+              components: [
+                {
+                  type: "body",
+                  parameters: [
+                    { type: "text", text: "ETX-TEST123" },
+                    { type: "text", text: "Mythic" },
+                    { type: "text", text: "Weekly" },
+                    { type: "text", text: "Rp 50.000" },
+                  ],
+                },
+              ],
+            } : {}),
+          },
+        };
+      } else {
+        // Plain text test mode
+        messagePayload = {
+          messaging_product: "whatsapp",
+          to: normalizedPhone,
+          type: "text",
+          text: { body: "🧪 Test pesan dari ETNYX Bot. Kalau kamu terima ini, berarti WA API sudah berfungsi!" },
+        };
+      }
+
       const res = await fetch(
         `https://graph.facebook.com/v21.0/${settings.metaWaPhoneNumberId}/messages`,
         {
@@ -94,17 +133,18 @@ export async function GET(request: NextRequest) {
             Authorization: `Bearer ${settings.metaWaAccessToken}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            messaging_product: "whatsapp",
-            to: normalizedPhone,
-            type: "text",
-            text: { body: "🧪 Test pesan dari ETNYX Bot. Kalau kamu terima ini, berarti WA API sudah berfungsi!" },
-          }),
+          body: JSON.stringify(messagePayload),
         }
       );
 
       const resBody = await res.json().catch(() => ({}));
-      metaResult = res.ok ? { success: true } : { success: false, error: resBody };
+      metaResult = {
+        success: res.ok,
+        httpStatus: res.status,
+        normalizedPhone,
+        requestPayload: messagePayload,
+        response: resBody,
+      };
     } catch (e) {
       metaResult = { success: false, error: String(e) };
     }

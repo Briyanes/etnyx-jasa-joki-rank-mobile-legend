@@ -557,12 +557,12 @@ async function sendWhatsAppTemplate(
       }
     );
 
+    const resBody = await res.json().catch(() => ({}));
     if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      console.error(`Meta WA template "${templateName}" error:`, JSON.stringify(err));
+      console.error(`Meta WA template "${templateName}" error:`, JSON.stringify(resBody));
       return false;
     }
-    console.log(`Meta WA: template "${templateName}" sent successfully to ${normalizedPhone}`);
+    console.log(`Meta WA: template "${templateName}" sent to ${normalizedPhone}`, JSON.stringify(resBody));
     return true;
   } catch (error) {
     console.error(`Meta WA template "${templateName}" failed:`, error);
