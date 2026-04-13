@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
+import { sendTelegramMessage } from "@/lib/notifications";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.com";
+const WA_CS = "6281515141540";
+const LINE = "━━━━━━━━━━━━━━━━━━";
 
 // ============ Helper: Get Meta WA Settings ============
 async function getMetaWASettings() {
@@ -105,7 +108,8 @@ export async function POST(request: NextRequest) {
         }
       } else {
         // For images, documents, etc. — reply with help
-        await sendTextMessage(from, "Maaf, saat ini kami hanya bisa memproses pesan teks. Silakan ketik *menu* untuk melihat pilihan.", settings);
+        const csLink = `https://wa.me/${WA_CS}?text=${encodeURIComponent("Halo min, saya butuh bantuan")}`;
+        await sendTextMessage(from, `Maaf, saat ini kami hanya bisa memproses pesan teks.\n\nKetik *menu* untuk bantuan otomatis\nAtau hubungi CS langsung:\n${csLink}`, settings);
       }
     }
 
@@ -134,13 +138,14 @@ async function handleIncomingMessage(
     return sendPricingInfo(from, settings);
   }
 
-  if (["2", "cek", "track", "status", "order"].some(k => lower === k || lower.startsWith("cek ") || lower.startsWith("track "))) {
+  if (["2", "cek", "track", "status"].some(k => lower === k || lower.startsWith("cek ") || lower.startsWith("track "))) {
     // Check if they sent an order ID
     const orderIdMatch = text.match(/ETX-[A-Z0-9]+/i);
     if (orderIdMatch) {
       return sendOrderStatus(from, orderIdMatch[0].toUpperCase(), settings);
     }
-    return sendTextMessage(from, "Silakan kirim Order ID kamu (contoh: *ETX-MNX6ABC123*) untuk cek status order.", settings);
+    // Auto-detect latest order by phone number
+    return sendLatestOrderByPhone(from, settings);
   }
 
   // Direct order ID check
@@ -160,8 +165,8 @@ async function handleIncomingMessage(
     return sendPromoInfo(from, settings);
   }
 
-  // Default: show menu
-  return sendMainMenu(from, settings);
+  // Default: unknown message → show menu + forward to CS via Telegram
+  await sendUnknownMessage(from, text, settings);
 }
 
 // ============ Response Builders ============
@@ -170,8 +175,12 @@ async function sendMainMenu(
   from: string,
   settings: { phoneNumberId: string; accessToken: string }
 ) {
-  const message = `Halo! Selamat datang di *ETNYX* 👋
-Jasa Joki & Gendong Mobile Legends terpercaya!
+  const message = `${LINE}
+  *ETNYX — Menu Utama* 👋
+${LINE}
+
+Selamat datang di *ETNYX*!
+Jasa Joki & Gendong Mobile Legends terpercaya.
 
 Silakan pilih menu:
 
@@ -183,7 +192,7 @@ Silakan pilih menu:
 
 Atau kirim *Order ID* langsung (contoh: ETX-MNX6ABC123) untuk cek status.
 
-🌐 Website: ${SITE_URL}`;
+🌐 ${SITE_URL}`;
 
   return sendTextMessage(from, message, settings);
 }
@@ -192,7 +201,9 @@ async function sendPricingInfo(
   from: string,
   settings: { phoneNumberId: string; accessToken: string }
 ) {
-  const message = `*DAFTAR HARGA JOKI RANK ML* 💰
+  const message = `${LINE}
+  *Daftar Harga Joki Rank ML* 💰
+${LINE}
 
 Harga mulai dari Rp 5.000 tergantung rank yang dipilih.
 
@@ -206,10 +217,10 @@ Harga mulai dari Rp 5.000 tergantung rank yang dipilih.
 • Per Bintang
 • Gendong / Duo Boost
 
-📱 Order langsung di website:
+📱 Order & kalkulator harga:
 ${SITE_URL}/order
 
-_Harga ter-update dan kalkulator otomatis tersedia di halaman order._`;
+_Harga ter-update otomatis di halaman order._`;
 
   return sendTextMessage(from, message, settings);
 }
@@ -241,7 +252,9 @@ async function sendOrderStatus(
 
     const rankDisplay = order.package_title || `${order.current_rank} → ${order.target_rank}`;
 
-    const message = `*STATUS ORDER*
+    const message = `${LINE}
+  *Status Order* 📋
+${LINE}
 
 📋 *Order ID:* ${order.order_id}
 📊 *Status:* ${statusLabels[order.status] || order.status}
@@ -258,17 +271,67 @@ ${order.current_progress_rank ? `🏅 *Rank Saat Ini:* ${order.current_progress_
   }
 }
 
+async function sendLatestOrderByPhone(
+  from: string,
+  settings: { phoneNumberId: string; accessToken: string }
+) {
+  try {
+    const supabase = await createAdminClient();
+    // Normalize phone: from is like "6281234567890"
+    const phoneVariants = [from, `+${from}`, `0${from.slice(2)}`];
+
+    const { data: orders } = await supabase
+      .from("orders")
+      .select("order_id, status, current_rank, target_rank, package_title, total_price, progress, current_progress_rank")
+      .in("whatsapp", phoneVariants)
+      .order("created_at", { ascending: false })
+      .limit(3);
+
+    if (!orders || orders.length === 0) {
+      return sendTextMessage(from, `Belum ada order yang terdaftar dengan nomor kamu.\n\n📱 Order sekarang di:\n${SITE_URL}/order`, settings);
+    }
+
+    const statusLabels: Record<string, string> = {
+      pending: "⏳ Menunggu Bayar",
+      confirmed: "✅ Dikonfirmasi",
+      in_progress: "🔄 Dikerjakan",
+      completed: "🏆 Selesai",
+      cancelled: "❌ Dibatalkan",
+    };
+
+    let message = `${LINE}\n  *Order Terbaru Kamu* 📋\n${LINE}\n\n`;
+
+    for (const o of orders) {
+      const rankDisplay = o.package_title || `${o.current_rank} → ${o.target_rank}`;
+      message += `📋 *${o.order_id}*\n`;
+      message += `   ${statusLabels[o.status] || o.status} | ${rankDisplay}\n`;
+      message += `   💰 Rp ${(o.total_price || 0).toLocaleString("id-ID")}`;
+      if (o.progress > 0) message += ` | 📈 ${o.progress}%`;
+      message += "\n\n";
+    }
+
+    message += `🔗 Kirim *Order ID* untuk detail lengkap.\nContoh: *${orders[0].order_id}*`;
+
+    return sendTextMessage(from, message.trim(), settings);
+  } catch {
+    return sendTextMessage(from, "Maaf, tidak bisa mengecek order saat ini. Coba kirim Order ID langsung ya (contoh: *ETX-MNX6ABC123*).", settings);
+  }
+}
+
 async function sendCSInfo(
   from: string,
   settings: { phoneNumberId: string; accessToken: string }
 ) {
-  const message = `*HUBUNGI CS ETNYX* 📞
+  const csLink = `https://wa.me/${WA_CS}`;
 
-Untuk bantuan lebih lanjut, silakan hubungi CS kami:
+  const message = `${LINE}
+  *Hubungi CS ETNYX* 📞
+${LINE}
 
-💬 *WhatsApp CS:* wa.me/6281515141540
+Untuk bantuan lebih lanjut, hubungi CS kami langsung:
+
+💬 *WhatsApp CS:* ${csLink}
 🌐 *Website:* ${SITE_URL}
-📧 *Email:* support@etnyx.com
 
 Jam operasional: 09.00 - 22.00 WIB
 _Response time: ~15 menit_`;
@@ -280,7 +343,9 @@ async function sendReviewInfo(
   from: string,
   settings: { phoneNumberId: string; accessToken: string }
 ) {
-  const message = `*TULIS REVIEW* ⭐
+  const message = `${LINE}
+  *Tulis Review* ⭐
+${LINE}
 
 Sudah selesai order? Bantu kami dengan review kamu!
 
@@ -306,10 +371,10 @@ async function sendPromoInfo(
       .limit(5);
 
     if (!promos || promos.length === 0) {
-      return sendTextMessage(from, "Saat ini belum ada promo aktif. Follow Instagram kami untuk update promo terbaru! 📱", settings);
+      return sendTextMessage(from, `${LINE}\n  *Promo* 🎁\n${LINE}\n\nSaat ini belum ada promo aktif.\nFollow Instagram kami untuk update promo terbaru! 📱`, settings);
     }
 
-    let message = "*PROMO AKTIF* 🎁\n\n";
+    let message = `${LINE}\n  *Promo Aktif* 🎁\n${LINE}\n\n`;
     for (const p of promos) {
       const discountLabel = p.discount_type === "percentage" ? `${p.discount_value}%` : `Rp ${p.discount_value.toLocaleString("id-ID")}`;
       message += `🏷️ *${p.code}* — Diskon ${discountLabel}\n`;
@@ -322,6 +387,44 @@ async function sendPromoInfo(
     return sendTextMessage(from, message.trim(), settings);
   } catch {
     return sendTextMessage(from, "Maaf, tidak bisa mengambil info promo saat ini. Coba lagi nanti ya!", settings);
+  }
+}
+
+async function sendUnknownMessage(
+  from: string,
+  text: string,
+  settings: { phoneNumberId: string; accessToken: string }
+) {
+  const csLink = `https://wa.me/${WA_CS}?text=${encodeURIComponent("Halo min, saya butuh bantuan")}`;
+
+  // Reply to customer with menu + CS redirect
+  const message = `Maaf, saya belum bisa bantu soal itu 🙏
+
+Kamu bisa:
+• Ketik *menu* untuk pilihan bantuan otomatis
+• Kirim *Order ID* untuk cek status order
+• Atau hubungi CS kami langsung:
+  ${csLink}
+
+_Pesan kamu sudah diteruskan ke tim CS kami._`;
+
+  await sendTextMessage(from, message, settings);
+
+  // Forward to Telegram admin group so CS knows
+  try {
+    const supabase = await createAdminClient();
+    const { data } = await supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "integrations")
+      .single();
+    const adminGroupId = data?.value?.telegramAdminGroupId;
+    if (adminGroupId) {
+      const telegramMsg = `💬 <b>PESAN WA MASUK</b>\n\n<b>Dari:</b> +${from}\n<b>Pesan:</b> ${text.slice(0, 500)}\n\n<i>Bot tidak paham — customer perlu dibalas via WA CS.</i>`;
+      await sendTelegramMessage(adminGroupId, telegramMsg);
+    }
+  } catch (err) {
+    console.error("Failed to forward unknown WA message to Telegram:", err);
   }
 }
 

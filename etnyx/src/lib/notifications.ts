@@ -7,7 +7,7 @@ const WA_OFFICIAL = WHATSAPP_NUMBER;
 /** Disclaimer footer for bot-sent WA messages */
 export function waDisclaimer(orderId: string): string {
   const csLink = `https://wa.me/${WA_OFFICIAL}?text=${encodeURIComponent(`Halo min, saya mau tanya soal order ${orderId}`)}`;
-  return `\n\n---\n⚠️ _Pesan ini dikirim otomatis, jangan balas pesan ini._\nHubungi CS kami di sini:\n${csLink}`;
+  return `\n\n[ Ini adalah pesan otomatis ]\n💬 _Balas *menu* untuk bantuan otomatis_\n📞 _Hubungi CS:_ ${csLink}`;
 }
 
 // ============ Types ============
@@ -583,7 +583,9 @@ export async function sendPaymentConfirmedWA(order: OrderData): Promise<boolean>
   const trackLink = `${SITE_URL}/track/?id=${order.order_id}`;
 
   const message = `
-*Pembayaran Dikonfirmasi!*
+━━━━━━━━━━━━━━━━━━
+  *Pembayaran Dikonfirmasi* ✅
+━━━━━━━━━━━━━━━━━━
 
 Halo! Pembayaran kamu sudah kami terima dan dikonfirmasi.
 
@@ -661,23 +663,23 @@ export async function sendOrderConfirmationWA(order: OrderData): Promise<boolean
   const isIpaymu = !!order.payment_url;
 
   const message = `
-Halo!
+━━━━━━━━━━━━━━━━━━
+  *Order Dikonfirmasi* 📋
+━━━━━━━━━━━━━━━━━━
 
-Terima kasih sudah order di *ETNYX*!
+👋 Halo! Terima kasih sudah order di *ETNYX*!
 
 *Detail Order:*
 ${formatOrderDetails(order, { showStatus: "Menunggu Pembayaran" })}
 
 Silakan selesaikan pembayaran untuk memproses order kamu.
 
-${isIpaymu ? `Bayar via iPaymu (QRIS/Transfer/E-Wallet):
+${isIpaymu ? `💳 Bayar via iPaymu (QRIS/Transfer/E-Wallet):
 ${paymentLink}
 
 Atau bayar manual (transfer bank):
-${manualPaymentLink}` : `Bayar & upload bukti di sini:
+${manualPaymentLink}` : `💳 Bayar & upload bukti di sini:
 ${manualPaymentLink}`}
-
-Butuh bantuan? Hubungi CS kami via link di bawah.
 
 _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 `.trim();
@@ -716,17 +718,19 @@ export async function sendOrderStartedWA(order: OrderData): Promise<boolean> {
   const trackLink = `${SITE_URL}/track/?id=${order.order_id}`;
 
   const message = `
-*Order Sedang Dikerjakan!*
+━━━━━━━━━━━━━━━━━━
+  *Order Sedang Dikerjakan* 🔄
+━━━━━━━━━━━━━━━━━━
 
 Halo! Order kamu sudah dikonfirmasi dan sedang dalam pengerjaan oleh booster kami.
 
 *Detail Order:*
 ${formatOrderDetails(order)}
 
-Kamu bisa track progress di sini:
+🔗 Track progress:
 ${trackLink}
 
-${isGendong ? "Booster kami akan menghubungi kamu untuk jadwal mabar." : "Jangan login ke akun selama proses joki ya!"}
+${isGendong ? "🎮 Booster kami akan menghubungi kamu untuk jadwal mabar." : "⚠️ *Mohon jangan login* selama proses joki dikerjakan ya."}
 
 _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 `.trim();
@@ -767,21 +771,19 @@ export async function sendOrderCompletedWA(order: OrderData): Promise<boolean> {
   const isGendong = order.package_title?.includes("Gendong") || order.package_title?.includes("Duo Boost");
 
   const message = `
-*Order Selesai!*
+━━━━━━━━━━━━━━━━━━
+  *Order Selesai* 🏆
+━━━━━━━━━━━━━━━━━━
 
 Yeay! Order kamu sudah selesai dikerjakan.
 
 *Detail Order:*
 ${formatOrderDetails(order)}
 
-${isGendong ? "Terima kasih sudah mabar bersama booster kami!" : "Silakan cek akun kamu dan ganti password untuk keamanan."}
+${isGendong ? "🎮 Terima kasih sudah mabar bersama booster kami!" : "🔐 Silakan cek akun kamu dan *ganti password* untuk keamanan."}
 
-*Bantu kami dengan review yuk!*
+⭐ *Bantu kami dengan review yuk!*
 ${reviewLink}
-
-*Ada masalah dengan worker?*
-Laporkan di sini:
-${reportLink}
 
 Terima kasih sudah menggunakan *ETNYX*!
 
@@ -825,14 +827,16 @@ export async function sendOrderCancelledWA(order: OrderData): Promise<boolean> {
   if (!order.whatsapp) return false;
 
   const message = `
-*Order Dibatalkan*
+━━━━━━━━━━━━━━━━━━
+  *Order Dibatalkan* ❌
+━━━━━━━━━━━━━━━━━━
 
 Halo, order kamu telah dibatalkan.
 
 *Order ID:* ${order.order_id}
 *Username:* ${order.username}
 
-Jika kamu merasa ini adalah kesalahan atau ingin order ulang, silakan hubungi kami via link di bawah.
+Jika kamu merasa ini adalah kesalahan atau ingin order ulang, silakan hubungi CS kami via tombol di bawah.
 
 _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 `.trim();
