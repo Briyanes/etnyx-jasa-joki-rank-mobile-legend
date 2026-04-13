@@ -42,14 +42,18 @@ export async function GET(request: NextRequest) {
 
   // 2. If order_id provided, test the full sendOrderConfirmationWA flow
   if (orderId) {
-    const { data: order } = await supabase
+    const { data: order, error: orderError } = await supabase
       .from("orders")
       .select("order_id, username, current_rank, target_rank, current_star, target_star, package, package_title, total_price, whatsapp, email, status")
       .eq("order_id", orderId)
       .single();
 
-    if (!order) {
-      return NextResponse.json({ error: `Order ${orderId} not found` }, { status: 404 });
+    if (!order || orderError) {
+      return NextResponse.json({ 
+        error: `Order ${orderId} not found`, 
+        dbError: orderError?.message || null,
+        hint: "Check if order_id matches exactly (case-sensitive)"
+      }, { status: 404 });
     }
 
     const result = await sendOrderConfirmationWA({
