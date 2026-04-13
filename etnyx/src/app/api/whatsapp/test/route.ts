@@ -93,6 +93,15 @@ export async function GET(request: NextRequest) {
       let messagePayload: Record<string, unknown>;
       if (template) {
         // Template test mode
+        const isOrderCancelled = template === "order_cancelled";
+        const buttonCount = template === "completed_order" ? 3 : isOrderCancelled ? 1 : 2;
+        const buttonComponents = Array.from({ length: buttonCount }, (_, i) => ({
+          type: "button",
+          sub_type: "url",
+          index: String(i),
+          parameters: [{ type: "text", text: i === buttonCount - 1 ? "Halo min, saya mau tanya soal order ETX-TEST123" : "ETX-TEST123" }],
+        }));
+
         messagePayload = {
           messaging_product: "whatsapp",
           to: normalizedPhone,
@@ -110,7 +119,7 @@ export async function GET(request: NextRequest) {
                 },
                 {
                   type: "body",
-                  parameters: template === "order_cancelled"
+                  parameters: isOrderCancelled
                     ? [
                         { type: "text", text: "ETX-TEST123" },
                         { type: "text", text: "TestUser" },
@@ -122,6 +131,7 @@ export async function GET(request: NextRequest) {
                         { type: "text", text: "Rp 50.000" },
                       ],
                 },
+                ...buttonComponents,
               ],
             } : {}),
           },
