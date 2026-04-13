@@ -206,13 +206,15 @@ _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 
       const adminChatId = settings?.value?.telegramAdminGroupId;
       const workerChatId = settings?.value?.telegramWorkerGroupId;
-      if (adminChatId || workerChatId) {
+      const alertChatId = settings?.value?.telegramAlertGroupId;
+      const targetChatId = alertChatId || adminChatId;
+      if (targetChatId || workerChatId) {
         const lines = staleInProgress.map(
           (o) => `• ${o.order_id} — ${o.username} (last update: ${new Date(o.updated_at).toLocaleDateString("id-ID")})`
         );
         const message = `⚠️ <b>STALE ORDERS ALERT</b>\n\n${staleInProgress.length} order in_progress lebih dari 14 hari tanpa update:\n\n${lines.join("\n")}\n\nCek & follow up segera!`;
         const sends: Promise<boolean>[] = [];
-        if (adminChatId) sends.push(sendTelegramMessage(adminChatId, message));
+        if (targetChatId) sends.push(sendTelegramMessage(targetChatId, message));
         if (workerChatId) sends.push(sendTelegramMessage(workerChatId, message));
         await Promise.allSettled(sends);
       }

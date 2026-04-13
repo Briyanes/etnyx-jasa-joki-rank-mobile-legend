@@ -2228,12 +2228,13 @@ function buildCategories(): DocCategory[] {
                 ]} />
               </div>
               <div className="bg-background rounded-lg p-3 border border-white/5">
-                <h4 className="text-text font-medium text-sm mb-2">Telegram 4 Grup</h4>
+                <h4 className="text-text font-medium text-sm mb-2">Telegram 5 Grup</h4>
                 <Table headers={["Grup", "Setting Key", "Fungsi"]} rows={[
-                  ["Admin", "telegramAdminGroupId", "Semua notifikasi order + review + report"],
-                  ["Worker", "telegramWorkerGroupId", "Order dikonfirmasi, order di-assign"],
+                  ["Admin", "telegramAdminGroupId", "Order baru, pembayaran, order selesai"],
+                  ["Worker", "telegramWorkerGroupId", "Order dikonfirmasi, di-assign, mulai, selesai, dibatalkan"],
                   ["Review", "telegramReviewGroupId", "Khusus review baru (skip jika sama dengan Admin)"],
                   ["Report", "telegramReportGroupId", "Khusus report worker (skip jika sama dengan Admin)"],
+                  ["Alert", "telegramAlertGroupId", "SLA alert, stale order, unknown WA message"],
                 ]} />
                 <p className="text-text-muted text-[11px] mt-2">Jika Review/Report group ID sama dengan Admin → tidak double-send. Sistem auto-skip duplikat.</p>
               </div>

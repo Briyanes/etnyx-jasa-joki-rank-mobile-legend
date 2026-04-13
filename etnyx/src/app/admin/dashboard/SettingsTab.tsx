@@ -56,7 +56,7 @@ interface IntegrationSettings {
   ipaymuApiKey: string; ipaymuVa: string; ipaymuIsProduction: boolean;
   resendApiKey: string; resendFromEmail: string;
   metaWaPhoneNumberId: string; metaWaAccessToken: string; metaWaVerifyToken: string; metaWaEnabled: boolean;
-  telegramBotToken: string; telegramAdminGroupId: string; telegramWorkerGroupId: string; telegramReviewGroupId: string; telegramReportGroupId: string;
+  telegramBotToken: string; telegramAdminGroupId: string; telegramWorkerGroupId: string; telegramReviewGroupId: string; telegramReportGroupId: string; telegramAlertGroupId: string;
 }
 
 type SettingsSubTab = "cms-sections" | "hero" | "banner" | "faq" | "team" | "social" | "site" | "pixels" | "integrations" | "gendong" | "general";
@@ -101,7 +101,7 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
     ipaymuApiKey: "", ipaymuVa: "", ipaymuIsProduction: false,
     resendApiKey: "", resendFromEmail: "noreply@etnyx.com",
     metaWaPhoneNumberId: "", metaWaAccessToken: "", metaWaVerifyToken: "", metaWaEnabled: false,
-    telegramBotToken: "", telegramAdminGroupId: "", telegramWorkerGroupId: "", telegramReviewGroupId: "", telegramReportGroupId: "",
+    telegramBotToken: "", telegramAdminGroupId: "", telegramWorkerGroupId: "", telegramReviewGroupId: "", telegramReportGroupId: "", telegramAlertGroupId: "",
   });
   const DEFAULT_BANK_ACCOUNTS: { bank: string; category: string; account_number: string; account_name: string; is_active: boolean; qris_image_url?: string }[] = [
     { bank: "BCA", category: "bank", account_number: "", account_name: "", is_active: true },
@@ -831,6 +831,12 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
               <input type="text" value={integrations.telegramReportGroupId} onChange={(e) => setIntegrations({ ...integrations, telegramReportGroupId: e.target.value })}
                 placeholder="-1001234567890" className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
               <p className="text-text-muted text-xs mt-1">Notifikasi laporan worker (opsional, default ke Admin Group)</p>
+            </div>
+            <div>
+              <label className="block text-sm text-text-muted mb-1.5">Alert Group Chat ID</label>
+              <input type="text" value={integrations.telegramAlertGroupId} onChange={(e) => setIntegrations({ ...integrations, telegramAlertGroupId: e.target.value })}
+                placeholder="-1001234567890" className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
+              <p className="text-text-muted text-xs mt-1">SLA alert, stale order, unknown WA message (opsional, default ke Admin Group)</p>
             </div>
             <div className="bg-background/50 rounded-lg p-3 text-xs text-text-muted space-y-1">
               <p><BookOpen className="w-3 h-3 inline mr-1" /> <strong>Cara mendapatkan Bot Token:</strong></p>

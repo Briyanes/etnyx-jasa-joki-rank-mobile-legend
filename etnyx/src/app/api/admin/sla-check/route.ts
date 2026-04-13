@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
     if (overdueOrders && overdueOrders.length > 0) {
       // Import notification service
       let sendTelegram: ((chatId: string, message: string) => Promise<boolean>) | null = null;
-      let integrationSettings: { telegramAdminGroupId?: string; telegramWorkerGroupId?: string } = {};
+      let integrationSettings: { telegramAdminGroupId?: string; telegramWorkerGroupId?: string; telegramAlertGroupId?: string } = {};
       try {
         const notifModule = await import("@/lib/notifications");
         sendTelegram = notifModule.sendTelegramMessage;
@@ -90,11 +90,12 @@ export async function POST(request: NextRequest) {
 
         const message = `⚠️ <b>SLA Alert!</b>\n\nOrder <b>${order.order_id}</b> sudah melewati deadline.\nUsername: ${order.username}\nRank: ${order.current_rank} → ${order.target_rank}\nDeadline: ${new Date(order.sla_deadline!).toLocaleString("id-ID")}\n\nSegera selesaikan!`;
 
-        // Send Telegram notification to admin & worker group
+        // Send Telegram notification to alert/admin & worker group
         if (sendTelegram) {
           try {
-            if (integrationSettings.telegramAdminGroupId) {
-              await sendTelegram(integrationSettings.telegramAdminGroupId, message);
+            const alertChatId = integrationSettings.telegramAlertGroupId || integrationSettings.telegramAdminGroupId;
+            if (alertChatId) {
+              await sendTelegram(alertChatId, message);
             }
             if (integrationSettings.telegramWorkerGroupId) {
               await sendTelegram(integrationSettings.telegramWorkerGroupId, message);

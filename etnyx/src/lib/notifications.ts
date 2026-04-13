@@ -39,6 +39,7 @@ interface IntegrationSettings {
   telegramWorkerGroupId?: string;
   telegramReviewGroupId?: string;
   telegramReportGroupId?: string;
+  telegramAlertGroupId?: string;
   metaWaPhoneNumberId?: string;
   metaWaAccessToken?: string;
   metaWaVerifyToken?: string;

@@ -201,8 +201,8 @@ export async function POST(request: NextRequest) {
           order_id: order.order_id,
           username: order.username,
           total_price: order.total_price,
-          sender_name: sanitizedSenderName,
-          sender_bank: sanitizedSenderBank,
+          sender_name: sanitizedSenderName ?? undefined,
+          sender_bank: sanitizedSenderBank ?? undefined,
         },
         order.id
       );

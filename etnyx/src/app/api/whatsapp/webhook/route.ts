@@ -410,7 +410,7 @@ _Pesan kamu sudah diteruskan ke tim CS kami._`;
 
   await sendTextMessage(from, message, settings);
 
-  // Forward to Telegram admin group so CS knows
+  // Forward to Telegram alert/admin group so CS knows
   try {
     const supabase = await createAdminClient();
     const { data } = await supabase
@@ -418,10 +418,10 @@ _Pesan kamu sudah diteruskan ke tim CS kami._`;
       .select("value")
       .eq("key", "integrations")
       .single();
-    const adminGroupId = data?.value?.telegramAdminGroupId;
-    if (adminGroupId) {
+    const alertGroupId = data?.value?.telegramAlertGroupId || data?.value?.telegramAdminGroupId;
+    if (alertGroupId) {
       const telegramMsg = `💬 <b>PESAN WA MASUK</b>\n\n<b>Dari:</b> +${from}\n<b>Pesan:</b> ${text.slice(0, 500)}\n\n<i>Bot tidak paham — customer perlu dibalas via WA CS.</i>`;
-      await sendTelegramMessage(adminGroupId, telegramMsg);
+      await sendTelegramMessage(alertGroupId, telegramMsg);
     }
   } catch (err) {
     console.error("Failed to forward unknown WA message to Telegram:", err);

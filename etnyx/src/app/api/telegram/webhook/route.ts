@@ -1069,6 +1069,7 @@ export async function POST(request: Request) {
         settings.telegramWorkerGroupId,
         settings.telegramReviewGroupId,
         settings.telegramReportGroupId,
+        settings.telegramAlertGroupId,
       ].filter(Boolean).map(Number);
       if (authorizedChats.length > 0 && !authorizedChats.includes(chatId)) {
         return NextResponse.json({ ok: true }); // silently ignore
