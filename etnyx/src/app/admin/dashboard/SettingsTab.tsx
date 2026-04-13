@@ -55,7 +55,7 @@ interface SiteInfo { siteName: string; taglineId: string; taglineEn: string; sup
 interface IntegrationSettings {
   ipaymuApiKey: string; ipaymuVa: string; ipaymuIsProduction: boolean;
   resendApiKey: string; resendFromEmail: string;
-  fonnteApiToken: string; fonnteDeviceId: string;
+  fonnteApiToken: string; fonnteDeviceId: string; // kept for backward compat, unused
   metaWaPhoneNumberId: string; metaWaAccessToken: string; metaWaVerifyToken: string; metaWaEnabled: boolean;
   telegramBotToken: string; telegramAdminGroupId: string; telegramWorkerGroupId: string; telegramReviewGroupId: string; telegramReportGroupId: string;
 }
@@ -760,25 +760,6 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
                 placeholder="noreply@etnyx.com" className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none" />
             </div>
             <p className="text-text-muted text-xs"><BookOpen className="w-3 h-3 inline mr-1" /> Dapatkan API Key di <a href="https://resend.com/api-keys" target="_blank" rel="noopener" className="text-accent hover:underline">resend.com/api-keys</a></p>
-          </div>
-
-          {/* Fonnte */}
-          <div className="bg-surface rounded-xl border border-white/5 p-6 space-y-4">
-            <div>
-              <h3 className="text-text font-bold text-sm flex items-center gap-2"><MessageCircle className="w-4 h-4 text-accent" /> Fonnte (WhatsApp Fallback)</h3>
-              <p className="text-text-muted text-xs mt-0.5">Backup jika Meta Cloud API tidak aktif</p>
-            </div>
-            <div>
-              <label className="block text-sm text-text-muted mb-1.5">API Token</label>
-              <input type="password" value={integrations.fonnteApiToken} onChange={(e) => setIntegrations({ ...integrations, fonnteApiToken: e.target.value })}
-                placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
-            </div>
-            <div>
-              <label className="block text-sm text-text-muted mb-1.5">Device ID (opsional)</label>
-              <input type="text" value={integrations.fonnteDeviceId} onChange={(e) => setIntegrations({ ...integrations, fonnteDeviceId: e.target.value })}
-                placeholder="628xxxxxxxxxx" className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
-            </div>
-            <p className="text-text-muted text-xs"><BookOpen className="w-3 h-3 inline mr-1" /> Dapatkan Token di <a href="https://md.fonnte.com/api" target="_blank" rel="noopener" className="text-accent hover:underline">md.fonnte.com</a></p>
           </div>
 
           {/* Meta WhatsApp Cloud API */}

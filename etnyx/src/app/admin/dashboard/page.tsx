@@ -466,7 +466,7 @@ export default function AdminDashboard() {
         return;
       }
       if (result._notificationSent === false) {
-        toast(`⚠️ Status berhasil diubah ke ${newStatus}, tapi WA notifikasi GAGAL terkirim ke customer. Cek pengaturan Fonnte di Settings > Integrations.`);
+        toast(`⚠️ Status berhasil diubah ke ${newStatus}, tapi WA notifikasi GAGAL terkirim ke customer. Cek pengaturan Meta WhatsApp di Settings > Integrations.`);
       }
       fetchOrders(); fetchStats();
     } catch (e) { console.error(e); }

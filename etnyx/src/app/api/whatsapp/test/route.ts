@@ -36,8 +36,6 @@ export async function GET(request: NextRequest) {
     metaWaEnabled: !!settings.metaWaEnabled,
     metaWaPhoneNumberId: settings.metaWaPhoneNumberId || "(not set)",
     metaWaAccessToken: settings.metaWaAccessToken ? `${settings.metaWaAccessToken.slice(0, 15)}...` : "(not set)",
-    fonnteApiToken: settings.fonnteApiToken ? `${settings.fonnteApiToken.slice(0, 10)}...` : "(not set)",
-    fonnteDeviceId: settings.fonnteDeviceId || "(not set)",
   };
 
   // 2. If order_id provided, test the full sendOrderConfirmationWA flow

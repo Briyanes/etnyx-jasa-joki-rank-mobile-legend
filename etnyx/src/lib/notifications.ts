@@ -33,8 +33,6 @@ interface OrderData {
 interface IntegrationSettings {
   resendApiKey?: string;
   resendFromEmail?: string;
-  fonnteApiToken?: string;
-  fonnteDeviceId?: string;
   telegramBotToken?: string;
   telegramAdminGroupId?: string;
   telegramWorkerGroupId?: string;
@@ -276,7 +274,6 @@ Review link sudah dikirim ke customer via WA.
   return sendTelegramMessage(chatId, message, undefined, replyMarkup);
 }
 
-// ============ WHATSAPP (Fonnte) ============
 
 // ============ TELEGRAM: Reviews & Worker Reports ============
 export async function notifyNewReview(review: {
@@ -377,7 +374,7 @@ ${report.report_detail ? `\n<b>Detail:</b> ${report.report_detail}` : ""}
   return true;
 }
 
-// ============ WHATSAPP (Meta Cloud API + Fonnte fallback) ============
+// ============ WHATSAPP (Meta Cloud API) ============
 
 function normalizePhone(phone: string): string {
   let normalized = phone.replace(/\D/g, "");
@@ -447,48 +444,6 @@ async function sendWhatsAppMeta(
   }
 }
 
-async function sendWhatsAppFonnte(
-  phone: string,
-  message: string,
-  url: string | undefined,
-  settings: IntegrationSettings
-): Promise<boolean> {
-  const token = settings.fonnteApiToken;
-  if (!token) return false;
-
-  const normalizedPhone = normalizePhone(phone);
-
-  try {
-    const body: Record<string, string> = {
-      target: normalizedPhone,
-      message: message,
-      countryCode: "62",
-    };
-    if (url) {
-      body.url = url;
-    }
-
-    const res = await fetch("https://api.fonnte.com/send", {
-      method: "POST",
-      headers: {
-        Authorization: token,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
-
-    const data = await res.json();
-    if (!data.status) {
-      console.error("Fonnte error:", data.reason);
-      return false;
-    }
-    return true;
-  } catch (error) {
-    console.error("Fonnte WA failed:", error);
-    return false;
-  }
-}
-
 export async function sendWhatsAppMessage(
   phone: string,
   message: string,
@@ -497,46 +452,39 @@ export async function sendWhatsAppMessage(
   if (!phone) return false;
 
   const settings = await getIntegrationSettings();
-  console.log(`WA send: phone=${phone}, metaEnabled=${settings.metaWaEnabled}, hasToken=${!!settings.metaWaAccessToken}, phoneNumId=${settings.metaWaPhoneNumberId || 'none'}, hasFonnte=${!!settings.fonnteApiToken}`);
+  console.log(`WA send: phone=${phone}, metaEnabled=${settings.metaWaEnabled}, hasToken=${!!settings.metaWaAccessToken}, phoneNumId=${settings.metaWaPhoneNumberId || 'none'}`);
 
-  // Try Meta Cloud API first
-  const metaSent = await sendWhatsAppMeta(phone, message, settings);
-  if (metaSent) return true;
-
-  // Fallback to Fonnte
-  console.log(`WA send: Meta failed, trying Fonnte for ${phone}`);
-  const fonnteSent = await sendWhatsAppFonnte(phone, message, url, settings);
-  if (!fonnteSent) {
-    console.error(`WA send FAILED: both Meta and Fonnte failed for ${phone}`);
+  const sent = await sendWhatsAppMeta(phone, message, settings);
+  if (!sent) {
+    console.error(`WA send FAILED: Meta text failed for ${phone} (customer may not have 24h conversation window)`);
   }
-  return fonnteSent;
+  return sent;
 }
 
-// Business-initiated WA: try template → Fonnte fallback (skip Meta text - requires 24h window)
+// Business-initiated WA: try template first, then Meta text as fallback
 async function sendBusinessWA(
   phone: string,
   templateName: string,
   templateParams: string[],
   fallbackMessage: string,
-  fallbackUrl?: string
+  _fallbackUrl?: string
 ): Promise<boolean> {
   if (!phone) return false;
 
   const settings = await getIntegrationSettings();
-  console.log(`WA business: phone=${phone}, template=${templateName}, metaEnabled=${settings.metaWaEnabled}, hasFonnte=${!!settings.fonnteApiToken}`);
+  console.log(`WA business: phone=${phone}, template=${templateName}, metaEnabled=${settings.metaWaEnabled}`);
 
   // 1. Try Meta template (works for business-initiated, no 24h window needed)
   const templateSent = await sendWhatsAppTemplate(phone, templateName, templateParams, settings);
   if (templateSent) return true;
 
-  // 2. Skip Meta text (requires 24h conversation window, will fail for new customers)
-  // 3. Fallback directly to Fonnte
-  console.log(`WA business: template "${templateName}" failed, trying Fonnte for ${phone}`);
-  const fonnteSent = await sendWhatsAppFonnte(phone, fallbackMessage, fallbackUrl, settings);
-  if (!fonnteSent) {
-    console.error(`WA business FAILED: template + Fonnte both failed for ${phone}`);
+  // 2. Fallback to Meta text (works if customer has 24h conversation window)
+  console.log(`WA business: template "${templateName}" failed, trying Meta text for ${phone}`);
+  const textSent = await sendWhatsAppMeta(phone, fallbackMessage, settings);
+  if (!textSent) {
+    console.error(`WA business FAILED: both template and text failed for ${phone}`);
   }
-  return fonnteSent;
+  return textSent;
 }
 
 // Send Meta WA template message (for business-initiated conversations)
