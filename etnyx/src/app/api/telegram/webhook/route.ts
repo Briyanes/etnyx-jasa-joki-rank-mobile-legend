@@ -867,11 +867,9 @@ export async function POST(request: Request) {
   try {
     // Verify request is from Telegram using secret token header
     const secretToken = process.env.TELEGRAM_WEBHOOK_SECRET;
-    if (secretToken) {
-      const headerToken = request.headers.get("x-telegram-bot-api-secret-token");
-      if (headerToken !== secretToken) {
-        return NextResponse.json({ ok: false }, { status: 403 });
-      }
+    const headerToken = request.headers.get("x-telegram-bot-api-secret-token");
+    if (!secretToken || headerToken !== secretToken) {
+      return NextResponse.json({ ok: false }, { status: 403 });
     }
 
     const update: TelegramUpdate = await request.json();

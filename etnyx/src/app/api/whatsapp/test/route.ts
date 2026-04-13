@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
   const diagnostics = {
     metaWaEnabled: !!settings.metaWaEnabled,
     metaWaPhoneNumberId: settings.metaWaPhoneNumberId || "(not set)",
-    metaWaAccessToken: settings.metaWaAccessToken ? `${settings.metaWaAccessToken.slice(0, 15)}...` : "(not set)",
+    metaWaAccessToken: !!settings.metaWaAccessToken,
   };
 
   // 2. If order_id provided, test the full sendOrderConfirmationWA flow

@@ -1,7 +1,7 @@
 "use client";
 
 import { toast, toastSuccess, toastError, toastWarning } from "@/components/ToastProvider";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -223,7 +223,7 @@ export default function AdminDashboard() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [followUpLoading, setFollowUpLoading] = useState<string | null>(null);
   const [statusActionLoading, setStatusActionLoading] = useState<string | null>(null);
-  const [searchDebounce, setSearchDebounce] = useState<ReturnType<typeof setTimeout> | null>(null);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [customerSearch, setCustomerSearch] = useState("");
   const [assigningWorker, setAssigningWorker] = useState<string | null>(null);
 
@@ -525,8 +525,8 @@ export default function AdminDashboard() {
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
     setOrdersPage(1);
-    if (searchDebounce) clearTimeout(searchDebounce);
-    setSearchDebounce(setTimeout(() => fetchOrders(), 500));
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    searchDebounceRef.current = setTimeout(() => fetchOrders(), 500);
   };
 
   // Payment proof functions

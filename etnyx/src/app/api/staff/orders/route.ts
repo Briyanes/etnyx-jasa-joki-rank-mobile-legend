@@ -214,6 +214,12 @@ export async function PUT(request: NextRequest) {
     if (!assignment) {
       return NextResponse.json({ error: "Order tidak ditemukan atau bukan milik kamu" }, { status: 403 });
     }
+
+    // Workers can only set in_progress status, not completed/cancelled
+    const workerAllowed = ["in_progress"];
+    if (newStatus && !workerAllowed.includes(newStatus)) {
+      return NextResponse.json({ error: "Worker tidak bisa set status ini" }, { status: 403 });
+    }
   }
 
   // Lead can update status for assigned orders but not pricing/admin stuff

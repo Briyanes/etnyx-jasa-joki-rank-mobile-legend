@@ -93,8 +93,8 @@ function calculateServerPrice(body: Record<string, unknown>): number | null {
   const isGendong = orderType === "gendong";
 
   if (orderType === "perstar" || isGendong) {
-    const rankId = String(body.perStarRankId || "");
-    const starQty = Number(body.starQuantity || 0);
+    const rankId = String(body.perStarRankId || body.currentRank || "").toLowerCase();
+    const starQty = Number(body.starQuantity || body.targetStar || 0);
     const priceMap = isGendong ? SERVER_GENDONG_PRICES : SERVER_PER_STAR_PRICES;
     const pricePerStar = priceMap[rankId];
     if (!pricePerStar || starQty < 1 || starQty > 100) return null;
@@ -174,6 +174,17 @@ export async function POST(request: NextRequest) {
     if (!isValidRank(normCurrent) || !isValidRank(normTarget)) {
       return NextResponse.json(
         { error: "Rank tidak valid" },
+        { status: 400 }
+      );
+    }
+
+    // Validate rank hierarchy: target must be higher than current
+    const RANK_ORDER = ["warrior","elite","master","grandmaster","epic","legend","mythicgrading","mythic","mythichonor","mythicglory","mythicimmortal"];
+    const currentIdx = RANK_ORDER.indexOf(currentRank.toLowerCase());
+    const targetIdx = RANK_ORDER.indexOf(targetRank.toLowerCase());
+    if (currentIdx >= 0 && targetIdx >= 0 && currentIdx >= targetIdx && currentRank !== targetRank) {
+      return NextResponse.json(
+        { error: "Target rank harus lebih tinggi dari rank saat ini" },
         { status: 400 }
       );
     }
@@ -325,6 +336,14 @@ export async function POST(request: NextRequest) {
     const verifiedTotalPrice = Math.max(0, totalPrice - verifiedDiscount - verifiedTierDiscount);
     const verifiedBasePrice = totalPrice;
 
+    // Minimum price floor — prevent zero-price exploits
+    if (verifiedTotalPrice < 1000) {
+      return NextResponse.json(
+        { error: "Harga terlalu rendah setelah diskon" },
+        { status: 400 }
+      );
+    }
+
     // Insert order
     const { data: order, error: orderError } = await supabase
       .from("orders")
@@ -384,11 +403,14 @@ export async function POST(request: NextRequest) {
       }
       if (!promoUsed) {
         // Promo exhausted (race condition: another user used the last slot)
+        const correctedPrice = Math.max(1000, verifiedBasePrice - verifiedTierDiscount);
         await supabase.from("orders").update({
           promo_code: null,
           promo_discount: 0,
-          total_price: verifiedBasePrice - verifiedTierDiscount,
+          total_price: correctedPrice,
         }).eq("id", order.id);
+        // Update local variable for iPaymu payment
+        Object.assign(order, { total_price: correctedPrice });
       }
     }
 

@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     const authHeader = request.headers.get("authorization");
     const cronSecret = process.env.CRON_SECRET;
 
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+    if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
       // Check admin auth as fallback
       const { verifyAdmin } = await import("@/lib/admin-auth");
       const admin = await verifyAdmin();

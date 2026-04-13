@@ -126,9 +126,12 @@ export async function POST(request: NextRequest) {
     let orderStatus = order.status;
 
     if (ipaymuStatusCode === 1 || ipaymuStatus === "berhasil" || ipaymuStatus === "success") {
-      // Verify payment amount
-      const paidAmount = Number(verifiedTrx.Amount ?? body.amount ?? 0);
-      if (paidAmount < order.total_price) {
+      // Verify payment amount — never trust unverified body.amount
+      const paidAmount = Number(verifiedTrx.Amount ?? 0);
+      if (paidAmount === 0) {
+        console.error(`Amount missing from verified transaction for ${refId}`);
+        paymentStatus = "pending";
+      } else if (paidAmount < order.total_price) {
         console.error(`Amount mismatch for ${refId}: paid ${paidAmount}, expected ${order.total_price}`);
         paymentStatus = "underpaid";
       } else {

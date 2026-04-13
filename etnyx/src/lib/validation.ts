@@ -29,8 +29,9 @@ export function isValidOrderStatus(status: string): boolean {
 
 const VALID_RANKS = [
   "warrior", "elite", "master", "grandmaster", "epic", 
-  "legend", "mythic", "mythicgrading", "mythical_glory", "mythicglory", "immortal",
-  "grading", "honor", "glory", "mythichonor", "mythicimmortal"
+  "legend", "mythicgrading", "mythic", "mythichonor", "mythicglory", "mythicimmortal",
+  // Aliases accepted from frontend
+  "mythical_glory",
 ] as const;
 
 export function isValidRank(rank: string): boolean {

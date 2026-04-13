@@ -35,9 +35,14 @@ export async function POST(request: NextRequest) {
     const supabase = await createAdminClient();
     const body = await request.json();
 
+    // Whitelist allowed fields
+    const allowed = ["name", "text", "rating", "avatar_url", "is_visible", "rank", "package"];
+    const safeData: Record<string, unknown> = {};
+    for (const k of allowed) { if (k in body) safeData[k] = body[k]; }
+
     const { data, error } = await supabase
       .from("testimonials")
-      .insert([body])
+      .insert([safeData])
       .select()
       .single();
 
@@ -57,7 +62,14 @@ export async function PUT(request: NextRequest) {
   try {
     const supabase = await createAdminClient();
     const body = await request.json();
-    const { id, ...updates } = body;
+    const { id, ...rawUpdates } = body;
+
+    if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 });
+
+    // Whitelist allowed fields
+    const allowed = ["name", "text", "rating", "avatar_url", "is_visible", "rank", "package"];
+    const updates: Record<string, unknown> = {};
+    for (const k of allowed) { if (k in rawUpdates) updates[k] = rawUpdates[k]; }
 
     const { data, error } = await supabase
       .from("testimonials")
