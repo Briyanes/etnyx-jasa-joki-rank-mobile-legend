@@ -553,13 +553,15 @@ async function sendWhatsAppTemplate(
 export async function sendPaymentConfirmedWA(order: OrderData): Promise<boolean> {
   if (!order.whatsapp) return false;
 
+  const trackLink = `${SITE_URL}/track/?id=${order.order_id}`;
+
   const message = `
 *Pembayaran Dikonfirmasi!*
 
 Halo! Pembayaran kamu sudah kami terima dan dikonfirmasi.
 
 *Order ID:* ${order.order_id}
-*Paket:* ${formatRankDisplay(order)}
+*Paket:* ${formatRankDisplay(order)} → ${formatTargetDisplay(order)}
 *Total:* ${formatRupiah(order.price)}
 
 Order kamu akan segera diproses oleh tim booster kami. Kamu akan menerima notifikasi saat pengerjaan dimulai.
@@ -569,11 +571,28 @@ Terima kasih sudah mempercayai *ETNYX*!
 _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 `.trim();
 
+  const templateButtons: Record<string, unknown>[] = [
+    {
+      type: "button",
+      sub_type: "url",
+      index: "0",
+      parameters: [{ type: "text", text: order.order_id }],
+    },
+    {
+      type: "button",
+      sub_type: "url",
+      index: "1",
+      parameters: [{ type: "text", text: `Halo min, saya mau tanya soal order ${order.order_id}` }],
+    },
+  ];
+
   return sendBusinessWA(
     order.whatsapp,
     "payment_confirmed",
     [order.order_id, formatRankDisplay(order), formatRupiah(order.price)],
-    message
+    message,
+    trackLink,
+    templateButtons
   );
 }
 
@@ -670,6 +689,7 @@ export async function sendOrderStartedWA(order: OrderData): Promise<boolean> {
   if (!order.whatsapp) return false;
 
   const isGendong = order.package_title?.includes("Gendong") || order.package_title?.includes("Duo Boost");
+  const trackLink = `${SITE_URL}/track/?id=${order.order_id}`;
 
   const message = `
 *Order Sedang Dikerjakan!*
@@ -680,28 +700,43 @@ Halo! Order kamu sudah dikonfirmasi dan sedang dalam pengerjaan oleh booster kam
 *Paket:* ${formatTargetDisplay(order)}
 
 Kamu bisa track progress di sini:
-${SITE_URL}/track/?id=${order.order_id}
+${trackLink}
 
 ${isGendong ? "Booster kami akan menghubungi kamu untuk jadwal mabar." : "Jangan login ke akun selama proses joki ya!"}
 
 _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 `.trim();
 
+  const templateButtons: Record<string, unknown>[] = [
+    {
+      type: "button",
+      sub_type: "url",
+      index: "0",
+      parameters: [{ type: "text", text: order.order_id }],
+    },
+    {
+      type: "button",
+      sub_type: "url",
+      index: "1",
+      parameters: [{ type: "text", text: `Halo min, saya mau tanya soal order ${order.order_id}` }],
+    },
+  ];
+
   return sendBusinessWA(
     order.whatsapp,
     "order_started",
     [order.order_id, formatTargetDisplay(order)],
     message,
-    `${SITE_URL}/track/?id=${order.order_id}`
+    trackLink,
+    templateButtons
   );
 }
 
 export async function sendOrderCompletedWA(order: OrderData): Promise<boolean> {
   if (!order.whatsapp) return false;
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.com";
-  const reviewLink = `${siteUrl}/review/?id=${order.order_id}`;
-  const reportLink = `${siteUrl}/review/?id=${order.order_id}&report=1`;
+  const reviewLink = `${SITE_URL}/review/?id=${order.order_id}`;
+  const reportLink = `${SITE_URL}/review/?id=${order.order_id}&report=1`;
 
   const isGendong = order.package_title?.includes("Gendong") || order.package_title?.includes("Duo Boost");
 
@@ -727,12 +762,34 @@ Terima kasih sudah menggunakan *ETNYX*!
 _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 `.trim();
 
+  const templateButtons: Record<string, unknown>[] = [
+    {
+      type: "button",
+      sub_type: "url",
+      index: "0",
+      parameters: [{ type: "text", text: order.order_id }],
+    },
+    {
+      type: "button",
+      sub_type: "url",
+      index: "1",
+      parameters: [{ type: "text", text: order.order_id }],
+    },
+    {
+      type: "button",
+      sub_type: "url",
+      index: "2",
+      parameters: [{ type: "text", text: `Halo min, saya mau tanya soal order ${order.order_id}` }],
+    },
+  ];
+
   return sendBusinessWA(
     order.whatsapp,
     "order_completed",
     [order.order_id, formatTargetDisplay(order)],
     message,
-    reviewLink
+    reviewLink,
+    templateButtons
   );
 }
 
@@ -752,11 +809,22 @@ Jika kamu merasa ini adalah kesalahan atau ingin order ulang, silakan hubungi ka
 _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 `.trim();
 
+  const templateButtons: Record<string, unknown>[] = [
+    {
+      type: "button",
+      sub_type: "url",
+      index: "0",
+      parameters: [{ type: "text", text: `Halo min, order ${order.order_id} dibatalkan. Saya mau tanya.` }],
+    },
+  ];
+
   return sendBusinessWA(
     order.whatsapp,
     "order_cancelled",
     [order.order_id, order.username],
-    message
+    message,
+    undefined,
+    templateButtons
   );
 }
 
