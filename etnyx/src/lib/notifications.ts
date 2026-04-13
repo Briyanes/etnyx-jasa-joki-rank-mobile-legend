@@ -229,9 +229,9 @@ export async function notifyAdminNewOrder(order: OrderData & { db_id?: string })
 <b>WhatsApp:</b> ${order.whatsapp || "-"}
 
 <b>Detail Order:</b>
-• Rank: ${formatRankDisplay(order)}
-• Paket: ${order.package}
-${order.is_express ? "EXPRESS" : ""}${order.is_premium ? " PREMIUM" : ""}
+• Paket: ${getOrderType(order)}
+• Detail: ${getOrderDetail(order)}
+• Addons: ${order.package}
 
 <b>Total:</b> ${formatRupiah(order.price)}
 
@@ -267,9 +267,9 @@ export async function notifyWorkerConfirmedOrder(order: OrderData): Promise<bool
 <b>Username:</b> ${order.username}
 
 <b>Detail Order:</b>
-• Rank: ${formatRankDisplay(order)}
-• Paket: ${order.package}
-${order.is_express ? "EXPRESS - PRIORITAS!" : ""}${order.is_premium ? " PREMIUM" : ""}
+• Paket: ${getOrderType(order)}
+• Detail: ${getOrderDetail(order)}
+• Addons: ${order.package}
 
 <b>Catatan:</b> ${order.notes || "-"}
 
@@ -292,8 +292,9 @@ export async function notifyAdminOrderCompleted(order: OrderData & { db_id?: str
 <b>WhatsApp:</b> ${order.whatsapp || "-"}
 
 <b>Detail:</b>
-• Rank: ${formatRankDisplay(order)}
-• Paket: ${order.package}
+• Paket: ${getOrderType(order)}
+• Detail: ${getOrderDetail(order)}
+• Addons: ${order.package}
 
 <b>Total:</b> ${formatRupiah(order.price)}
 
@@ -309,6 +310,123 @@ Review link sudah dikirim ke customer via WA.
   return sendTelegramMessage(chatId, message, undefined, replyMarkup);
 }
 
+
+export async function notifyAdminPaymentConfirmed(order: OrderData & { db_id?: string }): Promise<boolean> {
+  const settings = await getIntegrationSettings();
+  const chatId = settings.telegramAdminGroupId;
+  if (!chatId) return false;
+
+  const message = `
+✅ <b>PEMBAYARAN DIKONFIRMASI</b>
+
+<b>Order ID:</b> ${order.order_id}
+<b>Username:</b> ${order.username}
+
+<b>Detail Order:</b>
+• Paket: ${getOrderType(order)}
+• Detail: ${getOrderDetail(order)}
+• Addons: ${order.package}
+
+<b>Total:</b> ${formatRupiah(order.price)}
+`.trim();
+
+  const replyMarkup = order.db_id ? {
+    inline_keyboard: [
+      [{ text: "Mulai Kerjakan", callback_data: `start:${order.db_id}` }],
+      [{ text: "Detail", callback_data: `detail:${order.db_id}` }],
+    ],
+  } : undefined;
+
+  return sendTelegramMessage(chatId, message, undefined, replyMarkup);
+}
+
+export async function notifyOrderStarted(order: OrderData & { db_id?: string }): Promise<boolean> {
+  const settings = await getIntegrationSettings();
+
+  const message = `
+🔄 <b>ORDER SEDANG DIKERJAKAN</b>
+
+<b>Order ID:</b> ${order.order_id}
+<b>Username:</b> ${order.username}
+
+<b>Detail Order:</b>
+• Paket: ${getOrderType(order)}
+• Detail: ${getOrderDetail(order)}
+• Addons: ${order.package}
+
+<b>Total:</b> ${formatRupiah(order.price)}
+`.trim();
+
+  const results: boolean[] = [];
+
+  // Notify Admin group
+  if (settings.telegramAdminGroupId) {
+    const replyMarkup = order.db_id ? {
+      inline_keyboard: [
+        [{ text: "✅ Selesaikan", callback_data: `complete:${order.db_id}` }],
+        [{ text: "Detail", callback_data: `detail:${order.db_id}` }],
+      ],
+    } : undefined;
+    results.push(await sendTelegramMessage(settings.telegramAdminGroupId, message, undefined, replyMarkup));
+  }
+
+  // Notify Worker group
+  if (settings.telegramWorkerGroupId) {
+    results.push(await sendTelegramMessage(settings.telegramWorkerGroupId, message));
+  }
+
+  return results.some(r => r);
+}
+
+export async function notifyWorkerOrderCancelled(order: OrderData): Promise<boolean> {
+  const settings = await getIntegrationSettings();
+  const chatId = settings.telegramWorkerGroupId;
+  if (!chatId) return false;
+
+  const message = `
+❌ <b>ORDER DIBATALKAN</b>
+
+<b>Order ID:</b> ${order.order_id}
+<b>Username:</b> ${order.username}
+
+<b>Detail:</b>
+• Paket: ${getOrderType(order)}
+• Detail: ${getOrderDetail(order)}
+
+Order ini sudah tidak perlu dikerjakan.
+`.trim();
+
+  return sendTelegramMessage(chatId, message);
+}
+
+export async function notifyAdminPaymentProof(order: { order_id: string; username: string; total_price: number; sender_name?: string; sender_bank?: string }, dbId?: string): Promise<boolean> {
+  const settings = await getIntegrationSettings();
+  const chatId = settings.telegramAdminGroupId;
+  if (!chatId) return false;
+
+  const message = `
+💳 <b>BUKTI TRANSFER BARU</b>
+
+<b>Order:</b> <code>${order.order_id}</code>
+<b>Username:</b> ${order.username}
+<b>Total:</b> ${new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(order.total_price)}
+<b>Pengirim:</b> ${order.sender_name || "-"} (${order.sender_bank || "-"})
+
+Segera verifikasi bukti transfer ini.
+`.trim();
+
+  const replyMarkup = dbId ? {
+    inline_keyboard: [
+      [
+        { text: "✅ Approve", callback_data: `approve_proof:${dbId}` },
+        { text: "❌ Reject", callback_data: `reject_proof:${dbId}` },
+      ],
+      [{ text: "Detail", callback_data: `detail:${dbId}` }],
+    ],
+  } : undefined;
+
+  return sendTelegramMessage(chatId, message, undefined, replyMarkup);
+}
 
 // ============ TELEGRAM: Reviews & Worker Reports ============
 export async function notifyNewReview(review: {
@@ -953,9 +1071,24 @@ export async function sendNewOrderNotifications(order: OrderData): Promise<void>
 
 export async function sendOrderConfirmedNotifications(order: OrderData): Promise<void> {
   await Promise.allSettled([
+    notifyAdminPaymentConfirmed(order),
     notifyWorkerConfirmedOrder(order),
     sendPaymentConfirmedWA(order),
     sendPaymentConfirmedEmail(order),
+  ]);
+}
+
+export async function sendOrderStartedNotifications(order: OrderData): Promise<void> {
+  await Promise.allSettled([
+    sendOrderStartedWA(order),
+    notifyOrderStarted(order),
+  ]);
+}
+
+export async function sendOrderCancelledNotifications(order: OrderData): Promise<void> {
+  await Promise.allSettled([
+    sendOrderCancelledWA(order),
+    notifyWorkerOrderCancelled(order),
   ]);
 }
 

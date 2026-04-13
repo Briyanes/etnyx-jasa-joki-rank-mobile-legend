@@ -482,6 +482,18 @@ async function handleCallback(query: CallbackQuery) {
     return handleReportStatus(query.id, chatId, messageId, reportId, status, userName);
   }
 
+  // ---- APPROVE PAYMENT PROOF ----
+  if (data.startsWith("approve_proof:")) {
+    const orderId = data.split(":")[1];
+    return handleApproveProof(query.id, chatId, messageId, orderId, userName);
+  }
+
+  // ---- REJECT PAYMENT PROOF ----
+  if (data.startsWith("reject_proof:")) {
+    const orderId = data.split(":")[1];
+    return handleRejectProof(query.id, chatId, messageId, orderId, userName);
+  }
+
   return answerCallback(query.id, "Unknown action");
 }
 
@@ -516,13 +528,14 @@ async function handleConfirmOrder(callbackId: string, chatId: number, messageId:
 
   // Send payment confirmed notifications
   try {
-    const { sendPaymentConfirmedWA, notifyWorkerConfirmedOrder } = await import("@/lib/notifications");
+    const { sendPaymentConfirmedWA, notifyWorkerConfirmedOrder, notifyAdminPaymentConfirmed, sendPaymentConfirmedEmail } = await import("@/lib/notifications");
     const orderData = {
       order_id: order.order_id,
       username: order.username,
       current_rank: order.current_rank,
       target_rank: order.target_rank,
       package: order.package,
+      package_title: order.package_title,
       price: order.total_price,
       whatsapp: order.whatsapp,
       email: order.customer_email,
@@ -530,10 +543,13 @@ async function handleConfirmOrder(callbackId: string, chatId: number, messageId:
       is_express: order.is_express,
       is_premium: order.is_premium,
       notes: order.notes,
+      db_id: orderId,
     };
     Promise.allSettled([
       sendPaymentConfirmedWA(orderData),
       notifyWorkerConfirmedOrder(orderData),
+      notifyAdminPaymentConfirmed(orderData),
+      sendPaymentConfirmedEmail(orderData),
     ]).catch(console.error);
   } catch {
     // non-blocking
@@ -590,21 +606,25 @@ async function handleRejectOrder(callbackId: string, chatId: number, messageId: 
     return answerCallback(callbackId, "Order sudah dibatalkan");
   }
 
-  // Send cancellation notification to customer
+  // Send cancellation notification to customer + worker
   try {
-    const { sendOrderCancelledWA } = await import("@/lib/notifications");
+    const { sendOrderCancelledWA, notifyWorkerOrderCancelled } = await import("@/lib/notifications");
     const orderData = {
       order_id: order.order_id,
       username: order.username,
       current_rank: order.current_rank,
       target_rank: order.target_rank,
       package: order.package,
+      package_title: order.package_title,
       price: order.total_price,
       whatsapp: order.whatsapp,
       email: order.customer_email,
       status: "cancelled" as const,
     };
-    sendOrderCancelledWA(orderData).catch(console.error);
+    Promise.allSettled([
+      sendOrderCancelledWA(orderData),
+      notifyWorkerOrderCancelled(orderData),
+    ]).catch(console.error);
   } catch {
     // non-blocking
   }
@@ -653,9 +673,9 @@ async function handleStartOrder(callbackId: string, chatId: number, messageId: n
     return answerCallback(callbackId, "Order sudah dimulai oleh admin lain");
   }
 
-  // Send started notification to customer
+  // Send started notification to customer + admin + worker
   try {
-    const { sendOrderStartedWA } = await import("@/lib/notifications");
+    const { sendOrderStartedWA, notifyOrderStarted } = await import("@/lib/notifications");
     const orderData = {
       order_id: order.order_id,
       username: order.username,
@@ -667,8 +687,12 @@ async function handleStartOrder(callbackId: string, chatId: number, messageId: n
       whatsapp: order.whatsapp,
       email: order.customer_email,
       status: "in_progress" as const,
+      db_id: orderId,
     };
-    sendOrderStartedWA(orderData).catch(console.error);
+    Promise.allSettled([
+      sendOrderStartedWA(orderData),
+      notifyOrderStarted(orderData),
+    ]).catch(console.error);
   } catch {
     // non-blocking
   }
@@ -860,6 +884,168 @@ async function handleReportStatus(callbackId: string, chatId: number, messageId:
   
   // Refresh the reports list
   return handleReports(chatId);
+}
+
+async function handleApproveProof(callbackId: string, chatId: number, messageId: number, orderId: string, userName: string) {
+  const supabase = await createAdminClient();
+
+  const { data: order, error } = await supabase
+    .from("orders")
+    .select("*")
+    .eq("id", orderId)
+    .single();
+
+  if (error || !order) {
+    return answerCallback(callbackId, "Order tidak ditemukan");
+  }
+
+  if (order.status === "confirmed" || order.payment_status === "paid") {
+    return answerCallback(callbackId, "Pembayaran sudah dikonfirmasi");
+  }
+
+  // Approve payment proof
+  const { error: proofErr } = await supabase
+    .from("payment_proofs")
+    .update({ status: "approved" })
+    .eq("order_id", order.id)
+    .eq("status", "pending");
+
+  if (proofErr) {
+    return answerCallback(callbackId, "Gagal approve bukti transfer");
+  }
+
+  // Update order status
+  const { data: updatedRow, error: updateErr } = await supabase
+    .from("orders")
+    .update({
+      status: "confirmed",
+      payment_status: "paid",
+      confirmed_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", orderId)
+    .neq("status", "confirmed")
+    .select("id")
+    .single();
+
+  if (updateErr || !updatedRow) {
+    return answerCallback(callbackId, "Order sudah dikonfirmasi oleh admin lain");
+  }
+
+  // Log
+  await supabase.from("order_logs").insert({
+    order_id: order.id,
+    action: "payment_confirmed",
+    new_value: "paid",
+    notes: `Manual transfer approved via Telegram by ${userName}`,
+    created_by: userName,
+  });
+
+  // Send notifications
+  try {
+    const { sendPaymentConfirmedWA, notifyWorkerConfirmedOrder, notifyAdminPaymentConfirmed, sendPaymentConfirmedEmail } = await import("@/lib/notifications");
+    const orderData = {
+      order_id: order.order_id,
+      username: order.username,
+      current_rank: order.current_rank,
+      target_rank: order.target_rank,
+      package: order.package,
+      package_title: order.package_title,
+      price: order.total_price,
+      whatsapp: order.whatsapp,
+      email: order.customer_email,
+      status: "confirmed" as const,
+      is_express: order.is_express,
+      is_premium: order.is_premium,
+      notes: order.notes,
+      db_id: orderId,
+    };
+    Promise.allSettled([
+      sendPaymentConfirmedWA(orderData),
+      notifyWorkerConfirmedOrder(orderData),
+      notifyAdminPaymentConfirmed(orderData),
+      sendPaymentConfirmedEmail(orderData),
+    ]).catch(console.error);
+  } catch {
+    // non-blocking
+  }
+
+  const updated = `
+✅ <b>BUKTI TRANSFER DISETUJUI</b>
+
+<b>Order:</b> ${order.order_id}
+<b>Username:</b> ${order.username}
+${formatRupiah(order.total_price)}
+
+Disetujui oleh <b>${userName}</b>
+`.trim();
+
+  await editMessage(chatId, messageId, updated, {
+    inline_keyboard: [
+      [{ text: "Mulai Kerjakan", callback_data: `start:${orderId}` }],
+      [{ text: "Detail", callback_data: `detail:${orderId}` }],
+    ],
+  });
+
+  return answerCallback(callbackId, "Bukti transfer disetujui!");
+}
+
+async function handleRejectProof(callbackId: string, chatId: number, messageId: number, orderId: string, userName: string) {
+  const supabase = await createAdminClient();
+
+  const { data: order, error } = await supabase
+    .from("orders")
+    .select("*")
+    .eq("id", orderId)
+    .single();
+
+  if (error || !order) {
+    return answerCallback(callbackId, "Order tidak ditemukan");
+  }
+
+  // Reject payment proof
+  const { error: proofErr } = await supabase
+    .from("payment_proofs")
+    .update({ status: "rejected" })
+    .eq("order_id", order.id)
+    .eq("status", "pending");
+
+  if (proofErr) {
+    return answerCallback(callbackId, "Gagal reject bukti transfer");
+  }
+
+  // Reset payment_status back
+  await supabase
+    .from("orders")
+    .update({ payment_status: "unpaid", updated_at: new Date().toISOString() })
+    .eq("id", orderId);
+
+  // Log
+  await supabase.from("order_logs").insert({
+    order_id: order.id,
+    action: "payment_rejected",
+    new_value: "rejected",
+    notes: `Manual transfer rejected via Telegram by ${userName}`,
+    created_by: userName,
+  });
+
+  const updated = `
+❌ <b>BUKTI TRANSFER DITOLAK</b>
+
+<b>Order:</b> ${order.order_id}
+<b>Username:</b> ${order.username}
+${formatRupiah(order.total_price)}
+
+Ditolak oleh <b>${userName}</b>
+`.trim();
+
+  await editMessage(chatId, messageId, updated, {
+    inline_keyboard: [
+      [{ text: "Detail", callback_data: `detail:${orderId}` }],
+    ],
+  });
+
+  return answerCallback(callbackId, "Bukti transfer ditolak");
 }
 
 // ============ WEBHOOK ENDPOINT ============

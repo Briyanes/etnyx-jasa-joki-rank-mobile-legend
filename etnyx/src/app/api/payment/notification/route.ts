@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import crypto from "crypto";
-import { sendPaymentConfirmedWA, notifyWorkerConfirmedOrder } from "@/lib/notifications";
+import { sendPaymentConfirmedWA, notifyWorkerConfirmedOrder, notifyAdminPaymentConfirmed, sendPaymentConfirmedEmail } from "@/lib/notifications";
 import { sendMetaCAPI } from "@/lib/meta-capi";
 
 // Get iPaymu settings from DB or env
@@ -178,10 +178,12 @@ export async function POST(request: NextRequest) {
         db_id: order.id,
       };
       
-      // Send payment confirmed notifications (WA + Telegram worker group)
+      // Send payment confirmed notifications (WA + Telegram worker + admin + email)
       Promise.allSettled([
         sendPaymentConfirmedWA(orderData),
         notifyWorkerConfirmedOrder(orderData),
+        notifyAdminPaymentConfirmed(orderData),
+        sendPaymentConfirmedEmail(orderData),
       ]).catch(console.error);
 
       // Fire Meta Conversions API (server-side dedup with client pixel)

@@ -195,24 +195,17 @@ export async function POST(request: NextRequest) {
 
     // Send Telegram notification to admin about new payment proof
     try {
-      const notifModule = await import("@/lib/notifications");
-      const { data: integrationSettings } = await supabase
-        .from("settings")
-        .select("value")
-        .eq("key", "integrations")
-        .single();
-      const adminGroupId = integrationSettings?.value?.telegramAdminGroupId;
-      if (adminGroupId) {
-        await notifModule.sendTelegramMessage(
-          adminGroupId,
-        `<b>BUKTI TRANSFER BARU</b>\n\n` +
-        `Order: <code>${order.order_id}</code>\n` +
-        `${order.username}\n` +
-        `${new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(order.total_price)}\n` +
-        `${sanitizedSenderName || "-"} (${sanitizedSenderBank || "-"})\n\n` +
-        `Segera verifikasi di Admin Dashboard`
+      const { notifyAdminPaymentProof } = await import("@/lib/notifications");
+      await notifyAdminPaymentProof(
+        {
+          order_id: order.order_id,
+          username: order.username,
+          total_price: order.total_price,
+          sender_name: sanitizedSenderName,
+          sender_bank: sanitizedSenderBank,
+        },
+        order.id
       );
-      }
     } catch (e) {
       console.error("Telegram notification error:", e);
     }

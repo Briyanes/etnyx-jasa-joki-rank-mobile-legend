@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import { verifyAdmin } from "@/lib/admin-auth";
 import { sanitizeInput, isValidRank } from "@/lib/validation";
-import { sendNewOrderNotifications, sendOrderConfirmedNotifications, sendOrderCompletedNotifications, sendOrderStartedWA, sendOrderCancelledWA, sendTelegramMessage } from "@/lib/notifications";
+import { sendNewOrderNotifications, sendOrderConfirmedNotifications, sendOrderCompletedNotifications, sendOrderStartedNotifications, sendOrderCancelledNotifications, sendTelegramMessage } from "@/lib/notifications";
 import { logAdminAction } from "@/lib/audit-log";
 
 export async function GET(request: Request) {
@@ -372,17 +372,19 @@ export async function PATCH(request: Request) {
         } catch (e) { console.error(`[confirmed] Notification failed for ${data.order_id}:`, e); }
       }
 
-      // Status: in_progress -> WA "Sedang Dikerjakan"
+      // Status: in_progress -> WA "Sedang Dikerjakan" + Telegram Admin & Worker
       if (updates.status === "in_progress") {
         try {
-          notificationSent = await sendOrderStartedWA(orderData);
+          await sendOrderStartedNotifications(orderData);
+          notificationSent = true;
         } catch (e) { console.error(`[in_progress] Notification failed for ${data.order_id}:`, e); }
       }
 
-      // Status: cancelled -> WA "Order Dibatalkan"
+      // Status: cancelled -> WA "Order Dibatalkan" + Telegram Worker
       if (updates.status === "cancelled") {
         try {
-          notificationSent = await sendOrderCancelledWA(orderData);
+          await sendOrderCancelledNotifications(orderData);
+          notificationSent = true;
         } catch (e) { console.error(`[cancelled] Notification failed for ${data.order_id}:`, e); }
       }
       

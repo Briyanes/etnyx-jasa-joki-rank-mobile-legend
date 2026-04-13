@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
 
         // Send notifications only if order wasn't already confirmed
         try {
-          const { sendPaymentConfirmedWA, notifyWorkerConfirmedOrder } = await import("@/lib/notifications");
+          const { sendPaymentConfirmedWA, notifyWorkerConfirmedOrder, notifyAdminPaymentConfirmed, sendPaymentConfirmedEmail } = await import("@/lib/notifications");
           const orderData = {
             order_id: order.order_id,
             username: order.username,
@@ -129,11 +129,17 @@ export async function POST(request: NextRequest) {
             is_express: order.is_express,
             is_premium: order.is_premium,
             notes: order.notes,
+            package_title: order.package_title,
+            db_id: order.id,
           };
           // WA to customer: "Pembayaran Dikonfirmasi"
           await sendPaymentConfirmedWA(orderData);
           // Telegram to worker group: order ready to be assigned
           await notifyWorkerConfirmedOrder(orderData);
+          // Telegram to admin group: payment confirmed
+          await notifyAdminPaymentConfirmed(orderData);
+          // Email to customer
+          await sendPaymentConfirmedEmail(orderData);
 
           // Fire Meta CAPI Purchase for manual transfer (attribution)
           try {
