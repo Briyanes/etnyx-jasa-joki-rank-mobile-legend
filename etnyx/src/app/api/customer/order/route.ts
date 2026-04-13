@@ -557,6 +557,7 @@ export async function POST(request: NextRequest) {
           whatsapp: `+62${cleanWhatsapp}`,
           email: sanitizedEmail || undefined,
           status: "pending",
+          payment_url: paymentUrl,
         }),
         notifyAdminNewOrder({
           order_id: order.order_id,

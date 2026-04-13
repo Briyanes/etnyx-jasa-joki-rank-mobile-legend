@@ -28,6 +28,7 @@ interface OrderData {
   is_premium?: boolean;
   notes?: string;
   created_at?: string;
+  payment_url?: string;
 }
 
 interface IntegrationSettings {
@@ -603,6 +604,10 @@ export async function sendPaymentConfirmedEmail(order: OrderData): Promise<boole
 export async function sendOrderConfirmationWA(order: OrderData): Promise<boolean> {
   if (!order.whatsapp) return false;
 
+  const manualPaymentLink = `${SITE_URL}/payment/manual/?order_id=${order.order_id}`;
+  const paymentLink = order.payment_url || manualPaymentLink;
+  const isIpaymu = !!order.payment_url;
+
   const message = `
 Halo!
 
@@ -618,8 +623,12 @@ Terima kasih sudah order di *ETNYX*!
 
 Silakan selesaikan pembayaran untuk memproses order kamu.
 
-Bayar & upload bukti di sini:
-${SITE_URL}/payment/manual/?order_id=${order.order_id}
+${isIpaymu ? `Bayar via iPaymu (QRIS/Transfer/E-Wallet):
+${paymentLink}
+
+Atau bayar manual (transfer bank):
+${manualPaymentLink}` : `Bayar & upload bukti di sini:
+${manualPaymentLink}`}
 
 Butuh bantuan? Hubungi CS kami via link di bawah.
 
@@ -629,9 +638,9 @@ _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
   return sendBusinessWA(
     order.whatsapp,
     "order_confirmation",
-    [order.order_id, formatRankDisplay(order), formatRupiah(order.price)],
+    [order.order_id, formatRankDisplay(order), formatRupiah(order.price), paymentLink],
     message,
-    `${SITE_URL}/payment/manual/?order_id=${order.order_id}`
+    paymentLink
   );
 }
 
