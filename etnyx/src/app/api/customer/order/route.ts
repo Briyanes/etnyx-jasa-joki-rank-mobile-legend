@@ -179,8 +179,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate WhatsApp
-    const cleanWhatsapp = whatsapp.replace(/\D/g, "");
-    if (!isValidPhone(cleanWhatsapp)) {
+    const rawWhatsapp = whatsapp.replace(/\D/g, "");
+    // Strip leading 0 so "+62" prefix works correctly (081... → 81...)
+    const cleanWhatsapp = rawWhatsapp.startsWith("0") ? rawWhatsapp.slice(1) : rawWhatsapp.startsWith("62") ? rawWhatsapp.slice(2) : rawWhatsapp;
+    if (!isValidPhone(rawWhatsapp)) {
       return NextResponse.json(
         { error: "Nomor WhatsApp tidak valid" },
         { status: 400 }

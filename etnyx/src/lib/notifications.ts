@@ -381,6 +381,10 @@ ${report.report_detail ? `\n<b>Detail:</b> ${report.report_detail}` : ""}
 
 function normalizePhone(phone: string): string {
   let normalized = phone.replace(/\D/g, "");
+  // Handle "620..." format (e.g. from "+62081..." double prefix)
+  if (normalized.startsWith("620")) {
+    normalized = "62" + normalized.slice(3);
+  }
   if (normalized.startsWith("0")) {
     normalized = "62" + normalized.slice(1);
   }
