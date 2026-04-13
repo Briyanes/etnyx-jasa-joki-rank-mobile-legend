@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
+import { sendOrderConfirmationWA } from "@/lib/notifications";
 
-// Test endpoint — only accessible with admin auth
+// Test endpoint — accessible with JWT_SECRET or CRON_SECRET
 // GET /api/whatsapp/test?phone=628xxx
+// GET /api/whatsapp/test?order_id=ETX-xxx (test full order flow)
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const phone = searchParams.get("phone");
+  const orderId = searchParams.get("order_id");
   const authHeader = request.headers.get("authorization");
 
   // Simple auth: must match CRON_SECRET or JWT_SECRET
@@ -16,8 +19,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!phone) {
-    return NextResponse.json({ error: "Missing ?phone= parameter" }, { status: 400 });
+  if (!phone && !orderId) {
+    return NextResponse.json({ error: "Missing ?phone= or ?order_id= parameter" }, { status: 400 });
   }
 
   // 1. Check DB settings
@@ -36,6 +39,41 @@ export async function GET(request: NextRequest) {
     fonnteApiToken: settings.fonnteApiToken ? `${settings.fonnteApiToken.slice(0, 10)}...` : "(not set)",
     fonnteDeviceId: settings.fonnteDeviceId || "(not set)",
   };
+
+  // 2. If order_id provided, test the full sendOrderConfirmationWA flow
+  if (orderId) {
+    const { data: order } = await supabase
+      .from("orders")
+      .select("order_id, username, current_rank, target_rank, current_star, target_star, package, package_title, total_price, whatsapp, email, status")
+      .eq("order_id", orderId)
+      .single();
+
+    if (!order) {
+      return NextResponse.json({ error: `Order ${orderId} not found` }, { status: 404 });
+    }
+
+    const result = await sendOrderConfirmationWA({
+      order_id: order.order_id,
+      username: order.username,
+      current_rank: order.current_rank,
+      target_rank: order.target_rank,
+      current_star: order.current_star,
+      target_star: order.target_star,
+      package: order.package,
+      package_title: order.package_title,
+      price: order.total_price,
+      whatsapp: order.whatsapp,
+      email: order.email,
+      status: order.status,
+    });
+
+    return NextResponse.json({
+      diagnostics,
+      orderPhone: order.whatsapp,
+      sendResult: result,
+      note: result ? "Order confirmation WA sent!" : "FAILED to send order confirmation WA. Check Vercel function logs for details.",
+    });
+  }
 
   // 2. Try sending test message via Meta
   let metaResult: { success: boolean; error?: unknown } = { success: false };
