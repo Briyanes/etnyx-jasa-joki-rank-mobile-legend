@@ -105,6 +105,26 @@ function formatTargetDisplay(order: OrderData): string {
   return formatRank(order.target_rank, order.target_star);
 }
 
+// Check if order is joki paket (different current & target rank)
+function isJokiPaket(order: OrderData): boolean {
+  return order.current_rank !== order.target_rank;
+}
+
+// Standard detail order block for WA messages
+function formatOrderDetails(order: OrderData, opts?: { showStatus?: string }): string {
+  const lines = [`• Order ID: ${order.order_id}`];
+  if (isJokiPaket(order)) {
+    lines.push(`• Rank Awal: ${formatRank(order.current_rank, order.current_star)}`);
+  }
+  lines.push(`• Rank Tujuan: ${formatRank(order.target_rank, order.target_star)}`);
+  lines.push(`• Paket: ${order.package}`);
+  lines.push(`• Total: ${formatRupiah(order.price)}`);
+  if (opts?.showStatus) {
+    lines.push(`\n*Status:* ${opts.showStatus}`);
+  }
+  return lines.join("\n");
+}
+
 // ============ Notification Preferences ============
 export async function getNotificationPreferences(whatsapp: string): Promise<{
   whatsapp_order_updates: boolean;
@@ -560,9 +580,8 @@ export async function sendPaymentConfirmedWA(order: OrderData): Promise<boolean>
 
 Halo! Pembayaran kamu sudah kami terima dan dikonfirmasi.
 
-*Order ID:* ${order.order_id}
-*Paket:* ${formatRankDisplay(order)} → ${formatTargetDisplay(order)}
-*Total:* ${formatRupiah(order.price)}
+*Detail Order:*
+${formatOrderDetails(order)}
 
 Order kamu akan segera diproses oleh tim booster kami. Kamu akan menerima notifikasi saat pengerjaan dimulai.
 
@@ -589,7 +608,7 @@ _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
   return sendBusinessWA(
     order.whatsapp,
     "payment_confirmed",
-    [order.order_id, formatRankDisplay(order), formatRupiah(order.price)],
+    [order.order_id, formatRank(order.target_rank, order.target_star), order.package, formatRupiah(order.price)],
     message,
     trackLink,
     templateButtons
@@ -638,12 +657,7 @@ Halo!
 Terima kasih sudah order di *ETNYX*!
 
 *Detail Order:*
-• Order ID: ${order.order_id}
-• Rank: ${formatRankDisplay(order)}
-• Paket: ${order.package}
-• Total: ${formatRupiah(order.price)}
-
-*Status:* Menunggu Pembayaran
+${formatOrderDetails(order, { showStatus: "Menunggu Pembayaran" })}
 
 Silakan selesaikan pembayaran untuk memproses order kamu.
 
@@ -678,7 +692,7 @@ _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
   return sendBusinessWA(
     order.whatsapp,
     "order_confirmation",
-    [order.order_id, formatRankDisplay(order), formatRupiah(order.price), paymentLink],
+    [order.order_id, formatRank(order.target_rank, order.target_star), order.package, formatRupiah(order.price), paymentLink],
     message,
     paymentLink,
     templateButtons
@@ -696,8 +710,8 @@ export async function sendOrderStartedWA(order: OrderData): Promise<boolean> {
 
 Halo! Order kamu sudah dikonfirmasi dan sedang dalam pengerjaan oleh booster kami.
 
-*Order ID:* ${order.order_id}
-*Paket:* ${formatTargetDisplay(order)}
+*Detail Order:*
+${formatOrderDetails(order)}
 
 Kamu bisa track progress di sini:
 ${trackLink}
@@ -725,7 +739,7 @@ _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
   return sendBusinessWA(
     order.whatsapp,
     "order_started",
-    [order.order_id, formatTargetDisplay(order)],
+    [order.order_id, formatRank(order.target_rank, order.target_star), order.package, formatRupiah(order.price)],
     message,
     trackLink,
     templateButtons
@@ -745,8 +759,8 @@ export async function sendOrderCompletedWA(order: OrderData): Promise<boolean> {
 
 Yeay! Order kamu sudah selesai dikerjakan.
 
-*Order ID:* ${order.order_id}
-*Rank Akhir:* ${formatTargetDisplay(order)}
+*Detail Order:*
+${formatOrderDetails(order)}
 
 ${isGendong ? "Terima kasih sudah mabar bersama booster kami!" : "Silakan cek akun kamu dan ganti password untuk keamanan."}
 
@@ -786,7 +800,7 @@ _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
   return sendBusinessWA(
     order.whatsapp,
     "order_completed",
-    [order.order_id, formatTargetDisplay(order)],
+    [order.order_id, formatRank(order.target_rank, order.target_star), order.package, formatRupiah(order.price)],
     message,
     reviewLink,
     templateButtons
