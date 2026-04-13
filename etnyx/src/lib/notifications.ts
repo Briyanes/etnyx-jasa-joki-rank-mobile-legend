@@ -395,11 +395,21 @@ async function sendWhatsAppMeta(
   message: string,
   settings: IntegrationSettings
 ): Promise<boolean> {
-  if (!settings.metaWaEnabled || !settings.metaWaAccessToken || !settings.metaWaPhoneNumberId) {
+  if (!settings.metaWaEnabled) {
+    console.warn("Meta WA: disabled (metaWaEnabled=false)");
+    return false;
+  }
+  if (!settings.metaWaAccessToken) {
+    console.warn("Meta WA: no access token configured");
+    return false;
+  }
+  if (!settings.metaWaPhoneNumberId) {
+    console.warn("Meta WA: no phone number ID configured");
     return false;
   }
 
   const normalizedPhone = normalizePhone(phone);
+  console.log(`Meta WA: sending text to ${normalizedPhone} via phoneNumberId ${settings.metaWaPhoneNumberId}`);
 
   try {
     const res = await fetch(
@@ -422,12 +432,13 @@ async function sendWhatsAppMeta(
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      console.error("Meta WA error:", err);
+      console.error("Meta WA text error:", JSON.stringify(err));
       return false;
     }
+    console.log(`Meta WA: text sent successfully to ${normalizedPhone}`);
     return true;
   } catch (error) {
-    console.error("Meta WA failed:", error);
+    console.error("Meta WA text failed:", error);
     return false;
   }
 }
@@ -482,13 +493,18 @@ export async function sendWhatsAppMessage(
   if (!phone) return false;
 
   const settings = await getIntegrationSettings();
+  console.log(`WA send: phone=${phone}, metaEnabled=${settings.metaWaEnabled}, hasToken=${!!settings.metaWaAccessToken}, phoneNumId=${settings.metaWaPhoneNumberId || 'none'}, hasFonnte=${!!settings.fonnteApiToken}`);
 
-  // Try Meta Cloud API first (official, free tier)
+  // Try Meta Cloud API first (official)
   const metaSent = await sendWhatsAppMeta(phone, message, settings);
   if (metaSent) return true;
 
   // Fallback to Fonnte
-  return sendWhatsAppFonnte(phone, message, url, settings);
+  const fonnteSent = await sendWhatsAppFonnte(phone, message, url, settings);
+  if (!fonnteSent) {
+    console.error(`WA send FAILED: both Meta and Fonnte failed for ${phone}`);
+  }
+  return fonnteSent;
 }
 
 // Send Meta WA template message (for business-initiated conversations)
@@ -537,9 +553,10 @@ async function sendWhatsAppTemplate(
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      console.error(`Meta WA template "${templateName}" error:`, err);
+      console.error(`Meta WA template "${templateName}" error:`, JSON.stringify(err));
       return false;
     }
+    console.log(`Meta WA: template "${templateName}" sent successfully to ${normalizedPhone}`);
     return true;
   } catch (error) {
     console.error(`Meta WA template "${templateName}" failed:`, error);
