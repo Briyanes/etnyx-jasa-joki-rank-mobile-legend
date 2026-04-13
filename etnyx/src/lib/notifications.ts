@@ -468,7 +468,8 @@ async function sendBusinessWA(
   templateName: string,
   templateParams: string[],
   fallbackMessage: string,
-  _fallbackUrl?: string
+  _fallbackUrl?: string,
+  templateButtons?: Record<string, unknown>[]
 ): Promise<boolean> {
   if (!phone) return false;
 
@@ -476,7 +477,7 @@ async function sendBusinessWA(
   console.log(`WA business: phone=${phone}, template=${templateName}, metaEnabled=${settings.metaWaEnabled}`);
 
   // 1. Try Meta template (works for business-initiated, no 24h window needed)
-  const templateSent = await sendWhatsAppTemplate(phone, templateName, templateParams, settings);
+  const templateSent = await sendWhatsAppTemplate(phone, templateName, templateParams, settings, templateButtons);
   if (templateSent) return true;
 
   // 2. Fallback to Meta text (works if customer has 24h conversation window)
@@ -493,7 +494,8 @@ async function sendWhatsAppTemplate(
   phone: string,
   templateName: string,
   params: string[],
-  settings?: IntegrationSettings
+  settings?: IntegrationSettings,
+  extraComponents?: Record<string, unknown>[]
 ): Promise<boolean> {
   const s = settings || await getIntegrationSettings();
   if (!s.metaWaEnabled || !s.metaWaAccessToken || !s.metaWaPhoneNumberId) {
@@ -508,6 +510,9 @@ async function sendWhatsAppTemplate(
       type: "body",
       parameters: params.map(p => ({ type: "text", text: p })),
     });
+  }
+  if (extraComponents) {
+    components.push(...extraComponents);
   }
 
   try {
@@ -635,12 +640,29 @@ Butuh bantuan? Hubungi CS kami via link di bawah.
 _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 `.trim();
 
+  // Template buttons: [0] = URL (payment link), [1] = Phone (CS)
+  const templateButtons: Record<string, unknown>[] = [
+    {
+      type: "button",
+      sub_type: "url",
+      index: "0",
+      parameters: [{ type: "text", text: order.order_id }],
+    },
+    {
+      type: "button",
+      sub_type: "url",
+      index: "1",
+      parameters: [{ type: "text", text: `Halo min, saya mau tanya soal order ${order.order_id}` }],
+    },
+  ];
+
   return sendBusinessWA(
     order.whatsapp,
     "order_confirmation",
     [order.order_id, formatRankDisplay(order), formatRupiah(order.price), paymentLink],
     message,
-    paymentLink
+    paymentLink,
+    templateButtons
   );
 }
 
