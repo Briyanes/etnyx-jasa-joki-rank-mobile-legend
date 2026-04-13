@@ -400,7 +400,7 @@ ${report.report_detail ? `\n<b>Detail:</b> ${report.report_detail}` : ""}
 const WA_HEADER_IMAGE = {
   type: "header",
   parameters: [
-    { type: "image", image: { link: `${SITE_URL}/logo/logo-bundar.png` } },
+    { type: "image", image: { link: `${SITE_URL}/header-wa.jpg` } },
   ],
 };
 

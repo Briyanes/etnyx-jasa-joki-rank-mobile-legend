@@ -114,7 +114,7 @@ export async function GET(request: NextRequest) {
                 {
                   type: "header",
                   parameters: [
-                    { type: "image", image: { link: "https://etnyx.com/logo/logo-bundar.png" } },
+                    { type: "image", image: { link: "https://etnyx.com/header-wa.jpg" } },
                   ],
                 },
                 {
