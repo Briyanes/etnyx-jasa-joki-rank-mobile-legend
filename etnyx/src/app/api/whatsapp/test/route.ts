@@ -103,13 +103,24 @@ export async function GET(request: NextRequest) {
             ...(template !== "hello_world" ? {
               components: [
                 {
-                  type: "body",
+                  type: "header",
                   parameters: [
-                    { type: "text", text: "ETX-TEST123" },
-                    { type: "text", text: "Mythic" },
-                    { type: "text", text: "Weekly" },
-                    { type: "text", text: "Rp 50.000" },
+                    { type: "image", image: { link: "https://etnyx.com/logo/logo-bundar.png" } },
                   ],
+                },
+                {
+                  type: "body",
+                  parameters: template === "order_cancelled"
+                    ? [
+                        { type: "text", text: "ETX-TEST123" },
+                        { type: "text", text: "TestUser" },
+                      ]
+                    : [
+                        { type: "text", text: "ETX-TEST123" },
+                        { type: "text", text: "Mythic" },
+                        { type: "text", text: "Weekly" },
+                        { type: "text", text: "Rp 50.000" },
+                      ],
                 },
               ],
             } : {}),

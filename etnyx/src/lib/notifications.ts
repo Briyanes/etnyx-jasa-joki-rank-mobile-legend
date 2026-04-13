@@ -397,6 +397,13 @@ ${report.report_detail ? `\n<b>Detail:</b> ${report.report_detail}` : ""}
 
 // ============ WHATSAPP (Meta Cloud API) ============
 
+const WA_HEADER_IMAGE = {
+  type: "header",
+  parameters: [
+    { type: "image", image: { link: `${SITE_URL}/logo/logo-bundar.png` } },
+  ],
+};
+
 function normalizePhone(phone: string): string {
   let normalized = phone.replace(/\D/g, "");
   // Handle "620..." format (e.g. from "+62081..." double prefix)
@@ -592,6 +599,7 @@ _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 
   // payment_confirmed buttons: [0] = URL (Track Order), [1] = URL (Chat CS)
   const templateButtons: Record<string, unknown>[] = [
+    WA_HEADER_IMAGE,
     {
       type: "button",
       sub_type: "url",
@@ -676,6 +684,7 @@ _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 
   // Template buttons: [0] = URL (payment link), [1] = URL (Chat CS via redirect)
   const templateButtons: Record<string, unknown>[] = [
+    WA_HEADER_IMAGE,
     {
       type: "button",
       sub_type: "url",
@@ -724,6 +733,7 @@ _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 
   // order_started buttons: [0] = URL (Track Order), [1] = URL (Chat CS)
   const templateButtons: Record<string, unknown>[] = [
+    WA_HEADER_IMAGE,
     {
       type: "button",
       sub_type: "url",
@@ -778,8 +788,9 @@ Terima kasih sudah menggunakan *ETNYX*!
 _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 `.trim();
 
-  // order_completed buttons: [0] = URL (Review), [1] = URL (Report), [2] = URL (Chat CS)
+  // completed_order buttons: [0] = URL (Review), [1] = URL (Report), [2] = URL (Chat CS)
   const templateButtons: Record<string, unknown>[] = [
+    WA_HEADER_IMAGE,
     {
       type: "button",
       sub_type: "url",
@@ -828,6 +839,7 @@ _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 
   // order_cancelled button: [0] = URL (Chat CS)
   const templateButtons: Record<string, unknown>[] = [
+    WA_HEADER_IMAGE,
     {
       type: "button",
       sub_type: "url",
