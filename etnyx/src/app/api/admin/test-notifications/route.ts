@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     try {
       const ok = await sendOrderConfirmationWA({ ...testOrder, whatsapp });
       results.whatsapp_confirmation = { success: ok };
-      if (!ok) results.whatsapp_confirmation.error = "Fonnte API token belum diisi atau nomor salah";
+      if (!ok) results.whatsapp_confirmation.error = "Meta WhatsApp belum dikonfigurasi atau nomor salah";
     } catch (e) {
       results.whatsapp_confirmation = { success: false, error: e instanceof Error ? e.message : String(e) };
     }
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
     try {
       const ok = await sendOrderStartedWA({ ...testOrder, whatsapp });
       results.whatsapp_started = { success: ok };
-      if (!ok) results.whatsapp_started.error = "Fonnte API token belum diisi atau nomor salah";
+      if (!ok) results.whatsapp_started.error = "Meta WhatsApp belum dikonfigurasi atau nomor salah";
     } catch (e) {
       results.whatsapp_started = { success: false, error: e instanceof Error ? e.message : String(e) };
     }

@@ -136,15 +136,15 @@ async function handleIncomingMessage(
 
   if (["2", "cek", "track", "status", "order"].some(k => lower === k || lower.startsWith("cek ") || lower.startsWith("track "))) {
     // Check if they sent an order ID
-    const orderIdMatch = text.match(/ETX-\d{6}-\d{3}/i);
+    const orderIdMatch = text.match(/ETX-[A-Z0-9]+/i);
     if (orderIdMatch) {
       return sendOrderStatus(from, orderIdMatch[0].toUpperCase(), settings);
     }
-    return sendTextMessage(from, "Silakan kirim Order ID kamu (contoh: *ETX-260101-001*) untuk cek status order.", settings);
+    return sendTextMessage(from, "Silakan kirim Order ID kamu (contoh: *ETX-MNX6ABC123*) untuk cek status order.", settings);
   }
 
   // Direct order ID check
-  if (/^ETX-\d{6}-\d{3}$/i.test(lower.replace(/\s/g, ""))) {
+  if (/^ETX-[A-Z0-9]+$/i.test(lower.replace(/\s/g, ""))) {
     return sendOrderStatus(from, text.trim().toUpperCase(), settings);
   }
 
@@ -181,7 +181,7 @@ Silakan pilih menu:
 4️⃣ *Tulis Review*
 5️⃣ *Info Promo*
 
-Atau kirim *Order ID* langsung (contoh: ETX-260101-001) untuk cek status.
+Atau kirim *Order ID* langsung (contoh: ETX-MNX6ABC123) untuk cek status.
 
 🌐 Website: ${SITE_URL}`;
 

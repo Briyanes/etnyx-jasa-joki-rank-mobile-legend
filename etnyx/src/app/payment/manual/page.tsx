@@ -376,9 +376,9 @@ function ManualPaymentContent() {
           </div>
         </div>
 
-        {/* Activate WA Notifications */}
+        {/* Cek Status via WA Bot */}
         <a
-          href={`https://wa.me/${WHATSAPP_BOT_NUMBER}?text=${encodeURIComponent(`Aktifkan notifikasi order ${order.order_id}`)}`}
+          href={`https://wa.me/${WHATSAPP_BOT_NUMBER}?text=${encodeURIComponent(order.order_id)}`}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-3 bg-green-500/10 border border-green-500/20 rounded-xl px-4 py-3 hover:bg-green-500/15 transition-colors group"
@@ -388,12 +388,12 @@ function ManualPaymentContent() {
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-green-400 font-semibold text-sm">
-              {locale === "id" ? "Aktifkan Notifikasi WhatsApp" : "Activate WhatsApp Notifications"}
+              {locale === "id" ? "Cek Status via WhatsApp" : "Check Status via WhatsApp"}
             </p>
             <p className="text-text-muted text-[11px] leading-tight mt-0.5">
               {locale === "id"
-                ? "Klik untuk mengaktifkan notifikasi otomatis. Link dalam pesan akan bisa diklik."
-                : "Tap to enable auto notifications. Links in messages will be clickable."}
+                ? "Chat bot kami untuk cek status order & terima notifikasi otomatis."
+                : "Chat our bot to check order status & receive auto notifications."}
             </p>
           </div>
           <svg className="w-4 h-4 text-green-400/60 flex-shrink-0 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>

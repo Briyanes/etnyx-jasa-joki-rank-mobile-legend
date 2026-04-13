@@ -55,7 +55,6 @@ interface SiteInfo { siteName: string; taglineId: string; taglineEn: string; sup
 interface IntegrationSettings {
   ipaymuApiKey: string; ipaymuVa: string; ipaymuIsProduction: boolean;
   resendApiKey: string; resendFromEmail: string;
-  fonnteApiToken: string; fonnteDeviceId: string; // kept for backward compat, unused
   metaWaPhoneNumberId: string; metaWaAccessToken: string; metaWaVerifyToken: string; metaWaEnabled: boolean;
   telegramBotToken: string; telegramAdminGroupId: string; telegramWorkerGroupId: string; telegramReviewGroupId: string; telegramReportGroupId: string;
 }
@@ -101,7 +100,6 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
   const [integrations, setIntegrations] = useState<IntegrationSettings>({
     ipaymuApiKey: "", ipaymuVa: "", ipaymuIsProduction: false,
     resendApiKey: "", resendFromEmail: "noreply@etnyx.com",
-    fonnteApiToken: "", fonnteDeviceId: "",
     metaWaPhoneNumberId: "", metaWaAccessToken: "", metaWaVerifyToken: "", metaWaEnabled: false,
     telegramBotToken: "", telegramAdminGroupId: "", telegramWorkerGroupId: "", telegramReviewGroupId: "", telegramReportGroupId: "",
   });

@@ -71,8 +71,8 @@ async function checkNotifications(): Promise<Record<string, ServiceStatus>> {
       results.email = { status: "error", error: "Not configured" };
     }
 
-    // Check Fonnte (WhatsApp)
-    if (settings.fonnteApiToken) {
+    // Check Meta WhatsApp
+    if (settings.metaWaEnabled && settings.metaWaAccessToken) {
       results.whatsapp = { status: "ok" };
     } else {
       results.whatsapp = { status: "error", error: "Not configured" };
