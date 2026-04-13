@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
           type: "button",
           sub_type: "url",
           index: String(i),
-          parameters: [{ type: "text", text: i === buttonCount - 1 ? "Halo min, saya mau tanya soal order ETX-TEST123" : "ETX-TEST123" }],
+          parameters: [{ type: "text", text: i === buttonCount - 1 ? encodeURIComponent("Halo min, saya mau tanya soal order ETX-TEST123") : "ETX-TEST123" }],
         }));
 
         messagePayload = {

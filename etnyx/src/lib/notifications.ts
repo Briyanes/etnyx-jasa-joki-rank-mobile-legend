@@ -610,7 +610,7 @@ _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
       type: "button",
       sub_type: "url",
       index: "1",
-      parameters: [{ type: "text", text: `Halo min, saya mau tanya soal order ${order.order_id}` }],
+      parameters: [{ type: "text", text: encodeURIComponent(`Halo min, saya mau tanya soal order ${order.order_id}`) }],
     },
   ];
 
@@ -695,7 +695,7 @@ _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
       type: "button",
       sub_type: "url",
       index: "1",
-      parameters: [{ type: "text", text: `Halo min, saya mau tanya soal order ${order.order_id}` }],
+      parameters: [{ type: "text", text: encodeURIComponent(`Halo min, saya mau tanya soal order ${order.order_id}`) }],
     },
   ];
 
@@ -744,7 +744,7 @@ _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
       type: "button",
       sub_type: "url",
       index: "1",
-      parameters: [{ type: "text", text: `Halo min, saya mau tanya soal order ${order.order_id}` }],
+      parameters: [{ type: "text", text: encodeURIComponent(`Halo min, saya mau tanya soal order ${order.order_id}`) }],
     },
   ];
 
@@ -807,7 +807,7 @@ _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
       type: "button",
       sub_type: "url",
       index: "2",
-      parameters: [{ type: "text", text: `Halo min, saya mau tanya soal order ${order.order_id}` }],
+      parameters: [{ type: "text", text: encodeURIComponent(`Halo min, saya mau tanya soal order ${order.order_id}`) }],
     },
   ];
 
@@ -844,7 +844,7 @@ _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
       type: "button",
       sub_type: "url",
       index: "0",
-      parameters: [{ type: "text", text: `Halo min, order ${order.order_id} dibatalkan. Saya mau tanya.` }],
+      parameters: [{ type: "text", text: encodeURIComponent(`Halo min, order ${order.order_id} dibatalkan. Saya mau tanya.`) }],
     },
   ];
 
