@@ -692,7 +692,7 @@ _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
   return sendBusinessWA(
     order.whatsapp,
     "order_confirmation",
-    [order.order_id, formatRank(order.target_rank, order.target_star), order.package, formatRupiah(order.price), paymentLink],
+    [order.order_id, formatRank(order.target_rank, order.target_star), order.package, formatRupiah(order.price)],
     message,
     paymentLink,
     templateButtons
