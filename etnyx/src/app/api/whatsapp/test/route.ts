@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
   if (orderId) {
     const { data: order, error: orderError } = await supabase
       .from("orders")
-      .select("order_id, username, current_rank, target_rank, current_star, target_star, package, package_title, total_price, whatsapp, email, status")
+      .select("order_id, username, current_rank, target_rank, current_star, target_star, package, package_title, total_price, whatsapp, customer_email, status")
       .eq("order_id", orderId)
       .single();
 
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
       package_title: order.package_title,
       price: order.total_price,
       whatsapp: order.whatsapp,
-      email: order.email,
+      email: order.customer_email,
       status: order.status,
     });
 
