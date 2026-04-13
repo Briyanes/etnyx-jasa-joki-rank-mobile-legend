@@ -7,7 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { formatRupiah } from "@/utils/helpers";
-import { WHATSAPP_BOT_NUMBER } from "@/lib/constants";
+import { WHATSAPP_NUMBER } from "@/lib/constants";
 import {
   Copy,
   Check,
@@ -293,6 +293,8 @@ function ManualPaymentContent() {
 
   // Upload success
   if (uploaded) {
+    const csMessage = encodeURIComponent(`Halo min, saya sudah transfer & upload bukti untuk order *${order.order_id}*. Mohon dicek ya, terima kasih!`);
+    const csLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${csMessage}`;
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="bg-surface rounded-3xl p-8 max-w-md w-full text-center border border-white/5">
@@ -305,9 +307,18 @@ function ManualPaymentContent() {
             <p className="text-text-muted text-xs">Order ID</p>
             <p className="font-mono text-accent font-bold text-lg">{order.order_id}</p>
           </div>
+          <a
+            href={csLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 px-6 py-3.5 rounded-xl text-white font-semibold transition-colors"
+          >
+            <MessageCircle className="w-5 h-5" />
+            {locale === "id" ? "Konfirmasi ke CS via WhatsApp" : "Confirm to CS via WhatsApp"}
+          </a>
           <Link
             href={`/track?order_id=${order.order_id}`}
-            className="block w-full gradient-primary px-6 py-3.5 rounded-xl text-white font-semibold hover:opacity-90 transition-opacity"
+            className="block w-full mt-3 px-6 py-3 rounded-xl text-text-muted text-sm hover:text-text border border-white/10 hover:border-white/20 transition-colors"
           >
             {t.trackOrder}
           </Link>
@@ -375,29 +386,6 @@ function ManualPaymentContent() {
             <p className="gradient-text text-3xl font-bold tracking-tight">{formatRupiah(order.total_price)}</p>
           </div>
         </div>
-
-        {/* Cek Status via WA Bot */}
-        <a
-          href={`https://wa.me/${WHATSAPP_BOT_NUMBER}?text=${encodeURIComponent(order.order_id)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-3 bg-green-500/10 border border-green-500/20 rounded-xl px-4 py-3 hover:bg-green-500/15 transition-colors group"
-        >
-          <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
-            <MessageCircle className="w-5 h-5 text-green-400" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-green-400 font-semibold text-sm">
-              {locale === "id" ? "Cek Status via WhatsApp" : "Check Status via WhatsApp"}
-            </p>
-            <p className="text-text-muted text-[11px] leading-tight mt-0.5">
-              {locale === "id"
-                ? "Chat bot kami untuk cek status order & terima notifikasi otomatis."
-                : "Chat our bot to check order status & receive auto notifications."}
-            </p>
-          </div>
-          <svg className="w-4 h-4 text-green-400/60 flex-shrink-0 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
-        </a>
 
         {/* Steps */}
         <div className="flex items-center justify-between text-xs text-text-muted bg-surface rounded-xl border border-white/5 p-3">
