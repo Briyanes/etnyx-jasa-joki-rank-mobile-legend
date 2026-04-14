@@ -842,7 +842,7 @@ export default function LeadDashboard() {
                         )}
 
                         {/* Submit Hasil (lead inputs on behalf of worker) */}
-                        {order.assigned_worker_id && order.status === "in_progress" && (
+                        {order.assigned_worker_id && ["in_progress", "completed"].includes(order.status) && (
                           <button
                             onClick={() => setSubmittingOrder(submittingOrder === order.id ? null : order.id)}
                             className="flex items-center gap-1 px-3 py-1.5 bg-accent/10 text-accent rounded-lg text-xs hover:bg-accent/20 transition-colors"
