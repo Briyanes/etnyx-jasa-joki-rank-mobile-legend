@@ -602,7 +602,7 @@ function OverviewTab({ overview: o, trends, daily }: { overview: FinanceOverview
               <BarChartR data={daily}>
                 <XAxis dataKey="day" tick={{ fontSize: 10, fill: "#888" }} />
                 <YAxis tick={{ fontSize: 10, fill: "#888" }} tickFormatter={(v: number) => `${(v / 1000000).toFixed(1)}jt`} />
-                <Tooltip formatter={(v: number) => formatRupiah(v)} labelFormatter={(l: string) => `Tanggal ${l}`} contentStyle={{ background: "#1a1a2e", border: "1px solid #333", borderRadius: 8, fontSize: 11 }} />
+                <Tooltip formatter={(v) => formatRupiah(Number(v))} labelFormatter={(l) => `Tanggal ${l}`} contentStyle={{ background: "#1a1a2e", border: "1px solid #333", borderRadius: 8, fontSize: 11 }} />
                 <BarR dataKey="revenue" fill="#f59e0b" radius={[2, 2, 0, 0]} name="Revenue" />
               </BarChartR>
             </ResponsiveContainer>
@@ -619,7 +619,7 @@ function OverviewTab({ overview: o, trends, daily }: { overview: FinanceOverview
               <LineChart data={trends}>
                 <XAxis dataKey="label" tick={{ fontSize: 10, fill: "#888" }} />
                 <YAxis tick={{ fontSize: 10, fill: "#888" }} tickFormatter={(v: number) => `${(v / 1000000).toFixed(0)}jt`} />
-                <Tooltip formatter={(v: number) => formatRupiah(v)} contentStyle={{ background: "#1a1a2e", border: "1px solid #333", borderRadius: 8, fontSize: 11 }} />
+                <Tooltip formatter={(v) => formatRupiah(Number(v))} contentStyle={{ background: "#1a1a2e", border: "1px solid #333", borderRadius: 8, fontSize: 11 }} />
                 <Legend wrapperStyle={{ fontSize: 10 }} />
                 <Line type="monotone" dataKey="revenue" stroke="#f59e0b" name="Revenue" strokeWidth={2} dot={{ r: 3 }} />
                 <Line type="monotone" dataKey="grossProfit" stroke="#22c55e" name="Gross Profit" strokeWidth={2} dot={{ r: 3 }} />
@@ -755,7 +755,7 @@ function PnLTab({ overview: o, trends }: { overview: FinanceOverview; trends: Tr
               <BarChartR data={trends}>
                 <XAxis dataKey="label" tick={{ fontSize: 10, fill: "#888" }} />
                 <YAxis tick={{ fontSize: 10, fill: "#888" }} tickFormatter={(v: number) => `${(v / 1000000).toFixed(0)}jt`} />
-                <Tooltip formatter={(v: number) => formatRupiah(v)} contentStyle={{ background: "#1a1a2e", border: "1px solid #333", borderRadius: 8, fontSize: 11 }} />
+                <Tooltip formatter={(v) => formatRupiah(Number(v))} contentStyle={{ background: "#1a1a2e", border: "1px solid #333", borderRadius: 8, fontSize: 11 }} />
                 <Legend wrapperStyle={{ fontSize: 10 }} />
                 <BarR dataKey="revenue" fill="#f59e0b" name="Revenue" radius={[2, 2, 0, 0]} />
                 <BarR dataKey="commission" fill="#ef4444" name="COGS" radius={[2, 2, 0, 0]} />
@@ -1164,7 +1164,7 @@ function PlanningTab({ overview: o, trends }: { overview: FinanceOverview; trend
               <LineChart data={projections}>
                 <XAxis dataKey="month" tick={{ fontSize: 10, fill: "#888" }} label={{ value: "Bulan", fontSize: 10, fill: "#888" }} />
                 <YAxis tick={{ fontSize: 10, fill: "#888" }} tickFormatter={(v: number) => `${(v / 1000000).toFixed(0)}jt`} />
-                <Tooltip formatter={(v: number) => formatRupiah(v)} contentStyle={{ background: "#1a1a2e", border: "1px solid #333", borderRadius: 8, fontSize: 11 }} />
+                <Tooltip formatter={(v) => formatRupiah(Number(v))} contentStyle={{ background: "#1a1a2e", border: "1px solid #333", borderRadius: 8, fontSize: 11 }} />
                 <Legend wrapperStyle={{ fontSize: 10 }} />
                 <Line type="monotone" dataKey="revenue" stroke="#f59e0b" name="Revenue" strokeWidth={2} />
                 <Line type="monotone" dataKey="netProfit" stroke="#22c55e" name="Net Profit" strokeWidth={2} />
