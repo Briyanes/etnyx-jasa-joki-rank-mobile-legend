@@ -16,8 +16,8 @@ Platform jasa joki Mobile Legends profesional dengan sistem pembayaran ganda, ma
 
 ### 👥 Manajemen Tim (RBAC)
 - **Admin** - Full access, kelola semua
-- **Lead** - Kelola worker tim sendiri, assign order, bulk assign, view submissions (mobile responsive)
-- **Worker** - Submit progress, upload screenshot, edit/delete submission (30 menit), update rank progress (mobile responsive)
+- **Lead** - Kelola worker tim sendiri, assign order, bulk assign, submit hasil (mobile responsive)
+- **Worker** - Lihat credentials, update progress, catatan, selesaikan order (mobile responsive)
 
 ### 💰 Reward & Loyalty
 - **Tier System** - Bronze → Silver → Gold → Platinum
@@ -202,7 +202,95 @@ Dashboard → Orders → Klik "Lihat Bukti Transfer"
 
 ---
 
-## 📡 API Routes
+## � Order Flow & PIC (Person In Charge)
+
+### Alur Order Lengkap
+
+```
+Customer Order → Admin Approve Payment → Lead Assign Worker → Worker Push Rank → Lead Upload Hasil → Selesai
+```
+
+| Step | Status | PIC | Aksi |
+|------|--------|-----|------|
+| 1 | `pending` | **Customer** | Submit order + pilih payment method |
+| 2 | `pending` → `paid` | **Customer** | Upload bukti transfer (manual) / bayar via Midtrans |
+| 3 | `paid` → `confirmed` | **Admin** | Review bukti transfer → approve/reject |
+| 4 | `confirmed` → `in_progress` | **Lead** | Assign worker ke order (bisa bulk assign) |
+| 5 | `in_progress` | **Worker** | Terima credentials → push rank di game |
+| 6 | `in_progress` | **Worker** | Update progress (screenshot, catatan) |
+| 7 | `in_progress` → `completed` | **Worker** | Klik "Selesaikan Order" setelah rank tercapai |
+| 8 | `completed` | **Lead** | Upload hasil (screenshot before/after) via "Submit Hasil" |
+
+### Scope Per Role
+
+#### 👑 Admin (Full Access)
+| Fitur | Deskripsi |
+|-------|-----------|
+| Payment Approval | Approve/reject bukti transfer manual |
+| Order Management | Lihat semua order, ubah status, assign worker |
+| Staff Management | CRUD admin, lead, worker. Set lead_id untuk worker |
+| CMS Settings | Hero, banner, FAQ, pricing, payment methods, integrations |
+| Analytics | Revenue trend, order stats, package breakdown, customer growth |
+| Worker Leaderboard | Ranking worker berdasarkan score, winrate, rating |
+| Payroll | Komisi, gaji bulanan, payout batch |
+| Export | CSV/Excel export data |
+| Audit Log | Semua aksi tercatat |
+
+#### 🎯 Lead (Team Manager)
+| Fitur | Deskripsi |
+|-------|-----------|
+| View Orders | Lihat order `confirmed` + `in_progress` (unassigned & tim sendiri) |
+| Assign Worker | Assign worker dari tim sendiri ke order |
+| Bulk Assign | Assign beberapa order sekaligus (batch 5) |
+| Submit Hasil | Upload screenshot hasil untuk order `in_progress` & `completed` |
+| Worker Management | Lihat daftar worker dalam tim, status aktif/idle |
+| Shared Notes | Catatan per-order (tersimpan di `order_logs`) |
+| Pagination | 20 order per halaman |
+
+#### 🔧 Worker (Executor)
+| Fitur | Deskripsi |
+|-------|-----------|
+| View Assignment | Lihat order yang di-assign ke dirinya |
+| Credentials | Lihat akun game customer (dekripsi otomatis) |
+| Update Progress | Update persentase progress + screenshot |
+| Notes | Tambah catatan untuk lead |
+| Complete Order | Tandai order selesai (status → `completed`) |
+
+> **Catatan:** Worker TIDAK bisa submit hasil/screenshot hasil akhir. Hanya Lead yang mengupload hasil via dashboard Lead.
+
+### Notification Flow Per Status
+
+| Trigger | Channel | Penerima | Isi |
+|---------|---------|----------|-----|
+| Order dibuat (`pending`) | Telegram | Grup Admin | Info order baru + detail paket |
+| | WhatsApp | Customer | Konfirmasi order + link payment |
+| | Email | Customer | Order confirmation |
+| Payment uploaded | Telegram | Grup Admin | Bukti transfer perlu di-review |
+| Payment approved (`confirmed`) | Telegram | Grup Admin | Payment confirmed |
+| | WhatsApp | Customer | Pembayaran dikonfirmasi |
+| | Email | Customer | Payment confirmed |
+| Worker assigned (`in_progress`) | Telegram | Grup Worker | Order baru untuk dikerjakan |
+| | WhatsApp | Customer | Order sedang dikerjakan |
+| | Push | Worker | Push notification assignment |
+| Progress update | Telegram | Grup Worker | Update progress % |
+| Order selesai (`completed`) | Telegram | Grup Admin + Worker | Order selesai |
+| | WhatsApp | Customer | Order selesai + link review + link report |
+| | Email | Customer | Order completed |
+| Review submitted | Telegram | Grup Review | Review baru dari customer |
+
+### Telegram Bot Groups
+
+| Group | Kegunaan |
+|-------|----------|
+| Admin Group | Order baru, payment, status changes |
+| Worker Group | Assignment, progress, completion |
+| Review Group | Customer reviews |
+| Report Group | Customer reports/complaints |
+| Alert Group | System alerts, errors |
+
+---
+
+## �📡 API Routes
 
 ### Public
 | Method | Route | Deskripsi |
@@ -372,6 +460,11 @@ npm run build         # Production build
 
 | Hash | Deskripsi |
 |------|-----------|
+| `11ad7ef` | Fix: allow lead to submit hasil for completed orders too |
+| `08ced99` | Fix: remove worker submission, worker fokus push only |
+| `9a12808` | Fix: lead dashboard 5 improvements (unassigned count, assign confirmed, package_title, lead name, pagination) |
+| `0c7c14f` | Fix: 8 medium bugs (MIME upload, promo deps, bulk batch, sanitize, encryption, push UUID, referral) |
+| `de13b16` | Fix: 12 critical+high bugs (price bypass, credential leak, WA webhook, race conditions, TG auth, etc) |
 | `aa1e7ce` | Fix mobile responsive Lead & Worker dashboards |
 | `3d3cbd8` | Normalize Analytics tab theme to match dashboard |
 | `prev` | Fix delete button visibility for inactive staff |
