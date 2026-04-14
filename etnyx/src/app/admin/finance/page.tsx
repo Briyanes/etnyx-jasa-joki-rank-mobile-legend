@@ -106,7 +106,13 @@ const TABS: { id: TabType; label: string; icon: typeof DollarSign }[] = [
 // ============================================================
 //  COA (Chart of Accounts)
 // ============================================================
-const COA_DATA = [
+interface COAAccount {
+  code: string;
+  name: string;
+  children?: COAAccount[];
+}
+
+const COA_DATA: COAAccount[] = [
   { code: "1000", name: "ASET", children: [
     { code: "1100", name: "Kas & Bank", children: [
       { code: "1101", name: "Kas Tunai (Petty Cash)" },
