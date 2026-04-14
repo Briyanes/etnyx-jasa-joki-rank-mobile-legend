@@ -172,9 +172,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate ranks (accept both mythicglory and mythical_glory)
-    const normalizeRank = (r: string) =>
-      r === "mythicglory" ? "mythical_glory" : r;
+    // Normalize rank aliases to canonical form
+    const normalizeRank = (r: string) => {
+      const s = r.toLowerCase();
+      // Per-star short IDs → full rank names
+      if (s === "grading") return "mythicgrading";
+      if (s === "honor") return "mythichonor";
+      if (s === "glory") return "mythicglory";
+      if (s === "immortal") return "mythicimmortal";
+      if (s === "mythical_glory") return "mythicglory";
+      return s;
+    };
     const normCurrent = normalizeRank(currentRank);
     const normTarget = normalizeRank(targetRank);
 
@@ -187,9 +195,9 @@ export async function POST(request: NextRequest) {
 
     // Validate rank hierarchy: target must be higher than current
     const RANK_ORDER = ["warrior","elite","master","grandmaster","epic","legend","mythicgrading","mythic","mythichonor","mythicglory","mythicimmortal"];
-    const currentIdx = RANK_ORDER.indexOf(currentRank.toLowerCase());
-    const targetIdx = RANK_ORDER.indexOf(targetRank.toLowerCase());
-    if (currentIdx >= 0 && targetIdx >= 0 && currentIdx >= targetIdx && currentRank !== targetRank) {
+    const currentIdx = RANK_ORDER.indexOf(normCurrent);
+    const targetIdx = RANK_ORDER.indexOf(normTarget);
+    if (currentIdx >= 0 && targetIdx >= 0 && currentIdx >= targetIdx && normCurrent !== normTarget) {
       return NextResponse.json(
         { error: "Target rank harus lebih tinggi dari rank saat ini" },
         { status: 400 }
@@ -415,8 +423,8 @@ export async function POST(request: NextRequest) {
         username: sanitizedNickname,
         game_id: sanitizedUserId || "",
         whatsapp: `+62${cleanWhatsapp}`,
-        current_rank: currentRank,
-        target_rank: targetRank,
+        current_rank: normCurrent,
+        target_rank: normTarget,
         current_star: body.currentStar ?? null,
         target_star: body.targetStar ?? null,
         package: packageName,
@@ -632,8 +640,8 @@ export async function POST(request: NextRequest) {
         sendOrderConfirmationWA({
           order_id: order.order_id,
           username: sanitizedNickname,
-          current_rank: currentRank,
-          target_rank: targetRank,
+          current_rank: normCurrent,
+          target_rank: normTarget,
           current_star: body.currentStar ?? null,
           target_star: body.targetStar ?? null,
           package: packageName,
@@ -647,8 +655,8 @@ export async function POST(request: NextRequest) {
         notifyAdminNewOrder({
           order_id: order.order_id,
           username: sanitizedNickname,
-          current_rank: currentRank,
-          target_rank: targetRank,
+          current_rank: normCurrent,
+          target_rank: normTarget,
           current_star: body.currentStar ?? null,
           target_star: body.targetStar ?? null,
           package: packageName,

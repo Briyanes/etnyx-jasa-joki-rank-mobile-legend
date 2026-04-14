@@ -32,6 +32,8 @@ const VALID_RANKS = [
   "legend", "mythicgrading", "mythic", "mythichonor", "mythicglory", "mythicimmortal",
   // Aliases accepted from frontend
   "mythical_glory",
+  // Per-star short IDs (used in perstar/gendong order mode)
+  "grading", "honor", "glory", "immortal",
 ] as const;
 
 export function isValidRank(rank: string): boolean {
