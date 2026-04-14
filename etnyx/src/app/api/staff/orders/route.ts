@@ -238,9 +238,11 @@ export async function PUT(request: NextRequest) {
   }
 
   const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  let currentStatus: string | undefined;
   if (newStatus) {
     // Validate status transitions
     const { data: currentOrder } = await supabase.from("orders").select("status").eq("id", orderId).single();
+    currentStatus = currentOrder?.status;
     if (currentOrder && newStatus !== currentOrder.status) {
       const validTransitions: Record<string, string[]> = {
         pending: ["confirmed", "cancelled"],
@@ -275,7 +277,18 @@ export async function PUT(request: NextRequest) {
     }
   }
 
-  await supabase.from("orders").update(updates).eq("id", orderId);
+  // Atomic guard: only update if status hasn't changed since we read it
+  const updateQuery = supabase.from("orders").update(updates).eq("id", orderId);
+  if (currentStatus) {
+    updateQuery.eq("status", currentStatus);
+  }
+  const { data: updatedOrder, error: updateError } = await updateQuery.select("id").maybeSingle();
+  if (updateError) {
+    return NextResponse.json({ error: "Gagal update order" }, { status: 500 });
+  }
+  if (!updatedOrder) {
+    return NextResponse.json({ error: "Order sudah diubah oleh user lain. Silakan refresh." }, { status: 409 });
+  }
 
   // Update assignment status
   if (newStatus === "in_progress" && user.role === "worker") {

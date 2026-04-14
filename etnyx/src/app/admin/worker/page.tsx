@@ -361,7 +361,7 @@ export default function WorkerDashboard() {
                   newNote={newNote}
                   setNewNote={setNewNote}
                   noteSending={noteSending}
-                  onToggleNotes={() => { setNotesOrder(notesOrder === order.id ? null : order.id); if (notesOrder !== order.id) fetchNotes(order.id); }}
+                  onToggleNotes={() => { if (notesOrder === order.id) { setNotesOrder(null); } else { setNotesOrder(order.id); setNewNote(""); setNotes([]); fetchNotes(order.id); } }}
                   onAddNote={() => handleAddNote(order.id)}
                 />
               ))}

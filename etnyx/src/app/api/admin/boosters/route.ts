@@ -35,14 +35,21 @@ export async function POST(request: NextRequest) {
     }
 
     const sanitizedBody = {
-      ...body,
       name: sanitizeInput(body.name),
       specialization: body.specialization ? sanitizeInput(body.specialization) : undefined,
+      is_active: body.is_active !== undefined ? !!body.is_active : true,
+      avatar_url: body.avatar_url || undefined,
+      total_orders: typeof body.total_orders === "number" ? body.total_orders : undefined,
+      total_stars: typeof body.total_stars === "number" ? body.total_stars : undefined,
+      win_rate: typeof body.win_rate === "number" ? body.win_rate : undefined,
     };
+
+    // Remove undefined values
+    const insertData = Object.fromEntries(Object.entries(sanitizedBody).filter(([, v]) => v !== undefined));
 
     const { data, error } = await supabase
       .from("boosters")
-      .insert([sanitizedBody])
+      .insert([insertData])
       .select()
       .single();
 

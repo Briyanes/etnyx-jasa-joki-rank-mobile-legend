@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import { sendTelegramMessage } from "@/lib/notifications";
+import crypto from "crypto";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.com";
 const WA_CS = "6281515141540";
@@ -61,7 +62,20 @@ export async function GET(request: NextRequest) {
 // ============ POST: Incoming Messages ============
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    // Verify webhook signature from Meta
+    const appSecret = process.env.WHATSAPP_APP_SECRET;
+    const signature = request.headers.get("x-hub-signature-256");
+    const rawBody = await request.text();
+
+    if (appSecret && signature) {
+      const expectedSig = "sha256=" + crypto.createHmac("sha256", appSecret).update(rawBody).digest("hex");
+      if (signature !== expectedSig) {
+        console.warn("WA webhook signature mismatch");
+        return NextResponse.json({ status: "ok" }, { status: 403 });
+      }
+    }
+
+    const body = JSON.parse(rawBody);
 
     // Meta sends various webhook events — only process messages
     const entry = body?.entry?.[0];

@@ -248,14 +248,22 @@ export async function PATCH(request: Request) {
     }
     updates.updated_at = new Date().toISOString();
 
-    const { data, error } = await supabase
+    const updateQuery = supabase
       .from("orders")
       .update(updates)
-      .eq("id", id)
-      .select()
-      .single();
+      .eq("id", id);
+
+    // Atomic guard: only update if status hasn't changed since we read it
+    if (previousStatus) {
+      updateQuery.eq("status", previousStatus);
+    }
+
+    const { data, error } = await updateQuery.select().single();
 
     if (error) throw error;
+    if (!data) {
+      return NextResponse.json({ error: "Order sudah diubah oleh admin lain. Silakan refresh." }, { status: 409 });
+    }
 
     logAdminAction({
       admin_email: auth.user!.email,

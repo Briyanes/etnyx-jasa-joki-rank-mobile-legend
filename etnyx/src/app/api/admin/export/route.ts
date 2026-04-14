@@ -152,7 +152,11 @@ export async function GET(request: NextRequest) {
             const value = row[header];
             // Handle values with commas or quotes
             if (value === null || value === undefined) return "";
-            const str = String(value);
+            let str = String(value);
+            // CSV formula injection protection
+            if (/^[=+\-@|\t]/.test(str)) {
+              str = "'" + str;
+            }
             if (str.includes(",") || str.includes('"') || str.includes("\n")) {
               return `"${str.replace(/"/g, '""')}"`;
             }

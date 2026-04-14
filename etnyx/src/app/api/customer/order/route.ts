@@ -216,16 +216,20 @@ export async function POST(request: NextRequest) {
 
     // Server-side price verification: recalculate from order params
     const serverBasePrice = calculateServerPrice(body);
-    if (serverBasePrice !== null) {
-      // Allow 1% tolerance for rounding, but reject large manipulations
-      const tolerance = Math.max(serverBasePrice * 0.01, 100);
-      if (Math.abs(totalPrice - serverBasePrice) > tolerance) {
-        console.warn(`Price mismatch: client=${totalPrice}, server=${serverBasePrice}, order=${body.orderType}/${body.packageId || body.perStarRankId}`);
-        return NextResponse.json(
-          { error: "Harga tidak sesuai. Silakan refresh halaman dan coba lagi." },
-          { status: 400 }
-        );
-      }
+    if (serverBasePrice === null) {
+      return NextResponse.json(
+        { error: "Paket/tipe order tidak valid. Silakan refresh halaman dan coba lagi." },
+        { status: 400 }
+      );
+    }
+    // Allow 1% tolerance for rounding, but reject large manipulations
+    const tolerance = Math.max(serverBasePrice * 0.01, 100);
+    if (Math.abs(totalPrice - serverBasePrice) > tolerance) {
+      console.warn(`Price mismatch: client=${totalPrice}, server=${serverBasePrice}, order=${body.orderType}/${body.packageId || body.perStarRankId}`);
+      return NextResponse.json(
+        { error: "Harga tidak sesuai. Silakan refresh halaman dan coba lagi." },
+        { status: 400 }
+      );
     }
 
     // Sanitize inputs

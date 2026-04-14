@@ -1314,7 +1314,7 @@ function OrderPageContent() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [form, selectedPackage, canSubmit, promoApplied, promoDiscount, finalPrice, paymentMethod]);
+  }, [form, selectedPackage, canSubmit, promoApplied, promoDiscount, finalPrice, paymentMethod, orderMode, selectedStarRank, starQuantity, selectedGendongRank, gendongQuantity, gendongRoles, scheduleOptions, tierDiscountAmount, currentStar, targetStar]);
 
   // === REDIRECTING TO PAYMENT / FALLBACK SUCCESS ===
   if (orderResult) {

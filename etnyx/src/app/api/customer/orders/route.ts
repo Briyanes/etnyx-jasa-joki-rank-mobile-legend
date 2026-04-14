@@ -38,7 +38,7 @@ export async function GET() {
     // Get orders linked to customer_id or matching whatsapp
     let ordersQuery = supabase
       .from("orders")
-      .select("*")
+      .select("id, order_id, username, game_id, current_rank, target_rank, current_star, target_star, package, package_title, total_price, base_price, promo_code, promo_discount, status, progress, current_progress_rank, is_express, is_premium, payment_method, payment_status, hero_request, login_method, created_at, updated_at, completed_at")
       .order("created_at", { ascending: false });
 
     if (customer.whatsapp) {

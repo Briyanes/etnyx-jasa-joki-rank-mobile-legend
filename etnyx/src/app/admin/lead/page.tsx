@@ -264,15 +264,17 @@ export default function LeadDashboard() {
     if (!loading) fetchOrders();
   }, [statusFilter, debouncedSearch, loading, fetchOrders]);
 
-  // Auto-refresh polling every 30 seconds
+  // Auto-refresh polling every 30 seconds (pause when forms are open)
   useEffect(() => {
     if (loading) return;
     const interval = setInterval(() => {
+      // Skip refresh when user has active forms/panels open
+      if (assigningOrder || submittingOrder || editingSubmission || bulkAssigning) return;
       fetchOrders();
       fetchWorkers();
     }, 30000);
     return () => clearInterval(interval);
-  }, [loading, fetchOrders, fetchWorkers]);
+  }, [loading, fetchOrders, fetchWorkers, assigningOrder, submittingOrder, editingSubmission, bulkAssigning]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -806,7 +808,7 @@ export default function LeadDashboard() {
 
                         {/* Notes */}
                         <button
-                          onClick={() => { setNotesOrder(notesOrder === order.id ? null : order.id); if (notesOrder !== order.id) fetchNotes(order.id); }}
+                          onClick={() => { if (notesOrder === order.id) { setNotesOrder(null); } else { setNotesOrder(order.id); setNewNote(""); setNotes([]); fetchNotes(order.id); } }}
                           className="flex items-center gap-1 px-3 py-1.5 bg-blue-500/10 text-blue-400 rounded-lg text-xs hover:bg-blue-500/20 transition-colors"
                         >
                           <MessageSquare className="w-3.5 h-3.5" /> Catatan

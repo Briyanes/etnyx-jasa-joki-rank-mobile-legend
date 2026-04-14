@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
       .from("order_assignments")
       .select("staff_users(name)")
       .eq("order_id", order.id)
-      .eq("status", "active")
+      .in("status", ["assigned", "in_progress"])
       .single();
 
     const workerName = assignment?.staff_users

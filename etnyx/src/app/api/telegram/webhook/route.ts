@@ -1132,13 +1132,20 @@ export async function POST(request: Request) {
   }
 }
 
-// GET: Register webhook (one-time call)
+// GET: Register webhook (one-time call, admin only)
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const action = searchParams.get("action");
 
   if (action !== "register") {
     return NextResponse.json({ error: "Use ?action=register to set up webhook" });
+  }
+
+  // Verify admin auth
+  const { verifyAdmin } = await import("@/lib/admin-auth");
+  const auth = await verifyAdmin();
+  if (!auth.authenticated) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const settings = await getSettings();
