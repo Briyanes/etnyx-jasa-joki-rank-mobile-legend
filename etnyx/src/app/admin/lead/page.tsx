@@ -54,6 +54,8 @@ interface Worker {
   phone: string | null;
   is_active: boolean;
   last_login_at: string | null;
+  lead_id: string | null;
+  role: string;
 }
 
 interface StaffUser {
@@ -170,6 +172,10 @@ export default function LeadDashboard() {
   const [editLoading, setEditLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
 
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 20;
+
   const fetchCredentials = async (orderId: string) => {
     if (credentials[orderId]) { setShowCredentials(orderId); return; }
     setLoadingCreds(true);
@@ -206,6 +212,7 @@ export default function LeadDashboard() {
     if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
     searchTimerRef.current = setTimeout(() => {
       setDebouncedSearch(searchQuery);
+      setCurrentPage(1);
     }, 400);
     return () => { if (searchTimerRef.current) clearTimeout(searchTimerRef.current); };
   }, [searchQuery]);
@@ -490,7 +497,7 @@ export default function LeadDashboard() {
   const formatDate = (d: string) => new Date(d).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
   // Stats
-  const unassigned = orders.filter(o => !o.assigned_worker_id && o.status === "in_progress");
+  const unassigned = orders.filter(o => !o.assigned_worker_id && ["confirmed", "in_progress"].includes(o.status));
   const inProgress = orders.filter(o => o.status === "in_progress");
   const completed = orders.filter(o => o.status === "completed");
 
@@ -572,7 +579,7 @@ export default function LeadDashboard() {
                     <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center mx-auto mb-2">
                       <span className="text-accent font-bold text-sm">{w.name.charAt(0).toUpperCase()}</span>
                     </div>
-                    <p className="text-text text-sm font-medium truncate">{w.name}</p>
+                    <p className="text-text text-sm font-medium truncate">{w.name}{currentUser ? ` | ${currentUser.name}` : ""}</p>
                     <p className="text-text-muted text-[10px] mt-1">{workerActive} aktif · {workerCompleted} selesai</p>
                     {w.last_login_at && (
                       <p className="text-text-muted text-[10px]">Login: {new Date(w.last_login_at).toLocaleDateString("id-ID", { day: "2-digit", month: "short" })}</p>
@@ -634,7 +641,7 @@ export default function LeadDashboard() {
               <h2 className="text-text font-semibold flex items-center gap-2"><Package className="w-4 h-4 text-accent" /> Daftar Order</h2>
               <div className="flex items-center gap-2">
                 <Filter className="w-4 h-4 text-text-muted" />
-                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
+                <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1); }}
                   className="bg-background border border-white/10 rounded-lg px-3 py-1.5 text-text text-sm focus:border-accent focus:outline-none">
                   <option value="all">Semua Status</option>
                   <option value="pending">Pending</option>
@@ -662,12 +669,16 @@ export default function LeadDashboard() {
             {orders.length === 0 && (
               <div className="p-8 text-center text-text-muted">Tidak ada order</div>
             )}
-            {orders.map(order => {
+            {(() => {
+              const totalPages = Math.ceil(orders.length / ITEMS_PER_PAGE);
+              const paginatedOrders = orders.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+              return (<>
+            {paginatedOrders.map(order => {
               const sc = STATUS_CONFIG[order.status] || STATUS_CONFIG.pending;
               const isExpanded = expandedOrder === order.id;
               const isAssigning = assigningOrder === order.id;
               const assignedWorker = order.order_assignments?.[0]?.staff_users;
-              const canSelect = !order.assigned_worker_id && order.status !== "cancelled" && order.status !== "completed";
+              const canSelect = !order.assigned_worker_id && ["confirmed", "in_progress"].includes(order.status);
 
               return (
                 <div key={order.id} className="p-4 hover:bg-white/[0.02] transition-colors">
@@ -742,7 +753,7 @@ export default function LeadDashboard() {
                         </div>
                         <div>
                           <span className="text-text-muted text-xs">Package</span>
-                          <p className="text-text capitalize">{order.package}</p>
+                          <p className="text-text capitalize">{order.package_title || order.package}</p>
                         </div>
                         <div>
                           <span className="text-text-muted text-xs">{order.package_title?.includes("Gendong") || order.package_title?.includes("Duo Boost") ? "Mode" : "Login Method"}</span>
@@ -877,8 +888,8 @@ export default function LeadDashboard() {
                         </div>
                       )}
 
-                      {/* Assign / Reassign — only for in_progress orders (admin must click "Mulai Kerjakan" first) */}
-                      {order.status === "in_progress" && ((!assignedWorker) || assignedWorker) && (
+                      {/* Assign / Reassign — for confirmed + in_progress orders */}
+                      {["confirmed", "in_progress"].includes(order.status) && (
                         <div>
                           {!isAssigning ? (
                             <button
@@ -1196,6 +1207,35 @@ export default function LeadDashboard() {
                 </div>
               );
             })}
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="p-4 flex items-center justify-between border-t border-white/5">
+                <span className="text-text-muted text-xs">{orders.length} order · Halaman {currentPage}/{totalPages}</span>
+                <div className="flex items-center gap-1">
+                  <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}
+                    className="p-1.5 rounded-lg text-text-muted hover:text-text hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter(p => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
+                    .map((p, idx, arr) => (
+                      <span key={p} className="contents">
+                        {idx > 0 && arr[idx - 1] !== p - 1 && <span className="text-text-muted text-xs px-1">…</span>}
+                        <button onClick={() => setCurrentPage(p)}
+                          className={`w-8 h-8 rounded-lg text-xs font-medium transition-colors ${p === currentPage ? "gradient-primary text-white" : "text-text-muted hover:text-text hover:bg-white/5"}`}>
+                          {p}
+                        </button>
+                      </span>
+                    ))}
+                  <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}
+                    className="p-1.5 rounded-lg text-text-muted hover:text-text hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+              </>);
+            })()}
           </div>
         </div>
       </main>
