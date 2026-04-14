@@ -5,8 +5,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
-  LogOut, RefreshCw, CheckCircle, Clock, Play,
-  Star, Trophy, Swords, Target, Timer, ChevronDown, ChevronUp,
+  LogOut, RefreshCw, CheckCircle, Clock, Play, ChevronDown, ChevronUp,
   TrendingUp, Package, Loader2, Key, MessageSquare, Send, Gamepad2,
 } from "lucide-react";
 
@@ -32,21 +31,6 @@ interface Order {
   whatsapp: string | null;
   hero_request: string | null;
   login_method: string | null;
-}
-
-interface Submission {
-  id: string;
-  order_id: string;
-  stars_gained: number;
-  mvp_count: number;
-  savage_count: number;
-  maniac_count: number;
-  matches_played: number;
-  win_count: number;
-  duration_minutes: number;
-  screenshots: string[];
-  notes: string | null;
-  submitted_at: string;
 }
 
 interface Credentials {
@@ -98,9 +82,6 @@ export default function WorkerDashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [showAllCompleted, setShowAllCompleted] = useState(false);
 
-  // Submissions (read-only)
-  const [submissions, setSubmissions] = useState<Record<string, Submission[]>>({});
-
   // Progress update
   const [updatingProgress, setUpdatingProgress] = useState<string | null>(null);
   const [progressValue, setProgressValue] = useState(0);
@@ -135,14 +116,6 @@ export default function WorkerDashboard() {
       const res = await fetch(`/api/staff/orders${params}`);
       const data = await res.json();
       setOrders(data.orders || []);
-    } catch (e) { console.error(e); }
-  }, []);
-
-  const fetchSubmissions = useCallback(async (orderId: string) => {
-    try {
-      const res = await fetch(`/api/staff/submissions?orderId=${orderId}`);
-      const data = await res.json();
-      setSubmissions(prev => ({ ...prev, [orderId]: data.submissions || [] }));
     } catch (e) { console.error(e); }
   }, []);
 
@@ -329,11 +302,8 @@ export default function WorkerDashboard() {
                   order={order}
                   expanded={expandedOrder === order.id}
                   onToggle={() => {
-                    const next = expandedOrder === order.id ? null : order.id;
-                    setExpandedOrder(next);
-                    if (next) fetchSubmissions(order.id);
+                    setExpandedOrder(expandedOrder === order.id ? null : order.id);
                   }}
-                  submissions={submissions[order.id] || []}
                   onComplete={() => handleCompleteOrder(order.id)}
                   updatingProgress={updatingProgress === order.id}
                   onToggleProgress={() => {
@@ -488,7 +458,6 @@ interface OrderCardProps {
   order: Order;
   expanded: boolean;
   onToggle: () => void;
-  submissions: Submission[];
   onComplete: () => void;
   updatingProgress: boolean;
   onToggleProgress: () => void;
@@ -515,7 +484,7 @@ interface OrderCardProps {
 }
 
 function OrderCard({
-  order, expanded, onToggle, submissions,
+  order, expanded, onToggle,
   onComplete,
   updatingProgress, onToggleProgress, progressValue, setProgressValue,
   progressRank, setProgressRank, onUpdateProgress,
@@ -556,7 +525,7 @@ function OrderCard({
           {/* Order Details */}
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div><span className="text-text-muted text-xs">Game ID</span><p className="text-text">{order.game_id}</p></div>
-            <div><span className="text-text-muted text-xs">Package</span><p className="text-text capitalize">{order.package}</p></div>
+            <div><span className="text-text-muted text-xs">Package</span><p className="text-text capitalize">{order.package_title || order.package}</p></div>
             {order.current_progress_rank && (
               <div><span className="text-text-muted text-xs">Rank Saat Ini</span><p className="text-text">{RANK_LABELS[order.current_progress_rank] || order.current_progress_rank}</p></div>
             )}
@@ -642,38 +611,6 @@ function OrderCard({
               <div className="flex gap-2">
                 <button onClick={onUpdateProgress} className="px-3 py-1.5 gradient-primary rounded-lg text-white text-sm font-medium hover:opacity-90">Simpan</button>
                 <button onClick={onToggleProgress} className="px-3 py-1.5 bg-surface border border-white/10 rounded-lg text-text-muted text-sm">Batal</button>
-              </div>
-            </div>
-          )}
-
-          {/* Previous Submissions (read-only) */}
-          {submissions.length > 0 && (
-            <div>
-              <h4 className="text-text-muted text-xs font-medium mb-2">Riwayat Submission</h4>
-              <div className="space-y-2">
-                {submissions.map(s => (
-                  <div key={s.id} className="bg-background rounded-lg p-3 text-xs">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-text-muted">{new Date(s.submitted_at).toLocaleDateString("id-ID", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
-                          <span className="text-accent font-medium">+{s.stars_gained} <Star className="w-3 h-3 inline fill-accent" /></span>
-                        </div>
-                        <div className="flex gap-3 text-text-muted">
-                          <span>{s.matches_played} match</span>
-                          <span>{s.win_count}W</span>
-                          {s.mvp_count > 0 && <span>{s.mvp_count} MVP</span>}
-                          {s.savage_count > 0 && <span>{s.savage_count} Savage</span>}
-                        </div>
-                        {s.screenshots.length > 0 && (
-                          <div className="flex gap-1 mt-2">
-                            {s.screenshots.map((url, i) => (
-                              <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded overflow-hidden border border-white/10">
-                                <Image src={url} alt="" width={40} height={40} unoptimized className="w-full h-full object-cover" />
-                              </a>
-                            ))}
-                          </div>
-                        )}
-                  </div>
-                ))}
               </div>
             </div>
           )}
