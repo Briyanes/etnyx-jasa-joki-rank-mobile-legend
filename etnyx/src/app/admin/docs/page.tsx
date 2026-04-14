@@ -2884,6 +2884,61 @@ function buildCategories(): DocCategory[] {
 
               <div className="bg-background rounded-lg p-4 border border-accent/20">
                 <div className="flex items-center gap-2 mb-3">
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-accent/10 text-accent font-medium">v2.8</span>
+                  <h4 className="text-accent font-semibold text-sm">11-14 April 2026 (WA v4, Telegram Audit &amp; Pricing Overhaul)</h4>
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">WhatsApp Template v4</h5>
+                    <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
+                      <li><strong className="text-text">5 parameter deskriptif</strong> &mdash; OrderID, Paket, Detail (rank awal → tujuan), Addons, Total harga</li>
+                      <li>5 template Active di Meta: order_confirmation_v4, payment_confirmed_v4, order_started_v4, order_completed_v4, order_cancelled_v4</li>
+                      <li>Kode switched dari v2 → v4 di <Code>notifications.ts</Code></li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">Telegram Notification Audit (6 GAPs Fixed)</h5>
+                    <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
+                      <li><strong className="text-text">Admin payment notif</strong> &mdash; Notif ke Admin group saat customer upload bukti bayar</li>
+                      <li><strong className="text-text">Order started notif</strong> &mdash; Notif ke Worker group saat admin mulai kerjakan order</li>
+                      <li><strong className="text-text">Worker cancel notif</strong> &mdash; Notif ke Admin group saat worker cancel order</li>
+                      <li><strong className="text-text">Payment proof buttons</strong> &mdash; Inline approve/reject di Telegram</li>
+                      <li><strong className="text-text">Stale alert to worker</strong> &mdash; Alert ke worker jika order lama tidak di-update</li>
+                      <li><strong className="text-text">Email di semua path</strong> &mdash; Email konfirmasi dikirim di semua jalur pembayaran</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">5th Telegram Group: Alert</h5>
+                    <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
+                      <li><strong className="text-text">telegramAlertGroupId</strong> &mdash; Grup khusus untuk SLA alerts, stale orders, unknown WA messages</li>
+                      <li>Fallback ke Admin group jika Alert group belum dikonfigurasi</li>
+                      <li>Setting tersedia di Dashboard → Settings → Integrasi</li>
+                      <li>Total 5 grup: Admin, Worker, Review, Report, Alert</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">Per-Division Packages (36 Paket Baru)</h5>
+                    <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
+                      <li><strong className="text-text">GM per divisi</strong> &mdash; GM I–V → Honor, Glory, Immortal (masing-masing harga berbeda)</li>
+                      <li><strong className="text-text">Epic per divisi</strong> &mdash; Epic I–V → Honor, Glory, Immortal</li>
+                      <li><strong className="text-text">Legend per divisi</strong> &mdash; Legend I–V → Honor, Glory, Immortal</li>
+                      <li>Total katalog: 10 kategori, 102 paket</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">Pricing Rebalancing (-10%)</h5>
+                    <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
+                      <li><strong className="text-text">Problem</strong> &mdash; Harga paket lebih mahal dari per-star equivalent (pricing terbalik)</li>
+                      <li><strong className="text-text">Solusi</strong> &mdash; Semua harga paket dihitung ulang = 90% dari harga per-star equivalent</li>
+                      <li>Server-side price validation (<Code>SERVER_PACKAGE_PRICES</Code>) disinkronkan</li>
+                      <li><Code>pricing_catalog</Code> di-seed ke database untuk editing via Dashboard → Pricing tab</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-accent/20">
+                <div className="flex items-center gap-2 mb-3">
                   <span className="text-[10px] px-2 py-0.5 rounded bg-accent/10 text-accent font-medium">v2.7</span>
                   <h4 className="text-accent font-semibold text-sm">9-10 April 2026 (UI Polish &amp; Tracking)</h4>
                 </div>
