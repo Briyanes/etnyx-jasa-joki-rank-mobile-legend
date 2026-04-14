@@ -567,6 +567,15 @@ ${formatRupiah(order.total_price)}
 Dikonfirmasi oleh <b>${userName}</b>
 `.trim();
 
+  // Log action
+  await supabase.from("order_logs").insert({
+    order_id: orderId,
+    action: "status_confirmed",
+    new_value: "confirmed",
+    notes: `Dikonfirmasi via Telegram oleh ${userName}`,
+    created_by: `TG:${userName}`,
+  });
+
   await editMessage(chatId, messageId, updated, {
     inline_keyboard: [
       [{ text: "Mulai Kerjakan", callback_data: `start:${orderId}` }],
@@ -640,6 +649,15 @@ ${formatRupiah(order.total_price)}
 Ditolak oleh <b>${userName}</b>
 `.trim();
 
+  // Log action
+  await supabase.from("order_logs").insert({
+    order_id: orderId,
+    action: "status_cancelled",
+    new_value: "cancelled",
+    notes: `Ditolak via Telegram oleh ${userName}`,
+    created_by: `TG:${userName}`,
+  });
+
   await editMessage(chatId, messageId, updated);
   return answerCallback(callbackId, "Order ditolak");
 }
@@ -707,6 +725,15 @@ ${formatRupiah(order.total_price)}
 
 Dimulai oleh <b>${userName}</b>
 `.trim();
+
+  // Log action
+  await supabase.from("order_logs").insert({
+    order_id: orderId,
+    action: "status_in_progress",
+    new_value: "in_progress",
+    notes: `Dimulai via Telegram oleh ${userName}`,
+    created_by: `TG:${userName}`,
+  });
 
   await editMessage(chatId, messageId, updated, {
     inline_keyboard: [
@@ -780,6 +807,15 @@ ${formatRupiah(order.total_price)}
 
 Diselesaikan oleh <b>${userName}</b>
 `.trim();
+
+  // Log action
+  await supabase.from("order_logs").insert({
+    order_id: orderId,
+    action: "status_completed",
+    new_value: "completed",
+    notes: `Diselesaikan via Telegram oleh ${userName}`,
+    created_by: `TG:${userName}`,
+  });
 
   await editMessage(chatId, messageId, updated, {
     inline_keyboard: [

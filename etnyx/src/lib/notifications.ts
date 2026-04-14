@@ -400,6 +400,26 @@ Order ini sudah tidak perlu dikerjakan.
   return sendTelegramMessage(chatId, message);
 }
 
+export async function notifyAdminOrderCancelled(order: OrderData): Promise<boolean> {
+  const settings = await getIntegrationSettings();
+  const chatId = settings.telegramAdminGroupId;
+  if (!chatId) return false;
+
+  const message = `
+❌ <b>ORDER DIBATALKAN</b>
+
+<b>Order ID:</b> ${order.order_id}
+<b>Username:</b> ${order.username}
+
+<b>Detail:</b>
+• Paket: ${getOrderType(order)}
+• Detail: ${getOrderDetail(order)}
+• Total: ${formatRupiah(order.price)}
+`.trim();
+
+  return sendTelegramMessage(chatId, message);
+}
+
 export async function notifyAdminPaymentProof(order: { order_id: string; username: string; total_price: number; sender_name?: string; sender_bank?: string }, dbId?: string): Promise<boolean> {
   const settings = await getIntegrationSettings();
   const chatId = settings.telegramAdminGroupId;
@@ -1090,6 +1110,7 @@ export async function sendOrderCancelledNotifications(order: OrderData): Promise
   await Promise.allSettled([
     sendOrderCancelledWA(order),
     notifyWorkerOrderCancelled(order),
+    notifyAdminOrderCancelled(order),
   ]);
 }
 
