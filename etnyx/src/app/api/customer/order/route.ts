@@ -94,22 +94,23 @@ const SERVER_PACKAGE_PRICES: Record<string, number> = {
   "glory-immortal": 1170089,
 };
 
-function calculateServerPrice(body: Record<string, unknown>): number | null {
+function calculateServerPrice(body: Record<string, unknown>, cmsPricing?: { perstar?: Record<string, number>; gendong?: Record<string, number>; catalog?: Record<string, number> }): number | null {
   const orderType = String(body.orderType || "");
   const isGendong = orderType === "gendong";
 
   if (orderType === "perstar" || isGendong) {
     const rankId = String(body.perStarRankId || body.currentRank || "").toLowerCase();
-    const starQty = Number(body.starQuantity || body.targetStar || 0);
-    const priceMap = isGendong ? SERVER_GENDONG_PRICES : SERVER_PER_STAR_PRICES;
-    const pricePerStar = priceMap[rankId];
+    const starQty = Number(body.starQuantity || 0);
+    const hardcoded = isGendong ? SERVER_GENDONG_PRICES : SERVER_PER_STAR_PRICES;
+    const cmsMap = isGendong ? cmsPricing?.gendong : cmsPricing?.perstar;
+    const pricePerStar = cmsMap?.[rankId] ?? hardcoded[rankId];
     if (!pricePerStar || starQty < 1 || starQty > 100) return null;
     return pricePerStar * starQty;
   }
 
   if (orderType === "paket") {
     const packageId = String(body.packageId || "");
-    const price = SERVER_PACKAGE_PRICES[packageId];
+    const price = cmsPricing?.catalog?.[packageId] ?? SERVER_PACKAGE_PRICES[packageId];
     return price ?? null;
   }
 
@@ -214,24 +215,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Server-side price verification: recalculate from order params
-    const serverBasePrice = calculateServerPrice(body);
-    if (serverBasePrice === null) {
-      return NextResponse.json(
-        { error: "Paket/tipe order tidak valid. Silakan refresh halaman dan coba lagi." },
-        { status: 400 }
-      );
-    }
-    // Allow 1% tolerance for rounding, but reject large manipulations
-    const tolerance = Math.max(serverBasePrice * 0.01, 100);
-    if (Math.abs(totalPrice - serverBasePrice) > tolerance) {
-      console.warn(`Price mismatch: client=${totalPrice}, server=${serverBasePrice}, order=${body.orderType}/${body.packageId || body.perStarRankId}`);
-      return NextResponse.json(
-        { error: "Harga tidak sesuai. Silakan refresh halaman dan coba lagi." },
-        { status: 400 }
-      );
-    }
-
     // Sanitize inputs
     const sanitizedNickname = sanitizeInput(nickname);
     const sanitizedLogin = accountLogin ? sanitizeInput(accountLogin) : null;
@@ -264,6 +247,75 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createAdminClient();
 
+    // ===== SERVER-SIDE PRICE VERIFICATION =====
+    // Load CMS pricing from database (takes priority over hardcoded)
+    let cmsPricing: { perstar?: Record<string, number>; gendong?: Record<string, number>; catalog?: Record<string, number> } | undefined;
+    let seasonMultiplier = 1;
+    try {
+      const { data: pricingSettings } = await supabase
+        .from("settings")
+        .select("key, value")
+        .in("key", ["perstar_pricing", "gendong_pricing", "pricing_catalog", "season_pricing"]);
+      if (pricingSettings) {
+        cmsPricing = {};
+        for (const s of pricingSettings) {
+          if (s.key === "perstar_pricing" && Array.isArray(s.value)) {
+            cmsPricing.perstar = {};
+            for (const r of s.value) { if (r.id && r.price) cmsPricing.perstar[r.id] = r.price; }
+          }
+          if (s.key === "gendong_pricing" && Array.isArray(s.value)) {
+            cmsPricing.gendong = {};
+            for (const r of s.value) { if (r.id && r.price) cmsPricing.gendong[r.id] = r.price; }
+          }
+          if (s.key === "pricing_catalog" && Array.isArray(s.value)) {
+            cmsPricing.catalog = {};
+            for (const cat of s.value) {
+              if (cat.packages && Array.isArray(cat.packages)) {
+                for (const pkg of cat.packages) { if (pkg.id && pkg.price) cmsPricing.catalog[pkg.id] = pkg.price; }
+              }
+            }
+          }
+          if (s.key === "season_pricing" && s.value?.isEnabled && Array.isArray(s.value.phases)) {
+            const now = new Date();
+            const sorted = [...s.value.phases]
+              .filter((p: { startDate: string }) => p.startDate && new Date(p.startDate) <= now)
+              .sort((a: { startDate: string }, b: { startDate: string }) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+            if (sorted.length > 0 && sorted[0].multiplier) {
+              seasonMultiplier = sorted[0].multiplier;
+            }
+          }
+        }
+      }
+    } catch { /* fallback to hardcoded prices */ }
+
+    // Calculate raw item price from order params
+    const serverRawPrice = calculateServerPrice(body, cmsPricing);
+    if (serverRawPrice === null) {
+      return NextResponse.json(
+        { error: "Paket/tipe order tidak valid. Silakan refresh halaman dan coba lagi." },
+        { status: 400 }
+      );
+    }
+
+    // Apply season, express, premium multipliers (same as frontend)
+    let serverBasePrice = serverRawPrice;
+    if (seasonMultiplier !== 1) serverBasePrice *= seasonMultiplier;
+    if (isExpress) serverBasePrice *= 1.2;
+    if (isPremium) serverBasePrice *= 1.3;
+    serverBasePrice = Math.round(serverBasePrice);
+
+    // Compare server base price with client totalPrice (before discounts are applied server-side)
+    // Client sends totalPrice = basePrice - promoDiscount - tierDiscount
+    // So totalPrice <= serverBasePrice. We allow tolerance for rounding.
+    const tolerance = Math.max(serverBasePrice * 0.02, 500);
+    if (totalPrice > serverBasePrice + tolerance) {
+      console.warn(`Price manipulation: client=${totalPrice}, serverBase=${serverBasePrice}, order=${body.orderType}/${body.packageId || body.perStarRankId}`);
+      return NextResponse.json(
+        { error: "Harga tidak sesuai. Silakan refresh halaman dan coba lagi." },
+        { status: 400 }
+      );
+    }
+
     // ===== SERVER-SIDE PROMO/REFERRAL RE-VALIDATION =====
     let verifiedDiscount = 0;
     let verifiedPromoCode: string | null = null;
@@ -276,7 +328,7 @@ export async function POST(request: NextRequest) {
       // Try promo code first
       const { data: promoResult } = await supabase.rpc("validate_promo_code", {
         p_code: sanitizedPromoCode,
-        p_order_amount: totalPrice,
+        p_order_amount: serverBasePrice,
       });
 
       if (promoResult && promoResult.length > 0 && promoResult[0].valid) {
@@ -313,7 +365,7 @@ export async function POST(request: NextRequest) {
               .limit(1);
 
             if (!existingReferral || existingReferral.length === 0) {
-              verifiedDiscount = Math.round(totalPrice * 0.1); // 10% referral discount
+              verifiedDiscount = Math.round(serverBasePrice * 0.1); // 10% referral discount
               verifiedPromoCode = sanitizedPromoCode;
               referrerId = referrer.id;
             }
@@ -337,14 +389,15 @@ export async function POST(request: NextRequest) {
         const { data: cust } = await customerQuery.single();
         if (cust?.reward_tier) {
           const tierDiscountPct = cust.reward_tier === "platinum" ? 8 : cust.reward_tier === "gold" ? 5 : cust.reward_tier === "silver" ? 3 : 0;
-          verifiedTierDiscount = Math.round(totalPrice * tierDiscountPct / 100);
+          verifiedTierDiscount = Math.round(serverBasePrice * tierDiscountPct / 100);
           if (verifiedTierDiscount > 0) verifiedTierName = cust.reward_tier;
         }
       } catch { /* not a member or not found */ }
     }
 
-    const verifiedTotalPrice = Math.max(0, totalPrice - verifiedDiscount - verifiedTierDiscount);
-    const verifiedBasePrice = totalPrice;
+    // Use server-calculated base price, not client totalPrice
+    const verifiedBasePrice = serverBasePrice;
+    const verifiedTotalPrice = Math.max(0, serverBasePrice - verifiedDiscount - verifiedTierDiscount);
 
     // Minimum price floor — prevent zero-price exploits
     if (verifiedTotalPrice < 1000) {
