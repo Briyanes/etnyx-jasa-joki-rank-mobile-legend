@@ -215,8 +215,8 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Order tidak ditemukan atau bukan milik kamu" }, { status: 403 });
     }
 
-    // Workers can only set in_progress status, not completed/cancelled
-    const workerAllowed = ["in_progress"];
+    // Workers can set in_progress & completed status
+    const workerAllowed = ["in_progress", "completed"];
     if (newStatus && !workerAllowed.includes(newStatus)) {
       return NextResponse.json({ error: "Worker tidak bisa set status ini" }, { status: 403 });
     }
@@ -380,12 +380,17 @@ export async function PUT(request: NextRequest) {
       }
     } catch { /* non-blocking */ }
 
-    // Telegram to admin group
+    // Telegram to admin + worker group
     const settings = await getSettings();
-    if (settings.telegramBotToken && settings.telegramAdminGroupId) {
+    if (settings.telegramBotToken) {
       const { data: order } = await supabase.from("orders").select("order_id, username").eq("id", orderId).single();
       const msg = `📢 <b>ORDER DIKERJAKAN!</b>\n\nOrder: <b>${order?.order_id}</b>\nCustomer: ${order?.username}\nWorker: ${user.name}\n\nSedang dalam pengerjaan.`;
-      await sendTelegramMessage(settings.telegramAdminGroupId, msg, settings.telegramBotToken);
+      if (settings.telegramAdminGroupId) {
+        await sendTelegramMessage(settings.telegramAdminGroupId, msg, settings.telegramBotToken);
+      }
+      if (settings.telegramWorkerGroupId) {
+        await sendTelegramMessage(settings.telegramWorkerGroupId, msg, settings.telegramBotToken);
+      }
     }
   }
 
@@ -431,12 +436,17 @@ export async function PUT(request: NextRequest) {
       }
     } catch { /* non-blocking */ }
 
-    // Telegram to admin group
+    // Telegram to admin + worker group
     const settings = await getSettings();
-    if (settings.telegramBotToken && settings.telegramAdminGroupId) {
+    if (settings.telegramBotToken) {
       const { data: order } = await supabase.from("orders").select("order_id, username").eq("id", orderId).single();
-      const msg = `📢 <b>ORDER SELESAI!</b>\n\nOrder: <b>${order?.order_id}</b>\nCustomer: ${order?.username}\nWorker: ${user.name}\n\nReview di dashboard admin.`;
-      await sendTelegramMessage(settings.telegramAdminGroupId, msg, settings.telegramBotToken);
+      const msg = `🏆 <b>ORDER SELESAI!</b>\n\nOrder: <b>${order?.order_id}</b>\nCustomer: ${order?.username}\nWorker: ${user.name}\n\n✅ Order telah selesai dikerjakan.`;
+      if (settings.telegramAdminGroupId) {
+        await sendTelegramMessage(settings.telegramAdminGroupId, msg, settings.telegramBotToken);
+      }
+      if (settings.telegramWorkerGroupId) {
+        await sendTelegramMessage(settings.telegramWorkerGroupId, msg, settings.telegramBotToken);
+      }
     }
   }
 

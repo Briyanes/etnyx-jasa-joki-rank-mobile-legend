@@ -8,6 +8,7 @@ import {
   LogOut, RefreshCw, CheckCircle, Clock, Play,
   Star, Trophy, Swords, Target, Timer, Camera, ChevronDown, ChevronUp,
   TrendingUp, Package, Loader2, Key, MessageSquare, Send, Gamepad2,
+  Upload,
 } from "lucide-react";
 
 interface Order {
@@ -98,8 +99,14 @@ export default function WorkerDashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [showAllCompleted, setShowAllCompleted] = useState(false);
 
-  // Submissions (read-only)
+  // Submissions (read-only + submit form)
   const [submissions, setSubmissions] = useState<Record<string, Submission[]>>({});
+  const [submittingOrder, setSubmittingOrder] = useState<string | null>(null);
+  const [form, setForm] = useState({ starsGained: 0, mvpCount: 0, savageCount: 0, maniacCount: 0, matchesPlayed: 0, winCount: 0, durationMinutes: 0, notes: "" });
+  const [screenshots, setScreenshots] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const fileRef = useRef<HTMLInputElement | null>(null);
 
   // Progress update
   const [updatingProgress, setUpdatingProgress] = useState<string | null>(null);
@@ -255,6 +262,62 @@ export default function WorkerDashboard() {
     } catch { toastError("Gagal update status"); }
   };
 
+  // Screenshot upload
+  const handleUploadScreenshot = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/staff/upload", { method: "POST", body: formData });
+      const data = await res.json();
+      if (res.ok && data.url) {
+        setScreenshots(prev => [...prev, data.url]);
+      } else {
+        toast(data.error || "Upload gagal");
+      }
+    } catch { toastError("Upload gagal"); }
+    setUploading(false);
+    if (fileRef.current) fileRef.current.value = "";
+  };
+
+  // Submit match result
+  const handleSubmitResult = async (orderId: string) => {
+    if (form.matchesPlayed === 0) { toast("Isi jumlah match yang dimainkan"); return; }
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/staff/submissions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId,
+          starsGained: form.starsGained,
+          mvpCount: form.mvpCount,
+          savageCount: form.savageCount,
+          maniacCount: form.maniacCount,
+          matchesPlayed: form.matchesPlayed,
+          winCount: form.winCount,
+          durationMinutes: form.durationMinutes,
+          screenshots,
+          notes: form.notes || undefined,
+        }),
+      });
+      if (res.ok) {
+        setSubmittingOrder(null);
+        setForm({ starsGained: 0, mvpCount: 0, savageCount: 0, maniacCount: 0, matchesPlayed: 0, winCount: 0, durationMinutes: 0, notes: "" });
+        setScreenshots([]);
+        await fetchOrders();
+        await fetchSubmissions(orderId);
+        toast("Hasil berhasil disubmit!");
+      } else {
+        const data = await res.json();
+        toast(data.error || "Gagal submit");
+      }
+    } catch { toastError("Network error"); }
+    setSubmitting(false);
+  };
+
   const formatDate = (d: string) => new Date(d).toLocaleDateString("id-ID", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
 
   const activeOrders = orders.filter(o => o.status === "in_progress");
@@ -363,6 +426,18 @@ export default function WorkerDashboard() {
                   noteSending={noteSending}
                   onToggleNotes={() => { setNotesOrder(notesOrder === order.id ? null : order.id); if (notesOrder !== order.id) fetchNotes(order.id); }}
                   onAddNote={() => handleAddNote(order.id)}
+                  // Submission form
+                  submittingOrder={submittingOrder === order.id}
+                  onToggleSubmit={() => { setSubmittingOrder(submittingOrder === order.id ? null : order.id); if (submittingOrder !== order.id) { setForm({ starsGained: 0, mvpCount: 0, savageCount: 0, maniacCount: 0, matchesPlayed: 0, winCount: 0, durationMinutes: 0, notes: "" }); setScreenshots([]); } }}
+                  form={form}
+                  setForm={setForm}
+                  screenshots={screenshots}
+                  setScreenshots={setScreenshots}
+                  uploading={uploading}
+                  submitting={submitting}
+                  fileRef={fileRef}
+                  onUploadScreenshot={handleUploadScreenshot}
+                  onSubmitResult={() => handleSubmitResult(order.id)}
                 />
               ))}
             </div>
@@ -512,6 +587,18 @@ interface OrderCardProps {
   noteSending: boolean;
   onToggleNotes: () => void;
   onAddNote: () => void;
+  // Submission form
+  submittingOrder: boolean;
+  onToggleSubmit: () => void;
+  form: { starsGained: number; mvpCount: number; savageCount: number; maniacCount: number; matchesPlayed: number; winCount: number; durationMinutes: number; notes: string };
+  setForm: React.Dispatch<React.SetStateAction<{ starsGained: number; mvpCount: number; savageCount: number; maniacCount: number; matchesPlayed: number; winCount: number; durationMinutes: number; notes: string }>>;
+  screenshots: string[];
+  setScreenshots: React.Dispatch<React.SetStateAction<string[]>>;
+  uploading: boolean;
+  submitting: boolean;
+  fileRef: React.RefObject<HTMLInputElement | null>;
+  onUploadScreenshot: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onSubmitResult: () => void;
 }
 
 function OrderCard({
@@ -521,6 +608,8 @@ function OrderCard({
   progressRank, setProgressRank, onUpdateProgress,
   credentials, showCredentials, loadingCreds, onFetchCredentials, onHideCredentials,
   notesOrder, notes, newNote, setNewNote, noteSending, onToggleNotes, onAddNote,
+  submittingOrder, onToggleSubmit, form, setForm, screenshots, setScreenshots,
+  uploading, submitting, fileRef, onUploadScreenshot, onSubmitResult,
 }: OrderCardProps) {
   return (
     <div className="bg-surface rounded-xl border border-accent/20 overflow-hidden">
@@ -577,6 +666,9 @@ function OrderCard({
             </button>
             <button onClick={onToggleNotes} className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-500/10 text-purple-400 rounded-lg text-sm hover:bg-purple-500/20 transition-colors">
               <MessageSquare className="w-3.5 h-3.5" /> Catatan
+            </button>
+            <button onClick={onToggleSubmit} className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 text-blue-400 rounded-lg text-sm hover:bg-blue-500/20 transition-colors">
+              <Camera className="w-3.5 h-3.5" /> Submit Hasil
             </button>
             <button onClick={onComplete} className="flex items-center gap-1.5 px-3 py-1.5 bg-green-500/10 text-green-400 rounded-lg text-sm hover:bg-green-500/20 transition-colors">
               <CheckCircle className="w-3.5 h-3.5" /> Selesai
@@ -642,6 +734,98 @@ function OrderCard({
               <div className="flex gap-2">
                 <button onClick={onUpdateProgress} className="px-3 py-1.5 gradient-primary rounded-lg text-white text-sm font-medium hover:opacity-90">Simpan</button>
                 <button onClick={onToggleProgress} className="px-3 py-1.5 bg-surface border border-white/10 rounded-lg text-text-muted text-sm">Batal</button>
+              </div>
+            </div>
+          )}
+
+          {/* Submit Result Form */}
+          {submittingOrder && (
+            <div className="bg-background rounded-lg p-4 space-y-4">
+              <h4 className="text-text font-medium text-sm flex items-center gap-2">
+                <Send className="w-4 h-4 text-blue-400" /> Submit Hasil Match
+              </h4>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div>
+                  <label className="text-text-muted text-xs flex items-center gap-1"><Star className="w-3 h-3" /> Stars</label>
+                  <input type="number" min={0} value={form.starsGained} onChange={(e) => setForm(p => ({ ...p, starsGained: Number(e.target.value) }))}
+                    className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm mt-1 focus:border-accent focus:outline-none" />
+                </div>
+                <div>
+                  <label className="text-text-muted text-xs flex items-center gap-1"><Trophy className="w-3 h-3" /> MVP</label>
+                  <input type="number" min={0} value={form.mvpCount} onChange={(e) => setForm(p => ({ ...p, mvpCount: Number(e.target.value) }))}
+                    className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm mt-1 focus:border-accent focus:outline-none" />
+                </div>
+                <div>
+                  <label className="text-text-muted text-xs flex items-center gap-1"><Swords className="w-3 h-3" /> Savage</label>
+                  <input type="number" min={0} value={form.savageCount} onChange={(e) => setForm(p => ({ ...p, savageCount: Number(e.target.value) }))}
+                    className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm mt-1 focus:border-accent focus:outline-none" />
+                </div>
+                <div>
+                  <label className="text-text-muted text-xs flex items-center gap-1"><Target className="w-3 h-3" /> Maniac</label>
+                  <input type="number" min={0} value={form.maniacCount} onChange={(e) => setForm(p => ({ ...p, maniacCount: Number(e.target.value) }))}
+                    className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm mt-1 focus:border-accent focus:outline-none" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="text-text-muted text-xs flex items-center gap-1"><Swords className="w-3 h-3" /> Matches</label>
+                  <input type="number" min={0} value={form.matchesPlayed} onChange={(e) => setForm(p => ({ ...p, matchesPlayed: Number(e.target.value) }))}
+                    className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm mt-1 focus:border-accent focus:outline-none" />
+                </div>
+                <div>
+                  <label className="text-text-muted text-xs flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Wins</label>
+                  <input type="number" min={0} value={form.winCount} onChange={(e) => setForm(p => ({ ...p, winCount: Number(e.target.value) }))}
+                    className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm mt-1 focus:border-accent focus:outline-none" />
+                </div>
+                <div>
+                  <label className="text-text-muted text-xs flex items-center gap-1"><Timer className="w-3 h-3" /> Menit</label>
+                  <input type="number" min={0} value={form.durationMinutes} onChange={(e) => setForm(p => ({ ...p, durationMinutes: Number(e.target.value) }))}
+                    className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm mt-1 focus:border-accent focus:outline-none" />
+                </div>
+              </div>
+
+              {/* Screenshots */}
+              <div>
+                <label className="text-text-muted text-xs flex items-center gap-1 mb-2"><Camera className="w-3 h-3" /> Screenshots</label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {screenshots.map((url, i) => (
+                    <div key={i} className="relative w-16 h-16 rounded-lg overflow-hidden border border-white/10">
+                      <Image src={url} alt="" width={64} height={64} unoptimized className="w-full h-full object-cover" />
+                      <button onClick={() => setScreenshots(prev => prev.filter((_, idx) => idx !== i))} className="absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-xs flex items-center justify-center rounded-bl">×</button>
+                    </div>
+                  ))}
+                </div>
+                <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={onUploadScreenshot} className="hidden" />
+                <button
+                  onClick={() => fileRef.current?.click()}
+                  disabled={uploading}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-white/10 rounded-lg text-text-muted text-sm hover:text-text transition-colors disabled:opacity-50"
+                >
+                  {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                  {uploading ? "Uploading..." : "Upload Screenshot"}
+                </button>
+              </div>
+
+              {/* Notes */}
+              <div>
+                <label className="text-text-muted text-xs">Catatan</label>
+                <textarea
+                  value={form.notes}
+                  onChange={(e) => setForm(p => ({ ...p, notes: e.target.value }))}
+                  rows={2}
+                  placeholder="Catatan tambahan..."
+                  className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm mt-1 focus:border-accent focus:outline-none resize-none"
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <button onClick={onSubmitResult} disabled={submitting} className="flex items-center gap-1.5 px-4 py-2 gradient-primary rounded-lg text-white text-sm font-medium hover:opacity-90 disabled:opacity-50">
+                  {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                  {submitting ? "Mengirim..." : "Submit"}
+                </button>
+                <button onClick={onToggleSubmit} className="px-4 py-2 bg-surface border border-white/10 rounded-lg text-text-muted text-sm">Batal</button>
               </div>
             </div>
           )}
