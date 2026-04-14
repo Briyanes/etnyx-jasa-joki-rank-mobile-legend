@@ -7,6 +7,33 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.com";
 const WA_CS = "6281515141540";
 const LINE = "━━━━━━━━━━━━━━━━━━";
 
+// Known auto-reply bot numbers to ignore (prevent spam in Telegram alerts)
+const BOT_NUMBERS = new Set([
+  "628551000185", // INDIRA (Indosat)
+  "6285100001",   // Indosat prefix
+]);
+
+// Patterns that indicate auto-reply bot messages
+const BOT_MESSAGE_PATTERNS = [
+  /terima kasih sudah menghubungi/i,
+  /silahkan ketik .?hi.?/i,
+  /dengan senang hati akan membantu/i,
+  /pesan ini dikirim secara otomatis/i,
+  /auto.?reply/i,
+  /ini adalah pesan otomatis/i,
+];
+
+function isBotMessage(from: string, text: string): boolean {
+  // Check known bot numbers
+  if (BOT_NUMBERS.has(from)) return true;
+  for (const prefix of BOT_NUMBERS) {
+    if (from.startsWith(prefix)) return true;
+  }
+  // Check message patterns (need at least 2 matches to avoid false positives)
+  const patternMatches = BOT_MESSAGE_PATTERNS.filter(p => p.test(text)).length;
+  return patternMatches >= 2;
+}
+
 // ============ Helper: Get Meta WA Settings ============
 async function getMetaWASettings() {
   try {
@@ -107,6 +134,13 @@ export async function POST(request: NextRequest) {
       const from = msg.from; // sender phone number (e.g. "6281234567890")
       const msgType = msg.type;
       const timestamp = msg.timestamp;
+
+      // Skip auto-reply bot messages (e.g. INDIRA, carrier bots)
+      const msgText = msg.text?.body?.trim() || msg.interactive?.button_reply?.title || "";
+      if (isBotMessage(from, msgText)) {
+        console.log(`Skipped bot message from ${from}: ${msgText.slice(0, 50)}`);
+        continue;
+      }
 
       // Only handle text messages for chatbot
       if (msgType === "text") {
