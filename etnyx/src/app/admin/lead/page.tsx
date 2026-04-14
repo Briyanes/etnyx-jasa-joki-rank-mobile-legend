@@ -9,7 +9,7 @@ import {
   ChevronDown, ChevronUp, ChevronLeft, ChevronRight, UserPlus, Clock, CheckCircle, XCircle,
   AlertCircle, Loader2, Package, TrendingUp, Eye, MessageSquare,
   Send, RotateCcw, CheckSquare, Square, Star, Trophy, Swords, Target, Timer, Camera,
-  Gamepad2, Flame, Zap, Upload, Edit3, Trash2,
+  Gamepad2, Flame, Zap, Upload, Edit3, Trash2, Key,
 } from "lucide-react";
 
 interface Order {
@@ -86,6 +86,15 @@ interface Submission {
   staff_users: { id: string; name: string } | null;
 }
 
+interface Credentials {
+  order_id: string;
+  login_method: string | null;
+  account_login: string | null;
+  account_password: string | null;
+  is_gendong?: boolean;
+  notes?: string | null;
+}
+
 const RANK_LABELS: Record<string, string> = {
   warrior: "Warrior", elite: "Elite", master: "Master", grandmaster: "Grandmaster",
   epic: "Epic", legend: "Legend", mythic: "Mythic", mythicgrading: "Mythic Grading",
@@ -150,11 +159,32 @@ export default function LeadDashboard() {
   const [submitting, setSubmitting] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
 
+  // Credentials
+  const [credentials, setCredentials] = useState<Record<string, Credentials>>({});
+  const [showCredentials, setShowCredentials] = useState<string | null>(null);
+  const [loadingCreds, setLoadingCreds] = useState(false);
+
   // Edit/Delete submission
   const [editingSubmission, setEditingSubmission] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ starsGained: 0, mvpCount: 0, savageCount: 0, maniacCount: 0, matchesPlayed: 0, winCount: 0, durationMinutes: 0, notes: "" });
   const [editLoading, setEditLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
+
+  const fetchCredentials = async (orderId: string) => {
+    if (credentials[orderId]) { setShowCredentials(orderId); return; }
+    setLoadingCreds(true);
+    try {
+      const res = await fetch(`/api/staff/credentials?orderId=${orderId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setCredentials(prev => ({ ...prev, [orderId]: data }));
+        setShowCredentials(orderId);
+      } else {
+        toastError("Gagal load credentials");
+      }
+    } catch { toastError("Network error"); }
+    setLoadingCreds(false);
+  };
 
   const checkAuth = useCallback(async () => {
     try {
@@ -763,6 +793,17 @@ export default function LeadDashboard() {
                           </button>
                         )}
 
+                        {/* Credentials */}
+                        {!(order.package_title?.includes("Gendong") || order.package_title?.includes("Duo Boost")) && (
+                          <button
+                            onClick={() => fetchCredentials(order.id)}
+                            disabled={loadingCreds}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-yellow-500/10 text-yellow-400 rounded-lg text-xs hover:bg-yellow-500/20 transition-colors disabled:opacity-50"
+                          >
+                            {loadingCreds ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Key className="w-3.5 h-3.5" />} Credentials
+                          </button>
+                        )}
+
                         {/* Notes */}
                         <button
                           onClick={() => { setNotesOrder(notesOrder === order.id ? null : order.id); if (notesOrder !== order.id) fetchNotes(order.id); }}
@@ -799,6 +840,34 @@ export default function LeadDashboard() {
                           </a>
                         )}
                       </div>
+
+                      {/* Credentials Panel */}
+                      {showCredentials === order.id && credentials[order.id] && (
+                        <div className="bg-background rounded-lg p-3 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <h4 className="text-text font-medium text-xs flex items-center gap-1"><Key className="w-3 h-3 text-yellow-400" /> {credentials[order.id].is_gendong ? "Info Mabar" : "Login Credentials"}</h4>
+                            <button onClick={() => setShowCredentials(null)} className="text-text-muted text-xs hover:text-text">Tutup</button>
+                          </div>
+                          {credentials[order.id].is_gendong ? (
+                            <div>
+                              <p className="text-purple-400 text-xs font-medium"><Gamepad2 className="w-3.5 h-3.5 inline mr-1" /> Order Gendong / Mabar — Tidak perlu login akun</p>
+                              {credentials[order.id].notes && <p className="text-text text-xs mt-1 whitespace-pre-line">{credentials[order.id].notes}</p>}
+                            </div>
+                          ) : (<>
+                            {credentials[order.id].login_method && (
+                              <div><span className="text-text-muted text-xs">Method:</span><span className="text-text text-xs ml-2 capitalize">{credentials[order.id].login_method}</span></div>
+                            )}
+                            <div>
+                              <span className="text-text-muted text-xs">Login:</span>
+                              <p className="bg-surface rounded px-2 py-1 font-mono text-xs text-text break-all mt-0.5">{credentials[order.id].account_login || <span className="text-text-muted italic">N/A</span>}</p>
+                            </div>
+                            <div>
+                              <span className="text-text-muted text-xs">Password:</span>
+                              <p className="bg-surface rounded px-2 py-1 font-mono text-xs text-text break-all mt-0.5">{credentials[order.id].account_password || <span className="text-text-muted italic">N/A</span>}</p>
+                            </div>
+                          </>)}
+                        </div>
+                      )}
 
                       {/* Assign / Reassign — only for in_progress orders (admin must click "Mulai Kerjakan" first) */}
                       {order.status === "in_progress" && ((!assignedWorker) || assignedWorker) && (
@@ -1024,6 +1093,21 @@ export default function LeadDashboard() {
                                           <div>
                                             <label className="text-text-muted text-[10px]">MVP</label>
                                             <input type="number" min={0} value={editForm.mvpCount} onChange={(e) => setEditForm(p => ({ ...p, mvpCount: Number(e.target.value) }))}
+                                              className="w-full bg-background border border-white/10 rounded px-2 py-1 text-text text-xs focus:border-accent focus:outline-none" />
+                                          </div>
+                                          <div>
+                                            <label className="text-text-muted text-[10px]">Savage</label>
+                                            <input type="number" min={0} value={editForm.savageCount} onChange={(e) => setEditForm(p => ({ ...p, savageCount: Number(e.target.value) }))}
+                                              className="w-full bg-background border border-white/10 rounded px-2 py-1 text-text text-xs focus:border-accent focus:outline-none" />
+                                          </div>
+                                          <div>
+                                            <label className="text-text-muted text-[10px]">Maniac</label>
+                                            <input type="number" min={0} value={editForm.maniacCount} onChange={(e) => setEditForm(p => ({ ...p, maniacCount: Number(e.target.value) }))}
+                                              className="w-full bg-background border border-white/10 rounded px-2 py-1 text-text text-xs focus:border-accent focus:outline-none" />
+                                          </div>
+                                          <div>
+                                            <label className="text-text-muted text-[10px]">Durasi (min)</label>
+                                            <input type="number" min={0} value={editForm.durationMinutes} onChange={(e) => setEditForm(p => ({ ...p, durationMinutes: Number(e.target.value) }))}
                                               className="w-full bg-background border border-white/10 rounded px-2 py-1 text-text text-xs focus:border-accent focus:outline-none" />
                                           </div>
                                         </div>
