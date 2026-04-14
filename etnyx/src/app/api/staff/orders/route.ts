@@ -178,11 +178,18 @@ export async function POST(request: NextRequest) {
     created_by: user.name,
   });
 
-  // Notify worker via Telegram (if worker has Telegram)
+  // Notify worker + admin via Telegram
   const settings = await getSettings();
-  if (settings.telegramBotToken && settings.telegramWorkerGroupId) {
-    const msg = `📢 <b>ORDER BARU DITUGASKAN</b>\n\nWorker: <b>${worker.name}</b>\nOrder: <b>${order?.order_id || orderId}</b>\nNotes: ${notes || "-"}\n\nSegera kerjakan!`;
-    await sendTelegramMessage(settings.telegramWorkerGroupId, msg, settings.telegramBotToken);
+  if (settings.telegramBotToken) {
+    const msg = `📢 <b>ORDER BARU DITUGASKAN</b>\n\nWorker: <b>${worker.name}</b>\nAssigned by: <b>${user.name}</b>\nOrder: <b>${order?.order_id || orderId}</b>\nNotes: ${notes || "-"}\n\nSegera kerjakan!`;
+    const promises: Promise<boolean>[] = [];
+    if (settings.telegramWorkerGroupId) {
+      promises.push(sendTelegramMessage(settings.telegramWorkerGroupId, msg, settings.telegramBotToken));
+    }
+    if (settings.telegramAdminGroupId) {
+      promises.push(sendTelegramMessage(settings.telegramAdminGroupId, msg, settings.telegramBotToken));
+    }
+    await Promise.allSettled(promises);
   }
 
   return NextResponse.json({ success: true });

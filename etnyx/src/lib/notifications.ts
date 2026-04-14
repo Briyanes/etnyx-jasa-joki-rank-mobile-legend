@@ -312,6 +312,27 @@ Review link sudah dikirim ke customer via WA.
 }
 
 
+export async function notifyWorkerOrderCompleted(order: OrderData): Promise<boolean> {
+  const settings = await getIntegrationSettings();
+  const chatId = settings.telegramWorkerGroupId;
+  if (!chatId) return false;
+
+  const message = `
+🏆 <b>ORDER SELESAI!</b>
+
+<b>Order ID:</b> ${order.order_id}
+<b>Username:</b> ${order.username}
+
+<b>Detail:</b>
+• Paket: ${getOrderType(order)}
+• Detail: ${getOrderDetail(order)}
+
+Good job! 💪
+`.trim();
+
+  return sendTelegramMessage(chatId, message);
+}
+
 export async function notifyAdminPaymentConfirmed(order: OrderData & { db_id?: string }): Promise<boolean> {
   const settings = await getIntegrationSettings();
   const chatId = settings.telegramAdminGroupId;
@@ -1118,5 +1139,6 @@ export async function sendOrderCompletedNotifications(order: OrderData): Promise
   await Promise.allSettled([
     sendOrderCompletedWA(order),
     notifyAdminOrderCompleted(order),
+    notifyWorkerOrderCompleted(order),
   ]);
 }

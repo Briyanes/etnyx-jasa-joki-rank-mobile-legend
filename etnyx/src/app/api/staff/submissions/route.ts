@@ -131,6 +131,19 @@ export async function POST(request: NextRequest) {
     await supabase.from("orders").update({ progress: newProgress, updated_at: new Date().toISOString() }).eq("id", orderId);
   }
 
+  // TG notification for new submission
+  try {
+    const { data: orderInfo } = await supabase.from("orders").select("order_id").eq("id", orderId).single();
+    const { data: workerInfo } = await supabase.from("staff_users").select("name").eq("id", workerId).single();
+    const { sendTelegramMessage  } = await import("@/lib/notifications");
+    const { data: settingsRow } = await supabase.from("settings").select("value").eq("key", "integrations").single();
+    const integ = settingsRow?.value as Record<string, string> | null;
+    if (integ?.telegramAdminGroupId) {
+      const subMsg = `📋 <b>SUBMISSION BARU</b>\n\nOrder: <b>${orderInfo?.order_id || orderId}</b>\nWorker: <b>${workerInfo?.name || "Unknown"}</b>\nSubmitted by: <b>${user.name}</b>\n\n⭐ Stars: ${starsGained || 0}\n🎮 Matches: ${matchesPlayed || 0} (Win: ${winCount || 0})\n🏆 MVP: ${mvpCount || 0}\n📸 Screenshots: ${(screenshots || []).length}`;
+      await sendTelegramMessage(integ.telegramAdminGroupId, subMsg);
+    }
+  } catch { /* non-blocking */ }
+
   return NextResponse.json({ success: true, submission }, { status: 201 });
 }
 

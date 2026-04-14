@@ -160,10 +160,19 @@ _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 
       if (!updated) continue;
 
-      // Notify customer via WA
+      // Notify customer via WA + admin/worker via TG
       if (order.whatsapp) {
         await sendOrderCancelledWA(order);
       }
+      // TG notification for auto-cancel
+      try {
+        const cronSettings = await supabase.from("settings").select("value").eq("key", "integrations").single();
+        const integ = cronSettings.data?.value as Record<string, string> | null;
+        if (integ?.telegramAdminGroupId) {
+          const cancelMsg = `⚠️ <b>AUTO-CANCEL (72h)</b>\n\nOrder <b>${order.order_id}</b> dibatalkan otomatis karena belum ada pembayaran dalam 72 jam.\n\nCustomer: ${order.username}\nWA: ${order.whatsapp || "-"}`;
+          await sendTelegramMessage(integ.telegramAdminGroupId, cancelMsg);
+        }
+      } catch { /* non-blocking */ }
       cancelled++;
     }
     results.autoCancelPending = { total: staleOrders?.length || 0, cancelled };

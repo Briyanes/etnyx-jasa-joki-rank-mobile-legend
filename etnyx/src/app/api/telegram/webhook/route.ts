@@ -775,7 +775,7 @@ async function handleCompleteOrder(callbackId: string, chatId: number, messageId
 
   // Send completed notifications to customer + admin
   try {
-    const { sendOrderCompletedWA, notifyAdminOrderCompleted } = await import("@/lib/notifications");
+    const { sendOrderCompletedWA, notifyAdminOrderCompleted, notifyWorkerOrderCompleted } = await import("@/lib/notifications");
     const orderData = {
       order_id: order.order_id,
       username: order.username,
@@ -792,6 +792,7 @@ async function handleCompleteOrder(callbackId: string, chatId: number, messageId
     Promise.allSettled([
       sendOrderCompletedWA(orderData),
       notifyAdminOrderCompleted(orderData),
+      notifyWorkerOrderCompleted(orderData),
     ]).catch(console.error);
   } catch {
     // non-blocking
