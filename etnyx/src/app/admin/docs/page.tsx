@@ -3152,7 +3152,7 @@ function buildCategories(): DocCategory[] {
                   <div>
                     <h5 className="text-text text-xs font-medium mb-1">WA Number &amp; Dynamic Config</h5>
                     <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
-                      <li>Nomor WA admin diubah ke <Code>081515141452</Code></li>
+                      <li>Nomor WA admin diubah ke <Code>081515141540</Code></li>
                       <li>WhatsApp floating button sekarang ambil nomor dari Settings &rarr; Social Links (dinamis)</li>
                       <li>Footer juga ambil nomor dari settings API</li>
                     </ul>

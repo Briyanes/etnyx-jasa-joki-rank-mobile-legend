@@ -109,11 +109,11 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
     { bank: "BNI", category: "bank", account_number: "", account_name: "", is_active: true },
     { bank: "Mandiri", category: "bank", account_number: "", account_name: "", is_active: true },
     { bank: "Jago", category: "bank", account_number: "", account_name: "", is_active: true },
-    { bank: "DANA", category: "ewallet", account_number: "081515141452", account_name: "", is_active: true },
-    { bank: "GoPay", category: "ewallet", account_number: "081515141452", account_name: "", is_active: true },
-    { bank: "OVO", category: "ewallet", account_number: "081515141452", account_name: "", is_active: true },
-    { bank: "ShopeePay", category: "ewallet", account_number: "081515141452", account_name: "", is_active: true },
-    { bank: "LinkAja", category: "ewallet", account_number: "081515141452", account_name: "", is_active: true },
+    { bank: "DANA", category: "ewallet", account_number: "081515141540", account_name: "", is_active: true },
+    { bank: "GoPay", category: "ewallet", account_number: "081515141540", account_name: "", is_active: true },
+    { bank: "OVO", category: "ewallet", account_number: "081515141540", account_name: "", is_active: true },
+    { bank: "ShopeePay", category: "ewallet", account_number: "081515141540", account_name: "", is_active: true },
+    { bank: "LinkAja", category: "ewallet", account_number: "081515141540", account_name: "", is_active: true },
     { bank: "QRIS", category: "qris", account_number: "", account_name: "", is_active: true },
   ];
   const [bankAccounts, setBankAccounts] = useState(DEFAULT_BANK_ACCOUNTS);
@@ -654,7 +654,7 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
                               <label className="block text-xs text-text-muted mb-1">{group.key === "ewallet" ? "No. HP" : group.key === "qris" ? "Merchant ID (opsional)" : "No. Rekening"}</label>
                               <input type="text" value={bank.account_number}
                                 onChange={(e) => { const updated = [...bankAccounts]; updated[bank._idx] = { ...updated[bank._idx], account_number: e.target.value }; setBankAccounts(updated); }}
-                                placeholder={group.key === "ewallet" ? "081515141452" : "1234567890"}
+                                placeholder={group.key === "ewallet" ? "081515141540" : "1234567890"}
                                 className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm focus:border-accent focus:outline-none font-mono" />
                             </div>
                             <div>

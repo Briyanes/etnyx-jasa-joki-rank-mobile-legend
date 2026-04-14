@@ -14,7 +14,7 @@
 --   v14 = Staff payment accounts
 --   v15 = Ad spend tracking
 --   v16 = Lead-worker hierarchy (lead_id on staff_users)
---   v17 = Dual payment (manual transfer + Midtrans)
+--   v17 = Dual payment (manual transfer + iPaymu)
 --   v18 = Star/division tracking (current_star, target_star)
 --   v19 = Password reset tokens table
 --   v20 = Seed 30 workers (15 per lead) - data migration
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS orders (
 
   -- Payment
   payment_status TEXT DEFAULT 'unpaid' CHECK (payment_status IN ('unpaid', 'pending', 'paid', 'failed', 'refunded')),
-  midtrans_order_id TEXT,
+  midtrans_order_id TEXT, -- legacy column name, now stores iPaymu reference ID
   paid_at TIMESTAMPTZ,
   payment_confirmed_at TIMESTAMPTZ,
   payment_confirmed_by UUID REFERENCES staff_users(id),
