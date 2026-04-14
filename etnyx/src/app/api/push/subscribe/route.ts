@@ -12,9 +12,13 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createAdminClient();
 
-    // Validate customerId if provided — must be a real customer
+    // Validate customerId if provided — must be a valid UUID format and real customer
     let validCustomerId: string | null = null;
     if (customerId) {
+      // Validate UUID format to prevent injection
+      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(customerId)) {
+        return NextResponse.json({ error: "Invalid customer ID format" }, { status: 400 });
+      }
       const { data: customer } = await supabase
         .from("customers")
         .select("id")

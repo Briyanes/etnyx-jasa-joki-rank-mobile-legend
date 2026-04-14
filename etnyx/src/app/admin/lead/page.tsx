@@ -330,17 +330,23 @@ export default function LeadDashboard() {
     if (!bulkWorker || selectedOrders.size === 0) return;
     setBulkLoading(true);
     let success = 0;
-    for (const orderId of selectedOrders) {
-      try {
-        const res = await fetch("/api/staff/orders", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ orderId, workerId: bulkWorker, notes: bulkNotes }),
-        });
-        if (res.ok) success++;
-      } catch { /* continue */ }
+    let failed = 0;
+    const orderArray = Array.from(selectedOrders);
+    // Process in batches of 3 concurrent requests
+    for (let i = 0; i < orderArray.length; i += 3) {
+      const batch = orderArray.slice(i, i + 3);
+      const results = await Promise.allSettled(
+        batch.map(orderId =>
+          fetch("/api/staff/orders", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ orderId, workerId: bulkWorker, notes: bulkNotes }),
+          }).then(res => res.ok ? "ok" : "fail")
+        )
+      );
+      results.forEach(r => { if (r.status === "fulfilled" && r.value === "ok") success++; else failed++; });
     }
-    toast(`${success}/${selectedOrders.size} order berhasil di-assign`);
+    toast(`${success}/${selectedOrders.size} order berhasil di-assign${failed > 0 ? `, ${failed} gagal` : ""}`);
     setSelectedOrders(new Set());
     setBulkAssigning(false);
     setBulkWorker("");

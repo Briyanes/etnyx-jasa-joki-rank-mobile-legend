@@ -136,8 +136,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Upload file to Supabase Storage
-    const ext = file.name.split(".").pop() || "jpg";
-    const fileName = `proof-${orderId}-${Date.now()}.${ext}`;
+    // Use MIME type for extension (don't trust user filename)
+    const mimeToExt: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
+    const safeExt = mimeToExt[file.type] || "jpg";
+    const fileName = `proof-${orderId}-${Date.now()}.${safeExt}`;
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 

@@ -24,14 +24,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ valid: false, message: "Kode referral tidak valid" });
     }
 
-    // Self-referral check: compare email or whatsapp
+    // Self-referral check: compare email AND whatsapp
     if (customerEmail && referrer.email && customerEmail.toLowerCase() === referrer.email.toLowerCase()) {
       return NextResponse.json({ valid: false, message: "Tidak bisa menggunakan kode referral sendiri" });
     }
     if (customerWhatsapp && referrer.whatsapp) {
       const cleanInput = customerWhatsapp.replace(/\D/g, "");
       const cleanReferrer = referrer.whatsapp.replace(/\D/g, "");
-      if (cleanInput === cleanReferrer || `62${cleanInput}` === cleanReferrer || cleanInput === `62${cleanReferrer}`) {
+      // Normalize to compare: strip leading 62 or 0, then compare
+      const normalizeWa = (wa: string) => wa.replace(/^(62|0)/, "");
+      if (normalizeWa(cleanInput) === normalizeWa(cleanReferrer)) {
         return NextResponse.json({ valid: false, message: "Tidak bisa menggunakan kode referral sendiri" });
       }
     }

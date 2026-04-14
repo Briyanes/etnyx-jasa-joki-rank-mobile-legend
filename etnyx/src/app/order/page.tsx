@@ -1217,7 +1217,7 @@ function OrderPageContent() {
     } finally {
       setPromoLoading(false);
     }
-  }, [form.promoCode, basePrice]);
+  }, [form.promoCode, form.email, form.whatsapp, basePrice]);
 
   const removePromo = useCallback(() => {
     updateForm({ promoCode: "" });

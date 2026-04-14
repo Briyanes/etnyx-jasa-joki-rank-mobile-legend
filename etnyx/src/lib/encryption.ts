@@ -34,11 +34,13 @@ export function encryptField(text: string): string {
 }
 
 export function decryptField(encryptedText: string): string {
-  const [ivHex, authTagHex, encrypted] = encryptedText.split(":");
-  if (!ivHex || !authTagHex || !encrypted) {
-    console.warn("[SECURITY] decryptField: input not in encrypted format, returning as-is");
-    return encryptedText; // Not encrypted (legacy plain text)
+  const parts = encryptedText.split(":");
+  if (parts.length !== 3 || !parts[0] || !parts[1] || !parts[2]) {
+    console.warn("[SECURITY] decryptField: input not in encrypted format — legacy plaintext or corrupted data");
+    // Return as-is for backward compatibility with legacy unencrypted data
+    return encryptedText;
   }
+  const [ivHex, authTagHex, encrypted] = parts;
   const iv = Buffer.from(ivHex, "hex");
   const authTag = Buffer.from(authTagHex, "hex");
   const { derivedKey, legacyKey } = getKeys();
@@ -52,11 +54,16 @@ export function decryptField(encryptedText: string): string {
     return decrypted;
   } catch {
     // Fall back to legacy padded key for data encrypted before the fix
-    console.warn("[SECURITY] decryptField: using legacy key fallback — consider re-encrypting data");
-    const decipher = createDecipheriv("aes-256-gcm", legacyKey, iv);
-    decipher.setAuthTag(authTag);
-    let decrypted = decipher.update(encrypted, "hex", "utf8");
-    decrypted += decipher.final("utf8");
-    return decrypted;
+    try {
+      console.warn("[SECURITY] decryptField: using legacy key fallback — consider re-encrypting data");
+      const decipher = createDecipheriv("aes-256-gcm", legacyKey, iv);
+      decipher.setAuthTag(authTag);
+      let decrypted = decipher.update(encrypted, "hex", "utf8");
+      decrypted += decipher.final("utf8");
+      return decrypted;
+    } catch (e) {
+      console.error("[SECURITY] decryptField: DECRYPTION FAILED with both keys", e);
+      throw new Error("DECRYPTION_FAILED: Cannot decrypt data with any available key");
+    }
   }
 }

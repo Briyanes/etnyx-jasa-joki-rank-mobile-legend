@@ -26,8 +26,10 @@ export async function POST(request: NextRequest) {
   }
 
   const supabase = await createAdminClient();
-  const ext = file.name.split(".").pop() || "jpg";
-  const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+  // Use MIME type for extension (don't trust user filename like "photo.jpg.exe")
+  const mimeToExt: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
+  const safeExt = mimeToExt[file.type] || "jpg";
+  const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${safeExt}`;
 
   const { error: uploadError } = await supabase.storage
     .from("worker-screenshots")

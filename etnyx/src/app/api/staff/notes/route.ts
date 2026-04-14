@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import { verifyStaff } from "@/lib/staff-auth";
+import { sanitizeInput } from "@/lib/validation";
 
 // GET /api/staff/notes?orderId=xxx — Get notes for an order
 export async function GET(request: NextRequest) {
@@ -25,7 +26,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Gagal memuat notes" }, { status: 500 });
   }
 
-  return NextResponse.json({ notes: data || [] });
+  // Sanitize notes before returning
+  const sanitizedNotes = (data || []).map((log: Record<string, unknown>) => ({
+    ...log,
+    notes: typeof log.notes === "string" ? sanitizeInput(log.notes) : log.notes,
+    new_value: typeof log.new_value === "string" ? sanitizeInput(log.new_value) : log.new_value,
+  }));
+
+  return NextResponse.json({ notes: sanitizedNotes });
 }
 
 // POST /api/staff/notes — Add a note/comment to an order
