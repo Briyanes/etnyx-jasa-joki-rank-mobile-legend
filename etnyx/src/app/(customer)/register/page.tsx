@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { trackCompleteRegistration } from "@/lib/tracking";
 
 const translations = {
   id: {
@@ -99,6 +100,7 @@ export default function RegisterPage() {
         return;
       }
 
+      trackCompleteRegistration();
       router.push("/dashboard");
     } catch {
       setError(t.errorGeneric);

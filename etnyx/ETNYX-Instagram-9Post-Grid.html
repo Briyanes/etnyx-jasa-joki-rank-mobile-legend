@@ -1,0 +1,545 @@
+<!--
+  ETNYX — Instagram 9-Post Launch Grid + Mood Board
+  Updated & synced with system (April 2026)
+  For PDF export — ETNYX Dark Theme
+-->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ETNYX — Instagram 9-Post Launch Grid & Mood Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent: #0D9488;
+    --primary: #5F8A84;
+    --secondary: #7C3AED;
+    --bg: #FFFFFF;
+    --surface: #F5F7F7;
+    --card-bg: #F9FAFB;
+    --card-border: #E5E7EB;
+    --text: #1F2937;
+    --text-muted: #6B7280;
+    --success: #16A34A;
+    --warning: #D97706;
+    --danger: #DC2626;
+    --gradient: linear-gradient(135deg, #0D9488, #5F8A84);
+  }
+  @page { margin: 12mm 10mm; size: A4; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 40px 30px;
+    font-size: 12.5px;
+    line-height: 1.65;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Cover */
+  .cover { text-align:center; padding:50px 0 30px; border-bottom:2px solid rgba(13,148,136,0.3); margin-bottom:30px; page-break-after:always; }
+  .cover h1 { font-size:38px; font-weight:900; background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-transform:uppercase; letter-spacing:2px; margin-bottom:6px; }
+  .cover .tagline { font-size:16px; font-weight:600; color:var(--text-muted); margin-bottom:20px; }
+  .cover .meta { font-size:11px; color:var(--text-muted); margin-top:12px; }
+
+  /* Section Headers */
+  h2 { font-size:20px; font-weight:800; background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-transform:uppercase; letter-spacing:1px; margin-top:32px; margin-bottom:12px; padding-bottom:8px; border-bottom:2px solid rgba(13,148,136,0.2); page-break-after:avoid; }
+  h3 { font-size:15px; font-weight:700; color:var(--secondary); margin-top:20px; margin-bottom:8px; page-break-after:avoid; }
+  h4 { font-size:13px; font-weight:700; color:var(--accent); margin-top:14px; margin-bottom:6px; page-break-after:avoid; }
+
+  /* Cards */
+  .card-grid { display:grid; gap:10px; margin:10px 0; }
+  .g2 { grid-template-columns:1fr 1fr; }
+  .g3 { grid-template-columns:1fr 1fr 1fr; }
+  .card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:8px; padding:12px 14px; }
+  .card .icon { font-size:18px; margin-bottom:4px; }
+  .card .label { font-weight:700; font-size:12px; margin-bottom:4px; color:var(--text); }
+  .card .desc { font-size:11px; color:var(--text-muted); line-height:1.5; }
+
+  /* Tables */
+  table { width:100%; border-collapse:collapse; margin:10px 0; font-size:11.5px; page-break-inside:avoid; }
+  th { background:rgba(13,148,136,0.08); color:var(--accent); font-weight:700; text-align:left; padding:7px 10px; border-bottom:1px solid rgba(13,148,136,0.15); }
+  td { padding:6px 10px; border-bottom:1px solid #F3F4F6; color:#374151; }
+
+  /* Badges */
+  .badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:700; text-transform:uppercase; }
+  .badge-teal { background:rgba(13,148,136,0.1); color:#0D9488; }
+  .badge-purple { background:rgba(124,58,237,0.08); color:#6D28D9; }
+  .badge-green { background:rgba(22,163,74,0.08); color:#15803D; }
+  .badge-amber { background:rgba(217,119,6,0.08); color:#B45309; }
+  .badge-red { background:rgba(220,38,38,0.08); color:#B91C1C; }
+
+  /* Grid Visual */
+  .ig-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin:16px 0; }
+  .ig-cell {
+    background:var(--surface);
+    border:1px solid var(--card-border);
+    border-radius:8px;
+    padding:14px;
+    min-height:120px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+  }
+  .ig-cell .cell-num { font-size:10px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+  .ig-cell .cell-title { font-size:13px; font-weight:700; color:var(--text); margin-bottom:4px; }
+  .ig-cell .cell-type { font-size:10px; font-weight:600; margin-top:auto; }
+
+  /* Misc */
+  code { background:#F1F5F9; padding:1px 6px; border-radius:3px; font-size:11px; color:#0D9488; }
+  pre { background:#F8FAFC; border:1px solid #E2E8F0; padding:12px; border-radius:6px; font-size:11px; margin:8px 0; color:#334155; white-space:pre-wrap; }
+  hr { border:none; border-top:1px solid #E5E7EB; margin:24px 0; }
+  ul, ol { padding-left:18px; margin:6px 0; }
+  li { margin:3px 0; }
+  strong { color:#111827; }
+  p { margin:5px 0; }
+
+  .highlight-box { background:rgba(45,212,191,0.06); border:1px solid rgba(45,212,191,0.15); border-radius:6px; padding:10px 14px; margin:10px 0; font-size:11.5px; color:rgba(255,255,255,0.7); }
+  .quote { border-left:3px solid var(--accent); padding:8px 16px; background:rgba(45,212,191,0.06); border-radius:0 6px 6px 0; font-style:italic; color:var(--text-muted); margin:10px 0; }
+
+  /* Mood Board */
+  .mood-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; margin:12px 0; }
+  .mood-swatch { border-radius:8px; padding:16px 12px; text-align:center; min-height:70px; display:flex; flex-direction:column; justify-content:center; }
+  .mood-swatch .sw-hex { font-size:11px; font-weight:700; margin-top:4px; }
+  .mood-swatch .sw-name { font-size:10px; font-weight:600; }
+
+  /* Post Detail */
+  .post-detail { background:var(--surface); border:1px solid var(--card-border); border-radius:10px; padding:16px 18px; margin:14px 0; page-break-inside:avoid; }
+  .post-header { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .post-num { width:32px; height:32px; border-radius:50%; background:var(--gradient); display:flex; align-items:center; justify-content:center; font-weight:900; font-size:14px; color:#0F1419; flex-shrink:0; }
+  .post-title { font-size:16px; font-weight:700; }
+  .post-meta { font-size:10px; color:var(--text-muted); }
+  .script-block { background:rgba(0,0,0,0.3); border-radius:6px; padding:10px 14px; margin:8px 0; font-size:11px; line-height:1.6; }
+  .caption-block { background:rgba(45,212,191,0.04); border:1px solid rgba(45,212,191,0.1); border-radius:6px; padding:10px 14px; margin:8px 0; font-size:11px; line-height:1.6; }
+
+  @media print { body { padding:0; } .cover { padding:60px 0 40px; } }
+</style>
+</head>
+<body>
+
+<!-- ==================== COVER ==================== -->
+<div class="cover">
+  <h1>ETNYX</h1>
+  <div class="tagline">Instagram 9-Post Launch Grid & Mood Board</div>
+  <p style="font-size:13px; color:rgba(255,255,255,0.4);">Konten Plan + Visual Direction + Script Lengkap</p>
+
+  <div style="display:flex; justify-content:center; gap:40px; margin:24px 0;">
+    <div style="text-align:center;"><div style="font-size:32px; font-weight:900; background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">9</div><div style="font-size:11px; color:var(--text-muted); font-weight:600;">POSTS</div></div>
+    <div style="text-align:center;"><div style="font-size:32px; font-weight:900; background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">3×3</div><div style="font-size:11px; color:var(--text-muted); font-weight:600;">GRID</div></div>
+    <div style="text-align:center;"><div style="font-size:32px; font-weight:900; background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">3</div><div style="font-size:11px; color:var(--text-muted); font-weight:600;">MINGGU</div></div>
+  </div>
+
+  <p style="font-size:11px; color:rgba(255,255,255,0.35);">
+    Akun: @etnyx.id &nbsp;·&nbsp; Niche: Jasa Joki & Gendong Mobile Legends<br>
+    Format: Reels + Carousel &nbsp;·&nbsp; Repost: TikTok, Facebook, YouTube Shorts
+  </p>
+
+  <div class="quote" style="max-width:500px; margin:20px auto 0;">"Bukan joki biasa. Ini SISTEM."</div>
+
+  <div class="meta">
+    <strong>Versi:</strong> 2.0 — 15 April 2026 &nbsp;·&nbsp; Synced with ETNYX System
+  </div>
+</div>
+
+<!-- ==================== MOOD BOARD ==================== -->
+<h2>Mood Board & Visual Direction</h2>
+
+<h3>🎨 Color Palette (Brand Colors)</h3>
+<div class="mood-grid">
+  <div class="mood-swatch" style="background:#0F1419; border:1px solid rgba(255,255,255,0.1);"><div class="sw-name" style="color:#9CA3AF;">Dark BG</div><div class="sw-hex" style="color:#E6F1EF;">#0F1419</div></div>
+  <div class="mood-swatch" style="background:#151B22; border:1px solid rgba(255,255,255,0.1);"><div class="sw-name" style="color:#9CA3AF;">Surface</div><div class="sw-hex" style="color:#E6F1EF;">#151B22</div></div>
+  <div class="mood-swatch" style="background:#2DD4BF;"><div class="sw-name" style="color:#0F1419;">Accent</div><div class="sw-hex" style="color:#0F1419;">#2DD4BF</div></div>
+  <div class="mood-swatch" style="background:#7FA8A3;"><div class="sw-name" style="color:#0F1419;">Primary</div><div class="sw-hex" style="color:#0F1419;">#7FA8A3</div></div>
+</div>
+<div class="mood-grid">
+  <div class="mood-swatch" style="background:#22C55E;"><div class="sw-name" style="color:#0F1419;">Success</div><div class="sw-hex" style="color:#0F1419;">#22C55E</div></div>
+  <div class="mood-swatch" style="background:#F59E0B;"><div class="sw-name" style="color:#0F1419;">Warning</div><div class="sw-hex" style="color:#0F1419;">#F59E0B</div></div>
+  <div class="mood-swatch" style="background:#EF4444;"><div class="sw-name" style="color:#0F1419;">Danger</div><div class="sw-hex" style="color:#0F1419;">#EF4444</div></div>
+  <div class="mood-swatch" style="background:#A855F7;"><div class="sw-name" style="color:#0F1419;">Premium</div><div class="sw-hex" style="color:#0F1419;">#A855F7</div></div>
+</div>
+
+<h3>🔤 Typography</h3>
+<div class="card-grid g2">
+  <div class="card">
+    <div class="label">Font Family</div>
+    <div class="desc"><strong>Inter</strong> — Clean, modern, highly readable<br>Weights: 400 (body), 600 (subtitle), 700 (heading), 900 (display)</div>
+  </div>
+  <div class="card">
+    <div class="label">Font Hierarchy (Post)</div>
+    <div class="desc">
+      <strong>Hook/Title:</strong> Inter Black 900, 36-48px, Turquoise<br>
+      <strong>Subtitle:</strong> Inter SemiBold 600, 24-28px, White<br>
+      <strong>Body:</strong> Inter Regular 400, 18-20px, #E6F1EF<br>
+      <strong>CTA:</strong> Inter Bold 700, 22px, on gradient bg
+    </div>
+  </div>
+</div>
+
+<h3>📐 Visual Style</h3>
+<div class="card-grid g3">
+  <div class="card" style="border-top:3px solid var(--accent);">
+    <div class="icon">🖤</div>
+    <div class="label">Dark Dominant</div>
+    <div class="desc">Background selalu dark (#0F1419). Turquoise sebagai accent highlight. Clean, premium look.</div>
+  </div>
+  <div class="card" style="border-top:3px solid var(--secondary);">
+    <div class="icon">✨</div>
+    <div class="label">Glow Effect</div>
+    <div class="desc">Subtle glow di CTA button & accent text: rgba(45,212,191,0.15). Bukan neon flashy.</div>
+  </div>
+  <div class="card" style="border-top:3px solid var(--success);">
+    <div class="icon">🎯</div>
+    <div class="label">Clean & Minimal</div>
+    <div class="desc">Max 3 elemen per screen. Whitespace generous. No clutter. Biar pesan tersampaikan.</div>
+  </div>
+</div>
+
+<h3>🎬 Content Pillars</h3>
+<table>
+  <tr><th>Pillar</th><th>Ratio</th><th>Funnel</th><th>Goal</th></tr>
+  <tr><td>😤 <strong>Problem</strong></td><td>20%</td><td>Awareness</td><td>Relate, trigger pain point</td></tr>
+  <tr><td>😂 <strong>Entertainment</strong></td><td>20%</td><td>Awareness</td><td>Viral, reach, shares</td></tr>
+  <tr><td>📚 <strong>Education</strong></td><td>20%</td><td>Consideration</td><td>Trust, authority</td></tr>
+  <tr><td>🏆 <strong>Proof</strong></td><td>25%</td><td>Consideration→Conversion</td><td>Credibility</td></tr>
+  <tr><td>💰 <strong>Selling</strong></td><td>15%</td><td>Conversion</td><td>CTA, order, revenue</td></tr>
+</table>
+
+<h3>📌 Thumbnail Rules</h3>
+<ul>
+  <li>Background: <code>#0F1419</code> atau gradien gelap</li>
+  <li>Text: <strong>Turquoise</strong> untuk hook, <strong>White</strong> untuk subtitle</li>
+  <li>Logo ETNYX di pojok kanan bawah (watermark transparan)</li>
+  <li>Aspect ratio: 9:16 (Reels), 1:1 (Feed), 4:5 (Carousel)</li>
+  <li>Emoji strategis (1-2 per thumbnail, bukan berlebihan)</li>
+</ul>
+
+<hr>
+
+<!-- ==================== GRID OVERVIEW ==================== -->
+<h2>9-Post Grid Overview</h2>
+
+<p style="color:var(--text-muted);">3 post/minggu (Senin-Rabu-Jumat) = 3 minggu · Jam posting: 19:00-21:00 WIB</p>
+
+<div class="ig-grid">
+  <div class="ig-cell" style="border-top:3px solid var(--accent);">
+    <div><div class="cell-num">Post 1 · Sen W1</div><div class="cell-title">INTRO BRAND</div></div>
+    <div class="cell-type"><span class="badge badge-teal">Reels 30s</span></div>
+  </div>
+  <div class="ig-cell" style="border-top:3px solid var(--success);">
+    <div><div class="cell-num">Post 2 · Rab W1</div><div class="cell-title">TUTORIAL PAKET</div></div>
+    <div class="cell-type"><span class="badge badge-green">Reels 60s</span></div>
+  </div>
+  <div class="ig-cell" style="border-top:3px solid var(--secondary);">
+    <div><div class="cell-num">Post 3 · Jum W1</div><div class="cell-title">SOCIAL PROOF</div></div>
+    <div class="cell-type"><span class="badge badge-purple">Carousel 5</span></div>
+  </div>
+
+  <div class="ig-cell" style="border-top:3px solid var(--danger);">
+    <div><div class="cell-num">Post 4 · Sen W2</div><div class="cell-title">PAIN POINT</div></div>
+    <div class="cell-type"><span class="badge badge-red">Reels 15s</span></div>
+  </div>
+  <div class="ig-cell" style="border-top:3px solid var(--success);">
+    <div><div class="cell-num">Post 5 · Rab W2</div><div class="cell-title">TUTORIAL PERSTAR</div></div>
+    <div class="cell-type"><span class="badge badge-green">Reels 60s</span></div>
+  </div>
+  <div class="ig-cell" style="border-top:3px solid var(--accent);">
+    <div><div class="cell-num">Post 6 · Jum W2</div><div class="cell-title">KEAMANAN AKUN</div></div>
+    <div class="cell-type"><span class="badge badge-teal">Carousel 5</span></div>
+  </div>
+
+  <div class="ig-cell" style="border-top:3px solid var(--success);">
+    <div><div class="cell-num">Post 7 · Sen W3</div><div class="cell-title">TUTORIAL GENDONG</div></div>
+    <div class="cell-type"><span class="badge badge-green">Reels 60s</span></div>
+  </div>
+  <div class="ig-cell" style="border-top:3px solid var(--warning);">
+    <div><div class="cell-num">Post 8 · Rab W3</div><div class="cell-title">PROMO / CTA</div></div>
+    <div class="cell-type"><span class="badge badge-amber">Reels 30s</span></div>
+  </div>
+  <div class="ig-cell" style="border-top:3px solid var(--secondary);">
+    <div><div class="cell-num">Post 9 · Jum W3</div><div class="cell-title">FAQ</div></div>
+    <div class="cell-type"><span class="badge badge-purple">Carousel 6</span></div>
+  </div>
+</div>
+
+<div class="highlight-box">
+  <strong>Grid Pattern:</strong> Alternasi Reels (aksi) → Tutorial (edukasi) → Carousel (info). Setiap baris punya variasi format supaya grid IG terlihat aesthetic dan tidak monotone.
+</div>
+
+<h3>Jadwal Posting</h3>
+<table>
+  <tr><th>Minggu</th><th>Senin</th><th>Rabu</th><th>Jumat</th></tr>
+  <tr><td><strong>1</strong></td><td>POST 1: Intro Brand</td><td>POST 2: Tutorial Paket</td><td>POST 3: Social Proof</td></tr>
+  <tr><td><strong>2</strong></td><td>POST 4: Pain Point</td><td>POST 5: Tutorial PerStar</td><td>POST 6: Keamanan</td></tr>
+  <tr><td><strong>3</strong></td><td>POST 7: Tutorial Gendong</td><td>POST 8: Promo/CTA</td><td>POST 9: FAQ</td></tr>
+</table>
+
+<hr>
+
+<!-- ==================== POST DETAILS ==================== -->
+<h2>Detail Per Post</h2>
+
+<!-- POST 1 -->
+<div class="post-detail">
+  <div class="post-header">
+    <div class="post-num">1</div>
+    <div><div class="post-title">INTRO BRAND — "Ini bukan joki biasa"</div><div class="post-meta">Reels 30s · Awareness · Senin W1</div></div>
+  </div>
+  <h4>Hook (3 detik)</h4>
+  <p>"Masih pake joki yang bisa hack akun kamu?"</p>
+  <h4>Script</h4>
+  <div class="script-block">
+[0-3s] "Masih pake joki yang bisa hack akun kamu?"<br>
+[3-8s] "Kenalan sama ETNYX."<br>
+[8-15s] "Password kamu dienkripsi AES-256. Progress dilacak real-time dari dashboard. Notifikasi otomatis ke WhatsApp kamu."<br>
+[15-22s] "2.847+ order selesai. Rating 4.9 bintang."<br>
+[22-28s] "Bukan janji. Ini bukti."<br>
+[28-30s] "Link di bio. Mulai dari 5 ribu."
+  </div>
+  <h4>Caption</h4>
+  <div class="caption-block">
+Bukan joki abal-abal. Ini SISTEM. 🎮<br><br>
+✅ Akun dienkripsi military-grade (AES-256)<br>
+✅ Tracking real-time dari dashboard<br>
+✅ Notifikasi otomatis ke WA kamu<br>
+✅ 2.847+ order selesai, rating 4.9⭐<br><br>
+Mau push rank tanpa ribet?<br>
+👉 Link di bio atau WA langsung<br><br>
+#JokiML #MobileLegends #PushRank #ETNYX #JokiMobileLegends #RankBoost #MythicGlory #JasaJoki #MLBB
+  </div>
+  <h4>Key Points dari Sistem</h4>
+  <ul>
+    <li>Enkripsi AES-256 — credentials benar-benar dienkripsi di database</li>
+    <li>Dashboard tracking real-time — <code>/track</code> page publik</li>
+    <li>Notifikasi otomatis — WA (Meta Cloud API) + Email (Resend) + Telegram</li>
+  </ul>
+</div>
+
+<!-- POST 2 -->
+<div class="post-detail">
+  <div class="post-header">
+    <div class="post-num">2</div>
+    <div><div class="post-title">TUTORIAL: Cara Order Joki Paket</div><div class="post-meta">Reels 60s · Education · Rabu W1</div></div>
+  </div>
+  <h4>Hook</h4>
+  <p>"Cara order joki ML cuma 2 menit 👇"</p>
+  <h4>Script</h4>
+  <div class="script-block">
+[0-3s] "Cara order joki ML di ETNYX. 2 menit selesai."<br>
+[3-10s] "Step 1: Buka etnyx.com, klik ORDER JOKI."<br>
+[10-18s] "Step 2: Pilih MODE JOKI — kita pilih PAKET. Paket = harga fix dari rank A ke rank B."<br>
+[18-28s] "Step 3: Pilih PAKET yang sesuai. Contoh: Epic V ke Legend V. Harga langsung tertera."<br>
+[28-35s] "Step 4: Mau lebih cepat? Tambah Express (+20%) atau Premium (+30%)."<br>
+[35-43s] "Step 5: Isi data akun ML. User ID, Server ID, password. Semua dienkripsi AES-256."<br>
+[43-50s] "Step 6: Pilih pembayaran. Transfer bank, e-wallet, QRIS — semua bisa."<br>
+[50-57s] "Step 7: Bayar, dan langsung bisa tracking real-time!"<br>
+[57-60s] "Gampang kan? Link di bio. 👇"
+  </div>
+  <h4>System Mapping</h4>
+  <ul>
+    <li>Screen record: <code>etnyx.com/order</code> → Mode Paket → pilih paket card</li>
+    <li>Pricing dari CMS (Supabase settings table: <code>pricing_catalog</code>)</li>
+    <li>Express +20% / Premium +30% / Season multiplier (CMS)</li>
+    <li>Payment: Transfer Manual (11 metode) + iPaymu otomatis</li>
+    <li>Post-order: Tracking di <code>/track</code>, notif WA + Email otomatis</li>
+  </ul>
+</div>
+
+<!-- POST 3 -->
+<div class="post-detail">
+  <div class="post-header">
+    <div class="post-num">3</div>
+    <div><div class="post-title">SOCIAL PROOF — Review Customer</div><div class="post-meta">Carousel 5 Slides · Proof · Jumat W1</div></div>
+  </div>
+  <h4>Slide-by-Slide</h4>
+  <table>
+    <tr><th>Slide</th><th>Content</th></tr>
+    <tr><td><strong>1 Cover</strong></td><td>🗣️ "Kata mereka yang udah pake ETNYX" — Rating 4.9/5 dari 500+ review</td></tr>
+    <tr><td><strong>2</strong></td><td>⭐⭐⭐⭐⭐ Review customer 1 — Joki Paket (Epic → Mythic: 2 hari, akun aman)</td></tr>
+    <tr><td><strong>3</strong></td><td>⭐⭐⭐⭐⭐ Review customer 2 — Joki PerStar (tracking real-time, recommended)</td></tr>
+    <tr><td><strong>4</strong></td><td>⭐⭐⭐⭐⭐ Review customer 3 — Gendong (booster jago carry, dikasih tips)</td></tr>
+    <tr><td><strong>5 CTA</strong></td><td>2.847+ order ✅ · 4.9 rating ⭐ · 0 akun bermasalah 🔒 → etnyx.com/order</td></tr>
+  </table>
+  <h4>System Source</h4>
+  <ul>
+    <li>Reviews dari <code>/review</code> system — rating ≥4⭐ auto jadi testimonial</li>
+    <li>Tampilkan 3 mode order berbeda (paket, perstar, gendong)</li>
+  </ul>
+</div>
+
+<!-- POST 4 -->
+<div class="post-detail">
+  <div class="post-header">
+    <div class="post-num">4</div>
+    <div><div class="post-title">PAIN POINT — Solo Queue Horror</div><div class="post-meta">Reels 15-20s · Awareness · Senin W2</div></div>
+  </div>
+  <h4>Hook</h4>
+  <p>"POV: Kamu carry 15-2-8, tapi tetep kalah"</p>
+  <h4>Script</h4>
+  <div class="script-block">
+[0-3s] "POV: Carry 15 kill di ranked"<br>
+[3-6s] "Tim kamu:" (cut ke screenshot: AFK, 0-8-1, build aneh)<br>
+[6-10s] "Star -1. Lagi. Dan lagi."<br>
+[10-14s] "Meanwhile yang pake ETNYX:" (dashboard showing Mythic, winstreak)<br>
+[14-18s] "Beda cerita."<br>
+[18-20s] "etnyx.com — link di bio"
+  </div>
+  <h4>Psychological Trigger</h4>
+  <p><strong>Frustration + Desire:</strong> Relate dengan pain solo queue → tunjukkan solusi ETNYX → dashboard tracking sebagai bukti visual</p>
+</div>
+
+<!-- POST 5 -->
+<div class="post-detail">
+  <div class="post-header">
+    <div class="post-num">5</div>
+    <div><div class="post-title">TUTORIAL: Cara Order Joki PerBintang</div><div class="post-meta">Reels 45-60s · Education · Rabu W2</div></div>
+  </div>
+  <h4>Hook</h4>
+  <p>"Mau push cuma beberapa star? Ini caranya 👇"</p>
+  <h4>Script</h4>
+  <div class="script-block">
+[0-3s] "Ga perlu push full rank. Bisa per-bintang!"<br>
+[3-10s] "Buka etnyx.com → Order Joki. Pilih Mode: PER BINTANG."<br>
+[10-20s] "Pilih RANK kamu: Grand Master, Epic, Legend, Mythic. Harga per star langsung keliatan."<br>
+[20-28s] "Atur jumlah star (min 3). Total harga otomatis dihitung."<br>
+[28-35s] "Tambah Express atau Premium biar diprioritaskan."<br>
+[35-43s] "Isi data akun, pilih pembayaran. Semua terenkripsi AES-256."<br>
+[43-50s] "Selesai! Tracking real-time + notif WA otomatis."<br>
+[50-55s] "Mulai dari Rp 4.000/star. Budget friendly!"<br>
+[55-58s] "Link di bio. 👇"
+  </div>
+  <h4>System Mapping</h4>
+  <ul>
+    <li>Rank cards: <code>immortal</code>, <code>honor</code>, <code>glory</code>, <code>grading</code>, <code>mythic</code>, <code>legend</code>, <code>epic</code>, <code>grandmaster</code></li>
+    <li>Harga per star dari CMS <code>perstar_pricing</code></li>
+    <li>Min 3 star, slider/input quantity</li>
+    <li>API mengirim <code>perStarRankId</code> + <code>starQuantity</code></li>
+  </ul>
+</div>
+
+<!-- POST 6 -->
+<div class="post-detail">
+  <div class="post-header">
+    <div class="post-num">6</div>
+    <div><div class="post-title">KEAMANAN AKUN — Breakdown Fitur</div><div class="post-meta">Carousel 5 Slides · Education · Jumat W2</div></div>
+  </div>
+  <h4>Slide-by-Slide</h4>
+  <table>
+    <tr><th>Slide</th><th>Content</th></tr>
+    <tr><td><strong>1 Cover</strong></td><td>🔒 "Akun kamu AMAN di ETNYX" — Ini buktinya 👇</td></tr>
+    <tr><td><strong>2 🔐</strong></td><td><strong>Enkripsi AES-256:</strong> Password dienkripsi military-grade. Admin pun ga bisa baca password asli.</td></tr>
+    <tr><td><strong>3 📊</strong></td><td><strong>Tracking Real-Time:</strong> Pantau progress 24/7 dari dashboard. Setiap update = notif WA otomatis.</td></tr>
+    <tr><td><strong>4 👨‍💻</strong></td><td><strong>Booster Terverifikasi:</strong> Diseleksi, di-assign coordinator (Lead), credential hanya saat order aktif.</td></tr>
+    <tr><td><strong>5 CTA</strong></td><td>"Keamanan bukan fitur tambahan. Keamanan adalah STANDAR kami." → etnyx.com/order</td></tr>
+  </table>
+  <h4>Fakta dari Sistem</h4>
+  <ul>
+    <li>Credentials dienkripsi AES di database (bukan plain text)</li>
+    <li>Worker hanya bisa lihat credentials order yang di-assign ke dia</li>
+    <li>Rate limiting: max 5 order/menit per IP</li>
+    <li>HMAC verification di WA webhook</li>
+    <li>Server-side price validation (tidak trust client)</li>
+    <li>Audit trail semua action tercatat</li>
+  </ul>
+</div>
+
+<!-- POST 7 -->
+<div class="post-detail">
+  <div class="post-header">
+    <div class="post-num">7</div>
+    <div><div class="post-title">TUTORIAL: Cara Order Gendong</div><div class="post-meta">Reels 45-60s · Education · Senin W3</div></div>
+  </div>
+  <h4>Hook</h4>
+  <p>"Mau main bareng booster Mythic? Ini caranya 👇"</p>
+  <h4>Script</h4>
+  <div class="script-block">
+[0-3s] "Mode Gendong = kamu MAIN BARENG booster. Beda sama joki biasa!"<br>
+[3-10s] "Buka etnyx.com → Order Joki. Pilih Mode: GENDONG."<br>
+[10-20s] "Pilih RANK. Harga per star keliatan di card."<br>
+[20-28s] "Atur jumlah star (min 3). Total harga otomatis."<br>
+[28-35s] "Pilih ROLE yang kamu mau main: EXP Laner, Roamer, Mid, dll."<br>
+[35-42s] "Pilih jadwal main: pagi, siang, sore, malam, atau fleksibel."<br>
+[42-48s] "GA PERLU kasih password! Gendong pakai akun sendiri."<br>
+[48-55s] "Setelah bayar, booster contact kamu via WA. Langsung main bareng!"<br>
+[55-60s] "Link di bio. 👇"
+  </div>
+  <h4>Key Differentiator</h4>
+  <div class="highlight-box">
+    <strong>Gendong ≠ Joki.</strong> Customer tetap main pakai akun sendiri. Ga perlu share password. Booster carry sebagai duo partner. Pricing dari CMS <code>gendong_pricing</code>.
+  </div>
+</div>
+
+<!-- POST 8 -->
+<div class="post-detail">
+  <div class="post-header">
+    <div class="post-num">8</div>
+    <div><div class="post-title">PROMO / CTA — Urgency Slot</div><div class="post-meta">Reels 20-30s · Conversion · Rabu W3</div></div>
+  </div>
+  <h4>Hook</h4>
+  <p>"Slot booster minggu ini tinggal 5 🚨"</p>
+  <h4>Script</h4>
+  <div class="script-block">
+[0-3s] "SLOT BOOSTER MINGGU INI TINGGAL 5 🚨"<br>
+[3-8s] "Season reset tinggal [X] hari. Rank ga push sekarang? Siap-siap turun."<br>
+[8-15s] "ETNYX — push rank mulai 4 ribu. Paket, PerStar, atau Gendong."<br>
+[15-22s] "Tracking real-time. Akun dienkripsi. Booster Mythic verified."<br>
+[22-28s] "Jangan tunggu besok. Besok harga bisa beda."<br>
+[28-30s] "etnyx.com — link di bio 👇"
+  </div>
+  <h4>CTA Elements dari Sistem</h4>
+  <ul>
+    <li>Promo codes dari CMS (<code>promo_codes</code> table)</li>
+    <li>3 mode order sekaligus CTA: Paket + PerStar + Gendong</li>
+    <li>Season pricing multiplier (bisa naik saat season reset)</li>
+  </ul>
+</div>
+
+<!-- POST 9 -->
+<div class="post-detail">
+  <div class="post-header">
+    <div class="post-num">9</div>
+    <div><div class="post-title">FAQ — Pertanyaan Paling Sering</div><div class="post-meta">Carousel 6 Slides · Education · Jumat W3</div></div>
+  </div>
+  <h4>Slide-by-Slide</h4>
+  <table>
+    <tr><th>Slide</th><th>Q</th><th>A</th></tr>
+    <tr><td><strong>1 Cover</strong></td><td colspan="2">❓ FAQ — Pertanyaan yang Sering Ditanya · Swipe 👉</td></tr>
+    <tr><td><strong>2</strong></td><td>"Aman ga akun saya?"</td><td>100% aman. Enkripsi AES-256. Credential dihapus setelah selesai.</td></tr>
+    <tr><td><strong>3</strong></td><td>"Berapa lama prosesnya?"</td><td>Warrior→Epic: 1-2 hari. Epic→Legend: 2-3 hari. Legend→Mythic: 3-5 hari. Express lebih cepat!</td></tr>
+    <tr><td><strong>4</strong></td><td>"Bisa bayar pakai apa?"</td><td>Transfer bank, QRIS, e-wallet (OVO, GoPay, DANA, ShopeePay), manual transfer.</td></tr>
+    <tr><td><strong>5</strong></td><td>"Bedanya Paket, PerStar, Gendong?"</td><td>📦 Paket = serahin akun, beres. ⭐ PerStar = per bintang, fleksibel. 🤝 Gendong = main bareng.</td></tr>
+    <tr><td><strong>6 CTA</strong></td><td colspan="2">Masih ada pertanyaan? Chat WA 24/7 atau baca etnyx.com/faq · Link di bio</td></tr>
+  </table>
+  <h4>Chatbot WA Support</h4>
+  <p>Customer yang chat WA akan otomatis dijawab chatbot: ketik <code>1</code> untuk harga, <code>2</code> untuk cek order, <code>3</code> untuk CS, <code>4</code> untuk review, <code>5</code> untuk promo.</p>
+</div>
+
+<hr>
+
+<!-- ==================== REPOST GUIDE ==================== -->
+<h2>Panduan Repost Platform Lain</h2>
+
+<table>
+  <tr><th>Platform</th><th>Format</th><th>Catatan</th></tr>
+  <tr><td><strong>TikTok</strong></td><td>Reels langsung repost</td><td>Tambah trending sound, hapus watermark IG</td></tr>
+  <tr><td><strong>Facebook</strong></td><td>Reels + Carousel as album</td><td>Caption bisa lebih panjang, tambah link</td></tr>
+  <tr><td><strong>YouTube Shorts</strong></td><td>Reels langsung repost</td><td>Judul singkat, hashtag di deskripsi</td></tr>
+  <tr><td><strong>Twitter/X</strong></td><td>Clip 15s + thread</td><td>Thread versi text dari carousel</td></tr>
+</table>
+
+<hr>
+
+<!-- Footer -->
+<div style="text-align:center; padding:20px 0; color:var(--text-muted);">
+  <div style="font-size:18px; font-weight:900; background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:6px;">ETNYX</div>
+  <div style="font-style:italic; font-size:12px;">"Bukan joki biasa. Ini SISTEM." 🎮</div>
+  <div style="font-size:10px; margin-top:8px; color:rgba(255,255,255,0.3);">Instagram 9-Post Launch Grid & Mood Board v2.0 — 15 April 2026</div>
+</div>
+
+</body>
+</html>

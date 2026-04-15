@@ -1,13 +1,14 @@
 "use client";
 
 import { toastError } from "@/components/ToastProvider";
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { formatRupiah } from "@/utils/helpers";
 import { WHATSAPP_NUMBER } from "@/lib/constants";
+import { trackViewContent } from "@/lib/tracking";
 import {
   Copy,
   Check,
@@ -112,6 +113,7 @@ function ManualPaymentContent() {
   const [uploading, setUploading] = useState(false);
   const [uploaded, setUploaded] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
+  const trackedRef = useRef(false);
 
   const t = locale === "id"
     ? {
@@ -187,6 +189,11 @@ function ManualPaymentContent() {
         setOrder(data.order);
         setBankAccounts(data.bankAccounts || []);
         if (data.hasProof) setUploaded(true);
+        // Fire ViewContent once when order data is loaded
+        if (!trackedRef.current && data.order) {
+          trackedRef.current = true;
+          trackViewContent({ contentName: "Manual Payment", value: data.order.total_price });
+        }
       } catch {
         setError("Gagal memuat data");
       } finally {

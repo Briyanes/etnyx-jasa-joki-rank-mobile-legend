@@ -1,0 +1,1304 @@
+<!--
+  ETNYX — Panduan Sistem Operasional (Lengkap)
+  Merged: System Guide + Team Sync Presentation
+  For PDF export — Dark theme, gradient headlines
+  Last updated: 15 April 2026
+-->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ETNYX — Panduan Sistem Operasional</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent: #2DD4BF;
+    --primary: #7FA8A3;
+    --secondary: #A78BFA;
+    --bg: #0F1419;
+    --surface: #151B22;
+    --card-bg: rgba(255,255,255,0.04);
+    --card-border: rgba(255,255,255,0.08);
+    --text: #E6F1EF;
+    --text-muted: #9CA3AF;
+    --success: #22C55E;
+    --warning: #F59E0B;
+    --danger: #EF4444;
+    --teal: #2DD4BF;
+    --gradient: linear-gradient(135deg, #2DD4BF, #7FA8A3);
+  }
+
+  @page { margin: 12mm 10mm; size: A4; }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 40px 30px;
+    font-size: 12.5px;
+    line-height: 1.65;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* ========== Cover / Title ========== */
+  .cover {
+    text-align: center;
+    padding: 50px 0 30px;
+    border-bottom: 2px solid rgba(45,212,191,0.3);
+    margin-bottom: 30px;
+    page-break-after: always;
+  }
+  .cover h1 {
+    font-size: 38px;
+    font-weight: 900;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+  }
+  .cover .tagline {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+  .cover .meta {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 12px;
+  }
+  .cover .stat-row {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin: 24px 0;
+  }
+  .cover .stat-box { text-align: center; }
+  .cover .stat-num {
+    font-size: 32px;
+    font-weight: 900;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .cover .stat-lbl {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  .cover .quote {
+    border-left: 3px solid var(--accent);
+    padding: 8px 16px;
+    background: rgba(45,212,191,0.06);
+    border-radius: 0 6px 6px 0;
+    font-style: italic;
+    color: var(--text-muted);
+    max-width: 500px;
+    margin: 20px auto 0;
+    font-size: 13px;
+  }
+
+  /* ========== Section Headers ========== */
+  h2 {
+    font-size: 20px;
+    font-weight: 800;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 32px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid rgba(45,212,191,0.25);
+    page-break-after: avoid;
+  }
+  h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--secondary);
+    margin-top: 20px;
+    margin-bottom: 8px;
+    page-break-after: avoid;
+  }
+  h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--teal);
+    margin-top: 14px;
+    margin-bottom: 6px;
+    page-break-after: avoid;
+  }
+
+  /* ========== Cards ========== */
+  .card-grid {
+    display: grid;
+    gap: 10px;
+    margin: 10px 0;
+  }
+  .g2 { grid-template-columns: 1fr 1fr; }
+  .g3 { grid-template-columns: 1fr 1fr 1fr; }
+  .g4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .card .icon { font-size: 18px; margin-bottom: 4px; }
+  .card .label { font-weight: 700; font-size: 12px; margin-bottom: 4px; color: var(--text); }
+  .card .desc { font-size: 11px; color: var(--text-muted); line-height: 1.5; }
+
+  /* ========== Tables ========== */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+    font-size: 11.5px;
+    page-break-inside: avoid;
+  }
+  th {
+    background: rgba(45,212,191,0.12);
+    color: var(--accent);
+    font-weight: 700;
+    text-align: left;
+    padding: 7px 10px;
+    border-bottom: 1px solid rgba(45,212,191,0.2);
+  }
+  td {
+    padding: 6px 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    color: rgba(255,255,255,0.8);
+  }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* ========== Badges ========== */
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .badge-blue { background: rgba(45,212,191,0.15); color: var(--accent); }
+  .badge-purple { background: rgba(167,139,250,0.15); color: var(--secondary); }
+  .badge-green { background: rgba(74,222,128,0.15); color: var(--success); }
+  .badge-amber { background: rgba(250,204,21,0.15); color: var(--warning); }
+  .badge-red { background: rgba(248,113,113,0.15); color: var(--danger); }
+  .badge-teal { background: rgba(45,212,191,0.15); color: var(--teal); }
+
+  .auto-tag { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: 700; background: rgba(74,222,128,0.15); color: var(--success); }
+  .manual-tag { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: 700; background: rgba(250,204,21,0.15); color: var(--warning); }
+
+  /* ========== Misc ========== */
+  code {
+    background: rgba(255,255,255,0.08);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    color: var(--accent);
+    font-family: 'SF Mono', Menlo, monospace;
+  }
+  pre {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--card-border);
+    padding: 12px 14px;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-size: 11px;
+    margin: 8px 0;
+    page-break-inside: avoid;
+    color: var(--text);
+  }
+  pre code { background: none; padding: 0; color: inherit; }
+
+  hr {
+    border: none;
+    border-top: 1px solid rgba(45,212,191,0.15);
+    margin: 24px 0;
+  }
+
+  ul { padding-left: 18px; margin: 6px 0; }
+  li { margin: 3px 0; }
+  strong { color: #F8FAFC; }
+  p { margin: 5px 0; }
+  a { color: var(--accent); text-decoration: none; }
+
+  .highlight-box {
+    background: rgba(45,212,191,0.06);
+    border: 1px solid rgba(45,212,191,0.15);
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin: 10px 0;
+    font-size: 11.5px;
+    color: rgba(255,255,255,0.7);
+  }
+
+  .flow-box {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 10px 0;
+  }
+  .flow-step {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .flow-arrow { color: var(--accent); font-size: 14px; }
+
+  /* ========== ToC ========== */
+  .toc {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 20px 0;
+  }
+  .toc h3 { color: var(--accent); margin-top: 0; }
+  .toc ol { padding-left: 20px; }
+  .toc li { margin: 4px 0; font-size: 12px; color: var(--text-muted); }
+
+  @media print {
+    body { padding: 0; }
+    .cover { padding: 60px 0 40px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ==================== COVER ==================== -->
+<div class="cover">
+  <h1>ETNYX</h1>
+  <div class="tagline">Panduan Sistem Operasional</div>
+  <p style="font-size:13px; color:rgba(255,255,255,0.4);">Untuk Seluruh Tim — Admin · Lead · Worker · CS</p>
+
+  <div class="stat-row">
+    <div class="stat-box"><div class="stat-num">6</div><div class="stat-lbl">Total Tim</div></div>
+    <div class="stat-box"><div class="stat-num">90%</div><div class="stat-lbl">Automated</div></div>
+    <div class="stat-box"><div class="stat-num">24/7</div><div class="stat-lbl">System Runs</div></div>
+  </div>
+
+  <p style="font-size:11px; color:rgba(255,255,255,0.35);">
+    👤 2 Leader &nbsp;·&nbsp; 👤 1 CS &nbsp;·&nbsp; 👤 1 Admin &nbsp;·&nbsp; 👤 2 Developer (Owner)
+  </p>
+
+  <div class="quote">"Sistem yang jalan terus, bukan orang yang kerja terus."</div>
+
+  <div class="meta">
+    <strong>Versi:</strong> 2.0 — 15 April 2026<br>
+    <strong>Website:</strong> etnyx.com &nbsp;·&nbsp; <strong>Dashboard:</strong> etnyx.com/admin
+  </div>
+</div>
+
+<!-- ==================== TOC ==================== -->
+<div class="toc">
+  <h3>📋 Daftar Isi</h3>
+  <ol>
+    <li>Filosofi Sistem — Minim SDM, Max Omset</li>
+    <li>Overview Sistem & Fitur</li>
+    <li>Struktur Tim & Role</li>
+    <li>Alur Order Lengkap (End-to-End)</li>
+    <li>Step-by-Step: Customer Order</li>
+    <li>Otomatis vs Manual</li>
+    <li>Panduan Per Role — Admin</li>
+    <li>Panduan Per Role — Lead</li>
+    <li>Panduan Per Role — Worker</li>
+    <li>Panduan Per Role — CS</li>
+    <li>Tugas Harian Per Divisi</li>
+    <li>Mode Order & Pricing</li>
+    <li>Payment Flow</li>
+    <li>Notifikasi Otomatis (Multi Channel)</li>
+    <li>Chatbot WhatsApp</li>
+    <li>Customer Features</li>
+    <li>Security</li>
+    <li>Tech Stack</li>
+    <li>Known Issues & Improvement Plan</li>
+    <li>Roadmap 3 Bulan & KPI</li>
+    <li>Kapan Scale — Trigger & Action</li>
+    <li>Summary & Action Items</li>
+    <li>Kontak & Akses</li>
+    <li>FAQ Tim</li>
+  </ol>
+</div>
+
+<hr>
+
+<!-- ==================== 1. FILOSOFI ==================== -->
+<h2>1. Filosofi Sistem — Minim SDM, Max Omset</h2>
+
+<div class="highlight-box" style="border-left:3px solid var(--accent); font-style:italic;">
+  "Bangun sistem yang bekerja 24/7, bukan menambah orang untuk kerja 24/7."
+</div>
+
+<h3>Prinsip Utama</h3>
+<div class="card-grid g3">
+  <div class="card" style="border-top:3px solid var(--accent);">
+    <div class="icon">⚡</div>
+    <div class="label">Automate Everything</div>
+    <div class="desc">Order, payment, notifikasi, tracking — semua otomatis. Manusia cuma handle exception.</div>
+  </div>
+  <div class="card" style="border-top:3px solid var(--success);">
+    <div class="icon">🎯</div>
+    <div class="label">Self-Service Customer</div>
+    <div class="desc">Customer order, track, review sendiri via website. Nggak perlu CS jawab "udah sampai mana?"</div>
+  </div>
+  <div class="card" style="border-top:3px solid var(--secondary);">
+    <div class="icon">📊</div>
+    <div class="label">Data-Driven</div>
+    <div class="desc">Dashboard analytics, audit trail. Keputusan berdasarkan data, bukan feeling.</div>
+  </div>
+</div>
+
+<h3>Kenapa Cuma Butuh 6 Orang?</h3>
+<table>
+  <tr><th>Yang Biasa Manual</th><th>Di ETNYX</th><th></th></tr>
+  <tr><td>CS jawab "harga berapa?"</td><td>Website + pricing catalog otomatis</td><td><span class="auto-tag">AUTO</span></td></tr>
+  <tr><td>CS catat order di spreadsheet</td><td>Form order → langsung masuk DB</td><td><span class="auto-tag">AUTO</span></td></tr>
+  <tr><td>Admin cek transfer satu-satu</td><td>iPaymu auto-confirm / upload bukti</td><td><span class="auto-tag">SEMI-AUTO</span></td></tr>
+  <tr><td>WA satu-satu kasih update</td><td>Notifikasi WA/TG/Email otomatis</td><td><span class="auto-tag">AUTO</span></td></tr>
+  <tr><td>Customer tanya "udah sampai mana?"</td><td>Tracking page real-time (public)</td><td><span class="auto-tag">AUTO</span></td></tr>
+  <tr><td>Worker lapor via chat group</td><td>Worker dashboard — upload progress</td><td><span class="auto-tag">AUTO</span></td></tr>
+  <tr><td>Bikin invoice manual</td><td>Invoice auto-generate</td><td><span class="auto-tag">AUTO</span></td></tr>
+  <tr><td>Kumpulin testimoni manual</td><td>Review ≥4⭐ → auto jadi testimonial</td><td><span class="auto-tag">AUTO</span></td></tr>
+</table>
+
+<hr>
+
+<!-- ==================== 2. OVERVIEW ==================== -->
+<h2>2. Overview Sistem & Fitur</h2>
+
+<p>ETNYX adalah platform jasa joki & gendong Mobile Legends dengan fitur:</p>
+<div class="card-grid g2">
+  <div class="card">
+    <div class="label">🎮 3 Mode Order</div>
+    <div class="desc">Paket (rank→rank), Per-Bintang, Gendong (mabar)</div>
+  </div>
+  <div class="card">
+    <div class="label">💰 Dual Payment</div>
+    <div class="desc">Transfer Manual + iPaymu (otomatis)</div>
+  </div>
+  <div class="card">
+    <div class="label">🔔 Notifikasi Otomatis</div>
+    <div class="desc">WhatsApp, Telegram, Email, Push Notification</div>
+  </div>
+  <div class="card">
+    <div class="label">🖥️ Dashboard per Role</div>
+    <div class="desc">Admin, Lead, Worker — masing-masing punya akses sendiri</div>
+  </div>
+  <div class="card">
+    <div class="label">🤖 Chatbot WA</div>
+    <div class="desc">Auto-reply untuk customer: harga, cek order, promo</div>
+  </div>
+  <div class="card">
+    <div class="label">📊 Analytics & CMS</div>
+    <div class="desc">Revenue trend, conversion rate, pricing & promo management</div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ==================== 3. STRUKTUR TIM ==================== -->
+<h2>3. Struktur Tim & Role</h2>
+
+<div class="card-grid g3">
+  <div class="card" style="border-top:3px solid var(--accent);">
+    <div class="icon">🛡️</div>
+    <div class="label">Admin (1 orang)</div>
+    <div class="desc">Dashboard: <code>/admin</code><br>Full control: orders, payment, settings, staff, promo, pricing, analytics</div>
+  </div>
+  <div class="card" style="border-top:3px solid var(--secondary);">
+    <div class="icon">⭐</div>
+    <div class="label">Leader (2 orang)</div>
+    <div class="desc">Dashboard: <code>/admin/lead</code><br>Assign worker, koordinasi, QA, eskalasi, reporting</div>
+  </div>
+  <div class="card" style="border-top:3px solid var(--success);">
+    <div class="icon">💬</div>
+    <div class="label">CS (1 orang)</div>
+    <div class="desc">Tool: WhatsApp Business<br>Handle chat, closing leads, follow-up, komplain</div>
+  </div>
+</div>
+<div class="card-grid g2" style="margin-top:10px;">
+  <div class="card" style="border-top:3px solid var(--warning);">
+    <div class="icon">🎮</div>
+    <div class="label">Worker / Booster (scalable)</div>
+    <div class="desc">Dashboard: <code>/admin/worker</code><br>Push rank, update progress, upload screenshot</div>
+  </div>
+  <div class="card" style="border-top:3px solid var(--danger);">
+    <div class="icon">💻</div>
+    <div class="label">Developer / Owner (2 orang)</div>
+    <div class="desc">Maintain sistem, deploy, monitor, scaling infrastructure</div>
+  </div>
+</div>
+
+<h3>Hirarki</h3>
+<pre><code>Admin (Full Control)
+  └── Lead (Team Manager)
+        └── Worker 1, Worker 2, ... (Executor)</code></pre>
+
+<h3>Akses Dashboard per Role</h3>
+<table>
+  <tr><th>Role</th><th>URL</th><th>Bisa Apa</th></tr>
+  <tr><td><span class="badge badge-blue">Admin</span></td><td><code>/admin/dashboard</code></td><td>SEMUA — orders, pricing, staff, promo, payroll, settings, analytics</td></tr>
+  <tr><td><span class="badge badge-purple">Leader</span></td><td><code>/admin/lead</code></td><td>Order confirmed → assign worker, monitor progress, QA, notes</td></tr>
+  <tr><td><span class="badge badge-green">Worker</span></td><td><code>/admin/worker</code></td><td>Order assigned → credentials, progress, mark selesai</td></tr>
+  <tr><td><span class="badge badge-amber">CS</span></td><td>WA Business</td><td>Handle chat, closing, follow-up, tracking link</td></tr>
+  <tr><td><span class="badge badge-red">Customer</span></td><td><code>/order</code> · <code>/track</code> · <code>/review</code></td><td>Order, track progress, kasih review</td></tr>
+</table>
+
+<div class="highlight-box">
+  <strong>Security:</strong> Setiap staff login pakai email + password sendiri. Worker hanya bisa lihat order yang di-assign ke dia. Semua action tercatat di audit trail.
+</div>
+
+<hr>
+
+<!-- ==================== 4. ALUR ORDER LENGKAP ==================== -->
+<h2>4. Alur Order Lengkap (End-to-End)</h2>
+
+<div class="flow-box">
+  <span class="flow-step">Customer Order</span><span class="flow-arrow">→</span>
+  <span class="flow-step">Admin Approve</span><span class="flow-arrow">→</span>
+  <span class="flow-step">Lead Assign</span><span class="flow-arrow">→</span>
+  <span class="flow-step">Worker Push</span><span class="flow-arrow">→</span>
+  <span class="flow-step">Lead Upload Hasil</span><span class="flow-arrow">→</span>
+  <span class="flow-step">Selesai ✅</span>
+</div>
+
+<table>
+  <tr><th>#</th><th>Step</th><th>Siapa</th><th>Sistem</th></tr>
+  <tr><td>1</td><td>Customer isi form order di website</td><td>👤 Customer</td><td><span class="auto-tag">AUTO</span></td></tr>
+  <tr><td>2</td><td>Akun terverifikasi, credentials dienkripsi, order masuk DB</td><td>—</td><td><span class="auto-tag">AUTO</span></td></tr>
+  <tr><td>3</td><td>Order ID di-generate: <code>ETX-YYMMDD-001</code></td><td>—</td><td><span class="auto-tag">AUTO</span></td></tr>
+  <tr><td>4</td><td>Notif Telegram ke Admin group → "Order baru masuk!"</td><td>—</td><td><span class="auto-tag">AUTO</span></td></tr>
+  <tr><td>5</td><td>WA + Email ke customer → tracking link + detail order</td><td>—</td><td><span class="auto-tag">AUTO</span></td></tr>
+  <tr style="background:rgba(250,204,21,0.03);"><td>6a</td><td><strong>Auto Payment:</strong> Customer bayar via iPaymu → webhook auto-confirm</td><td>—</td><td><span class="auto-tag">AUTO</span></td></tr>
+  <tr style="background:rgba(250,204,21,0.03);"><td>6b</td><td><strong>Manual:</strong> Customer transfer → upload bukti → Admin review + approve</td><td>🛡️ Admin</td><td><span class="manual-tag">MANUAL</span></td></tr>
+  <tr><td>7</td><td>Status → <span class="badge badge-blue">Confirmed</span> · WA "Pembayaran dikonfirmasi!"</td><td>—</td><td><span class="auto-tag">AUTO</span></td></tr>
+  <tr><td>8</td><td>Notif Telegram ke Worker group → "Order siap dikerjakan"</td><td>—</td><td><span class="auto-tag">AUTO</span></td></tr>
+  <tr style="background:rgba(167,139,250,0.03);"><td>9</td><td><strong>Leader assign worker</strong> (pilih worker via Lead Dashboard)</td><td>⭐ Leader</td><td><span class="manual-tag">MANUAL</span></td></tr>
+  <tr><td>10</td><td>Status → <span class="badge badge-purple">In Progress</span> · Worker dapat Telegram notif</td><td>—</td><td><span class="auto-tag">AUTO</span></td></tr>
+  <tr><td>11</td><td>Worker ambil credentials (auto decrypt) → push rank</td><td>🎮 Worker</td><td><span class="auto-tag">AUTO</span></td></tr>
+  <tr><td>12</td><td>Worker upload progress (stars, matches, screenshots)</td><td>🎮 Worker</td><td><span class="manual-tag">MANUAL</span></td></tr>
+  <tr><td>13</td><td>Progress otomatis update di tracking page customer</td><td>—</td><td><span class="auto-tag">AUTO</span></td></tr>
+  <tr><td>14</td><td>Worker klik "Selesai" → Status <span class="badge badge-green">Completed</span></td><td>🎮 Worker</td><td><span class="manual-tag">MANUAL</span></td></tr>
+  <tr><td>15</td><td>Lead upload hasil (screenshot before/after)</td><td>⭐ Leader</td><td><span class="manual-tag">MANUAL</span></td></tr>
+  <tr><td>16</td><td>WA ke customer: "Order selesai! 🎉" + link review</td><td>—</td><td><span class="auto-tag">AUTO</span></td></tr>
+  <tr><td>17</td><td>Customer kasih review & rating</td><td>👤 Customer</td><td><span class="auto-tag">AUTO</span></td></tr>
+  <tr><td>18</td><td>Rating ≥4⭐ → otomatis jadi testimonial</td><td>—</td><td><span class="auto-tag">AUTO</span></td></tr>
+  <tr><td>19</td><td>Customer dapat reward points (1 pt per Rp 10.000)</td><td>—</td><td><span class="auto-tag">AUTO</span></td></tr>
+</table>
+
+<div class="highlight-box">
+  <strong>Summary:</strong> Dari 19 step, hanya <strong>5 yang manual</strong>. Sisanya <strong>100% otomatis</strong>.
+</div>
+
+<hr>
+
+<!-- ==================== 5. STEP-BY-STEP CUSTOMER ==================== -->
+<h2>5. Step-by-Step: Customer Order</h2>
+<p style="color:var(--text-muted); margin-bottom:8px;">Apa yang customer lihat & lakukan dari awal sampai akhir</p>
+
+<div class="card-grid g2">
+  <div class="card" style="border-left:3px solid var(--accent);">
+    <div class="label">Step 1 — Pilih Paket</div>
+    <div class="desc">
+      Buka <strong>etnyx.com/order</strong><br>
+      Pilih mode: <strong>Paket</strong>, <strong>Per-Star</strong>, atau <strong>Gendong</strong><br>
+      Lihat harga dari pricing catalog (CMS)<br>
+      Opsi: Express (+20%), Premium (+30%)<br>
+      Masukkan promo code (kalau ada)
+    </div>
+  </div>
+  <div class="card" style="border-left:3px solid var(--accent);">
+    <div class="label">Step 2 — Data Akun</div>
+    <div class="desc">
+      Isi User ID + Server ID (Moonton)<br>
+      <strong>Sistem verifikasi akun otomatis</strong> via Moonton API<br>
+      Pilih login method (Moonton/FB/Google/TikTok/VK/Apple)<br>
+      Masukkan login &amp; password → <strong>dienkripsi AES-256</strong><br>
+      Request hero favorit (opsional)
+    </div>
+  </div>
+  <div class="card" style="border-left:3px solid var(--success);">
+    <div class="label">Step 3 — Kontak &amp; Add-ons</div>
+    <div class="desc">
+      Isi nomor WhatsApp &amp; email<br>
+      Pilih opsi Express / Premium<br>
+      Tulis catatan khusus untuk worker<br>
+      Apply promo code / referral
+    </div>
+  </div>
+  <div class="card" style="border-left:3px solid var(--warning);">
+    <div class="label">Step 4 — Bayar</div>
+    <div class="desc">
+      <strong>Auto Payment</strong> (iPaymu — QRIS, VA, e-wallet) → redirect, bayar, auto confirm<br>
+      <strong>Manual Transfer</strong> → lihat rekening, transfer, upload bukti
+    </div>
+  </div>
+</div>
+
+<div class="highlight-box">
+  <strong>Setelah order:</strong> Customer otomatis dapat WA + Email konfirmasi dengan <strong>link tracking</strong> — bisa pantau progress kapan saja tanpa tanya CS.
+</div>
+
+<hr>
+
+<!-- ==================== 6. OTOMATIS VS MANUAL ==================== -->
+<h2>6. Otomatis vs Manual</h2>
+
+<div class="card-grid g2">
+  <div>
+    <h3 style="color:var(--success);">✅ Otomatis (Sistem Handle)</h3>
+    <table>
+      <tr><td>Order creation + validation</td></tr>
+      <tr><td>Akun verification (Moonton API)</td></tr>
+      <tr><td>Credential encryption (AES-256)</td></tr>
+      <tr><td>Order ID generation (ETX-YYMMDD-###)</td></tr>
+      <tr><td>Payment auto-confirm (iPaymu webhook)</td></tr>
+      <tr><td>WA notif ke customer (setiap status change)</td></tr>
+      <tr><td>Telegram notif ke admin/worker group</td></tr>
+      <tr><td>Email konfirmasi</td></tr>
+      <tr><td>Tracking page real-time (public)</td></tr>
+      <tr><td>Progress auto-update dari worker</td></tr>
+      <tr><td>Invoice auto-generate</td></tr>
+      <tr><td>Auto-testimonial dari review ≥4⭐</td></tr>
+      <tr><td>Reward points auto-credited</td></tr>
+      <tr><td>Promo code validation + discount</td></tr>
+      <tr><td>Tier discount auto-apply</td></tr>
+      <tr><td>Rate limiting + security</td></tr>
+      <tr><td>Audit trail (semua action tercatat)</td></tr>
+    </table>
+  </div>
+  <div>
+    <h3 style="color:var(--warning);">⚠️ Manual (Butuh Manusia)</h3>
+    <table>
+      <tr><td>Verify bukti transfer manual → <strong>Admin</strong></td></tr>
+      <tr><td>Assign worker ke order → <strong>Leader</strong></td></tr>
+      <tr><td>Upload hasil (before/after) → <strong>Leader</strong></td></tr>
+      <tr><td>Push rank (main game) → <strong>Worker</strong></td></tr>
+      <tr><td>Upload progress + screenshot → <strong>Worker</strong></td></tr>
+      <tr><td>Mark order selesai → <strong>Worker</strong></td></tr>
+      <tr><td>Handle komplain / eskalasi → <strong>CS / Admin</strong></td></tr>
+      <tr><td>Approve testimonial → <strong>Admin</strong></td></tr>
+      <tr><td>Follow-up leads → <strong>CS</strong></td></tr>
+      <tr><td>Quality check worker → <strong>Leader</strong></td></tr>
+      <tr><td>Update pricing / promo → <strong>Admin</strong></td></tr>
+    </table>
+    <div class="highlight-box">
+      <strong>Takeaway:</strong> 17 otomatis vs 11 manual.<br>
+      Manual pun rata-rata cuma klik 1-2 tombol di dashboard.
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ==================== 7. PANDUAN ADMIN ==================== -->
+<h2>7. Panduan Per Role — Admin</h2>
+<p><strong>Login:</strong> <code>/admin</code> → masukkan password admin</p>
+
+<h4>Dashboard Utama</h4>
+<ul>
+  <li>Total order, revenue, statistik harian</li>
+  <li>Grafik revenue trend & order stats</li>
+  <li>Quick actions: approve payment, assign order</li>
+</ul>
+
+<h4>Payment Approval (Tugas Utama)</h4>
+<ol>
+  <li>Buka tab <strong>Orders</strong></li>
+  <li>Filter status <code>paid</code> (butuh approval)</li>
+  <li>Klik <strong>"Lihat Bukti Transfer"</strong></li>
+  <li>Review gambar bukti + nama pengirim</li>
+  <li>Klik <strong>Approve</strong> (order → <code>confirmed</code>) atau <strong>Reject</strong> (+ alasan)</li>
+  <li>Customer otomatis dapat notifikasi WA & Email</li>
+</ol>
+
+<h4>Kelola Staff</h4>
+<ol>
+  <li>Tab <strong>Staff</strong> → Tambah Admin/Lead/Worker</li>
+  <li>Untuk Worker: wajib pilih Lead-nya (<code>lead_id</code>)</li>
+  <li>Bisa nonaktifkan/hapus staff</li>
+</ol>
+
+<h4>CMS Settings</h4>
+<div class="card-grid g2">
+  <div class="card"><div class="label">Hero Section</div><div class="desc">Edit teks & gambar hero homepage</div></div>
+  <div class="card"><div class="label">Pricing Catalog</div><div class="desc">Edit paket harga (paket, per-star, gendong)</div></div>
+  <div class="card"><div class="label">Promo Codes</div><div class="desc">Buat/edit kode promo</div></div>
+  <div class="card"><div class="label">Integrations</div><div class="desc">API keys (Telegram, WA, iPaymu, dll)</div></div>
+  <div class="card"><div class="label">Bank Accounts</div><div class="desc">Kelola rekening transfer manual</div></div>
+  <div class="card"><div class="label">Season Pricing</div><div class="desc">Atur multiplier harga per musim</div></div>
+</div>
+
+<h4>Analytics</h4>
+<ul>
+  <li>Revenue trend (AreaChart)</li>
+  <li>Package breakdown & Top customers</li>
+  <li>Rank pair analytics & Worker leaderboard</li>
+</ul>
+
+<h4>Export Data</h4>
+<ul><li>Export orders ke CSV/Excel — Filter by tanggal, status, dll</li></ul>
+
+<hr>
+
+<!-- ==================== 8. PANDUAN LEAD ==================== -->
+<h2>8. Panduan Per Role — Lead</h2>
+<p><strong>Login:</strong> <code>/admin</code> → login dengan akun Lead</p>
+
+<h4>Melihat Order</h4>
+<ul>
+  <li>Tampil order <code>confirmed</code> (belum assign) dan <code>in_progress</code> (tim sendiri)</li>
+  <li>Counter "Belum Ditugaskan" menunjukkan jumlah order pending</li>
+  <li>Pagination: 20 order per halaman</li>
+</ul>
+
+<h4>Assign Worker (Tugas Utama)</h4>
+<ol>
+  <li>Lihat order dengan status <code>confirmed</code></li>
+  <li>Klik <strong>"Tugaskan"</strong> pada order</li>
+  <li>Pilih worker dari dropdown (hanya worker tim sendiri)</li>
+  <li>Worker langsung dapat push notification + order muncul di dashboard-nya</li>
+</ol>
+
+<h4>Bulk Assign</h4>
+<ol>
+  <li>Centang beberapa order sekaligus</li>
+  <li>Pilih worker → klik "Assign Semua"</li>
+  <li>Diproses batch per 5 order</li>
+</ol>
+
+<h4>Submit Hasil</h4>
+<ol>
+  <li>Setelah worker selesai (status <code>completed</code> atau <code>in_progress</code>)</li>
+  <li>Klik <strong>"Submit Hasil"</strong> pada order</li>
+  <li>Upload screenshot before/after</li>
+  <li>Customer otomatis dapat notifikasi + link review</li>
+</ol>
+
+<h4>Shared Notes & Worker Cards</h4>
+<ul>
+  <li>Setiap order punya catatan bersama (Lead & Worker bisa tambah)</li>
+  <li>Lihat daftar worker: status aktif/idle, jumlah order aktif</li>
+</ul>
+
+<hr>
+
+<!-- ==================== 9. PANDUAN WORKER ==================== -->
+<h2>9. Panduan Per Role — Worker</h2>
+<p><strong>Login:</strong> <code>/admin</code> → login dengan akun Worker</p>
+
+<h4>Melihat Assignment</h4>
+<ul>
+  <li>Tampil order yang di-assign ke kamu</li>
+  <li>Info: nickname customer, rank target, deadline</li>
+</ul>
+
+<h4>Mulai Kerja</h4>
+<ol>
+  <li>Klik order → lihat <strong>Credentials</strong> (akun game customer)</li>
+  <li>Login ke game → mulai push rank</li>
+  <li><strong>PENTING:</strong> Jangan share credentials ke siapapun!</li>
+</ol>
+
+<h4>Update Progress</h4>
+<ol>
+  <li>Klik <strong>"Update Progress"</strong></li>
+  <li>Isi: Stars gained, MVP, Savage, Matches, Win, Duration, Screenshots</li>
+  <li>Submit → customer langsung lihat update di tracking page</li>
+  <li>Bisa edit submission dalam <strong>30 menit</strong></li>
+</ol>
+
+<h4>Selesaikan Order</h4>
+<ol>
+  <li>Rank target tercapai → klik <strong>"Selesaikan Order"</strong></li>
+  <li>Status berubah ke <code>completed</code></li>
+  <li>Lead akan upload hasil akhir</li>
+</ol>
+
+<h3 style="color:var(--danger);">🚫 SOP Keamanan — WAJIB</h3>
+<div class="card-grid g2">
+  <div class="card" style="border:1px solid rgba(248,113,113,0.2);">
+    <div class="label" style="color:var(--danger);">DILARANG</div>
+    <div class="desc">
+      ✖ Akses email / data lain di akun customer<br>
+      ✖ Share credentials ke siapapun<br>
+      ✖ Pakai emulator yang terdeteksi<br>
+      ✖ Push di luar jam yang diizinkan<br>
+      ✖ Toxic / flame in game
+    </div>
+  </div>
+  <div class="card" style="border:1px solid rgba(74,222,128,0.2);">
+    <div class="label" style="color:var(--success);">WAJIB</div>
+    <div class="desc">
+      ✔ Login via secondary device<br>
+      ✔ VPN lokasi sesuai customer<br>
+      ✔ Play pattern natural (bukan bot)<br>
+      ✔ Screenshot setiap milestone<br>
+      ✔ Lapor kendala ke Leader segera
+    </div>
+  </div>
+</div>
+
+<h4>Yang TIDAK Bisa Dilakukan Worker:</h4>
+<ul>
+  <li>❌ Submit hasil/screenshot final (Lead yang upload)</li>
+  <li>❌ Assign order ke worker lain</li>
+  <li>❌ Lihat order orang lain</li>
+  <li>❌ Akses settings/CMS</li>
+</ul>
+
+<hr>
+
+<!-- ==================== 10. PANDUAN CS ==================== -->
+<h2>10. Panduan Per Role — CS</h2>
+<p><strong>Tool utama:</strong> WhatsApp Business + Dashboard (view only)</p>
+
+<div class="card-grid g2">
+  <div class="card" style="border-left:3px solid var(--success);">
+    <div class="label">📲 Handle Chat Masuk</div>
+    <div class="desc">
+      • Jawab DM dari sosmed / WA → SLA: <strong>&lt; 5 menit</strong><br>
+      • Kualifikasi: tanya nama, rank sekarang, target rank<br>
+      • Kasih info harga (refer ke pricing catalog)<br>
+      • Guide customer ke <strong>etnyx.com/order</strong><br>
+      • Prinsip: arahkan ke self-service
+    </div>
+  </div>
+  <div class="card" style="border-left:3px solid var(--warning);">
+    <div class="label">🛡️ Handle Objection</div>
+    <div class="desc">
+      • <strong>"Mahal"</strong> → Bandingin push sendiri vs 2-3 hari di ETNYX<br>
+      • <strong>"Takut ban"</strong> → Enkripsi, VPN, play natural, 0 banned<br>
+      • <strong>"Pikir-pikir"</strong> → Hold slot + harga 2 jam<br>
+      • <strong>"Garansi?"</strong> → Star turun = gratis push ulang
+    </div>
+  </div>
+  <div class="card" style="border-left:3px solid var(--accent);">
+    <div class="label">🔄 Follow-up</div>
+    <div class="desc">
+      • +2 jam: "Masih tertarik push rank?"<br>
+      • +24 jam: "Promo masih berlaku hari ini"<br>
+      • +3 hari: "Kalau butuh bantuan, ETNYX siap!"<br>
+      • <strong>Max 3x follow-up, jangan spam</strong>
+    </div>
+  </div>
+  <div class="card" style="border-left:3px solid var(--secondary);">
+    <div class="label">📞 Handle Komplain</div>
+    <div class="desc">
+      • Cek status di tracking page<br>
+      • Butuh action → eskalasi ke Leader / Admin<br>
+      • Update progress → info "bisa cek di link tracking"<br>
+      • Log setiap interaksi penting
+    </div>
+  </div>
+</div>
+
+<h4>Quick Reply Templates (Setup di WA Business)</h4>
+<div class="card-grid g3">
+  <div class="card"><div class="label">/halo</div><div class="desc">Opening script</div></div>
+  <div class="card"><div class="label">/harga</div><div class="desc">Price list</div></div>
+  <div class="card"><div class="label">/garansi</div><div class="desc">Guarantee</div></div>
+  <div class="card"><div class="label">/order</div><div class="desc">Order form link</div></div>
+  <div class="card"><div class="label">/tracking</div><div class="desc">Tracking link</div></div>
+  <div class="card"><div class="label">/promo</div><div class="desc">Current promo</div></div>
+</div>
+
+<div class="highlight-box">
+  <strong>Prinsip CS di ETNYX:</strong> Jangan manual orderin customer. Arahkan ke website. Sistem yang handle — CS fokus closing &amp; handling.
+</div>
+
+<hr>
+
+<!-- ==================== 11. TUGAS HARIAN ==================== -->
+<h2>11. Tugas Harian Per Divisi</h2>
+
+<h3>📅 Admin — Daily Checklist</h3>
+<table>
+  <tr><th>Waktu</th><th>Task</th><th>Tool</th></tr>
+  <tr><td>Pagi</td><td>Cek order semalam → verify payment pending</td><td>Admin Dashboard → Orders</td></tr>
+  <tr><td>Pagi</td><td>Cek Telegram → ada order butuh action?</td><td>Telegram</td></tr>
+  <tr><td>Siang</td><td>Review bukti pembayaran baru → approve/reject</td><td>"Lihat Bukti"</td></tr>
+  <tr><td>Siang</td><td>Cek overview: revenue, order pending, conversion</td><td>Dashboard Overview</td></tr>
+  <tr><td>Sore</td><td>Monitor order in_progress lama → follow up Leader</td><td>Filter status</td></tr>
+  <tr><td>Sore</td><td>Approve testimonial baru</td><td>Testimonials</td></tr>
+  <tr><td>Malam</td><td>Final check: semua payment hari ini verified?</td><td>Dashboard</td></tr>
+</table>
+
+<h3>📅 Leader — Daily Checklist</h3>
+<table>
+  <tr><th>Waktu</th><th>Task</th><th>Tool</th></tr>
+  <tr style="background:rgba(167,139,250,0.04);"><td><strong>ASAP</strong></td><td><strong>Assign worker ke order "confirmed"</strong> — PRIORITAS #1!</td><td>Lead Dashboard</td></tr>
+  <tr><td>Pagi</td><td>Cek Telegram → order confirmed baru</td><td>Telegram + Dashboard</td></tr>
+  <tr><td>Pagi</td><td>Cek ketersediaan worker hari ini</td><td>Lead Dashboard</td></tr>
+  <tr><td>Siang</td><td>Monitor progress worker → ada yang stuck?</td><td>Submissions</td></tr>
+  <tr><td>Siang</td><td>Quality check: screenshot valid? win rate OK?</td><td>Lead Dashboard</td></tr>
+  <tr><td>Sore</td><td>Follow up worker belum submit progress</td><td>TG / WA worker</td></tr>
+  <tr><td>Malam</td><td>Recap: order selesai hari ini? Blockers?</td><td>Telegram group</td></tr>
+</table>
+
+<div class="highlight-box">
+  <strong>⚡ Krusial:</strong> Assign worker secepat mungkin setelah payment confirmed. Semakin cepat assign = customer puas = repeat order.
+</div>
+
+<h3>📅 CS — Daily Checklist</h3>
+<table>
+  <tr><th>Waktu</th><th>Task</th><th>Tool</th></tr>
+  <tr><td>All day</td><td>Reply chat masuk (WA/DM) → SLA <strong>&lt; 5 menit</strong></td><td>WA Business</td></tr>
+  <tr><td>Pagi</td><td>Cek DM IG/TikTok semalam → reply atau arahkan ke WA</td><td>Instagram / TikTok</td></tr>
+  <tr><td>Siang</td><td>Follow-up leads belum order (+2 jam / +24 jam)</td><td>WA Business</td></tr>
+  <tr><td>Sore</td><td>Handle komplain → cek tracking → eskalasi</td><td>WA + Tracking</td></tr>
+  <tr><td>Malam</td><td>Recap: leads masuk, yang close?</td><td>WA + catatan</td></tr>
+</table>
+
+<h3>📅 Worker — Daily Checklist</h3>
+<table>
+  <tr><th>Waktu</th><th>Task</th><th>Tool</th></tr>
+  <tr><td>Pagi</td><td>Cek dashboard → order baru di-assign?</td><td>Worker Dashboard</td></tr>
+  <tr><td>Pagi</td><td>Fetch credentials order baru → start push</td><td>Worker Dashboard</td></tr>
+  <tr><td>Per sesi</td><td>Upload progress (stars, matches, screenshot)</td><td>Worker Dashboard</td></tr>
+  <tr><td>Sore</td><td>Cek order lain belum selesai → lanjut</td><td>Worker Dashboard</td></tr>
+  <tr><td>Selesai</td><td>Target tercapai → klik "Selesai"</td><td>Worker Dashboard</td></tr>
+</table>
+
+<h3>📅 Weekly Tasks</h3>
+<div class="card-grid g3">
+  <div class="card">
+    <div class="label">Admin Weekly</div>
+    <div class="desc">Review promo codes · Cek payroll worker · Review pricing · Export data order</div>
+  </div>
+  <div class="card">
+    <div class="label">Leader Weekly</div>
+    <div class="desc">Review performance worker · Rotasi worker overload · Report ke Admin</div>
+  </div>
+  <div class="card">
+    <div class="label">CS Weekly</div>
+    <div class="desc">Recap conversion rate · Update quick reply templates</div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ==================== 12. MODE ORDER & PRICING ==================== -->
+<h2>12. Mode Order & Pricing</h2>
+
+<div class="card-grid g3">
+  <div class="card" style="border-top:3px solid var(--accent);">
+    <div class="label">🎯 Paket (Rank → Rank)</div>
+    <div class="desc">Customer pilih paket (misal: Epic V → Mythic). Harga fixed per paket.<br>Contoh: Epic V → Mythic = Rp 315.089</div>
+  </div>
+  <div class="card" style="border-top:3px solid var(--secondary);">
+    <div class="label">⭐ Per-Bintang</div>
+    <div class="desc">Pilih rank + jumlah bintang. Harga per bintang × jumlah.<br>Contoh: Mythic Immortal × 3 = Rp 93.000</div>
+  </div>
+  <div class="card" style="border-top:3px solid var(--success);">
+    <div class="label">🤝 Gendong (Duo Boost)</div>
+    <div class="desc">Main bareng booster. Harga per bintang lebih tinggi. Tidak perlu share password.</div>
+  </div>
+</div>
+
+<h3>Biaya Tambahan</h3>
+<table>
+  <tr><th>Add-on</th><th>Biaya</th><th>Keterangan</th></tr>
+  <tr><td><span class="badge badge-amber">Express</span></td><td>+20%</td><td>Prioritas pengerjaan</td></tr>
+  <tr><td><span class="badge badge-purple">Premium</span></td><td>+30%</td><td>Booster senior + prioritas</td></tr>
+  <tr><td><span class="badge badge-teal">Season</span></td><td>Variabel</td><td>Multiplier harga per musim (CMS)</td></tr>
+</table>
+
+<h3>Diskon</h3>
+<table>
+  <tr><th>Jenis</th><th>Besaran</th></tr>
+  <tr><td>Promo Code</td><td>Variabel (set di CMS)</td></tr>
+  <tr><td>Referral</td><td>10%</td></tr>
+  <tr><td>Tier Silver</td><td>3%</td></tr>
+  <tr><td>Tier Gold</td><td>5%</td></tr>
+  <tr><td>Tier Platinum</td><td>8%</td></tr>
+</table>
+
+<hr>
+
+<!-- ==================== 13. PAYMENT FLOW ==================== -->
+<h2>13. Payment Flow</h2>
+
+<h3>Transfer Manual (Selalu Aktif)</h3>
+<div class="flow-box">
+  <span class="flow-step">Customer pilih Manual</span><span class="flow-arrow">→</span>
+  <span class="flow-step">/payment/manual</span><span class="flow-arrow">→</span>
+  <span class="flow-step">Lihat rekening</span><span class="flow-arrow">→</span>
+  <span class="flow-step">Transfer</span><span class="flow-arrow">→</span>
+  <span class="flow-step">Upload bukti</span><span class="flow-arrow">→</span>
+  <span class="flow-step">Admin approve</span>
+</div>
+
+<h3>iPaymu Otomatis (Jika Aktif)</h3>
+<div class="flow-box">
+  <span class="flow-step">Customer pilih Auto</span><span class="flow-arrow">→</span>
+  <span class="flow-step">Redirect iPaymu</span><span class="flow-arrow">→</span>
+  <span class="flow-step">Bayar (QRIS/VA/e-wallet)</span><span class="flow-arrow">→</span>
+  <span class="flow-step">Webhook auto-verify</span><span class="flow-arrow">→</span>
+  <span class="flow-step">Confirmed ✅</span>
+</div>
+
+<div class="highlight-box">
+  <strong>Status iPaymu:</strong> Menunggu approval. Sementara hanya Transfer Manual.<br>
+  <strong>Jika iPaymu gagal:</strong> Otomatis fallback ke Transfer Manual + customer dapat WA dengan info rekening.
+</div>
+
+<hr>
+
+<!-- ==================== 14. NOTIFIKASI ==================== -->
+<h2>14. Notifikasi Otomatis (Multi Channel)</h2>
+<p style="color:var(--text-muted);">Semua otomatis, nggak ada yang harus kirim manual</p>
+
+<table>
+  <tr><th>Event</th><th>Ke Siapa</th><th>Channel</th><th>Isi</th></tr>
+  <tr><td>Order masuk</td><td>Admin group</td><td>Telegram</td><td>Detail order, harga, kontak</td></tr>
+  <tr><td>Order masuk</td><td>Customer</td><td>WA + Email</td><td>Konfirmasi + link tracking</td></tr>
+  <tr><td>Payment confirmed</td><td>Customer</td><td>WA + Email</td><td>"Pembayaran dikonfirmasi!"</td></tr>
+  <tr><td>Payment confirmed</td><td>Worker group</td><td>Telegram</td><td>"Order siap dikerjakan"</td></tr>
+  <tr><td>Worker assigned</td><td>Worker</td><td>Telegram</td><td>Detail order + instruksi</td></tr>
+  <tr><td>Order selesai</td><td>Customer</td><td>WA + Email</td><td>"Order selesai! 🎉" + link review</td></tr>
+  <tr><td>Review masuk</td><td>Review group</td><td>Telegram</td><td>Rating + content</td></tr>
+  <tr><td>Worker report</td><td>Report group</td><td>Telegram</td><td>Detail laporan</td></tr>
+</table>
+
+<div class="card-grid g3" style="margin-top:10px;">
+  <div class="card" style="text-align:center;">
+    <div class="icon">📲</div>
+    <div class="label">WhatsApp (Meta Cloud API)</div>
+    <div class="desc">Ke customer — setiap status change</div>
+  </div>
+  <div class="card" style="text-align:center;">
+    <div class="icon">✈️</div>
+    <div class="label">Telegram Bot</div>
+    <div class="desc">Ke internal team — 5 group</div>
+  </div>
+  <div class="card" style="text-align:center;">
+    <div class="icon">📧</div>
+    <div class="label">Email (Resend)</div>
+    <div class="desc">Ke customer — konfirmasi & receipt</div>
+  </div>
+</div>
+
+<h3>Telegram Bot Groups</h3>
+<table>
+  <tr><th>Group</th><th>Isi Notifikasi</th></tr>
+  <tr><td><strong>Admin Group</strong></td><td>Order baru, payment proof, status changes</td></tr>
+  <tr><td><strong>Worker Group</strong></td><td>Assignment baru, progress, order selesai</td></tr>
+  <tr><td><strong>Review Group</strong></td><td>Customer review masuk</td></tr>
+  <tr><td><strong>Report Group</strong></td><td>Customer report/complaint</td></tr>
+  <tr><td><strong>Alert Group</strong></td><td>System errors, unknown WA messages</td></tr>
+</table>
+
+<hr>
+
+<!-- ==================== 15. CHATBOT WA ==================== -->
+<h2>15. Chatbot WhatsApp</h2>
+
+<p>Customer chat ke WA ETNYX mendapat auto-reply:</p>
+<table>
+  <tr><th>Keyword</th><th>Response</th></tr>
+  <tr><td><code>menu</code> / <code>hi</code> / <code>halo</code></td><td>Menu utama (5 pilihan)</td></tr>
+  <tr><td><code>1</code> / <code>harga</code></td><td>Info pricing + link order</td></tr>
+  <tr><td><code>2</code> / <code>cek</code> / <code>ETX-xxxxx</code></td><td>Status order (auto-lookup)</td></tr>
+  <tr><td><code>3</code> / <code>cs</code> / <code>bantuan</code></td><td>Link WA ke CS</td></tr>
+  <tr><td><code>4</code> / <code>review</code></td><td>Link review</td></tr>
+  <tr><td><code>5</code> / <code>promo</code></td><td>Info promo aktif</td></tr>
+  <tr><td>Lainnya</td><td>"Maaf belum bisa bantu" + forward ke TG Alert</td></tr>
+</table>
+
+<div class="highlight-box">
+  <strong>Filter Bot:</strong> Pesan dari bot pihak ketiga (INDIRA/Indosat dll) otomatis di-skip, tidak diteruskan ke Telegram.
+</div>
+
+<hr>
+
+<!-- ==================== 16. CUSTOMER FEATURES ==================== -->
+<h2>16. Customer Features</h2>
+
+<div class="card-grid g3">
+  <div class="card">
+    <div class="label">📍 Order Tracking</div>
+    <div class="desc"><code>/track</code> → masukkan Order ID → lihat status real-time, timeline timestamp</div>
+  </div>
+  <div class="card">
+    <div class="label">👤 Customer Dashboard</div>
+    <div class="desc"><code>/login</code> → semua order, reward points, tier progression (Bronze→Platinum)</div>
+  </div>
+  <div class="card">
+    <div class="label">⭐ Review & Report</div>
+    <div class="desc">Link terpisah untuk beri rating/testimoni & laporkan masalah</div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ==================== 17. SECURITY ==================== -->
+<h2>17. Security</h2>
+
+<table>
+  <tr><th>Fitur</th><th>Detail</th></tr>
+  <tr><td><strong>Enkripsi</strong></td><td>Credential game customer dienkripsi (AES) di database</td></tr>
+  <tr><td><strong>Rate Limiting</strong></td><td>Max 5 order/menit per IP</td></tr>
+  <tr><td><strong>Input Sanitization</strong></td><td>Semua input di-sanitize (XSS prevention)</td></tr>
+  <tr><td><strong>HMAC Verification</strong></td><td>WA webhook diverifikasi signature-nya</td></tr>
+  <tr><td><strong>Server-side Price</strong></td><td>Harga dihitung ulang di server, tidak trust client</td></tr>
+  <tr><td><strong>Promo Atomic</strong></td><td>Promo code di-consume secara atomic (race condition safe)</td></tr>
+  <tr><td><strong>Audit Trail</strong></td><td>Semua action tercatat (siapa, kapan, apa)</td></tr>
+</table>
+
+<div class="highlight-box" style="border-left:3px solid var(--danger);">
+  <strong>Penting untuk Worker:</strong><br>
+  • JANGAN share credentials customer ke siapapun<br>
+  • JANGAN screenshot credentials dan kirim ke chat<br>
+  • Credentials hanya bisa dilihat di dashboard, ter-enkripsi di database
+</div>
+
+<hr>
+
+<!-- ==================== 18. TECH STACK ==================== -->
+<h2>18. Tech Stack</h2>
+
+<table>
+  <tr><th>Komponen</th><th>Teknologi</th></tr>
+  <tr><td>Frontend</td><td>Next.js 16, React 19, Tailwind CSS 4</td></tr>
+  <tr><td>Backend</td><td>Next.js API Routes (Route Handlers)</td></tr>
+  <tr><td>Database</td><td>Supabase (PostgreSQL)</td></tr>
+  <tr><td>Storage</td><td>Supabase Storage</td></tr>
+  <tr><td>Payment</td><td>iPaymu (menunggu approval)</td></tr>
+  <tr><td>Email</td><td>Resend</td></tr>
+  <tr><td>WhatsApp</td><td>Meta Cloud API</td></tr>
+  <tr><td>Telegram</td><td>Telegram Bot API</td></tr>
+  <tr><td>Hosting</td><td>Vercel</td></tr>
+</table>
+
+<hr>
+
+<!-- ==================== 19. KNOWN ISSUES ==================== -->
+<h2>19. Known Issues & Improvement Plan</h2>
+
+<h3 style="color:var(--danger);">Bug Aktif</h3>
+<table>
+  <tr><th>Issue</th><th>Impact</th><th>Workaround</th></tr>
+  <tr>
+    <td><strong>Assign worker di Admin Dashboard broken</strong></td>
+    <td>Admin ga bisa assign dari dashboard admin</td>
+    <td>Gunakan <strong>Lead Dashboard</strong> untuk assign</td>
+  </tr>
+  <tr>
+    <td><strong>No fallback kalau iPaymu gagal</strong></td>
+    <td>Customer stuck kalau auto payment error</td>
+    <td>CS arahkan ke manual transfer</td>
+  </tr>
+</table>
+
+<h3 style="color:var(--warning);">Improvement Plan</h3>
+<table>
+  <tr><th>Item</th><th>Priority</th><th>Status</th></tr>
+  <tr><td>Fix admin dashboard assign worker</td><td><span class="badge badge-red">HIGH</span></td><td>Akan di-fix</td></tr>
+  <tr><td>iPaymu fallback → auto WA manual transfer info</td><td><span class="badge badge-red">HIGH</span></td><td>Planned</td></tr>
+  <tr><td>Worker leaderboard & performance analytics</td><td><span class="badge badge-amber">MED</span></td><td>Planned</td></tr>
+  <tr><td>PDF invoice (proper library)</td><td><span class="badge badge-blue">LOW</span></td><td>Backlog</td></tr>
+  <tr><td>Scheduled auto follow-up (cron-based)</td><td><span class="badge badge-amber">MED</span></td><td>Planned</td></tr>
+  <tr><td>Customer dashboard / member area</td><td><span class="badge badge-amber">MED</span></td><td>Planned</td></tr>
+</table>
+
+<hr>
+
+<!-- ==================== 20. ROADMAP ==================== -->
+<h2>20. Roadmap 3 Bulan & KPI</h2>
+
+<div class="card-grid g3">
+  <div class="card" style="border-top:3px solid var(--accent);">
+    <div class="label">Month 1 — LAUNCH & STABILIZE</div>
+    <div class="desc">
+      <strong>Target:</strong> 30 order · Rp 15jt<br><br>
+      ✅ Semua fitur core live<br>
+      ✅ Tim familiar dashboard<br>
+      ✅ SOP jalan<br>
+      ✅ Content mulai posting<br>
+      ✅ Fix critical bugs<br>
+      ✅ WA Conversion: 20%
+    </div>
+  </div>
+  <div class="card" style="border-top:3px solid var(--success);">
+    <div class="label">Month 2 — SCALE</div>
+    <div class="desc">
+      <strong>Target:</strong> 75 order · Rp 45jt<br><br>
+      📈 Double down content perform<br>
+      📈 Tambah worker sesuai demand<br>
+      📈 Spark Ads (TikTok)<br>
+      📈 Optimize closing rate 30%<br>
+      📈 Customer repeat: 20%
+    </div>
+  </div>
+  <div class="card" style="border-top:3px solid var(--warning);">
+    <div class="label">Month 3 — DOMINATE</div>
+    <div class="desc">
+      <strong>Target:</strong> 150 order · Rp 100jt<br><br>
+      🚀 Paid + organic + UGC + collab<br>
+      🚀 Hire content editor<br>
+      🚀 Launch loyalty program<br>
+      🚀 WA Conversion: 40%<br>
+      🚀 Customer repeat: 30%
+    </div>
+  </div>
+</div>
+
+<h3>KPI yang Dimonitor</h3>
+<table>
+  <tr><th>Metric</th><th>M1</th><th>M2</th><th>M3</th></tr>
+  <tr><td>Total Order</td><td>30</td><td>75</td><td>150</td></tr>
+  <tr><td>Revenue</td><td>Rp 15jt</td><td>Rp 45jt</td><td>Rp 100jt</td></tr>
+  <tr><td>WA Conversion</td><td>20%</td><td>30%</td><td>40%</td></tr>
+  <tr><td>Customer Repeat</td><td>10%</td><td>20%</td><td>30%</td></tr>
+  <tr><td>Avg Rating</td><td>4.5</td><td>4.7</td><td>4.9</td></tr>
+</table>
+
+<hr>
+
+<!-- ==================== 21. SCALING ==================== -->
+<h2>21. Kapan Scale — Trigger & Action</h2>
+
+<h3>Operasional Scaling</h3>
+<table>
+  <tr><th>Trigger</th><th>Action</th></tr>
+  <tr><td>Order backlog &gt; 5 pending assign</td><td>Tambah worker</td></tr>
+  <tr><td>DM masuk &gt; 50/hari</td><td>Tambah 1 CS</td></tr>
+  <tr><td>WA conversion &gt; 40%</td><td>Tambah traffic via ads</td></tr>
+  <tr><td>Repeat order &gt; 30%</td><td>Launch loyalty program</td></tr>
+  <tr><td>Revenue &gt; Rp 50jt/bulan</td><td>Hire content editor</td></tr>
+  <tr><td>Worker SLA terlewat &gt; 3x/minggu</td><td>Review worker, tambah kapasitas</td></tr>
+</table>
+
+<h3>Content Scaling</h3>
+<table>
+  <tr><th>Trigger</th><th>Action</th></tr>
+  <tr><td>Video &gt; 50K views</td><td>Buat 3 variasi konten serupa</td></tr>
+  <tr><td>Video &gt; 100K views</td><td>Boost dengan Spark Ads</td></tr>
+  <tr><td>Video &gt; 500K views</td><td>Buat series (Part 1, 2, 3...)</td></tr>
+  <tr><td>Hook perform &gt; 70% retention</td><td>Pakai di 5 konten lain</td></tr>
+</table>
+
+<div class="highlight-box">
+  <strong>Prinsip scaling ETNYX:</strong> Tambah orang hanya kalau sistem sudah optimal dan demand membutuhkan. Data yang tentukan kapan scale.
+</div>
+
+<hr>
+
+<!-- ==================== 22. SUMMARY ==================== -->
+<h2>22. Summary & Action Items</h2>
+
+<div class="card-grid g2">
+  <div class="card" style="border-left:3px solid var(--accent);">
+    <div class="label">🔑 Key Takeaways</div>
+    <div class="desc">
+      • Sistem dibangun agar <strong>90% proses otomatis</strong><br>
+      • Customer self-service: order, bayar, track, review — tanpa CS<br>
+      • Tim hanya handle 5 hal manual<br>
+      • Semua role punya dashboard sendiri<br>
+      • Notifikasi multi-channel otomatis<br>
+      • Scaling ditentukan oleh data
+    </div>
+  </div>
+  <div class="card" style="border-left:3px solid var(--success);">
+    <div class="label">✅ Action Items per Role</div>
+    <div class="desc">
+      <strong>Admin:</strong> Verify payment &lt; 1 jam, approve testimonial, monitor overview<br>
+      <strong>Leader:</strong> Assign worker ASAP setelah confirmed, QA harian, report mingguan<br>
+      <strong>CS:</strong> Reply &lt; 5 menit, arahkan ke website, max 3x follow-up<br>
+      <strong>Worker:</strong> Update progress setiap sesi, screenshot setiap milestone, patuhi SOP<br>
+      <strong>Developer:</strong> Fix assign bug, monitor system health, deploy updates
+    </div>
+  </div>
+</div>
+
+<div class="card-grid g3" style="margin-top:10px;">
+  <div class="card" style="text-align:center; border-top:3px solid var(--warning);">
+    <div class="label">Next Step</div>
+    <div class="desc">Semua anggota login dashboard, coba semua flow</div>
+  </div>
+  <div class="card" style="text-align:center; border-top:3px solid var(--accent);">
+    <div class="label">Deadline</div>
+    <div class="desc">Familiar dashboard + SOP dalam <strong>3 hari</strong></div>
+  </div>
+  <div class="card" style="text-align:center; border-top:3px solid var(--success);">
+    <div class="label">Check-in</div>
+    <div class="desc">Sync meeting: <strong>1 minggu dari sekarang</strong></div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ==================== 23. KONTAK ==================== -->
+<h2>23. Kontak & Akses</h2>
+
+<table>
+  <tr><th>Item</th><th>Detail</th></tr>
+  <tr><td>Website</td><td>https://etnyx.com</td></tr>
+  <tr><td>Admin Dashboard</td><td>https://etnyx.com/admin</td></tr>
+  <tr><td>Repository</td><td>github.com/Briyanes/etnyx-jasa-joki-rank-mobile-legend</td></tr>
+  <tr><td>WA Bisnis</td><td>— (set di Meta Business)</td></tr>
+  <tr><td>Telegram Bot</td><td>@EtnyxBot</td></tr>
+</table>
+
+<hr>
+
+<!-- ==================== 24. FAQ ==================== -->
+<h2>24. FAQ Tim</h2>
+
+<div class="card-grid g2">
+  <div class="card">
+    <div class="label">Customer komplain?</div>
+    <div class="desc">Cek order di dashboard → lihat progress & logs → hubungi via WA. Serius? Eskalasi ke Admin.</div>
+  </div>
+  <div class="card">
+    <div class="label">iPaymu gagal saat bayar?</div>
+    <div class="desc">Otomatis fallback ke transfer manual. Customer dapat WA dengan info rekening.</div>
+  </div>
+  <div class="card">
+    <div class="label">Worker bisa handle >1 order?</div>
+    <div class="desc">Ya, worker bisa ditugaskan beberapa order sekaligus. Semua muncul di dashboard.</div>
+  </div>
+  <div class="card">
+    <div class="label">Tambah paket harga baru?</div>
+    <div class="desc">Admin → Settings → Pricing Catalog → Edit/tambah. Langsung aktif.</div>
+  </div>
+  <div class="card">
+    <div class="label">Customer cancel order?</div>
+    <div class="desc">Customer hubungi CS. Admin ubah status ke <code>cancelled</code> di dashboard.</div>
+  </div>
+  <div class="card">
+    <div class="label">Worker tidak responsif?</div>
+    <div class="desc">Lead bisa re-assign order ke worker lain melalui dashboard Lead.</div>
+  </div>
+</div>
+
+<hr>
+
+<div style="text-align:center; padding:20px 0; color:var(--text-muted);">
+  <div style="font-size:18px; font-weight:900; background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:6px;">ETNYX</div>
+  <div style="font-style:italic; font-size:12px;">"Sistem yang jalan terus, bukan orang yang kerja terus." 🎮</div>
+  <div style="font-size:10px; margin-top:8px; color:rgba(255,255,255,0.3);">Panduan Sistem Operasional v2.0 — 15 April 2026</div>
+</div>
+
+</body>
+</html>

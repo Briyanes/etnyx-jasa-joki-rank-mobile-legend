@@ -1,0 +1,1129 @@
+<!--
+  ETNYX — 90-Day Content Bank & Strategy
+  Comprehensive Content Strategy + Calendar + Scripts
+  Updated & synced with system (April 2026)
+  For PDF export — ETNYX Dark Theme
+-->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ETNYX — 90-Day Content Bank & Strategy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent: #2DD4BF;
+    --primary: #7FA8A3;
+    --secondary: #A855F7;
+    --bg: #0F1419;
+    --surface: #151B22;
+    --card-bg: rgba(255,255,255,0.04);
+    --card-border: rgba(255,255,255,0.08);
+    --text: #E6F1EF;
+    --text-muted: #9CA3AF;
+    --success: #22C55E;
+    --warning: #F59E0B;
+    --danger: #EF4444;
+    --gradient: linear-gradient(135deg, #2DD4BF, #7FA8A3);
+  }
+  @page { margin: 10mm 8mm; size: A4; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 40px 28px;
+    font-size: 11.5px;
+    line-height: 1.6;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Cover */
+  .cover { text-align:center; padding:50px 0 30px; border-bottom:2px solid rgba(45,212,191,0.3); margin-bottom:30px; page-break-after:always; }
+  .cover h1 { font-size:38px; font-weight:900; background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-transform:uppercase; letter-spacing:2px; margin-bottom:6px; }
+  .cover .tagline { font-size:16px; font-weight:600; color:var(--text-muted); margin-bottom:18px; }
+  .cover .meta { font-size:11px; color:var(--text-muted); margin-top:12px; }
+
+  /* Headings */
+  h2 { font-size:18px; font-weight:800; background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-transform:uppercase; letter-spacing:1px; margin-top:28px; margin-bottom:10px; padding-bottom:6px; border-bottom:2px solid rgba(45,212,191,0.25); page-break-after:avoid; }
+  h3 { font-size:14px; font-weight:700; color:var(--secondary); margin-top:18px; margin-bottom:6px; page-break-after:avoid; }
+  h4 { font-size:12px; font-weight:700; color:var(--accent); margin-top:12px; margin-bottom:5px; page-break-after:avoid; }
+
+  /* Cards */
+  .card-grid { display:grid; gap:8px; margin:8px 0; }
+  .g2 { grid-template-columns:1fr 1fr; }
+  .g3 { grid-template-columns:1fr 1fr 1fr; }
+  .g4 { grid-template-columns:1fr 1fr 1fr 1fr; }
+  .g5 { grid-template-columns:1fr 1fr 1fr 1fr 1fr; }
+  .card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:8px; padding:10px 12px; }
+  .card .icon { font-size:16px; margin-bottom:3px; }
+  .card .label { font-weight:700; font-size:11px; margin-bottom:3px; color:var(--text); }
+  .card .value { font-size:20px; font-weight:900; background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .card .desc { font-size:10.5px; color:var(--text-muted); line-height:1.45; }
+
+  /* Tables */
+  table { width:100%; border-collapse:collapse; margin:8px 0; font-size:10.5px; page-break-inside:avoid; }
+  th { background:rgba(45,212,191,0.12); color:var(--accent); font-weight:700; text-align:left; padding:6px 8px; border-bottom:1px solid rgba(45,212,191,0.2); font-size:10px; }
+  td { padding:5px 8px; border-bottom:1px solid rgba(255,255,255,0.05); color:rgba(255,255,255,0.8); }
+  tr:nth-child(even) { background:rgba(255,255,255,0.02); }
+
+  /* Badges */
+  .badge { display:inline-block; padding:1px 7px; border-radius:4px; font-size:9px; font-weight:700; text-transform:uppercase; }
+  .badge-teal { background:rgba(45,212,191,0.15); color:var(--accent); }
+  .badge-purple { background:rgba(168,85,247,0.15); color:var(--secondary); }
+  .badge-green { background:rgba(34,197,94,0.15); color:var(--success); }
+  .badge-amber { background:rgba(245,158,11,0.15); color:var(--warning); }
+  .badge-red { background:rgba(239,68,68,0.15); color:var(--danger); }
+
+  /* Misc */
+  code { background:rgba(255,255,255,0.08); padding:1px 5px; border-radius:3px; font-size:10px; color:var(--accent); }
+  pre { background:rgba(0,0,0,0.4); border:1px solid var(--card-border); padding:10px; border-radius:6px; font-size:10px; margin:6px 0; color:var(--text); white-space:pre-wrap; font-family:'Inter', monospace; }
+  hr { border:none; border-top:1px solid rgba(45,212,191,0.15); margin:20px 0; }
+  ul, ol { padding-left:16px; margin:5px 0; }
+  li { margin:2px 0; }
+  strong { color:#F8FAFC; }
+  p { margin:4px 0; }
+
+  .highlight-box { background:rgba(45,212,191,0.06); border:1px solid rgba(45,212,191,0.15); border-radius:6px; padding:8px 12px; margin:8px 0; font-size:10.5px; color:rgba(255,255,255,0.7); }
+  .quote { border-left:3px solid var(--accent); padding:6px 14px; background:rgba(45,212,191,0.06); border-radius:0 6px 6px 0; font-style:italic; color:var(--text-muted); margin:8px 0; }
+
+  /* Flow */
+  .flow-box { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin:8px 0; font-size:11px; }
+  .flow-step { background:var(--surface); border:1px solid var(--card-border); padding:6px 12px; border-radius:6px; font-weight:600; }
+  .flow-arrow { color:var(--accent); font-weight:900; }
+
+  /* Script block */
+  .script-block { background:rgba(0,0,0,0.3); border-radius:6px; padding:8px 12px; margin:6px 0; font-size:10.5px; line-height:1.55; }
+
+  /* Section divider */
+  .section-divider { text-align:center; padding:16px 0; margin:24px 0; border-top:1px solid rgba(45,212,191,0.1); border-bottom:1px solid rgba(45,212,191,0.1); }
+  .section-divider .num { font-size:28px; font-weight:900; background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .section-divider .label { font-size:10px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:2px; }
+
+  /* Week header */
+  .week-header { background:linear-gradient(135deg, rgba(45,212,191,0.1), rgba(127,168,163,0.05)); border:1px solid rgba(45,212,191,0.15); border-radius:8px; padding:10px 14px; margin:14px 0 8px; display:flex; justify-content:space-between; align-items:center; }
+  .week-header .week-title { font-weight:800; font-size:13px; color:var(--accent); }
+  .week-header .week-theme { font-size:11px; color:var(--text-muted); }
+
+  @media print { body { padding:0; } .cover { padding:60px 0 40px; } }
+</style>
+</head>
+<body>
+
+<!-- ==================== COVER ==================== -->
+<div class="cover">
+  <h1>ETNYX</h1>
+  <div class="tagline">90-Day Content Bank & Strategy</div>
+  <p style="font-size:13px; color:rgba(255,255,255,0.4);">Content Blueprint · Calendar · Scripts · Production System</p>
+
+  <div style="display:flex; justify-content:center; gap:30px; margin:24px 0;">
+    <div style="text-align:center;"><div style="font-size:28px; font-weight:900; background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">90</div><div style="font-size:10px; color:var(--text-muted); font-weight:600;">HARI</div></div>
+    <div style="text-align:center;"><div style="font-size:28px; font-weight:900; background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">5</div><div style="font-size:10px; color:var(--text-muted); font-weight:600;">PILLARS</div></div>
+    <div style="text-align:center;"><div style="font-size:28px; font-weight:900; background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">270+</div><div style="font-size:10px; color:var(--text-muted); font-weight:600;">KONTEN</div></div>
+    <div style="text-align:center;"><div style="font-size:28px; font-weight:900; background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">10</div><div style="font-size:10px; color:var(--text-muted); font-weight:600;">VIRAL SCRIPTS</div></div>
+  </div>
+
+  <p style="font-size:11px; color:rgba(255,255,255,0.35);">
+    Akun: @etnyx.id &nbsp;·&nbsp; Niche: Jasa Joki & Gendong Mobile Legends<br>
+    Platform: TikTok · Instagram · YouTube Shorts · WhatsApp
+  </p>
+
+  <div class="meta">
+    <strong>Versi:</strong> 2.0 — 15 April 2026 &nbsp;·&nbsp; Synced with ETNYX System
+  </div>
+</div>
+
+<!-- ==================== TOC ==================== -->
+<h2>Daftar Isi</h2>
+<table>
+  <tr><td><strong>1</strong></td><td>Brand Foundation & USP</td></tr>
+  <tr><td><strong>2</strong></td><td>Psychological Triggers & Customer Journey</td></tr>
+  <tr><td><strong>3</strong></td><td>Content Pillars (5 Pilar)</td></tr>
+  <tr><td><strong>4</strong></td><td>Monthly Calendar — Bulan 1 (Day 1-30)</td></tr>
+  <tr><td><strong>5</strong></td><td>Monthly Strategy — Bulan 2 & 3</td></tr>
+  <tr><td><strong>6</strong></td><td>Content Types Mandatory</td></tr>
+  <tr><td><strong>7</strong></td><td>Video Structure System (Hook, Retention, CTA)</td></tr>
+  <tr><td><strong>8</strong></td><td>Editing & Visual Direction</td></tr>
+  <tr><td><strong>9</strong></td><td>Copywriting System (Hooks, CTAs, Captions)</td></tr>
+  <tr><td><strong>10</strong></td><td>Funnel Strategy</td></tr>
+  <tr><td><strong>11</strong></td><td>WhatsApp Closing System</td></tr>
+  <tr><td><strong>12</strong></td><td>Production System & Tools</td></tr>
+  <tr><td><strong>13</strong></td><td>Performance Strategy & KPI</td></tr>
+  <tr><td><strong>14</strong></td><td>TOP 10 Viral Content — Full Script</td></tr>
+  <tr><td><strong>15</strong></td><td>Checklist Implementasi</td></tr>
+</table>
+
+<hr>
+
+<!-- ==================== 1. BRAND FOUNDATION ==================== -->
+<div class="section-divider"><div class="num">01</div><div class="label">Brand Foundation</div></div>
+
+<h2>Brand Foundation & USP</h2>
+
+<div class="card-grid g2">
+  <div class="card">
+    <div class="label">Brand</div>
+    <div class="desc"><strong>ETNYX</strong> — Jasa Joki & Gendong Rank Mobile Legends<br>Positioning: Satu-satunya jasa joki ML dengan SISTEM, bukan freelancer acak</div>
+  </div>
+  <div class="card">
+    <div class="label">Tone of Voice</div>
+    <div class="desc"><strong>Bahasa:</strong> Indonesian bahasa gaul (lo-gue, casual, slang ML)<br><strong>Personality:</strong> Confident, direct, sesama gamers<br><strong>Energy:</strong> Bold tapi professional. Ga alay, ga lebay</div>
+  </div>
+</div>
+
+<h3>USP Table — 8 Keunggulan Unik</h3>
+<table>
+  <tr><th>#</th><th>USP</th><th>Detail</th><th>Proof</th></tr>
+  <tr><td>1</td><td><strong>Enkripsi AES-256</strong></td><td>Password dienkripsi military-grade</td><td>Implementasi di database</td></tr>
+  <tr><td>2</td><td><strong>Real-time Tracking</strong></td><td>Dashboard tracking publik <code>/track</code></td><td>Bisa dicoba langsung</td></tr>
+  <tr><td>3</td><td><strong>Multi-notifikasi</strong></td><td>WA (Meta Cloud API) + Email (Resend) + Telegram</td><td>Otomatis setiap status</td></tr>
+  <tr><td>4</td><td><strong>3 Mode Order</strong></td><td>Paket · Per Bintang · Gendong</td><td>Sesuai budget & preferensi</td></tr>
+  <tr><td>5</td><td><strong>Harga Transparan</strong></td><td>CMS pricing, no hidden cost</td><td>Tertera di website</td></tr>
+  <tr><td>6</td><td><strong>Invoice & Screenshot</strong></td><td>PDF invoice + bukti kerja</td><td>Dikirim otomatis</td></tr>
+  <tr><td>7</td><td><strong>Booster Terverifikasi</strong></td><td>Lead assign, max 3 order/worker</td><td>Sistem assignment</td></tr>
+  <tr><td>8</td><td><strong>Dual Payment</strong></td><td>Transfer Manual + iPaymu (otomatis)</td><td>11 metode + QRIS/VA</td></tr>
+</table>
+
+<hr>
+
+<!-- ==================== 2. PSYCHOLOGY ==================== -->
+<div class="section-divider"><div class="num">02</div><div class="label">Psychology & Journey</div></div>
+
+<h2>Psychological Triggers</h2>
+
+<div class="card-grid g4">
+  <div class="card" style="border-top:3px solid var(--danger);">
+    <div class="icon">😨</div>
+    <div class="label">Fear</div>
+    <div class="desc">"Akun gue aman ga?" → Jawab: AES-256, 0 akun bermasalah</div>
+  </div>
+  <div class="card" style="border-top:3px solid var(--success);">
+    <div class="icon">🌟</div>
+    <div class="label">Desire</div>
+    <div class="desc">"Pengen Mythic tapi ga bisa" → Jawab: 2-3 hari selesai</div>
+  </div>
+  <div class="card" style="border-top:3px solid var(--warning);">
+    <div class="icon">😤</div>
+    <div class="label">Frustration</div>
+    <div class="desc">"Solo queue toxic, star turun" → Jawab: serahin profesional</div>
+  </div>
+  <div class="card" style="border-top:3px solid var(--secondary);">
+    <div class="icon">⏰</div>
+    <div class="label">Urgency</div>
+    <div class="desc">"Season reset!" → Jawab: slot terbatas, push sekarang</div>
+  </div>
+</div>
+
+<h2>Customer Journey Mapping</h2>
+
+<div class="flow-box">
+  <div class="flow-step">🔍 <strong>Awareness</strong> (40%)</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step">🤔 <strong>Consideration</strong> (35%)</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step">💰 <strong>Conversion</strong> (25%)</div>
+</div>
+
+<table>
+  <tr><th>Stage</th><th>Content</th><th>Platform</th><th>CTA</th></tr>
+  <tr><td><strong>Awareness</strong></td><td>Problem, Entertainment, Meme</td><td>TikTok, Reels</td><td>Follow, Save, Share</td></tr>
+  <tr><td><strong>Consideration</strong></td><td>Tutorial, Proof, FAQ, Security</td><td>TikTok, Carousel, YT</td><td>DM, Bookmark, Bio</td></tr>
+  <tr><td><strong>Conversion</strong></td><td>Promo, Urgency, How to Order</td><td>Story, WA Status</td><td>Chat WA, Order Now</td></tr>
+</table>
+
+<hr>
+
+<!-- ==================== 3. PILLARS ==================== -->
+<div class="section-divider"><div class="num">03</div><div class="label">Content Pillars</div></div>
+
+<h2>5 Content Pillars</h2>
+
+<div class="card-grid g5">
+  <div class="card" style="border-top:3px solid var(--danger); text-align:center;">
+    <div class="icon">😤</div>
+    <div class="value">20%</div>
+    <div class="label">Problem</div>
+    <div class="desc">Relate, trigger pain point</div>
+  </div>
+  <div class="card" style="border-top:3px solid var(--warning); text-align:center;">
+    <div class="icon">😂</div>
+    <div class="value">20%</div>
+    <div class="label">Entertainment</div>
+    <div class="desc">Viral, reach, shares</div>
+  </div>
+  <div class="card" style="border-top:3px solid var(--accent); text-align:center;">
+    <div class="icon">📚</div>
+    <div class="value">20%</div>
+    <div class="label">Education</div>
+    <div class="desc">Trust, authority</div>
+  </div>
+  <div class="card" style="border-top:3px solid var(--success); text-align:center;">
+    <div class="icon">🏆</div>
+    <div class="value">25%</div>
+    <div class="label">Proof</div>
+    <div class="desc">Credibility, testi</div>
+  </div>
+  <div class="card" style="border-top:3px solid var(--secondary); text-align:center;">
+    <div class="icon">💰</div>
+    <div class="value">15%</div>
+    <div class="label">Selling</div>
+    <div class="desc">CTA, order, revenue</div>
+  </div>
+</div>
+
+<h3>Posting Schedule</h3>
+<table>
+  <tr><th>Platform</th><th>Frequency</th><th>Format</th><th>Time</th></tr>
+  <tr><td><strong>TikTok</strong></td><td>2-3x / hari</td><td>Reels 15-60s</td><td>11:00, 15:00, 19:30</td></tr>
+  <tr><td><strong>IG Reels</strong></td><td>1x / hari</td><td>Reels 30-60s</td><td>12:00 / 18:00</td></tr>
+  <tr><td><strong>IG Story</strong></td><td>3-5x / hari</td><td>Story / Poll</td><td>09:00, 15:00, 21:00</td></tr>
+  <tr><td><strong>IG Carousel</strong></td><td>2x / minggu</td><td>5-6 slides</td><td>12:00</td></tr>
+  <tr><td><strong>YouTube Shorts</strong></td><td>1x / hari</td><td>Reels repurpose</td><td>14:00</td></tr>
+  <tr><td><strong>WA Status</strong></td><td>3x / hari</td><td>Proof, Promo</td><td>09:00, 15:00, 21:00</td></tr>
+</table>
+
+<h3>Weekly Theme Rotation</h3>
+<div class="card-grid g4">
+  <div class="card" style="border-left:3px solid var(--danger);">
+    <div class="label">Week 1 — Pain</div>
+    <div class="desc">Solo queue pain, toxic team, stuck rank</div>
+  </div>
+  <div class="card" style="border-left:3px solid var(--accent);">
+    <div class="label">Week 2 — Trust</div>
+    <div class="desc">Testimoni, security, behind scenes</div>
+  </div>
+  <div class="card" style="border-left:3px solid var(--success);">
+    <div class="label">Week 3 — Value</div>
+    <div class="desc">Tutorial, tips ML, education</div>
+  </div>
+  <div class="card" style="border-left:3px solid var(--secondary);">
+    <div class="label">Week 4 — Push</div>
+    <div class="desc">Promo, urgency, CTA hard</div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ==================== 4. CALENDAR MONTH 1 ==================== -->
+<div class="section-divider"><div class="num">04</div><div class="label">Monthly Calendar</div></div>
+
+<h2>Bulan 1 — Build Foundation (Day 1-30)</h2>
+
+<p style="color:var(--text-muted);">Goal: 10K followers TikTok · 500 WA leads · 50 orders · Establish brand presence</p>
+
+<!-- Week 1 -->
+<div class="week-header">
+  <div class="week-title">📅 Week 1 — Pain Week</div>
+  <div class="week-theme"><span class="badge badge-red">AWARENESS</span> Expose pain points, build relatability</div>
+</div>
+
+<table>
+  <tr><th>Day</th><th>Platform</th><th>Pillar</th><th>Title</th><th>Hook</th><th>Format</th></tr>
+  <tr><td><strong>1</strong></td><td>TikTok</td><td>Problem</td><td>5 Tanda Butuh Joki</td><td>"Kalau kamu ngalamin 3 dari 5 ini..."</td><td>Reels 35s</td></tr>
+  <tr><td>1</td><td>TikTok</td><td>Entertainment</td><td>Solo Queue Experience</td><td>"POV: promos Mythic, tim draft 3 MM"</td><td>Reels 20s</td></tr>
+  <tr><td>1</td><td>IG Story</td><td>Engagement</td><td>Poll Rank</td><td>"Rank kamu sekarang apa?"</td><td>Poll</td></tr>
+  <tr><td><strong>2</strong></td><td>TikTok</td><td>Problem</td><td>Star Turun Terus</td><td>"Pernah menang 5x berturut terus kalah 8x?"</td><td>Reels 20s</td></tr>
+  <tr><td>2</td><td>TikTok</td><td>Proof</td><td>Before-After #1</td><td>"Epic → Legend. 24 jam."</td><td>Reels 15s</td></tr>
+  <tr><td>2</td><td>IG Reels</td><td>Problem</td><td>Repurpose Solo Q</td><td>—</td><td>Reels</td></tr>
+  <tr><td><strong>3</strong></td><td>TikTok</td><td>Entertainment</td><td>Tipe-tipe Teammate</td><td>"Tipe-tipe teammate di ranked"</td><td>Reels 30s</td></tr>
+  <tr><td>3</td><td>TikTok</td><td>Problem</td><td>Capek Push Rank</td><td>"3 bulan push rank, stuck di tempat yang sama"</td><td>Reels 25s</td></tr>
+  <tr><td>3</td><td>IG Carousel</td><td>Education</td><td>3 Kesalahan Push Rank</td><td>"3 kesalahan yang bikin rank stuck"</td><td>Carousel 5</td></tr>
+  <tr><td><strong>4</strong></td><td>TikTok</td><td>Proof</td><td>Customer Chat SS</td><td>"Ini chat customer barusan"</td><td>Reels 15s</td></tr>
+  <tr><td>4</td><td>TikTok</td><td>Education</td><td>Bedanya Joki vs Gendong</td><td>"Banyak yang bingung bedanya"</td><td>Reels 30s</td></tr>
+  <tr><td>4</td><td>IG Story</td><td>Proof</td><td>Testi Screenshot</td><td>—</td><td>Story</td></tr>
+  <tr><td><strong>5</strong></td><td>TikTok</td><td>Selling</td><td>Flash Sale</td><td>"FLASH SALE HARI INI DOANG"</td><td>Reels 15s</td></tr>
+  <tr><td>5</td><td>TikTok</td><td>Problem</td><td>AFK Ranked</td><td>"POV: ranked mulai, teammate langsung AFK"</td><td>Reels 15s</td></tr>
+  <tr><td>5</td><td>YT Shorts</td><td>Problem</td><td>Repurpose Solo Q</td><td>—</td><td>Shorts</td></tr>
+  <tr><td><strong>6-7</strong></td><td>IG Story</td><td>Proof</td><td>Weekend Proof</td><td>—</td><td>Story 3-5x</td></tr>
+</table>
+
+<!-- Week 2 -->
+<div class="week-header">
+  <div class="week-title">📅 Week 2 — Trust Week</div>
+  <div class="week-theme"><span class="badge badge-teal">CONSIDERATION</span> Build credibility with proof & education</div>
+</div>
+
+<table>
+  <tr><th>Day</th><th>Platform</th><th>Pillar</th><th>Title</th><th>Hook</th><th>Format</th></tr>
+  <tr><td><strong>8</strong></td><td>TikTok</td><td>Proof</td><td>Epic→Mythic 48 Jam</td><td>"Order masuk jam 10 pagi..."</td><td>Reels 30s</td></tr>
+  <tr><td>8</td><td>TikTok</td><td>Education</td><td>Aman Ga Pake Joki</td><td>"Pertanyaan #1 yang selalu ditanya"</td><td>Reels 40s</td></tr>
+  <tr><td>8</td><td>IG Story</td><td>Trust</td><td>Encryption Demo</td><td>—</td><td>Story</td></tr>
+  <tr><td><strong>9</strong></td><td>TikTok</td><td>Proof</td><td>Testi Video Customer</td><td>"Customer ini awalnya ragu banget"</td><td>Reels 40s</td></tr>
+  <tr><td>9</td><td>TikTok</td><td>Education</td><td>3 Mode Order</td><td>"Mau tau bedanya Paket, PerStar, Gendong?"</td><td>Reels 35s</td></tr>
+  <tr><td>9</td><td>IG Carousel</td><td>Education</td><td>Keamanan Akun</td><td>"Akun kamu AMAN di ETNYX"</td><td>Carousel 5</td></tr>
+  <tr><td><strong>10</strong></td><td>TikTok</td><td>Proof</td><td>Before-After Montage</td><td>"5 order minggu ini. 5 Mythic baru."</td><td>Reels 25s</td></tr>
+  <tr><td>10</td><td>TikTok</td><td>Entertainment</td><td>Reaksi Customer</td><td>"Reaksi customer liat rank udah Mythic"</td><td>Reels 20s</td></tr>
+  <tr><td>10</td><td>IG Reels</td><td>Proof</td><td>Repurpose 48 Jam</td><td>—</td><td>Reels</td></tr>
+  <tr><td><strong>11</strong></td><td>TikTok</td><td>Consideration</td><td>Joki Abal vs ETNYX</td><td>"Ini bedanya joki abal sama ETNYX"</td><td>Reels 40s</td></tr>
+  <tr><td>11</td><td>TikTok</td><td>Proof</td><td>Dashboard Demo</td><td>"Ini yang customer lihat selama order"</td><td>Reels 25s</td></tr>
+  <tr><td><strong>12</strong></td><td>TikTok</td><td>Education</td><td>Cara Order Tutorial</td><td>"Order di ETNYX? 3 langkah"</td><td>Reels 30s</td></tr>
+  <tr><td>12</td><td>TikTok</td><td>Proof</td><td>Stats Week</td><td>"1 minggu ETNYX: [X] order selesai"</td><td>Reels 15s</td></tr>
+  <tr><td>12</td><td>IG Feed</td><td>Branding</td><td>Weekly Stats</td><td>—</td><td>Feed 1:1</td></tr>
+  <tr><td><strong>13-14</strong></td><td>IG Story</td><td>Trust</td><td>Weekend Proof</td><td>—</td><td>Story 3-5x</td></tr>
+</table>
+
+<!-- Week 3 -->
+<div class="week-header">
+  <div class="week-title">📅 Week 3 — Value Week</div>
+  <div class="week-theme"><span class="badge badge-green">EDUCATION</span> Deliver value, establish authority</div>
+</div>
+
+<table>
+  <tr><th>Day</th><th>Platform</th><th>Pillar</th><th>Title</th><th>Hook</th><th>Format</th></tr>
+  <tr><td><strong>15</strong></td><td>TikTok</td><td>Education</td><td>Hero Tier List Season</td><td>"Tier list season ini menurut booster Mythic"</td><td>Reels 45s</td></tr>
+  <tr><td>15</td><td>TikTok</td><td>Entertainment</td><td>Booster vs Player</td><td>"Ini bedanya main booster vs player biasa"</td><td>Reels 30s</td></tr>
+  <tr><td><strong>16</strong></td><td>TikTok</td><td>Education</td><td>Build Guide Meta</td><td>"Build yang booster kita pake"</td><td>Reels 35s</td></tr>
+  <tr><td>16</td><td>TikTok</td><td>Proof</td><td>Gameplay Highlight</td><td>"Savage pake [hero] di Mythic!"</td><td>Reels 20s</td></tr>
+  <tr><td>16</td><td>IG Carousel</td><td>Education</td><td>5 Tips Push Rank</td><td>"5 tips dari booster Mythic Glory"</td><td>Carousel 6</td></tr>
+  <tr><td><strong>17</strong></td><td>TikTok</td><td>Education</td><td>Rotasi Map Guide</td><td>"Kenapa rank kamu stuck? Karena ini."</td><td>Reels 40s</td></tr>
+  <tr><td>17</td><td>TikTok</td><td>Proof</td><td>Before-After Detail</td><td>"Watch: Epic V → Mythic. Full journey."</td><td>Reels 30s</td></tr>
+  <tr><td><strong>18</strong></td><td>TikTok</td><td>Education</td><td>Draft Pick Guide</td><td>"Draft pick 101 biar ga kalah dari awal"</td><td>Reels 35s</td></tr>
+  <tr><td>18</td><td>TikTok</td><td>Entertainment</td><td>ML Meme of Week</td><td>"When kamu carry 15 kill tapi tetep kalah"</td><td>Reels 15s</td></tr>
+  <tr><td><strong>19</strong></td><td>TikTok</td><td>Education</td><td>Behind the Scenes</td><td>"Sehari jadi booster ETNYX"</td><td>Reels 45s</td></tr>
+  <tr><td>19</td><td>TikTok</td><td>Selling</td><td>Weekend Promo</td><td>"Promo WEEKEND — [X]% off"</td><td>Reels 15s</td></tr>
+  <tr><td>19</td><td>IG Feed</td><td>Branding</td><td>Weekly Stats</td><td>—</td><td>Feed 1:1</td></tr>
+  <tr><td><strong>20-21</strong></td><td>IG Story</td><td>Engagement</td><td>Weekend Q&A</td><td>"Ask me anything tentang ML/joki"</td><td>Q&A Story</td></tr>
+</table>
+
+<!-- Week 4 -->
+<div class="week-header">
+  <div class="week-title">📅 Week 4 — Push Week</div>
+  <div class="week-theme"><span class="badge badge-purple">CONVERSION</span> Drive orders with urgency & promo</div>
+</div>
+
+<table>
+  <tr><th>Day</th><th>Platform</th><th>Pillar</th><th>Title</th><th>Hook</th><th>Format</th></tr>
+  <tr><td><strong>22</strong></td><td>TikTok</td><td>Selling</td><td>Harga Joki ML</td><td>"Berapa sih harga joki ML? Gue jawab jujur."</td><td>Reels 35s</td></tr>
+  <tr><td>22</td><td>TikTok</td><td>Urgency</td><td>Season Reset</td><td>"Season reset [X] hari lagi!"</td><td>Reels 25s</td></tr>
+  <tr><td><strong>23</strong></td><td>TikTok</td><td>Proof</td><td>Mega Testi Comp</td><td>"10 customer paling puas minggu ini"</td><td>Reels 30s</td></tr>
+  <tr><td>23</td><td>TikTok</td><td>Selling</td><td>Promo Code</td><td>"Kasih kode ini buat diskon [X]%"</td><td>Reels 15s</td></tr>
+  <tr><td>23</td><td>IG Carousel</td><td>Selling</td><td>Price Breakdown</td><td>"Price list lengkap ETNYX"</td><td>Carousel 6</td></tr>
+  <tr><td><strong>24</strong></td><td>TikTok</td><td>Selling</td><td>Countdown Promo</td><td>"Promo tinggal 48 jam ⏰"</td><td>Reels 15s</td></tr>
+  <tr><td>24</td><td>TikTok</td><td>Proof</td><td>Customer Story</td><td>"Dari Epic stuck 3 bulan → Mythic 3 hari"</td><td>Reels 35s</td></tr>
+  <tr><td><strong>25</strong></td><td>TikTok</td><td>Selling</td><td>Promo Akhir Bulan</td><td>"Promo TERAKHIR bulan ini. Serius."</td><td>Reels 20s</td></tr>
+  <tr><td>25</td><td>TikTok</td><td>Entertainment</td><td>Plot Twist</td><td>"Temen gue: 'kok rank naik cepet?'"</td><td>Reels 25s</td></tr>
+  <tr><td><strong>26</strong></td><td>TikTok</td><td>Proof</td><td>Monthly Best Of</td><td>"1 bulan ETNYX. Ini hasilnya."</td><td>Reels 30s</td></tr>
+  <tr><td>26</td><td>TikTok</td><td>Urgency</td><td>Final Call</td><td>"Harga naik besok. Kesempatan terakhir."</td><td>Reels 15s</td></tr>
+  <tr><td><strong>27</strong></td><td>TikTok</td><td>Proof</td><td>Milestone Recap</td><td>"Bulan pertama: 150+ order selesai"</td><td>Reels 25s</td></tr>
+  <tr><td>27</td><td>IG Feed</td><td>Branding</td><td>Monthly Recap</td><td>—</td><td>Infographic</td></tr>
+  <tr><td><strong>28-30</strong></td><td>—</td><td>—</td><td>Buffer / Repurpose</td><td>Repurpose top performing content</td><td>Various</td></tr>
+</table>
+
+<hr>
+
+<!-- ==================== 5. MONTH 2 & 3 ==================== -->
+<div class="section-divider"><div class="num">05</div><div class="label">Month 2 & 3</div></div>
+
+<h2>Bulan 2 — Scale & Optimize (Day 31-60)</h2>
+<p style="color:var(--text-muted); margin-bottom:8px;">Target: 30K followers TikTok · 1.500 WA leads · 200+ orders</p>
+
+<div class="card-grid g2">
+  <div class="card">
+    <div class="label">Strategy Shift</div>
+    <div class="desc">
+      • <strong>Double down</strong> format yang perform di Bulan 1<br>
+      • <strong>Tambah frekuensi</strong> 3x TikTok/hari<br>
+      • <strong>Introduce series</strong> konten (episodic → retention)<br>
+      • <strong>Mulai collab</strong> ML content creators
+    </div>
+  </div>
+  <div class="card">
+    <div class="label">New Content Series</div>
+    <div class="desc">
+      • <strong>Push Rank Diary</strong> — 2x/minggu, progress day by day<br>
+      • <strong>Booster's Pick</strong> — 1x/minggu, hero favorit + gameplay<br>
+      • <strong>Customer Story</strong> — 1x/minggu, testimoni video detail<br>
+      • <strong>Rank Challenge</strong> — 1x/minggu, "Epic→Mythic 48 jam?"<br>
+      • <strong>Joki vs Player</strong> — 1x/minggu, comparison gameplay
+    </div>
+  </div>
+</div>
+
+<h2>Bulan 3 — Dominate & Systemize (Day 61-90)</h2>
+<p style="color:var(--text-muted); margin-bottom:8px;">Target: 50K+ followers TikTok · 3.000 WA leads · 400+ orders</p>
+
+<div class="card-grid g2">
+  <div class="card">
+    <div class="label">Strategy Shift</div>
+    <div class="desc">
+      • <strong>Content machine</strong> batching fully optimized<br>
+      • <strong>Community building</strong> loyal customer → UGC<br>
+      • <strong>Paid ads</strong> boost top organic content<br>
+      • <strong>Referral push</strong> activate reward system
+    </div>
+  </div>
+  <div class="card">
+    <div class="label">Advanced Tactics</div>
+    <div class="desc">
+      • <strong>UGC Campaign</strong> — customer share story → repost + reward<br>
+      • <strong>Creator Collab</strong> — 3-5 ML micro-influencer (5K-50K)<br>
+      • <strong>TikTok Ads</strong> — Spark Ads top 5 organic videos<br>
+      • <strong>IG Highlights</strong> — Testimoni, Cara Order, Promo, FAQ, Tracking<br>
+      • <strong>WA Broadcast</strong> — weekly promo/tips ke database leads
+    </div>
+  </div>
+</div>
+
+<h3>Scaling Roadmap</h3>
+<div class="flow-box">
+  <div class="flow-step" style="border-color:var(--warning);"><strong>Month 1:</strong> TEST — find winning formats</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step" style="border-color:var(--success);"><strong>Month 2:</strong> SCALE — double down winners</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step" style="border-color:var(--secondary);"><strong>Month 3:</strong> DOMINATE — paid + organic + UGC</div>
+</div>
+
+<h3>Content Scaling Rules</h3>
+<table>
+  <tr><th>Performance</th><th>Action</th></tr>
+  <tr><td>Video &gt; 10% retention</td><td>Buat 3 variasi</td></tr>
+  <tr><td>Video &gt; 100K views</td><td>Boost sebagai TikTok Spark Ad (Rp 50-100K/hari)</td></tr>
+  <tr><td>Video &gt; 5% save rate</td><td>Jadikan series (recurring weekly)</td></tr>
+  <tr><td>Video &lt; 500 views (48h)</td><td>Kill, ganti format</td></tr>
+  <tr><td>Hook yang work</td><td>Recycle dengan twist berbeda</td></tr>
+</table>
+
+<hr>
+
+<!-- ==================== 6. CONTENT TYPES ==================== -->
+<div class="section-divider"><div class="num">06</div><div class="label">Content Types</div></div>
+
+<h2>Content Types Mandatory</h2>
+<table>
+  <tr><th>#</th><th>Content Type</th><th>Min Frequency</th><th>Funnel</th><th>Platform</th></tr>
+  <tr><td>1</td><td><strong>How to Order</strong></td><td>2x / bulan</td><td>Conversion</td><td>TikTok + IG Carousel</td></tr>
+  <tr><td>2</td><td><strong>Testimoni Chat</strong></td><td>3x / minggu</td><td>Proof</td><td>TikTok + IG Story</td></tr>
+  <tr><td>3</td><td><strong>Testimoni Video</strong></td><td>1x / minggu</td><td>Proof</td><td>TikTok + IG Reels</td></tr>
+  <tr><td>4</td><td><strong>Before-After Rank</strong></td><td>3x / minggu</td><td>Proof</td><td>TikTok + IG</td></tr>
+  <tr><td>5</td><td><strong>Gameplay Proof</strong></td><td>2x / minggu</td><td>Proof</td><td>TikTok + YT Shorts</td></tr>
+  <tr><td>6</td><td><strong>Edukasi ML</strong></td><td>3x / minggu</td><td>Education</td><td>TikTok + IG Carousel</td></tr>
+  <tr><td>7</td><td><strong>Meme Relatable</strong></td><td>2x / minggu</td><td>Entertainment</td><td>TikTok + IG</td></tr>
+  <tr><td>8</td><td><strong>Promo / Urgency</strong></td><td>2x / minggu</td><td>Conversion</td><td>IG Story + TikTok</td></tr>
+  <tr><td>9</td><td><strong>Behind the Scenes</strong></td><td>1x / minggu</td><td>Trust</td><td>TikTok + IG</td></tr>
+  <tr><td>10</td><td><strong>FAQ</strong></td><td>2x / bulan</td><td>Conversion</td><td>TikTok + IG Carousel</td></tr>
+</table>
+
+<hr>
+
+<!-- ==================== 7. VIDEO STRUCTURE ==================== -->
+<div class="section-divider"><div class="num">07</div><div class="label">Video Structure</div></div>
+
+<h2>Video Structure System</h2>
+
+<div class="flow-box" style="font-weight:700;">
+  <div class="flow-step" style="background:rgba(239,68,68,0.1); border-color:var(--danger);">🎣 HOOK<br><span style="font-size:9px; font-weight:400;">0-3 detik</span></div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step" style="background:rgba(245,158,11,0.1); border-color:var(--warning);">😤 PROBLEM<br><span style="font-size:9px; font-weight:400;">3-8 detik</span></div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step" style="background:rgba(45,212,191,0.1); border-color:var(--accent);">💡 SOLUTION<br><span style="font-size:9px; font-weight:400;">8-15 detik</span></div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step" style="background:rgba(34,197,94,0.1); border-color:var(--success);">🏆 PROOF<br><span style="font-size:9px; font-weight:400;">15-25 detik</span></div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step" style="background:rgba(168,85,247,0.1); border-color:var(--secondary);">📣 CTA<br><span style="font-size:9px; font-weight:400;">25-30 detik</span></div>
+</div>
+
+<h3>🎣 Hook System (Detik 0-3)</h3>
+<table>
+  <tr><th>Tipe</th><th>Contoh</th><th>Kenapa Work</th></tr>
+  <tr><td><strong>Shock Statement</strong></td><td>"90% player Epic SALAH push rank"</td><td>Menantang belief → penasaran</td></tr>
+  <tr><td><strong>Relatable Pain</strong></td><td>"Pernah promos Mythic terus kalah 3x?"</td><td>Instant relate</td></tr>
+  <tr><td><strong>Number + Curiosity</strong></td><td>"2.847 order selesai. Ini rahasianya."</td><td>Data = credibility</td></tr>
+  <tr><td><strong>Question</strong></td><td>"Tau ga kenapa rank stuck?"</td><td>Otak otomatis cari jawaban</td></tr>
+  <tr><td><strong>POV Format</strong></td><td>"POV: tim draft 3 marksman"</td><td>Immersive → relate</td></tr>
+  <tr><td><strong>Controversy</strong></td><td>"Joki itu salah? Baca komen."</td><td>Debatable → engagement</td></tr>
+  <tr><td><strong>Visual Shock</strong></td><td>(gameplay savage opening frame)</td><td>Visual drama → stop scroll</td></tr>
+  <tr><td><strong>Cliffhanger</strong></td><td>"Ini yang terjadi kalau order joki..."</td><td>Curiosity gap</td></tr>
+</table>
+
+<div class="highlight-box">
+  <strong>Hook Rules:</strong> Max 3 detik · Teks + voiceover simultaneously · Zoom in di detik pertama · Hindari intro panjang · Test 3 hook alternatif per konten
+</div>
+
+<h3>📈 Retention Strategy (Detik 3-25)</h3>
+<table>
+  <tr><th>Teknik</th><th>Implementasi</th></tr>
+  <tr><td><strong>Pattern Interrupt</strong></td><td>Setiap 3-5 detik: potong, zoom, sfx, transition</td></tr>
+  <tr><td><strong>Open Loop</strong></td><td>"...tapi yang ke-3 ini yang paling penting"</td></tr>
+  <tr><td><strong>Progressive Reveal</strong></td><td>Jangan kasih semua info sekaligus</td></tr>
+  <tr><td><strong>Visual Stimulation</strong></td><td>Min 1 visual change per 2 detik</td></tr>
+  <tr><td><strong>Storytelling</strong></td><td>"Nah, customer ini awalnya ragu..."</td></tr>
+  <tr><td><strong>Data Drops</strong></td><td>Selipkan angka di tengah: "ini datanya ya..."</td></tr>
+</table>
+
+<h3>📣 CTA Placement</h3>
+<table>
+  <tr><th>Posisi</th><th>Tipe</th><th>Contoh</th></tr>
+  <tr><td>Mid-video (detik 10-15)</td><td>Soft CTA</td><td>"Stay sampe akhir buat tau lebih lanjut"</td></tr>
+  <tr><td>End (detik terakhir)</td><td>Direct CTA</td><td>"Link di bio. Chat sekarang."</td></tr>
+  <tr><td>Text overlay</td><td>Persistent</td><td>"@etnyx.id" di pojok</td></tr>
+  <tr><td>Pinned comment</td><td>Passive</td><td>"Mau order? Klik link di bio 👆"</td></tr>
+  <tr><td>Caption</td><td>Funnel</td><td>"DM 'JOKI' buat info harga"</td></tr>
+</table>
+
+<hr>
+
+<!-- ==================== 8. EDITING ==================== -->
+<div class="section-divider"><div class="num">08</div><div class="label">Editing & Visual</div></div>
+
+<h2>Editing & Visual Direction</h2>
+
+<h3>🎬 Video Editing Rules</h3>
+<table>
+  <tr><th>Rule</th><th>Detail</th></tr>
+  <tr><td><strong>Pacing</strong></td><td>Fast cut, max 3 detik per shot</td></tr>
+  <tr><td><strong>Transisi</strong></td><td>Hard cut dominan, slide untuk before-after</td></tr>
+  <tr><td><strong>Zoom</strong></td><td>Dynamic zoom in tiap poin penting (1.5x-2x)</td></tr>
+  <tr><td><strong>B-Roll</strong></td><td>Gameplay insert setiap 5-7 detik di talking head</td></tr>
+  <tr><td><strong>Motion Text</strong></td><td>Teks sinkron voiceover, animasi pop/slide</td></tr>
+  <tr><td><strong>SFX</strong></td><td>Impact tiap poin, meme sound untuk humor</td></tr>
+  <tr><td><strong>Music</strong></td><td>Background low volume, gaming/electronic vibe</td></tr>
+  <tr><td><strong>Duration</strong></td><td>15-45s (TikTok), 30-60s (Reels/Shorts)</td></tr>
+</table>
+
+<h3>🎵 SFX Library Wajib</h3>
+<div class="card-grid g4">
+  <div class="card"><div class="desc">💥 <strong>Boom/Impact</strong> — poin penting</div></div>
+  <div class="card"><div class="desc">🔔 <strong>Ding</strong> — reveal</div></div>
+  <div class="card"><div class="desc">😐 <strong>Vine Boom</strong> — meme</div></div>
+  <div class="card"><div class="desc">💰 <strong>Cash Register</strong> — harga</div></div>
+  <div class="card"><div class="desc">😒 <strong>Bruh</strong> — hal bodoh</div></div>
+  <div class="card"><div class="desc">😰 <strong>Suspense</strong> — before reveal</div></div>
+  <div class="card"><div class="desc">🎺 <strong>Victory</strong> — result/after</div></div>
+  <div class="card"><div class="desc">⚠️ <strong>Sad Violin</strong> — fail moment</div></div>
+</div>
+
+<h3>🎨 Visual Branding (Updated ETNYX Colors)</h3>
+<table>
+  <tr><th>Elemen</th><th>Warna</th><th>Hex</th><th>Usage</th></tr>
+  <tr><td><strong>Accent</strong></td><td>Turquoise</td><td><code>#2DD4BF</code></td><td>Logo, accent, highlight, CTA</td></tr>
+  <tr><td><strong>Primary</strong></td><td>Teal</td><td><code>#7FA8A3</code></td><td>Secondary elements, gradient</td></tr>
+  <tr><td><strong>Background</strong></td><td>Dark Navy</td><td><code>#0F1419</code></td><td>Thumbnail, text bg, overlay</td></tr>
+  <tr><td><strong>Surface</strong></td><td>Dark Surface</td><td><code>#151B22</code></td><td>Cards, panels</td></tr>
+  <tr><td><strong>Text</strong></td><td>Off White</td><td><code>#E6F1EF</code></td><td>Main text</td></tr>
+  <tr><td><strong>Success</strong></td><td>Green</td><td><code>#22C55E</code></td><td>Positive, "done", angka naik</td></tr>
+  <tr><td><strong>Warning</strong></td><td>Amber</td><td><code>#F59E0B</code></td><td>Urgency, promo, angka</td></tr>
+  <tr><td><strong>Danger</strong></td><td>Red</td><td><code>#EF4444</code></td><td>Fear, alert, angka turun</td></tr>
+  <tr><td><strong>Premium</strong></td><td>Purple</td><td><code>#A855F7</code></td><td>Special elements</td></tr>
+  <tr><td><strong>Gradient</strong></td><td>Turquoise→Teal</td><td><code>#2DD4BF → #7FA8A3</code></td><td>Logo glow, CTA buttons</td></tr>
+</table>
+
+<div class="highlight-box">
+  <strong>Visual Style:</strong> Dark gaming aesthetic · Subtle glow effects pada logo & key elements · Clean & minimal (max 3 elemen/screen) · Glassmorphism cards · Logo watermark pojok kanan bawah
+</div>
+
+<h3>Subtitle Highlight Rules</h3>
+<table>
+  <tr><th>Element</th><th>Color</th><th>Example</th></tr>
+  <tr><td>Keyword utama</td><td><span style="color:var(--accent);">Turquoise #2DD4BF</span></td><td>"ETNYX", "enkripsi", "tracking"</td></tr>
+  <tr><td>Angka/data</td><td><span style="color:var(--success);">Green #22C55E</span></td><td>"2.847", "4.8⭐", "48 jam"</td></tr>
+  <tr><td>Urgency word</td><td><span style="color:var(--warning);">Amber #F59E0B</span></td><td>"SEKARANG", "TERAKHIR", "TINGGAL"</td></tr>
+  <tr><td>Warning/fear</td><td><span style="color:var(--danger);">Red #EF4444</span></td><td>"GAGAL", "STUCK", "TURUN"</td></tr>
+</table>
+
+<hr>
+
+<!-- ==================== 9. COPYWRITING ==================== -->
+<div class="section-divider"><div class="num">09</div><div class="label">Copywriting</div></div>
+
+<h2>Copywriting System</h2>
+
+<h3>🎣 15 Viral Hook Templates</h3>
+<table>
+  <tr><th>#</th><th>Template</th><th>Pillar</th></tr>
+  <tr><td>1</td><td>"Kalau kamu still stuck di [rank], ini yang harus kamu tau..."</td><td>Problem</td></tr>
+  <tr><td>2</td><td>"[Angka] order selesai. Dan ini yang mereka semua bilang."</td><td>Proof</td></tr>
+  <tr><td>3</td><td>"Stop push rank sendiri kalau kamu ngalamin [pain] ini."</td><td>Problem</td></tr>
+  <tr><td>4</td><td>"Gue bantu [angka] orang ke Mythic bulan ini. Ini caranya."</td><td>Proof</td></tr>
+  <tr><td>5</td><td>"Ini bedanya [rank A] sama [rank B] menurut booster."</td><td>Education</td></tr>
+  <tr><td>6</td><td>"POV: kamu promos [rank] dan dapet tim [hal random]."</td><td>Entertainment</td></tr>
+  <tr><td>7</td><td>"Rahasia kenapa rank kamu ga naik padahal udah tryhard."</td><td>Problem</td></tr>
+  <tr><td>8</td><td>"Customer ini ragu. Sekarang udah order ke-[angka]."</td><td>Proof</td></tr>
+  <tr><td>9</td><td>"3 hal yang PASTI bikin kamu lose streak."</td><td>Education</td></tr>
+  <tr><td>10</td><td>"Joki abal ga bakal kasih kamu ini. Tapi kita kasih."</td><td>Consideration</td></tr>
+  <tr><td>11</td><td>"Season reset tinggal [X] hari. Rank kamu gimana?"</td><td>Urgency</td></tr>
+  <tr><td>12</td><td>"Ini yang terjadi dalam 48h setelah order ETNYX."</td><td>Proof</td></tr>
+  <tr><td>13</td><td>"Hero ini lagi broken. Tapi 90% salah build-nya."</td><td>Education</td></tr>
+  <tr><td>14</td><td>"Push sendiri berminggu-minggu atau 2 hari selesai?"</td><td>Selling</td></tr>
+  <tr><td>15</td><td>"Dari hampir uninstall ML sampai Mythic."</td><td>Proof</td></tr>
+</table>
+
+<h3>📣 CTA Templates</h3>
+<div class="card-grid g2">
+  <div class="card" style="border-top:2px solid var(--primary);">
+    <div class="label">Soft CTA (Awareness)</div>
+    <div class="desc">
+      1. "Follow buat tips ML lainnya 🎮"<br>
+      2. "Save video ini buat nanti 📌"<br>
+      3. "Comment rank kamu sekarang 👇"<br>
+      4. "Share ke temen yang butuh 🔗"<br>
+      5. "Tag temen yang kayak gini 😂"
+    </div>
+  </div>
+  <div class="card" style="border-top:2px solid var(--secondary);">
+    <div class="label">Hard CTA (Conversion)</div>
+    <div class="desc">
+      6. "Chat sekarang — link di bio 📲"<br>
+      7. "DM 'JOKI' buat info harga 💬"<br>
+      8. "Slot terbatas. Grab sekarang ⏰"<br>
+      9. "Order sekarang, besok udah Mythic 🏆"<br>
+      10. "Klik link di bio → 3 langkah ✅"
+    </div>
+  </div>
+</div>
+
+<h3>📝 Caption Examples</h3>
+
+<div class="card" style="margin:6px 0;">
+  <div class="label">Caption — Proof</div>
+  <div class="desc">
+    Epic III → Mythic IV. 3 hari. 0 banned. 12 winstreak.<br>
+    Ini bukan janji. Ini bukti. 📸<br>
+    Customer ke-2.847 yang udah percaya ETNYX. Kamu kapan?<br>
+    Order sekarang → link di bio ✅ Atau DM "JOKI" buat info harga.<br>
+    #jokiml #mobilelegends #pushrank #mythic
+  </div>
+</div>
+
+<div class="card" style="margin:6px 0;">
+  <div class="label">Caption — Urgency</div>
+  <div class="desc">
+    ⚠️ PROMO AKHIR SEASON ⚠️<br>
+    Diskon 25% SEMUA PAKET. Season reset tinggal 10 hari.<br>
+    Harga normal: Rp 150.000 → Promo: Rp 112.500<br>
+    Slot terbatas — harga normal Senin. Chat sekarang → link di bio 📲<br>
+    #promoML #jokimurah #diskon #mobilelegends
+  </div>
+</div>
+
+<div class="card" style="margin:6px 0;">
+  <div class="label">Caption — Trust/FAQ</div>
+  <div class="desc">
+    "Aman ga sih pake joki?" — Pertanyaan #1.<br>
+    ✅ Enkripsi AES-256 (military grade) ✅ Track real-time dari HP<br>
+    ✅ Notif WA setiap update ✅ 2.847 order, 0 akun bermasalah<br>
+    Masih ragu? Chat dulu aja, gratis nanya 😊 Link WA di bio 📲<br>
+    #jokiaman #jokiterpercaya #mobilelegends #faq
+  </div>
+</div>
+
+<hr>
+
+<!-- ==================== 10. FUNNEL ==================== -->
+<div class="section-divider"><div class="num">10</div><div class="label">Funnel Strategy</div></div>
+
+<h2>Funnel Strategy</h2>
+
+<div class="flow-box" style="font-weight:700; font-size:12px;">
+  <div class="flow-step" style="background:rgba(239,68,68,0.08);">📱 CONTENT<br><span style="font-size:9px; font-weight:400;">TikTok/IG</span></div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step" style="background:rgba(245,158,11,0.08);">🔗 DM/BIO<br><span style="font-size:9px; font-weight:400;">Bridge</span></div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step" style="background:rgba(45,212,191,0.08);">💬 WHATSAPP<br><span style="font-size:9px; font-weight:400;">Qualify</span></div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step" style="background:rgba(34,197,94,0.08);">✅ ORDER<br><span style="font-size:9px; font-weight:400;">Closing</span></div>
+</div>
+
+<h3>Bio Setup (TikTok & IG)</h3>
+<pre>🎮 Jasa Joki ML #1 Indonesia
+⚡ Cepat • Aman • Terenkripsi
+📊 2.847+ Order | ⭐ 4.8 Rating
+👇 Order / Tanya Harga:
+[Link WA / Linktree]</pre>
+
+<h3>Linktree Structure</h3>
+<ol>
+  <li>📲 <strong>Chat WhatsApp</strong> (priority #1)</li>
+  <li>🌐 <strong>Order Langsung</strong> — etnyx.com/order</li>
+  <li>💰 <strong>Cek Harga</strong> — price page</li>
+  <li>⭐ <strong>Lihat Testimoni</strong></li>
+  <li>❓ <strong>FAQ</strong></li>
+</ol>
+
+<h3>Retargeting Strategy</h3>
+<table>
+  <tr><th>Event</th><th>Action</th><th>Timing</th></tr>
+  <tr><td>DM tapi ga WA</td><td>IG Story mention promo</td><td>24 jam</td></tr>
+  <tr><td>WA tapi ga order</td><td>WA follow-up</td><td>6 jam</td></tr>
+  <tr><td>Sudah order 1x</td><td>WA promo repeat order</td><td>14 hari</td></tr>
+  <tr><td>Customer loyal</td><td>Referral code + reward info</td><td>30 hari</td></tr>
+</table>
+
+<hr>
+
+<!-- ==================== 11. WA CLOSING ==================== -->
+<div class="section-divider"><div class="num">11</div><div class="label">WA Closing System</div></div>
+
+<h2>WhatsApp Closing System</h2>
+<p style="color:var(--text-muted);">8 script template untuk setiap stage closing. Disesuaikan dengan sistem ETNYX (Meta Cloud API, auto-notif, chatbot).</p>
+
+<div class="card-grid g2">
+  <div class="card">
+    <div class="label">Script 1: Opening</div>
+    <div class="desc">
+      Customer: "Mau nanya soal joki ML"<br><br>
+      Admin:<br>
+      "Halooo kak! 👋 Makasih udah hubungi ETNYX. Boleh tau:<br>
+      1. Rank sekarang berapa?<br>
+      2. Target rank apa?<br>
+      3. Preferensi mode? (Paket/Per Star/Gendong)<br>
+      Biar kasih info paling pas 😊"
+    </div>
+  </div>
+  <div class="card">
+    <div class="label">Script 2: Qualification</div>
+    <div class="desc">
+      "Oke, [rank] ke [target]. Sip! 💪<br><br>
+      Boleh tanya sedikit:<br>
+      1. Timezone / jam biasa main?<br>
+      2. Hero yang ga boleh dipake?<br>
+      3. Deadline?<br>
+      Biar booster bisa adjust jadwal 👍"
+    </div>
+  </div>
+  <div class="card">
+    <div class="label">Script 3: Price Presentation</div>
+    <div class="desc">
+      "Untuk [rank A] ke [rank B]:<br><br>
+      💰 Paket: Rp [X]<br>
+      ⭐ Per Star: Rp [X] x [jumlah]<br>
+      🤝 Gendong: Rp [X]<br><br>
+      Yang kakak dapet:<br>
+      ✅ Tracking real-time ✅ Notif WA<br>
+      ✅ Screenshot bukti ✅ Enkripsi AES-256<br>
+      ✅ Invoice PDF · Estimasi: [X] hari"
+    </div>
+  </div>
+  <div class="card">
+    <div class="label">Script 4: Objection — "Mahal"</div>
+    <div class="desc">
+      "Gue ngerti kak. Tapi coba bandingin:<br><br>
+      ❌ Push sendiri: berminggu-minggu, stress<br>
+      ✅ ETNYX: 2-3 hari, aman, tinggal santai<br><br>
+      Kalau mau budget-friendly, coba Per Star — bayar sesuai kebutuhan 😊"
+    </div>
+  </div>
+  <div class="card">
+    <div class="label">Script 5: Objection — "Takut banned"</div>
+    <div class="desc">
+      "Wajar kak! 👍 Di ETNYX:<br>
+      🔒 Enkripsi AES-256 (military grade)<br>
+      📊 Track 24/7 dari HP<br>
+      📱 Notif WA otomatis setiap update<br>
+      🛡️ 2.847+ order, 0 akun bermasalah<br><br>
+      Coba order kecil dulu buat ngerasain 😊"
+    </div>
+  </div>
+  <div class="card">
+    <div class="label">Script 6: Urgency Push</div>
+    <div class="desc">
+      "Kak, update:<br>
+      ⚠️ Slot booster tinggal [X] buat minggu ini.<br>
+      Kalau full, next slot Senin depan.<br><br>
+      Langsung aja ya biar kita reserve 👍<br>
+      etnyx.com/order atau proses dari sini 😊"
+    </div>
+  </div>
+  <div class="card">
+    <div class="label">Script 7: Closing</div>
+    <div class="desc">
+      "Sipp kak! Order detail:<br>
+      📋 Rank: [A] → [B] · Mode: [X] · Harga: Rp [X]<br><br>
+      Order: etnyx.com/order<br>
+      Atau transfer: [Rekening/QRIS]<br><br>
+      ✅ Upload bukti → ✅ Konfirmasi 30 menit<br>
+      ✅ Booster mulai → ✅ Track 24/7"
+    </div>
+  </div>
+  <div class="card">
+    <div class="label">Script 8: Post-Order Follow Up</div>
+    <div class="desc">
+      "Kakak! Order selesai 🎉🏆<br>
+      Rank: [A] → [B] ✅ · Waktu: [X] hari<br><br>
+      Boleh kasih review di [link]? 🙏<br>
+      Reward points: [X] pts → tuker diskon!<br>
+      Share referral code → temen diskon, kakak bonus 🔗"
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ==================== 12. PRODUCTION ==================== -->
+<div class="section-divider"><div class="num">12</div><div class="label">Production System</div></div>
+
+<h2>Production System</h2>
+
+<h3>🔄 Daily Production Workflow</h3>
+<table>
+  <tr><th>Jam</th><th>Activity</th><th>Duration</th><th>Output</th></tr>
+  <tr><td>09:00</td><td><strong>Ideation</strong> — trending, competitor, calendar, 3 hooks</td><td>30 min</td><td>3 briefs</td></tr>
+  <tr><td>09:30</td><td><strong>Scripting</strong> — full script, visual direction, assets</td><td>30 min</td><td>3 scripts</td></tr>
+  <tr><td>10:00</td><td><strong>Recording</strong> — talking head, screen record, voiceover</td><td>60 min</td><td>5-10 takes</td></tr>
+  <tr><td>11:00</td><td><strong>Editing</strong> — CapCut, subtitle, SFX, music, export</td><td>120 min</td><td>3-5 videos</td></tr>
+  <tr><td>13:00</td><td><strong>Posting</strong> — upload, captions, hashtags, pin comment</td><td>30 min</td><td>All platforms</td></tr>
+</table>
+<p style="color:var(--text-muted);">Total daily: ~4 jam → output 3-5 konten</p>
+
+<h3>📦 Batching System</h3>
+<div class="highlight-box">
+  <strong>1 hari produksi = 5-10 konten (untuk 2-3 hari posting)</strong><br>
+  Senin & Kamis: Full production (5-10 konten) · Selasa/Rabu/Jumat: Posting + engagement + analytics · Weekend: Light content + repurpose
+</div>
+
+<h3>🛠️ Tools</h3>
+<table>
+  <tr><th>Tool</th><th>Usage</th><th>Cost</th></tr>
+  <tr><td><strong>CapCut</strong></td><td>Video editing utama</td><td>Free</td></tr>
+  <tr><td><strong>Canva</strong></td><td>IG carousel, thumbnail, template</td><td>Free/Pro</td></tr>
+  <tr><td><strong>TikTok App</strong></td><td>Posting + analytics + trending</td><td>Free</td></tr>
+  <tr><td><strong>WA Business</strong></td><td>Customer + quick replies + labels</td><td>Free</td></tr>
+  <tr><td><strong>Google Sheets</strong></td><td>Content calendar tracking</td><td>Free</td></tr>
+  <tr><td><strong>Telegram</strong></td><td>Internal team coordination (5 grup)</td><td>Free</td></tr>
+</table>
+
+<h3>⏰ Optimal Posting Times</h3>
+<div class="card-grid g3">
+  <div class="card" style="border-top:2px solid var(--danger);">
+    <div class="label">TikTok</div>
+    <div class="desc">11:00-12:00 (istirahat)<br>15:00-16:30 (pulang)<br>19:30-21:00 (prime gaming)</div>
+  </div>
+  <div class="card" style="border-top:2px solid var(--secondary);">
+    <div class="label">Instagram</div>
+    <div class="desc">Feed/Reels: 12:00 / 18:00<br>Story: 09:00, 15:00, 21:00</div>
+  </div>
+  <div class="card" style="border-top:2px solid var(--danger);">
+    <div class="label">YouTube Shorts</div>
+    <div class="desc">Primary: 14:00-15:00<br>Secondary: 20:00-21:00</div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ==================== 13. PERFORMANCE ==================== -->
+<div class="section-divider"><div class="num">13</div><div class="label">Performance & KPI</div></div>
+
+<h2>Performance Strategy & KPI</h2>
+
+<h3>📊 Primary KPIs</h3>
+<table>
+  <tr><th>KPI</th><th>Month 1</th><th>Month 2</th><th>Month 3</th></tr>
+  <tr><td><strong>TikTok Followers</strong></td><td>10.000</td><td>30.000</td><td>50.000+</td></tr>
+  <tr><td><strong>TikTok Avg Views</strong></td><td>5.000</td><td>15.000</td><td>30.000+</td></tr>
+  <tr><td><strong>IG Followers</strong></td><td>2.000</td><td>5.000</td><td>10.000+</td></tr>
+  <tr><td><strong>WA Leads/bulan</strong></td><td>500</td><td>1.500</td><td>3.000+</td></tr>
+  <tr><td><strong>Orders/bulan</strong></td><td>50</td><td>200</td><td>400+</td></tr>
+  <tr><td><strong>Conversion (WA→Order)</strong></td><td>10%</td><td>15%</td><td>20%</td></tr>
+</table>
+
+<h3>Content KPIs</h3>
+<table>
+  <tr><th>Metric</th><th>Good</th><th>Great</th><th>Viral</th></tr>
+  <tr><td>Retention Rate</td><td>&gt;30%</td><td>&gt;50%</td><td>&gt;70%</td></tr>
+  <tr><td>Like Rate</td><td>&gt;5%</td><td>&gt;10%</td><td>&gt;15%</td></tr>
+  <tr><td>Comment Rate</td><td>&gt;1%</td><td>&gt;3%</td><td>&gt;5%</td></tr>
+  <tr><td>Share Rate</td><td>&gt;1%</td><td>&gt;2%</td><td>&gt;5%</td></tr>
+  <tr><td>Save Rate</td><td>&gt;3%</td><td>&gt;5%</td><td>&gt;10%</td></tr>
+</table>
+
+<h3>Spark Ads Strategy</h3>
+<div class="highlight-box">
+  <strong>Budget:</strong> Rp 500K - 1jt/minggu · <strong>Target:</strong> Look-alike audience · <strong>Objective:</strong> Traffic (WA/website)<br>
+  <strong>Creative:</strong> Top 3 organic videos · <strong>Duration:</strong> 3-7 hari/ad · <strong>Kill rule:</strong> CPC > Rp 2.000 → matiin → ganti
+</div>
+
+<h3>Anti-Flop Recovery</h3>
+<table>
+  <tr><th>Situation</th><th>Recovery</th></tr>
+  <tr><td>3 video berturut &lt;1K views</td><td>Switch format drastis (pure entertainment)</td></tr>
+  <tr><td>Engagement turun &gt;30%</td><td>Buat controversy/hot take content</td></tr>
+  <tr><td>Followers growth flat</td><td>Collab + giveaway + trending hijack</td></tr>
+  <tr><td>WA leads turun</td><td>Push more proof + urgency content</td></tr>
+</table>
+
+<hr>
+
+<!-- ==================== 14. TOP 10 VIRAL ==================== -->
+<div class="section-divider"><div class="num">14</div><div class="label">TOP 10 Viral Scripts</div></div>
+
+<h2>TOP 10 Viral Content — Full Script</h2>
+
+<p style="color:var(--text-muted); margin-bottom:12px;">10 konten dengan potensi viral tertinggi. Full script + editing direction. Siap produksi.</p>
+
+<!-- Viral #1 -->
+<div class="card" style="margin:8px 0; border-left:3px solid var(--danger);">
+  <div class="label">🏆 #1 — "5 Tanda Kamu Butuh Joki" <span class="badge badge-red">⭐⭐⭐⭐⭐</span></div>
+  <div class="desc" style="margin-bottom:4px;">Reels 35s · Problem → Awareness · Relatable + Shareable</div>
+  <div class="script-block">
+[0-3s] HOOK: "Kalau kamu ngalamin 3 dari 5 ini... kamu BUTUH bantuan."<br>
+[3-6s] Tanda 1: -4 star hari ini (SFX: boom)<br>
+[6-9s] Tanda 2: Tim selalu ada feeders (SFX: bruh)<br>
+[9-13s] Tanda 3: Promos Legend 5x gagal (SFX: sad violin) — "5x GAGAL" merah<br>
+[13-17s] Tanda 4: Rank TURUN bukan naik (SFX: descending)<br>
+[17-22s] Tanda 5: Hampir uninstall ML (dramatic pause)<br>
+[22-28s] SOLUTION: Dashboard + before-after montage. "ETNYX. Joki ML profesional."<br>
+[28-35s] CTA: "Link di bio. Chat sekarang. Besok rank kamu beda."
+  </div>
+</div>
+
+<!-- Viral #2 -->
+<div class="card" style="margin:8px 0; border-left:3px solid var(--success);">
+  <div class="label">🏆 #2 — "Epic ke Mythic — 48 Jam" <span class="badge badge-green">⭐⭐⭐⭐⭐</span></div>
+  <div class="desc" style="margin-bottom:4px;">Reels 30s · Proof → Conversion · Before-after = proof king</div>
+  <div class="script-block">
+[0-3s] Screen record: Epic III. "Order masuk jam 10 pagi." (DAY 1 10:00 AM)<br>
+[3-8s] Dashboard 25%. "6 jam kemudian. Udah Legend." (DAY 1 04:00 PM)<br>
+[8-13s] Gameplay highlight: 12 winstreak (SFX: combo)<br>
+[13-18s] Dashboard 75%, Legend I. "Tinggal dikit lagi." (DAY 2 02:00 PM)<br>
+[18-24s] BLACK SCREEN → FLASH: Mythic IV! (SFX: VICTORY 🎺) Before-after split. "48 JAM. DONE ✓"<br>
+[24-30s] CTA: "Giliran kamu. DM 'JOKI' atau link di bio."
+  </div>
+</div>
+
+<!-- Viral #3 -->
+<div class="card" style="margin:8px 0; border-left:3px solid var(--accent);">
+  <div class="label">🏆 #3 — "Joki Abal vs ETNYX" <span class="badge badge-teal">⭐⭐⭐⭐⭐</span></div>
+  <div class="desc" style="margin-bottom:4px;">Reels 40s + IG Carousel 7 · Consideration → Trust · Comparison = engagement</div>
+  <div class="script-block">
+[0-3s] "Ini bedanya joki abal... sama ETNYX."<br>
+[3-9s] KEAMANAN: Abal → password di notes HP | ETNYX → AES-256 encrypted<br>
+[9-15s] TRACKING: Abal → "sabar, ntar" | ETNYX → dashboard real-time 24/7<br>
+[15-21s] BUKTI: Abal → "done" no screenshot | ETNYX → stats + invoice PDF<br>
+[21-27s] NOTIF: Abal → nothing | ETNYX → WA otomatis setiap step<br>
+[27-35s] "Kamu pilih mana? 2.847 customer udah pilih ETNYX. Rating 4.8/5."<br>
+[35-40s] CTA: "Link di bio. Join the 2.847."
+  </div>
+</div>
+
+<!-- Viral #4 -->
+<div class="card" style="margin:8px 0; border-left:3px solid var(--warning);">
+  <div class="label">🏆 #4 — "POV: Promos Mythic Dapat Tim Ini" <span class="badge badge-amber">⭐⭐⭐⭐⭐</span></div>
+  <div class="desc" style="margin-bottom:4px;">Reels 25s · Entertainment/Problem → Awareness · Relatable humor = shares</div>
+  <div class="script-block">
+[0-2s] "POV: Promos Mythic" (epic music)<br>
+[2-5s] Legend I ★★★★ matchmaking (SFX: heartbeat)<br>
+[5-12s] Draft: double MM 🤡 (bruh) · Hanabi 2026??? (vine boom) · AFK dari draft (windows error)<br>
+[12-18s] Montage: feeding, 0-5, defeat. "-1 ⭐ lagi" (sad music)<br>
+[18-23s] TWIST: "Enough." → Screen record ETNYX order → bayar (upbeat)<br>
+[23-25s] "ETNYX. Push rank tanpa drama. Link di bio 📲"
+  </div>
+</div>
+
+<!-- Viral #5 -->
+<div class="card" style="margin:8px 0; border-left:3px solid var(--secondary);">
+  <div class="label">🏆 #5 — "Reaksi Customer Pertama Kali" <span class="badge badge-purple">⭐⭐⭐⭐</span></div>
+  <div class="desc" style="margin-bottom:4px;">Reels 40s · Proof → Trust · Customer story = trust builder</div>
+  <div class="script-block">
+[0-3s] "Customer ini awalnya ragu banget. Chat seminggu."<br>
+[3-10s] Chat montage: "takut akun ilang", "yakin ga banned?"<br>
+[10-15s] "Akhirnya coba order per star — yang kecil."<br>
+[15-22s] Tracking: 25% → 50% → 75% → 100%. Chat: "wih bisa diliat!"<br>
+[22-30s] Chat: "UDAH MYTHIC?? CEPET BANGET 🙏🙏🙏" → "next order lagi ya"<br>
+[30-40s] "Dari ragu → repeat order ke-3. Kamu bisa jadi next story. Link di bio."
+  </div>
+</div>
+
+<!-- Viral #6-10 -->
+<div class="card" style="margin:8px 0; border-left:3px solid var(--primary);">
+  <div class="label">🏆 #6 — "Sehari Jadi Booster ETNYX" <span class="badge badge-teal">⭐⭐⭐⭐</span></div>
+  <div class="desc">Reels 45s · Behind-the-scene · Login dashboard → order → gameplay → submit → komisi. Trust builder.</div>
+</div>
+
+<div class="card" style="margin:8px 0; border-left:3px solid var(--primary);">
+  <div class="label">🏆 #7 — "Berapa Sih Harga Joki ML?" <span class="badge badge-teal">⭐⭐⭐⭐</span></div>
+  <div class="desc">Reels 35s · FAQ → High intent. Price breakdown + value proposition. "Mulai dari 4 ribu/star."</div>
+</div>
+
+<div class="card" style="margin:8px 0; border-left:3px solid var(--primary);">
+  <div class="label">🏆 #8 — "Aman Ga Sih Pake Joki?" <span class="badge badge-teal">⭐⭐⭐⭐⭐</span></div>
+  <div class="desc">Reels 40s · FAQ #1 → Remove objection. AES-256, tracking, notif, invoice. "2.847 order, 0 akun bermasalah."</div>
+</div>
+
+<div class="card" style="margin:8px 0; border-left:3px solid var(--primary);">
+  <div class="label">🏆 #9 — "Season Reset — Push Sekarang!" <span class="badge badge-teal">⭐⭐⭐⭐</span></div>
+  <div class="desc">Reels 25s · Urgency → Conversion. Rank drop simulation + countdown. Timely content setiap season.</div>
+</div>
+
+<div class="card" style="margin:8px 0; border-left:3px solid var(--primary);">
+  <div class="label">🏆 #10 — "3 Langkah Order di ETNYX" <span class="badge badge-teal">⭐⭐⭐⭐</span></div>
+  <div class="desc">Reels 30s · Tutorial → Conversion. Screen record etnyx.com/order. "Pilih mode → bayar → tracking. Selesai."</div>
+</div>
+
+<hr>
+
+<!-- ==================== 15. CHECKLIST ==================== -->
+<div class="section-divider"><div class="num">15</div><div class="label">Checklist</div></div>
+
+<h2>Checklist Implementasi</h2>
+
+<h3>📋 Week 1 Setup</h3>
+<div class="card-grid g2">
+  <div class="card">
+    <div class="label">Platform Setup</div>
+    <div class="desc">
+      □ TikTok bisnis (@etnyx.id)<br>
+      □ Instagram bisnis (@etnyx.id)<br>
+      □ WA Business + quick replies<br>
+      □ Linktree / link bio<br>
+      □ YouTube channel<br>
+      □ IG Highlight covers (5 kategori)
+    </div>
+  </div>
+  <div class="card">
+    <div class="label">Content Prep</div>
+    <div class="desc">
+      □ Template subtitle CapCut<br>
+      □ SFX library download<br>
+      □ 10 screenshot testimoni<br>
+      □ 5 before-after screenshot<br>
+      □ 5 gameplay highlight clips<br>
+      □ Content calendar di Sheets/Notion
+    </div>
+  </div>
+</div>
+
+<h3>📅 Daily Checklist</h3>
+<table>
+  <tr><th>Task</th><th>Frequency</th></tr>
+  <tr><td>Post 2-3 TikTok</td><td>Daily</td></tr>
+  <tr><td>Post 1 IG Reels</td><td>Daily</td></tr>
+  <tr><td>Post 3-5 IG Story</td><td>Daily</td></tr>
+  <tr><td>Update WA Status 2-3x</td><td>Daily</td></tr>
+  <tr><td>Reply DM & WA &lt; 5 menit</td><td>Daily</td></tr>
+  <tr><td>Pin comment CTA di video baru</td><td>Daily</td></tr>
+  <tr><td>Engage di comment (15 min setelah posting)</td><td>Daily</td></tr>
+</table>
+
+<h3>📊 Weekly Review (Setiap Senin)</h3>
+<ol>
+  <li>Sort semua konten by views → Identify TOP 3 & BOTTOM 3</li>
+  <li>Analisis: hook, format, jam posting, sound — apa yang work?</li>
+  <li>Cek funnel: bio click → DM → WA → order</li>
+  <li>Adjust plan minggu depan berdasarkan data</li>
+  <li>Batch production (5-10 video)</li>
+</ol>
+
+<h3>📈 Monthly Review</h3>
+<table>
+  <tr><th>Question</th><th>If Yes</th><th>If No</th></tr>
+  <tr><td>Format consistently &gt;10K views?</td><td>Scale — 3 variasi/minggu</td><td>Test format baru</td></tr>
+  <tr><td>CTR ke WA &gt;2%?</td><td>Maintain + optimize closing</td><td>Fix CTA + bio + funnel</td></tr>
+  <tr><td>Conversion WA &gt;10%?</td><td>Scale traffic</td><td>Fix WA scripts</td></tr>
+  <tr><td>Followers growth &gt;20%/bulan?</td><td>Maintain strategy</td><td>Pivot content type</td></tr>
+</table>
+
+<hr>
+
+<!-- ==================== FOOTER ==================== -->
+<div style="text-align:center; padding:20px 0; color:var(--text-muted);">
+  <div style="font-size:18px; font-weight:900; background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:6px;">ETNYX</div>
+  <div style="font-style:italic; font-size:11px;">"Execute consistently. Measure ruthlessly. Scale what works." 🎮</div>
+  <div style="font-size:10px; margin-top:8px; color:rgba(255,255,255,0.3);">90-Day Content Bank & Strategy v2.0 — 15 April 2026</div>
+</div>
+
+</body>
+</html>

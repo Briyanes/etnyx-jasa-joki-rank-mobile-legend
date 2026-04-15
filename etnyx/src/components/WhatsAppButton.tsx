@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { WHATSAPP_NUMBER } from "@/lib/constants";
+import { trackLead } from "@/lib/tracking";
 
 export default function WhatsAppButton() {
   const { locale } = useLanguage();
@@ -92,6 +93,7 @@ export default function WhatsAppButton() {
         rel="noopener noreferrer"
         aria-label="Chat via WhatsApp"
         className="group relative flex items-center justify-center w-16 h-16 bg-[#25D366] rounded-full shadow-lg hover:shadow-xl hover:shadow-[#25D366]/30 transition-all hover:scale-110"
+        onClick={() => trackLead()}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
       >

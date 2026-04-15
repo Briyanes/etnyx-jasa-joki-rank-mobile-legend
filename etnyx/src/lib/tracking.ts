@@ -167,6 +167,42 @@ export function trackViewContent(data?: { value?: number; contentName?: string }
   }
 }
 
+/** Fire CompleteRegistration event (customer registers an account) */
+export function trackCompleteRegistration(data?: { value?: number; currency?: string }) {
+  if (typeof window.fbq === "function") {
+    window.fbq("track", "CompleteRegistration", data || {});
+  }
+
+  if (typeof window.gtag === "function") {
+    window.gtag("event", "sign_up", {
+      method: "email",
+      value: data?.value || 0,
+      currency: data?.currency || "IDR",
+    });
+  }
+
+  if (window.ttq?.track) {
+    window.ttq.track("CompleteRegistration", data || {});
+  }
+}
+
+/** Fire Search event (user searches/browses pricing) */
+export function trackSearch(data?: { searchString?: string }) {
+  if (typeof window.fbq === "function") {
+    window.fbq("track", "Search", { search_string: data?.searchString || "" });
+  }
+
+  if (typeof window.gtag === "function") {
+    window.gtag("event", "search", {
+      search_term: data?.searchString || "",
+    });
+  }
+
+  if (window.ttq?.track) {
+    window.ttq.track("Search", { query: data?.searchString || "" });
+  }
+}
+
 /**
  * Capture UTM params + click IDs from URL and store in sessionStorage.
  * Call this on page load (homepage, order page, etc.)

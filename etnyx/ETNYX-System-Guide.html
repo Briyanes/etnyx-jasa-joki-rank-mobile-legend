@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>ETNYX - Panduan Sistem Operasional</title>
+<style>
+  @page { margin: 18mm 14mm; size: A4; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif; max-width: 780px; margin: 0 auto; padding: 30px; color: #1a1a1a; line-height: 1.65; font-size: 13px; }
+  h1 { color: #0f1419; font-size: 22px; border-bottom: 3px solid #14B8A6; padding-bottom: 8px; margin-top: 36px; }
+  h2 { color: #0d9488; font-size: 18px; margin-top: 30px; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px; page-break-after: avoid; }
+  h3 { color: #374151; font-size: 15px; margin-top: 20px; page-break-after: avoid; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 12px; page-break-inside: avoid; }
+  th { background: #0f172a; color: white; padding: 8px 10px; text-align: left; font-weight: 600; }
+  td { border: 1px solid #d1d5db; padding: 7px 10px; }
+  tr:nth-child(even) { background: #f8fafc; }
+  code { background: #f1f5f9; padding: 1px 5px; border-radius: 3px; font-size: 12px; color: #0f172a; }
+  pre { background: #1e293b; color: #e2e8f0; padding: 14px; border-radius: 6px; overflow-x: auto; font-size: 12px; page-break-inside: avoid; }
+  pre code { background: none; color: inherit; padding: 0; }
+  hr { border: none; border-top: 2px solid #14B8A6; margin: 28px 0; }
+  li { margin: 3px 0; }
+  ul { padding-left: 20px; }
+  strong { color: #0f172a; }
+  blockquote { border-left: 3px solid #14B8A6; margin: 12px 0; padding: 8px 16px; background: #f0fdfa; color: #134e4a; font-style: italic; }
+  a { color: #14B8A6; }
+  p { margin: 6px 0; }
+  @media print { body { padding: 0; } }
+</style>
+</head>
+<body>
+<h1>ETNYX — Panduan Sistem Operasional</h1>
+<h3>Untuk Seluruh Tim (Admin, Lead, Worker)</h3>
+
+<p><strong>Versi:</strong> 1.0 — 14 April 2026</p>
+<p><strong>Website:</strong> https://etnyx.com</p>
+<p><strong>Dashboard:</strong> https://etnyx.com/admin</p>
+
+<hr>
+
+<h2>1. OVERVIEW SISTEM</h2>
+
+<p>ETNYX adalah platform jasa joki & gendong Mobile Legends dengan fitur:</p>
+<ul>
+<li><strong>3 Mode Order:</strong> Paket, Per-Bintang, Gendong</li>
+<li><strong>Dual Payment:</strong> Transfer Manual + iPaymu (otomatis)</li>
+<li><strong>Notifikasi Otomatis:</strong> WhatsApp, Telegram, Email, Push</li>
+<li><strong>Dashboard per Role:</strong> Admin, Lead, Worker</li>
+<li><strong>Chatbot WA:</strong> Auto-reply untuk customer</li>
+</ul>
+
+<hr>
+
+<h2>2. STRUKTUR TIM & ROLE</h2>
+
+<table>
+<thead><tr><th>Role</th><th>Akses Dashboard</th><th>Tugas Utama</th></tr></thead><tbody>
+<tr><td><strong>Admin</strong></td><td><code>/admin</code></td><td>Payment approval, kelola staff, CMS, analytics</td></tr>
+<tr><td><strong>Lead</strong></td><td><code>/admin/lead</code></td><td>Assign worker, submit hasil, manage tim</td></tr>
+<tr><td><strong>Worker</strong></td><td><code>/admin/worker</code></td><td>Push rank, update progress, selesaikan order</td></tr>
+</tbody></table>
+
+<h3>Hirarki:</h3>
+<pre><code>Admin (Full Control)
+<p>  └── Lead (Team Manager)</p>
+        └── Worker 1, Worker 2, ... (Executor)</code></pre>
+
+<hr>
+
+<h2>3. ALUR ORDER LENGKAP</h2>
+
+<pre><code>Customer Order → Admin Approve → Lead Assign → Worker Push → Lead Upload Hasil → Selesai</code></pre>
+
+<h3>Step-by-Step:</h3>
+
+<table>
+<thead><tr><th>Step</th><th>Status Order</th><th>PIC</th><th>Aksi</th><th>Notifikasi</th></tr></thead><tbody>
+<tr><td>1</td><td><code>pending</code></td><td><strong>Customer</strong></td><td>Submit order, pilih paket & payment</td><td>—</td></tr>
+<tr><td>2</td><td><code>pending</code></td><td><strong>Customer</strong></td><td>Upload bukti transfer / bayar via iPaymu</td><td>WA + Email ke Customer</td></tr>
+<tr><td>3</td><td><code>paid</code> → <code>confirmed</code></td><td><strong>Admin</strong></td><td>Review bukti transfer → Approve/Reject</td><td>TG Admin, WA + Email ke Customer</td></tr>
+<tr><td>4</td><td><code>confirmed</code> → <code>in_progress</code></td><td><strong>Lead</strong></td><td>Assign worker ke order</td><td>TG Worker, WA Customer, Push Worker</td></tr>
+<tr><td>5</td><td><code>in_progress</code></td><td><strong>Worker</strong></td><td>Lihat credentials → push rank di game</td><td>—</td></tr>
+<tr><td>6</td><td><code>in_progress</code></td><td><strong>Worker</strong></td><td>Update progress (%, screenshot, catatan)</td><td>TG Worker</td></tr>
+<tr><td>7</td><td><code>in_progress</code> → <code>completed</code></td><td><strong>Worker</strong></td><td>Klik "Selesaikan Order"</td><td>TG Admin + Worker</td></tr>
+<tr><td>8</td><td><code>completed</code></td><td><strong>Lead</strong></td><td>Upload hasil (screenshot before/after)</td><td>WA + Email ke Customer</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>4. PANDUAN PER ROLE</h2>
+
+<hr>
+
+<h3>4A. ADMIN — Panduan Lengkap</h3>
+
+<p><strong>Login:</strong> <code>/admin</code> → masukkan password admin</p>
+
+<h4>Dashboard Utama</h4>
+<ul>
+<li>Total order, revenue, statistik harian</li>
+<li>Grafik revenue trend & order stats</li>
+<li>Quick actions: approve payment, assign order</li>
+</ul>
+
+<h4>Payment Approval (Tugas Utama)</h4>
+<p>1. Buka tab <strong>Orders</strong></p>
+<p>2. Filter status <code>paid</code> (butuh approval)</p>
+<p>3. Klik <strong>"Lihat Bukti Transfer"</strong></p>
+<p>4. Review gambar bukti + nama pengirim</p>
+<p>5. Klik <strong>Approve</strong> (order → <code>confirmed</code>) atau <strong>Reject</strong> (+ alasan)</p>
+<p>6. Customer otomatis dapat notifikasi WA & Email</p>
+
+<h4>Kelola Staff</h4>
+<p>1. Tab <strong>Staff</strong> → Tambah Admin/Lead/Worker</p>
+<p>2. Untuk Worker: wajib pilih Lead-nya (<code>lead_id</code>)</p>
+<p>3. Bisa nonaktifkan/hapus staff</p>
+
+<h4>CMS Settings</h4>
+<ul>
+<li><strong>Hero Section</strong> — Edit teks & gambar hero homepage</li>
+<li><strong>Pricing Catalog</strong> — Edit paket harga (paket, per-star, gendong)</li>
+<li><strong>Promo Codes</strong> — Buat/edit kode promo</li>
+<li><strong>Integrations</strong> — Set API keys (Telegram, WA, iPaymu, dll)</li>
+<li><strong>Bank Accounts</strong> — Kelola rekening transfer manual</li>
+<li><strong>Season Pricing</strong> — Atur multiplier harga per musim</li>
+</ul>
+
+<h4>Analytics</h4>
+<ul>
+<li>Revenue trend (AreaChart)</li>
+<li>Package breakdown</li>
+<li>Top customers</li>
+<li>Rank pair analytics</li>
+<li>Worker leaderboard</li>
+</ul>
+
+<h4>Export Data</h4>
+<ul>
+<li>Export orders ke CSV/Excel</li>
+<li>Filter by tanggal, status, dll</li>
+</ul>
+
+<hr>
+
+<h3>4B. LEAD — Panduan Lengkap</h3>
+
+<p><strong>Login:</strong> <code>/admin</code> → login dengan akun Lead</p>
+
+<h4>Melihat Order</h4>
+<ul>
+<li>Tampil order <code>confirmed</code> (belum di-assign) dan <code>in_progress</code> (tim sendiri)</li>
+<li>Counter "Belum Ditugaskan" menunjukkan jumlah order yang perlu di-assign</li>
+<li>Pagination: 20 order per halaman</li>
+</ul>
+
+<h4>Assign Worker (Tugas Utama)</h4>
+<p>1. Lihat order dengan status <code>confirmed</code></p>
+<p>2. Klik <strong>"Tugaskan"</strong> pada order</p>
+<p>3. Pilih worker dari dropdown (hanya worker tim sendiri)</p>
+<p>4. Worker langsung dapat push notification + order muncul di dashboard-nya</p>
+
+<h4>Bulk Assign</h4>
+<p>1. Centang beberapa order sekaligus</p>
+<p>2. Pilih worker → klik "Assign Semua"</p>
+<p>3. Diproses batch per 5 order</p>
+
+<h4>Submit Hasil</h4>
+<p>1. Setelah worker selesai (status <code>completed</code> atau <code>in_progress</code>)</p>
+<p>2. Klik <strong>"Submit Hasil"</strong> pada order</p>
+<p>3. Upload screenshot before/after</p>
+<p>4. Customer otomatis dapat notifikasi + link review</p>
+
+<h4>Shared Notes</h4>
+<ul>
+<li>Setiap order punya catatan bersama</li>
+<li>Lead & Worker bisa tambah catatan</li>
+<li>Catatan tersimpan di order logs</li>
+</ul>
+
+<h4>Worker Cards</h4>
+<ul>
+<li>Lihat daftar worker dalam tim</li>
+<li>Status: aktif/idle, jumlah order aktif</li>
+<li>Nama Lead tampil di setiap worker card</li>
+</ul>
+
+<hr>
+
+<h3>4C. WORKER — Panduan Lengkap</h3>
+
+<p><strong>Login:</strong> <code>/admin</code> → login dengan akun Worker</p>
+
+<h4>Melihat Assignment</h4>
+<ul>
+<li>Tampil order yang di-assign ke kamu</li>
+<li>Info: nickname customer, rank target, deadline</li>
+</ul>
+
+<h4>Mulai Kerja</h4>
+<p>1. Klik order → lihat <strong>Credentials</strong> (akun game customer)</p>
+<p>2. Login ke game → mulai push rank</p>
+<p>3. <strong>PENTING:</strong> Jangan share credentials ke siapapun!</p>
+
+<h4>Update Progress</h4>
+<p>1. Klik <strong>"Update Progress"</strong> pada order</p>
+<p>2. Isi persentase progress (0-100%)</p>
+<p>3. Upload screenshot progress (opsional)</p>
+<p>4. Tambah catatan jika perlu</p>
+
+<h4>Selesaikan Order</h4>
+<p>1. Setelah rank target tercapai</p>
+<p>2. Klik <strong>"Selesaikan Order"</strong></p>
+<p>3. Status berubah ke <code>completed</code></p>
+<p>4. Lead akan upload hasil akhir</p>
+
+<h4>Yang TIDAK Bisa Dilakukan Worker:</h4>
+<ul>
+<li>&#10060; Submit hasil/screenshot final (Lead yang upload)</li>
+<li>&#10060; Assign order ke worker lain</li>
+<li>&#10060; Lihat order orang lain</li>
+<li>&#10060; Akses settings/CMS</li>
+</ul>
+
+<hr>
+
+<h2>5. MODE ORDER & PRICING</h2>
+
+<h3>A. Paket (Rank → Rank)</h3>
+<ul>
+<li>Customer pilih paket (misal: Epic V → Mythic)</li>
+<li>Harga fixed per paket</li>
+<li>Contoh: Epic V → Mythic = Rp 315.089</li>
+</ul>
+
+<h3>B. Per-Bintang</h3>
+<ul>
+<li>Customer pilih rank + jumlah bintang</li>
+<li>Harga per bintang × jumlah</li>
+<li>Contoh: Mythic Immortal × 3 star = Rp 31.000 × 3 = Rp 93.000</li>
+</ul>
+
+<h3>C. Gendong (Duo Boost)</h3>
+<ul>
+<li>Customer main bareng booster</li>
+<li>Harga per bintang lebih tinggi (booster tidak pegang akun)</li>
+<li>Customer pilih role & jadwal main</li>
+<li>Tidak perlu share password</li>
+</ul>
+
+<h3>Biaya Tambahan:</h3>
+<table>
+<thead><tr><th>Add-on</th><th>Biaya</th><th>Keterangan</th></tr></thead><tbody>
+<tr><td><strong>Express</strong></td><td>+20%</td><td>Prioritas pengerjaan</td></tr>
+<tr><td><strong>Premium</strong></td><td>+30%</td><td>Booster senior + prioritas</td></tr>
+<tr><td><strong>Season Multiplier</strong></td><td>Variabel</td><td>Harga naik/turun sesuai musim (CMS)</td></tr>
+</tbody></table>
+
+<h3>Diskon:</h3>
+<table>
+<thead><tr><th>Jenis</th><th>Besaran</th></tr></thead><tbody>
+<tr><td>Promo Code</td><td>Variabel (set di CMS)</td></tr>
+<tr><td>Referral</td><td>10%</td></tr>
+<tr><td>Tier Silver</td><td>3%</td></tr>
+<tr><td>Tier Gold</td><td>5%</td></tr>
+<tr><td>Tier Platinum</td><td>8%</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>6. PAYMENT FLOW</h2>
+
+<h3>Transfer Manual (Selalu Aktif)</h3>
+<pre><code>Customer pilih "Transfer Manual"
+<p>  → Redirect ke /payment/manual</p>
+<p>  → Lihat daftar rekening (Bank/E-Wallet/QRIS)</p>
+<p>  → Transfer → Upload bukti + nama pengirim</p>
+<p>  → Admin dapat notif Telegram</p>
+  → Admin approve → Customer dapat WA "Pembayaran dikonfirmasi"</code></pre>
+
+<h3>iPaymu Otomatis (Jika Aktif)</h3>
+<pre><code>Customer pilih "Otomatis (iPaymu)"
+<p>  → Redirect ke halaman iPaymu</p>
+<p>  → Bayar via QRIS/VA/GoPay/ShopeePay/Kartu Kredit</p>
+<p>  → Auto-verified via webhook</p>
+  → Order langsung confirmed</code></pre>
+
+<p><strong>Status iPaymu saat ini:</strong> Menunggu approval dari iPaymu. Sementara hanya Transfer Manual.</p>
+
+<h3>Jika iPaymu Gagal:</h3>
+<ul>
+<li>Otomatis fallback ke Transfer Manual</li>
+<li>Customer dapat WA dengan info rekening + link upload bukti</li>
+</ul>
+
+<hr>
+
+<h2>7. NOTIFIKASI OTOMATIS</h2>
+
+<h3>Telegram Bot Groups</h3>
+
+<table>
+<thead><tr><th>Group</th><th>Isi Notifikasi</th></tr></thead><tbody>
+<tr><td><strong>Admin Group</strong></td><td>Order baru, payment proof, status changes</td></tr>
+<tr><td><strong>Worker Group</strong></td><td>Assignment baru, progress update, order selesai</td></tr>
+<tr><td><strong>Review Group</strong></td><td>Customer review masuk</td></tr>
+<tr><td><strong>Report Group</strong></td><td>Customer report/complaint</td></tr>
+<tr><td><strong>Alert Group</strong></td><td>System errors, unknown WA messages</td></tr>
+</tbody></table>
+
+<h3>WhatsApp ke Customer</h3>
+
+<table>
+<thead><tr><th>Trigger</th><th>Pesan</th></tr></thead><tbody>
+<tr><td>Order dibuat</td><td>Konfirmasi order + link pembayaran</td></tr>
+<tr><td>Payment confirmed</td><td>"Pembayaran dikonfirmasi, order sedang diproses"</td></tr>
+<tr><td>Worker assigned</td><td>"Order kamu sedang dikerjakan"</td></tr>
+<tr><td>Order selesai</td><td>"Order selesai! Cek hasilnya" + link review + link report</td></tr>
+<tr><td>iPaymu gagal</td><td>Info fallback manual + rekening + link upload bukti</td></tr>
+</tbody></table>
+
+<h3>Email ke Customer</h3>
+<ul>
+<li>Order confirmation</li>
+<li>Payment confirmed</li>
+<li>Order completed</li>
+</ul>
+
+<hr>
+
+<h2>8. CHATBOT WHATSAPP</h2>
+
+<p>Customer bisa chat ke WA ETNYX dan mendapat auto-reply:</p>
+
+<table>
+<thead><tr><th>Keyword</th><th>Response</th></tr></thead><tbody>
+<tr><td><code>menu</code> / <code>hi</code> / <code>halo</code></td><td>Menu utama (5 pilihan)</td></tr>
+<tr><td><code>1</code> / <code>harga</code></td><td>Info pricing + link order</td></tr>
+<tr><td><code>2</code> / <code>cek</code> / <code>ETX-xxxxx</code></td><td>Status order (auto-lookup by phone/order ID)</td></tr>
+<tr><td><code>3</code> / <code>cs</code> / <code>bantuan</code></td><td>Link WA ke CS</td></tr>
+<tr><td><code>4</code> / <code>review</code></td><td>Link review</td></tr>
+<tr><td><code>5</code> / <code>promo</code></td><td>Info promo aktif</td></tr>
+<tr><td>Lainnya</td><td>"Maaf belum bisa bantu" + forward ke Telegram Alert</td></tr>
+</tbody></table>
+
+<p><strong>Filter Bot:</strong> Pesan dari bot pihak ketiga (misal: INDIRA/Indosat) otomatis di-skip, tidak diteruskan ke Telegram.</p>
+
+<hr>
+
+<h2>9. CUSTOMER FEATURES</h2>
+
+<h3>Order Tracking</h3>
+<ul>
+<li>Customer bisa lacak order di <code>/track</code></li>
+<li>Masukkan Order ID → lihat status real-time</li>
+<li>Timeline dengan timestamp setiap perubahan status</li>
+</ul>
+
+<h3>Customer Dashboard</h3>
+<ul>
+<li>Login via <code>/login</code></li>
+<li>Lihat semua order & status</li>
+<li>Reward points & redeem catalog</li>
+<li>Tier progression (Bronze → Silver → Gold → Platinum)</li>
+</ul>
+
+<h3>Review & Report</h3>
+<ul>
+<li>Setelah order selesai, customer dapat link terpisah:</li>
+<p>  - <strong>Review</strong> — beri rating & testimoni</p>
+<p>  - <strong>Report Worker</strong> — laporkan masalah</p>
+</ul>
+
+<hr>
+
+<h2>10. SECURITY</h2>
+
+<table>
+<thead><tr><th>Fitur</th><th>Detail</th></tr></thead><tbody>
+<tr><td><strong>Enkripsi</strong></td><td>Credential game customer dienkripsi (AES) di database</td></tr>
+<tr><td><strong>Rate Limiting</strong></td><td>Max 5 order/menit per IP</td></tr>
+<tr><td><strong>Input Sanitization</strong></td><td>Semua input di-sanitize (XSS prevention)</td></tr>
+<tr><td><strong>HMAC Verification</strong></td><td>WA webhook diverifikasi signature-nya</td></tr>
+<tr><td><strong>Server-side Price</strong></td><td>Harga dihitung ulang di server, tidak trust client</td></tr>
+<tr><td><strong>Promo Atomic</strong></td><td>Promo code di-consume secara atomic (race condition safe)</td></tr>
+</tbody></table>
+
+<h3>Penting untuk Worker:</h3>
+<ul>
+<li><strong>JANGAN</strong> share credentials customer ke siapapun</li>
+<li><strong>JANGAN</strong> screenshot credentials dan kirim ke chat</li>
+<li>Credentials hanya bisa dilihat di dashboard, ter-enkripsi di database</li>
+</ul>
+
+<hr>
+
+<h2>11. TECH STACK (Info untuk yang Technical)</h2>
+
+<table>
+<thead><tr><th>Komponen</th><th>Teknologi</th></tr></thead><tbody>
+<tr><td>Frontend</td><td>Next.js 16, React 19, Tailwind CSS 4</td></tr>
+<tr><td>Backend</td><td>Next.js API Routes</td></tr>
+<tr><td>Database</td><td>Supabase (PostgreSQL)</td></tr>
+<tr><td>Storage</td><td>Supabase Storage</td></tr>
+<tr><td>Payment</td><td>iPaymu (menunggu approval)</td></tr>
+<tr><td>Email</td><td>Resend</td></tr>
+<tr><td>WhatsApp</td><td>Meta Cloud API</td></tr>
+<tr><td>Telegram</td><td>Telegram Bot API</td></tr>
+<tr><td>Hosting</td><td>Vercel</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>12. KONTAK & AKSES</h2>
+
+<table>
+<thead><tr><th>Item</th><th>Detail</th></tr></thead><tbody>
+<tr><td>Website</td><td>https://etnyx.com</td></tr>
+<tr><td>Admin Dashboard</td><td>https://etnyx.com/admin</td></tr>
+<tr><td>Repository</td><td>github.com/Briyanes/etnyx-jasa-joki-rank-mobile-legend</td></tr>
+<tr><td>WA Bisnis</td><td>— (set di Meta Business)</td></tr>
+<tr><td>Telegram Bot</td><td>@EtnyxBot</td></tr>
+</tbody></table>
+
+<hr>
+
+<h2>13. FAQ TIM</h2>
+
+<p><strong>Q: Bagaimana jika customer komplain?</strong></p>
+<p>A: Cek order di dashboard → lihat progress & logs → hubungi customer via WA. Jika masalah serius, eskalasi ke Admin.</p>
+
+<p><strong>Q: Bagaimana jika iPaymu gagal saat customer bayar?</strong></p>
+<p>A: Otomatis fallback ke transfer manual. Customer dapat WA dengan info rekening.</p>
+
+<p><strong>Q: Worker bisa lihat lebih dari 1 order?</strong></p>
+<p>A: Ya, worker bisa ditugaskan beberapa order sekaligus. Semua muncul di dashboard Worker.</p>
+
+<p><strong>Q: Bagaimana cara tambah paket harga baru?</strong></p>
+<p>A: Admin → Settings → Pricing Catalog → Edit/tambah paket. Perubahan langsung aktif.</p>
+
+<p><strong>Q: Customer bisa cancel order?</strong></p>
+<p>A: Customer hubungi CS. Admin bisa ubah status ke <code>cancelled</code> di dashboard.</p>
+
+<p><strong>Q: Bagaimana jika worker tidak responsif?</strong></p>
+<p>A: Lead bisa re-assign order ke worker lain melalui dashboard Lead.</p>
+
+<hr>
+
+<p><em>Dokumen ini adalah panduan operasional resmi ETNYX. Update terakhir: 14 April 2026.</em></p>
+
+</body>
+</html>

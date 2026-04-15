@@ -302,6 +302,7 @@ export default function Portfolio() {
                 href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Halo kak, saya mau order joki ${selectedItem.rank_from} ke ${selectedItem.rank_to}`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => { import("@/lib/tracking").then(m => m.trackLead()); }}
                 className="block w-full py-3 bg-primary hover:bg-primary/90 text-background font-semibold rounded-xl text-center transition-all"
               >
                 {txt.orderSimilar}
