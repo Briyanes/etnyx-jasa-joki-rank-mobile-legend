@@ -8,6 +8,7 @@ import {
   sendOrderCompletedWA,
   sendOrderStartedWA,
   waDisclaimer,
+  csWaLink,
 } from "@/lib/notifications";
 
 // POST /api/admin/orders/follow-up — Send follow-up messages
@@ -78,7 +79,8 @@ export async function POST(request: NextRequest) {
         } catch { /* no bank accounts configured */ }
 
         const uploadUrl = `${siteConfig.url}/payment/manual/?order_id=${order.order_id}`;
-        message = `Halo kak!\n\nIni dari *ETNYX*. Kami ingin mengingatkan terkait order yang belum dibayar:\n\n*Order ID:* ${order.order_id}\n*Paket:* ${rankDisplay}\n*Total:* Rp ${order.total_price.toLocaleString("id-ID")}${paymentInfo}\n\nSetelah transfer, upload bukti di sini:\n${uploadUrl}\n\nSilakan selesaikan pembayaran agar order bisa segera diproses ya!\n\n_ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}`;
+        const csLink = csWaLink(order.order_id);
+        message = `Halo kak!\n\nIni dari *ETNYX*. Kami ingin mengingatkan terkait order yang belum dibayar:\n\n*Order ID:* ${order.order_id}\n*Paket:* ${rankDisplay}\n*Total:* Rp ${order.total_price.toLocaleString("id-ID")}${paymentInfo}\n\nSetelah transfer, upload bukti di sini:\n${uploadUrl}\n\nSilakan selesaikan pembayaran agar order bisa segera diproses ya!\n\n📞 *Butuh bantuan?* Hubungi CS ETNYX:\n${csLink}\n\n_ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}`;
         sent = await sendWhatsAppMessage(order.whatsapp, message, uploadUrl);
         break;
       }
@@ -86,9 +88,11 @@ export async function POST(request: NextRequest) {
       case "follow_up_credentials": {
         const isGendong = order.package_title?.includes("Gendong") || order.package_title?.includes("Duo Boost");
         if (isGendong) {
-          message = `Halo kak!\n\nPembayaran kamu sudah dikonfirmasi.\n\n*Order ID:* ${order.order_id}\n\nOrder *Gendong/Mabar* kamu akan segera diproses. Booster kami akan menghubungi kamu untuk menentukan jadwal mabar.\n\nMohon pastikan kamu siap bermain sesuai jadwal yang sudah disepakati ya!\n\n_ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}`;
+          const csLinkGendong = csWaLink(order.order_id);
+          message = `Halo kak!\n\nPembayaran kamu sudah dikonfirmasi.\n\n*Order ID:* ${order.order_id}\n\nOrder *Gendong/Mabar* kamu akan segera diproses. Booster kami akan menghubungi kamu untuk menentukan jadwal mabar.\n\nMohon pastikan kamu siap bermain sesuai jadwal yang sudah disepakati ya!\n\n📞 *Butuh bantuan?* Hubungi CS ETNYX:\n${csLinkGendong}\n\n_ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}`;
         } else {
-          message = `Halo kak!\n\nPembayaran kamu sudah dikonfirmasi.\n\n*Order ID:* ${order.order_id}\n\nKami butuh *data login akun ML* kamu untuk mulai proses boosting:\n\n1. Email/No HP Moonton\n2. Password akun\n\n*Penting:* Jangan login ke akun selama proses joki ya!\n\nKirim data login kamu ke CS kami via link di bawah.\n\n_ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}`;
+          const csLinkCred = csWaLink(order.order_id);
+          message = `Halo kak!\n\nPembayaran kamu sudah dikonfirmasi.\n\n*Order ID:* ${order.order_id}\n\nKami butuh *data login akun ML* kamu untuk mulai proses boosting:\n\n1. Email/No HP Moonton\n2. Password akun\n\n*Penting:* Jangan login ke akun selama proses joki ya!\n\n📲 *Kirim data login ke CS ETNYX:*\n${csLinkCred}\n\n_ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}`;
         }
         sent = await sendWhatsAppMessage(order.whatsapp, message);
         break;
@@ -97,7 +101,8 @@ export async function POST(request: NextRequest) {
       case "follow_up_progress": {
         const progress = order.progress || 0;
         const isGendongProgress = order.package_title?.includes("Gendong") || order.package_title?.includes("Duo Boost");
-        message = `Halo kak!\n\nUpdate progress order kamu:\n\n*Order ID:* ${order.order_id}\n*Progress:* ${progress}%\n*Target:* ${targetDisplay}\n\nBooster kami sedang mengerjakan order kamu. Estimasi selesai dalam waktu dekat!\n\n${isGendongProgress ? "Pastikan kamu siap bermain sesuai jadwal mabar ya!" : "Jangan login ke akun selama proses ya!"}\n\nTrack order di sini:\n${siteConfig.url}/track/?id=${order.order_id}\n\n_ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}`;
+        const csLinkProgress = csWaLink(order.order_id);
+        message = `Halo kak!\n\nUpdate progress order kamu:\n\n*Order ID:* ${order.order_id}\n*Progress:* ${progress}%\n*Target:* ${targetDisplay}\n\nBooster kami sedang mengerjakan order kamu. Estimasi selesai dalam waktu dekat!\n\n${isGendongProgress ? "Pastikan kamu siap bermain sesuai jadwal mabar ya!" : "Jangan login ke akun selama proses ya!"}\n\nTrack order di sini:\n${siteConfig.url}/track/?id=${order.order_id}\n\n📞 *Ada pertanyaan?* Hubungi CS ETNYX:\n${csLinkProgress}\n\n_ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}`;
         sent = await sendWhatsAppMessage(order.whatsapp, message, `${siteConfig.url}/track/?id=${order.order_id}`);
         break;
       }
@@ -142,13 +147,15 @@ export async function POST(request: NextRequest) {
 
       case "request_review": {
         const reviewUrl = `${siteConfig.url}/review/?id=${order.order_id}`;
-        message = `Halo kak!\n\nTerima kasih sudah menggunakan *ETNYX*!\n\n*Order ID:* ${order.order_id}\n*Rank:* ${rankDisplay}\n\nKami senang banget order kamu sudah selesai!\n\nBoleh minta waktunya sebentar untuk kasih *review*?\n\nKasih review di sini:\n${reviewUrl}\n\nTerima kasih banyak!\n\n_ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}`;
+        const csLinkReview = csWaLink(order.order_id);
+        message = `Halo kak!\n\nTerima kasih sudah menggunakan *ETNYX*!\n\n*Order ID:* ${order.order_id}\n*Rank:* ${rankDisplay}\n\nKami senang banget order kamu sudah selesai!\n\nBoleh minta waktunya sebentar untuk kasih *review*?\n\nKasih review di sini:\n${reviewUrl}\n\n📞 *Butuh bantuan?* Hubungi CS ETNYX:\n${csLinkReview}\n\nTerima kasih banyak!\n\n_ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}`;
         sent = await sendWhatsAppMessage(order.whatsapp, message, reviewUrl);
         break;
       }
 
       case "reactivation": {
-        message = `Halo kak!\n\nKami dari *ETNYX*. Kami lihat order kamu sebelumnya belum selesai:\n\n*Order ID:* ${order.order_id}\n*Paket:* ${rankDisplay}\n\nApakah kamu masih tertarik untuk melanjutkan? Kami siap bantu push rank kamu kapan saja!\n\nHubungi CS kami via link di bawah untuk melanjutkan order.\n\n_ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}`;
+        const csLinkReactivation = csWaLink(order.order_id);
+        message = `Halo kak!\n\nKami dari *ETNYX*. Kami lihat order kamu sebelumnya belum selesai:\n\n*Order ID:* ${order.order_id}\n*Paket:* ${rankDisplay}\n\nApakah kamu masih tertarik untuk melanjutkan? Kami siap bantu push rank kamu kapan saja!\n\n📲 *Lanjutkan order? Chat CS ETNYX:*\n${csLinkReactivation}\n\n_ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}`;
         sent = await sendWhatsAppMessage(order.whatsapp, message);
         break;
       }

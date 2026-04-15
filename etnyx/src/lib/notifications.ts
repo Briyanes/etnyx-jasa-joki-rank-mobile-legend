@@ -4,10 +4,15 @@ import { WHATSAPP_NUMBER } from "./constants";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.com";
 const WA_OFFICIAL = WHATSAPP_NUMBER;
 
+/** Generate WA CS link with pre-filled text including Order ID */
+export function csWaLink(orderId: string): string {
+  const text = `Halo CS ETNYX 👋\n\nSaya ingin follow up pesanan saya:\n📋 Order ID: *${orderId}*\n\nMohon bantuannya 🙏`;
+  return `https://wa.me/${WA_OFFICIAL}?text=${encodeURIComponent(text)}`;
+}
+
 /** Disclaimer footer for bot-sent WA messages */
 export function waDisclaimer(orderId: string): string {
-  const csLink = `https://wa.me/${WA_OFFICIAL}?text=${encodeURIComponent(`Halo min, saya mau tanya soal order ${orderId}`)}`;
-  return `\n\n[ Ini adalah pesan otomatis ]\n💬 _Balas *menu* untuk bantuan otomatis_\n📞 _Hubungi CS:_ ${csLink}`;
+  return `\n\n[ Ini adalah pesan otomatis ]\n💬 _Balas *menu* untuk bantuan otomatis_\n📞 _Hubungi CS:_ ${csWaLink(orderId)}`;
 }
 
 // ============ Types ============
@@ -773,20 +778,25 @@ Terima kasih sudah mempercayai *ETNYX*!
 _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 `.trim();
 
-  // payment_confirmed_v4 buttons: [0] = URL (Track Order), [1] = static URL (Bio/CS)
+  // payment_confirmed_v5 buttons: [0] = URL (Track Order), [1] = URL (Hubungi CS with Order ID)
   const templateButtons: Record<string, unknown>[] = [
-    WA_HEADER_IMAGE,
     {
       type: "button",
       sub_type: "url",
       index: "0",
       parameters: [{ type: "text", text: order.order_id }],
     },
+    {
+      type: "button",
+      sub_type: "url",
+      index: "1",
+      parameters: [{ type: "text", text: order.order_id }],
+    },
   ];
 
   return sendBusinessWA(
     order.whatsapp,
-    "payment_confirmed_v4",
+    "payment_confirmed_v5",
     [order.order_id, getOrderType(order), getOrderDetail(order), order.package, formatRupiah(order.price)],
     message,
     trackLink,
@@ -852,20 +862,25 @@ ${manualPaymentLink}`}
 _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 `.trim();
 
-  // order_confirmation_v4 buttons: [0] = URL (payment link), [1] = static URL (Bio/CS)
+  // order_confirmation_v5 buttons: [0] = URL (payment link), [1] = URL (Hubungi CS with Order ID)
   const templateButtons: Record<string, unknown>[] = [
-    WA_HEADER_IMAGE,
     {
       type: "button",
       sub_type: "url",
       index: "0",
       parameters: [{ type: "text", text: order.order_id }],
     },
+    {
+      type: "button",
+      sub_type: "url",
+      index: "1",
+      parameters: [{ type: "text", text: order.order_id }],
+    },
   ];
 
   return sendBusinessWA(
     order.whatsapp,
-    "order_confirmation_v4",
+    "order_confirmation_v5",
     [order.order_id, getOrderType(order), getOrderDetail(order), order.package, formatRupiah(order.price)],
     message,
     paymentLink,
@@ -897,20 +912,25 @@ ${isGendong ? "🎮 Booster kami akan menghubungi kamu untuk jadwal mabar." : "�
 _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 `.trim();
 
-  // order_started_v4 buttons: [0] = URL (Track Order), [1] = static URL (Bio/CS)
+  // order_started_v5 buttons: [0] = URL (Track Order), [1] = URL (Hubungi CS with Order ID)
   const templateButtons: Record<string, unknown>[] = [
-    WA_HEADER_IMAGE,
     {
       type: "button",
       sub_type: "url",
       index: "0",
       parameters: [{ type: "text", text: order.order_id }],
     },
+    {
+      type: "button",
+      sub_type: "url",
+      index: "1",
+      parameters: [{ type: "text", text: order.order_id }],
+    },
   ];
 
   return sendBusinessWA(
     order.whatsapp,
-    "order_started_v4",
+    "order_started_v5",
     [order.order_id, getOrderType(order), getOrderDetail(order), order.package, formatRupiah(order.price)],
     message,
     trackLink,
@@ -946,20 +966,25 @@ Terima kasih sudah menggunakan *ETNYX*!
 _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 `.trim();
 
-  // completed_order_v4 buttons: [0] = URL (Review), [1] = static URL (Bio/CS)
+  // completed_order_v5 buttons: [0] = URL (Review), [1] = URL (Hubungi CS with Order ID)
   const templateButtons: Record<string, unknown>[] = [
-    WA_HEADER_IMAGE,
     {
       type: "button",
       sub_type: "url",
       index: "0",
       parameters: [{ type: "text", text: order.order_id }],
     },
+    {
+      type: "button",
+      sub_type: "url",
+      index: "1",
+      parameters: [{ type: "text", text: order.order_id }],
+    },
   ];
 
   return sendBusinessWA(
     order.whatsapp,
-    "completed_order_v4",
+    "completed_order_v5",
     [order.order_id, getOrderType(order), getOrderDetail(order), order.package, formatRupiah(order.price)],
     message,
     reviewLink,
@@ -985,14 +1010,19 @@ Jika kamu merasa ini adalah kesalahan atau ingin order ulang, silakan hubungi CS
 _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
 `.trim();
 
-  // order_cancelled_v4 buttons: [0] = static URL (Bio/CS)
+  // order_cancelled_v5 buttons: [0] = URL (Hubungi CS with Order ID)
   const templateButtons: Record<string, unknown>[] = [
-    WA_HEADER_IMAGE,
+    {
+      type: "button",
+      sub_type: "url",
+      index: "0",
+      parameters: [{ type: "text", text: order.order_id }],
+    },
   ];
 
   return sendBusinessWA(
     order.whatsapp,
-    "order_cancelled_v4",
+    "order_cancelled_v5",
     [order.order_id, order.username],
     message,
     undefined,
