@@ -10,6 +10,7 @@ export { decryptField } from "@/lib/encryption";
 const IPAYMU_API_KEY = process.env.IPAYMU_API_KEY || "";
 const IPAYMU_VA = process.env.IPAYMU_VA || "";
 const IPAYMU_IS_PRODUCTION = process.env.IPAYMU_IS_PRODUCTION === "true";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://etnyx.com");
 
 function getIpaymuUrl(isProduction: boolean) {
   return isProduction
@@ -530,13 +531,13 @@ export async function POST(request: NextRequest) {
         const ipaymuRefId = `ETN-${orderId}-${Date.now()}`;
 
         const ipaymuBody = {
-          product: [`Joki ML: ${currentRank} to ${targetRank}`],
+          product: [`Joki ML: ${normCurrent} to ${normTarget}`],
           qty: ["1"],
           price: [String(verifiedTotalPrice)],
           amount: String(verifiedTotalPrice),
-          returnUrl: `${process.env.NEXT_PUBLIC_SITE_URL || ""}/payment/success?order_id=${orderId}`,
-          cancelUrl: `${process.env.NEXT_PUBLIC_SITE_URL || ""}/payment/success?order_id=${orderId}&transaction_status=cancel`,
-          notifyUrl: `${process.env.NEXT_PUBLIC_SITE_URL || ""}/api/payment/notification`,
+          returnUrl: `${SITE_URL}/payment/success?order_id=${orderId}`,
+          cancelUrl: `${SITE_URL}/payment/success?order_id=${orderId}&transaction_status=cancel`,
+          notifyUrl: `${SITE_URL}/api/payment/notification`,
           referenceId: ipaymuRefId,
           buyerName: sanitizedNickname,
           buyerPhone: `+62${cleanWhatsapp}`,
@@ -614,7 +615,7 @@ export async function POST(request: NextRequest) {
           }
         } catch { /* no bank accounts configured */ }
 
-        const uploadUrl = `${process.env.NEXT_PUBLIC_SITE_URL || ""}/payment/manual/?order_id=${orderId}`;
+        const uploadUrl = `${SITE_URL}/payment/manual/?order_id=${orderId}`;
         const fallbackMsg = `Halo kak!\n\nIni dari *ETNYX*. Pembayaran otomatis sedang bermasalah, mohon maaf atas ketidaknyamanannya.\n\nSilakan lakukan pembayaran manual untuk order berikut:\n\n*Order ID:* ${orderId}\n*Paket:* ${sanitizedPackageTitle || packageName}\n*Total:* Rp ${verifiedTotalPrice.toLocaleString("id-ID")}${paymentInfo}\n\nSetelah transfer, upload bukti di sini:\n${uploadUrl}\n\nAda pertanyaan? Balas pesan ini aja~\n\n_ETNYX - Push Rank, Tanpa Main_`;
 
         const { sendWhatsAppMessage } = await import("@/lib/notifications");

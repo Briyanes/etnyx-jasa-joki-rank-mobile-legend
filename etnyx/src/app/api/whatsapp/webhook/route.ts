@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
-import { sendTelegramMessage } from "@/lib/notifications";
+import { sendTelegramMessage, csWaLink, waDisclaimer } from "@/lib/notifications";
+import { WHATSAPP_NUMBER } from "@/lib/constants";
 import crypto from "crypto";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.com";
-const WA_CS = "6281515141540";
-const LINE = "━━━━━━━━━━━━━━━━━━";
+const WA_CS = WHATSAPP_NUMBER;
 
 // Known auto-reply bot numbers to ignore (prevent spam in Telegram alerts)
 const BOT_NUMBERS = new Set([
@@ -157,7 +157,7 @@ export async function POST(request: NextRequest) {
       } else {
         // For images, documents, etc. — reply with help
         const csLink = `https://wa.me/${WA_CS}?text=${encodeURIComponent("Halo min, saya butuh bantuan")}`;
-        await sendTextMessage(from, `Maaf, saat ini kami hanya bisa memproses pesan teks.\n\nKetik *menu* untuk bantuan otomatis\nAtau hubungi CS langsung:\n${csLink}`, settings);
+        await sendTextMessage(from, `Halo kak!\n\nMaaf, saat ini kami hanya bisa memproses pesan teks.\n\nKetik *menu* untuk bantuan otomatis\nAtau hubungi CS langsung:\n${csLink}\n\n_ETNYX - Push Rank, Tanpa Main_\n\n[ Ini adalah pesan otomatis ]\n💬 _Balas *menu* untuk bantuan otomatis_`, settings);
       }
     }
 
@@ -223,24 +223,8 @@ async function sendMainMenu(
   from: string,
   settings: { phoneNumberId: string; accessToken: string }
 ) {
-  const message = `${LINE}
-  *ETNYX — Menu Utama* 👋
-${LINE}
-
-Selamat datang di *ETNYX*!
-Jasa Joki & Gendong Mobile Legends terpercaya.
-
-Silakan pilih menu:
-
-1️⃣ *Harga & Paket*
-2️⃣ *Cek Status Order*
-3️⃣ *Hubungi CS*
-4️⃣ *Tulis Review*
-5️⃣ *Info Promo*
-
-Atau kirim *Order ID* langsung (contoh: ETX-MNX6ABC123) untuk cek status.
-
-🌐 ${SITE_URL}`;
+  const csLink = `https://wa.me/${WA_CS}`;
+  const message = `Halo kak! 👋\n\nSelamat datang di *ETNYX*!\nJasa Joki & Gendong Mobile Legends terpercaya.\n\nSilakan pilih menu:\n\n1️⃣ *Harga & Paket*\n2️⃣ *Cek Status Order*\n3️⃣ *Hubungi CS*\n4️⃣ *Tulis Review*\n5️⃣ *Info Promo*\n\nAtau kirim *Order ID* langsung (contoh: ETX-MNX6ABC123) untuk cek status.\n\n🌐 ${SITE_URL}\n\n📞 *Butuh bantuan?* Hubungi CS ETNYX:\n${csLink}\n\n_ETNYX - Push Rank, Tanpa Main_\n\n[ Ini adalah pesan otomatis ]\n💬 _Balas *menu* untuk bantuan otomatis_`;
 
   return sendTextMessage(from, message, settings);
 }
@@ -249,26 +233,8 @@ async function sendPricingInfo(
   from: string,
   settings: { phoneNumberId: string; accessToken: string }
 ) {
-  const message = `${LINE}
-  *Daftar Harga Joki Rank ML* 💰
-${LINE}
-
-Harga mulai dari Rp 5.000 tergantung rank yang dipilih.
-
-*Mode Tersedia:*
-• Standard — Harga normal
-• Express — Dikerjakan prioritas (+biaya)
-• Premium — Booster terbaik (+biaya)
-
-*Layanan:*
-• Push Rank (Warrior → Mythic Glory)
-• Per Bintang
-• Gendong / Duo Boost
-
-📱 Order & kalkulator harga:
-${SITE_URL}/order
-
-_Harga ter-update otomatis di halaman order._`;
+  const csLink = `https://wa.me/${WA_CS}`;
+  const message = `Halo kak!\n\nBerikut info *Harga Joki Rank ML* di ETNYX:\n\nHarga mulai dari Rp 5.000 tergantung rank yang dipilih.\n\n*Mode Tersedia:*\n• Standard — Harga normal\n• Express — Dikerjakan prioritas (+biaya)\n• Premium — Booster terbaik (+biaya)\n\n*Layanan:*\n• Push Rank (Warrior → Mythic Glory)\n• Per Bintang\n• Gendong / Duo Boost\n\n📱 *Order & kalkulator harga:*\n${SITE_URL}/order\n\n📞 *Butuh bantuan?* Hubungi CS ETNYX:\n${csLink}\n\n_ETNYX - Push Rank, Tanpa Main_\n\n[ Ini adalah pesan otomatis ]\n💬 _Balas *menu* untuk bantuan otomatis_`;
 
   return sendTextMessage(from, message, settings);
 }
@@ -300,18 +266,7 @@ async function sendOrderStatus(
 
     const rankDisplay = order.package_title || `${order.current_rank} → ${order.target_rank}`;
 
-    const message = `${LINE}
-  *Status Order* 📋
-${LINE}
-
-📋 *Order ID:* ${order.order_id}
-📊 *Status:* ${statusLabels[order.status] || order.status}
-🎮 *Paket:* ${rankDisplay}
-💰 *Total:* Rp ${(order.total_price || 0).toLocaleString("id-ID")}
-${order.progress > 0 ? `📈 *Progress:* ${order.progress}%` : ""}
-${order.current_progress_rank ? `🏅 *Rank Saat Ini:* ${order.current_progress_rank}` : ""}
-
-🔗 Track real-time: ${SITE_URL}/track/?id=${order.order_id}`;
+    const message = `Halo kak!\n\nBerikut status order kamu:\n\n📋 *Order ID:* ${order.order_id}\n📊 *Status:* ${statusLabels[order.status] || order.status}\n🎮 *Paket:* ${rankDisplay}\n💰 *Total:* Rp ${(order.total_price || 0).toLocaleString("id-ID")}\n${order.progress > 0 ? `📈 *Progress:* ${order.progress}%\n` : ""}${order.current_progress_rank ? `🏅 *Rank Saat Ini:* ${order.current_progress_rank}\n` : ""}\n🔗 Track real-time:\n${SITE_URL}/track/?id=${order.order_id}${waDisclaimer(order.order_id)}\n\n_ETNYX - Push Rank, Tanpa Main_`;
 
     return sendTextMessage(from, message.trim(), settings);
   } catch {
@@ -336,7 +291,8 @@ async function sendLatestOrderByPhone(
       .limit(3);
 
     if (!orders || orders.length === 0) {
-      return sendTextMessage(from, `Belum ada order yang terdaftar dengan nomor kamu.\n\n📱 Order sekarang di:\n${SITE_URL}/order`, settings);
+      const csLink = `https://wa.me/${WA_CS}`;
+      return sendTextMessage(from, `Halo kak!\n\nBelum ada order yang terdaftar dengan nomor kamu.\n\n📱 Order sekarang di:\n${SITE_URL}/order\n\n📞 *Butuh bantuan?* Hubungi CS ETNYX:\n${csLink}\n\n_ETNYX - Push Rank, Tanpa Main_\n\n[ Ini adalah pesan otomatis ]\n💬 _Balas *menu* untuk bantuan otomatis_`, settings);
     }
 
     const statusLabels: Record<string, string> = {
@@ -347,7 +303,7 @@ async function sendLatestOrderByPhone(
       cancelled: "❌ Dibatalkan",
     };
 
-    let message = `${LINE}\n  *Order Terbaru Kamu* 📋\n${LINE}\n\n`;
+    let message = `Halo kak!\n\nBerikut *Order Terbaru* kamu:\n\n`;
 
     for (const o of orders) {
       const rankDisplay = o.package_title || `${o.current_rank} → ${o.target_rank}`;
@@ -359,6 +315,7 @@ async function sendLatestOrderByPhone(
     }
 
     message += `🔗 Kirim *Order ID* untuk detail lengkap.\nContoh: *${orders[0].order_id}*`;
+    message += `${waDisclaimer(orders[0].order_id)}\n\n_ETNYX - Push Rank, Tanpa Main_`;
 
     return sendTextMessage(from, message.trim(), settings);
   } catch {
@@ -372,17 +329,7 @@ async function sendCSInfo(
 ) {
   const csLink = `https://wa.me/${WA_CS}`;
 
-  const message = `${LINE}
-  *Hubungi CS ETNYX* 📞
-${LINE}
-
-Untuk bantuan lebih lanjut, hubungi CS kami langsung:
-
-💬 *WhatsApp CS:* ${csLink}
-🌐 *Website:* ${SITE_URL}
-
-Jam operasional: 09.00 - 22.00 WIB
-_Response time: ~15 menit_`;
+  const message = `Halo kak!\n\nUntuk bantuan lebih lanjut, hubungi CS kami langsung:\n\n💬 *WhatsApp CS:* ${csLink}\n🌐 *Website:* ${SITE_URL}\n\nJam operasional: 09.00 - 22.00 WIB\n_Response time: ~15 menit_\n\n_ETNYX - Push Rank, Tanpa Main_\n\n[ Ini adalah pesan otomatis ]\n💬 _Balas *menu* untuk bantuan otomatis_`;
 
   return sendTextMessage(from, message, settings);
 }
@@ -391,16 +338,8 @@ async function sendReviewInfo(
   from: string,
   settings: { phoneNumberId: string; accessToken: string }
 ) {
-  const message = `${LINE}
-  *Tulis Review* ⭐
-${LINE}
-
-Sudah selesai order? Bantu kami dengan review kamu!
-
-📝 Tulis review: ${SITE_URL}/review
-📖 Lihat review lainnya: ${SITE_URL}/reviews
-
-_Review kamu sangat berarti untuk kami!_`;
+  const csLink = `https://wa.me/${WA_CS}`;
+  const message = `Halo kak!\n\nSudah selesai order? Bantu kami dengan *review* kamu!\n\n📝 *Tulis review:* ${SITE_URL}/review\n📖 *Lihat review lainnya:* ${SITE_URL}/reviews\n\n_Review kamu sangat berarti untuk kami!_\n\n📞 *Butuh bantuan?* Hubungi CS ETNYX:\n${csLink}\n\n_ETNYX - Push Rank, Tanpa Main_\n\n[ Ini adalah pesan otomatis ]\n💬 _Balas *menu* untuk bantuan otomatis_`;
 
   return sendTextMessage(from, message, settings);
 }
@@ -418,11 +357,14 @@ async function sendPromoInfo(
       .or(`valid_until.is.null,valid_until.gte.${new Date().toISOString()}`)
       .limit(5);
 
+    const csLink = `https://wa.me/${WA_CS}`;
+    const footer = `\n\n📞 *Butuh bantuan?* Hubungi CS ETNYX:\n${csLink}\n\n_ETNYX - Push Rank, Tanpa Main_\n\n[ Ini adalah pesan otomatis ]\n💬 _Balas *menu* untuk bantuan otomatis_`;
+
     if (!promos || promos.length === 0) {
-      return sendTextMessage(from, `${LINE}\n  *Promo* 🎁\n${LINE}\n\nSaat ini belum ada promo aktif.\nFollow Instagram kami untuk update promo terbaru! 📱`, settings);
+      return sendTextMessage(from, `Halo kak!\n\nSaat ini belum ada promo aktif.\nFollow Instagram kami untuk update promo terbaru! 📱${footer}`, settings);
     }
 
-    let message = `${LINE}\n  *Promo Aktif* 🎁\n${LINE}\n\n`;
+    let message = `Halo kak!\n\nBerikut *Promo Aktif* saat ini:\n\n`;
     for (const p of promos) {
       const discountLabel = p.discount_type === "percentage" ? `${p.discount_value}%` : `Rp ${p.discount_value.toLocaleString("id-ID")}`;
       message += `🏷️ *${p.code}* — Diskon ${discountLabel}\n`;
@@ -431,6 +373,7 @@ async function sendPromoInfo(
       message += "\n";
     }
     message += `Gunakan kode promo saat order di:\n${SITE_URL}/order`;
+    message += footer;
 
     return sendTextMessage(from, message.trim(), settings);
   } catch {
@@ -446,15 +389,7 @@ async function sendUnknownMessage(
   const csLink = `https://wa.me/${WA_CS}?text=${encodeURIComponent("Halo min, saya butuh bantuan")}`;
 
   // Reply to customer with menu + CS redirect
-  const message = `Maaf, saya belum bisa bantu soal itu 🙏
-
-Kamu bisa:
-• Ketik *menu* untuk pilihan bantuan otomatis
-• Kirim *Order ID* untuk cek status order
-• Atau hubungi CS kami langsung:
-  ${csLink}
-
-_Pesan kamu sudah diteruskan ke tim CS kami._`;
+  const message = `Halo kak!\n\nMaaf, saya belum bisa bantu soal itu 🙏\n\nKamu bisa:\n• Ketik *menu* untuk pilihan bantuan otomatis\n• Kirim *Order ID* untuk cek status order\n• Atau hubungi CS kami langsung:\n  ${csLink}\n\n_Pesan kamu sudah diteruskan ke tim CS kami._\n\n_ETNYX - Push Rank, Tanpa Main_\n\n[ Ini adalah pesan otomatis ]\n💬 _Balas *menu* untuk bantuan otomatis_`;
 
   await sendTextMessage(from, message, settings);
 

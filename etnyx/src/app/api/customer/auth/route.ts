@@ -56,11 +56,17 @@ export async function POST(request: Request) {
       // Check if email exists
       const cleanEmail = email.trim().toLowerCase();
 
-      const { data: existing } = await supabase
+      const { data: existing, error: existingErr } = await supabase
         .from("customers")
         .select("id")
         .eq("email", cleanEmail)
         .single();
+
+      // PGRST116 = no rows found (expected for new registration)
+      if (existingErr && existingErr.code !== "PGRST116") {
+        console.error("Auth check error:", existingErr);
+        return NextResponse.json({ error: "Terjadi kesalahan. Coba lagi." }, { status: 500 });
+      }
 
       if (existing) {
         return NextResponse.json({ error: "Email sudah terdaftar" }, { status: 400 });
