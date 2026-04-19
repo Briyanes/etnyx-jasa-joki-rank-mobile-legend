@@ -1,0 +1,375 @@
+<!--
+  ETNYX — Google Ads Master Reference
+  Consolidated from 11 separate files → 1 complete guide
+  Updated: 20 April 2026
+-->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ETNYX — Google Ads Master Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent: #2DD4BF;
+    --primary: #7FA8A3;
+    --bg: #0F1419;
+    --surface: #151B22;
+    --card: #1A2129;
+    --border: rgba(255,255,255,0.08);
+    --text: #E6F1EF;
+    --muted: #9CA3AF;
+    --success: #22C55E;
+    --warning: #F59E0B;
+    --error: #EF4444;
+    --purple: #A855F7;
+    --gradient: linear-gradient(135deg, #2DD4BF, #7FA8A3);
+  }
+  @page { margin: 10mm; size: A4; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 30px 24px;
+    font-size: 12px;
+    line-height: 1.7;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .cover { text-align:center; padding:50px 0 30px; border-bottom:2px solid rgba(45,212,191,0.3); margin-bottom:30px; }
+  .cover h1 { font-size:42px; font-weight:900; background:var(--gradient); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:2px; }
+  .cover .sub { font-size:16px; font-weight:600; color:var(--muted); margin:8px 0; }
+
+  h2 { font-size:18px; font-weight:800; background:var(--gradient); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; text-transform:uppercase; letter-spacing:1px; margin:32px 0 12px; padding-bottom:8px; border-bottom:2px solid rgba(45,212,191,0.2); }
+  h3 { font-size:14px; font-weight:700; color:var(--accent); margin:20px 0 8px; }
+  h4 { font-size:12px; font-weight:700; color:var(--primary); margin:14px 0 6px; }
+
+  .card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin:10px 0; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:10px 0; }
+  .grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin:10px 0; }
+
+  table { width:100%; border-collapse:collapse; margin:10px 0; font-size:11px; }
+  th { background:rgba(45,212,191,0.08); color:var(--accent); font-weight:700; text-align:left; padding:8px 10px; border-bottom:1px solid var(--border); }
+  td { padding:7px 10px; border-bottom:1px solid var(--border); }
+
+  .badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:9px; font-weight:700; text-transform:uppercase; }
+  .b-teal { background:rgba(45,212,191,0.1); color:#2DD4BF; }
+  .b-green { background:rgba(34,197,94,0.1); color:#22C55E; }
+  .b-purple { background:rgba(168,85,247,0.1); color:#C084FC; }
+  .b-amber { background:rgba(245,158,11,0.1); color:#FBBF24; }
+  .b-red { background:rgba(239,68,68,0.1); color:#F87171; }
+
+  .warn-box { border-radius:8px; padding:12px 14px; margin:12px 0; font-size:11px; background:rgba(239,68,68,0.06); border:1px solid rgba(239,68,68,0.2); color:#FCA5A5; }
+  .info-box { border-radius:8px; padding:12px 14px; margin:12px 0; font-size:11px; background:rgba(59,130,246,0.06); border:1px solid rgba(59,130,246,0.2); color:#93C5FD; }
+  .success-box { border-radius:8px; padding:12px 14px; margin:12px 0; font-size:11px; background:rgba(34,197,94,0.06); border:1px solid rgba(34,197,94,0.2); color:#86EFAC; }
+
+  code { background:rgba(45,212,191,0.1); padding:1px 6px; border-radius:3px; font-size:10px; color:var(--accent); font-family:monospace; }
+  ul, ol { padding-left:18px; margin:6px 0; }
+  li { margin:3px 0; font-size:11px; }
+  hr { border:none; border-top:1px solid var(--border); margin:24px 0; }
+  strong { color:#F3F4F6; }
+  p { margin:5px 0; font-size:11px; color:var(--muted); }
+
+  .kw-block { background:rgba(0,0,0,0.3); border-radius:8px; padding:12px 14px; margin:8px 0; font-size:11px; line-height:1.8; color:var(--muted); font-family:monospace; }
+
+  @media print { body { padding:0; } }
+</style>
+</head>
+<body>
+
+<!-- ==================== COVER ==================== -->
+<div class="cover">
+  <h1>ETNYX</h1>
+  <div class="sub">Google Ads Master Reference</div>
+  <p style="font-size:12px; color:var(--muted);">Strategy · Policy · Keywords · Headlines · Setup Guide</p>
+  <div style="display:flex; justify-content:center; gap:40px; margin:24px 0;">
+    <div style="text-align:center;"><div style="font-size:28px; font-weight:900; background:var(--gradient); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;">1</div><div style="font-size:10px; color:var(--muted); font-weight:600;">Campaign</div></div>
+    <div style="text-align:center;"><div style="font-size:28px; font-weight:900; background:var(--gradient); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;">4</div><div style="font-size:10px; color:var(--muted); font-weight:600;">Ad Groups</div></div>
+    <div style="text-align:center;"><div style="font-size:28px; font-weight:900; background:var(--gradient); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;">20</div><div style="font-size:10px; color:var(--muted); font-weight:600;">Keywords</div></div>
+    <div style="text-align:center;"><div style="font-size:28px; font-weight:900; background:var(--gradient); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;">15</div><div style="font-size:10px; color:var(--muted); font-weight:600;">Headlines</div></div>
+  </div>
+  <p style="font-size:10px; color:rgba(255,255,255,0.3);">Consolidated from 11 files · Account: 480-618-0046 · Final URL: etnyx.com/order</p>
+  <div style="font-size:10px; color:rgba(255,255,255,0.25); margin-top:8px;">Versi 1.0 — 20 April 2026</div>
+</div>
+
+<!-- ==================== 1. POLICY COMPLIANCE ==================== -->
+<h2>1. Policy Compliance (CRITICAL)</h2>
+
+<div class="warn-box">
+  <strong>⚠️ Google Ads Policy: "Enabling Dishonest Behavior"</strong><br>
+  Semua 4 ads pernah di-disapproved karena melanggar Account Farming Policy. Framing harus "Gaming Coaching" — BUKAN account boosting/takeover.
+</div>
+
+<h3>🚫 Forbidden Words</h3>
+<table>
+  <tr><th>❌ Dilarang</th><th>✅ Pengganti Aman</th><th>Alasan</th></tr>
+  <tr><td><strong>joki</strong></td><td>coaching, training</td><td>Implies third-party play</td></tr>
+  <tr><td><strong>push rank</strong></td><td>rank coaching, rank training</td><td>Implies boosting</td></tr>
+  <tr><td><strong>gendong</strong></td><td>duo coaching, partner play</td><td>Implies carry service</td></tr>
+  <tr><td><strong>boost/booster</strong></td><td>coach, trainer, mentor</td><td>Direct violation trigger</td></tr>
+  <tr><td><strong>garansi rank</strong></td><td>target rank</td><td>Unrealistic claims</td></tr>
+  <tr><td><strong>hack/cheat</strong></td><td>—</td><td>Immediate ban</td></tr>
+  <tr><td><strong>gratis/free</strong></td><td>mulai dari, terjangkau</td><td>Misleading if not actually free</td></tr>
+</table>
+
+<h3>✅ Approved Framing</h3>
+<div class="grid2">
+  <div class="card">
+    <div style="font-weight:700; color:var(--success); margin-bottom:6px;">Campaign Name</div>
+    <code>[Search] ETNYX — High Intent ML Coaching</code>
+  </div>
+  <div class="card">
+    <div style="font-weight:700; color:var(--success); margin-bottom:6px;">Ad Group Naming</div>
+    <code>ml-core, rank-training, tier-specific, duo-coaching</code>
+  </div>
+</div>
+
+<hr>
+
+<!-- ==================== 2. CAMPAIGN SETTINGS ==================== -->
+<h2>2. Campaign Settings</h2>
+
+<table>
+  <tr><th>Setting</th><th>Value</th><th>Notes</th></tr>
+  <tr><td><strong>Campaign Type</strong></td><td>Search</td><td>Text ads only</td></tr>
+  <tr><td><strong>Account ID</strong></td><td>480-618-0046</td><td>—</td></tr>
+  <tr><td><strong>Final URL</strong></td><td>https://etnyx.com/order</td><td>All ads point here</td></tr>
+  <tr><td><strong>Budget</strong></td><td>Rp 50.000/hari</td><td>= Rp 1,5M/bulan (test)</td></tr>
+  <tr><td><strong>Bidding Phase 1</strong></td><td>Maximize Clicks</td><td>2 minggu pertama (data)</td></tr>
+  <tr><td><strong>Bidding Phase 2</strong></td><td>Maximize Conversions</td><td>Setelah 30+ conversions</td></tr>
+  <tr><td><strong>Location</strong></td><td>Indonesia</td><td>—</td></tr>
+  <tr><td><strong>Language</strong></td><td>Indonesian + English</td><td>—</td></tr>
+  <tr><td><strong>Network</strong></td><td>Google Search only</td><td>Turn OFF Display Network</td></tr>
+</table>
+
+<h3>💰 Target CPC by Ad Group</h3>
+<table>
+  <tr><th>Ad Group</th><th>Target CPC</th><th>Intent Level</th></tr>
+  <tr><td>ml-core</td><td>Rp 800-1.000</td><td>Medium (broad intent)</td></tr>
+  <tr><td>rank-training</td><td>Rp 1.000-1.200</td><td>High</td></tr>
+  <tr><td>tier-specific</td><td>Rp 1.200-1.500</td><td>Very High (tier queries)</td></tr>
+  <tr><td>duo-coaching</td><td>Rp 1.000-1.200</td><td>High</td></tr>
+</table>
+
+<hr>
+
+<!-- ==================== 3. KEYWORDS ==================== -->
+<h2>3. Keywords (20 Total)</h2>
+
+<div class="info-box">
+  <strong>Match Type Strategy:</strong> Phrase match (scale) + Exact match (high intent). <strong>JANGAN</strong> pakai Broad match — terlalu luas, buang budget.
+</div>
+
+<h3>Ad Group 1: ml-core (5 keywords)</h3>
+<div class="kw-block">
+"mobile legends coaching" — Phrase<br>
+[mobile legends coaching] — Exact<br>
+"ml coaching service" — Phrase<br>
+"mobile legends rank help" — Phrase<br>
+"ml gaming coach" — Phrase
+</div>
+
+<h3>Ad Group 2: rank-training (5 keywords)</h3>
+<div class="kw-block">
+"rank coaching mobile legends" — Phrase<br>
+[rank coaching mobile legends] — Exact<br>
+"ml rank up training" — Phrase<br>
+"mobile legends rank training" — Phrase<br>
+"how to rank up ml" — Phrase
+</div>
+
+<h3>Ad Group 3: tier-specific (5 keywords)</h3>
+<div class="kw-block">
+"mythic coaching mobile legends" — Phrase<br>
+[mythic coaching mobile legends] — Exact<br>
+"legend rank coaching ml" — Phrase<br>
+"epic to legend coaching" — Phrase<br>
+"ml tier coaching" — Phrase
+</div>
+
+<h3>Ad Group 4: duo-coaching (5 keywords)</h3>
+<div class="kw-block">
+"duo coaching mobile legends" — Phrase<br>
+[duo coaching mobile legends] — Exact<br>
+"play with coach ml" — Phrase<br>
+"ml partner coaching" — Phrase<br>
+"mobile legends duo rank" — Phrase
+</div>
+
+<h3>🚫 Negative Keywords</h3>
+<div class="kw-block">
+-free -gratis -script -cheat -hack -download -tutorial -mod -apk -cara -tips<br>
+-diamond -skin -top up -redeem -kode
+</div>
+
+<hr>
+
+<!-- ==================== 4. HEADLINES ==================== -->
+<h2>4. Headlines & Descriptions</h2>
+
+<h3>15 Policy-Safe Headlines</h3>
+<table>
+  <tr><th>#</th><th>Headline (max 30 chars)</th><th>Intent</th></tr>
+  <tr><td>1</td><td>ML Coaching Mulai 4 Ribu</td><td>Price anchor</td></tr>
+  <tr><td>2</td><td>Rank Up Dengan Coach Mythic</td><td>Authority</td></tr>
+  <tr><td>3</td><td>Coaching ML Aman & Terenkripsi</td><td>Safety</td></tr>
+  <tr><td>4</td><td>2.847+ Player Sudah Naik Rank</td><td>Social proof</td></tr>
+  <tr><td>5</td><td>Rating 4.9⭐ dari 500+ Review</td><td>Trust signal</td></tr>
+  <tr><td>6</td><td>Coach Mythic Glory Tersertifikasi</td><td>Credibility</td></tr>
+  <tr><td>7</td><td>Tracking Progress Real-Time</td><td>Feature</td></tr>
+  <tr><td>8</td><td>Data Dienkripsi AES-256</td><td>Security tech</td></tr>
+  <tr><td>9</td><td>Bayar Setelah Lihat Progress</td><td>Risk reversal</td></tr>
+  <tr><td>10</td><td>Duo Coaching — Main Bareng</td><td>Mode: gendong</td></tr>
+  <tr><td>11</td><td>Epic ke Legend? Bisa 2-3 Hari</td><td>Speed promise</td></tr>
+  <tr><td>12</td><td>ETNYX — Sistem Coaching ML #1</td><td>Brand</td></tr>
+  <tr><td>13</td><td>Notifikasi WA Otomatis</td><td>Feature</td></tr>
+  <tr><td>14</td><td>Pilih Paket atau Per Bintang</td><td>Flexibility</td></tr>
+  <tr><td>15</td><td>100% Aman. Ini Bukan Joki Biasa</td><td>Differentiator</td></tr>
+</table>
+
+<h3>4 Descriptions</h3>
+<table>
+  <tr><th>#</th><th>Description (max 90 chars)</th></tr>
+  <tr><td>1</td><td>Coaching Mobile Legends dengan coach Mythic tersertifikasi. Tracking real-time, data terenkripsi AES-256. Mulai 4 ribu.</td></tr>
+  <tr><td>2</td><td>2.847+ player sudah naik rank bersama ETNYX. Pilih paket, per bintang, atau duo coaching. Rating 4.9⭐.</td></tr>
+  <tr><td>3</td><td>Sistem coaching ML paling aman di Indonesia. Enkripsi military-grade, notif WA otomatis, progress real-time.</td></tr>
+  <tr><td>4</td><td>Naik rank tanpa ribet. Coach Mythic Glory siap bantu kamu. Bayar transfer, QRIS, atau e-wallet. etnyx.com</td></tr>
+</table>
+
+<h3>💡 Headlines Research Insights</h3>
+<div class="grid2">
+  <div class="card">
+    <div style="font-weight:700; color:var(--accent); margin-bottom:6px;">What Works (Competitor Research)</div>
+    <ul>
+      <li>Speed/timeline — "2 hari", "cepat"</li>
+      <li>Safety — "100% aman", "terenkripsi"</li>
+      <li>Specific price — "Mulai 4 Ribu" > "Murah"</li>
+      <li>Rating with stars — "4.9⭐" > "terpercaya"</li>
+      <li>Numbers > adjectives</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div style="font-weight:700; color:var(--accent); margin-bottom:6px;">Quality Score Target</div>
+    <ul>
+      <li>Current estimate: 5-6/10</li>
+      <li>Target: 7-8/10</li>
+      <li>Fix: keyword-headline relevance ↑</li>
+      <li>Fix: landing page load speed ↑</li>
+      <li>Fix: ad extensions (sitelinks) ↑</li>
+    </ul>
+  </div>
+</div>
+
+<hr>
+
+<!-- ==================== 5. SITELINKS ==================== -->
+<h2>5. Sitelinks (14)</h2>
+
+<table>
+  <tr><th>#</th><th>Sitelink Text</th><th>URL Path</th></tr>
+  <tr><td>1</td><td>Coaching by Package</td><td>/order</td></tr>
+  <tr><td>2</td><td>Coaching by Rank</td><td>/order</td></tr>
+  <tr><td>3</td><td>Duo Coaching</td><td>/order</td></tr>
+  <tr><td>4</td><td>View Pricing</td><td>/pricing</td></tr>
+  <tr><td>5</td><td>Coach Mythic Glory</td><td>/order</td></tr>
+  <tr><td>6</td><td>Real-Time Tracking</td><td>/order</td></tr>
+  <tr><td>7</td><td>AES-256 Security</td><td>/order</td></tr>
+  <tr><td>8</td><td>Customer Reviews</td><td>/order</td></tr>
+  <tr><td>9</td><td>Epic → Legend</td><td>/order</td></tr>
+  <tr><td>10</td><td>Legend → Mythic</td><td>/order</td></tr>
+  <tr><td>11</td><td>Express Coaching</td><td>/order</td></tr>
+  <tr><td>12</td><td>Premium Coaching</td><td>/order</td></tr>
+  <tr><td>13</td><td>WhatsApp Support</td><td>/contact</td></tr>
+  <tr><td>14</td><td>About ETNYX</td><td>/</td></tr>
+</table>
+
+<hr>
+
+<!-- ==================== 6. SETUP GUIDE ==================== -->
+<h2>6. Setup — Google Ads Editor</h2>
+
+<h3>📋 6-Step Import</h3>
+<ol style="font-size:12px; line-height:2;">
+  <li><strong>Download</strong> Google Ads Editor → <a href="https://ads.google.com/intl/en_id/home/tools/ads-editor/" style="color:var(--accent);">ads.google.com/editor</a></li>
+  <li><strong>Login</strong> ke account 480-618-0046</li>
+  <li><strong>Import CSV:</strong> Account → Import → From file → pilih CSV campaign file</li>
+  <li><strong>Verify:</strong> Cek 4 ad groups, 20 keywords, 15 headlines di editor</li>
+  <li><strong>Add Sitelinks:</strong> Shared Library → Sitelinks → add 14 sitelinks dari tabel di atas</li>
+  <li><strong>Post:</strong> Klik "Post" → review → confirm → campaign live!</li>
+</ol>
+
+<h3>✅ Pre-Launch Checklist</h3>
+<div class="grid2">
+  <div class="card">
+    <ul>
+      <li>☐ Campaign name = "[Search] ETNYX — High Intent ML Coaching"</li>
+      <li>☐ Budget = Rp 50.000/day</li>
+      <li>☐ Bidding = Maximize Clicks</li>
+      <li>☐ Location = Indonesia</li>
+    </ul>
+  </div>
+  <div class="card">
+    <ul>
+      <li>☐ Display Network = OFF</li>
+      <li>☐ 20 keywords, Phrase + Exact match</li>
+      <li>☐ Negative keywords added</li>
+      <li>☐ Conversion tracking (Google Ads pixel) verified</li>
+    </ul>
+  </div>
+</div>
+
+<hr>
+
+<!-- ==================== 7. BIDDING PHASES ==================== -->
+<h2>7. Bidding & Budget Phases</h2>
+
+<table>
+  <tr><th>Phase</th><th>Duration</th><th>Budget</th><th>Bidding</th><th>Goal</th></tr>
+  <tr><td><span class="badge b-teal">Phase 1</span></td><td>Week 1-2</td><td>Rp 50K/day</td><td>Maximize Clicks</td><td>Collect data, 50+ clicks</td></tr>
+  <tr><td><span class="badge b-amber">Phase 2</span></td><td>Week 3-4</td><td>Rp 50K/day</td><td>Maximize Conversions</td><td>After 30+ conversions</td></tr>
+  <tr><td><span class="badge b-green">Phase 3</span></td><td>Month 2+</td><td>Rp 75-100K/day</td><td>Target CPA</td><td>Scale profitable keywords</td></tr>
+  <tr><td><span class="badge b-purple">Phase 4</span></td><td>Month 3+</td><td>Rp 150-300K/day</td><td>Target ROAS</td><td>Full optimization</td></tr>
+</table>
+
+<h3>📊 KPI Targets</h3>
+<table>
+  <tr><th>Metric</th><th>Phase 1</th><th>Phase 2</th><th>Phase 3+</th></tr>
+  <tr><td>CTR</td><td>>3%</td><td>>5%</td><td>>7%</td></tr>
+  <tr><td>CPC</td><td><Rp 1.500</td><td><Rp 1.200</td><td><Rp 1.000</td></tr>
+  <tr><td>Conv Rate</td><td>>2%</td><td>>4%</td><td>>6%</td></tr>
+  <tr><td>CPA</td><td><Rp 50.000</td><td><Rp 30.000</td><td><Rp 20.000</td></tr>
+  <tr><td>ROAS</td><td>>1x</td><td>>2x</td><td>>3x</td></tr>
+</table>
+
+<hr>
+
+<!-- ==================== 8. TROUBLESHOOTING ==================== -->
+<h2>8. Troubleshooting</h2>
+
+<table>
+  <tr><th>Problem</th><th>Cause</th><th>Fix</th></tr>
+  <tr><td><span class="badge b-red">Ads Disapproved</span></td><td>"Enabling Dishonest Behavior"</td><td>Replace all forbidden words. Use coaching framing. Appeal after 48h.</td></tr>
+  <tr><td>Low CTR (<2%)</td><td>Headlines not compelling</td><td>Add numbers, specifics. Test 3 headline combos per ad group.</td></tr>
+  <tr><td>High CPC (>Rp 2.000)</td><td>Broad keywords</td><td>Switch to Exact match. Add more negatives.</td></tr>
+  <tr><td>Low Quality Score (<5)</td><td>Keyword-ad mismatch</td><td>Match headline to keyword. Improve landing page speed.</td></tr>
+  <tr><td>No Conversions</td><td>Tracking not setup</td><td>Verify Google Ads pixel on etnyx.com. Check conversion action.</td></tr>
+  <tr><td>Budget exhausted early</td><td>Broad match eating budget</td><td>Switch to Phrase/Exact. Increase negative keywords.</td></tr>
+</table>
+
+<hr>
+
+<!-- Footer -->
+<div style="text-align:center; padding:24px 0; color:var(--muted);">
+  <div style="font-size:20px; font-weight:900; background:var(--gradient); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:6px;">ETNYX</div>
+  <div style="font-style:italic; font-size:12px;">"Bukan joki biasa. Ini SISTEM." 🎮</div>
+  <div style="font-size:10px; margin-top:8px; color:rgba(255,255,255,0.25);">Google Ads Master Reference v1.0 — 20 April 2026<br>Consolidated: Editor Import Guide, GSN Strategy, Headlines Strategy, Policy Fix,<br>Quick Reference (EN/ID), ImageFeed Brief, Copy-Paste TXT, Campaign CSVs</div>
+</div>
+
+</body>
+</html>

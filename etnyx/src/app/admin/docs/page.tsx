@@ -116,10 +116,10 @@ function buildCategories(): DocCategory[] {
                 Platform full-stack dengan admin dashboard, staff management, payment gateway, dan multi-channel notification.
               </p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <StatCard label="Halaman" value="18" sub="Customer + Admin" />
-                <StatCard label="API Routes" value="65+" sub="RESTful endpoints" />
-                <StatCard label="Dashboard Tabs" value="15" sub="Admin CMS" />
-                <StatCard label="Integrasi" value="7" sub="External services" />
+                <StatCard label="Halaman" value="23" sub="Customer + Admin" />
+                <StatCard label="API Routes" value="79" sub="RESTful endpoints" />
+                <StatCard label="Dashboard Tabs" value="17" sub="Admin CMS" />
+                <StatCard label="Integrasi" value="8" sub="External services" />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="bg-background rounded-lg p-3 border border-white/5">
@@ -154,6 +154,9 @@ function buildCategories(): DocCategory[] {
                   ["Order Form", "/order", <RoleBadge key="p2" role="public" />],
                   ["Track Order", "/track", <RoleBadge key="p3" role="public" />],
                   ["Bio / Link Tree", "/bio", <RoleBadge key="p4" role="public" />],
+                  ["FAQ", "/faq", <RoleBadge key="faq" role="public" />],
+                  ["Reviews", "/reviews", <RoleBadge key="rev" role="public" />],
+                  ["CS / Contact", "/cs", <RoleBadge key="cs" role="public" />],
                   ["Login", "/login", <RoleBadge key="p6" role="public" />],
                   ["Register", "/register", <RoleBadge key="p7" role="public" />],
                   ["Reset Password", "/reset-password", <RoleBadge key="p8" role="public" />],
@@ -161,13 +164,17 @@ function buildCategories(): DocCategory[] {
                   ["Payment Success", "/payment/success", <RoleBadge key="p10" role="customer" />],
                   ["Submit Review", "/review?id=xxx", <RoleBadge key="p5" role="customer" />],
                   ["Customer Dashboard", "/dashboard", <RoleBadge key="c" role="customer" />],
+                  ["Customer Order", "/dashboard/order", <RoleBadge key="co" role="customer" />],
                   ["Privacy Policy", "/privacy", <RoleBadge key="pp" role="public" />],
                   ["Terms of Service", "/terms", <RoleBadge key="tos" role="public" />],
+                  ["Refund Policy", "/refund-policy", <RoleBadge key="rp" role="public" />],
                   ["Admin Dashboard", "/admin/dashboard", <RoleBadge key="a" role="admin" />],
+                  ["Admin Finance", "/admin/finance", <RoleBadge key="af" role="admin" />],
                   ["Lead Dashboard", "/admin/lead", <RoleBadge key="l" role="lead" />],
                   ["Worker Dashboard", "/admin/worker", <RoleBadge key="w" role="worker" />],
                   ["Admin Docs", "/admin/docs", <span key="all" className="flex gap-1"><RoleBadge role="admin" /><RoleBadge role="lead" /><RoleBadge role="worker" /></span>],
                   ["Sitemap", "/sitemap.xml", <RoleBadge key="sm" role="public" />],
+                  ["Robots.txt", "/robots.txt", <RoleBadge key="rb" role="auto" />],
                 ]} />
               </div>
             </div>
