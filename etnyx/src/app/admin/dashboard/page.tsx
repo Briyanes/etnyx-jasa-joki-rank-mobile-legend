@@ -1602,13 +1602,13 @@ export default function AdminDashboard() {
                     </div>
                   ) : (
                     <>
-                      {/* Category tabs */}
-                      <div className="flex gap-2 overflow-x-auto pb-1 items-center">
+                      {/* Category tabs - scrollable horizontally */}
+                      <div className="flex gap-2 overflow-x-auto pb-2 items-center snap-x scroll-smooth scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent hover:scrollbar-thumb-white/20 -mx-2 px-2">
                         {pricingCatalog.map((cat) => (
                           <button
                             key={cat.id}
                             onClick={() => setActivePricingCat(cat.id)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all flex-shrink-0 snap-start ${
                               activePricingCat === cat.id
                                 ? "gradient-primary text-white shadow-lg shadow-accent/20"
                                 : "bg-surface border border-white/5 text-text-muted hover:text-text"
@@ -1620,7 +1620,7 @@ export default function AdminDashboard() {
                         ))}
                         <button
                           onClick={() => setShowAddCat(true)}
-                          className="px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap border border-dashed border-accent/30 text-accent hover:bg-accent/10 transition-all flex items-center gap-1"
+                          className="px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap border border-dashed border-accent/30 text-accent hover:bg-accent/10 transition-all flex items-center gap-1 flex-shrink-0"
                         >
                           <Plus className="w-3 h-3" /> Kategori
                         </button>
