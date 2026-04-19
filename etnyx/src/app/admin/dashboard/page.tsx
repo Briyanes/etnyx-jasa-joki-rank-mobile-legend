@@ -997,7 +997,7 @@ export default function AdminDashboard() {
         </header>
 
         {/* Content */}
-        <main className="p-6">
+        <main className="p-4 sm:p-6 overflow-x-hidden max-w-full">
 
           {/* ===== OVERVIEW TAB ===== */}
           {activeTab === "overview" && stats && (
@@ -1430,7 +1430,7 @@ export default function AdminDashboard() {
 
           {/* ===== PRICING TAB ===== */}
           {activeTab === "pricing" && (
-            <div className="space-y-4">
+            <div className="space-y-4 overflow-x-hidden max-w-full min-w-0">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-text-muted">Edit harga paket dan per bintang yang tampil di halaman order</p>
@@ -1446,39 +1446,39 @@ export default function AdminDashboard() {
               </div>
 
               {/* Mode Switcher */}
-              <div className="flex gap-2 p-1 bg-surface rounded-xl border border-white/5">
+              <div className="flex gap-1 sm:gap-2 p-1 bg-surface rounded-xl border border-white/5 overflow-x-auto">
                 <button
                   onClick={() => setPricingMode("paket")}
-                  className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
+                  className={`flex-1 min-w-0 py-2 px-2 sm:px-4 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
                     pricingMode === "paket"
                       ? "gradient-primary text-white shadow-lg"
                       : "text-text-muted hover:text-text"
                   }`}
                 >
-                  <Package className="w-4 h-4 inline-block mr-2" />
-                  Joki Paket
+                  <Package className="w-4 h-4 inline-block mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Joki </span>Paket
                 </button>
                 <button
                   onClick={() => setPricingMode("perstar")}
-                  className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
+                  className={`flex-1 min-w-0 py-2 px-2 sm:px-4 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
                     pricingMode === "perstar"
                       ? "gradient-primary text-white shadow-lg"
                       : "text-text-muted hover:text-text"
                   }`}
                 >
-                  <Star className="w-4 h-4 inline-block mr-2" />
-                  Joki Per Bintang
+                  <Star className="w-4 h-4 inline-block mr-1 sm:mr-2" />
+                  Per Bintang
                 </button>
                 <button
                   onClick={() => setPricingMode("gendong")}
-                  className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
+                  className={`flex-1 min-w-0 py-2 px-2 sm:px-4 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
                     pricingMode === "gendong"
                       ? "gradient-primary text-white shadow-lg"
                       : "text-text-muted hover:text-text"
                   }`}
                 >
-                  <Users className="w-4 h-4 inline-block mr-2" />
-                  Joki Gendong
+                  <Users className="w-4 h-4 inline-block mr-1 sm:mr-2" />
+                  Gendong
                 </button>
               </div>
 
@@ -1603,7 +1603,7 @@ export default function AdminDashboard() {
                   ) : (
                     <>
                       {/* Category tabs - scrollable horizontally */}
-                      <div className="flex gap-2 overflow-x-auto pb-2 items-center snap-x scroll-smooth scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent hover:scrollbar-thumb-white/20 -mx-2 px-2">
+                      <div className="flex gap-2 overflow-x-auto pb-2 items-center snap-x scroll-smooth scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent hover:scrollbar-thumb-white/20">
                         {pricingCatalog.map((cat) => (
                           <button
                             key={cat.id}
@@ -1654,7 +1654,8 @@ export default function AdminDashboard() {
                               )}
                             </div>
                           </div>
-                          <table className="w-full text-sm">
+                          <div className="overflow-x-auto">
+                          <table className="w-full text-sm min-w-[600px]">
                             <thead>
                               <tr className="border-b border-white/5">
                                 <th className="text-left text-text-muted text-xs font-medium px-4 py-2.5">Paket</th>
@@ -1741,6 +1742,7 @@ export default function AdminDashboard() {
                               ))}
                             </tbody>
                           </table>
+                          </div>
                           {/* Add Package Button / Form */}
                           {showAddPkg && activePricingCat === cat.id ? (
                             <div className="p-4 border-t border-white/5 bg-white/[0.02] space-y-3">
@@ -1811,7 +1813,8 @@ export default function AdminDashboard() {
                     <h3 className="text-sm font-semibold text-text">Harga Per Bintang</h3>
                     <span className="text-xs text-text-muted">{perStarPricing.length} tier</span>
                   </div>
-                  <table className="w-full text-sm">
+                  <div className="overflow-x-auto">
+                  <table className="w-full text-sm min-w-[550px]">
                     <thead>
                       <tr className="border-b border-white/5">
                         <th className="text-left text-text-muted text-xs font-medium px-4 py-2.5">Tier Rank</th>
@@ -1881,6 +1884,7 @@ export default function AdminDashboard() {
                       ))}
                     </tbody>
                   </table>
+                  </div>
                 </div>
               )}
 
@@ -1891,7 +1895,8 @@ export default function AdminDashboard() {
                     <h3 className="text-sm font-semibold text-text">Harga Joki Gendong (Duo Boost)</h3>
                     <span className="text-xs text-text-muted">{gendongPricing.length} tier</span>
                   </div>
-                  <table className="w-full text-sm">
+                  <div className="overflow-x-auto">
+                  <table className="w-full text-sm min-w-[550px]">
                     <thead>
                       <tr className="border-b border-white/5">
                         <th className="text-left text-text-muted text-xs font-medium px-4 py-2.5">Tier Rank</th>
@@ -1961,6 +1966,7 @@ export default function AdminDashboard() {
                       ))}
                     </tbody>
                   </table>
+                  </div>
                 </div>
               )}
             </div>
