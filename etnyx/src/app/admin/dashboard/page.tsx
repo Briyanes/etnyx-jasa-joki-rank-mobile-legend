@@ -1430,7 +1430,7 @@ export default function AdminDashboard() {
 
           {/* ===== PRICING TAB ===== */}
           {activeTab === "pricing" && (
-            <div className="space-y-4">
+            <div className="space-y-4 overflow-hidden">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-text-muted">Edit harga paket dan per bintang yang tampil di halaman order</p>
@@ -1603,7 +1603,7 @@ export default function AdminDashboard() {
                   ) : (
                     <>
                       {/* Category tabs */}
-                      <div className="flex gap-2 overflow-x-auto overflow-y-hidden pb-1 items-center -mx-6 px-6 -mb-4 pb-4">
+                      <div className="flex gap-2 overflow-x-auto overflow-y-hidden pb-1 items-center">
                         {pricingCatalog.map((cat) => (
                           <button
                             key={cat.id}
