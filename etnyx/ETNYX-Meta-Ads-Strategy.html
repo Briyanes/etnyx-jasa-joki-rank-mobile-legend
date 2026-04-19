@@ -1,7 +1,8 @@
 <!--
   ETNYX — Meta Ads Strategy, Pixel Audit & Funnel Roadmap
-  Expert-level campaign blueprint for Mobile Legends joki service
-  Created: 20 April 2026
+  Panduan lengkap untuk Advertiser & Editor Meta/Instagram Ads
+  Theme: ETNYX System Guide v2
+  Updated: 20 April 2026
 -->
 <!DOCTYPE html>
 <html lang="id">
@@ -12,194 +13,506 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
 <style>
+  /* ===== ETNYX SYSTEM GUIDE v2 — CANONICAL THEME ===== */
   :root {
     --accent: #2DD4BF;
     --primary: #7FA8A3;
+    --secondary: #A78BFA;
     --bg: #0F1419;
     --surface: #151B22;
-    --card: #1A2129;
-    --border: rgba(255,255,255,0.08);
+    --card-bg: rgba(255,255,255,0.04);
+    --card-border: rgba(255,255,255,0.08);
     --text: #E6F1EF;
-    --muted: #9CA3AF;
+    --text-muted: #9CA3AF;
     --success: #22C55E;
     --warning: #F59E0B;
-    --error: #EF4444;
-    --blue: #3B82F6;
-    --purple: #A855F7;
-    --tof: #EF4444;
-    --mof: #F59E0B;
-    --bof: #22C55E;
+    --danger: #EF4444;
+    --teal: #2DD4BF;
+    --gradient: linear-gradient(135deg, #2DD4BF, #7FA8A3);
   }
-  @page { margin: 10mm; size: A4; }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:'Inter',-apple-system,sans-serif; background:var(--bg); color:var(--text); max-width:900px; margin:0 auto; padding:30px 24px; font-size:12px; line-height:1.7; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
 
-  .cover { text-align:center; padding:50px 0 30px; border-bottom:2px solid rgba(45,212,191,0.3); margin-bottom:30px; }
-  .cover h1 { font-size:42px; font-weight:900; background:linear-gradient(135deg,#2DD4BF,#7FA8A3); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:2px; }
-  .cover .sub { font-size:16px; font-weight:600; color:var(--muted); margin:8px 0 20px; }
+  @page { margin: 12mm 10mm; size: A4; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  h2 { font-size:18px; font-weight:800; background:linear-gradient(135deg,#2DD4BF,#7FA8A3); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; text-transform:uppercase; letter-spacing:1px; margin:32px 0 12px; padding-bottom:8px; border-bottom:2px solid rgba(45,212,191,0.2); }
-  h3 { font-size:14px; font-weight:700; color:var(--accent); margin:20px 0 8px; }
-  h4 { font-size:12px; font-weight:700; color:var(--primary); margin:14px 0 6px; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 40px 30px;
+    font-size: 12.5px;
+    line-height: 1.65;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
 
-  .card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin:10px 0; }
-  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:10px 0; }
-  .grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin:10px 0; }
-  .grid4 { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:8px; margin:10px 0; }
+  /* ===== Cover ===== */
+  .cover {
+    text-align: center;
+    padding: 50px 0 30px;
+    border-bottom: 2px solid rgba(45,212,191,0.3);
+    margin-bottom: 30px;
+    page-break-after: always;
+  }
+  .cover h1 {
+    font-size: 38px;
+    font-weight: 900;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+  }
+  .cover .tagline {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+  .cover .meta {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 12px;
+  }
+  .cover .stat-row {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin: 24px 0;
+  }
+  .cover .stat-box { text-align: center; }
+  .cover .stat-num {
+    font-size: 32px;
+    font-weight: 900;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .cover .stat-lbl {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  .cover .quote {
+    border-left: 3px solid var(--accent);
+    padding: 8px 16px;
+    background: rgba(45,212,191,0.06);
+    border-radius: 0 6px 6px 0;
+    font-style: italic;
+    color: var(--text-muted);
+    max-width: 500px;
+    margin: 20px auto 0;
+    font-size: 13px;
+  }
 
-  table { width:100%; border-collapse:collapse; margin:10px 0; font-size:11px; }
-  th { background:rgba(45,212,191,0.08); color:var(--accent); font-weight:700; text-align:left; padding:8px 10px; border-bottom:1px solid var(--border); }
-  td { padding:7px 10px; border-bottom:1px solid var(--border); color:var(--text); }
-  tr:hover td { background:rgba(255,255,255,0.02); }
+  /* ===== Section Headers ===== */
+  h2 {
+    font-size: 20px;
+    font-weight: 800;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 32px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid rgba(45,212,191,0.25);
+    page-break-after: avoid;
+  }
+  h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--secondary);
+    margin-top: 20px;
+    margin-bottom: 8px;
+    page-break-after: avoid;
+  }
+  h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--teal);
+    margin-top: 14px;
+    margin-bottom: 6px;
+    page-break-after: avoid;
+  }
 
-  .badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:9px; font-weight:700; text-transform:uppercase; }
-  .b-tof { background:rgba(239,68,68,0.15); color:#F87171; }
-  .b-mof { background:rgba(245,158,11,0.15); color:#FBBF24; }
-  .b-bof { background:rgba(34,197,94,0.15); color:#4ADE80; }
-  .b-meta { background:rgba(59,130,246,0.15); color:#60A5FA; }
-  .b-google { background:rgba(245,158,11,0.15); color:#FBBF24; }
-  .b-tiktok { background:rgba(168,85,247,0.15); color:#C084FC; }
-  .b-accent { background:rgba(45,212,191,0.1); color:#2DD4BF; }
-  .b-green { background:rgba(34,197,94,0.1); color:#22C55E; }
-  .b-red { background:rgba(239,68,68,0.1); color:#EF4444; }
+  /* ===== Cards & Grid ===== */
+  .card-grid { display: grid; gap: 10px; margin: 10px 0; }
+  .g2 { grid-template-columns: 1fr 1fr; }
+  .g3 { grid-template-columns: 1fr 1fr 1fr; }
+  .g4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .card .label { font-weight: 700; font-size: 12px; margin-bottom: 4px; color: var(--text); }
+  .card .desc { font-size: 11px; color: var(--text-muted); line-height: 1.5; }
 
-  .info-box { border-radius:8px; padding:10px 14px; margin:10px 0; font-size:11px; }
-  .info { background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.2); color:#93C5FD; }
-  .warn { background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.2); color:#FCD34D; }
-  .ok { background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.2); color:#86EFAC; }
+  /* ===== Tables ===== */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+    font-size: 11.5px;
+    page-break-inside: avoid;
+  }
+  th {
+    background: rgba(45,212,191,0.12);
+    color: var(--accent);
+    font-weight: 700;
+    text-align: left;
+    padding: 7px 10px;
+    border-bottom: 1px solid rgba(45,212,191,0.2);
+  }
+  td {
+    padding: 6px 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    color: rgba(255,255,255,0.8);
+  }
+  tr:hover td { background: rgba(255,255,255,0.02); }
 
-  .funnel-flow { display:flex; gap:8px; align-items:stretch; margin:14px 0; }
-  .funnel-step { flex:1; border-radius:10px; padding:14px; text-align:center; }
-  .funnel-step .num { font-size:24px; font-weight:900; margin-bottom:4px; }
-  .funnel-step .label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1px; }
-  .funnel-step .desc { font-size:10px; color:var(--muted); margin-top:6px; }
+  /* ===== Badges ===== */
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .badge-teal { background: rgba(45,212,191,0.15); color: var(--teal); }
+  .badge-green { background: rgba(74,222,128,0.15); color: var(--success); }
+  .badge-purple { background: rgba(167,139,250,0.15); color: var(--secondary); }
+  .badge-amber { background: rgba(250,204,21,0.15); color: var(--warning); }
+  .badge-red { background: rgba(248,113,113,0.15); color: var(--danger); }
+  .badge-blue { background: rgba(45,212,191,0.15); color: var(--accent); }
 
-  .timeline { position:relative; padding-left:24px; margin:12px 0; }
-  .timeline::before { content:''; position:absolute; left:8px; top:0; bottom:0; width:2px; background:var(--border); }
-  .tl-item { position:relative; margin-bottom:14px; }
-  .tl-item::before { content:''; position:absolute; left:-20px; top:4px; width:12px; height:12px; border-radius:50%; border:2px solid var(--accent); background:var(--bg); }
-  .tl-item.active::before { background:var(--accent); }
-  .tl-title { font-weight:700; font-size:12px; color:var(--text); }
-  .tl-sub { font-size:10px; color:var(--muted); margin-top:2px; }
+  /* ===== Funnel Badges (Meta-specific) ===== */
+  .badge-tof { background: rgba(239,68,68,0.15); color: #F87171; }
+  .badge-mof { background: rgba(245,158,11,0.15); color: #FBBF24; }
+  .badge-bof { background: rgba(34,197,94,0.15); color: #4ADE80; }
+  .badge-meta { background: rgba(59,130,246,0.15); color: #60A5FA; }
+  .badge-google { background: rgba(245,158,11,0.15); color: #FBBF24; }
+  .badge-tiktok { background: rgba(167,139,250,0.15); color: #C084FC; }
 
-  code { background:rgba(45,212,191,0.1); padding:1px 6px; border-radius:3px; font-size:10px; color:var(--accent); font-family:monospace; }
-  ul, ol { padding-left:18px; margin:6px 0; }
-  li { margin:3px 0; font-size:11px; }
-  hr { border:none; border-top:1px solid var(--border); margin:24px 0; }
-  strong { color:#F3F4F6; }
+  /* ===== Alert Boxes ===== */
+  .alert {
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin: 12px 0;
+    font-size: 11.5px;
+    line-height: 1.6;
+  }
+  .alert-danger {
+    background: rgba(239,68,68,0.06);
+    border: 1px solid rgba(239,68,68,0.2);
+    color: #FCA5A5;
+  }
+  .alert-warning {
+    background: rgba(245,158,11,0.06);
+    border: 1px solid rgba(245,158,11,0.2);
+    color: #FCD34D;
+  }
+  .alert-info {
+    background: rgba(45,212,191,0.06);
+    border: 1px solid rgba(45,212,191,0.15);
+    color: rgba(255,255,255,0.7);
+  }
+  .alert-success {
+    background: rgba(34,197,94,0.06);
+    border: 1px solid rgba(34,197,94,0.2);
+    color: #86EFAC;
+  }
 
-  .stat-card { text-align:center; background:var(--card); border:1px solid var(--border); border-radius:10px; padding:14px; }
-  .stat-card .val { font-size:22px; font-weight:900; background:linear-gradient(135deg,#2DD4BF,#7FA8A3); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
-  .stat-card .lbl { font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-top:4px; }
+  /* ===== Funnel Flow ===== */
+  .funnel-flow {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+    margin: 14px 0;
+  }
+  .funnel-step {
+    flex: 1;
+    border-radius: 8px;
+    padding: 14px;
+    text-align: center;
+    page-break-inside: avoid;
+  }
+  .funnel-step .num { font-size: 24px; font-weight: 900; margin-bottom: 4px; }
+  .funnel-step .label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+  .funnel-step .desc { font-size: 10px; color: var(--text-muted); margin-top: 6px; }
 
-  @media print { body { padding:0; } }
+  /* ===== TOC ===== */
+  .toc {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 16px 0;
+  }
+  .toc-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .toc a {
+    display: block;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 11.5px;
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+  .toc a:hover { color: var(--accent); }
+  .toc a .num { color: var(--accent); font-weight: 700; margin-right: 8px; }
+  .toc a .role { float: right; font-size: 9px; }
+
+  /* ===== Misc ===== */
+  .highlight-box {
+    background: rgba(45,212,191,0.06);
+    border: 1px solid rgba(45,212,191,0.15);
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin: 10px 0;
+    font-size: 11.5px;
+    color: rgba(255,255,255,0.7);
+  }
+  .flow-box {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 10px 0;
+  }
+  .flow-step {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .flow-arrow { color: var(--accent); font-size: 14px; }
+
+  code {
+    background: rgba(255,255,255,0.08);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    color: var(--accent);
+    font-family: 'SF Mono', Menlo, monospace;
+  }
+  hr {
+    border: none;
+    border-top: 1px solid rgba(45,212,191,0.15);
+    margin: 24px 0;
+  }
+  ul, ol { padding-left: 18px; margin: 6px 0; }
+  li { margin: 3px 0; }
+  strong { color: #F8FAFC; }
+  p { margin: 5px 0; }
+
+  @media print {
+    body { padding: 0; }
+    .cover { padding: 60px 0 40px; }
+  }
 </style>
 </head>
 <body>
 
-<!-- ===================== COVER ===================== -->
+<!-- ==================== COVER ==================== -->
 <div class="cover">
   <h1>ETNYX</h1>
-  <div class="sub">Meta Ads Strategy & Full-Funnel Roadmap</div>
-  <p style="color:var(--muted); font-size:12px;">Campaign Blueprint · Pixel Events · Custom Audiences · Budget Scaling</p>
-  <div style="display:flex; justify-content:center; gap:30px; margin:24px 0;">
-    <div class="stat-card" style="min-width:100px;"><div class="val">TOF</div><div class="lbl">Awareness</div></div>
-    <div class="stat-card" style="min-width:100px;"><div class="val">MOF</div><div class="lbl">Consideration</div></div>
-    <div class="stat-card" style="min-width:100px;"><div class="val">BOF</div><div class="lbl">Conversion</div></div>
+  <div class="tagline">Meta Ads Strategy & Full-Funnel Roadmap</div>
+  <p style="font-size:13px; color:rgba(255,255,255,0.4);">Campaign Blueprint · Pixel Events · Custom Audiences · Budget Scaling</p>
+
+  <div class="stat-row">
+    <div class="stat-box"><div class="stat-num">TOF</div><div class="stat-lbl">Awareness</div></div>
+    <div class="stat-box"><div class="stat-num">MOF</div><div class="stat-lbl">Consideration</div></div>
+    <div class="stat-box"><div class="stat-num">BOF</div><div class="stat-lbl">Conversion</div></div>
   </div>
-  <p style="font-size:10px; color:rgba(255,255,255,0.3);">Objective: Sales (Purchase) · Platform: Meta + Instagram · v1.0 — 20 April 2026</p>
+
+  <p style="font-size:11px; color:rgba(255,255,255,0.35);">
+    Objective: Sales (Purchase) &nbsp;·&nbsp; Platform: Meta + Instagram<br>
+    Niche: Jasa Joki &amp; Gendong Mobile Legends
+  </p>
+
+  <div class="quote">"Organic → Paid flywheel. Konten yang proven di IG, jadikan ad creative."</div>
+
+  <div class="meta">
+    <strong>Versi:</strong> 2.0 — 20 April 2026<br>
+    <strong>Audience:</strong> Meta Ads Manager · Media Buyer · Content Editor
+  </div>
+
+  <!-- TOC -->
+  <div class="toc" style="text-align:left; margin-top:24px;">
+    <div class="toc-title">📑 Daftar Isi</div>
+    <a href="#ringkasan"><span class="num">1</span> Ringkasan Eksekutif <span class="role badge badge-teal">Semua</span></a>
+    <a href="#audience"><span class="num">2</span> Target Audience Research <span class="role badge badge-purple">Advertiser</span></a>
+    <a href="#pixel"><span class="num">3</span> Pixel Events — Full Audit <span class="role badge badge-purple">Advertiser</span></a>
+    <a href="#audiences"><span class="num">4</span> Custom Audiences Setup <span class="role badge badge-purple">Advertiser</span></a>
+    <a href="#funnel"><span class="num">5</span> Full-Funnel Strategy (TOF → MOF → BOF) <span class="role badge badge-teal">Semua</span></a>
+    <a href="#budget"><span class="num">6</span> Budget &amp; Scaling Roadmap <span class="role badge badge-purple">Advertiser</span></a>
+    <a href="#kpi"><span class="num">7</span> KPI &amp; Metrics <span class="role badge badge-teal">Semua</span></a>
+    <a href="#creative"><span class="num">8</span> Creative Framework <span class="role badge badge-amber">Editor</span></a>
+    <a href="#checklist"><span class="num">9</span> Weekly Optimization Checklist <span class="role badge badge-purple">Advertiser</span></a>
+    <a href="#naming"><span class="num">10</span> Campaign Naming Convention <span class="role badge badge-teal">Semua</span></a>
+    <a href="#organic"><span class="num">11</span> IG &amp; FB Organic Synergy <span class="role badge badge-amber">Editor</span></a>
+  </div>
 </div>
 
-<!-- ===================== 1. TARGET AUDIENCE ===================== -->
-<h2>1. Target Audience Research</h2>
+<!-- ==================== 1. RINGKASAN EKSEKUTIF ==================== -->
+<h2 id="ringkasan">1. Ringkasan Eksekutif</h2>
 
-<h3>📊 Demografi Mobile Legends Indonesia (2026)</h3>
-<div class="grid3">
-  <div class="card" style="border-top:3px solid var(--accent);">
-    <div style="font-size:18px;">🎮</div>
-    <div style="font-weight:700; margin:4px 0;">Total Player Indonesia</div>
-    <div style="font-size:10px; color:var(--muted);">~90 juta akun aktif (2025-2026). Indonesia = pasar terbesar MLBB di dunia.</div>
+<div class="alert alert-info">
+  <strong>TL;DR:</strong> Full-funnel Meta Ads (TOF → MOF → BOF) targeting player ML 18-34 tahun di Jawa + Sumatera. Objective: Sales (Purchase). Budget mulai Rp 50K/hari. Optimize ke Purchase event. Konten organic IG jadi sumber creative ads.
+</div>
+
+<div class="card-grid g3">
+  <div class="card" style="text-align:center; border-top:3px solid #F87171;">
+    <div style="font-size:22px; font-weight:900; color:#F87171;">TOF</div>
+    <div class="desc">Cold traffic. Interest targeting + LAL. <strong>60% budget.</strong></div>
   </div>
-  <div class="card" style="border-top:3px solid var(--blue);">
-    <div style="font-size:18px;">👥</div>
-    <div style="font-weight:700; margin:4px 0;">Gender Split</div>
-    <div style="font-size:10px; color:var(--muted);">Pria: ~65-70% · Wanita: ~30-35%. Wanita tumbuh signifikan (role support/mage popular).</div>
+  <div class="card" style="text-align:center; border-top:3px solid #FBBF24;">
+    <div style="font-size:22px; font-weight:900; color:#FBBF24;">MOF</div>
+    <div class="desc">Retarget visitors + engagers. <strong>25% budget.</strong></div>
   </div>
-  <div class="card" style="border-top:3px solid var(--purple);">
-    <div style="font-size:18px;">🎂</div>
-    <div style="font-weight:700; margin:4px 0;">Umur</div>
-    <div style="font-size:10px; color:var(--muted);">18-24: ~45% · 25-34: ~35% · 13-17: ~15% · 35+: ~5%. Sweet spot: <strong>18-34</strong>.</div>
+  <div class="card" style="text-align:center; border-top:3px solid #4ADE80;">
+    <div style="font-size:22px; font-weight:900; color:#4ADE80;">BOF</div>
+    <div class="desc">Cart + checkout abandoners. <strong>15% budget.</strong></div>
   </div>
 </div>
 
-<h3>🗺️ Lokasi Player Terbanyak (Rekomendasi Targeting)</h3>
-<table>
-  <tr><th>#</th><th>Provinsi/Kota</th><th>Density</th><th>Catatan</th></tr>
-  <tr><td>1</td><td><strong>Jawa Barat</strong> (Bandung, Bekasi, Bogor, Depok)</td><td>🔥🔥🔥🔥🔥</td><td>Populasi gaming terbesar, banyak warnet & komunitas</td></tr>
-  <tr><td>2</td><td><strong>DKI Jakarta</strong></td><td>🔥🔥🔥🔥🔥</td><td>Spending power tinggi, urban gamer</td></tr>
-  <tr><td>3</td><td><strong>Jawa Timur</strong> (Surabaya, Malang)</td><td>🔥🔥🔥🔥</td><td>Komunitas esport aktif, MPL base</td></tr>
-  <tr><td>4</td><td><strong>Jawa Tengah</strong> (Semarang, Solo, Yogyakarta)</td><td>🔥🔥🔥🔥</td><td>Mahasiswa banyak, budget conscious</td></tr>
-  <tr><td>5</td><td><strong>Sumatera Utara</strong> (Medan)</td><td>🔥🔥🔥</td><td>Komunitas ML aktif, turnamen lokal banyak</td></tr>
-  <tr><td>6</td><td><strong>Sumatera Selatan</strong> (Palembang)</td><td>🔥🔥🔥</td><td>Basis esport Sumatera</td></tr>
-  <tr><td>7</td><td><strong>Banten</strong> (Tangerang, Serang)</td><td>🔥🔥🔥</td><td>Spill-over dari Jakarta</td></tr>
-  <tr><td>8</td><td><strong>Lampung</strong></td><td>🔥🔥</td><td>Growing market</td></tr>
-  <tr><td>9</td><td><strong>Riau &amp; Kepri</strong></td><td>🔥🔥</td><td>Pekanbaru + Batam</td></tr>
-  <tr><td>10</td><td><strong>Bali &amp; NTB</strong></td><td>🔥🔥</td><td>Denpasar — urban gamer</td></tr>
-</table>
-
-<div class="info-box info">
-  <strong>Rekomendasi Targeting Geo:</strong> Mulai dari <strong>Jawa (Barat + Timur + Tengah + Jakarta + Banten)</strong> + <strong>Sumatera (Utara + Selatan)</strong>. Ini cover ~70% player ML Indonesia. Setelah winning, expand ke Kalimantan &amp; Sulawesi.
-</div>
-
-<h3>🎯 Targeting Setup di Meta Ads</h3>
-<div class="card">
-  <table>
-    <tr><th>Parameter</th><th>Setting</th></tr>
-    <tr><td>Lokasi</td><td>Indonesia — Jawa Barat, DKI Jakarta, Jawa Timur, Jawa Tengah, DI Yogyakarta, Banten, Sumatera Utara, Sumatera Selatan</td></tr>
-    <tr><td>Umur</td><td><strong>18 – 34</strong></td></tr>
-    <tr><td>Gender</td><td>All (pria + wanita) — biar algo optimize sendiri</td></tr>
-    <tr><td>Bahasa</td><td>Indonesian, English (Indonesia)</td></tr>
-    <tr><td>Placement</td><td>Advantage+ (biar Meta optimize) atau Manual: Feed + Stories + Reels IG &amp; FB</td></tr>
-    <tr><td>Device</td><td>Mobile only (ML = mobile game)</td></tr>
-  </table>
-</div>
-
-<h3>🎮 Interest Targeting (Detailed Targeting)</h3>
-<div class="grid2">
-  <div class="card">
-    <div style="font-weight:700; color:var(--accent); margin-bottom:6px;">Primary Interests</div>
-    <ul>
-      <li>Mobile Legends: Bang Bang</li>
-      <li>Mobile Legends (MLBB)</li>
-      <li>Moonton</li>
-      <li>MPL Indonesia</li>
-      <li>EVOS Esports</li>
-      <li>RRQ (Rex Regum Qeon)</li>
-      <li>ONIC Esports</li>
-      <li>Alter Ego</li>
-    </ul>
+<div class="card-grid g4">
+  <div class="card" style="text-align:center;">
+    <div style="font-size:16px; font-weight:900; background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">18-34</div>
+    <div class="desc">Umur target</div>
   </div>
-  <div class="card">
-    <div style="font-weight:700; color:var(--accent); margin-bottom:6px;">Secondary / Broad</div>
-    <ul>
-      <li>Mobile gaming</li>
-      <li>Esports</li>
-      <li>Online gaming</li>
-      <li>MOBA (Multiplayer Online Battle Arena)</li>
-      <li>Gaming accessories</li>
-      <li>Game top-up / diamond</li>
-      <li>Codashop</li>
-      <li>UniPin</li>
-    </ul>
+  <div class="card" style="text-align:center;">
+    <div style="font-size:16px; font-weight:900; background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Rp 50K</div>
+    <div class="desc">Budget/hari awal</div>
+  </div>
+  <div class="card" style="text-align:center;">
+    <div style="font-size:16px; font-weight:900; background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Mobile</div>
+    <div class="desc">Device only</div>
+  </div>
+  <div class="card" style="text-align:center;">
+    <div style="font-size:16px; font-weight:900; background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Purchase</div>
+    <div class="desc">Optimize event</div>
   </div>
 </div>
 
 <hr>
 
-<!-- ===================== 2. PIXEL EVENTS ===================== -->
-<h2>2. Pixel Events — Full Audit</h2>
+<!-- ==================== 2. TARGET AUDIENCE ==================== -->
+<h2 id="audience">2. Target Audience Research <span class="badge badge-purple">Advertiser</span></h2>
 
-<p style="color:var(--muted);">Semua pixel events yang ter-implementasi di website ETNYX, trigger point, dan mapping ke setiap platform.</p>
+<div class="alert alert-info">
+  <strong>TL;DR:</strong> ~90 juta player ML di Indonesia. Target utama: pria 18-34, Jawa + Sumatera (cover ~70% player). Interest: MLBB, Moonton, MPL, EVOS, RRQ, ONIC.
+</div>
+
+<h3>📊 Demografi Mobile Legends Indonesia (2026)</h3>
+<div class="card-grid g3">
+  <div class="card" style="border-top:3px solid var(--accent);">
+    <div style="font-size:18px;">🎮</div>
+    <div class="label">Total Player Indonesia</div>
+    <div class="desc">~90 juta akun aktif (2025-2026). Indonesia = pasar terbesar MLBB di dunia.</div>
+  </div>
+  <div class="card" style="border-top:3px solid var(--secondary);">
+    <div style="font-size:18px;">👥</div>
+    <div class="label">Gender Split</div>
+    <div class="desc">Pria: ~65-70% · Wanita: ~30-35%. Wanita tumbuh signifikan (role support/mage popular).</div>
+  </div>
+  <div class="card" style="border-top:3px solid var(--warning);">
+    <div style="font-size:18px;">🎂</div>
+    <div class="label">Umur</div>
+    <div class="desc">18-24: ~45% · 25-34: ~35% · 13-17: ~15% · 35+: ~5%. Sweet spot: <strong>18-34</strong>.</div>
+  </div>
+</div>
+
+<h3>🗺️ Lokasi Player Terbanyak</h3>
+<table>
+  <tr><th>#</th><th>Provinsi/Kota</th><th>Density</th><th>Catatan</th></tr>
+  <tr><td>1</td><td><strong>Jawa Barat</strong> (Bandung, Bekasi, Bogor, Depok)</td><td>🔥🔥🔥🔥🔥</td><td>Populasi gaming terbesar</td></tr>
+  <tr><td>2</td><td><strong>DKI Jakarta</strong></td><td>🔥🔥🔥🔥🔥</td><td>Spending power tinggi</td></tr>
+  <tr><td>3</td><td><strong>Jawa Timur</strong> (Surabaya, Malang)</td><td>🔥🔥🔥🔥</td><td>Komunitas esport aktif</td></tr>
+  <tr><td>4</td><td><strong>Jawa Tengah</strong> (Semarang, Solo, Yogya)</td><td>🔥🔥🔥🔥</td><td>Mahasiswa, budget conscious</td></tr>
+  <tr><td>5</td><td><strong>Sumatera Utara</strong> (Medan)</td><td>🔥🔥🔥</td><td>ML community aktif</td></tr>
+  <tr><td>6</td><td><strong>Sumatera Selatan</strong> (Palembang)</td><td>🔥🔥🔥</td><td>Basis esport Sumatera</td></tr>
+  <tr><td>7</td><td><strong>Banten</strong> (Tangerang)</td><td>🔥🔥🔥</td><td>Spill-over Jakarta</td></tr>
+  <tr><td>8</td><td><strong>Lampung</strong></td><td>🔥🔥</td><td>Growing market</td></tr>
+  <tr><td>9</td><td><strong>Riau &amp; Kepri</strong></td><td>🔥🔥</td><td>Pekanbaru + Batam</td></tr>
+  <tr><td>10</td><td><strong>Bali &amp; NTB</strong></td><td>🔥🔥</td><td>Denpasar — urban gamer</td></tr>
+</table>
+
+<div class="alert alert-success">
+  <strong>📌 Rekomendasi Geo:</strong> Mulai dari <strong>Jawa (Barat + Timur + Tengah + Jakarta + Banten) + Sumatera (Utara + Selatan)</strong>. Cover ~70% player ML. Setelah winning, expand ke Kalimantan &amp; Sulawesi.
+</div>
+
+<h3>🎯 Setting Targeting di Meta Ads Manager</h3>
+<table>
+  <tr><th>Parameter</th><th>Setting</th></tr>
+  <tr><td><strong>Lokasi</strong></td><td>Indonesia — Jawa Barat, DKI Jakarta, Jawa Timur, Jawa Tengah, DI Yogyakarta, Banten, Sumatera Utara, Sumatera Selatan</td></tr>
+  <tr><td><strong>Umur</strong></td><td>18 – 34</td></tr>
+  <tr><td><strong>Gender</strong></td><td>All (pria + wanita) — biar algo optimize sendiri</td></tr>
+  <tr><td><strong>Bahasa</strong></td><td>Indonesian, English (Indonesia)</td></tr>
+  <tr><td><strong>Placement</strong></td><td>Advantage+ (biar Meta optimize) atau Manual: Feed + Stories + Reels IG &amp; FB</td></tr>
+  <tr><td><strong>Device</strong></td><td>Mobile only (ML = mobile game)</td></tr>
+</table>
+
+<h3>🎮 Interest Targeting (Detailed Targeting)</h3>
+<div class="card-grid g2">
+  <div class="card">
+    <div class="label" style="color:var(--accent);">Primary Interests</div>
+    <div class="desc">
+      <ul>
+        <li>Mobile Legends: Bang Bang</li>
+        <li>Mobile Legends (MLBB)</li>
+        <li>Moonton</li>
+        <li>MPL Indonesia</li>
+        <li>EVOS Esports</li>
+        <li>RRQ (Rex Regum Qeon)</li>
+        <li>ONIC Esports</li>
+        <li>Alter Ego</li>
+      </ul>
+    </div>
+  </div>
+  <div class="card">
+    <div class="label" style="color:var(--accent);">Secondary / Broad</div>
+    <div class="desc">
+      <ul>
+        <li>Mobile gaming</li>
+        <li>Esports</li>
+        <li>Online gaming</li>
+        <li>MOBA (Multiplayer Online Battle Arena)</li>
+        <li>Gaming accessories</li>
+        <li>Game top-up / diamond</li>
+        <li>Codashop</li>
+        <li>UniPin</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ==================== 3. PIXEL EVENTS ==================== -->
+<h2 id="pixel">3. Pixel Events — Full Audit <span class="badge badge-purple">Advertiser</span></h2>
+
+<div class="alert alert-info">
+  <strong>TL;DR:</strong> 8 pixel events sudah ter-implementasi di website. Yang paling penting: <strong>Purchase</strong> (conversion utama) dan <strong>AddToCart</strong> (high-intent signal). Semua platform (Meta, Google, TikTok) sudah terhubung via dashboard Settings.
+</div>
 
 <h3>🔥 Event Flow (Customer Journey)</h3>
 <div class="funnel-flow">
@@ -218,7 +531,7 @@
     <div class="label" style="color:#60A5FA;">AddToCart</div>
     <div class="desc">Pilih paket</div>
   </div>
-  <div class="funnel-step" style="background:rgba(168,85,247,0.1); border:1px solid rgba(168,85,247,0.2);">
+  <div class="funnel-step" style="background:rgba(167,139,250,0.1); border:1px solid rgba(167,139,250,0.2);">
     <div class="num" style="color:#C084FC;">4</div>
     <div class="label" style="color:#C084FC;">Checkout</div>
     <div class="desc">Submit order</div>
@@ -235,50 +548,50 @@
   <tr>
     <th>Event</th>
     <th>Trigger Point</th>
-    <th><span class="badge b-meta">Meta</span> fbq()</th>
-    <th><span class="badge b-google">Google</span> gtag()</th>
-    <th><span class="badge b-tiktok">TikTok</span> ttq()</th>
-    <th>Kegunaan Ads</th>
+    <th><span class="badge badge-meta">Meta</span></th>
+    <th><span class="badge badge-google">Google</span></th>
+    <th><span class="badge badge-tiktok">TikTok</span></th>
+    <th>Kegunaan</th>
   </tr>
   <tr>
     <td><strong>PageView</strong></td>
-    <td>Otomatis di setiap halaman (layout.tsx)</td>
+    <td>Otomatis setiap halaman</td>
     <td><code>PageView</code></td>
     <td><code>page_view</code></td>
     <td><code>page</code></td>
-    <td>Base tracking, hitung traffic, buat audience "All Visitors"</td>
+    <td>Base tracking, audience "All Visitors"</td>
   </tr>
   <tr>
     <td><strong>ViewContent</strong></td>
-    <td>Customer buka <code>/order</code></td>
+    <td>Buka <code>/order</code></td>
     <td><code>ViewContent</code></td>
     <td><code>view_item</code></td>
     <td><code>ViewContent</code></td>
-    <td>Track intent. Audience: "Orang yang lihat order page"</td>
+    <td>Track intent, audience "Order Page Viewers"</td>
   </tr>
   <tr>
     <td><strong>AddToCart</strong></td>
-    <td>Customer pilih paket/mode joki (step 1 → 2)</td>
+    <td>Pilih paket/mode (step 1→2)</td>
     <td><code>AddToCart</code></td>
     <td><code>add_to_cart</code></td>
     <td><code>AddToCart</code></td>
-    <td>High intent signal. Audience: "Orang yang sudah pilih paket"</td>
+    <td>High intent signal</td>
   </tr>
   <tr>
     <td><strong>InitiateCheckout</strong></td>
-    <td>Customer submit order (step 4 konfirmasi)</td>
+    <td>Submit order (step 4)</td>
     <td><code>InitiateCheckout</code></td>
     <td><code>begin_checkout</code></td>
     <td><code>InitiateCheckout</code></td>
-    <td>Very high intent. Audience: "Submit tapi belum bayar"</td>
+    <td>Very high intent</td>
   </tr>
   <tr>
     <td><strong>Purchase</strong></td>
-    <td>Setelah bayar via iPaymu → redirect <code>/payment/success</code></td>
+    <td>Bayar via iPaymu → <code>/payment/success</code></td>
     <td><code>Purchase</code></td>
-    <td><code>purchase</code> + <code>conversion</code></td>
+    <td><code>purchase</code></td>
     <td><code>CompletePayment</code></td>
-    <td>Conversion utama! Optimize campaign ke event ini</td>
+    <td><strong style="color:var(--success);">Conversion utama!</strong></td>
   </tr>
   <tr>
     <td><strong>Lead</strong></td>
@@ -286,19 +599,19 @@
     <td><code>Lead</code></td>
     <td><code>generate_lead</code></td>
     <td><code>SubmitForm</code></td>
-    <td>Track orang yang contact WA. Audience: "WA clickers"</td>
+    <td>Track WA clickers</td>
   </tr>
   <tr>
     <td><strong>CompleteRegistration</strong></td>
-    <td>Customer register akun</td>
+    <td>Register akun</td>
     <td><code>CompleteRegistration</code></td>
     <td><code>sign_up</code></td>
     <td><code>CompleteRegistration</code></td>
-    <td>Track registrasi. Audience: "Registered users"</td>
+    <td>Track registrasi</td>
   </tr>
   <tr>
     <td><strong>Search</strong></td>
-    <td>Customer browse pricing</td>
+    <td>Browse pricing</td>
     <td><code>Search</code></td>
     <td><code>search</code></td>
     <td><code>Search</code></td>
@@ -308,277 +621,304 @@
 
 <h3>🔐 Meta CAPI (Server-Side)</h3>
 <div class="card">
-  <p style="color:var(--muted); font-size:11px;">Selain client-side pixel (browser), ETNYX juga mengirim <strong>Purchase</strong> event via Meta Conversions API (server-side). Ini penting karena:</p>
-  <ul>
-    <li><strong>Bypass ad blockers</strong> — server-side tidak terblok adblocker</li>
-    <li><strong>Event deduplication</strong> — via <code>event_id</code>, Meta tau ini event sama</li>
-    <li><strong>PII hashing</strong> — email &amp; phone di-hash SHA-256 sebelum dikirim</li>
-    <li><strong>File:</strong> <code>lib/meta-capi.ts</code> → trigger setelah payment webhook sukses</li>
-  </ul>
+  <div class="desc">
+    Selain client-side pixel (browser), ETNYX juga mengirim <strong>Purchase</strong> event via Meta Conversions API (server-side):
+    <ul>
+      <li><strong>Bypass ad blockers</strong> — server-side tidak terblok adblocker</li>
+      <li><strong>Event deduplication</strong> — via <code>event_id</code>, Meta tau ini event sama</li>
+      <li><strong>PII hashing</strong> — email &amp; phone di-hash SHA-256 sebelum dikirim</li>
+      <li><strong>File:</strong> <code>lib/meta-capi.ts</code> → trigger setelah payment webhook sukses</li>
+    </ul>
+  </div>
 </div>
 
 <h3>⚙️ Pixel Dashboard Settings</h3>
 <table>
-  <tr><th>Pixel Platform</th><th>Toggle Field</th><th>Config Fields</th><th>Status</th></tr>
-  <tr><td><span class="badge b-meta">Meta Pixel</span></td><td><code>isMetaEnabled</code></td><td>Pixel ID + Access Token (CAPI)</td><td>✅ Implemented</td></tr>
-  <tr><td><span class="badge b-google">Google Ads</span></td><td><code>isGoogleAdsEnabled</code></td><td>Ads ID (AW-xxx) + Conversion Label</td><td>✅ Implemented</td></tr>
-  <tr><td><span class="badge b-google">GA4</span></td><td><code>isGoogleAnalyticsEnabled</code></td><td>Measurement ID (G-xxx)</td><td>✅ Implemented</td></tr>
-  <tr><td><span class="badge b-tiktok">TikTok</span></td><td><code>isTiktokEnabled</code></td><td>Pixel ID</td><td>✅ Implemented</td></tr>
-  <tr><td><span class="badge b-accent">GTM</span></td><td><code>isGtmEnabled</code></td><td>Container ID (GTM-xxx)</td><td>✅ Implemented</td></tr>
+  <tr><th>Platform</th><th>Toggle Field</th><th>Config</th><th>Status</th></tr>
+  <tr><td><span class="badge badge-meta">Meta Pixel</span></td><td><code>isMetaEnabled</code></td><td>Pixel ID + Access Token (CAPI)</td><td><span class="badge badge-green">Active</span></td></tr>
+  <tr><td><span class="badge badge-google">Google Ads</span></td><td><code>isGoogleAdsEnabled</code></td><td>Ads ID (AW-xxx) + Conversion Label</td><td><span class="badge badge-green">Active</span></td></tr>
+  <tr><td><span class="badge badge-google">GA4</span></td><td><code>isGoogleAnalyticsEnabled</code></td><td>Measurement ID (G-xxx)</td><td><span class="badge badge-green">Active</span></td></tr>
+  <tr><td><span class="badge badge-tiktok">TikTok</span></td><td><code>isTiktokEnabled</code></td><td>Pixel ID</td><td><span class="badge badge-green">Active</span></td></tr>
+  <tr><td><span class="badge badge-teal">GTM</span></td><td><code>isGtmEnabled</code></td><td>Container ID (GTM-xxx)</td><td><span class="badge badge-green">Active</span></td></tr>
 </table>
 
-<div class="info-box ok">
+<div class="alert alert-success">
   <strong>Setup Pixel:</strong> Dashboard → Settings → Pixels. Toggle on, masukkan ID. Semua events otomatis fire ke platform yang aktif. Tidak perlu edit kode.
 </div>
 
 <hr>
 
-<!-- ===================== 3. CUSTOM AUDIENCES ===================== -->
-<h2>3. Custom Audiences Setup</h2>
+<!-- ==================== 4. CUSTOM AUDIENCES ==================== -->
+<h2 id="audiences">4. Custom Audiences Setup <span class="badge badge-purple">Advertiser</span></h2>
 
-<p style="color:var(--muted);">Audience yang perlu dibuat di Meta Ads Manager berdasarkan pixel events di atas.</p>
+<div class="alert alert-info">
+  <strong>TL;DR:</strong> 17 audiences total — 7 Website Custom Audiences, 5 Engagement Audiences, 5 Lookalikes. Buat semua di Meta Ads Manager → Audiences. Seed terbaik untuk LAL: Purchasers (setelah 100+ events).
+</div>
 
-<h3>🎯 Website Custom Audiences (WCA)</h3>
+<h3>🌐 Website Custom Audiences (WCA)</h3>
 <table>
-  <tr><th>#</th><th>Audience Name</th><th>Source</th><th>Retention</th><th>Funnel</th><th>Untuk</th></tr>
-  <tr><td>1</td><td><strong>WCA - All Visitors</strong></td><td>PageView (all pages)</td><td>180 hari</td><td><span class="badge b-tof">TOF</span></td><td>Retarget semua visitor website</td></tr>
-  <tr><td>2</td><td><strong>WCA - Order Page Viewers</strong></td><td>ViewContent (/order)</td><td>30 hari</td><td><span class="badge b-mof">MOF</span></td><td>Orang yang sudah lihat harga</td></tr>
-  <tr><td>3</td><td><strong>WCA - Add to Cart</strong></td><td>AddToCart event</td><td>14 hari</td><td><span class="badge b-mof">MOF</span></td><td>Sudah pilih paket, belum checkout</td></tr>
-  <tr><td>4</td><td><strong>WCA - Initiate Checkout</strong></td><td>InitiateCheckout event</td><td>7 hari</td><td><span class="badge b-bof">BOF</span></td><td>Sudah submit order, belum bayar</td></tr>
-  <tr><td>5</td><td><strong>WCA - Purchasers</strong></td><td>Purchase event</td><td>180 hari</td><td><span class="badge b-bof">BOF</span></td><td>Repeat order &amp; LAL seed</td></tr>
-  <tr><td>6</td><td><strong>WCA - WA Clickers</strong></td><td>Lead event</td><td>30 hari</td><td><span class="badge b-mof">MOF</span></td><td>Contact WA tapi belum beli</td></tr>
-  <tr><td>7</td><td><strong>WCA - Registered Users</strong></td><td>CompleteRegistration</td><td>60 hari</td><td><span class="badge b-mof">MOF</span></td><td>Punya akun, belum order</td></tr>
+  <tr><th>#</th><th>Audience Name</th><th>Source</th><th>Retention</th><th>Funnel</th><th>Kegunaan</th></tr>
+  <tr><td>1</td><td><strong>WCA - All Visitors</strong></td><td>PageView (all pages)</td><td>180 hari</td><td><span class="badge badge-tof">TOF</span></td><td>Retarget semua visitor</td></tr>
+  <tr><td>2</td><td><strong>WCA - Order Page Viewers</strong></td><td>ViewContent (/order)</td><td>30 hari</td><td><span class="badge badge-mof">MOF</span></td><td>Sudah lihat harga</td></tr>
+  <tr><td>3</td><td><strong>WCA - Add to Cart</strong></td><td>AddToCart event</td><td>14 hari</td><td><span class="badge badge-mof">MOF</span></td><td>Pilih paket, belum checkout</td></tr>
+  <tr><td>4</td><td><strong>WCA - Initiate Checkout</strong></td><td>InitiateCheckout event</td><td>7 hari</td><td><span class="badge badge-bof">BOF</span></td><td>Submit, belum bayar</td></tr>
+  <tr><td>5</td><td><strong>WCA - Purchasers</strong></td><td>Purchase event</td><td>180 hari</td><td><span class="badge badge-bof">BOF</span></td><td>Repeat order &amp; LAL seed</td></tr>
+  <tr><td>6</td><td><strong>WCA - WA Clickers</strong></td><td>Lead event</td><td>30 hari</td><td><span class="badge badge-mof">MOF</span></td><td>Contact WA, belum beli</td></tr>
+  <tr><td>7</td><td><strong>WCA - Registered Users</strong></td><td>CompleteRegistration</td><td>60 hari</td><td><span class="badge badge-mof">MOF</span></td><td>Punya akun, belum order</td></tr>
 </table>
 
-<h3>📱 Engagement Custom Audiences</h3>
+<h3>📱 Engagement Custom Audiences (ECA)</h3>
 <table>
-  <tr><th>#</th><th>Audience Name</th><th>Source</th><th>Retention</th><th>Untuk</th></tr>
-  <tr><td>8</td><td><strong>ECA - IG Engagers</strong></td><td>Instagram @etnyx.id (semua interaksi)</td><td>90 hari</td><td>Retarget orang yang interact di IG</td></tr>
+  <tr><th>#</th><th>Audience Name</th><th>Source</th><th>Retention</th><th>Kegunaan</th></tr>
+  <tr><td>8</td><td><strong>ECA - IG Engagers</strong></td><td>Instagram @etnyx.id (semua interaksi)</td><td>90 hari</td><td>Retarget IG audience</td></tr>
   <tr><td>9</td><td><strong>ECA - IG Profile Visitors</strong></td><td>Instagram profile visits</td><td>30 hari</td><td>Warm audience</td></tr>
   <tr><td>10</td><td><strong>ECA - FB Page Engagers</strong></td><td>Facebook Page (semua interaksi)</td><td>90 hari</td><td>Retarget FB audience</td></tr>
-  <tr><td>11</td><td><strong>ECA - Video Viewers 50%+</strong></td><td>Video views (Reels/Stories) ≥50%</td><td>30 hari</td><td>Interested audience yang nonton reels</td></tr>
-  <tr><td>12</td><td><strong>ECA - Video Viewers 75%+</strong></td><td>Video views ≥75%</td><td>30 hari</td><td>High-interest untuk BOF retarget</td></tr>
+  <tr><td>11</td><td><strong>ECA - Video Viewers 50%+</strong></td><td>Video views (Reels/Stories) ≥50%</td><td>30 hari</td><td>Interested audience</td></tr>
+  <tr><td>12</td><td><strong>ECA - Video Viewers 75%+</strong></td><td>Video views ≥75%</td><td>30 hari</td><td>High-interest for BOF</td></tr>
 </table>
 
 <h3>👥 Lookalike Audiences (LAL)</h3>
 <table>
   <tr><th>#</th><th>LAL Name</th><th>Seed Audience</th><th>%</th><th>Funnel</th></tr>
-  <tr><td>13</td><td><strong>LAL - Purchasers 1%</strong></td><td>WCA - Purchasers</td><td>1%</td><td><span class="badge b-tof">TOF</span> — Best quality</td></tr>
-  <tr><td>14</td><td><strong>LAL - Purchasers 3%</strong></td><td>WCA - Purchasers</td><td>3%</td><td><span class="badge b-tof">TOF</span> — Scale</td></tr>
-  <tr><td>15</td><td><strong>LAL - Add to Cart 1%</strong></td><td>WCA - Add to Cart</td><td>1%</td><td><span class="badge b-tof">TOF</span></td></tr>
-  <tr><td>16</td><td><strong>LAL - IG Engagers 1%</strong></td><td>ECA - IG Engagers</td><td>1%</td><td><span class="badge b-tof">TOF</span></td></tr>
-  <tr><td>17</td><td><strong>LAL - Video 75%+ 1%</strong></td><td>ECA - Video 75%+</td><td>1%</td><td><span class="badge b-tof">TOF</span></td></tr>
+  <tr><td>13</td><td><strong>LAL - Purchasers 1%</strong></td><td>WCA - Purchasers</td><td>1%</td><td><span class="badge badge-tof">TOF</span> — Best quality</td></tr>
+  <tr><td>14</td><td><strong>LAL - Purchasers 3%</strong></td><td>WCA - Purchasers</td><td>3%</td><td><span class="badge badge-tof">TOF</span> — Scale</td></tr>
+  <tr><td>15</td><td><strong>LAL - Add to Cart 1%</strong></td><td>WCA - Add to Cart</td><td>1%</td><td><span class="badge badge-tof">TOF</span></td></tr>
+  <tr><td>16</td><td><strong>LAL - IG Engagers 1%</strong></td><td>ECA - IG Engagers</td><td>1%</td><td><span class="badge badge-tof">TOF</span></td></tr>
+  <tr><td>17</td><td><strong>LAL - Video 75%+ 1%</strong></td><td>ECA - Video 75%+</td><td>1%</td><td><span class="badge badge-tof">TOF</span></td></tr>
 </table>
 
-<div class="info-box warn">
-  <strong>Penting:</strong> LAL - Purchasers baru efektif setelah punya min 100 purchase events. Sebelum itu, gunakan LAL dari IG Engagers atau Video Viewers sebagai seed.
+<div class="alert alert-warning">
+  <strong>⚠️ Penting:</strong> LAL - Purchasers baru efektif setelah min <strong>100 purchase events</strong>. Sebelum itu, gunakan LAL dari IG Engagers atau Video Viewers sebagai seed.
 </div>
 
 <hr>
 
-<!-- ===================== 4. FUNNEL STRATEGY ===================== -->
-<h2>4. Full-Funnel Campaign Strategy (TOF → MOF → BOF)</h2>
+<!-- ==================== 5. FUNNEL STRATEGY ==================== -->
+<h2 id="funnel">5. Full-Funnel Strategy <span class="badge badge-teal">Semua</span></h2>
+
+<div class="alert alert-info">
+  <strong>TL;DR:</strong> 3 campaigns (TOF/MOF/BOF). Semua objective = Sales (Purchase). Budget split: 60/25/15. Exclude Purchasers di TOF &amp; MOF. Creative berbeda di setiap stage.
+</div>
 
 <div class="funnel-flow">
   <div class="funnel-step" style="background:rgba(239,68,68,0.12); border:2px solid rgba(239,68,68,0.3);">
     <div class="num" style="color:#F87171;">TOF</div>
     <div class="label" style="color:#F87171;">Awareness</div>
-    <div class="desc">Jangkau audience baru. Cold traffic.</div>
+    <div class="desc">Cold traffic baru</div>
   </div>
   <div class="funnel-step" style="background:rgba(245,158,11,0.12); border:2px solid rgba(245,158,11,0.3);">
     <div class="num" style="color:#FBBF24;">MOF</div>
     <div class="label" style="color:#FBBF24;">Consideration</div>
-    <div class="desc">Retarget yang sudah interact.</div>
+    <div class="desc">Sudah interact</div>
   </div>
   <div class="funnel-step" style="background:rgba(34,197,94,0.12); border:2px solid rgba(34,197,94,0.3);">
     <div class="num" style="color:#4ADE80;">BOF</div>
     <div class="label" style="color:#4ADE80;">Conversion</div>
-    <div class="desc">Push pembelian. Hot traffic.</div>
+    <div class="desc">Hot traffic</div>
   </div>
 </div>
 
 <h3>🔴 TOF — Top of Funnel (Awareness)</h3>
-<div class="card">
+<div class="card" style="border-left:3px solid #F87171;">
   <table>
     <tr><th>Setting</th><th>Detail</th></tr>
-    <tr><td>Objective</td><td><strong>Sales (Purchase)</strong> — tetap optimize ke purchase walau TOF, karena algo Meta makin pintar</td></tr>
-    <tr><td>Optimization</td><td>Maximize conversions → Purchase</td></tr>
-    <tr><td>Audience</td><td>Interest targeting (ML, MLBB, Moonton, MPL, esport teams) + LAL Purchasers 1-3%</td></tr>
-    <tr><td>Exclusion</td><td>Exclude WCA - Purchasers (180d) — jangan target yang udah beli</td></tr>
-    <tr><td>Placement</td><td>Advantage+ atau Manual (IG Feed + IG Stories + IG Reels + FB Feed)</td></tr>
-    <tr><td>Creative</td><td>Reels-style video (15-30s), pain point + solusi. Hook kuat 3 detik pertama</td></tr>
-    <tr><td>Budget</td><td>60% dari total daily budget</td></tr>
-    <tr><td>Bidding</td><td>Lowest cost (awal) → Cost cap setelah tau CPA</td></tr>
+    <tr><td><strong>Objective</strong></td><td>Sales (Purchase) — tetap optimize ke purchase, algo Meta pintar</td></tr>
+    <tr><td><strong>Audience</strong></td><td>Interest targeting (ML, MLBB, Moonton, MPL, esport teams) + LAL Purchasers 1-3%</td></tr>
+    <tr><td><strong>Exclusion</strong></td><td>Exclude WCA - Purchasers (180d)</td></tr>
+    <tr><td><strong>Placement</strong></td><td>Advantage+ atau Manual (IG Feed + Stories + Reels + FB Feed)</td></tr>
+    <tr><td><strong>Creative</strong></td><td>Reels video 15-30s, pain point + solusi, hook kuat 3 detik pertama</td></tr>
+    <tr><td><strong>Budget</strong></td><td><strong>60%</strong> dari total daily budget</td></tr>
+    <tr><td><strong>Bidding</strong></td><td>Lowest cost (awal) → Cost cap setelah tau CPA</td></tr>
   </table>
   <h4>Creative Ideas TOF</h4>
   <ul>
     <li>"Masih pake joki yang bisa hack akun kamu?" → Brand intro</li>
-    <li>"POV: Carry 15 kill tapi tetep kalah" → Pain point ML</li>
+    <li>"POV: Carry 15 kill tapi tetep kalah" → Pain point</li>
     <li>"Slot booster minggu ini tinggal 5" → Urgency</li>
     <li>Testimoni singkat customer (UGC style)</li>
   </ul>
 </div>
 
 <h3>🟡 MOF — Middle of Funnel (Consideration)</h3>
-<div class="card">
+<div class="card" style="border-left:3px solid #FBBF24;">
   <table>
     <tr><th>Setting</th><th>Detail</th></tr>
-    <tr><td>Objective</td><td><strong>Sales (Purchase)</strong></td></tr>
-    <tr><td>Optimization</td><td>Maximize conversions → Purchase</td></tr>
-    <tr><td>Audience</td><td>WCA - All Visitors (180d) + WCA - Order Page Viewers (30d) + ECA - IG Engagers (90d) + ECA - Video 50%+ (30d) — EXCLUDE Purchasers</td></tr>
-    <tr><td>Creative</td><td>Tutorial order, social proof, fitur keamanan, perbandingan harga</td></tr>
-    <tr><td>Budget</td><td>25% dari total daily budget</td></tr>
-    <tr><td>Bidding</td><td>Lowest cost</td></tr>
+    <tr><td><strong>Objective</strong></td><td>Sales (Purchase)</td></tr>
+    <tr><td><strong>Audience</strong></td><td>WCA - All Visitors (180d) + Order Page Viewers (30d) + ECA - IG Engagers (90d) + Video 50%+ (30d) — EXCLUDE Purchasers</td></tr>
+    <tr><td><strong>Creative</strong></td><td>Tutorial order, social proof, fitur keamanan, perbandingan harga</td></tr>
+    <tr><td><strong>Budget</strong></td><td><strong>25%</strong> dari total daily budget</td></tr>
+    <tr><td><strong>Bidding</strong></td><td>Lowest cost</td></tr>
   </table>
   <h4>Creative Ideas MOF</h4>
   <ul>
     <li>"Cara order joki ML cuma 2 menit" → Tutorial step-by-step</li>
-    <li>"Akun kamu aman di ETNYX — ini buktinya" → Security features</li>
+    <li>"Akun kamu aman di ETNYX" → Security features</li>
     <li>"4.9⭐ dari 500+ review" → Social proof carousel</li>
     <li>Perbandingan harga ETNYX vs kompetitor</li>
   </ul>
 </div>
 
 <h3>🟢 BOF — Bottom of Funnel (Conversion)</h3>
-<div class="card">
+<div class="card" style="border-left:3px solid #4ADE80;">
   <table>
     <tr><th>Setting</th><th>Detail</th></tr>
-    <tr><td>Objective</td><td><strong>Sales (Purchase)</strong></td></tr>
-    <tr><td>Optimization</td><td>Maximize conversions → Purchase</td></tr>
-    <tr><td>Audience</td><td>WCA - Add to Cart (14d) + WCA - Initiate Checkout (7d) + WCA - WA Clickers (30d) — EXCLUDE Purchasers (7d)</td></tr>
-    <tr><td>Creative</td><td>Urgency, diskon, reminder, DPA (dynamic product ads)</td></tr>
-    <tr><td>Budget</td><td>15% dari total daily budget</td></tr>
-    <tr><td>Bidding</td><td>Lowest cost → Cost cap setelah data cukup</td></tr>
+    <tr><td><strong>Objective</strong></td><td>Sales (Purchase)</td></tr>
+    <tr><td><strong>Audience</strong></td><td>WCA - Add to Cart (14d) + Initiate Checkout (7d) + WA Clickers (30d) — EXCLUDE Purchasers (7d)</td></tr>
+    <tr><td><strong>Creative</strong></td><td>Urgency, diskon, reminder, DPA</td></tr>
+    <tr><td><strong>Budget</strong></td><td><strong>15%</strong> dari total daily budget</td></tr>
+    <tr><td><strong>Bidding</strong></td><td>Lowest cost → Cost cap setelah data cukup</td></tr>
   </table>
   <h4>Creative Ideas BOF</h4>
   <ul>
     <li>"Kamu belum selesai order 👀 Slot tinggal sedikit"</li>
-    <li>"Promo khusus hari ini — diskon 10% pakai kode ETNYX10"</li>
-    <li>"Mulai dari Rp 4.000/star — bayar sekarang sebelum harga naik"</li>
+    <li>"Promo hari ini — diskon 10% pakai kode ETNYX10"</li>
+    <li>"Mulai Rp 4.000/star — bayar sebelum harga naik"</li>
     <li>Carousel: before/after rank + harga + CTA</li>
   </ul>
 </div>
 
 <hr>
 
-<!-- ===================== 5. BUDGET ROADMAP ===================== -->
-<h2>5. Budget & Scaling Roadmap</h2>
+<!-- ==================== 6. BUDGET ROADMAP ==================== -->
+<h2 id="budget">6. Budget & Scaling Roadmap <span class="badge badge-purple">Advertiser</span></h2>
 
-<h3>📅 Phase 1: Testing (Minggu 1-2) — Rp 50.000/hari</h3>
+<div class="alert alert-info">
+  <strong>TL;DR:</strong> 4 fase. Mulai Rp 50K/hari → test 2 minggu → optimize → scale ke Rp 300K+/hari di bulan 3. Naikkan budget 20% per 2-3 hari — JANGAN loncat &gt;50%.
+</div>
+
+<h3>📅 Phase 1: Testing (Minggu 1-2) — Rp 50K/hari</h3>
 <div class="card">
   <table>
     <tr><th>Funnel</th><th>%</th><th>Daily</th><th>Setup</th></tr>
-    <tr><td><span class="badge b-tof">TOF</span> Awareness</td><td>70%</td><td>Rp 35.000</td><td>1 Campaign, 3-5 Ad Sets (beda audience), 2-3 creative per ad set</td></tr>
-    <tr><td><span class="badge b-mof">MOF</span> Retarget</td><td>20%</td><td>Rp 10.000</td><td>1 Campaign, 1-2 Ad Sets (IG engagers + web visitors)</td></tr>
-    <tr><td><span class="badge b-bof">BOF</span> Conversion</td><td>10%</td><td>Rp 5.000</td><td>1 Campaign, 1 Ad Set (cart + checkout abandonners)</td></tr>
+    <tr><td><span class="badge badge-tof">TOF</span></td><td>70%</td><td>Rp 35K</td><td>1 Campaign, 3-5 Ad Sets (beda audience), 2-3 creative per ad set</td></tr>
+    <tr><td><span class="badge badge-mof">MOF</span></td><td>20%</td><td>Rp 10K</td><td>1 Campaign, 1-2 Ad Sets (IG engagers + web visitors)</td></tr>
+    <tr><td><span class="badge badge-bof">BOF</span></td><td>10%</td><td>Rp 5K</td><td>1 Campaign, 1 Ad Set (cart + checkout abandoners)</td></tr>
   </table>
   <h4>Goals Phase 1</h4>
   <ul>
     <li>Test 6-10 creative variations (hook, angle, format berbeda)</li>
     <li>Kumpulkan min 50 pixel events (ViewContent, AddToCart)</li>
-    <li>Identifikasi winning creative (CTR > 2%, CPC < Rp 3.000)</li>
+    <li>Identifikasi winning creative (CTR &gt; 2%, CPC &lt; Rp 3.000)</li>
     <li>Build custom audiences dari pixel data</li>
-    <li><strong>Target CPA:</strong> Rp 30.000 - 50.000 per purchase</li>
+    <li><strong>Target CPA:</strong> Rp 30.000 – 50.000 per purchase</li>
   </ul>
-  <div class="info-box warn">
-    <strong>Sabar!</strong> Di budget Rp 50rb/hari, Meta butuh waktu 3-5 hari untuk learning phase. Jangan matikan ad set sebelum 3 hari kecuali spend >2x target CPA tanpa konversi.
+  <div class="alert alert-warning" style="margin-top:10px;">
+    <strong>⏳ Sabar!</strong> Di budget Rp 50K/hari, Meta butuh 3-5 hari learning phase. Jangan matikan ad set sebelum 3 hari kecuali spend &gt;2x target CPA tanpa konversi.
   </div>
 </div>
 
-<h3>📅 Phase 2: Optimization (Minggu 3-4) — Rp 75.000-100.000/hari</h3>
+<h3>📅 Phase 2: Optimization (Minggu 3-4) — Rp 75-100K/hari</h3>
 <div class="card">
   <table>
     <tr><th>Funnel</th><th>%</th><th>Daily</th><th>Action</th></tr>
-    <tr><td><span class="badge b-tof">TOF</span></td><td>60%</td><td>Rp 45-60K</td><td>Kill losers, duplicate winners ke audience baru, test new creatives</td></tr>
-    <tr><td><span class="badge b-mof">MOF</span></td><td>25%</td><td>Rp 19-25K</td><td>Add video viewers audience, test carousel social proof</td></tr>
-    <tr><td><span class="badge b-bof">BOF</span></td><td>15%</td><td>Rp 11-15K</td><td>Dynamic retargeting, urgency creatives</td></tr>
+    <tr><td><span class="badge badge-tof">TOF</span></td><td>60%</td><td>Rp 45-60K</td><td>Kill losers, duplicate winners, test new creatives</td></tr>
+    <tr><td><span class="badge badge-mof">MOF</span></td><td>25%</td><td>Rp 19-25K</td><td>Add video viewers, test carousel social proof</td></tr>
+    <tr><td><span class="badge badge-bof">BOF</span></td><td>15%</td><td>Rp 11-15K</td><td>Dynamic retargeting, urgency creatives</td></tr>
   </table>
   <h4>Optimization Rules</h4>
   <ul>
-    <li><strong>Kill:</strong> Ad set dengan CPA > 2x target setelah 3 hari</li>
-    <li><strong>Scale:</strong> Ad set dengan CPA ≤ target → naikkan budget 20% per 2-3 hari</li>
-    <li><strong>Duplicate:</strong> Winning ad set → buat copy ke audience berbeda</li>
-    <li><strong>Refresh:</strong> Creative fatigue setelah 7-10 hari (frequency > 2.5) → ganti hook/visual</li>
-    <li>Mulai buat LAL dari purchase data (kalau udah ≥ 50 purchases)</li>
+    <li><strong style="color:var(--danger);">Kill:</strong> Ad set CPA &gt; 2x target setelah 3 hari</li>
+    <li><strong style="color:var(--success);">Scale:</strong> Ad set CPA ≤ target → naikkan budget 20% per 2-3 hari</li>
+    <li><strong style="color:var(--accent);">Duplicate:</strong> Winning ad set → copy ke audience berbeda</li>
+    <li><strong style="color:var(--warning);">Refresh:</strong> Creative fatigue setelah 7-10 hari (frequency &gt; 2.5) → ganti hook/visual</li>
+    <li>Mulai buat LAL dari purchase data (setelah ≥ 50 purchases)</li>
   </ul>
 </div>
 
-<h3>📅 Phase 3: Scaling (Minggu 5-8) — Rp 150.000-300.000/hari</h3>
+<h3>📅 Phase 3: Scaling (Minggu 5-8) — Rp 150-300K/hari</h3>
 <div class="card">
   <table>
     <tr><th>Funnel</th><th>%</th><th>Daily</th><th>Action</th></tr>
-    <tr><td><span class="badge b-tof">TOF</span></td><td>55%</td><td>Rp 83-165K</td><td>LAL Purchasers 1% + 3%, expand geo (Kalimantan, Sulawesi), Advantage+</td></tr>
-    <tr><td><span class="badge b-mof">MOF</span></td><td>25%</td><td>Rp 38-75K</td><td>Full retarget stack, sequential storytelling</td></tr>
-    <tr><td><span class="badge b-bof">BOF</span></td><td>20%</td><td>Rp 30-60K</td><td>Promo codes, limited time offers, repeat buyer campaigns</td></tr>
+    <tr><td><span class="badge badge-tof">TOF</span></td><td>55%</td><td>Rp 83-165K</td><td>LAL Purchasers 1%+3%, expand geo, Advantage+</td></tr>
+    <tr><td><span class="badge badge-mof">MOF</span></td><td>25%</td><td>Rp 38-75K</td><td>Full retarget stack, sequential storytelling</td></tr>
+    <tr><td><span class="badge badge-bof">BOF</span></td><td>20%</td><td>Rp 30-60K</td><td>Promo codes, limited offers, repeat buyer</td></tr>
   </table>
   <h4>Scaling Strategy</h4>
   <ul>
-    <li><strong>Horizontal scaling:</strong> Duplicate winning campaign ke audience segments baru</li>
-    <li><strong>Vertical scaling:</strong> Naikkan budget 20-30% setiap 3 hari (jangan jump &gt;50%)</li>
-    <li><strong>Advantage+ Shopping Campaign:</strong> Setelah 100+ purchases, test ASC (biar algo full optimize)</li>
-    <li><strong>CBO (Campaign Budget Optimization):</strong> Biarkan Meta alokasikan budget ke ad set terbaik</li>
-    <li><strong>Target ROAS:</strong> Min 3x (spend 100rb → revenue 300rb)</li>
+    <li><strong>Horizontal:</strong> Duplicate winning campaign ke audience segments baru</li>
+    <li><strong>Vertical:</strong> Naikkan budget 20-30% setiap 3 hari (jangan &gt;50%)</li>
+    <li><strong>Advantage+:</strong> Setelah 100+ purchases, test ASC (algo full optimize)</li>
+    <li><strong>CBO:</strong> Biarkan Meta alokasikan budget ke ad set terbaik</li>
+    <li><strong>Target ROAS:</strong> Min 3x (spend 100K → revenue 300K)</li>
   </ul>
 </div>
 
-<h3>📅 Phase 4: Maturity (Bulan 3+) — Rp 300.000-1.000.000/hari</h3>
+<h3>📅 Phase 4: Maturity (Bulan 3+) — Rp 300K-1jt/hari</h3>
 <div class="card">
   <ul>
     <li>Full Advantage+ Shopping Campaign sebagai main driver</li>
     <li>Retarget purchasers untuk repeat order (upsell paket lebih tinggi)</li>
     <li>Seasonal push: naikkan budget 2-3x saat season reset ML</li>
-    <li>Cross-platform: run parallel di TikTok Ads &amp; Google Ads</li>
+    <li>Cross-platform: parallel TikTok Ads &amp; Google Ads</li>
     <li>Test influencer/KOL collab (micro-influencer ML 5-50K followers)</li>
-    <li><strong>Target CPA:</strong> Rp 15.000-25.000 per purchase</li>
+    <li><strong>Target CPA:</strong> Rp 15.000-25.000</li>
     <li><strong>Target ROAS:</strong> 4-6x</li>
   </ul>
 </div>
 
 <hr>
 
-<!-- ===================== 6. KPI & METRICS ===================== -->
-<h2>6. KPI & Metrics to Track</h2>
+<!-- ==================== 7. KPI & METRICS ==================== -->
+<h2 id="kpi">7. KPI & Metrics <span class="badge badge-teal">Semua</span></h2>
 
-<div class="grid3">
-  <div class="stat-card"><div class="val">CPA</div><div class="lbl">Cost per Acquisition</div><div style="font-size:10px; color:var(--muted); margin-top:6px;">Target: Rp 25-40K</div></div>
-  <div class="stat-card"><div class="val">ROAS</div><div class="lbl">Return on Ad Spend</div><div style="font-size:10px; color:var(--muted); margin-top:6px;">Target: 3-5x</div></div>
-  <div class="stat-card"><div class="val">CTR</div><div class="lbl">Click-Through Rate</div><div style="font-size:10px; color:var(--muted); margin-top:6px;">Target: > 2%</div></div>
+<div class="alert alert-info">
+  <strong>TL;DR:</strong> 3 KPI utama — CPA (target &lt; Rp 25K), ROAS (target &gt; 3x), CTR (target &gt; 2%). Monitor daily, optimize weekly.
+</div>
+
+<div class="card-grid g3">
+  <div class="card" style="text-align:center; border-top:3px solid var(--accent);">
+    <div style="font-size:20px; font-weight:900; background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">CPA</div>
+    <div class="desc">Cost per Acquisition</div>
+    <div style="font-size:11px; color:var(--accent); margin-top:4px; font-weight:700;">Target: Rp 25-40K</div>
+  </div>
+  <div class="card" style="text-align:center; border-top:3px solid var(--success);">
+    <div style="font-size:20px; font-weight:900; background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">ROAS</div>
+    <div class="desc">Return on Ad Spend</div>
+    <div style="font-size:11px; color:var(--success); margin-top:4px; font-weight:700;">Target: 3-5x</div>
+  </div>
+  <div class="card" style="text-align:center; border-top:3px solid var(--secondary);">
+    <div style="font-size:20px; font-weight:900; background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">CTR</div>
+    <div class="desc">Click-Through Rate</div>
+    <div style="font-size:11px; color:var(--secondary); margin-top:4px; font-weight:700;">Target: > 2%</div>
+  </div>
 </div>
 
 <table>
-  <tr><th>Metric</th><th>Target Phase 1</th><th>Target Phase 3+</th><th>Action jika di bawah target</th></tr>
-  <tr><td>CPA</td><td>< Rp 50.000</td><td>< Rp 25.000</td><td>Ganti creative, narrow audience, cek landing page</td></tr>
-  <tr><td>ROAS</td><td>> 2x</td><td>> 4x</td><td>Optimize funnel, naikkan AOV (upsell express/premium)</td></tr>
-  <tr><td>CTR (Link)</td><td>> 1.5%</td><td>> 2.5%</td><td>Hook lemah → test hook baru di 3 detik pertama</td></tr>
-  <tr><td>CPC</td><td>< Rp 3.000</td><td>< Rp 1.500</td><td>Creative/audience mismatch → refine targeting</td></tr>
-  <tr><td>CPM</td><td>< Rp 30.000</td><td>< Rp 20.000</td><td>Audience terlalu sempit → broaden</td></tr>
-  <tr><td>Frequency</td><td>< 2.0</td><td>< 2.5</td><td>Creative fatigue → refresh creatives</td></tr>
-  <tr><td>Conversion Rate</td><td>> 2%</td><td>> 5%</td><td>Landing page issue → optimize /order page</td></tr>
-  <tr><td>Hook Rate (3s)</td><td>> 25%</td><td>> 40%</td><td>Opening 3 detik lemah → test visual/text hook baru</td></tr>
+  <tr><th>Metric</th><th>Target Phase 1</th><th>Target Phase 3+</th><th>Jika Di Bawah Target</th></tr>
+  <tr><td><strong>CPA</strong></td><td>&lt; Rp 50K</td><td>&lt; Rp 25K</td><td>Ganti creative, narrow audience, cek landing page</td></tr>
+  <tr><td><strong>ROAS</strong></td><td>&gt; 2x</td><td>&gt; 4x</td><td>Optimize funnel, naikkan AOV (upsell express/premium)</td></tr>
+  <tr><td><strong>CTR (Link)</strong></td><td>&gt; 1.5%</td><td>&gt; 2.5%</td><td>Hook lemah → test hook baru di 3 detik pertama</td></tr>
+  <tr><td><strong>CPC</strong></td><td>&lt; Rp 3K</td><td>&lt; Rp 1.5K</td><td>Creative/audience mismatch → refine targeting</td></tr>
+  <tr><td><strong>CPM</strong></td><td>&lt; Rp 30K</td><td>&lt; Rp 20K</td><td>Audience terlalu sempit → broaden</td></tr>
+  <tr><td><strong>Frequency</strong></td><td>&lt; 2.0</td><td>&lt; 2.5</td><td>Creative fatigue → refresh creatives</td></tr>
+  <tr><td><strong>Conv Rate</strong></td><td>&gt; 2%</td><td>&gt; 5%</td><td>Landing page issue → optimize /order page</td></tr>
+  <tr><td><strong>Hook Rate (3s)</strong></td><td>&gt; 25%</td><td>&gt; 40%</td><td>Opening 3 detik lemah → ganti visual/text hook</td></tr>
 </table>
 
 <hr>
 
-<!-- ===================== 7. CREATIVE FRAMEWORK ===================== -->
-<h2>7. Creative Framework — Winning Ad Formula</h2>
+<!-- ==================== 8. CREATIVE FRAMEWORK ==================== -->
+<h2 id="creative">8. Creative Framework <span class="badge badge-amber">Editor</span></h2>
 
-<h3>🎬 Video Ad Structure (Reels-style)</h3>
-<div class="card">
-  <table>
-    <tr><th>Segment</th><th>Durasi</th><th>Isi</th><th>Tujuan</th></tr>
-    <tr><td><strong>HOOK</strong></td><td>0-3 detik</td><td>Pattern interrupt. Text on screen bold. "Masih pake joki yang bisa hack akun?"</td><td>Stop scroll. Hook rate > 30%</td></tr>
-    <tr><td><strong>PROBLEM</strong></td><td>3-8 detik</td><td>Pain point yang relatable. "Solo queue toxic, star turun terus"</td><td>Empathy, "ini gue banget"</td></tr>
-    <tr><td><strong>SOLUTION</strong></td><td>8-18 detik</td><td>Perkenalkan ETNYX. Tunjukkan dashboard, tracking, fitur keamanan</td><td>Trust &amp; credibility</td></tr>
-    <tr><td><strong>PROOF</strong></td><td>18-25 detik</td><td>"2.847+ order, 4.9 rating, 0 akun bermasalah"</td><td>Social proof</td></tr>
-    <tr><td><strong>CTA</strong></td><td>25-30 detik</td><td>"Link di bio. Mulai dari 4 ribu." + Logo ETNYX</td><td>Drive action</td></tr>
-  </table>
+<div class="alert alert-info">
+  <strong>Untuk Editor:</strong> Ini formula untuk bikin ad creative yang winning. Semua video ads harus ikuti struktur Hook → Problem → Solution → Proof → CTA.
 </div>
 
+<h3>🎬 Video Ad Structure (Reels-style)</h3>
+<table>
+  <tr><th>Segment</th><th>Durasi</th><th>Isi</th><th>Tujuan</th></tr>
+  <tr><td><strong style="color:var(--danger);">HOOK</strong></td><td>0-3 detik</td><td>Pattern interrupt. Text bold on screen. "Masih pake joki yang bisa hack akun?"</td><td>Stop scroll. Hook rate &gt; 30%</td></tr>
+  <tr><td><strong style="color:var(--warning);">PROBLEM</strong></td><td>3-8 detik</td><td>Pain point relatable. "Solo queue toxic, star turun terus"</td><td>Empathy, "ini gue banget"</td></tr>
+  <tr><td><strong style="color:var(--accent);">SOLUTION</strong></td><td>8-18 detik</td><td>Perkenalkan ETNYX. Dashboard, tracking, keamanan</td><td>Trust &amp; credibility</td></tr>
+  <tr><td><strong style="color:var(--secondary);">PROOF</strong></td><td>18-25 detik</td><td>"2.847+ order, 4.9 rating, 0 akun bermasalah"</td><td>Social proof</td></tr>
+  <tr><td><strong style="color:var(--success);">CTA</strong></td><td>25-30 detik</td><td>"Link di bio. Mulai dari 4 ribu." + Logo ETNYX</td><td>Drive action</td></tr>
+</table>
+
 <h3>📝 Ad Copy Templates</h3>
-<div class="grid2">
-  <div class="card" style="border-left:3px solid var(--tof);">
-    <div style="font-weight:700; color:#F87171; margin-bottom:6px;">TOF — Pain Point</div>
-    <div style="font-size:10px; color:var(--muted); line-height:1.7;">
+<div class="card-grid g2">
+  <div class="card" style="border-left:3px solid #F87171;">
+    <div class="label" style="color:#F87171;">TOF — Pain Point Copy</div>
+    <div class="desc" style="line-height:1.7;">
       Ranked solo queue = mental breakdown 😤<br><br>
       Tim AFK. Feeder. Build aneh.<br>
       Star turun terus padahal carry.<br><br>
@@ -590,17 +930,17 @@
       👉 etnyx.com/order
     </div>
   </div>
-  <div class="card" style="border-left:3px solid var(--bof);">
-    <div style="font-weight:700; color:#4ADE80; margin-bottom:6px;">BOF — Urgency</div>
-    <div style="font-size:10px; color:var(--muted); line-height:1.7;">
+  <div class="card" style="border-left:3px solid #4ADE80;">
+    <div class="label" style="color:#4ADE80;">BOF — Urgency Copy</div>
+    <div class="desc" style="line-height:1.7;">
       🚨 Season reset tinggal [X] hari!<br><br>
       Rank kamu belum Mythic?<br>
-      Setelah reset, harus grind dari awal. 😱<br><br>
-      Push sekarang sebelum terlambat:<br>
+      Setelah reset, grind dari awal. 😱<br><br>
+      Push sekarang:<br>
       📦 Paket: Epic → Mythic Rp 195K<br>
       ⭐ Per Star: mulai Rp 4.000<br>
       🤝 Gendong: main bareng booster pro<br><br>
-      ⚡ Pakai kode ETNYX10 → diskon 10%<br>
+      ⚡ Kode ETNYX10 → diskon 10%<br>
       👉 etnyx.com/order
     </div>
   </div>
@@ -608,72 +948,103 @@
 
 <hr>
 
-<!-- ===================== 8. WEEKLY CHECKLIST ===================== -->
-<h2>8. Weekly Optimization Checklist</h2>
+<!-- ==================== 9. WEEKLY CHECKLIST ==================== -->
+<h2 id="checklist">9. Weekly Optimization Checklist <span class="badge badge-purple">Advertiser</span></h2>
 
-<div class="card">
-  <table>
-    <tr><th>Hari</th><th>Action</th></tr>
-    <tr><td><strong>Senin</strong></td><td>Review weekend performance. Kill ad sets CPA > 2x target. Note winning creatives.</td></tr>
-    <tr><td><strong>Selasa</strong></td><td>Upload 1-2 new creatives. Test new hooks/angles.</td></tr>
-    <tr><td><strong>Rabu</strong></td><td>Check frequency. Refresh creatives with frequency > 2.5. Check pixel fires di Events Manager.</td></tr>
-    <tr><td><strong>Kamis</strong></td><td>Scale winning ad sets (+20% budget). Duplicate to new audiences if ROAS > 3x.</td></tr>
-    <tr><td><strong>Jumat</strong></td><td>Review weekly metrics. Update custom audiences. Plan next week's creatives.</td></tr>
-    <tr><td><strong>Weekend</strong></td><td>Monitor only. Weekend = peak gaming time. Jangan matikan ads kecuali darurat.</td></tr>
-  </table>
+<div class="alert alert-info">
+  <strong>Untuk Advertiser:</strong> Ikuti jadwal ini setiap minggu untuk menjaga performa campaign.
+</div>
+
+<table>
+  <tr><th>Hari</th><th>Action</th><th>Detail</th></tr>
+  <tr><td><strong>Senin</strong></td><td>Review weekend</td><td>Kill ad sets CPA &gt; 2x target. Note winning creatives.</td></tr>
+  <tr><td><strong>Selasa</strong></td><td>Upload creative baru</td><td>1-2 new creatives. Test hooks/angles baru.</td></tr>
+  <tr><td><strong>Rabu</strong></td><td>Cek frequency</td><td>Refresh creatives freq &gt; 2.5. Cek pixel fires di Events Manager.</td></tr>
+  <tr><td><strong>Kamis</strong></td><td>Scale winners</td><td>+20% budget ad sets winning. Duplicate ke audience baru jika ROAS &gt; 3x.</td></tr>
+  <tr><td><strong>Jumat</strong></td><td>Weekly report</td><td>Review metrics. Update audiences. Plan creatives minggu depan.</td></tr>
+  <tr><td><strong>Weekend</strong></td><td>Monitor only</td><td>Peak gaming time! Jangan matikan ads kecuali darurat.</td></tr>
+</table>
+
+<hr>
+
+<!-- ==================== 10. NAMING CONVENTION ==================== -->
+<h2 id="naming">10. Campaign Naming Convention <span class="badge badge-teal">Semua</span></h2>
+
+<div class="alert alert-info">
+  <strong>Untuk Semua:</strong> Gunakan format konsisten ini supaya mudah analisa dan komunikasi antar tim.
+</div>
+
+<table>
+  <tr><th>Level</th><th>Format</th><th>Contoh</th></tr>
+  <tr><td><strong>Campaign</strong></td><td><code>[Funnel] - [Objective] - [Date]</code></td><td>TOF - Sales Purchase - Apr26</td></tr>
+  <tr><td><strong>Ad Set</strong></td><td><code>[Audience] - [Geo] - [Age]</code></td><td>Interest MLBB - Jawa - 18-34</td></tr>
+  <tr><td><strong>Ad</strong></td><td><code>[Format] - [Hook/Angle] - [Version]</code></td><td>Reels - PainPoint SoloQ - v1</td></tr>
+</table>
+
+<div class="highlight-box">
+  <strong>Contoh lengkap:</strong><br>
+  Campaign: <code>TOF - Sales Purchase - Apr26</code><br>
+  → Ad Set: <code>Interest MLBB+Moonton - Jawa - 18-34</code><br>
+  → Ad: <code>Reels - PainPoint SoloQ - v1</code>
 </div>
 
 <hr>
 
-<!-- ===================== 9. CAMPAIGN NAMING ===================== -->
-<h2>9. Campaign Naming Convention</h2>
+<!-- ==================== 11. ORGANIC SYNERGY ==================== -->
+<h2 id="organic">11. IG & FB Organic Synergy <span class="badge badge-amber">Editor</span></h2>
 
-<div class="card">
-  <p style="font-size:10px; color:var(--muted); margin-bottom:8px;">Gunakan format konsisten supaya mudah analisa:</p>
-  <table>
-    <tr><th>Level</th><th>Format</th><th>Contoh</th></tr>
-    <tr><td>Campaign</td><td><code>[Funnel] - [Objective] - [Date]</code></td><td>TOF - Sales Purchase - Apr26</td></tr>
-    <tr><td>Ad Set</td><td><code>[Audience] - [Geo] - [Age]</code></td><td>Interest MLBB - Jawa - 18-34</td></tr>
-    <tr><td>Ad</td><td><code>[Format] - [Hook/Angle] - [Version]</code></td><td>Reels - PainPoint SoloQ - v1</td></tr>
-  </table>
+<div class="alert alert-info">
+  <strong>Untuk Editor:</strong> Konten organic di IG adalah "testing ground" gratis. Post yang perform bagus → jadikan ad creative → sudah terbukti works.
 </div>
 
-<hr>
-
-<!-- ===================== 10. INSTAGRAM + FB ENGAGED ===================== -->
-<h2>10. Leverage IG & FB Engagement</h2>
-
-<h3>📱 Instagram @etnyx.id Strategy (Organic + Paid Synergy)</h3>
+<h3>📱 Instagram @etnyx.id Strategy</h3>
 <div class="card">
   <ul>
-    <li><strong>Post organic content 3x/minggu</strong> (sesuai 9-Post Grid plan) — ini jadi creative bank untuk ads</li>
-    <li><strong>Boost best-performing organic posts</strong> → convert jadi ad dengan "Boost Post" atau create ad dari existing post</li>
-    <li><strong>Stories daily:</strong> progress update, BTS push rank, promo countdown → build engagement audience</li>
-    <li><strong>Reels first:</strong> 80% konten = Reels (reach paling besar di IG 2026)</li>
+    <li><strong>Post organic 3x/minggu</strong> (sesuai 9-Post Grid plan) → jadi creative bank untuk ads</li>
+    <li><strong>Boost best-performing posts</strong> → jadikan ad via "Boost Post" atau create ad dari existing post</li>
+    <li><strong>Stories daily:</strong> progress update, BTS push rank, promo countdown</li>
+    <li><strong>Reels first:</strong> 80% konten = Reels (reach terbesar di IG 2026)</li>
     <li><strong>CTA di setiap post:</strong> "Link di bio" atau "DM untuk order"</li>
     <li><strong>Engagement bait:</strong> Poll di Stories ("Main role apa?"), Quiz, Q&amp;A</li>
   </ul>
 </div>
 
-<h3>Organic → Paid Flywheel</h3>
+<h3>🔄 Organic → Paid Flywheel</h3>
+<div class="flow-box">
+  <div class="flow-step">📱 Post Organic</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step">📊 Monitor 24-48h</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step">🏆 High Engagement?</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step">💰 Jadikan Ad</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step">📈 More Followers</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step">🔄 Repeat</div>
+</div>
+
 <div class="card">
   <ol>
     <li>Post konten organic (Reels, Carousel)</li>
-    <li>Monitor 24-48 jam — cek mana yang engagement paling tinggi</li>
-    <li>Post dengan engagement tinggi → jadikan ad creative (proven content)</li>
-    <li>Paid ads → drive traffic → sebagian follow IG → nambah organic reach</li>
-    <li>More followers → more engagement → better engagement audiences → better retarget</li>
+    <li>Monitor 24-48 jam — cek engagement mana tertinggi</li>
+    <li>Post engagement tinggi → jadikan ad creative (proven content)</li>
+    <li>Paid ads → drive traffic → sebagian follow IG → organic reach naik</li>
+    <li>More followers → more engagement → better audiences → better retarget</li>
     <li>Repeat cycle ♻️</li>
   </ol>
 </div>
 
 <hr>
 
-<!-- ===================== FOOTER ===================== -->
-<div style="text-align:center; padding:30px 0; color:var(--muted);">
-  <div style="font-size:20px; font-weight:900; background:linear-gradient(135deg,#2DD4BF,#7FA8A3); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:6px;">ETNYX</div>
-  <div style="font-style:italic; font-size:12px;">"Bukan joki biasa. Ini SISTEM." 🎮</div>
-  <div style="font-size:10px; margin-top:8px; color:rgba(255,255,255,0.3);">Meta Ads Strategy & Funnel Roadmap v1.0 — 20 April 2026<br>By: Advertiser Expert · SMO Strategy</div>
+<!-- ==================== FOOTER ==================== -->
+<div style="text-align:center; padding:30px 0; color:var(--text-muted);">
+  <div style="font-size:22px; font-weight:900; background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:8px;">ETNYX</div>
+  <div class="quote" style="display:inline-block;">"Organic → Paid flywheel. Konten proven, jadikan ad." 🎮</div>
+  <div style="font-size:10px; margin-top:12px; color:rgba(255,255,255,0.25);">
+    Meta Ads Strategy &amp; Full-Funnel Roadmap v2.0 — 20 April 2026<br>
+    Campaign Blueprint · Pixel Events · Custom Audiences · Budget Scaling
+  </div>
 </div>
 
 </body>

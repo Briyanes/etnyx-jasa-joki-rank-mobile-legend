@@ -1,5 +1,1001 @@
 <!--
   ETNYX — Instagram 9-Post Launch Grid & Mood Board
+  Panduan lengkap untuk Content Editor & Social Media Manager
+  Theme: ETNYX System Guide v2
+  Updated: 20 April 2026
+-->
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ETNYX — Instagram 9-Post Launch Grid & Mood Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+  /* ===== ETNYX SYSTEM GUIDE v2 — CANONICAL THEME ===== */
+  :root {
+    --accent: #2DD4BF;
+    --primary: #7FA8A3;
+    --secondary: #A78BFA;
+    --bg: #0F1419;
+    --surface: #151B22;
+    --card-bg: rgba(255,255,255,0.04);
+    --card-border: rgba(255,255,255,0.08);
+    --text: #E6F1EF;
+    --text-muted: #9CA3AF;
+    --success: #22C55E;
+    --warning: #F59E0B;
+    --danger: #EF4444;
+    --teal: #2DD4BF;
+    --gradient: linear-gradient(135deg, #2DD4BF, #7FA8A3);
+  }
+
+  @page { margin: 12mm 10mm; size: A4; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 40px 30px;
+    font-size: 12.5px;
+    line-height: 1.65;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* ===== Cover ===== */
+  .cover {
+    text-align: center;
+    padding: 50px 0 30px;
+    border-bottom: 2px solid rgba(45,212,191,0.3);
+    margin-bottom: 30px;
+    page-break-after: always;
+  }
+  .cover h1 {
+    font-size: 38px;
+    font-weight: 900;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+  }
+  .cover .tagline {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+  .cover .meta {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 12px;
+  }
+  .cover .stat-row {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin: 24px 0;
+  }
+  .cover .stat-box { text-align: center; }
+  .cover .stat-num {
+    font-size: 32px;
+    font-weight: 900;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .cover .stat-lbl {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  .cover .quote {
+    border-left: 3px solid var(--accent);
+    padding: 8px 16px;
+    background: rgba(45,212,191,0.06);
+    border-radius: 0 6px 6px 0;
+    font-style: italic;
+    color: var(--text-muted);
+    max-width: 500px;
+    margin: 20px auto 0;
+    font-size: 13px;
+  }
+
+  /* ===== Section Headers ===== */
+  h2 {
+    font-size: 20px;
+    font-weight: 800;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 32px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid rgba(45,212,191,0.25);
+    page-break-after: avoid;
+  }
+  h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--secondary);
+    margin-top: 20px;
+    margin-bottom: 8px;
+    page-break-after: avoid;
+  }
+  h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--teal);
+    margin-top: 14px;
+    margin-bottom: 6px;
+    page-break-after: avoid;
+  }
+
+  /* ===== Cards & Grid ===== */
+  .card-grid { display: grid; gap: 10px; margin: 10px 0; }
+  .g2 { grid-template-columns: 1fr 1fr; }
+  .g3 { grid-template-columns: 1fr 1fr 1fr; }
+  .g4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .card .label { font-weight: 700; font-size: 12px; margin-bottom: 4px; color: var(--text); }
+  .card .desc { font-size: 11px; color: var(--text-muted); line-height: 1.5; }
+
+  /* ===== Tables ===== */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+    font-size: 11.5px;
+    page-break-inside: avoid;
+  }
+  th {
+    background: rgba(45,212,191,0.12);
+    color: var(--accent);
+    font-weight: 700;
+    text-align: left;
+    padding: 7px 10px;
+    border-bottom: 1px solid rgba(45,212,191,0.2);
+  }
+  td {
+    padding: 6px 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    color: rgba(255,255,255,0.8);
+  }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* ===== Badges ===== */
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .badge-teal { background: rgba(45,212,191,0.15); color: var(--teal); }
+  .badge-green { background: rgba(74,222,128,0.15); color: var(--success); }
+  .badge-purple { background: rgba(167,139,250,0.15); color: var(--secondary); }
+  .badge-amber { background: rgba(250,204,21,0.15); color: var(--warning); }
+  .badge-red { background: rgba(248,113,113,0.15); color: var(--danger); }
+  .badge-blue { background: rgba(45,212,191,0.15); color: var(--accent); }
+
+  /* ===== Alert Boxes ===== */
+  .alert {
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin: 12px 0;
+    font-size: 11.5px;
+    line-height: 1.6;
+  }
+  .alert-info {
+    background: rgba(45,212,191,0.06);
+    border: 1px solid rgba(45,212,191,0.15);
+    color: rgba(255,255,255,0.7);
+  }
+  .alert-warning {
+    background: rgba(245,158,11,0.06);
+    border: 1px solid rgba(245,158,11,0.2);
+    color: #FCD34D;
+  }
+  .alert-success {
+    background: rgba(34,197,94,0.06);
+    border: 1px solid rgba(34,197,94,0.2);
+    color: #86EFAC;
+  }
+
+  /* ===== TOC ===== */
+  .toc {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 16px 0;
+  }
+  .toc-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .toc a {
+    display: block;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 11.5px;
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+  .toc a:hover { color: var(--accent); }
+  .toc a .num { color: var(--accent); font-weight: 700; margin-right: 8px; }
+  .toc a .role { float: right; font-size: 9px; }
+
+  /* ===== Instagram Grid ===== */
+  .ig-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 16px 0; }
+  .ig-cell {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    min-height: 190px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    page-break-inside: avoid;
+  }
+  .ig-cell .cell-preview {
+    flex: 1;
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+    min-height: 150px;
+  }
+  .ig-cell .cell-preview .emoji { font-size: 26px; }
+  .ig-cell .cell-preview .hook {
+    font-size: 12.5px;
+    font-weight: 800;
+    line-height: 1.35;
+    color: var(--text);
+  }
+  .ig-cell .cell-preview .hook em {
+    font-style: normal;
+    color: var(--accent);
+  }
+  .ig-cell .cell-footer {
+    padding: 7px 10px;
+    background: rgba(255,255,255,0.02);
+    border-top: 1px solid var(--card-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .ig-cell .cell-footer .post-label {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  /* ===== Color Swatches ===== */
+  .swatch {
+    border-radius: 8px;
+    padding: 16px 10px;
+    text-align: center;
+    min-height: 65px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .swatch .sw-name { font-size: 10px; font-weight: 600; }
+  .swatch .sw-hex { font-size: 11px; font-weight: 700; margin-top: 3px; font-family: 'SF Mono', Menlo, monospace; }
+
+  /* ===== Post Detail ===== */
+  .post-detail {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 16px;
+    margin: 14px 0;
+    page-break-inside: avoid;
+  }
+  .post-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .post-num {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 14px;
+    color: #0F1419;
+    flex-shrink: 0;
+  }
+  .post-title { font-size: 14px; font-weight: 800; color: var(--text); }
+  .post-meta { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+  .script-block {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin: 8px 0;
+    font-size: 11px;
+    line-height: 1.7;
+    color: var(--text-muted);
+  }
+  .caption-block {
+    background: rgba(45,212,191,0.04);
+    border: 1px solid rgba(45,212,191,0.12);
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin: 8px 0;
+    font-size: 11px;
+    line-height: 1.7;
+    color: var(--text-muted);
+  }
+
+  /* ===== Misc ===== */
+  .highlight-box {
+    background: rgba(45,212,191,0.06);
+    border: 1px solid rgba(45,212,191,0.15);
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin: 10px 0;
+    font-size: 11.5px;
+    color: rgba(255,255,255,0.7);
+  }
+  .flow-box {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 10px 0;
+  }
+  .flow-step {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .flow-arrow { color: var(--accent); font-size: 14px; }
+
+  code {
+    background: rgba(255,255,255,0.08);
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    color: var(--accent);
+    font-family: 'SF Mono', Menlo, monospace;
+  }
+  hr {
+    border: none;
+    border-top: 1px solid rgba(45,212,191,0.15);
+    margin: 24px 0;
+  }
+  ul, ol { padding-left: 18px; margin: 6px 0; }
+  li { margin: 3px 0; }
+  strong { color: #F8FAFC; }
+  p { margin: 5px 0; }
+
+  @media print {
+    body { padding: 0; }
+    .cover { padding: 60px 0 40px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ==================== COVER ==================== -->
+<div class="cover">
+  <h1>ETNYX</h1>
+  <div class="tagline">Instagram 9-Post Launch Grid & Mood Board</div>
+  <p style="font-size:13px; color:rgba(255,255,255,0.4);">Konten Plan · Visual Direction · Script Lengkap</p>
+
+  <div class="stat-row">
+    <div class="stat-box"><div class="stat-num">9</div><div class="stat-lbl">Posts</div></div>
+    <div class="stat-box"><div class="stat-num">3×3</div><div class="stat-lbl">Grid</div></div>
+    <div class="stat-box"><div class="stat-num">3</div><div class="stat-lbl">Minggu</div></div>
+  </div>
+
+  <p style="font-size:11px; color:rgba(255,255,255,0.35);">
+    Akun: @etnyx.id &nbsp;·&nbsp; Niche: Jasa Joki &amp; Gendong Mobile Legends<br>
+    Format: Reels + Carousel &nbsp;·&nbsp; Repost: TikTok, Facebook, YouTube Shorts
+  </p>
+
+  <div class="quote">"Bukan joki biasa. Ini SISTEM."</div>
+
+  <div class="meta">
+    <strong>Versi:</strong> 4.0 — 20 April 2026<br>
+    <strong>Audience:</strong> Content Editor · Social Media Manager · Videographer
+  </div>
+
+  <!-- TOC -->
+  <div class="toc" style="text-align:left; margin-top:24px;">
+    <div class="toc-title">📑 Daftar Isi</div>
+    <a href="#ringkasan"><span class="num">1</span> Ringkasan Eksekutif <span class="role badge badge-teal">Semua</span></a>
+    <a href="#mood"><span class="num">2</span> Mood Board &amp; Visual Direction <span class="role badge badge-amber">Editor</span></a>
+    <a href="#grid"><span class="num">3</span> 9-Post Grid Preview <span class="role badge badge-teal">Semua</span></a>
+    <a href="#jadwal"><span class="num">4</span> Jadwal Posting <span class="role badge badge-purple">SMM</span></a>
+    <a href="#detail"><span class="num">5</span> Detail Per Post (Script + Caption) <span class="role badge badge-amber">Editor</span></a>
+    <a href="#repost"><span class="num">6</span> Panduan Repost Multi-Platform <span class="role badge badge-purple">SMM</span></a>
+  </div>
+</div>
+
+<!-- ==================== 1. RINGKASAN EKSEKUTIF ==================== -->
+<h2 id="ringkasan">1. Ringkasan Eksekutif</h2>
+
+<div class="alert alert-info">
+  <strong>TL;DR:</strong> 9 post untuk 3 minggu pertama @etnyx.id. Posting 3x/minggu (Senin-Rabu-Jumat, 19:00-21:00 WIB). Mix format: 5 Reels + 3 Carousel + 1 Reels pendek. Setiap post punya script lengkap + caption siap copy-paste. Setelah posting IG, repost ke TikTok, FB, YouTube Shorts.
+</div>
+
+<div class="card-grid g3">
+  <div class="card" style="text-align:center; border-top:3px solid var(--accent);">
+    <div style="font-size:18px; font-weight:900; background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">5 Reels</div>
+    <div class="desc">Video 15-60 detik</div>
+  </div>
+  <div class="card" style="text-align:center; border-top:3px solid var(--secondary);">
+    <div style="font-size:18px; font-weight:900; color:var(--secondary);">3 Carousel</div>
+    <div class="desc">5-6 slides per post</div>
+  </div>
+  <div class="card" style="text-align:center; border-top:3px solid var(--danger);">
+    <div style="font-size:18px; font-weight:900; color:var(--danger);">1 Short Reels</div>
+    <div class="desc">15 detik pain point</div>
+  </div>
+</div>
+
+<h3>📌 Content Pillars</h3>
+<table>
+  <tr><th>Pilar</th><th>%</th><th>Funnel</th><th>Goal</th><th>Post #</th></tr>
+  <tr><td>😤 <strong>Problem</strong></td><td>10%</td><td>Awareness</td><td>Relatable pain point solo queue</td><td><span class="badge badge-red">Post 4</span></td></tr>
+  <tr><td>📚 <strong>Education</strong></td><td>35%</td><td>Consideration</td><td>Trust, authority, tutorial</td><td><span class="badge badge-green">Post 2, 5, 7</span></td></tr>
+  <tr><td>🏆 <strong>Proof</strong></td><td>20%</td><td>Consideration→Conv</td><td>Credibility, reviews</td><td><span class="badge badge-purple">Post 3, 6</span></td></tr>
+  <tr><td>💰 <strong>Selling</strong></td><td>10%</td><td>Conversion</td><td>CTA, urgency, promo</td><td><span class="badge badge-amber">Post 8</span></td></tr>
+  <tr><td>🎮 <strong>Brand</strong></td><td>10%</td><td>Awareness</td><td>Intro, positioning</td><td><span class="badge badge-teal">Post 1</span></td></tr>
+  <tr><td>❓ <strong>FAQ</strong></td><td>15%</td><td>Consideration</td><td>Objection handling</td><td><span class="badge badge-purple">Post 9</span></td></tr>
+</table>
+
+<h3>📐 Content Funnel Flow</h3>
+<div class="flow-box">
+  <div class="flow-step">🎯 Problem/Brand (W1)</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step">📚 Education/Proof (W1-W2)</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step">🏆 Trust/Security (W2)</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step">💰 CTA/FAQ (W3)</div>
+</div>
+
+<hr>
+
+<!-- ==================== 2. MOOD BOARD ==================== -->
+<h2 id="mood">2. Mood Board & Visual Direction <span class="badge badge-amber">Editor</span></h2>
+
+<div class="alert alert-info">
+  <strong>Untuk Editor/Designer:</strong> Semua visual content harus mengikuti palette dan rules di bawah. Konsistensi = brand recognition. Jangan pakai warna di luar palette ini.
+</div>
+
+<h3>🎨 Color Palette</h3>
+<div class="card-grid g4">
+  <div class="swatch" style="background:#0F1419; border:1px solid rgba(255,255,255,0.1);"><div class="sw-name" style="color:var(--text-muted);">Dark BG</div><div class="sw-hex" style="color:var(--text);">#0F1419</div></div>
+  <div class="swatch" style="background:#151B22; border:1px solid rgba(255,255,255,0.1);"><div class="sw-name" style="color:var(--text-muted);">Surface</div><div class="sw-hex" style="color:var(--text);">#151B22</div></div>
+  <div class="swatch" style="background:#2DD4BF;"><div class="sw-name" style="color:#0F1419;">Accent</div><div class="sw-hex" style="color:#0F1419;">#2DD4BF</div></div>
+  <div class="swatch" style="background:#7FA8A3;"><div class="sw-name" style="color:#0F1419;">Primary</div><div class="sw-hex" style="color:#0F1419;">#7FA8A3</div></div>
+</div>
+<div class="card-grid g4">
+  <div class="swatch" style="background:#22C55E;"><div class="sw-name" style="color:#0F1419;">Success</div><div class="sw-hex" style="color:#0F1419;">#22C55E</div></div>
+  <div class="swatch" style="background:#F59E0B;"><div class="sw-name" style="color:#0F1419;">Warning</div><div class="sw-hex" style="color:#0F1419;">#F59E0B</div></div>
+  <div class="swatch" style="background:#EF4444;"><div class="sw-name" style="color:#0F1419;">Danger</div><div class="sw-hex" style="color:#0F1419;">#EF4444</div></div>
+  <div class="swatch" style="background:#A78BFA;"><div class="sw-name" style="color:#0F1419;">Secondary</div><div class="sw-hex" style="color:#0F1419;">#A78BFA</div></div>
+</div>
+
+<h3>🔤 Typography & Visual Rules</h3>
+<div class="card-grid g2">
+  <div class="card">
+    <div class="label">Font & Sizing</div>
+    <div class="desc">
+      <strong>Inter</strong> — Clean, modern, readable<br><br>
+      <strong>Hook text:</strong> Black 900, 36-48px, warna Accent (#2DD4BF)<br>
+      <strong>Subtitle:</strong> SemiBold 600, 24-28px, White<br>
+      <strong>Body:</strong> Regular 400, 18-20px, #E6F1EF<br>
+      <strong>CTA button:</strong> Bold 700, 22px, di atas gradient bg
+    </div>
+  </div>
+  <div class="card">
+    <div class="label">Visual Rules</div>
+    <div class="desc">
+      🖤 Background SELALU dark (#0F1419)<br>
+      ✨ Subtle turquoise glow pada CTA<br>
+      🎯 Max 3 elemen per screen<br>
+      📐 Reels: 9:16 · Feed: 1:1 · Carousel: 4:5<br>
+      🏷️ Logo ETNYX watermark kanan bawah<br>
+      🎮 ML hero art sebagai visual utama
+    </div>
+  </div>
+</div>
+
+<div class="alert alert-warning">
+  <strong>⚠️ Jangan:</strong> Background putih, warna neon selain palette, font script/decorative, terlalu banyak text per slide, screenshot tanpa overlay brand.
+</div>
+
+<hr>
+
+<!-- ==================== 3. GRID PREVIEW ==================== -->
+<h2 id="grid">3. 9-Post Grid — Visual Preview <span class="badge badge-teal">Semua</span></h2>
+
+<div class="alert alert-info">
+  <strong>Cara Baca:</strong> Layout Instagram dibaca kanan → kiri (terbaru di kiri atas). Row 1 = Week 3 (terbaru). Row 3 = Week 1 (pertama diposting).<br>
+  <strong>Posting:</strong> 3x/minggu · Senin + Rabu 19:00 · Jumat 20:00 WIB
+</div>
+
+<div class="ig-grid">
+  <!-- ROW 1: Week 3 (terbaru, atas di IG) -->
+  <div class="ig-cell" style="border-top:3px solid #A78BFA;">
+    <div class="cell-preview" style="background:linear-gradient(180deg, rgba(167,139,250,0.08), transparent);">
+      <div class="emoji">❓</div>
+      <div class="hook"><em>Pertanyaan Yang Sering Ditanya</em> Swipe 👉</div>
+    </div>
+    <div class="cell-footer">
+      <div class="post-label">Post 9 · Jum W3</div>
+      <span class="badge badge-purple">Carousel 6</span>
+    </div>
+  </div>
+  <div class="ig-cell" style="border-top:3px solid var(--warning);">
+    <div class="cell-preview" style="background:linear-gradient(180deg, rgba(245,158,11,0.08), transparent);">
+      <div class="emoji">🚨</div>
+      <div class="hook"><em>SLOT BOOSTER</em> Minggu Ini Tinggal 5</div>
+    </div>
+    <div class="cell-footer">
+      <div class="post-label">Post 8 · Rab W3</div>
+      <span class="badge badge-amber">Reels 30s</span>
+    </div>
+  </div>
+  <div class="ig-cell" style="border-top:3px solid var(--success);">
+    <div class="cell-preview" style="background:linear-gradient(180deg, rgba(34,197,94,0.08), transparent);">
+      <div class="emoji">🤝</div>
+      <div class="hook">Mau Main Bareng <em>Booster Mythic?</em> Ini Caranya 👇</div>
+    </div>
+    <div class="cell-footer">
+      <div class="post-label">Post 7 · Sen W3</div>
+      <span class="badge badge-green">Reels 60s</span>
+    </div>
+  </div>
+
+  <!-- ROW 2: Week 2 -->
+  <div class="ig-cell" style="border-top:3px solid var(--accent);">
+    <div class="cell-preview" style="background:linear-gradient(180deg, rgba(45,212,191,0.08), transparent);">
+      <div class="emoji">🔒</div>
+      <div class="hook"><em>Akun Kamu Aman</em> di ETNYX<br>Ini Buktinya 👇</div>
+    </div>
+    <div class="cell-footer">
+      <div class="post-label">Post 6 · Jum W2</div>
+      <span class="badge badge-teal">Carousel 5</span>
+    </div>
+  </div>
+  <div class="ig-cell" style="border-top:3px solid var(--success);">
+    <div class="cell-preview" style="background:linear-gradient(180deg, rgba(34,197,94,0.08), transparent);">
+      <div class="emoji">⭐</div>
+      <div class="hook">Mau Push Cuma <em>Beberapa Star?</em> Ini Caranya 👇</div>
+    </div>
+    <div class="cell-footer">
+      <div class="post-label">Post 5 · Rab W2</div>
+      <span class="badge badge-green">Reels 60s</span>
+    </div>
+  </div>
+  <div class="ig-cell" style="border-top:3px solid var(--danger);">
+    <div class="cell-preview" style="background:linear-gradient(180deg, rgba(239,68,68,0.08), transparent);">
+      <div class="emoji">😤</div>
+      <div class="hook">POV: Kamu <em>Carry 15-2-8</em>, Tapi Tetep Kalah</div>
+    </div>
+    <div class="cell-footer">
+      <div class="post-label">Post 4 · Sen W2</div>
+      <span class="badge badge-red">Reels 15s</span>
+    </div>
+  </div>
+
+  <!-- ROW 3: Week 1 (awal, bawah di IG) -->
+  <div class="ig-cell" style="border-top:3px solid #A78BFA;">
+    <div class="cell-preview" style="background:linear-gradient(180deg, rgba(167,139,250,0.08), transparent);">
+      <div class="emoji">🗣️</div>
+      <div class="hook"><em>Kata Mereka</em> Yang Udah Pake ETNYX<br>4.9/5 ⭐</div>
+    </div>
+    <div class="cell-footer">
+      <div class="post-label">Post 3 · Jum W1</div>
+      <span class="badge badge-purple">Carousel 5</span>
+    </div>
+  </div>
+  <div class="ig-cell" style="border-top:3px solid var(--success);">
+    <div class="cell-preview" style="background:linear-gradient(180deg, rgba(34,197,94,0.08), transparent);">
+      <div class="emoji">📦</div>
+      <div class="hook"><em>Cara Order</em> Joki Mobile Legends Cuma 2 Menit</div>
+    </div>
+    <div class="cell-footer">
+      <div class="post-label">Post 2 · Rab W1</div>
+      <span class="badge badge-green">Reels 60s</span>
+    </div>
+  </div>
+  <div class="ig-cell" style="border-top:3px solid var(--accent);">
+    <div class="cell-preview" style="background:linear-gradient(180deg, rgba(45,212,191,0.08), transparent);">
+      <div class="emoji">🎮</div>
+      <div class="hook">Masih Pake Joki <em>Yang Bisa Hack</em> Akun Kamu?</div>
+    </div>
+    <div class="cell-footer">
+      <div class="post-label">Post 1 · Sen W1</div>
+      <span class="badge badge-teal">Reels 30s</span>
+    </div>
+  </div>
+</div>
+
+<div class="highlight-box">
+  <strong>Grid Pattern:</strong> Variasi warna &amp; format supaya feed aesthetic. Alternasi Reels ↔ Carousel. Setiap baris = mix emosi (merah/kuning) + tutorial (hijau) + info (teal/ungu).
+</div>
+
+<hr>
+
+<!-- ==================== 4. JADWAL POSTING ==================== -->
+<h2 id="jadwal">4. Jadwal Posting <span class="badge badge-purple">SMM</span></h2>
+
+<div class="alert alert-info">
+  <strong>Untuk Social Media Manager:</strong> Jadwal posting 3x/minggu. Senin &amp; Rabu jam 19:00 WIB. Jumat jam 20:00 WIB. Weekend = peak gaming → tambah Stories.
+</div>
+
+<table>
+  <tr><th>Minggu</th><th>Senin 19:00</th><th>Rabu 19:00</th><th>Jumat 20:00</th></tr>
+  <tr>
+    <td><strong>W1</strong></td>
+    <td>1. Intro Brand <span class="badge badge-teal">Reels 30s</span></td>
+    <td>2. Tutorial Paket <span class="badge badge-green">Reels 60s</span></td>
+    <td>3. Social Proof <span class="badge badge-purple">Carousel 5</span></td>
+  </tr>
+  <tr>
+    <td><strong>W2</strong></td>
+    <td>4. Pain Point <span class="badge badge-red">Reels 15s</span></td>
+    <td>5. Tutorial PerStar <span class="badge badge-green">Reels 60s</span></td>
+    <td>6. Keamanan <span class="badge badge-teal">Carousel 5</span></td>
+  </tr>
+  <tr>
+    <td><strong>W3</strong></td>
+    <td>7. Tutorial Gendong <span class="badge badge-green">Reels 60s</span></td>
+    <td>8. Promo/CTA <span class="badge badge-amber">Reels 30s</span></td>
+    <td>9. FAQ <span class="badge badge-purple">Carousel 6</span></td>
+  </tr>
+</table>
+
+<div class="card-grid g2">
+  <div class="card">
+    <div class="label">📱 Stories (Harian)</div>
+    <div class="desc">
+      <ul>
+        <li>Progress update order yang berjalan</li>
+        <li>BTS: booster sedang push rank</li>
+        <li>Poll: "Main role apa?" / "Rank kamu sekarang?"</li>
+        <li>Countdown promo atau season reset</li>
+        <li>Repost testimoni customer</li>
+      </ul>
+    </div>
+  </div>
+  <div class="card">
+    <div class="label">⏰ Best Posting Times</div>
+    <div class="desc">
+      <ul>
+        <li><strong>Senin-Jumat:</strong> 19:00-21:00 WIB (after work/school)</li>
+        <li><strong>Weekend:</strong> 14:00-16:00 dan 20:00-22:00 WIB</li>
+        <li><strong>Peak ML hours:</strong> 20:00-00:00 WIB</li>
+        <li>Jangan posting pagi (08:00-12:00) — engagement rendah</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ==================== 5. DETAIL PER POST ==================== -->
+<h2 id="detail">5. Detail Per Post <span class="badge badge-amber">Editor</span></h2>
+
+<div class="alert alert-info">
+  <strong>Untuk Editor/Videographer:</strong> Setiap post punya script lengkap (timing per detik), caption siap copy-paste, dan notes visual. Untuk Carousel, ada breakdown per slide.
+</div>
+
+<!-- POST 1 -->
+<div class="post-detail">
+  <div class="post-header">
+    <div class="post-num">1</div>
+    <div>
+      <div class="post-title">INTRO BRAND — "Masih pake joki yang bisa hack akun?"</div>
+      <div class="post-meta"><span class="badge badge-teal">Reels 30s</span> &nbsp;·&nbsp; Awareness &nbsp;·&nbsp; Senin W1 19:00</div>
+    </div>
+  </div>
+  <h4>🎬 Script (per detik)</h4>
+  <div class="script-block">
+<strong>[0-3s]</strong> "Masih pake joki yang bisa hack akun kamu?" ← <strong style="color:var(--danger);">HOOK</strong><br>
+<strong>[3-8s]</strong> "Kenalan sama ETNYX."<br>
+<strong>[8-15s]</strong> "Password dienkripsi AES-256. Progress dilacak real-time. Notif otomatis ke WA."<br>
+<strong>[15-22s]</strong> "2.847+ order selesai. Rating 4.9 bintang."<br>
+<strong>[22-28s]</strong> "Bukan janji. Ini bukti."<br>
+<strong>[28-30s]</strong> "Link di bio. Mulai dari 4 ribu."
+  </div>
+  <h4>📝 Caption (copy-paste)</h4>
+  <div class="caption-block">
+Bukan joki abal-abal. Ini SISTEM. 🎮<br><br>
+✅ Akun dienkripsi military-grade (AES-256)<br>
+✅ Tracking real-time dari dashboard<br>
+✅ Notifikasi otomatis ke WA kamu<br>
+✅ 2.847+ order selesai, rating 4.9⭐<br><br>
+Mau push rank tanpa ribet?<br>
+👉 Link di bio atau WA langsung<br><br>
+#JokiML #MobileLegends #PushRank #ETNYX #MLBB #JokiRank
+  </div>
+  <h4>🎥 Notes Visual</h4>
+  <p style="color:var(--text-muted);">Opening: text besar bold di layar gelap. Transisi ke logo ETNYX + tampilan dashboard. B-roll: footage ML hero + UI website. Closing: logo + link CTA gradient.</p>
+</div>
+
+<!-- POST 2 -->
+<div class="post-detail">
+  <div class="post-header">
+    <div class="post-num">2</div>
+    <div>
+      <div class="post-title">TUTORIAL: Cara Order Joki Paket — 2 Menit</div>
+      <div class="post-meta"><span class="badge badge-green">Reels 60s</span> &nbsp;·&nbsp; Education &nbsp;·&nbsp; Rabu W1 19:00</div>
+    </div>
+  </div>
+  <h4>🎬 Script (per detik)</h4>
+  <div class="script-block">
+<strong>[0-3s]</strong> "Cara order joki ML di ETNYX. 2 menit selesai." ← <strong style="color:var(--danger);">HOOK</strong><br>
+<strong>[3-10s]</strong> "Step 1: Buka etnyx.com, klik ORDER JOKI."<br>
+<strong>[10-18s]</strong> "Step 2: Pilih MODE — JOKI PAKET. Harga fix dari rank A ke B."<br>
+<strong>[18-28s]</strong> "Step 3: Pilih PAKET. Contoh: Epic V ke Legend V."<br>
+<strong>[28-35s]</strong> "Step 4: Tambah Express (+20%) atau Premium (+30%)."<br>
+<strong>[35-43s]</strong> "Step 5: Isi data akun ML. Dienkripsi AES-256."<br>
+<strong>[43-50s]</strong> "Step 6: Pilih pembayaran. Transfer, e-wallet, QRIS."<br>
+<strong>[50-57s]</strong> "Step 7: Bayar, langsung tracking real-time!"<br>
+<strong>[57-60s]</strong> "Gampang kan? Link di bio. 👇"
+  </div>
+  <h4>🎥 Notes Visual</h4>
+  <p style="color:var(--text-muted);"><strong>Screen recording</strong> <code>etnyx.com/order</code> → Mode Paket → pilih → isi form → bayar. Overlay step number di tiap transisi. Kursor highlight elemen yang dibahas.</p>
+</div>
+
+<!-- POST 3 -->
+<div class="post-detail">
+  <div class="post-header">
+    <div class="post-num">3</div>
+    <div>
+      <div class="post-title">SOCIAL PROOF — Kata Mereka Yang Udah Pake ETNYX</div>
+      <div class="post-meta"><span class="badge badge-purple">Carousel 5 slides</span> &nbsp;·&nbsp; Proof &nbsp;·&nbsp; Jumat W1 20:00</div>
+    </div>
+  </div>
+  <h4>📑 Breakdown per Slide</h4>
+  <table>
+    <tr><th>Slide</th><th>Tipe</th><th>Content</th></tr>
+    <tr><td><strong>1</strong></td><td>Cover</td><td>🗣️ "Kata Mereka Yang Udah Pake ETNYX" — 4.9/5 ⭐ · 500+ Reviews</td></tr>
+    <tr><td><strong>2</strong></td><td>Review</td><td>⭐⭐⭐⭐⭐ Joki Paket — "Epic → Mythic 2 hari, akun aman"</td></tr>
+    <tr><td><strong>3</strong></td><td>Review</td><td>⭐⭐⭐⭐⭐ Joki PerStar — "Tracking real-time, recommended!"</td></tr>
+    <tr><td><strong>4</strong></td><td>Review</td><td>⭐⭐⭐⭐⭐ Gendong — "Booster jago carry, dikasih tips"</td></tr>
+    <tr><td><strong>5</strong></td><td>CTA</td><td>2.847+ order ✅ · 4.9⭐ · 0 akun bermasalah 🔒 → etnyx.com/order</td></tr>
+  </table>
+  <h4>🎥 Notes Visual</h4>
+  <p style="color:var(--text-muted);">Slide 2-4: screenshot review asli dengan overlay brand (dark bg, accent border). Slide 5: stat numbers besar + CTA button gradient.</p>
+</div>
+
+<!-- POST 4 -->
+<div class="post-detail">
+  <div class="post-header">
+    <div class="post-num">4</div>
+    <div>
+      <div class="post-title">PAIN POINT — POV: Carry 15-2-8, Tetep Kalah</div>
+      <div class="post-meta"><span class="badge badge-red">Reels 15s</span> &nbsp;·&nbsp; Awareness &nbsp;·&nbsp; Senin W2 19:00</div>
+    </div>
+  </div>
+  <h4>🎬 Script (per detik)</h4>
+  <div class="script-block">
+<strong>[0-3s]</strong> "POV: Carry 15 kill di ranked" ← <strong style="color:var(--danger);">HOOK</strong><br>
+<strong>[3-6s]</strong> "Tim kamu:" (cut ke screenshot: AFK, 0-8-1, build aneh)<br>
+<strong>[6-10s]</strong> "Star -1. Lagi. Dan lagi."<br>
+<strong>[10-14s]</strong> "Meanwhile yang pake ETNYX:" (dashboard Mythic, winstreak)<br>
+<strong>[14-18s]</strong> "Beda cerita."<br>
+<strong>[18-20s]</strong> "etnyx.com — link di bio"
+  </div>
+  <h4>🎥 Notes Visual</h4>
+  <p style="color:var(--text-muted);"><strong>Angle:</strong> Frustration → Desire. Split screen: kiri = scoreboard kalah (merah), kanan = dashboard ETNYX (hijau). Trending audio ML. Fast cuts, meme style.</p>
+</div>
+
+<!-- POST 5 -->
+<div class="post-detail">
+  <div class="post-header">
+    <div class="post-num">5</div>
+    <div>
+      <div class="post-title">TUTORIAL: Mau Push Cuma Beberapa Star?</div>
+      <div class="post-meta"><span class="badge badge-green">Reels 60s</span> &nbsp;·&nbsp; Education &nbsp;·&nbsp; Rabu W2 19:00</div>
+    </div>
+  </div>
+  <h4>🎬 Script (per detik)</h4>
+  <div class="script-block">
+<strong>[0-3s]</strong> "Ga perlu push full rank. Bisa per-bintang!" ← <strong style="color:var(--danger);">HOOK</strong><br>
+<strong>[3-10s]</strong> "Buka etnyx.com → Order. Pilih Mode: PER BINTANG."<br>
+<strong>[10-20s]</strong> "Pilih RANK. Harga per star langsung keliatan."<br>
+<strong>[20-28s]</strong> "Atur jumlah star (min 3). Total otomatis."<br>
+<strong>[28-35s]</strong> "Tambah Express/Premium biar prioritas."<br>
+<strong>[35-43s]</strong> "Isi data. Terenkripsi AES-256."<br>
+<strong>[43-50s]</strong> "Selesai! Tracking + notif WA."<br>
+<strong>[50-55s]</strong> "Mulai Rp 4.000/star."<br>
+<strong>[55-58s]</strong> "Link di bio. 👇"
+  </div>
+  <h4>🎥 Notes Visual</h4>
+  <p style="color:var(--text-muted);"><strong>Screen recording</strong> <code>/order</code> → Mode Per Bintang → pilih rank → slider jumlah star → bayar. Overlay harga besar saat muncul "Rp 4.000/star".</p>
+</div>
+
+<!-- POST 6 -->
+<div class="post-detail">
+  <div class="post-header">
+    <div class="post-num">6</div>
+    <div>
+      <div class="post-title">KEAMANAN — Akun Kamu Aman di ETNYX</div>
+      <div class="post-meta"><span class="badge badge-teal">Carousel 5 slides</span> &nbsp;·&nbsp; Trust &nbsp;·&nbsp; Jumat W2 20:00</div>
+    </div>
+  </div>
+  <h4>📑 Breakdown per Slide</h4>
+  <table>
+    <tr><th>Slide</th><th>Tipe</th><th>Content</th></tr>
+    <tr><td><strong>1</strong></td><td>Cover</td><td>🔒 "Akun Kamu AMAN di ETNYX" — Ini buktinya 👇</td></tr>
+    <tr><td><strong>2</strong></td><td>Feature</td><td>🔐 <strong>Enkripsi AES-256</strong> — Password dienkripsi military-grade</td></tr>
+    <tr><td><strong>3</strong></td><td>Feature</td><td>📊 <strong>Tracking Real-Time</strong> — Pantau 24/7, notif WA otomatis</td></tr>
+    <tr><td><strong>4</strong></td><td>Feature</td><td>👨‍💻 <strong>Booster Terverifikasi</strong> — Diseleksi, credential saat order aktif saja</td></tr>
+    <tr><td><strong>5</strong></td><td>CTA</td><td>"Keamanan bukan fitur tambahan. Ini STANDAR kami." → etnyx.com</td></tr>
+  </table>
+  <h4>🎥 Notes Visual</h4>
+  <p style="color:var(--text-muted);">Slide 2-4: icon besar + headline + penjelasan 1 kalimat. Warna accent (#2DD4BF) dominant. Slide 5: quote block + CTA gradient button.</p>
+</div>
+
+<!-- POST 7 -->
+<div class="post-detail">
+  <div class="post-header">
+    <div class="post-num">7</div>
+    <div>
+      <div class="post-title">TUTORIAL: Main Bareng Booster Mythic (Gendong)</div>
+      <div class="post-meta"><span class="badge badge-green">Reels 60s</span> &nbsp;·&nbsp; Education &nbsp;·&nbsp; Senin W3 19:00</div>
+    </div>
+  </div>
+  <h4>🎬 Script (per detik)</h4>
+  <div class="script-block">
+<strong>[0-3s]</strong> "Mode Gendong = main BARENG booster!" ← <strong style="color:var(--danger);">HOOK</strong><br>
+<strong>[3-10s]</strong> "Buka etnyx.com → Order. Pilih Mode: GENDONG."<br>
+<strong>[10-20s]</strong> "Pilih RANK. Harga per star di card."<br>
+<strong>[20-28s]</strong> "Atur jumlah star (min 3)."<br>
+<strong>[28-35s]</strong> "Pilih ROLE: EXP, Roamer, Mid, dll."<br>
+<strong>[35-42s]</strong> "Pilih jadwal main."<br>
+<strong>[42-48s]</strong> "GA PERLU kasih password! Main pakai akun sendiri."<br>
+<strong>[48-55s]</strong> "Bayar, booster contact via WA. Langsung main!"<br>
+<strong>[55-60s]</strong> "Link di bio. 👇"
+  </div>
+  <div class="highlight-box"><strong>Key Message:</strong> Gendong ≠ Joki. Tidak perlu share password. Booster carry sebagai duo partner. Ini yang paling aman!</div>
+</div>
+
+<!-- POST 8 -->
+<div class="post-detail">
+  <div class="post-header">
+    <div class="post-num">8</div>
+    <div>
+      <div class="post-title">PROMO — Slot Booster Tinggal 5 🚨</div>
+      <div class="post-meta"><span class="badge badge-amber">Reels 30s</span> &nbsp;·&nbsp; Conversion &nbsp;·&nbsp; Rabu W3 19:00</div>
+    </div>
+  </div>
+  <h4>🎬 Script (per detik)</h4>
+  <div class="script-block">
+<strong>[0-3s]</strong> "SLOT BOOSTER MINGGU INI TINGGAL 5 🚨" ← <strong style="color:var(--danger);">HOOK</strong><br>
+<strong>[3-8s]</strong> "Season reset tinggal [X] hari."<br>
+<strong>[8-15s]</strong> "ETNYX — push rank mulai 4 ribu."<br>
+<strong>[15-22s]</strong> "Tracking real-time. Akun dienkripsi."<br>
+<strong>[22-28s]</strong> "Jangan tunggu besok."<br>
+<strong>[28-30s]</strong> "etnyx.com — link di bio 👇"
+  </div>
+  <h4>🎥 Notes Visual</h4>
+  <p style="color:var(--text-muted);">Urgency style: warna merah/amber dominant. Counter "5 slots" animasi. Flash sale feeling. Closing: CTA gradient besar + logo.</p>
+</div>
+
+<!-- POST 9 -->
+<div class="post-detail">
+  <div class="post-header">
+    <div class="post-num">9</div>
+    <div>
+      <div class="post-title">FAQ — Pertanyaan Yang Sering Ditanya</div>
+      <div class="post-meta"><span class="badge badge-purple">Carousel 6 slides</span> &nbsp;·&nbsp; Education &nbsp;·&nbsp; Jumat W3 20:00</div>
+    </div>
+  </div>
+  <h4>📑 Breakdown per Slide</h4>
+  <table>
+    <tr><th>Slide</th><th>Pertanyaan</th><th>Jawaban</th></tr>
+    <tr><td><strong>1</strong></td><td colspan="2">❓ Pertanyaan Yang Sering Ditanya · Swipe 👉</td></tr>
+    <tr><td><strong>2</strong></td><td>"Aman ga akun saya?"</td><td>100% aman. Enkripsi AES-256.</td></tr>
+    <tr><td><strong>3</strong></td><td>"Berapa lama?"</td><td>Epic→Legend: 2-3 hari. Express lebih cepat!</td></tr>
+    <tr><td><strong>4</strong></td><td>"Bayar pakai apa?"</td><td>Transfer, QRIS, e-wallet (OVO, GoPay, DANA).</td></tr>
+    <tr><td><strong>5</strong></td><td>"Bedanya Paket, PerStar, Gendong?"</td><td>📦 Serahin akun · ⭐ Per bintang · 🤝 Main bareng</td></tr>
+    <tr><td><strong>6</strong></td><td colspan="2">Masih tanya? Chat WA 24/7 · etnyx.com · Link di bio</td></tr>
+  </table>
+  <h4>🎥 Notes Visual</h4>
+  <p style="color:var(--text-muted);">Q di atas (font besar, putih), A di bawah (font medium, accent). Background dark. Slide 6: CTA gradient + WA icon + logo.</p>
+</div>
+
+<hr>
+
+<!-- ==================== 6. PANDUAN REPOST ==================== -->
+<h2 id="repost">6. Panduan Repost Multi-Platform <span class="badge badge-purple">SMM</span></h2>
+
+<div class="alert alert-info">
+  <strong>Untuk SMM:</strong> Setelah posting di IG, repost ke 3 platform lain. Jangan langsung cross-post — sesuaikan format per platform.
+</div>
+
+<table>
+  <tr><th>Platform</th><th>Format</th><th>Catatan Penting</th></tr>
+  <tr>
+    <td><strong>TikTok</strong></td>
+    <td>Reels → repost langsung</td>
+    <td>Tambah trending sound, <strong style="color:var(--danger);">hapus watermark IG</strong>, caption lebih pendek + hashtag TikTok</td>
+  </tr>
+  <tr>
+    <td><strong>Facebook</strong></td>
+    <td>Reels + Carousel as album</td>
+    <td>Caption lebih panjang, <strong>tambah link langsung</strong> (FB support clickable link), tag FB Page</td>
+  </tr>
+  <tr>
+    <td><strong>YouTube Shorts</strong></td>
+    <td>Reels → repost</td>
+    <td>Judul singkat (hook), deskripsi: link + hashtag, thumbnail auto dari frame terbaik</td>
+  </tr>
+</table>
+
+<div class="card-grid g3">
+  <div class="card" style="border-top:3px solid #E4405F;">
+    <div class="label">Instagram</div>
+    <div class="desc">Post PERTAMA di sini. Sumber utama. Bio link ke etnyx.com/order.</div>
+  </div>
+  <div class="card" style="border-top:3px solid #000000; border-top-color:#fff;">
+    <div class="label">TikTok</div>
+    <div class="desc">Repost 1-2 jam setelah IG. Trending sound wajib. Caption singkat + CTA.</div>
+  </div>
+  <div class="card" style="border-top:3px solid #FF0000;">
+    <div class="label">YouTube Shorts</div>
+    <div class="desc">Repost sore/malam. Judul = hook. Link di deskripsi.</div>
+  </div>
+</div>
+
+<hr>
+
+<!-- ==================== FOOTER ==================== -->
+<div style="text-align:center; padding:30px 0; color:var(--text-muted);">
+  <div style="font-size:22px; font-weight:900; background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:8px;">ETNYX</div>
+  <div class="quote" style="display:inline-block;">"Bukan joki biasa. Ini SISTEM." 🎮</div>
+  <div style="font-size:10px; margin-top:12px; color:rgba(255,255,255,0.25);">
+    Instagram 9-Post Grid &amp; Mood Board v4.0 — 20 April 2026<br>
+    Content Plan · Visual Direction · Script Lengkap · Multi-Platform Repost
+  </div>
+</div>
+
+</body>
+</html><!--
+  ETNYX — Instagram 9-Post Launch Grid & Mood Board
   Theme: ETNYX System Guide v2 (dark, gradient headlines)
   For PDF export — matches all ETNYX reference docs
   Updated: 20 April 2026
