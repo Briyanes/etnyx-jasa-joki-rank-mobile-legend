@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ETNYX — Image Feed Editor Brief (90 Days)</title>
+  <style>
+    @page { margin: 16mm 12mm; size: A4; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 24px;
+      color: #1a1a1a;
+      line-height: 1.6;
+      font-size: 12px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    /* Typography */
+    h1 {
+      font-size: 28px;
+      font-weight: 900;
+      color: #0f1419;
+      margin: 0 0 8px;
+      letter-spacing: -0.5px;
+    }
+    h2 {
+      font-size: 16px;
+      font-weight: 800;
+      color: #0f1419;
+      border-bottom: 2px solid #14B8A6;
+      padding-bottom: 6px;
+      margin: 24px 0 12px;
+      page-break-after: avoid;
+    }
+    h3 {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0d9488;
+      margin: 14px 0 8px;
+      page-break-after: avoid;
+    }
+    h4 {
+      font-size: 11px;
+      font-weight: 700;
+      color: #374151;
+      margin: 8px 0 4px;
+      page-break-after: avoid;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      padding: 32px 0 24px;
+      border-bottom: 3px solid #14B8A6;
+      margin-bottom: 28px;
+      page-break-after: always;
+    }
+    .tagline {
+      font-size: 14px;
+      color: #64748B;
+      margin: 6px 0;
+      font-weight: 500;
+    }
+    .meta {
+      font-size: 11px;
+      color: #94A3B8;
+      margin-top: 12px;
+    }
+
+    /* Cards & Boxes */
+    .card {
+      background: #f0fdfa;
+      border: 1px solid #99f6e0;
+      border-radius: 6px;
+      padding: 10px 12px;
+      margin: 8px 0;
+      font-size: 11px;
+    }
+    .card strong { color: #0f172a; }
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin: 8px 0;
+    }
+    .quick-box {
+      background: #fef3c7;
+      border-left: 3px solid #f59e0b;
+      padding: 8px 12px;
+      margin: 6px 0;
+      font-size: 11px;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0;
+      font-size: 10.5px;
+      page-break-inside: avoid;
+    }
+    th {
+      background: #0f172a;
+      color: white;
+      padding: 7px 8px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 10px;
+    }
+    td {
+      padding: 5px 8px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    tr:nth-child(even) { background: #f8fafc; }
+
+    /* Day Block */
+    .day-block {
+      background: white;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 10px;
+      margin: 8px 0;
+      page-break-inside: avoid;
+    }
+    .day-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 6px;
+    }
+    .day-number {
+      font-weight: 900;
+      font-size: 18px;
+      color: #14B8A6;
+    }
+    .day-info {
+      font-size: 10px;
+      color: #64748B;
+    }
+    .posting-time {
+      background: #dbeafe;
+      color: #0c4a6e;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-weight: 600;
+      font-size: 10px;
+    }
+    .theme-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 9px;
+      margin: 4px 4px 4px 0;
+    }
+    .theme-problem { background: #fee2e2; color: #991b1b; }
+    .theme-entertainment { background: #fef3c7; color: #92400e; }
+    .theme-education { background: #dbeafe; color: #0c4a6e; }
+    .theme-proof { background: #dcfce7; color: #166534; }
+    .theme-selling { background: #f3e8ff; color: #6b21a8; }
+
+    .caption {
+      background: #f1f5f9;
+      padding: 8px;
+      border-left: 2px solid #64748B;
+      margin: 6px 0;
+      font-size: 10px;
+      line-height: 1.5;
+      font-style: italic;
+      color: #334155;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-size: 9px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .badge-teal { background: #ccfbf1; color: #0d9488; }
+    .badge-amber { background: #fed7aa; color: #92400e; }
+    .badge-red { background: #fecaca; color: #7f1d1d; }
+    .badge-blue { background: #bfdbfe; color: #1e40af; }
+
+    /* Note */
+    .note {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-radius: 4px;
+      padding: 6px 8px;
+      margin: 4px 0;
+      font-size: 9.5px;
+      color: #78350f;
+    }
+
+    /* Week section */
+    .week-divider {
+      text-align: center;
+      padding: 16px 0;
+      margin: 20px 0;
+      border-top: 2px solid #cbd5e1;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 12px;
+      font-weight: 700;
+      color: #0f172a;
+      page-break-after: avoid;
+    }
+    .week-divider strong { color: #14B8A6; font-size: 14px; }
+
+    /* List */
+    ul, ol { padding-left: 18px; margin: 6px 0; }
+    li { margin: 3px 0; line-height: 1.5; }
+
+    /* Checklist */
+    .checklist { display: grid; gap: 4px; margin: 8px 0; }
+    .check-item {
+      display: flex;
+      align-items: center;
+      padding: 4px;
+      font-size: 10.5px;
+    }
+    .check-item input { margin-right: 6px; }
+
+    /* Sections */
+    .section { margin: 16px 0; }
+    hr {
+      border: none;
+      border-top: 1px solid #cbd5e1;
+      margin: 20px 0;
+    }
+
+    /* Quick ref */
+    .quick-ref {
+      background: linear-gradient(135deg, #f0fdfa, #f8fafc);
+      border: 2px solid #14B8A6;
+      border-radius: 8px;
+      padding: 14px;
+      margin: 16px 0;
+      page-break-inside: avoid;
+    }
+    .quick-ref h3 { margin-top: 0; color: #0d9488; }
+
+    /* Print */
+    @media print {
+      body { padding: 0; }
+      .page-break { page-break-before: always; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ========== COVER ========== -->
+<div class="header">
+  <h1>ETNYX</h1>
+  <div class="tagline">IMAGE FEED EDITOR GUIDE — 90 Days Calendar</div>
+  <div class="tagline" style="font-size: 12px; margin-top: 12px;">Daily Posting Schedule • Caption Templates • Quick Checklist</div>
+  <div class="meta">
+    <strong>Untuk:</strong> Image Feed Editor (Solo)<br>
+    <strong>Platform:</strong> Instagram Reels + Feed Carousel<br>
+    <strong>Periode:</strong> 90 Hari (13 Minggu) | Mulai: April 2026
+  </div>
+</div>
+
+<!-- ========== QUICK REFERENCE ========== -->
+<div class="quick-ref">
+  <h3>⚡ QUICK REFERENCE — START HERE</h3>
+  <table>
+    <tr>
+      <th>Posting Schedule</th>
+      <th>Format</th>
+      <th>Pillar %</th>
+    </tr>
+    <tr>
+      <td><strong>IG Reels:</strong> 1x/hari @ 12:00 + 18:00</td>
+      <td>15-60 sec Video/Image</td>
+      <td>Problem (20%)</td>
+    </tr>
+    <tr>
+      <td><strong>IG Carousel:</strong> 2x/minggu @ 12:00</td>
+      <td>5-6 slide image</td>
+      <td>Education (20%)</td>
+    </tr>
+    <tr>
+      <td><strong>IG Story:</strong> 3-5x/hari</td>
+      <td>Proof, Poll, Promo</td>
+      <td>Proof (25%)</td>
+    </tr>
+  </table>
+</div>
+
+<div class="card-grid">
+  <div class="card">
+    <h4>📁 File Naming</h4>
+    <p><code>Day01-Problem-SoloQueue.mp4</code> atau <code>Week02-Testimonial-Collection.jpg</code></p>
+  </div>
+  <div class="card">
+    <h4>✅ BEFORE POSTING</h4>
+    <p>1. Captions ✓ | 2. Hashtag ✓ | 3. CTA ✓ | 4. Link Bio ✓ | 5. Schedule ✓</p>
+  </div>
+</div>
+
+<hr>
+
+<!-- ========== 5 PILLARS CHEATSHEET ========== -->
+<h2>5 Content Pillars — Posting Distribution</h2>
+
+<div class="card-grid">
+  <div class="card" style="border-left: 4px solid #ef4444;">
+    <h4>😤 PROBLEM (20%)</h4>
+    <p><strong>Goal:</strong> Relate, trigger pain<br>
+    <strong>Format:</strong> Short video, meme<br>
+    <strong>Topics:</strong> Solo queue toxic, stuck rank, skill gap<br>
+    <strong>Posting:</strong> Monday-Friday 12:00</p>
+  </div>
+
+  <div class="card" style="border-left: 4px solid #f59e0b;">
+    <h4>😂 ENTERTAINMENT (20%)</h4>
+    <p><strong>Goal:</strong> Viral, reach, shares<br>
+    <strong>Format:</strong> Funny clip, meme, dance<br>
+    <strong>Topics:</strong> ML meme, funny moments, trending<br>
+    <strong>Posting:</strong> Tuesday-Thursday 18:00</p>
+  </div>
+
+  <div class="card" style="border-left: 4px solid #3b82f6;">
+    <h4>📚 EDUCATION (20%)</h4>
+    <p><strong>Goal:</strong> Trust, authority<br>
+    <strong>Format:</strong> Tutorial, tips & tricks<br>
+    <strong>Topics:</strong> Hero guide, rank push tips, build item<br>
+    <strong>Posting:</strong> Carousel 2x/minggu</p>
+  </div>
+
+  <div class="card" style="border-left: 4px solid #22c55e;">
+    <h4>🏆 PROOF (25%)</h4>
+    <p><strong>Goal:</strong> Credibility, FOMO<br>
+    <strong>Format:</strong> Testimoni, before-after, rank proof<br>
+    <strong>Topics:</strong> Client results, mythic push, success<br>
+    <strong>Posting:</strong> Story 3x/hari</p>
+  </div>
+
+  <div class="card" style="border-left: 4px solid #a855f7;">
+    <h4>💰 SELLING (15%)</h4>
+    <p><strong>Goal:</strong> Conversion, CTA<br>
+    <strong>Format:</strong> Promo, how-to-order, limited offer<br>
+    <strong>Topics:</strong> Flash sale, "order sekarang", bonus<br>
+    <strong>Posting:</strong> Story peak hours</p>
+  </div>
+</div>
+
+<div class="note">
+  <strong>📌 Jangan lupa:</strong> Setiap caption harus ada CTA (Follow, Save, DM, Link Bio). Tanpa CTA = post sia-sia.
+</div>
+
+<hr>
+
+<!-- ========== CAPTION TEMPLATES ========== -->
+<h2>Caption Templates Library — Copy Paste Ready</h2>
+
+<h3>🎯 Problem Hook (20%)</h3>
+<div class="caption">
+"Solo queue di rank epic be like... 💀 Yang relate angkat tangan! Tapi tenang, ada solusinya. Kita bisa bantuin push rank lo proper. DM aja, slot terbatas 🔥"
+</div>
+<div class="caption">
+"Star turun terus? Toxic teamate? Mage gitu tapi GA bisa aim. 😤 Bukannya kasih excuses, tapi lo deserve Mythic. Serah ke profesional aja. Link bio 👆"
+</div>
+
+<h3>😂 Entertainment Hook (20%)</h3>
+<div class="caption">
+"POV: Lo ADC tapi support ilang 💀💀💀 Tag temen lo yang gini. Save ini kalau butuh hiburan 😂 #mobilelegends #mlmeme"
+</div>
+<div class="caption">
+"Ketika akhirnya matched dengan jungler yang pinter... 🎉 Kesampean ranked grind serius. Lo punya jungler kaya gini? Share dong 👇"
+</div>
+
+<h3>📚 Education Hook (20%)</h3>
+<div class="caption">
+"⭐ 5 ITEM YANG HARUS LO BELI KALAU PUSHING RANK:
+1. Def Boots (WAJIB)
+2. Winter Truncheon
+3. Antique Cuirass
+4. Twilight Armor
+5. Uru Mask ← Underrated!
+
+Save ini, bookmark, share ke group 👇 Jangan asal beli item!"
+</div>
+<div class="caption">
+"Cara pick hero yang BENAR di ranked:
+❌ Ambil fav hero aja
+✅ Adjust team composition
+
+Pick support kalau tim punya 4 damage dealer. Maksimalkan win rate > elo hunting. Tips lainnya swipe up ➡️"
+</div>
+
+<h3>🏆 Proof/Testimonial (25%)</h3>
+<div class="caption">
+"Dari Epic jadi Mythic dalam 3 hari ✨ Testimoni real dari client kami. Ini proof kalau sys kami beneran work. Terakhir slot! Hubungi WA untuk daftar 💬"
+</div>
+<div class="caption">
+"Akun aman? Ya 100% ✅ Military-grade encryption (AES-256). 0 kasus ganti password/banned. Screening ketat, booster verified. Serius ambil rank lo. Link bio 👆"
+</div>
+
+<h3>💰 Selling Hook (15%)</h3>
+<div class="caption">
+"⏰ FLASH PROMO — HARI INI SAJA!
+Paket Mythic boost: 50% OFF
+From 1.5jt → 750K aja!
+
+Slot tinggal 3. DM sekarang jangan nunggu full 🔥"
+</div>
+<div class="caption">
+"3 Alasan kenapa ETNYX beda dari joki lain:
+✅ Sistem (bukan freelancer)
+✅ Transparent (tracking public)
+✅ Aman (encryption militer)
+
+Yakin? Chat WA, tanya-tanya gratis 👇"
+</div>
+
+<hr>
+
+<!-- ========== WEEK 1 ========== -->
+<div class="week-divider"><strong>MINGGU 1</strong> • Day 1-7 • Theme: PAIN POINT & AWARENESS</div>
+
+<div class="day-block">
+  <div class="day-header">
+    <div>
+      <div class="day-number">DAY 1</div>
+      <div class="day-info">Monday, April 14 | Reels + Carousel</div>
+    </div>
+    <div><span class="posting-time">12:00 + 18:00</span></div>
+  </div>
+  <span class="theme-badge theme-problem">PROBLEM</span>
+  <h4>📍 Content: "Solo Queue Pain"</h4>
+  <p><strong>Format:</strong> Short video 15-30s (meme/relatable)<br>
+  <strong>Visual:</strong> Gameplay screenshot - toxic team moment<br>
+  <strong>Angle:</strong> "Relate? Stuck di rank? Toxic teamate?"</p>
+  <div class="caption">
+"Solo queue di rank epic be like... 💀 Star turun terus, teammate kok gitu. Yang relate angkat tangan! Ada solusi sih. DM untuk tanya-tanya. Slot terbatas 🔥 #mnllegends #rankedgrind"
+  </div>
+  <div class="note"><strong>🎬 Tips:</strong> Pakai audio trending (viral sound). Subtitle in-frame. 30 seconds max. CTA harus jelas.</div>
+</div>
+
+<div class="day-block">
+  <div class="day-header">
+    <div>
+      <div class="day-number">DAY 2</div>
+      <div class="day-info">Tuesday, April 15 | Reels</div>
+    </div>
+    <div><span class="posting-time">18:00</span></div>
+  </div>
+  <span class="theme-badge theme-entertainment">ENTERTAINMENT</span>
+  <h4>📍 Content: "Funny Moment / Meme"</h4>
+  <p><strong>Format:</strong> Video 20s or static meme<br>
+  <strong>Visual:</strong> Funny gameplay moment / ML meme<br>
+  <strong>Angle:</strong> "Tag temen lo yang gini 😂"</p>
+  <div class="caption">
+"POV: Jadi support tapi tim ADC gak fokus 💀 Tag temen lo yang racist di game 😂 Save ini, bagus buat hiburan weekend. Follow untuk konten lebih seru! #mlmeme #mobilelegendsmeme"
+  </div>
+  <div class="note"><strong>🎬 Tips:</strong> Gunakan trending audio. Humor yang relatable. "Tag temen" = encourage shares. Share rate high = algorithm boost.</div>
+</div>
+
+<div class="day-block">
+  <div class="day-header">
+    <div>
+      <div class="day-number">DAY 3</div>
+      <div class="day-info">Wednesday, April 16 | Carousel</div>
+    </div>
+    <div><span class="posting-time">12:00</span></div>
+  </div>
+  <span class="theme-badge theme-education">EDUCATION</span>
+  <h4>📍 Content: "Hero Guide Carousel" (5-6 slides)</h4>
+  <p><strong>Format:</strong> Educational carousel<br>
+  <strong>Visual:</strong> Clean design, text + hero image<br>
+  <strong>Angle:</strong> "5 Cara Gampang Push Rank"</p>
+  <div class="caption">
+"5 CARA GAMPANG PUSH RANK (Step-by-step):
+1️⃣ Pick meta hero (hero OP season ini)
+2️⃣ Learn 3-5 build item saja
+3️⃣ Focus farm early game
+4️⃣ Team fight dengan item lengkap
+5️⃣ Take objective (turtle, lord)
+
+Save ini! Bookmark! Share ke grup rank lo 👇 Jangan asal push, tapi push SMART. Swipe untuk tips lanjutan ➡️"
+  </div>
+  <div class="note"><strong>🎨 Design:</strong> Slide 1 = Hook/title big. Slide 2-5 = detail per point. Last slide = CTA (Link Bio / Follow). Warna: teal + dark theme.</div>
+</div>
+
+<div class="day-block">
+  <div class="day-header">
+    <div>
+      <div class="day-number">DAY 4</div>
+      <div class="day-info">Thursday, April 17 | Reels</div>
+    </div>
+    <div><span class="posting-time">12:00</span></div>
+  </div>
+  <span class="theme-badge theme-problem">PROBLEM</span>
+  <h4>📍 Content: "Stuck Rank Problem"</h4>
+  <p><strong>Format:</strong> Video 15-30s<br>
+  <strong>Visual:</strong> Gameplay + text overlay<br>
+  <strong>Angle:</strong> "Skill gap itu real"</p>
+  <div class="caption">
+"Udah grind 100 game, rank gabisa naik. Bukan gara-gara sial, tapi ada GAP SKILL. Jangan marah, ambil kesempatan ini. Joki profesional bisa bantu. DM sekarang sebelum slot penuh! 🔥 #mobilelegends #mythic"
+  </div>
+  <div class="note"><strong>🎬 Tips:</strong> Show real gameplay struggle. Relatable emotion. Strong CTA. Use urgent language ("sebelum full").</div>
+</div>
+
+<div class="day-block">
+  <div class="day-header">
+    <div>
+      <div class="day-number">DAY 5</div>
+      <div class="day-info">Friday, April 18 | Reels</div>
+    </div>
+    <div><span class="posting-time">18:00</span></div>
+  </div>
+  <span class="theme-badge theme-entertainment">ENTERTAINMENT</span>
+  <h4>📍 Content: "Trending ML Meme / Funny Video"</h4>
+  <p><strong>Format:</strong> 20-30s video<br>
+  <strong>Visual:</strong> Gameplay funny moment<br>
+  <strong>Angle:</strong> Relatable humor</p>
+  <div class="caption">
+"When teamate pick Lancelot tapi ga bisa sword dance 💀😂 Siapa teamate lo yang gini? Tag di comments 👇 Save kalau butuh hiburan, share ke grup! #mlhumor #mobilelegends #funny"
+  </div>
+  <div class="note"><strong>🎬 Tips:</strong> Trending audio MANDATORY. Captions. High energy. Encourage tagging/comments for engagement.</div>
+</div>
+
+<div class="day-block">
+  <div class="day-header">
+    <div>
+      <div class="day-number">DAY 6</div>
+      <div class="day-info">Saturday, April 19 | Reels</div>
+    </div>
+    <div><span class="posting-time">12:00</span></div>
+  </div>
+  <span class="theme-badge theme-proof">PROOF</span>
+  <h4>📍 Content: "Client Testimonial / Success Story"</h4>
+  <p><strong>Format:</strong> Video 30-45s (before-after)<br>
+  <strong>Visual:</strong> Rank progression screenshot proof<br>
+  <strong>Angle:</strong> "Real result dari client kami"</p>
+  <div class="caption">
+"Epic → Mythic dalam 3 hari! ✨ Testimoni real dari @[client]. Sistemnya benar-benar work. Akun 100% aman (AES-256 encryption). Mau coba? Slot terbatas. Chat sekarang 💬 Link di bio 👆"
+  </div>
+  <div class="note"><strong>📸 Proof:</strong> Screenshot rank naik + nama asli client (konsent). Transparansi = trust. Akun aman = highlight utama.</div>
+</div>
+
+<div class="day-block">
+  <div class="day-header">
+    <div>
+      <div class="day-number">DAY 7</div>
+      <div class="day-info">Sunday, April 20 | Story + Reel</div>
+    </div>
+    <div><span class="posting-time">18:00</span></div>
+  </div>
+  <span class="theme-badge theme-selling">SELLING</span>
+  <h4>📍 Content: "Promo / CTA Selling"</h4>
+  <p><strong>Format:</strong> Video 15-20s<br>
+  <strong>Visual:</strong> Promo graphic + countdown<br>
+  <strong>Angle:</strong> "Limited offer / urgency"</p>
+  <div class="caption">
+"⏰ PROMO MINGGU INI!
+Paket Epic → Legendary: 40% OFF
+50K → 30K only!!
+
+Schedule push: HARI INI-BESOK aja. Setelahnya full 🔥 DM cepat! #etnyx #promoml #limitedoffer"
+  </div>
+  <div class="note"><strong>💰 Selling:</strong> Price visible. Urgency ("HARI INI" / "terbatas"). CTA phone clear. Use Story too untuk exposure maksimal.</div>
+</div>
+
+<hr>
+
+<!-- ========== WEEK 2 ========== -->
+<div class="week-divider"><strong>MINGGU 2</strong> • Day 8-14 • Theme: TRUST & CREDIBILITY</div>
+
+<div class="day-block">
+  <div class="day-header">
+    <div>
+      <div class="day-number">DAY 8</div>
+      <div class="day-info">Monday, April 21 | Reels</div>
+    </div>
+    <div><span class="posting-time">12:00</span></div>
+  </div>
+  <span class="theme-badge theme-education">EDUCATION</span>
+  <h4>📍 Content: "Security & Safety Edge"</h4>
+  <p><strong>Format:</strong> 20-30s explainer video<br>
+  <strong>Visual:</strong> Lock icon / security visual<br>
+  <strong>Angle:</strong> "Akun lo 100% aman"</p>
+  <div class="caption">
+"Takut akun gue kena hack? 🔒 ETNYX pake encryption military-grade (AES-256). Password lo double-encrypted. 0 kasus ganti password di 2+ tahun. Aman! Trust kami. DM untuk info detail 👇 #etnyx #aman"
+  </div>
+  <div class="note"><strong>🔐 Messaging:</strong> Security = main fear. Address ini langsung. Use technical terms (tapi simple). Build trust.</div>
+</div>
+
+<div class="day-block">
+  <div class="day-header">
+    <div>
+      <div class="day-number">DAY 9</div>
+      <div class="day-info">Tuesday, April 22 | Carousel</div>
+    </div>
+    <div><span class="posting-time">12:00</span></div>
+  </div>
+  <span class="theme-badge theme-proof">PROOF</span>
+  <h4>📍 Content: "Multiple Testimonials Carousel"</h4>
+  <p><strong>Format:</strong> 5-6 slide testimonial<br>
+  <strong>Visual:</strong> Client photo + quote + result<br>
+  <strong>Angle:</strong> "Banyak yang sukses, kenapa lo?"</p>
+  <div class="caption">
+"🏆 TESTIMONIAL DARI REAL CLIENT:
+Slide 1: @client1 - Epic → Mythic (3 hari)
+Slide 2: @client2 - Rank stuck → Push 2 star (1 minggu)
+Slide 3: @client3 - Akun aman, hasil jelas, harga fair
+...
+
+Scroll untuk lihat lebih banyak! Yakin mau coba? Chat WA ➡️"
+  </div>
+  <div class="note"><strong>📸 Collection:</strong> Multiple faces = credibility. Real names = authenticity. Mix results (fast push + security + fair price).</div>
+</div>
+
+<div class="day-block">
+  <div class="day-header">
+    <div>
+      <div class="day-number">DAY 10</div>
+      <div class="day-info">Wednesday, April 23 | Reels</div>
+    </div>
+    <div><span class="posting-time">18:00</span></div>
+  </div>
+  <span class="theme-badge theme-entertainment">ENTERTAINMENT</span>
+  <h4>📍 Content: "Behind The Scenes / Booster Team"</h4>
+  <p><strong>Format:</strong> 20-30s video<br>
+  <strong>Visual:</strong> Team playing, energy, professional<br>
+  <strong>Angle:</strong> "Ini booster kami, expert sejati"</p>
+  <div class="caption">
+"Behind the scenes: Booster team ETNYX! 🎮⚡ Mereka push rank 8-12 jam per hari. Expert sejati. Ga asal ambil order, tapi BENAR-BENAR profesional. Yakin order ke kami? DM!"
+  </div>
+  <div class="note"><strong>👥 Trust Builder:</strong> Show real people. Energy. Professionalism. Makes business feel legitimate & human.</div>
+</div>
+
+<div class="day-block">
+  <div class="day-header">
+    <div>
+      <div class="day-number">DAY 11</div>
+      <div class="day-info">Thursday, April 24 | Reels</div>
+    </div>
+    <div><span class="posting-time">12:00</span></div>
+  </div>
+  <span class="theme-badge theme-problem">PROBLEM</span>
+  <h4>📍 Content: "Fear of Getting Caught / Ban"</h4>
+  <p><strong>Format:</strong> 15-20s video <br>
+  <strong>Visual:</strong> Gameplay screenshot<br>
+  <strong>Angle:</strong> "Takut di-ban? Gapapa, kami aman"</p>
+  <div class="caption">
+"Takut akun di-ban? 😰 Tenang, ETNYX udah 2+ tahun, 0 ban case. Sistemnya aman, transparansi penuh. Client aman, order jelas. Percaya diri sama kami. DM tanya-tanya! #etnyx #amanjoki"
+  </div>
+  <div class="note"><strong>😰 Fear Address:</strong> Common objection = ban risk. Overcome dengan track record. Numbers = proof.</div>
+</div>
+
+<div class="day-block">
+  <div class="day-header">
+    <div>
+      <div class="day-number">DAY 12</div>
+      <div class="day-info">Friday, April 25 | Story + Reels</div>
+    </div>
+    <div><span class="posting-time">18:00</span></div>
+  </div>
+  <span class="theme-badge theme-selling">SELLING</span>
+  <h4>📍 Content: "How to Order / Process Explained"</h4>
+  <p><strong>Format:</strong> 3-step explainer 20s<br>
+  <strong>Visual:</strong> Step-by-step visual<br>
+  <strong>Angle:</strong> "Mudah, cepat, simple"</p>
+  <div class="caption">
+"Cara order di ETNYX (super mudah):
+1️⃣ DM atau chat WA
+2️⃣ Sebutkan target rank + hero fav
+3️⃣ Bayar (transfer / iPaymu)
+4️⃣ Tunggu hasil (2-3 hari)
+
+Done! ✅ Link WA di bio 👆 Chat sekarang, tanya gratis!"
+  </div>
+  <div class="note"><strong>📝 How-to:</strong> Simplify process. 3-4 steps max. Remove friction. Include link. CTA clear.</div>
+</div>
+
+<div class="day-block">
+  <div class="day-header">
+    <div>
+      <div class="day-number">DAY 13</div>
+      <div class="day-info">Saturday, April 26 | Reels</div>
+    </div>
+    <div><span class="posting-time">12:00</span></div>
+  </div>
+  <span class="theme-badge theme-entertainment">ENTERTAINMENT</span>
+  <h4>📍 Content: "ML Trending Moment / Viral Video"</h4>
+  <p><strong>Format:</strong> 20-30s video<br>
+  <strong>Visual:</strong> Popular ML content<br>
+  <strong>Angle:</strong> Trending/viral angle</p>
+  <div class="caption">
+"When lo jadi core tapi map awareness 0 💀😂 Siapa ini? Save untuk ngehighlight video ini nanti 😂 Tag temen lo yang gini di comments! Follow untuk konten seru lainnya 👇"
+  </div>
+  <div class="note"><strong>🎬 Viral Bait:</strong> Tag-bait content. High engagement. Share rate tinggi = algo boost. Momentum killer weekly.</div>
+</div>
+
+<div class="day-block">
+  <div class="day-header">
+    <div>
+      <div class="day-number">DAY 14</div>
+      <div class="day-info">Sunday, April 27 | Story</div>
+    </div>
+    <div><span class="posting-time">18:00</span></div>
+  </div>
+  <span class="theme-badge theme-proof">PROOF</span>
+  <h4>📍 Content: "Live Push Proof / Real-time Update"</h4>
+  <p><strong>Format:</strong> Story series (3-5 slides)<br>
+  <strong>Visual:</strong> Live gameplay screenshots<br>
+  <strong>Angle:</strong> "Lihat real-time pushing"</p>
+  <div class="caption">
+"LIVE UPDATE: Client sedang push nih! 📸 Dari Epic 1 → soon-to-be Legendary. Real-time proof. 3 hari lagi selesai. Yakin mau hasil kayak ini? Chat WA cepet sebelum ketemu kuota 🚀"
+  </div>
+  <div class="note"><strong>📊 Live Proof:</strong> Story format = sense of urgency. Real-time = authenticity. Multiple slides = keep audience engaged.</div>
+</div>
+
+<hr style="page-break-before: always;">
+
+<!-- ========== WEEK 3 ========== -->
+<div class="week-divider"><strong>MINGGU 3</strong> • Day 15-21 • Theme: EDUCATION & AUTHORITY</div>
+
+<p style="color: #64748B; font-size: 11px;"><strong>Pattern:</strong> Monday/Wednesday/Friday = Problem/Education/Proof (Reel). Tuesday/Thursday = Entertainment (15-20s). Saturday = Testimonial/Viral (Educational value). Sunday = Selling/CTA.</p>
+
+<div class="day-block">
+  <div class="day-header">
+    <div>
+      <div class="day-number">DAY 15</div>
+      <div class="day-info">Monday, April 28 | Carousel</div>
+    </div>
+    <div><span class="posting-time">12:00</span></div>
+  </div>
+  <span class="theme-badge theme-education">EDUCATION</span>
+  <h4>📍 Content: "Top 5 Meta Hero This Season"</h4>
+  <div class="caption">
+"🏆 TOP 5 META HERO SEASON INI (PICK INI = WIN):
+1. Lunox (Support) - Sustain tinggi
+2. Chou (Fighter) - Versatile, never die
+3. Gusion (Assassin) - High burst, easy carry
+4. Estes (Support) - Heal OP
+5. Uranus (Tank) - Regen crazy
+
+Save ini! Jangan main hero OP. Focus familiar hero aja, maximize skill. Tips Hero guide next slide ➡️"
+  </div>
+</div>
+
+<div class="day-block">
+  <div class="day-header">
+    <div>
+      <div class="day-number">DAY 16-21</div>
+      <div class="day-info">Tue-Sun | Pattern Repeat</div>
+    </div>
+  </div>
+  <div class="note"><strong>⏰ PATTERN REPEAT:</strong> Dari minggu 3 ke atas, gunakan pattern yang sama:
+  <ul>
+    <li><strong>Mon/Wed/Fri 12:00:</strong> Problem/Education/Proof Reel</li>
+    <li><strong>Tue/Thu 18:00:</strong> Entertainment (trending audio, tag-bait)</li>
+    <li><strong>Sat 12:00:</strong> Testimonial / Viral Content</li>
+    <li><strong>Sun 18:00:</strong> Selling / Promo / CTA</li>
+    <li><strong>2x/minggu Carousel:</strong> Education (5-6 slides)</li>
+  </ul>
+  </div>
+</div>
+
+<hr>
+
+<!-- ========== CONTENT CALENDAR TABLE ========== -->
+<h2>90-Day Content Calendar Summary</h2>
+
+<table>
+  <tr>
+    <th>Week</th>
+    <th>Days</th>
+    <th>Theme</th>
+    <th>Key Message</th>
+    <th>Primary Format</th>
+  </tr>
+  <tr>
+    <td><strong>W1</strong></td>
+    <td>1-7</td>
+    <td>Pain & Awareness</td>
+    <td>"Relate to problem"</td>
+    <td>Problem + Entertainment</td>
+  </tr>
+  <tr>
+    <td><strong>W2</strong></td>
+    <td>8-14</td>
+    <td>Trust & Security</td>
+    <td>"Safe & proven"</td>
+    <td>Testimonial + Security</td>
+  </tr>
+  <tr>
+    <td><strong>W3</strong></td>
+    <td>15-21</td>
+    <td>Education & Authority</td>
+    <td>"Learn how to win"</td>
+    <td>Tutorial + Proof</td>
+  </tr>
+  <tr>
+    <td><strong>W4</strong></td>
+    <td>22-28</td>
+    <td>Entertainment & Reach</td>
+    <td>"Viral moments"</td>
+    <td>Funny + Engaging</td>
+  </tr>
+  <tr>
+    <td><strong>W5-13</strong></td>
+    <td>29-90</td>
+    <td>Repeat Cycle</td>
+    <td>Mix semua + seasonal</td>
+    <td>All formats rotating</td>
+  </tr>
+</table>
+
+<div class="note">
+  <strong>💡 Cycle Logic:</strong> Week 1-4 = Foundation (Pain → Trust → Learn → Viral). Week 5+ = Repetition dengan variasi. Musim baru = theme fresh (season reset promo, dll).
+</div>
+
+<hr>
+
+<!-- ========== EDITOR CHECKLIST ========== -->
+<h2>✅ Pre-Posting Checklist</h2>
+
+<div class="checklist">
+  <div class="check-item">
+    <input type="checkbox"> <strong>Caption:</strong> Sesuai template? CTA jelas? Grammar OK?
+  </div>
+  <div class="check-item">
+    <input type="checkbox"> <strong>Hashtag:</strong> 15-20 hashtag (mix: reach + niche + trending)
+  </div>
+  <div class="check-item">
+    <input type="checkbox"> <strong>Link Bio:</strong> WhatsApp link active? Bisa diklik?
+  </div>
+  <div class="check-item">
+    <input type="checkbox"> <strong>Visual:</strong> Subtitle jelas? Sound on-brand? 1080x1920 dimension OK?
+  </div>
+  <div class="check-item">
+    <input type="checkbox"> <strong>CTA Visible:</strong> "DM", "Chat WA", "Follow", "Save" ada?
+  </div>
+  <div class="check-item">
+    <input type="checkbox"> <strong>Scheduled Time:</strong> Posting at optimal time (12:00 / 18:00)?
+  </div>
+  <div class="check-item">
+    <input type="checkbox"> <strong>File Naming:</strong> Format: <code>DayXX-Theme-Title.mp4</code>
+  </div>
+  <div class="check-item">
+    <input type="checkbox"> <strong>Backup:</strong> Original file saved? Ke cloud? (Google Drive / Dropbox)
+  </div>
+</div>
+
+<hr>
+
+<!-- ========== HASHTAG LIBRARY ========== -->
+<h2>Hashtag Library</h2>
+
+<h3>Reach Hashtag (500K-2M reach)</h3>
+<p><code>#mobilelegends #mlranked #mlph #mema #gamingph #esports</code></p>
+
+<h3>Niche Hashtag (50K-500K)</h3>
+<p><code>#mlcontent #jokiml #boosterph #rankedgrind #mythicpush #legendaryrank</code></p>
+
+<h3>Trending Hash (Weekly update)</h3>
+<p><code>#trendingreels #fypシ #viral #foryoupage #explore</code></p>
+
+<div class="note">
+  <strong>📌 Strategi:</strong> Per post: 5 reach + 10 niche + 3-5 trending. Total 15-20 hashtag optimal untuk Instagram.
+</div>
+
+<hr>
+
+<!-- ========== TOOLS & RESOURCES ========== -->
+<h2>Tools & Resources for Editor</h2>
+
+<table>
+  <tr>
+    <th>Tool</th>
+    <th>Purpose</th>
+    <th>Link / Free Alternative</th>
+  </tr>
+  <tr>
+    <td><strong>CapCut</strong></td>
+    <td>Video editing (subtitle, effect, audio)</td>
+    <td>Free (mobile + desktop)</td>
+  </tr>
+  <tr>
+    <td><strong>Canva Pro</strong></td>
+    <td>Carousel design (5-6 slide template)</td>
+    <td>$120/yr or Figma free</td>
+  </tr>
+  <tr>
+    <td><strong>Adobe Premiere</strong></td>
+    <td>Professional editing</td>
+    <td>$55/mo atau DaVinci Resolve free</td>
+  </tr>
+  <tr>
+    <td><strong>Trend Sounds</strong></td>
+    <td>Find trending audio for Reels</td>
+    <td>IG Reels itself, TikTok, YouTube</td>
+  </tr>
+  <tr>
+    <td><strong>Buffer / Later</strong></td>
+    <td>Schedule posts in advance</td>
+    <td>Free tier available</td>
+  </tr>
+  <tr>
+    <td><strong>Google Drive</strong></td>
+    <td>Backup video files</td>
+    <td>15GB free</td>
+  </tr>
+</table>
+
+<hr>
+
+<!-- ========== PERFORMANCE TRACKING ========== -->
+<h2>📊 Performance Tracking (Weekly Review)</h2>
+
+<div class="quick-ref">
+  <h3>Key Metrics to Monitor</h3>
+  <table>
+    <tr>
+      <th>Metric</th>
+      <th>Target</th>
+      <th>How to Check</th>
+    </tr>
+    <tr>
+      <td><strong>Reach</strong></td>
+      <td>>5K per Reel</td>
+      <td>IG Insights (Top Posts)</td>
+    </tr>
+    <tr>
+      <td><strong>Engagement</strong></td>
+      <td>>500 likes + 50 comments</td>
+      <td>Post engagement rate</td>
+    </tr>
+    <tr>
+      <td><strong>Saves</strong></td>
+      <td>>100 per post</td>
+      <td>Engagement metric detail</td>
+    </tr>
+    <tr>
+      <td><strong>Shares</strong></td>
+      <td>>20 per post</td>
+      <td>Post insights (shares count)</td>
+    </tr>
+    <tr>
+      <td><strong>Followers Growth</strong></td>
+      <td>+50-100 per minggu</td>
+      <td>IG Analytics > Follower increase</td>
+    </tr>
+    <tr>
+      <td><strong>DM / WA Inquiry</strong></td>
+      <td>>5 inquiry per minggu</td>
+      <td>Manual count from DM + WA</td>
+    </tr>
+  </table>
+</div>
+
+<div class="note">
+  <strong>🎯 Weekly Action:</strong> Setiap Minggu Pasen review metrics. Post yang performa jelek (reach <2K) → analyze why. Audio ga trending? Caption ga hook? Design bad? Adjust week berikutnya.
+</div>
+
+<hr>
+
+<!-- ========== FOOTER ========== -->
+<div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #cbd5e1; font-size: 10px; color: #64748B;">
+  <p><strong>ETNYX — Image Feed Editor Brief v1.0</strong><br>
+  Created: April 2026 | Print-friendly PDF | For Solo Image Feed Editor<br>
+  Questions? DM @etnyx.id or chat WhatsApp
+  </p>
+</div>
+
+</body>
+</html>

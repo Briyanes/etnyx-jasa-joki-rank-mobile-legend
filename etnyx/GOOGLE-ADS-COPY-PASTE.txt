@@ -1,0 +1,127 @@
+=====================================
+CAMPAIGN: [Search] ETNYX — Coaching ML Niat Tinggi
+=====================================
+
+AD GROUP 1: ml-core
+Keywords:
+1. coaching ml
+2. mobile legends coaching
+3. coaching gaming profesional
+4. tingkatkan rank ml
+5. mentor gaming ml
+
+AD GROUP 2: pelatihan-rank
+Keywords:
+1. coaching peningkatan rank
+2. pelatihan rank ml
+3. tingkatkan permainan ranking
+4. pelatihan skill gaming
+5. coaching ranking
+
+AD GROUP 3: tier-spesifik
+Keywords:
+1. coaching rank epic
+2. pelatihan rank mythic
+3. coaching tier ml
+4. raih rank mythic
+5. naik ranking game
+
+AD GROUP 4: duo-coaching
+Keywords:
+1. duo gaming coaching
+2. sesi gaming tim
+3. coaching gaming partner
+4. belajar dari pro gamer
+5. duo coaching ranking
+
+=====================================
+HEADLINES (Gunakan untuk semua keywords):
+=====================================
+1. Coaching ML Profesional
+2. Belajar dari Pro Gamer
+3. Tingkatkan Skill Gaming
+4. Pelatihan Rank Efektif
+5. Sesi Coaching Aman
+6. Paket Coaching Terjangkau
+7. Bimbingan dari Expert
+8. Penilaian Gaming Gratis
+9. Lihat Opsi Coaching
+10. Mulai Training Hari Ini
+11. Hubungi via WhatsApp
+12. Butuh Bantuan? Coaching Expert
+13. Dipercaya 4.8★
+14. Majukan Permainan Ranking
+15. Support Expert 24/7
+
+=====================================
+DESCRIPTIONS (Gunakan untuk semua keywords):
+=====================================
+Desc 1: Raih rank lebih tinggi dengan bimbingan dari expert gaming profesional kami. Metode terbukti dan transparan.
+
+Desc 2: Tingkatkan skill bermain dengan coaching personal dari booster berpengalaman. Jadilah versi terbaik dari diri Anda!
+
+=====================================
+FINAL URL (Untuk semua):
+=====================================
+https://etnyx.com/order
+
+=====================================
+MAX CPC (Untuk semua):
+=====================================
+2,500 IDR
+
+=====================================
+MATCH TYPE (Untuk semua keywords):
+=====================================
+Broad
+
+=====================================
+SITELINKS (16 items):
+=====================================
+1. Coaching per Rank → https://etnyx.com/order
+2. Duo Coaching → https://etnyx.com/order
+3. Coaching Rank → https://etnyx.com/order
+4. Paket Coaching → https://etnyx.com/order
+5. Lacak Order → https://etnyx.com/order
+6. Coaching per Tier → https://etnyx.com/order
+7. Coaching ML → https://etnyx.com/order
+8. Lihat Layanan → https://etnyx.com/order
+9. Konsultasi Gratis → https://etnyx.com/order
+10. Harga Paket → https://etnyx.com/order
+11. Testimoni → https://etnyx.com/order
+12. FAQ → https://etnyx.com/order
+13. Tentang Kami → https://etnyx.com/order
+14. Hubungi Kami → https://etnyx.com/order
+15. Support WhatsApp → https://etnyx.com/order
+16. Mulai Sekarang → https://etnyx.com/order
+
+=====================================
+CARA INPUT KE GOOGLE ADS:
+=====================================
+1. Buka Google Ads (web: https://ads.google.com)
+2. Click "+ Campaign" (Tambah Kampanye)
+3. Pilih: Search Network
+4. Nama Campaign: [Search] ETNYX — Coaching ML Niat Tinggi
+5. Budget: Sesuai kebutuhan (cth: Rp 200.000/hari)
+6. Click "Continue"
+
+7. Tambah Ad Group pertama (ml-core)
+   - Nama: ml-core
+   - Kopas keywords dari list atas
+   - Masukkan semua 5 keywords
+
+8. Tambah Ads di Ad Group:
+   - Headline 1-3: Pilih 3 dari list headlines
+   - Desc 1-2: Copy dari descriptions
+   - Final URL: https://etnyx.com/order
+
+9. Ulangi untuk Ad Group 2, 3, 4
+
+10. Tambah Sitelinks:
+    - Klik "Extensions"
+    - Pilih "Sitelinks"
+    - Add semua 16 sitelinks
+
+11. Click "PUBLISH" atau "POST"
+
+SELESAI! ✅

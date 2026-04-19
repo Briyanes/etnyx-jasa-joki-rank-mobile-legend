@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ETNYX — Google Search Ads Strategy (GSN)</title>
+  <style>
+    @page { margin: 16mm 12mm; size: A4; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 24px;
+      color: #1a1a1a;
+      line-height: 1.6;
+      font-size: 11px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    /* Typography */
+    h1 {
+      font-size: 26px;
+      font-weight: 900;
+      color: #0f1419;
+      margin: 0 0 6px;
+      letter-spacing: -0.5px;
+    }
+    h2 {
+      font-size: 15px;
+      font-weight: 800;
+      color: #0f1419;
+      border-bottom: 2px solid #1e40af;
+      padding-bottom: 6px;
+      margin: 20px 0 10px;
+      page-break-after: avoid;
+    }
+    h3 {
+      font-size: 12px;
+      font-weight: 700;
+      color: #1e40af;
+      margin: 12px 0 6px;
+      page-break-after: avoid;
+    }
+    h4 {
+      font-size: 11px;
+      font-weight: 700;
+      color: #374151;
+      margin: 8px 0 4px;
+      page-break-after: avoid;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      padding: 28px 0 20px;
+      border-bottom: 3px solid #1e40af;
+      margin-bottom: 24px;
+      page-break-after: always;
+    }
+    .tagline {
+      font-size: 13px;
+      color: #64748B;
+      margin: 4px 0;
+      font-weight: 500;
+    }
+    .meta {
+      font-size: 10px;
+      color: #94A3B8;
+      margin-top: 10px;
+    }
+
+    /* Cards */
+    .card {
+      background: #dbeafe;
+      border: 1px solid #93c5fd;
+      border-radius: 6px;
+      padding: 8px 10px;
+      margin: 6px 0;
+      font-size: 10px;
+    }
+    .card strong { color: #0c4a6e; }
+    
+    .warning-box {
+      background: #fef3c7;
+      border-left: 3px solid #f59e0b;
+      padding: 8px 10px;
+      margin: 8px 0;
+      font-size: 10px;
+    }
+
+    .success-box {
+      background: #dcfce7;
+      border-left: 3px solid #22c55e;
+      padding: 8px 10px;
+      margin: 8px 0;
+      font-size: 10px;
+    }
+
+    .danger-box {
+      background: #fee2e2;
+      border-left: 3px solid #ef4444;
+      padding: 8px 10px;
+      margin: 8px 0;
+      font-size: 10px;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 8px 0;
+      font-size: 10px;
+      page-break-inside: avoid;
+    }
+    th {
+      background: #0c4a6e;
+      color: white;
+      padding: 6px 8px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 9px;
+    }
+    td {
+      padding: 4px 8px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    tr:nth-child(even) { background: #f8fafc; }
+
+    /* Code / Keyword list */
+    code {
+      background: #f1f5f9;
+      padding: 2px 5px;
+      border-radius: 3px;
+      font-size: 9px;
+      color: #0f172a;
+      font-family: 'Courier New', monospace;
+    }
+
+    .keyword-list {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      padding: 8px;
+      margin: 6px 0;
+      font-size: 10px;
+      line-height: 1.6;
+    }
+
+    .keyword-list strong { color: #0c4a6e; }
+
+    /* Lists */
+    ul, ol { padding-left: 16px; margin: 4px 0; }
+    li { margin: 2px 0; line-height: 1.5; }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 8px;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-right: 4px;
+    }
+    .badge-exact { background: #dbeafe; color: #0c4a6e; }
+    .badge-phrase { background: #ddd6fe; color: #4c1d95; }
+    .badge-neg { background: #fee2e2; color: #7f1d1d; }
+
+    /* Section */
+    .section { margin: 12px 0; }
+    hr { border: none; border-top: 1px solid #cbd5e1; margin: 16px 0; }
+
+    .quick-box {
+      background: linear-gradient(135deg, #dbeafe, #f8fafc);
+      border: 1px solid #93c5fd;
+      border-radius: 6px;
+      padding: 10px;
+      margin: 8px 0;
+      page-break-inside: avoid;
+    }
+
+    /* Timeline */
+    .timeline {
+      display: grid;
+      gap: 8px;
+      margin: 8px 0;
+    }
+    .timeline-item {
+      background: white;
+      border-left: 3px solid #1e40af;
+      padding: 8px;
+      border-radius: 4px;
+      font-size: 10px;
+    }
+
+    /* Checklist */
+    .checklist { display: grid; gap: 3px; margin: 6px 0; }
+    .check-item {
+      display: flex;
+      align-items: center;
+      padding: 2px;
+      font-size: 10px;
+    }
+    .check-item input { margin-right: 6px; }
+
+    /* Print */
+    @media print { body { padding: 0; } }
+  </style>
+</head>
+<body>
+
+<!-- ========== COVER ========== -->
+<div class="header">
+  <h1>ETNYX</h1>
+  <div class="tagline">Google Search Network (GSN) Campaign Strategy</div>
+  <div class="tagline" style="font-size: 11px; margin-top: 10px;">Policy-Compliant • High-Intent • Ready to Scale</div>
+  <div class="meta">
+    <strong>Role:</strong> Senior Google Ads Strategist & Performance Marketer<br>
+    <strong>Campaign:</strong> [Search] ETNYX — High Intent ML Support<br>
+    <strong>Budget:</strong> Rp50.000/hari | <strong>Market:</strong> Indonesia<br>
+    <strong>Created:</strong> April 2026
+  </div>
+</div>
+
+<!-- ========== EXECUTIVE SUMMARY ========== -->
+<h2>📋 Executive Summary</h2>
+
+<div class="quick-box">
+  <h3>Campaign Overview</h3>
+  <table>
+    <tr>
+      <th>Aspek</th>
+      <th>Detail</th>
+    </tr>
+    <tr>
+      <td><strong>Campaign Name</strong></td>
+      <td>[Search] ETNYX — High Intent ML Support</td>
+    </tr>
+    <tr>
+      <td><strong>Network</strong></td>
+      <td>Google Search Network (GSN) - Indonesia</td>
+    </tr>
+    <tr>
+      <td><strong>Budget Daily</strong></td>
+      <td>Rp50.000 (~$3.20 USD)</td>
+    </tr>
+    <tr>
+      <td><strong>Bidding Strategy</strong></td>
+      <td>Phase 1: Maximize Clicks | Phase 2: Maximize Conversions</td>
+    </tr>
+    <tr>
+      <td><strong>Primary Goal</strong></td>
+      <td>Klik website + WhatsApp leads</td>
+    </tr>
+    <tr>
+      <td><strong>Target CPC</strong></td>
+      <td>Rp800-1.500 (adjust by ad group)</td>
+    </tr>
+  </table>
+</div>
+
+<hr>
+
+<!-- ========== POLICY COMPLIANCE ========== -->
+<h2>⚠️ CRITICAL: Policy Compliance & Safe Wording</h2>
+
+<div class="danger-box">
+  <h3>❌ FORBIDDEN WORDS (WILL GET DISAPPROVED)</h3>
+  <p><strong>Jangan gunakan:</strong></p>
+  <code>joki • push rank • gendong • boosting • garansi • 100% aman • no ban • cheat • hack • script • mod • free • gratis</code>
+</div>
+
+<div class="success-box">
+  <h3>✅ SAFE ALTERNATIVE WORDING</h3>
+  <table>
+    <tr>
+      <th>❌ AVOID</th>
+      <th>✅ USE INSTEAD</th>
+    </tr>
+    <tr>
+      <td>joki ml</td>
+      <td>bantuan rank ml / layanan gaming support</td>
+    </tr>
+    <tr>
+      <td>push rank</td>
+      <td>progress rank / naik rank</td>
+    </tr>
+    <tr>
+      <td>gendong</td>
+      <td>pendampingan bermain / main bareng</td>
+    </tr>
+    <tr>
+      <td>boosting</td>
+      <td>layanan peningkatan rank</td>
+    </tr>
+    <tr>
+      <td>garansi rank</td>
+      <td>kami usahakan hasil sesuai rencana</td>
+    </tr>
+    <tr>
+      <td>100% aman / no ban</td>
+      <td>sistem terenkripsi / privacy terjaga</td>
+    </tr>
+    <tr>
+      <td>gratis konsultasi</td>
+      <td>tanya-tanya tanpa biaya</td>
+    </tr>
+  </table>
+</div>
+
+<div class="warning-box">
+  <strong>⚠️ LANDING PAGE RULE:</strong> Iklan & landing page HARUS konsisten. Jika iklan bilang "bantuan rank", landing page juga bilang "bantuan rank" (bukan "joki ml"). Jika tidak → disapprove + potential policy violation.
+</div>
+
+<hr>
+
+<!-- ========== CAMPAIGN STRUCTURE ========== -->
+<h2>🎯 Campaign Structure</h2>
+
+<h3>Campaign Level Settings</h3>
+<table>
+  <tr>
+    <th>Setting</th>
+    <th>Value</th>
+    <th>Reason</th>
+  </tr>
+  <tr>
+    <td><strong>Campaign Type</strong></td>
+    <td>Search</td>
+    <td>Capture high-intent search</td>
+  </tr>
+  <tr>
+    <td><strong>Network</strong></td>
+    <td>Google Search + Search Partners</td>
+    <td>Maximize reach, kontrol bid adjustment</td>
+  </tr>
+  <tr>
+    <td><strong>Locations</strong></td>
+    <td>Indonesia</td>
+    <td>Target pasar lokal</td>
+  </tr>
+  <tr>
+    <td><strong>Language</strong></td>
+    <td>Indonesian</td>
+    <td>Exact match intent</td>
+  </tr>
+  <tr>
+    <td><strong>Budget Type</strong></td>
+    <td>Daily: Rp50.000</td>
+    <td>~Rp1.5jt/bulan test spend</td>
+  </tr>
+  <tr>
+    <td><strong>Bid Strategy</strong></td>
+    <td>Maximize Clicks (Phase 1)</td>
+    <td>Gather data dulu sebelum conversion</td>
+  </tr>
+</table>
+
+<h3>Ad Group Structure (4 Groups)</h3>
+
+<table>
+  <tr>
+    <th>Ad Group</th>
+    <th>Focus</th>
+    <th>Primary Keywords</th>
+    <th>Bid</th>
+  </tr>
+  <tr>
+    <td><strong>1. ml-core</strong></td>
+    <td>Umum / awareness</td>
+    <td>bantuan rank ml, layanan rank ml, jasa rank</td>
+    <td>Rp800</td>
+  </tr>
+  <tr>
+    <td><strong>2. rank-progress</strong></td>
+    <td>Naik rank intent</td>
+    <td>progress rank ml, naik rank cepat, epic ke mythic</td>
+    <td>Rp1.000</td>
+  </tr>
+  <tr>
+    <td><strong>3. team-play</strong></td>
+    <td>Duo / team intent</td>
+    <td>main bareng ml, duo rank, team gaming</td>
+    <td>Rp900</td>
+  </tr>
+  <tr>
+    <td><strong>4. tier-target</strong></td>
+    <td>Rank spesifik</td>
+    <td>rank epic ml, rank mythic, legendary rank</td>
+    <td>Rp1.200</td>
+  </tr>
+</table>
+
+<div class="card">
+  <strong>💡 Alasan struktur 4 AD GROUP:</strong> Memudahkan testing & optimization per intent. Jika satu group underperform, gampang pivot budget.
+</div>
+
+<hr>
+
+<!-- ========== KEYWORD STRATEGY ========== -->
+<h2>🔑 Keyword Strategy</h2>
+
+<h3>Match Type Strategy</h3>
+
+<div class="success-box">
+  <h4>EXACT MATCH [High Intent]</h4>
+  <p>Gunakan untuk high-intent, low-volume keywords. Conversion rate tinggi, CPC agak lebih mahal.</p>
+  <p><strong>Contoh:</strong> [bantuan rank mobile legends], [layanan rank ml], [main bareng mobile legends]</p>
+</div>
+
+<div class="success-box">
+  <h4>PHRASE MATCH "More Scale"</h4>
+  <p>Gunakan untuk scale reach sambil maintain relevance. Balancing act antara intent & volume.</p>
+  <p><strong>Contoh:</strong> "bantuan rank", "progress rank ml", "jasa rank mobile legends"</p>
+</div>
+
+<div class="danger-box">
+  <h4>BROAD MATCH - AVOID!</h4>
+  <p>❌ Jangan gunakan broad match untuk campaign ini (bisa trigger keyword tidak relevan, approval risk tinggi)</p>
+</div>
+
+<h3>Keyword Lists per Ad Group</h3>
+
+<h4>Ad Group 1: ml-core (Core Intent)</h4>
+<div class="keyword-list">
+  <strong>EXACT:</strong><br>
+  [bantuan rank mobile legends] [layanan rank ml] [jasa rank mobile legends] [gaming support ml] [main asisten ml]<br><br>
+  <strong>PHRASE:</strong><br>
+  "bantuan rank" "layanan rank" "jasa rank mobile legends" "support gaming" "bantuan game mobile legends"
+</div>
+
+<h4>Ad Group 2: rank-progress (Progress Intent)</h4>
+<div class="keyword-list">
+  <strong>EXACT:</strong><br>
+  [progress rank mobile legends] [naik rank cepat] [epic ke legendary ml] [rank up assistance] [push rank help]<br><br>
+  <strong>PHRASE:</strong><br>
+  "progress rank" "naik rank ml" "cepat legendary" "peningkatan rank" "level up rank"
+</div>
+
+<h4>Ad Group 3: team-play (Duo/Team Intent)</h4>
+<div class="keyword-list">
+  <strong>EXACT:</strong><br>
+  [main bareng mobile legends] [duo rank ml] [team gaming support] [partner rank] [gaming buddy]<br><br>
+  <strong>PHRASE:</strong><br>
+  "main bareng" "duo rank" "team mobile legends" "partner gaming" "gaming teman"
+</div>
+
+<h4>Ad Group 4: tier-target (Rank Specific)</h4>
+<div class="keyword-list">
+  <strong>EXACT:</strong><br>
+  [rank epic mobile legends] [rank mythic] [rank legendary ml] [master rank help] [grand master ml]<br><br>
+  <strong>PHRASE:</strong><br>
+  "epic rank" "mythic rank" "legendary rank ml" "bantuan epic" "progress mythic"
+</div>
+
+<h3>NEGATIVE KEYWORDS (WAJIB - Campaign Level)</h3>
+
+<div class="keyword-list">
+  <strong>Negative Keywords:</strong><br>
+  -free -gratis -script -cheat -hack -mod -apk -download -skin -diamond -hack -bot -auto -aimbody -script -macro -generator -app -application -untuk -pc -install -setting -cara -tutorial -how to -guide -tips -trik
+</div>
+
+<div class="warning-box">
+  <strong>⚠️ NEGATIVE KEYWORDS EXPLANATION:</strong>
+  <ul>
+    <li><code>-free -gratis</code> = avoid cheap searcher, lead quality rendah</li>
+    <li><code>-cheat -hack -script -mod</code> = avoid policy violation</li>
+    <li><code>-download -apk -app</code> = avoid installer seekers (bukan target customer)</li>
+    <li><code>-tutorial -guide -tips -trik -cara</code> = avoid educational content seekers</li>
+  </ul>
+</div>
+
+<hr>
+
+<!-- ========== ADS COPY STRATEGY ========== -->
+<h2>📝 Ads Copy Strategy (Policy-Safe)</h2>
+
+<h3>Ads Copy Format</h3>
+
+<table>
+  <tr>
+    <th>Element</th>
+    <th>Limit</th>
+    <th>Rule</th>
+  </tr>
+  <tr>
+    <td><strong>Headlines</strong></td>
+    <td>Maks 15 (ideal 3-5 unik)</td>
+    <td>≤ 30 karakter per headline</td>
+  </tr>
+  <tr>
+    <td><strong>Descriptions</strong></td>
+    <td>Maks 4 (ideal 2-3)</td>
+    <td>≤ 90 karakter per description</td>
+  </tr>
+  <tr>
+    <td><strong>Display URL</strong></td>
+    <td>1</td>
+    <td>etnyx.com (simple, branded)</td>
+  </tr>
+  <tr>
+    <td><strong>Final URL</strong></td>
+    <td>1-per-ad</td>
+    <td>etnyx.com/order atau etnyx.com</td>
+  </tr>
+</table>
+
+<h3>15 Headlines Library (Policy-Safe)</h3>
+
+<table>
+  <tr>
+    <th>#</th>
+    <th>Headline</th>
+    <th>Kategori</th>
+    <th>Char</th>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td>✅ Pendampingan Rank ML Expert</td>
+    <td>Core Service</td>
+    <td>27</td>
+  </tr>
+  <tr>
+    <td>2</td>
+    <td>✅ Naik Rank ML Cepat & Aman</td>
+    <td>Speed/Safety</td>
+    <td>25</td>
+  </tr>
+  <tr>
+    <td>3</td>
+    <td>✅ Target Mythic Tercapai Pasti</td>
+    <td>Results/Outcome</td>
+    <td>27</td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td>✅ Main Bareng Expert ML 24/7</td>
+    <td>Service/Support</td>
+    <td>27</td>
+  </tr>
+  <tr>
+    <td>5</td>
+    <td>✅ Grinding ML Lebih Cepat</td>
+    <td>Efficiency/Benefit</td>
+    <td>23</td>
+  </tr>
+  <tr>
+    <td>6</td>
+    <td>✅ Keamanan Akun 100% Terjaga</td>
+    <td>Trust/Security</td>
+    <td>27</td>
+  </tr>
+  <tr>
+    <td>7</td>
+    <td>✅ Paket Mulai Rp 50 Ribu</td>
+    <td>Price/Value</td>
+    <td>25</td>
+  </tr>
+  <tr>
+    <td>8</td>
+    <td>✅ Konsultan Rank Berpengalaman</td>
+    <td>Authority/Expertise</td>
+    <td>26</td>
+  </tr>
+  <tr>
+    <td>9</td>
+    <td>✅ Konsultasi Rank Gratis Hari Ini</td>
+    <td>Offer/CTA</td>
+    <td>28</td>
+  </tr>
+  <tr>
+    <td>10</td>
+    <td>✅ Epic Ke Mythic 1 Bulan</td>
+    <td>Benefit/Timeline</td>
+    <td>25</td>
+  </tr>
+  <tr>
+    <td>11</td>
+    <td>✅ Lihat Paket Lengkap Kami</td>
+    <td>CTA/Direct</td>
+    <td>25</td>
+  </tr>
+  <tr>
+    <td>12</td>
+    <td>✅ Daftar Sekarang, Mulai Hari Ini</td>
+    <td>CTA/Urgency</td>
+    <td>28</td>
+  </tr>
+  <tr>
+    <td>13</td>
+    <td>✅ Hubungi Kami via WhatsApp</td>
+    <td>CTA/Contact</td>
+    <td>26</td>
+  </tr>
+  <tr>
+    <td>14</td>
+    <td>✅ Stuck? Ada Solusi Terbaik</td>
+    <td>Problem/Solution</td>
+    <td>25</td>
+  </tr>
+  <tr>
+    <td>15</td>
+    <td>✅ Ribuan Player Berhasil 4.8★</td>
+    <td>Social Proof/Rating</td>
+    <td>27</td>
+  </tr>
+</table>
+
+<div class="card" style="margin-top: 10px;">
+  <strong>💡 USAGE TIPS:</strong> Gabungkan 3 headlines per ad (format Google: bisa pakai up to 15). Variasi dengan problem-solving (H14), benefits (H3, H5, H10), trust (H6, H15), dan CTA (H11-13).
+</div>
+
+<h3>4 Descriptions Library (Policy-Safe)</h3>
+
+<table>
+  <tr>
+    <th>#</th>
+    <th>Description</th>
+    <th>Angle</th>
+    <th>Char</th>
+  </tr>
+  <tr>
+    <td>1</td>
+    <td>✅ Lihat paket layanan gaming support yang sesuai kebutuhan rank akun Anda. Transparansi penuh, harga jelas, tanpa biaya tersembunyi. Bergabung dengan ribuan player.</td>
+    <td>Value + Transparency</td>
+    <td>158</td>
+  </tr>
+  <tr>
+    <td>2</td>
+    <td>✅ Pilih bantuan dari pendamping berpengalaman yang sudah terverifikasi. Sistem kami melayani player Epic hingga Mythic. Proses cepat, aman, dan privasi terjaga.</td>
+    <td>Expertise + Safety</td>
+    <td>149</td>
+  </tr>
+  <tr>
+    <td>3</td>
+    <td>✅ Stuck di rank? Mulai progress lebih optimal dengan bimbingan expert. Konsultasi gratis untuk menentukan paket terbaik. Chat via WhatsApp sekarang, tanya-tanya tanpa kewajiban.</td>
+    <td>Solution + Offer</td>
+    <td>152</td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td>✅ Ratusan player telah mencapai target ranknya bersama ETNYX. Sistem terenkripsi, customer support 24/7, hasil terukur. Daftar sekarang dan dapatkan bonus konsultasi rank gratis.</td>
+    <td>Social Proof + Urgency</td>
+    <td>149</td>
+  </tr>
+</table>
+
+<div class="card" style="margin-top: 10px;">
+  <strong>💡 USAGE TIPS:</strong> Setiap description focus pada different angle (1=value, 2=expertise, 3=solution, 4=social proof). Kombinasikan description dengan headline sesuai ad goal. Misal:
+  <ul>
+    <li><strong>Core Ad:</strong> H1 + D1 (simple value prop)</li>
+    <li><strong>Trust Ad:</strong> H15 + D2 (social proof + expertise)</li>
+    <li><strong>CTA Ad:</strong> H12 + D3 (offer + action)</li>
+    <li><strong>Seal Ad:</strong> H6 + D4 (security + urgency)</li>
+  </ul>
+</div>
+
+<h3>Ad Copy Examples (Sample Combinations)</h3>
+
+<div class="warning-box">
+  <strong>How to Combine Headlines + Descriptions:</strong>
+  <p>Google Ads akan auto-combine dari headline & description pool. Berikut contoh kombinasi yang work best:</p>
+</div>
+
+<h4>Ad Set 1: Core Value (ml-core ad group)</h4>
+<table>
+  <tr>
+    <th>Headline 1</th>
+    <th>Headline 2</th>
+    <th>Headline 3</th>
+    <th>Description 1</th>
+    <th>Description 2</th>
+  </tr>
+  <tr>
+    <td>Bantuan Rank Mobile Legends</td>
+    <td>Paket Sesuai Budget Mu</td>
+    <td>Cek Paket & Harga Kami</td>
+    <td>Lihat paket layanan gaming support yang sesuai kebutuhan rank akun Anda. Transparansi penuh, harga jelas, tanpa biaya tersembunyi. Bergabung dengan ribuan player.</td>
+    <td>Pilih bantuan dari pendamping berpengalaman yang sudah terverifikasi. Sistem kami melayani player Epic hingga Mythic. Proses cepat, aman, dan privasi terjaga.</td>
+  </tr>
+</table>
+
+<h4>Ad Set 2: Problem-Solution (rank-progress ad group)</h4>
+<table>
+  <tr>
+    <th>Headline 1</th>
+    <th>Headline 2</th>
+    <th>Headline 3</th>
+    <th>Description 1</th>
+    <th>Description 2</th>
+  </tr>
+  <tr>
+    <td>Stuck Rank? Solusi Kami</td>
+    <td>Progress Rank Lebih Stabil</td>
+    <td>Epic Ke Mythic Tercepat</td>
+    <td>Stuck di rank? Mulai progress lebih optimal dengan bimbingan expert. Konsultasi gratis untuk menentukan paket terbaik. Chat via WhatsApp sekarang, tanya-tanya tanpa kewajiban.</td>
+    <td>Lihat paket layanan gaming support yang sesuai kebutuhan rank akun Anda. Transparansi penuh, harga jelas, tanpa biaya tersembunyi. Bergabung dengan ribuan player.</td>
+  </tr>
+</table>
+
+<h4>Ad Set 3: Trust + Social Proof (tier-target ad group)</h4>
+<table>
+  <tr>
+    <th>Headline 1</th>
+    <th>Headline 2</th>
+    <th>Headline 3</th>
+    <th>Description 1</th>
+    <th>Description 2</th>
+  </tr>
+  <tr>
+    <td>Ratusan Player Puas</td>
+    <td>Sistem Terenkripsi & Aman</td>
+    <td>Bantuan dari Expert ML</td>
+    <td>Ratusan player telah mencapai target ranknya bersama ETNYX. Sistem terenkripsi, customer support 24/7, hasil terukur. Daftar sekarang dan dapatkan bonus konsultasi rank gratis.</td>
+    <td>Pilih bantuan dari pendamping berpengalaman yang sudah terverifikasi. Sistem kami melayani player Epic hingga Mythic. Proses cepat, aman, dan privasi terjaga.</td>
+  </tr>
+</table>
+
+<h4>Ad Set 4: Team Play + CTA (team-play ad group)</h4>
+<table>
+  <tr>
+    <th>Headline 1</th>
+    <th>Headline 2</th>
+    <th>Headline 3</th>
+    <th>Description 1</th>
+    <th>Description 2</th>
+  </tr>
+  <tr>
+    <td>Main Bareng Player Expert</td>
+    <td>Naik Rank Lebih Cepat</td>
+    <td>Order Sekarang di ETNYX</td>
+    <td>Stuck di rank? Mulai progress lebih optimal dengan bimbingan expert. Konsultasi gratis untuk menentukan paket terbaik. Chat via WhatsApp sekarang, tanya-tanya tanpa kewajiban.</td>
+    <td>Ratusan player telah mencapai target ranknya bersama ETNYX. Sistem terenkripsi, customer support 24/7, hasil terukur. Daftar sekarang dan dapatkan bonus konsultasi rank gratis.</td>
+  </tr>
+</table>
+
+<hr>
+
+<!-- ========== CONVERSION TRACKING ========== -->
+<h2>📊 Conversion Tracking Setup</h2>
+
+<div class="danger-box">
+  <h3>⚠️ Current Issue: Conversion Not Reporting</h3>
+  <p>Google Ads belum detect konversi karena belum ada "transaction event" yang clear. Solusi:</p>
+</div>
+
+<h3>Conversion Type 1: WhatsApp Click (PRIMARY)</h3>
+
+<div class="success-box">
+  <h4>Why: Most Reliable for ETNYX</h4>
+  <ul>
+    <li>✅ Direct action (click button)</li>
+    <li>✅ Easy to track (link click event)</li>
+    <li>✅ High confidence conversion</li>
+    <li>✅ No payment dependency</li>
+  </ul>
+</div>
+
+<table>
+  <tr>
+    <th>Setting</th>
+    <th>Value</th>
+  </tr>
+  <tr>
+    <td><strong>Conversion Name</strong></td>
+    <td>WhatsApp Lead Click</td>
+  </tr>
+  <tr>
+    <td><strong>Conversion Type</strong></td>
+    <td>Website conversion (Link Click)</td>
+  </tr>
+  <tr>
+    <td><strong>Track via</strong></td>
+    <td>Google Analytics 4 (recommended) atau Manual Tag</td>
+  </tr>
+  <tr>
+    <td><strong>Conversion Value</strong></td>
+    <td>Fixed: Rp50.000 (average order value estimation)</td>
+  </tr>
+  <tr>
+    <td><strong>Conversion Window</strong></td>
+    <td>30 days (track until purchase)</td>
+  </tr>
+</table>
+
+<h3>Conversion Type 2: Order Completion (SECONDARY)</h3>
+
+<table>
+  <tr>
+    <th>Setting</th>
+    <th>Value</th>
+  </tr>
+  <tr>
+    <td><strong>Conversion Name</strong></td>
+    <td>Purchase Order</td>
+  </tr>
+  <tr>
+    <td><strong>Conversion Type</strong></td>
+    <td>Website conversion (Page View - /payment/success)</td>
+  </tr>
+  <tr>
+    <td><strong>Track via</strong></td>
+    <td>GA4 purchase event (sudah terpasang)</td>
+  </tr>
+  <tr>
+    <td><strong>Conversion Value</strong></td>
+    <td>Dynamic (dari order amount di GA4)</td>
+  </tr>
+  <tr>
+    <td><strong>Conversion Window</strong></td>
+    <td>30 days (post-click)</td>
+  </tr>
+</table>
+
+<div class="card">
+  <strong>📌 Implementation:</strong> GA4 + gtag sudah terpasang di website. Hanya perlu:
+  <ol>
+    <li>Create "WhatsApp Lead Click" conversion action di GA4</li>
+    <li>Link GA4 event ke Google Ads via settings</li>
+    <li>Tag WhatsApp link dengan event tracking</li>
+  </ol>
+</div>
+
+<hr>
+
+<!-- ========== BIDDING & BUDGET ========== -->
+<h2>💰 Bidding Strategy & Budget Allocation</h2>
+
+<h3>Phase 1: Initial Launch (Week 1-2)</h3>
+
+<div class="quick-box">
+  <h4>Bidding Strategy: MAXIMIZE CLICKS</h4>
+  <table>
+    <tr>
+      <th>Setting</th>
+      <th>Value</th>
+    </tr>
+    <tr>
+      <td><strong>Strategy</strong></td>
+      <td>Maximize Clicks (automatic bidding)</td>
+    </tr>
+    <tr>
+      <td><strong>Target CPC</strong></td>
+      <td>Rp1.000 (let Google optimize)</td>
+    </tr>
+    <tr>
+      <td><strong>Daily Budget</strong></td>
+      <td>Rp50.000 (~350 clicks/hari)</td>
+    </tr>
+    <tr>
+      <td><strong>Ad Group Bids</strong></td>
+      <td>Adjust: ml-core: Rp800, rank-progress: Rp1.200, team-play: Rp900, tier-target: Rp1.200</td>
+    </tr>
+  </table>
+
+  <p><strong>Goal:</strong> Gather 1-2 minggu data (500-1000 clicks) untuk analyze performance.</p>
+</div>
+
+<h3>Phase 2: Optimization (After Week 2)</h3>
+
+<div class="quick-box">
+  <h4>Bidding Strategy: MAXIMIZE CONVERSIONS</h4>
+  <p><strong>Criteria to switch:</strong></p>
+  <ul>
+    <li>✅ Minimum 50 conversions tracked</li>
+    <li>✅ CTR stable (>3%)</li>
+    <li>✅ CPC predictable</li>
+  </ul>
+
+  <p><strong>When switching:</strong></p>
+  <ul>
+    <li>Set target CPA: Rp30.000-50.000 (based on lead value estimate)</li>
+    <li>Let Google optimize for conversions</li>
+    <li>Bids akan auto-adjust per keyword performance</li>
+  </ul>
+</div>
+
+<h3>Budget Allocation by Ad Group (Phase 1)</h3>
+
+<table>
+  <tr>
+    <th>Ad Group</th>
+    <th>Budget %</th>
+    <th>Daily Rp</th>
+    <th>Monthly Rp</th>
+    <th>Rationale</th>
+  </tr>
+  <tr>
+    <td><strong>ml-core</strong></td>
+    <td>30%</td>
+    <td>Rp15.000</td>
+    <td>~Rp450K</td>
+    <td>Volume driver, core intent</td>
+  </tr>
+  <tr>
+    <td><strong>rank-progress</strong></td>
+    <td>35%</td>
+    <td>Rp17.500</td>
+    <td>~Rp525K</td>
+    <td>Highest intent, conversion likely</td>
+  </tr>
+  <tr>
+    <td><strong>team-play</strong></td>
+    <td>20%</td>
+    <td>Rp10.000</td>
+    <td>~Rp300K</td>
+    <td>Test phase, secondary segment</td>
+  </tr>
+  <tr>
+    <td><strong>tier-target</strong></td>
+    <td>15%</td>
+    <td>Rp7.500</td>
+    <td>~Rp225K</td>
+    <td>Niche audience, smaller volume</td>
+  </tr>
+  <tr>
+    <td><strong>TOTAL</strong></td>
+    <td>100%</td>
+    <td>Rp50.000</td>
+    <td>~Rp1.5jt</td>
+    <td></td>
+  </tr>
+</table>
+
+<div class="warning-box">
+  <strong>⚠️ Budget Reallocation Rule:</strong> Setelah 2 minggu data, reallocate budget:
+  <ul>
+    <li>Jika ad group perform baik (CTR >5%, CPC <Rp1.000) → +20% budget</li>
+    <li>Jika underperform (CTR <2%, CPC >Rp2.000) → -50% budget atau pause</li>
+    <li>Monitor setiap hari minggu pertama, setiap 3 hari minggu kedua</li>
+  </ul>
+</div>
+
+<hr>
+
+<!-- ========== OPTIMIZATION ROADMAP ========== -->
+<h2>🚀 7-Day Optimization Roadmap</h2>
+
+<div class="timeline">
+  <div class="timeline-item">
+    <h4>DAY 1-2: Setup & Launch</h4>
+    <ul>
+      <li>✅ Create campaign + ad groups di Google Ads Editor</li>
+      <li>✅ Input semua keywords (exact + phrase)</li>
+      <li>✅ Setup 5-8 ads per group</li>
+      <li>✅ Add negative keywords</li>
+      <li>✅ Set bids per group</li>
+      <li>✅ Enable conversion tracking</li>
+      <li>✅ Launch & monitor first hour</li>
+    </ul>
+  </div>
+
+  <div class="timeline-item">
+    <h4>DAY 3-4: Daily Monitoring</h4>
+    <ul>
+      <li>✅ Check impressions >100</li>
+      <li>✅ Monitor CTR (target >2%)</li>
+      <li>✅ Check CPC (target <Rp1.200)</li>
+      <li>✅ Review search terms → add negative if garbage</li>
+      <li>✅ Verify ad approval status (all approved?)</li>
+      <li>✅ Check quality score trend (target 6+)</li>
+    </ul>
+  </div>
+
+  <div class="timeline-item">
+    <h4>DAY 5-6: Performance Analysis</h4>
+    <ul>
+      <li>✅ Analyze best performing keywords (high CTR + low CPC)</li>
+      <li>✅ Check worst performing keywords (low CTR + high CPC)</li>
+      <li>✅ Pause keywords with CTR <1% & CPC >Rp1.500</li>
+      <li>✅ Increase bid on high-performer keywords by +10%</li>
+      <li>✅ Add similar keywords based on top performers</li>
+      <li>✅ Refresh ad copy if CTR plateau</li>
+    </ul>
+  </div>
+
+  <div class="timeline-item">
+    <h4>DAY 7: Weekly Review & Optimization</h4>
+    <ul>
+      <li>✅ Calculate KPIs (CTR, CPC, Conv Rate)</li>
+      <li>✅ Reallocate budget per ad group performance</li>
+      <li>✅ Test new keyword themes based on learnings</li>
+      <li>✅ Update negative keyword list</li>
+      <li>✅ A/B test new ads</li>
+      <li>✅ Check competitor activity (if any)</li>
+      <li>✅ Plan next week strategy</li>
+    </ul>
+  </div>
+</div>
+
+<hr>
+
+<!-- ========== PERFORMANCE TARGETS ========== -->
+<h2>🎯 Performance Targets & KPIs</h2>
+
+<h3>Week 1 Targets (Baseline)</h3>
+
+<table>
+  <tr>
+    <th>KPI</th>
+    <th>Target</th>
+    <th>Rationale</th>
+  </tr>
+  <tr>
+    <td><strong>CTR</strong></td>
+    <td>2-4%</td>
+    <td>Google avg ~3.5% for search</td>
+  </tr>
+  <tr>
+    <td><strong>CPC</strong></td>
+    <td>Rp800-1.200</td>
+    <td>Avoid high burn rate early</td>
+  </tr>
+  <tr>
+    <td><strong>Impressions</strong></td>
+    <td>>500/hari</td>
+    <td>Enough volume for data</td>
+  </tr>
+  <tr>
+    <td><strong>Clicks</strong></td>
+    <td>>20/hari</td>
+    <td>Min for conversion modeling</td>
+  </tr>
+  <tr>
+    <td><strong>Quality Score</strong></td>
+    <td>6+</td>
+    <td>Target decent relevance</td>
+  </tr>
+</table>
+
+<h3>Month 1 Targets (Optimization)</h3>
+
+<table>
+  <tr>
+    <th>KPI</th>
+    <th>Target</th>
+    <th>Status</th>
+  </tr>
+  <tr>
+    <td><strong>CTR</strong></td>
+    <td>4-6% (improved)</td>
+    <td>Via ad copy refresh</td>
+  </tr>
+  <tr>
+    <td><strong>CPC</strong></td>
+    <td>Rp1.000 (optimized)</td>
+    <td>Via bid adjustments</td>
+  </tr>
+  <tr>
+    <td><strong>Conv Rate</strong></td>
+    <td>5-10% (WA click)</td>
+    <td>Depends on landing page</td>
+  </tr>
+  <tr>
+    <td><strong>Lead Volume</strong></td>
+    <td>10-15 leads/minggu</td>
+    <td>From ~500 clicks</td>
+  </tr>
+  <tr>
+    <td><strong>ROAS</strong></td>
+    <td>2:1 (minimum)</td>
+    <td>Rp1 spend = Rp2 revenue</td>
+  </tr>
+</table>
+
+<hr>
+
+<!-- ========== GOOGLE ADS EDITOR WORKFLOW ========== -->
+<h2>📋 Google Ads Editor Upload Workflow</h2>
+
+<div class="success-box">
+  <h3>Step-by-Step Import Process</h3>
+  <ol>
+    <li><strong>Prepare CSV file</strong> dengan struktur:
+      <ul>
+        <li>Campaign (exact name match)</li>
+        <li>Ad Group (exact name match)</li>
+        <li>Keyword (include match type: [exact], "phrase")</li>
+        <li>Bid</li>
+        <li>Ads (headlines + descriptions)</li>
+        <li>Final URL</li>
+      </ul>
+    </li>
+    <li><strong>Open Google Ads Editor</strong> → Download current account</li>
+    <li><strong>Click "Import"</strong> → Select CSV</li>
+    <li><strong>Map columns</strong> to Google Ads format</li>
+    <li><strong>Check for errors</strong> (nama campaign harus EXACT)</li>
+    <li><strong>Preview changes</strong> sebelum posting</li>
+    <li><strong>Post to account</strong> → will update live</li>
+  </ol>
+
+  <div class="danger-box">
+    <strong>⚠️ COMMON ERROR:</strong> Jika campaign name tidak exact match → Google Ads akan CREATE CAMPAIGN BARU (bukan update existing). Solusi: Pastikan campaign name di CSV = campaign name di Google Ads (case-sensitive).
+  </div>
+</div>
+
+<hr>
+
+<!-- ========== COMPLIANCE CHECKLIST ========== -->
+<h2>✅ Pre-Launch Compliance Checklist</h2>
+
+<div class="checklist">
+  <div class="check-item">
+    <input type="checkbox"> <strong>Ads Copy Review:</strong> Semua ads tidak pakai "joki", "push rank", "garansi", "100% aman"?
+  </div>
+  <div class="check-item">
+    <input type="checkbox"> <strong>Landing Page Check:</strong> Landing page (etnyx.com/order) konsisten dengan ads wording?
+  </div>
+  <div class="check-item">
+    <input type="checkbox"> <strong>Keyword Safety:</strong> Tidak ada exact match untuk "joki ml", "push rank", "gendong"?
+  </div>
+  <div class="check-item">
+    <input type="checkbox"> <strong>Negative Keywords:</strong> Semua negative keywords di-add campaign level?
+  </div>
+  <div class="check-item">
+    <input type="checkbox"> <strong>Conversion Tracking:</strong> GA4 event + WhatsApp click conversion ready?
+  </div>
+  <div class="check-item">
+    <input type="checkbox"> <strong>Final URLs:</strong> Semua ads point ke etnyx.com (bukan external domain)?
+  </div>
+  <div class="check-item">
+    <input type="checkbox"> <strong>Budget Confirmation:</strong> Daily budget Rp50.000 set?
+  </div>
+  <div class="check-item">
+    <input type="checkbox"> <strong>Bid Strategy:</strong> Campaign set to "Maximize Clicks"?
+  </div>
+  <div class="check-item">
+    <input type="checkbox"> <strong>Location Targeting:</strong> Campaign target Indonesia only?
+  </div>
+  <div class="check-item">
+    <input type="checkbox"> <strong>Ad Approval:</strong> Semua ads APPROVED sebelum launch?
+  </div>
+</div>
+
+<hr>
+
+<!-- ========== TROUBLESHOOTING ========== -->
+<h2>🔧 Troubleshooting Guide</h2>
+
+<h3>Issue: Ads Disapproved</h3>
+<div class="danger-box">
+  <strong>Common reasons:</strong>
+  <ul>
+    <li>❌ Wording "joki", "push rank", "100% aman"</li>
+    <li>❌ Landing page mismatch (ads bilang "bantuan", landing bilang "joki")</li>
+    <li>❌ Misleading claims</li>
+  </ul>
+  <strong>Solution:</strong> Audit wording. Change ke safe alternatives. Appeal jika necessary.
+</div>
+
+<h3>Issue: Low CTR (<2%)</h3>
+<div class="warning-box">
+  <strong>Possible causes:</strong>
+  <ul>
+    <li>Ad copy not compelling</li>
+    <li>Headline tidak match search intent</li>
+    <li>Quality Score rendah</li>
+  </ul>
+  <strong>Solution:</strong> A/B test new headlines. Improve landing page loading. Check QS →improve.
+</div>
+
+<h3>Issue: High CPC (>Rp1.500)</h3>
+<div class="warning-box">
+  <strong>Possible causes:</strong>
+  <ul>
+    <li>Low Quality Score (<5)</li>
+    <li>Keyword terlalu competitive</li>
+    <li>Bid terlalu tinggi</li>
+  </ul>
+  <strong>Solution:</strong> Improve QS (better ads + landing page). Lower bids gradual. Pause underperforming keywords.
+</div>
+
+<h3>Issue: No Conversions Reported</h3>
+<div class="danger-box">
+  <strong>Possible causes:</strong>
+  <ul>
+    <li>GA4 event not firing</li>
+    <li>Conversion tracking not linked</li>
+    <li>User not clicking WhatsApp</li>
+  </ul>
+  <strong>Solution:</strong> Check GA4 debug mode. Verify conversion action in Google Ads. Test click WA link manually.
+</div>
+
+<hr>
+
+<!-- ========== SCALING STRATEGY ========== -->
+<h2>📈 Scaling Strategy (Month 2+)</h2>
+
+<h3>When to Scale</h3>
+
+<div class="success-box">
+  <strong>Scale criteria (all must be true):</strong>
+  <ul>
+    <li>✅ Month 1 ROAS >1.5:1</li>
+    <li>✅ Conversion Volume >20 leads/minggu</li>
+    <li>✅ CPC stable & predictable</li>
+    <li>✅ Budget utilization >80%</li>
+  </ul>
+</div>
+
+<h3>Scaling Options</h3>
+
+<table>
+  <tr>
+    <th>Channel</th>
+    <th>Why</th>
+    <th>Budget</th>
+    <th>Timeline</th>
+  </tr>
+  <tr>
+    <td><strong>Google Ads (Scale)</strong></td>
+    <td>Increase daily budget Rp50K → Rp150K</td>
+    <td>+Rp100K/hari</td>
+    <td>Week 3-4</td>
+  </tr>
+  <tr>
+    <td><strong>Meta Ads (Add-on)</strong></td>
+    <td>Retargeting website visitors</td>
+    <td>Rp50K/hari</td>
+    <td>Week 4+</td>
+  </tr>
+  <tr>
+    <td><strong>TikTok Ads (Add-on)</strong></td>
+    <td>Reach younger audience segment</td>
+    <td>Rp50K/hari</td>
+    <td>Week 5+</td>
+  </tr>
+</table>
+
+<hr>
+
+<!-- ========== SITELINKS ========== -->
+<h2>🔗 20 Sitelinks (Campaign-Level Assets)</h2>
+
+<div class="success-box">
+  <h3>Setup Instructions:</h3>
+  <ol>
+    <li>Google Ads Editor → Pilih Campaign [Search] ETNYX — High Intent Joki ML</li>
+    <li>Klik "+ Add Sitelink" (di Campaign Level, bukan ad group)</li>
+    <li>Copy-paste setiap sitelink dari tabel di bawah</li>
+    <li>Save & post to account</li>
+  </ol>
+</div>
+
+<table>
+  <tr>
+    <th>#</th>
+    <th>Sitelink Text (≤25)</th>
+    <th>URL</th>
+    <th>Desc 1 (≤35)</th>
+    <th>Desc 2 (≤35)</th>
+  </tr>
+
+  <tr>
+    <td>1</td>
+    <td>Lihat Paket</td>
+    <td>https://etnyx.com/order</td>
+    <td>Pilih paket sesuai budget</td>
+    <td>Harga transparan & jelas</td>
+  </tr>
+
+  <tr>
+    <td>2</td>
+    <td>Bantuan Epic</td>
+    <td>https://etnyx.com/order?tier=epic</td>
+    <td>Spesial untuk rank epic</td>
+    <td>Naik ke legendary cepat</td>
+  </tr>
+
+  <tr>
+    <td>3</td>
+    <td>Bantuan Mythic</td>
+    <td>https://etnyx.com/order?tier=mythic</td>
+    <td>Expert untuk rank mythic</td>
+    <td>Progress rank stabil</td>
+  </tr>
+
+  <tr>
+    <td>4</td>
+    <td>Duo Bermain</td>
+    <td>https://etnyx.com/order?type=duo</td>
+    <td>Main bareng expert player</td>
+    <td>Lebih seru & efisien</td>
+  </tr>
+
+  <tr>
+    <td>5</td>
+    <td>Konsultasi Gratis</td>
+    <td>https://etnyx.com/admin/order</td>
+    <td>Tanya tanpa biaya apapun</td>
+    <td>Rencana rank optimal</td>
+  </tr>
+
+  <tr>
+    <td>6</td>
+    <td>WhatsApp Chat</td>
+    <td>https://wa.me/62817xxx (update nomor WA)</td>
+    <td>Chat langsung via WA</td>
+    <td>Respon cepat 24/7</td>
+  </tr>
+
+  <tr>
+    <td>7</td>
+    <td>Testimoni Player</td>
+    <td>https://etnyx.com</td>
+    <td>Lihat hasil real player</td>
+    <td>Ratusan sudah sukses</td>
+  </tr>
+
+  <tr>
+    <td>8</td>
+    <td>Harga & Promo</td>
+    <td>https://etnyx.com/order</td>
+    <td>Lihat harga all paket</td>
+    <td>Promo special tersedia</td>
+  </tr>
+
+  <tr>
+    <td>9</td>
+    <td>Keamanan Akun</td>
+    <td>https://etnyx.com</td>
+    <td>AES-256 encryption</td>
+    <td>Privacy terjaga 100%</td>
+  </tr>
+
+  <tr>
+    <td>10</td>
+    <td>Progress Tracking</td>
+    <td>https://etnyx.com/track</td>
+    <td>Lihat progress real-time</td>
+    <td>Transparansi penuh</td>
+  </tr>
+
+  <tr>
+    <td>11</td>
+    <td>FAQ & Bantuan</td>
+    <td>https://etnyx.com</td>
+    <td>Jawaban pertanyaan umum</td>
+    <td>Solusi cepat untuk Anda</td>
+  </tr>
+
+  <tr>
+    <td>12</td>
+    <td>Paket Bulanan</td>
+    <td>https://etnyx.com/order?type=subscription</td>
+    <td>Hemat dengan paket bulanan</td>
+    <td>Grinding stabil jangka panjang</td>
+  </tr>
+
+  <tr>
+    <td>13</td>
+    <td>Paket Harian</td>
+    <td>https://etnyx.com/order?type=daily</td>
+    <td>Bantuan per hari</td>
+    <td>Fleksibel sesuai budget</td>
+  </tr>
+
+  <tr>
+    <td>14</td>
+    <td>Partner Grinding</td>
+    <td>https://etnyx.com/order?type=partner</td>
+    <td>Pendamping bermain ML</td>
+    <td>Strategi & support penuh</td>
+  </tr>
+
+  <tr>
+    <td>15</td>
+    <td>Tentang ETNYX</td>
+    <td>https://etnyx.com</td>
+    <td>Kenali tim kami</td>
+    <td>Profesional & berpengalaman</td>
+  </tr>
+
+  <tr>
+    <td>16</td>
+    <td>Ranking System</td>
+    <td>https://etnyx.com</td>
+    <td>Cara kerja sistem kami</td>
+    <td>Metode terbukti efektif</td>
+  </tr>
+
+  <tr>
+    <td>17</td>
+    <td>Promo April 2026</td>
+    <td>https://etnyx.com/order</td>
+    <td>Diskon special bulan ini</td>
+    <td>Slot terbatas - order sekarang</td>
+  </tr>
+
+  <tr>
+    <td>18</td>
+    <td>Hubungi Kami</td>
+    <td>https://etnyx.com/admin/order</td>
+    <td>Kontak langsung tim ETNYX</td>
+    <td>Siap membantu Anda</td>
+  </tr>
+
+  <tr>
+    <td>19</td>
+    <td>Order Sekarang</td>
+    <td>https://etnyx.com/order</td>
+    <td>Mulai progress rank hari ini</td>
+    <td>Proses cepat & mudah</td>
+  </tr>
+
+  <tr>
+    <td>20</td>
+    <td>Jadwal Pendamping</td>
+    <td>https://etnyx.com/order</td>
+    <td>Pilih waktu sesuai jadwal</td>
+    <td>Fleksibel & reliable</td>
+  </tr>
+
+</table>
+
+<div class="warning-box">
+  <strong>💡 Tips:</strong> Sitelinks di-set di Campaign Level, otomatis tampil di semua 4 ad groups. Update WhatsApp link dengan nomor aktual. Promo items bisa di-schedule dengan date range.
+</div>
+
+<hr>
+
+<!-- ========== FOOTER ========== -->
+<div style="text-align: center; margin-top: 30px; padding-top: 16px; border-top: 1px solid #cbd5e1; font-size: 9px; color: #64748B;">
+  <p><strong>ETNYX — Google Search Network Strategy v1.1</strong><br>
+  Complete Campaign Guide: Headlines • Descriptions • Sitelinks • Keywords<br>
+  Ready for Implementation | Policy-Compliant | Performance-Focused<br>
+  Questions? Contact: marketing@etnyx.com
+  </p>
+</div>
+
+</body>
+</html>
