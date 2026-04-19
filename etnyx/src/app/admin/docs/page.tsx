@@ -998,7 +998,7 @@ function buildCategories(): DocCategory[] {
                   <li><strong>Trigger:</strong> Payment webhook setelah berhasil bayar (iPaymu notification)</li>
                   <li><strong>Deduplication:</strong> event_id yang sama di kedua send → Meta hanya count 1x</li>
                   <li><strong>User Data:</strong> Email + Phone hashed SHA-256, IP address, user agent</li>
-                  <li><strong>Endpoint:</strong> <Code>POST graph.facebook.com/v21.0/{'{pixelId}'}/events</Code></li>
+                  <li><strong>Endpoint:</strong> <Code>POST graph.facebook.com/v21.0/PIXEL_ID/events</Code></li>
                   <li><strong>File:</strong> <Code>lib/meta-capi.ts</Code></li>
                 </ul>
               </div>

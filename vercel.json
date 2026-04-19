@@ -1,3 +1,5 @@
 {
-  "framework": "nextjs"
+  "buildCommand": "cd etnyx && npm run build",
+  "framework": "nextjs",
+  "rootDirectory": "etnyx"
 }
