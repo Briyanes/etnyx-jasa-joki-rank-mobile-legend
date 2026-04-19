@@ -1603,7 +1603,7 @@ export default function AdminDashboard() {
                   ) : (
                     <>
                       {/* Category tabs */}
-                      <div className="flex gap-2 overflow-x-auto pb-1 items-center">
+                      <div className="flex gap-2 overflow-x-auto overflow-y-hidden pb-1 items-center -mx-6 px-6 -mb-4 pb-4">
                         {pricingCatalog.map((cat) => (
                           <button
                             key={cat.id}
