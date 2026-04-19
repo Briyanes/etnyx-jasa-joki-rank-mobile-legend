@@ -11,6 +11,10 @@ export const rankOptions: RankOption[] = [
   { value: "mythicglory", label: "Mythic Glory", order: 8 },
 ];
 
+export const rankLabels: Record<string, string> = Object.fromEntries(
+  rankOptions.map((r) => [r.value, r.label])
+);
+
 export const pricingTiers: PricingTier[] = [
   {
     id: "basic",
