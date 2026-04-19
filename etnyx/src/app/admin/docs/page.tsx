@@ -907,15 +907,65 @@ function buildCategories(): DocCategory[] {
           title: "Conversion Tracking & Pixels",
           content: (
             <div className="space-y-4">
-              <p className="text-text-muted text-sm">Full-funnel conversion tracking ke 3 platform sekaligus. Semua dikelola dari Dashboard &rarr; Settings &rarr; Pixels.</p>
+              <p className="text-text-muted text-sm">Full-funnel conversion tracking ke 5 platform sekaligus (Meta, Google Ads, GA4, GTM, TikTok). Semua dikelola dari Dashboard &rarr; Settings &rarr; Pixels.</p>
+              
+              <div className="bg-background rounded-lg p-3 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-2">✅ Pixel Integration Status</h4>
+                <Table headers={["Pixel", "Status", "Events Triggered", "Config"]} rows={[
+                  ["Meta Pixel", "✓ Active", "8 events", "ID + Access Token"],
+                  ["Google Ads", "✓ Active", "9 events", "ID + Conversion Label"],
+                  ["Google Analytics 4", "✓ Active", "9 events", "Measurement ID"],
+                  ["Google Tag Manager", "⭕ Optional", "Flexible", "Container ID"],
+                  ["TikTok Pixel", "⭕ Optional", "8 events", "Pixel ID"],
+                ]} />
+              </div>
+
               <div className="bg-background rounded-lg p-4 border border-white/5">
-                <h4 className="text-text font-medium text-sm mb-3">Conversion Funnel</h4>
+                <h4 className="text-text font-medium text-sm mb-3">📊 8 Meta Pixel Events</h4>
+                <div className="text-text-muted text-xs space-y-1">
+                  <div>✓ <strong>PageView</strong> — Setiap page load (otomatis)</div>
+                  <div>✓ <strong>ViewContent</strong> — User buka /order page</div>
+                  <div>✓ <strong>AddToCart</strong> — User pilih paket (step 1)</div>
+                  <div>✓ <strong>InitiateCheckout</strong> — User submit form (step 4)</div>
+                  <div>✓ <strong>Purchase</strong> — Bayar sukses (CLIENT + SERVER via CAPI)</div>
+                  <div>✓ <strong>Lead</strong> — Klik "Hubungi WhatsApp"</div>
+                  <div>✓ <strong>CompleteRegistration</strong> — Register/login</div>
+                  <div>✓ <strong>Search</strong> — Browse pricing</div>
+                </div>
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">🎯 TOF/MOF/BOF Funnel Strategy (Meta Pixel)</h4>
+                <div className="space-y-2 text-text-muted text-xs">
+                  <div className="p-2 bg-red-500/10 border border-red-500/20 rounded">
+                    <strong className="text-red-300">🔴 TOF (Top of Funnel) — Awareness</strong>
+                    <div className="mt-1">• Audience: Website Visitors (PageView, 7d) + Order Page Viewers (ViewContent, 14d)</div>
+                    <div>• Budget: 30-40% dari total</div>
+                    <div>• Tujuan: Reach, brand awareness, traffic</div>
+                  </div>
+                  <div className="p-2 bg-yellow-500/10 border border-yellow-500/20 rounded">
+                    <strong className="text-yellow-300">🟡 MOF (Middle of Funnel) — Consideration [HIGHEST ROI]</strong>
+                    <div className="mt-1">• Audience: Cart Abandoners (AddToCart no buy, 30d) + Checkout Initiators (InitiateCheckout no buy, 30d)</div>
+                    <div>• Budget: 40-50% dari total</div>
+                    <div>• Expected ROAS: 60-100% (retarget warm leads)</div>
+                  </div>
+                  <div className="p-2 bg-green-500/10 border border-green-500/20 rounded">
+                    <strong className="text-green-300">🟢 BOF (Bottom of Funnel) — Conversion</strong>
+                    <div className="mt-1">• Audience: Recent Customers (Purchase, 30d) + High-Intent Leads (Lead, 14d) + Lookalike 1%</div>
+                    <div>• Budget: 15-25% dari total</div>
+                    <div>• Expected ROAS: 150-300%+ (existing customers + warm leads)</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-3">Conversion Funnel (User Journey)</h4>
                 <StepFlow steps={[
                   { title: "PageView", desc: "Otomatis di setiap halaman (Meta fbq, TikTok ttq.page)", badge: "auto" },
                   { title: "ViewContent", desc: "Customer buka halaman /order", page: "/order" },
                   { title: "AddToCart", desc: "Customer pilih paket atau klik Lanjut dari step 1", page: "/order (step 1 → 2)" },
                   { title: "InitiateCheckout", desc: "Customer submit order (step 4 Konfirmasi)", page: "/order (step 4)" },
-                  { title: "Purchase", desc: "Setelah bayar via iPaymu, redirect ke success page", page: "/payment/success" },
+                  { title: "Purchase", desc: "Setelah bayar via iPaymu, redirect ke success page (DUAL: client + server)", page: "/payment/success" },
                 ]} />
               </div>
               <div className="bg-background rounded-lg p-3 border border-white/5">
@@ -925,8 +975,10 @@ function buildCategories(): DocCategory[] {
                   ["ViewContent", "ViewContent", "view_item", "ViewContent"],
                   ["AddToCart", "AddToCart", "add_to_cart", "AddToCart"],
                   ["InitiateCheckout", "InitiateCheckout", "begin_checkout", "InitiateCheckout"],
-                  ["Purchase", "Purchase", "purchase + conversion", "CompletePayment"],
+                  ["Purchase", "Purchase + CAPI", "purchase + conversion", "CompletePayment"],
                   ["Lead", "Lead", "generate_lead", "SubmitForm"],
+                  ["CompleteRegistration", "CompleteRegistration", "sign_up", "CompleteRegistration"],
+                  ["Search", "Search", "search", "Search"],
                 ]} />
               </div>
               <div className="bg-background rounded-lg p-3 border border-white/5">
@@ -940,20 +992,132 @@ function buildCategories(): DocCategory[] {
                 ]} />
               </div>
               <div className="bg-background rounded-lg p-3 border border-white/5">
-                <h4 className="text-text font-medium text-sm mb-2">Meta CAPI (Server-Side)</h4>
+                <h4 className="text-text font-medium text-sm mb-2">Meta CAPI (Server-Side Tracking)</h4>
                 <ul className="text-text-muted text-xs space-y-1 list-disc ml-4">
-                  <li>Server-side Purchase event via Meta Conversions API</li>
-                  <li>Trigger: payment webhook setelah berhasil bayar</li>
-                  <li>PII hashing: SHA-256 (email, phone)</li>
-                  <li>Event deduplication via event_id</li>
-                  <li>File: <Code>lib/meta-capi.ts</Code></li>
+                  <li><strong>Dual Send:</strong> Purchase event dikirim 2x (client fbq + server CAPI)</li>
+                  <li><strong>Trigger:</strong> Payment webhook setelah berhasil bayar (iPaymu notification)</li>
+                  <li><strong>Deduplication:</strong> event_id yang sama di kedua send → Meta hanya count 1x</li>
+                  <li><strong>User Data:</strong> Email + Phone hashed SHA-256, IP address, user agent</li>
+                  <li><strong>Endpoint:</strong> <Code>POST graph.facebook.com/v21.0/{'{pixelId}'}/events</Code></li>
+                  <li><strong>File:</strong> <Code>lib/meta-capi.ts</Code></li>
                 </ul>
               </div>
+              <InfoBox type="success">
+                <strong>Custom Audiences Setup:</strong> Buat 8 custom audiences di Meta Ads Manager berdasarkan events → gunakan untuk TOF/MOF/BOF campaigns. See Settings → Pixels tab untuk Pixel ID & Access Token.
+              </InfoBox>
               <InfoBox type="warning">
                 <strong>CSP:</strong> Domain tracking sudah di-whitelist di <Code>next.config.ts</Code> (script-src, connect-src, frame-src). Jika pixel tidak load, cek apakah customer pakai ad blocker.
               </InfoBox>
               <InfoBox type="info">
                 <strong>File:</strong> <Code>lib/tracking.ts</Code> (client events), <Code>lib/meta-capi.ts</Code> (server CAPI), <Code>components/TrackingPixels.tsx</Code> (pixel loader)
+              </InfoBox>
+            </div>
+          ),
+        },
+        {
+          id: "meta-custom-audiences",
+          icon: Users,
+          title: "Meta Custom Audiences (TOF/MOF/BOF)",
+          content: (
+            <div className="space-y-4">
+              <p className="text-text-muted text-sm">Buat 8 custom audiences di Meta Ads Manager berdasarkan 8 Meta pixel events. Gunakan untuk campaign TOF/MOF/BOF funnel strategy.</p>
+              
+              <div className="bg-background rounded-lg p-3 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-2">8 Custom Audiences Setup</h4>
+                <Table headers={["#", "Audience Name", "Event", "Lookback", "Size (Est.)"]} rows={[
+                  ["1", "TOF - Website Visitors", "PageView", "7 days", "1000-5000"],
+                  ["2", "TOF - Order Page Viewers", "ViewContent", "14 days", "200-1000"],
+                  ["3", "MOF - Cart Abandoners", "AddToCart (NO purchase)", "30 days", "50-200"],
+                  ["4", "MOF - Checkout Initiators", "InitiateCheckout (NO purchase)", "30 days", "20-100"],
+                  ["5", "BOF - Recent Customers", "Purchase", "30 days", "5-50"],
+                  ["6", "BOF - High-Intent Leads", "Lead (WhatsApp click)", "14 days", "10-30"],
+                  ["7", "BOF - Lookalike 1%", "Similar to Recent Customers", "N/A", "100-1000+"],
+                  ["8", "BOF - Converters (Retention)", "Purchase OR CompleteRegistration", "365 days", "10-100+"],
+                ]} />
+              </div>
+
+              <div className="bg-background rounded-lg p-3 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-2">How to Create (In Meta Ads Manager)</h4>
+                <ol className="text-text-muted text-xs space-y-1 list-decimal ml-4">
+                  <li>Go to: <strong>Audiences → Custom Audiences → Create Audience → Website (Pixel)</strong></li>
+                  <li>Audience Name: "<strong>TOF - Website Visitors</strong>"</li>
+                  <li>Select: <strong>All Pixels</strong> (or specific pixel if multiple)</li>
+                  <li>Event: <strong>PageView</strong></li>
+                  <li>Lookback Window: <strong>7 days</strong></li>
+                  <li>Include: <strong>All people who had this event</strong></li>
+                  <li>Save &amp; Repeat for other audiences</li>
+                </ol>
+              </div>
+
+              <div className="bg-background rounded-lg p-3 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-2">🔴 TOF Audiences (Awareness)</h4>
+                <div className="text-text-muted text-xs space-y-2">
+                  <div><strong>Audience #1: Website Visitors (7d)</strong></div>
+                  <div className="ml-2">Event: PageView | Size: 1000-5000 | Budget: 30-40%</div>
+                  <div className="ml-2 text-text/70">→ All users who visited any page</div>
+                  
+                  <div className="mt-2"><strong>Audience #2: Order Page Viewers (14d)</strong></div>
+                  <div className="ml-2">Event: ViewContent | Size: 200-1000 | Budget: 30-40%</div>
+                  <div className="ml-2 text-text/70">→ Users interested in ordering (viewed /order page)</div>
+                </div>
+              </div>
+
+              <div className="bg-background rounded-lg p-3 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-2">🟡 MOF Audiences (Consideration) [HIGHEST ROI]</h4>
+                <div className="text-text-muted text-xs space-y-2">
+                  <div><strong>Audience #3: Cart Abandoners (30d, NO purchase)</strong></div>
+                  <div className="ml-2">Event: AddToCart + EXCLUDE Purchase | Size: 50-200 | Budget: 40-50%</div>
+                  <div className="ml-2 text-text/70">→ Warm leads who selected package but didn't buy</div>
+                  <div className="ml-2 text-text/70">→ Expected ROAS: 60-100% (retarget with discount/promo)</div>
+                  
+                  <div className="mt-2"><strong>Audience #4: Checkout Initiators (30d, NO purchase)</strong></div>
+                  <div className="ml-2">Event: InitiateCheckout + EXCLUDE Purchase | Size: 20-100 | Budget: 40-50%</div>
+                  <div className="ml-2 text-text/70">→ VERY hot leads who started checkout but abandoned</div>
+                  <div className="ml-2 text-text/70">→ Expected ROAS: 80-120% (urgent retarget)</div>
+                </div>
+              </div>
+
+              <div className="bg-background rounded-lg p-3 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-2">🟢 BOF Audiences (Conversion)</h4>
+                <div className="text-text-muted text-xs space-y-2">
+                  <div><strong>Audience #5: Recent Customers (30d)</strong></div>
+                  <div className="ml-2">Event: Purchase | Size: 5-50 | Budget: 15-25%</div>
+                  <div className="ml-2 text-text/70">→ Use for: Upsell, cross-sell, loyalty program</div>
+                  
+                  <div className="mt-2"><strong>Audience #6: High-Intent Leads (14d)</strong></div>
+                  <div className="ml-2">Event: Lead (clicked WhatsApp) | Size: 10-30 | Budget: 15-25%</div>
+                  <div className="ml-2 text-text/70">→ Use for: Follow-up campaign, limited time offer</div>
+                  
+                  <div className="mt-2"><strong>Audience #7: Lookalike 1% (Similar to customers)</strong></div>
+                  <div className="ml-2">Source: Recent Customers | Size: 100-1000+ | Budget: 15-25%</div>
+                  <div className="ml-2 text-text/70">→ Most similar users to existing customers</div>
+                  <div className="ml-2 text-text/70">→ Expected ROAS: 200%+ (2-5x higher conversion than cold)</div>
+                  <div className="ml-2 text-text/70">→ ⚠️ Requires minimum 100 users in source audience</div>
+                  
+                  <div className="mt-2"><strong>Audience #8: Converters (365d retention)</strong></div>
+                  <div className="ml-2">Events: Purchase OR CompleteRegistration | Size: 10-100+ | Budget: 15-25%</div>
+                  <div className="ml-2 text-text/70">→ All customers ever (long-term)</div>
+                  <div className="ml-2 text-text/70">→ Use for: Loyalty program, referral incentives, VIP tier</div>
+                </div>
+              </div>
+
+              <div className="bg-background rounded-lg p-3 border border-white/5">
+                <h4 className="text-text font-medium text-sm mb-2">Campaign Structure (Budget Allocation)</h4>
+                <Table headers={["Funnel", "Audiences", "Budget %", "Expected ROAS", "Strategy"]} rows={[
+                  ["🔴 TOF", "Website Visitors + Order Viewers", "30-40%", "20-40%", "Reach, brand awareness"],
+                  ["🟡 MOF", "Cart/Checkout Abandoners", "40-50%", "60-100%", "Retarget warm leads (MOST PROFITABLE)"],
+                  ["🟢 BOF", "Customers + Lookalike + Leads", "15-25%", "150-300%+", "High-intent conversion + upsell"],
+                ]} />
+              </div>
+
+              <InfoBox type="success">
+                <strong>Data Accumulation:</strong> Custom audiences need 7-14 days for optimal size. Start small (5-10% budget) to test, then scale after verifying positive ROAS.
+              </InfoBox>
+              <InfoBox type="info">
+                <strong>Exclusion Rules:</strong> For MOF audiences, always EXCLUDE people who already made a purchase to avoid wasting budget on converters. Use "Exclude people who..." in audience builder.
+              </InfoBox>
+              <InfoBox type="warning">
+                <strong>Lookalike Ready:</strong> Create Lookalike audience after collecting minimum 100 customers in "Recent Customers" audience. Usually takes 1-2 weeks.
               </InfoBox>
             </div>
           ),
