@@ -955,7 +955,7 @@ export default function AdminDashboard() {
       </aside>
 
       {/* ===== MAIN ===== */}
-      <div className={`flex-1 ${sidebarOpen ? "md:ml-56" : "md:ml-16"} transition-all duration-200`}>
+      <div className={`flex-1 min-w-0 overflow-x-hidden ${sidebarOpen ? "md:ml-56" : "md:ml-16"} transition-all duration-200`}>
         {/* Topbar */}
         <header className="sticky top-0 z-20 bg-background/80 backdrop-blur-xl border-b border-white/5">
           <div className="px-4 md:px-6 py-3 flex items-center justify-between">
@@ -1483,7 +1483,7 @@ export default function AdminDashboard() {
               </div>
 
               {/* Season Pricing Scheduler */}
-              <div className="bg-surface rounded-xl border border-white/5 p-5 space-y-4">
+              <div className="bg-surface rounded-xl border border-white/5 p-3 sm:p-5 space-y-4 min-w-0">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <CalendarDays className="w-5 h-5 text-accent" />
@@ -1515,9 +1515,9 @@ export default function AdminDashboard() {
                       <input type="text" value={seasonPricing.seasonName} onChange={(e) => setSeasonPricing({ ...seasonPricing, seasonName: e.target.value })}
                         placeholder="Season 35 - April 2026" className="w-full sm:w-80 bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-sm focus:border-accent focus:outline-none" />
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 min-w-0">
                       {seasonPricing.phases.map((phase, idx) => (
-                        <div key={phase.id} className={`rounded-xl border p-4 space-y-3 ${phase.id === "early" ? "border-red-500/30 bg-red-500/5" : phase.id === "mid" ? "border-blue-500/30 bg-blue-500/5" : "border-green-500/30 bg-green-500/5"}`}>
+                        <div key={phase.id} className={`rounded-xl border p-3 sm:p-4 space-y-3 min-w-0 ${phase.id === "early" ? "border-red-500/30 bg-red-500/5" : phase.id === "mid" ? "border-blue-500/30 bg-blue-500/5" : "border-green-500/30 bg-green-500/5"}`}>
                           <div className="flex items-center justify-between">
                             <span className={`text-xs font-bold ${phase.id === "early" ? "text-red-400" : phase.id === "mid" ? "text-blue-400" : "text-green-400"}`}>
                               {phase.id === "early" ? <Flame className="w-3.5 h-3.5 inline" /> : phase.id === "mid" ? <Zap className="w-3.5 h-3.5 inline" /> : <Target className="w-3.5 h-3.5 inline" />}{" "}{phase.label}
