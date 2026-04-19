@@ -1806,7 +1806,7 @@ export default function AdminDashboard() {
 
               {/* PER STAR MODE */}
               {pricingMode === "perstar" && (
-                <div className="bg-surface rounded-xl border border-white/5 overflow-hidden">
+                <div className="bg-surface rounded-xl border border-white/5 overflow-x-auto">
                   <div className="px-4 py-3 bg-white/[0.02] border-b border-white/5 flex items-center justify-between">
                     <h3 className="text-sm font-semibold text-text">Harga Per Bintang</h3>
                     <span className="text-xs text-text-muted">{perStarPricing.length} tier</span>
@@ -1886,7 +1886,7 @@ export default function AdminDashboard() {
 
               {/* GENDONG (DUO BOOST) MODE */}
               {pricingMode === "gendong" && (
-                <div className="bg-surface rounded-xl border border-white/5 overflow-hidden">
+                <div className="bg-surface rounded-xl border border-white/5 overflow-x-auto">
                   <div className="px-4 py-3 bg-white/[0.02] border-b border-white/5 flex items-center justify-between">
                     <h3 className="text-sm font-semibold text-text">Harga Joki Gendong (Duo Boost)</h3>
                     <span className="text-xs text-text-muted">{gendongPricing.length} tier</span>
