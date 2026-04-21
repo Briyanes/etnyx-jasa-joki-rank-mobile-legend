@@ -1,0 +1,179 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - banner [ref=e4]:
+        - generic [ref=e5]:
+          - link "ETNYX" [ref=e6] [cursor=pointer]:
+            - /url: /
+            - img [ref=e7]
+            - img "ETNYX" [ref=e9]
+          - generic [ref=e10]:
+            - generic [ref=e11]:
+              - img [ref=e12]
+              - text: Aman
+            - generic [ref=e14]:
+              - img [ref=e15]
+              - text: Cepat
+            - generic [ref=e17]:
+              - img [ref=e18]
+              - text: 24/7
+            - button "🇮🇩 ID" [ref=e20]:
+              - generic [ref=e21]: 🇮🇩
+              - generic [ref=e22]: ID
+      - generic [ref=e25]:
+        - button "Pilih Paket" [ref=e387] [cursor=pointer]:
+          - img [ref=e388]
+          - generic [ref=e29]: Pilih Paket
+        - button "Data Akun & Kontak" [ref=e523] [cursor=pointer]:
+          - img [ref=e524]
+          - generic [ref=e34]: Data Akun & Kontak
+        - button "Opsi & Pembayaran" [ref=e574] [cursor=pointer]:
+          - img [ref=e575]
+          - generic [ref=e39]: Opsi & Pembayaran
+        - button "4 Konfirmasi" [ref=e42] [cursor=pointer]:
+          - generic [ref=e43]: "4"
+          - generic [ref=e44]: Konfirmasi
+    - generic [ref=e45]:
+      - generic [ref=e579]:
+        - generic [ref=e580]:
+          - generic [ref=e581]: "4"
+          - heading "Konfirmasi Order" [level=2] [ref=e582]
+        - generic [ref=e583]:
+          - generic [ref=e586]:
+            - img [ref=e587]
+            - text: JOKI GENDONG
+          - generic [ref=e592]:
+            - paragraph [ref=e593]: Duo Boost — Tier & Jumlah Bintang
+            - generic [ref=e594]:
+              - img "Epic" [ref=e595]
+              - generic [ref=e596]:
+                - paragraph [ref=e597]: Epic
+                - paragraph [ref=e598]: 3 Bintang × Rp 7.000/star
+                - paragraph [ref=e599]: Rp 21.000
+          - generic [ref=e600]:
+            - paragraph [ref=e601]: Data Akun & Jadwal Mabar
+            - generic [ref=e602]:
+              - generic [ref=e603]: Nickname
+              - generic [ref=e604]: ʙ ʀ ɪ ʏ ᴀ ɴ
+              - generic [ref=e605]: User ID
+              - generic [ref=e606]:
+                - text: 44950290 (2071)
+                - img [ref=e607]
+              - generic [ref=e609]: Role
+              - generic [ref=e610]:
+                - img [ref=e611]
+                - text: EXP Laner
+              - generic [ref=e620]: Jadwal
+              - generic [ref=e621]: Malam (19:00-22:00)
+              - generic [ref=e622]: Hero Request
+              - generic [ref=e623]: Nana, Lancelot, Hanabi
+          - generic [ref=e624]:
+            - paragraph [ref=e625]: Kontak
+            - generic [ref=e626]:
+              - generic [ref=e627]: WhatsApp
+              - generic [ref=e628]: "+6281234567890"
+              - generic [ref=e629]: Email
+              - generic [ref=e630]: briyankrnd@gmail.com
+          - generic [ref=e631]:
+            - paragraph [ref=e632]: Rincian Harga
+            - generic [ref=e633]:
+              - generic [ref=e634]:
+                - generic [ref=e635]: Duo Boost Epic × 3 Bintang
+                - generic [ref=e636]: Rp 21.000
+              - generic [ref=e637]:
+                - generic [ref=e638]: Total Bayar
+                - generic [ref=e639]: Rp 21.000
+          - generic [ref=e640]:
+            - paragraph [ref=e641]: Metode Pembayaran
+            - generic [ref=e642]:
+              - button "Transfer Manual Bank (BCA, BRI, BNI, Mandiri, Jago), E-Wallet, QRIS" [ref=e643]:
+                - img [ref=e645]
+                - img [ref=e647]
+                - paragraph [ref=e649]: Transfer Manual
+                - paragraph [ref=e650]: Bank (BCA, BRI, BNI, Mandiri, Jago), E-Wallet, QRIS
+              - button "Otomatis (iPaymu) QRIS, VA, GoPay, ShopeePay, Kartu Kredit" [ref=e651]:
+                - img [ref=e652]
+                - paragraph [ref=e654]: Otomatis (iPaymu)
+                - paragraph [ref=e655]: QRIS, VA, GoPay, ShopeePay, Kartu Kredit
+          - generic [ref=e656] [cursor=pointer]:
+            - checkbox "Saya menyetujui syarat & ketentuan layanan ETNYX." [ref=e657]
+            - generic [ref=e658]:
+              - text: Saya menyetujui
+              - link "syarat & ketentuan" [ref=e659]:
+                - /url: /terms
+              - text: layanan ETNYX.
+          - generic [ref=e660]:
+            - img [ref=e661]
+            - paragraph [ref=e663]: Data akun dienkripsi dan hanya digunakan untuk proses joki. Kami sarankan ganti password setelah order selesai.
+      - generic [ref=e199]:
+        - button "Kembali" [ref=e512]:
+          - img [ref=e513]
+          - text: Kembali
+        - button "Bayar Sekarang" [disabled] [ref=e664]:
+          - text: Bayar Sekarang
+          - img [ref=e665]
+    - contentinfo [ref=e203]:
+      - generic [ref=e206]:
+        - generic [ref=e207]:
+          - img "ETNYX" [ref=e208]
+          - paragraph [ref=e209]: Jasa joki & gendong Mobile Legends terpercaya. Tinggal order, booster kami yang push rank kamu.
+          - generic [ref=e210]:
+            - link "Instagram" [ref=e211] [cursor=pointer]:
+              - /url: https://instagram.com/etnyx.id
+              - img [ref=e212]
+            - link "Facebook" [ref=e215] [cursor=pointer]:
+              - /url: https://facebook.com/etnyx.id
+              - img [ref=e216]
+            - link "TikTok" [ref=e219] [cursor=pointer]:
+              - /url: https://tiktok.com/@etnyx.id
+              - img [ref=e220]
+            - link "YouTube" [ref=e223] [cursor=pointer]:
+              - /url: https://youtube.com/@etnyx_id
+              - img [ref=e224]
+        - generic [ref=e227]:
+          - generic [ref=e228]:
+            - heading "Navigasi" [level=4] [ref=e229]
+            - link "Order Joki" [ref=e230] [cursor=pointer]:
+              - /url: /order
+            - link "Lacak Order" [ref=e231] [cursor=pointer]:
+              - /url: /track
+            - link "Paket Harga" [ref=e232] [cursor=pointer]:
+              - /url: /#pricing
+            - link "FAQ" [ref=e233] [cursor=pointer]:
+              - /url: /#faq
+          - generic [ref=e234]:
+            - heading "Legal" [level=4] [ref=e235]
+            - link "Syarat & Ketentuan" [ref=e236] [cursor=pointer]:
+              - /url: /terms
+            - link "Kebijakan Privasi" [ref=e237] [cursor=pointer]:
+              - /url: /privacy
+            - link "Kebijakan Refund" [ref=e238] [cursor=pointer]:
+              - /url: /refund-policy
+          - generic [ref=e239]:
+            - heading "Kontak" [level=4] [ref=e240]
+            - link "WhatsApp" [ref=e241] [cursor=pointer]:
+              - /url: https://wa.me/6281515141452
+            - link "support@etnyx.id" [ref=e242] [cursor=pointer]:
+              - /url: mailto:support@etnyx.id
+        - generic [ref=e244]:
+          - paragraph [ref=e245]: PT Sumber Arto Moro Abadi Kreatif
+          - paragraph [ref=e246]: Jl. Yos Sudarso, Ngambak, Beru, Kec. Wlingi, Kabupaten Blitar, Jawa Timur 66184
+          - paragraph [ref=e247]: "Email: support@etnyx.id • WhatsApp: 081515141540"
+        - generic [ref=e250]:
+          - paragraph [ref=e251]: © 2026 ETNYX. All rights reserved.
+          - generic [ref=e252]: •
+          - paragraph [ref=e253]: Designed & Developed by Briyanes
+  - button "Toggle theme" [ref=e345]:
+    - img [ref=e346]
+  - generic [ref=e258] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e259]:
+      - img [ref=e260]
+    - generic [ref=e352]:
+      - button "Open issues overlay" [ref=e353]:
+        - generic [ref=e354]:
+          - generic [ref=e355]: "0"
+          - generic [ref=e356]: "1"
+        - generic [ref=e357]: Issue
+      - button "Collapse issues badge" [ref=e358]:
+        - img [ref=e359]
+  - alert [ref=e361]

@@ -1,0 +1,188 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - banner [ref=e4]:
+        - generic [ref=e5]:
+          - link "ETNYX" [ref=e6] [cursor=pointer]:
+            - /url: /
+            - img [ref=e7]
+            - img "ETNYX" [ref=e9]
+          - generic [ref=e10]:
+            - generic [ref=e11]:
+              - img [ref=e12]
+              - text: Aman
+            - generic [ref=e14]:
+              - img [ref=e15]
+              - text: Cepat
+            - generic [ref=e17]:
+              - img [ref=e18]
+              - text: 24/7
+            - button "🇮🇩 ID" [ref=e20]:
+              - generic [ref=e21]: 🇮🇩
+              - generic [ref=e22]: ID
+      - generic [ref=e25]:
+        - button "1 Pilih Paket" [ref=e27] [cursor=pointer]:
+          - generic [ref=e28]: "1"
+          - generic [ref=e29]: Pilih Paket
+        - button "2 Data Akun & Kontak" [disabled] [ref=e32]:
+          - generic [ref=e33]: "2"
+          - generic [ref=e34]: Data Akun & Kontak
+        - button "3 Opsi & Pembayaran" [disabled] [ref=e37]:
+          - generic [ref=e38]: "3"
+          - generic [ref=e39]: Opsi & Pembayaran
+        - button "4 Konfirmasi" [disabled] [ref=e42]:
+          - generic [ref=e43]: "4"
+          - generic [ref=e44]: Konfirmasi
+    - generic [ref=e45]:
+      - generic [ref=e47]:
+        - generic [ref=e48]:
+          - generic [ref=e49]: "1"
+          - heading "Pilih Paket Joki" [level=2] [ref=e50]
+        - generic [ref=e51]:
+          - generic [ref=e52]:
+            - button "Joki Paket" [ref=e53]:
+              - img [ref=e54]
+              - text: Joki Paket
+            - button "Joki Per Bintang" [ref=e58]:
+              - img [ref=e59]
+              - text: Joki Per Bintang
+            - button "Joki Gendong" [ref=e61]:
+              - img [ref=e62]
+              - text: Joki Gendong
+          - paragraph [ref=e67]: Main bareng booster — tanpa share akun, kamu tetap bermain.
+          - generic [ref=e68]:
+            - heading "Pilih Rank" [level=3] [ref=e69]
+            - generic [ref=e70]:
+              - button "Epic Epic Rp 7.000/ Star Rp 10.000 Disc 30% Duo Boost" [ref=e340]:
+                - generic [ref=e88]:
+                  - paragraph [ref=e89]: Epic
+                  - generic [ref=e90]:
+                    - img "Epic" [ref=e91]
+                    - generic [ref=e92]:
+                      - paragraph [ref=e93]: Rp 7.000/ Star
+                      - paragraph [ref=e94]: Rp 10.000
+                - generic [ref=e95]:
+                  - generic [ref=e96]: Disc 30%
+                  - generic [ref=e97]:
+                    - img [ref=e98]
+                    - text: Duo Boost
+              - button "Legend Legend Rp 8.000/ Star Rp 11.000 Disc 27% Duo Boost" [ref=e341]:
+                - generic [ref=e104]:
+                  - paragraph [ref=e105]: Legend
+                  - generic [ref=e106]:
+                    - img "Legend" [ref=e107]
+                    - generic [ref=e108]:
+                      - paragraph [ref=e109]: Rp 8.000/ Star
+                      - paragraph [ref=e110]: Rp 11.000
+                - generic [ref=e111]:
+                  - generic [ref=e112]: Disc 27%
+                  - generic [ref=e113]:
+                    - img [ref=e114]
+                    - text: Duo Boost
+              - button "Mythic Mythic Rp 14.000/ Star Rp 21.000 Disc 33% Duo Boost" [ref=e342]:
+                - generic [ref=e136]:
+                  - paragraph [ref=e137]: Mythic
+                  - generic [ref=e138]:
+                    - img "Mythic" [ref=e139]
+                    - generic [ref=e140]:
+                      - paragraph [ref=e141]: Rp 14.000/ Star
+                      - paragraph [ref=e142]: Rp 21.000
+                - generic [ref=e143]:
+                  - generic [ref=e144]: Disc 33%
+                  - generic [ref=e145]:
+                    - img [ref=e146]
+                    - text: Duo Boost
+              - button "Mythic Honor Mythic Honor Rp 15.000/ Star Rp 25.000 Disc 40% Duo Boost" [ref=e343]:
+                - generic [ref=e152]:
+                  - paragraph [ref=e153]: Mythic Honor
+                  - generic [ref=e154]:
+                    - img "Mythic Honor" [ref=e155]
+                    - generic [ref=e156]:
+                      - paragraph [ref=e157]: Rp 15.000/ Star
+                      - paragraph [ref=e158]: Rp 25.000
+                - generic [ref=e159]:
+                  - generic [ref=e160]: Disc 40%
+                  - generic [ref=e161]:
+                    - img [ref=e162]
+                    - text: Duo Boost
+              - button "Mythic Glory Mythic Glory Rp 23.000/ Star Rp 25.000 Disc 8% Duo Boost" [ref=e344]:
+                - generic [ref=e168]:
+                  - paragraph [ref=e169]: Mythic Glory
+                  - generic [ref=e170]:
+                    - img "Mythic Glory" [ref=e171]
+                    - generic [ref=e172]:
+                      - paragraph [ref=e173]: Rp 23.000/ Star
+                      - paragraph [ref=e174]: Rp 25.000
+                - generic [ref=e175]:
+                  - generic [ref=e176]: Disc 8%
+                  - generic [ref=e177]:
+                    - img [ref=e178]
+                    - text: Duo Boost
+      - button "Lanjut" [disabled] [ref=e200]:
+        - text: Lanjut
+        - img [ref=e201]
+    - contentinfo [ref=e203]:
+      - generic [ref=e206]:
+        - generic [ref=e207]:
+          - img "ETNYX" [ref=e208]
+          - paragraph [ref=e209]: Jasa joki & gendong Mobile Legends terpercaya. Tinggal order, booster kami yang push rank kamu.
+          - generic [ref=e210]:
+            - link "Instagram" [ref=e211] [cursor=pointer]:
+              - /url: https://instagram.com/etnyx.id
+              - img [ref=e212]
+            - link "Facebook" [ref=e215] [cursor=pointer]:
+              - /url: https://facebook.com/etnyx.id
+              - img [ref=e216]
+            - link "TikTok" [ref=e219] [cursor=pointer]:
+              - /url: https://tiktok.com/@etnyx.id
+              - img [ref=e220]
+            - link "YouTube" [ref=e223] [cursor=pointer]:
+              - /url: https://youtube.com/@etnyx_id
+              - img [ref=e224]
+        - generic [ref=e227]:
+          - generic [ref=e228]:
+            - heading "Navigasi" [level=4] [ref=e229]
+            - link "Order Joki" [ref=e230] [cursor=pointer]:
+              - /url: /order
+            - link "Lacak Order" [ref=e231] [cursor=pointer]:
+              - /url: /track
+            - link "Paket Harga" [ref=e232] [cursor=pointer]:
+              - /url: /#pricing
+            - link "FAQ" [ref=e233] [cursor=pointer]:
+              - /url: /#faq
+          - generic [ref=e234]:
+            - heading "Legal" [level=4] [ref=e235]
+            - link "Syarat & Ketentuan" [ref=e236] [cursor=pointer]:
+              - /url: /terms
+            - link "Kebijakan Privasi" [ref=e237] [cursor=pointer]:
+              - /url: /privacy
+            - link "Kebijakan Refund" [ref=e238] [cursor=pointer]:
+              - /url: /refund-policy
+          - generic [ref=e239]:
+            - heading "Kontak" [level=4] [ref=e240]
+            - link "WhatsApp" [ref=e241] [cursor=pointer]:
+              - /url: https://wa.me/6281515141452
+            - link "support@etnyx.id" [ref=e242] [cursor=pointer]:
+              - /url: mailto:support@etnyx.id
+        - generic [ref=e244]:
+          - paragraph [ref=e245]: PT Sumber Arto Moro Abadi Kreatif
+          - paragraph [ref=e246]: Jl. Yos Sudarso, Ngambak, Beru, Kec. Wlingi, Kabupaten Blitar, Jawa Timur 66184
+          - paragraph [ref=e247]: "Email: support@etnyx.id • WhatsApp: 081515141540"
+        - generic [ref=e250]:
+          - paragraph [ref=e251]: © 2026 ETNYX. All rights reserved.
+          - generic [ref=e252]: •
+          - paragraph [ref=e253]: Designed & Developed by Briyanes
+  - button "Toggle theme" [ref=e345]:
+    - img [ref=e346]
+  - generic [ref=e258] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e259]:
+      - img [ref=e260]
+    - generic [ref=e352]:
+      - button "Open issues overlay" [ref=e353]:
+        - generic [ref=e354]:
+          - generic [ref=e355]: "0"
+          - generic [ref=e356]: "1"
+        - generic [ref=e357]: Issue
+      - button "Collapse issues badge" [ref=e358]:
+        - img [ref=e359]
+  - alert [ref=e361]

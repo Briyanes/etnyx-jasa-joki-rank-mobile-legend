@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ETNYX Reels — Post 8: Promo Slot Terbatas (30s)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#000;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:100vh;gap:16px;padding:16px 0;font-family:'Inter',sans-serif;overflow:auto;}
+  .stage{position:relative;width:calc(390px * var(--phone-scale,1));height:calc(844px * var(--phone-scale,1));flex:0 0 auto;}
+  .phone{width:390px;height:844px;background:#0F1419;position:absolute;top:0;left:0;overflow:hidden;border-radius:40px;box-shadow:0 0 60px rgba(239,68,68,0.15);transform:scale(var(--phone-scale,1));transform-origin:top left;}
+  .scene{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:40px 28px;opacity:0;transition:opacity 0.35s;z-index:1;}
+  .scene.active{opacity:1;z-index:10;}
+
+  /* S0: Urgency Hook (0-5s) */
+  .s0{background:radial-gradient(ellipse at center,rgba(239,68,68,0.1) 0%,#0F1419 70%);}
+  .s0 .alarm{font-size:60px;opacity:0;transform:scale(0.5);transition:all 0.5s cubic-bezier(0.34,1.56,0.64,1);}
+  .s0 .alarm.show{opacity:1;transform:scale(1);animation:shake 0.5s ease 0.5s;}
+  @keyframes shake{0%,100%{transform:rotate(0);}25%{transform:rotate(-12deg);}75%{transform:rotate(12deg);}50%{transform:rotate(-8deg);}}
+  .s0 .utitle{font-size:28px;font-weight:900;color:#fff;text-align:center;line-height:1.3;margin-top:12px;opacity:0;transition:all 0.4s ease 0.3s;}
+  .s0 .utitle.show{opacity:1;}
+  .s0 .utitle .red{color:#EF4444;}
+  .s0 .utitle .yellow{color:#F59E0B;}
+  .s0 .slot-badge{display:flex;align-items:center;gap:6px;margin-top:16px;opacity:0;transition:all 0.4s ease 0.6s;}
+  .s0 .slot-badge.show{opacity:1;animation:pulseBadge 1s ease infinite;}
+  @keyframes pulseBadge{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
+  .s0 .sb{background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.5);color:#EF4444;font-size:16px;font-weight:900;padding:8px 18px;border-radius:12px;}
+  .s0 .countdown{font-size:13px;color:#F59E0B;font-weight:700;margin-top:10px;opacity:0;transition:opacity 0.3s ease 0.8s;}
+  .s0 .countdown.show{opacity:1;}
+
+  /* S1: Season Reset + Slot Counter (5-12s) */
+  .s1{padding:40px 24px;gap:14px;}
+  .season-card{width:100%;background:linear-gradient(135deg,rgba(239,68,68,0.06),rgba(245,158,11,0.06));border:1px solid rgba(239,68,68,0.2);border-radius:16px;padding:18px;text-align:center;opacity:0;transform:scale(0.9);transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1);}
+  .season-card.show{opacity:1;transform:scale(1);}
+  .season-card .sicon{font-size:36px;margin-bottom:8px;}
+  .season-card .stitle{font-size:16px;font-weight:900;color:#E6F1EF;margin-bottom:6px;}
+  .season-card .stitle .red{color:#EF4444;}
+  .season-card .ssub{font-size:11px;color:#7FA8A3;line-height:1.4;}
+  .timer-grid{display:flex;gap:8px;justify-content:center;margin-top:12px;}
+  .tg{background:#0D1117;border:1px solid #1E2A35;border-radius:10px;padding:8px 12px;text-align:center;opacity:0;transition:all 0.3s;}
+  .tg.show{opacity:1;}
+  .tg .tn{font-size:22px;font-weight:900;color:#EF4444;}
+  .tg .tl{font-size:7px;font-weight:700;color:#7FA8A3;margin-top:2px;}
+  .slot-meter{width:100%;background:#151B22;border:1px solid rgba(239,68,68,0.2);border-radius:14px;padding:14px;opacity:0;transition:all 0.4s ease;}
+  .slot-meter.show{opacity:1;}
+  .slot-meter h4{font-size:12px;font-weight:800;color:#E6F1EF;margin-bottom:10px;text-align:center;}
+  .smbar{width:100%;height:12px;background:#1E2A35;border-radius:6px;overflow:hidden;margin-bottom:8px;}
+  .smfill{height:100%;width:0%;background:linear-gradient(90deg,#22C55E,#F59E0B,#EF4444);border-radius:6px;transition:width 1.5s cubic-bezier(0.34,1.56,0.64,1);}
+  .smfill.go{width:83%;}
+  .slot-count{display:flex;justify-content:space-between;font-size:10px;font-weight:800;}
+  .slot-count .used{color:#EF4444;}
+  .slot-count .left{color:#22C55E;}
+  .slot-dots{display:flex;gap:6px;justify-content:center;margin-top:8px;}
+  .sdot{width:24px;height:24px;border-radius:50%;background:rgba(239,68,68,0.2);border:2px solid #EF4444;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:#EF4444;opacity:0;transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);}
+  .sdot.show{opacity:1;}
+  .sdot.taken{background:rgba(239,68,68,0.8);color:#fff;}
+  .sdot.open{border-color:#22C55E;background:rgba(34,197,94,0.15);color:#22C55E;animation:dotPulse 1.2s ease infinite;}
+  @keyframes dotPulse{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,0.4);}50%{box-shadow:0 0 0 6px rgba(34,197,94,0);}}
+
+  /* S2: Flash Sale Pricing (12-20s) */
+  .s2{padding:40px 24px;gap:12px;}
+  .flash-header{display:flex;align-items:center;gap:8px;opacity:0;transition:all 0.4s ease;}
+  .flash-header.show{opacity:1;}
+  .flash-header .fh-icon{font-size:28px;animation:flashPulse 0.5s ease infinite alternate;}
+  @keyframes flashPulse{0%{opacity:0.6;transform:scale(0.95);}100%{opacity:1;transform:scale(1.05);}}
+  .flash-header .fh-text{font-size:20px;font-weight:900;color:#EF4444;}
+  .flash-header .fh-timer{background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#EF4444;font-size:12px;font-weight:900;padding:4px 10px;border-radius:8px;margin-left:auto;}
+  .price-cards{width:100%;display:flex;flex-direction:column;gap:8px;}
+  .pc{background:#151B22;border:1px solid #1E2A35;border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:10px;opacity:0;transform:translateX(-20px);transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1);}
+  .pc.show{opacity:1;transform:translateX(0);}
+  .pc.highlight{border-color:#F59E0B;background:linear-gradient(135deg,rgba(245,158,11,0.06),rgba(239,68,68,0.04));}
+  .pc .pci{font-size:22px;flex-shrink:0;}
+  .pc .pcm{flex:1;}
+  .pc .pcn{font-size:12px;font-weight:800;color:#E6F1EF;}
+  .pc .pcd{font-size:9px;color:#7FA8A3;}
+  .pc .pcpr{text-align:right;}
+  .pc .pcorig{font-size:10px;color:#4A5568;text-decoration:line-through;}
+  .pc .pcnow{font-size:15px;font-weight:900;color:#F59E0B;}
+  .pc .pcsave{font-size:8px;color:#22C55E;font-weight:800;}
+
+  /* S3: Social proof + CTA (20-30s) */
+  .s3{background:radial-gradient(ellipse at 50% 50%,rgba(245,158,11,0.08) 0%,#0F1419 60%);gap:12px;}
+  .proof-row{display:flex;gap:10px;opacity:0;transition:all 0.4s ease;}
+  .proof-row.show{opacity:1;}
+  .proof{background:#151B22;border:1px solid #1E2A35;border-radius:12px;padding:12px;text-align:center;flex:1;}
+  .proof .pi{font-size:20px;margin-bottom:4px;}
+  .proof .pn{font-size:16px;font-weight:900;color:#2DD4BF;}
+  .proof .pl{font-size:8px;color:#7FA8A3;font-weight:700;}
+  .cta-stack{display:flex;flex-direction:column;align-items:center;gap:10px;}
+  .cta-stack .elogo{font-size:42px;font-weight:900;letter-spacing:5px;background:linear-gradient(135deg,#EF4444,#F59E0B);-webkit-background-clip:text;-webkit-text-fill-color:transparent;opacity:0;transform:scale(0.7);transition:all 0.5s cubic-bezier(0.34,1.56,0.64,1);}
+  .cta-stack .elogo.show{opacity:1;transform:scale(1);}
+  .cta-stack .cprice{font-size:28px;font-weight:900;color:#F59E0B;opacity:0;transition:opacity 0.3s ease 0.15s;}
+  .cta-stack .cprice.show{opacity:1;}
+  .cta-stack .csub{font-size:12px;color:#7FA8A3;font-weight:600;opacity:0;transition:opacity 0.3s ease 0.25s;}
+  .cta-stack .csub.show{opacity:1;}
+  .cta-stack .cbtn{background:linear-gradient(135deg,#EF4444,#F59E0B);color:#fff;font-weight:800;font-size:15px;padding:14px 36px;border-radius:14px;opacity:0;transition:all 0.4s ease 0.35s;}
+  .cta-stack .cbtn.show{opacity:1;animation:ctaPulse 1s ease infinite 0.5s;}
+  @keyframes ctaPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.4);}50%{box-shadow:0 0 0 12px rgba(239,68,68,0);}}
+  .cta-stack .curgent{font-size:10px;color:#EF4444;font-weight:800;opacity:0;transition:opacity 0.3s ease 0.45s;animation:blink 1s ease infinite;}
+  .cta-stack .curgent.show{opacity:1;}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.4;}}
+
+  .audio-bars{position:absolute;top:16px;right:16px;z-index:200;display:flex;gap:2px;align-items:flex-end;height:14px;opacity:0;transition:opacity 0.3s;}
+  .audio-bars.show{opacity:1;}
+  .audio-bars .ab{width:3px;background:#EF4444;border-radius:2px;animation:aB 0.7s ease-in-out infinite alternate;}
+  .audio-bars .ab:nth-child(1){height:5px;animation-delay:0s;}
+  .audio-bars .ab:nth-child(2){height:10px;animation-delay:0.12s;}
+  .audio-bars .ab:nth-child(3){height:7px;animation-delay:0.25s;}
+  .audio-bars .ab:nth-child(4){height:12px;animation-delay:0.08s;}
+  @keyframes aB{0%{transform:scaleY(0.4);}100%{transform:scaleY(1);}}
+  .timer-bar{position:absolute;bottom:0;left:0;height:4px;background:linear-gradient(90deg,#EF4444,#F59E0B);width:0%;z-index:100;}
+  .controls{display:flex;gap:10px;z-index:100;align-items:center;justify-content:center;}
+  .ctrl-btn{background:#151B22;color:#EF4444;border:1px solid #EF4444;padding:8px 16px;border-radius:8px;font-family:'Inter',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s;}
+  .ctrl-btn:hover{background:#EF4444;color:#fff;}
+  .ctrl-btn.recording{background:#EF4444;border-color:#EF4444;color:#fff;}
+  .ctrl-btn.muted{opacity:0.5;}
+  .timer-display{color:#7FA8A3;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;}
+  .hide-controls .controls{display:none;}
+  /* Lucide Icons */
+  [data-lucide]{fill:none;stroke-linecap:round;stroke-linejoin:round;display:block;}
+  .lcl{width:20px;height:20px;stroke-width:2;}
+  .lc-teal{stroke:#2DD4BF;}
+  .lc-green{stroke:#22C55E;}
+  .lc-red{stroke:#EF4444;}
+  .lc-star{stroke:#F59E0B;fill:rgba(245,158,11,0.1);}
+  .proof .pi [data-lucide]{margin:0 auto;width:20px;height:20px;}
+  .phone.urgent{animation:edgeGlow 2s ease infinite;}
+  @keyframes edgeGlow{0%,100%{box-shadow:0 0 60px rgba(239,68,68,0.15);}50%{box-shadow:0 0 80px rgba(239,68,68,0.35);}}
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+<div class="phone" id="phone">
+  <div class="audio-bars" id="audioBars"><div class="ab"></div><div class="ab"></div><div class="ab"></div><div class="ab"></div></div>
+
+  <!-- S0: Urgency Hook (0-5s) -->
+  <div class="scene s0 active" id="scene0">
+    <div class="alarm" id="alarm">&#x1F6A8;</div>
+    <div class="utitle" id="utitle">Slot Joki <span class="red">TERBATAS!</span><br><span class="yellow">Cuma 5 slot</span> lagi</div>
+    <div class="slot-badge" id="slotBadge"><div class="sb">&#x1F525; 5 SLOT TERSISA</div></div>
+    <div class="countdown" id="countdown">Season reset dalam 3 hari...</div>
+  </div>
+
+  <!-- S1: Season + Slot Meter (5-12s) -->
+  <div class="scene s1" id="scene1">
+    <div class="season-card" id="seasonCard">
+      <div class="sicon">&#x1F3C6;</div>
+      <div class="stitle">Season <span class="red">Reset</span> Segera!</div>
+      <div class="ssub">Rank kamu bakal turun. Push sekarang sebelum terlambat!</div>
+      <div class="timer-grid">
+        <div class="tg" id="tg1"><div class="tn">03</div><div class="tl">HARI</div></div>
+        <div class="tg" id="tg2"><div class="tn">14</div><div class="tl">JAM</div></div>
+        <div class="tg" id="tg3"><div class="tn">27</div><div class="tl">MENIT</div></div>
+      </div>
+    </div>
+    <div class="slot-meter" id="slotMeter">
+      <h4>Kapasitas Booster Hari Ini</h4>
+      <div class="smbar"><div class="smfill" id="smfill"></div></div>
+      <div class="slot-count"><span class="used">25 Terisi</span><span class="left">5 Tersisa</span></div>
+      <div class="slot-dots" id="slotDots">
+        <div class="sdot" id="d1">&#x2713;</div>
+        <div class="sdot" id="d2">&#x2713;</div>
+        <div class="sdot" id="d3">&#x2713;</div>
+        <div class="sdot" id="d4">&#x2713;</div>
+        <div class="sdot" id="d5">&#x2713;</div>
+        <div class="sdot" id="d6">&#x2713;</div>
+        <div class="sdot" id="d7"></div>
+        <div class="sdot" id="d8"></div>
+        <div class="sdot" id="d9"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S2: Flash Sale Pricing (12-20s) -->
+  <div class="scene s2" id="scene2">
+    <div class="flash-header" id="flashHeader">
+      <div class="fh-icon">&#x26A1;</div>
+      <div class="fh-text">FLASH SALE</div>
+      <div class="fh-timer">23:59:59</div>
+    </div>
+    <div class="price-cards">
+      <div class="pc highlight" id="pc1"><div class="pci">&#x2B50;</div><div class="pcm"><div class="pcn">Per Star (GM)</div><div class="pcd">Push per bintang</div></div><div class="pcpr"><div class="pcorig">Rp 6.000</div><div class="pcnow">Rp 4.000</div><div class="pcsave">HEMAT 33%</div></div></div>
+      <div class="pc" id="pc2"><div class="pci">&#x1F4E6;</div><div class="pcm"><div class="pcn">Paket Epic → Legend</div><div class="pcd">All-in-one boost</div></div><div class="pcpr"><div class="pcorig">Rp 120K</div><div class="pcnow">Rp 85.000</div><div class="pcsave">HEMAT 29%</div></div></div>
+      <div class="pc" id="pc3"><div class="pci">&#x1F91D;</div><div class="pcm"><div class="pcn">Gendong (Epic)</div><div class="pcd">Main bareng, no password</div></div><div class="pcpr"><div class="pcorig">Rp 12K</div><div class="pcnow">Rp 9.000</div><div class="pcsave">HEMAT 25%</div></div></div>
+    </div>
+  </div>
+
+  <!-- S3: CTA (20-30s) -->
+  <div class="scene s3" id="scene3">
+    <div class="proof-row" id="proofRow">
+      <div class="proof"><div class="pi"><i data-lucide="users" class="lcl lc-teal"></i></div><div class="pn">2.800+</div><div class="pl">Customer</div></div>
+      <div class="proof"><div class="pi"><i data-lucide="star" class="lcl lc-star"></i></div><div class="pn">4.9/5</div><div class="pl">Rating</div></div>
+      <div class="proof"><div class="pi"><i data-lucide="shield-check" class="lcl lc-green"></i></div><div class="pn">100%</div><div class="pl">Aman</div></div>
+    </div>
+    <div class="cta-stack">
+      <div class="elogo" id="eLogo">ETNYX</div>
+      <div class="cprice" id="cPrice">Mulai Rp 4.000/star &#x2B50;</div>
+      <div class="csub" id="cSub">3 Mode: Paket &bull; Per Star &bull; Gendong</div>
+      <div class="cbtn" id="cBtn">&#x1F525; ORDER SEKARANG</div>
+      <div class="curgent" id="cUrgent">&#x26A0;&#xFE0F; 5 slot tersisa &mdash; bisa habis kapan saja</div>
+    </div>
+  </div>
+
+  <div class="timer-bar" id="timerBar"></div>
+</div>
+</div>
+
+<div class="controls"><button class="ctrl-btn" id="playBtn" onclick="startAnimation()">&#x25B6; Play</button><button class="ctrl-btn" id="recBtn" onclick="toggleRecMode()">&#x1F534; Rec</button><button class="ctrl-btn" id="muteBtn" onclick="toggleMute()">&#x1F50A;</button><div class="timer-display" id="timerDisplay">0.0s / 30s</div></div>
+
+<script>
+let audioCtx=null,isMuted=false,masterGain=null,bgOsc=null;
+function initAudio(){if(audioCtx)return;audioCtx=new(window.AudioContext||window.webkitAudioContext)();masterGain=audioCtx.createGain();masterGain.gain.value=0.5;masterGain.connect(audioCtx.destination);}
+function toggleMute(){isMuted=!isMuted;const b=document.getElementById('muteBtn');if(isMuted){b.textContent='\uD83D\uDD07';b.classList.add('muted');if(masterGain)masterGain.gain.value=0;}else{b.textContent='\uD83D\uDD0A';b.classList.remove('muted');if(masterGain)masterGain.gain.value=0.5;}}
+function startBG(){if(!audioCtx)return;bgOsc=audioCtx.createOscillator();bgOsc.type='sawtooth';bgOsc.frequency.value=80;const g=audioCtx.createGain();g.gain.value=0.03;const f=audioCtx.createBiquadFilter();f.type='lowpass';f.frequency.value=200;bgOsc.connect(f);f.connect(g);g.connect(masterGain);bgOsc.start();const b=audioCtx.createBuffer(1,audioCtx.sampleRate*2,audioCtx.sampleRate);const d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;const n=audioCtx.createBufferSource();n.buffer=b;n.loop=true;const nf=audioCtx.createBiquadFilter();nf.type='lowpass';nf.frequency.value=120;const ng=audioCtx.createGain();ng.gain.value=0.03;n.connect(nf);nf.connect(ng);ng.connect(masterGain);n.start();bgOsc._n=n;}
+function stopBG(){if(bgOsc){try{bgOsc.stop();bgOsc._n.stop();}catch(e){}bgOsc=null;}}
+function sfx(type){if(!audioCtx)return;const t=audioCtx.currentTime;
+if(type==='alarm'){const o=audioCtx.createOscillator();o.type='square';o.frequency.setValueAtTime(800,t);o.frequency.setValueAtTime(600,t+0.1);o.frequency.setValueAtTime(800,t+0.2);const g=audioCtx.createGain();g.gain.setValueAtTime(0.07,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.3);o.connect(g);g.connect(masterGain);o.start();o.stop(t+0.3);}
+else if(type==='whoosh'){const b=audioCtx.createBuffer(1,audioCtx.sampleRate*0.2,audioCtx.sampleRate);const d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(1-i/d.length);const s=audioCtx.createBufferSource();s.buffer=b;const f=audioCtx.createBiquadFilter();f.type='bandpass';f.Q.value=0.5;f.frequency.setValueAtTime(400,t);f.frequency.exponentialRampToValueAtTime(2500,t+0.12);const g=audioCtx.createGain();g.gain.setValueAtTime(0.1,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.15);s.connect(f);f.connect(g);g.connect(masterGain);s.start();}
+else if(type==='impact'){const o=audioCtx.createOscillator();o.type='sine';o.frequency.setValueAtTime(150,t);o.frequency.exponentialRampToValueAtTime(40,t+0.5);const g=audioCtx.createGain();g.gain.setValueAtTime(0.2,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.5);o.connect(g);g.connect(masterGain);o.start();o.stop(t+0.5);}
+else if(type==='ding'){const o=audioCtx.createOscillator();o.type='sine';o.frequency.value=1200;const g=audioCtx.createGain();g.gain.setValueAtTime(0.08,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.25);o.connect(g);g.connect(masterGain);o.start();o.stop(t+0.25);}
+else if(type==='slide'){const o=audioCtx.createOscillator();o.type='sine';o.frequency.setValueAtTime(500,t);o.frequency.exponentialRampToValueAtTime(800,t+0.1);const g=audioCtx.createGain();g.gain.setValueAtTime(0.05,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.1);o.connect(g);g.connect(masterGain);o.start();o.stop(t+0.1);}
+else if(type==='tick'){const o=audioCtx.createOscillator();o.type='triangle';o.frequency.value=900;const g=audioCtx.createGain();g.gain.setValueAtTime(0.05,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.05);o.connect(g);g.connect(masterGain);o.start();o.stop(t+0.05);}
+else if(type==='urgency'){const o=audioCtx.createOscillator();o.type='sawtooth';o.frequency.setValueAtTime(200,t);o.frequency.linearRampToValueAtTime(800,t+0.3);const g=audioCtx.createGain();g.gain.setValueAtTime(0.06,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.35);o.connect(g);g.connect(masterGain);o.start();o.stop(t+0.35);}
+else if(type==='success'){[800,1000,1200].forEach((f,i)=>{const o=audioCtx.createOscillator();o.type='sine';o.frequency.value=f;const g=audioCtx.createGain();g.gain.setValueAtTime(0.08,t+i*0.1);g.gain.exponentialRampToValueAtTime(0.001,t+i*0.1+0.25);o.connect(g);g.connect(masterGain);o.start(t+i*0.1);o.stop(t+i*0.1+0.25);});}
+}
+const TOTAL=30000;let playing=false,startTime=0,animFrame=null,fired={};
+const SCENES=[{id:'scene0',start:0,end:5000},{id:'scene1',start:5000,end:12000},{id:'scene2',start:12000,end:20000},{id:'scene3',start:20000,end:30000}];
+
+function startAnimation(){
+  if(playing)return;initAudio();playing=true;fired={};startTime=performance.now();
+  document.getElementById('playBtn').textContent='\u23F8';document.getElementById('playBtn').style.opacity='0.5';
+  document.querySelectorAll('.scene').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.show,.go').forEach(el=>el.classList.remove('show','go'));
+  document.getElementById('timerBar').style.width='0%';
+  document.getElementById('smfill').style.width='0%';
+  document.getElementById('phone').classList.remove('urgent');
+  stopBG();startBG();document.getElementById('audioBars').classList.add('show');
+  tick();
+}
+
+function tick(){
+  const e=performance.now()-startTime;const p=Math.min((e/TOTAL)*100,100);
+  document.getElementById('timerBar').style.width=p+'%';
+  document.getElementById('timerDisplay').textContent=(e/1000).toFixed(1)+'s / 30s';
+  SCENES.forEach(sc=>{const el=document.getElementById(sc.id);if(e>=sc.start&&e<sc.end){if(!el.classList.contains('active'))el.classList.add('active');}else{el.classList.remove('active');}});
+
+  // S0: Urgency Hook
+  if(e>=100&&!fired.a){fired.a=true;document.getElementById('phone').classList.add('urgent');}
+  if(e>=200&&!fired.b){fired.b=true;document.getElementById('alarm').classList.add('show');sfx('alarm');}
+  if(e>=800&&!fired.c){fired.c=true;document.getElementById('utitle').classList.add('show');sfx('impact');}
+  if(e>=1800&&!fired.d){fired.d=true;document.getElementById('slotBadge').classList.add('show');sfx('urgency');}
+  if(e>=2800&&!fired.e){fired.e=true;document.getElementById('countdown').classList.add('show');}
+  if(e>=4800&&!fired.w0){fired.w0=true;sfx('whoosh');}
+
+  // S1: Season + Slots
+  if(e>=5200&&!fired.s1a){fired.s1a=true;document.getElementById('seasonCard').classList.add('show');sfx('impact');}
+  if(e>=6000&&!fired.s1b){fired.s1b=true;['tg1','tg2','tg3'].forEach((id,i)=>setTimeout(()=>{document.getElementById(id).classList.add('show');sfx('tick');},i*300));}
+  if(e>=7500&&!fired.s1c){fired.s1c=true;document.getElementById('slotMeter').classList.add('show');}
+  if(e>=8000&&!fired.s1d){fired.s1d=true;document.getElementById('smfill').classList.add('go');sfx('urgency');}
+  if(e>=8800&&!fired.s1e){fired.s1e=true;
+    for(let i=1;i<=9;i++){setTimeout(()=>{const d=document.getElementById('d'+i);d.classList.add('show');if(i<=6){d.classList.add('taken');}else{d.classList.add('open');}sfx('tick');},i*150);}
+  }
+  if(e>=11800&&!fired.w1){fired.w1=true;sfx('whoosh');}
+
+  // S2: Flash Sale
+  if(e>=12200&&!fired.s2a){fired.s2a=true;document.getElementById('flashHeader').classList.add('show');sfx('alarm');}
+  if(e>=13000&&!fired.s2b){fired.s2b=true;document.getElementById('pc1').classList.add('show');sfx('slide');}
+  if(e>=14200&&!fired.s2c){fired.s2c=true;document.getElementById('pc2').classList.add('show');sfx('slide');}
+  if(e>=15400&&!fired.s2d){fired.s2d=true;document.getElementById('pc3').classList.add('show');sfx('slide');}
+  if(e>=19800&&!fired.w2){fired.w2=true;sfx('whoosh');}
+
+  // S3: CTA
+  if(e>=20200&&!fired.s3a){fired.s3a=true;document.getElementById('proofRow').classList.add('show');sfx('ding');}
+  if(e>=21500&&!fired.s3b){fired.s3b=true;document.getElementById('eLogo').classList.add('show');sfx('impact');}
+  if(e>=22500&&!fired.s3c){fired.s3c=true;document.getElementById('cPrice').classList.add('show');}
+  if(e>=23500&&!fired.s3d){fired.s3d=true;document.getElementById('cSub').classList.add('show');}
+  if(e>=24500&&!fired.s3e){fired.s3e=true;document.getElementById('cBtn').classList.add('show');sfx('success');}
+  if(e>=26000&&!fired.s3f){fired.s3f=true;document.getElementById('cUrgent').classList.add('show');sfx('alarm');}
+
+  if(e<TOTAL){animFrame=requestAnimationFrame(tick);}else{playing=false;stopBG();document.getElementById('audioBars').classList.remove('show');document.getElementById('playBtn').textContent='\u25B6 Play';document.getElementById('playBtn').style.opacity='1';document.getElementById('timerDisplay').textContent='30.0s / 30s';}
+}
+function toggleRecMode(){const b=document.getElementById('recBtn');document.body.classList.toggle('hide-controls');if(document.body.classList.contains('hide-controls')){b.classList.add('recording');b.textContent='\u2B1B';setTimeout(startAnimation,1000);}else{b.classList.remove('recording');b.textContent='\uD83D\uDD34 Rec';}}
+function updateStageScale(){const s=Math.min((window.innerWidth-32)/390,(window.innerHeight-32)/844,1);document.documentElement.style.setProperty('--phone-scale',String(s));}
+window.addEventListener('resize',updateStageScale);
+document.addEventListener('DOMContentLoaded',()=>{if(typeof lucide!=='undefined')lucide.createIcons();updateStageScale();});
+</script>
+</body>
+</html>

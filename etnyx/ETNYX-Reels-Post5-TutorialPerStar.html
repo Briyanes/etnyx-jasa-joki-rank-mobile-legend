@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ETNYX Reels — Post 5: Tutorial Order Per Star (60s)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#000;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:100vh;gap:16px;padding:16px 0;font-family:'Inter',sans-serif;overflow:auto;}
+  .stage{position:relative;width:calc(390px * var(--phone-scale,1));height:calc(844px * var(--phone-scale,1));flex:0 0 auto;}
+  .phone{width:390px;height:844px;background:#0F1419;position:absolute;top:0;left:0;overflow:hidden;border-radius:40px;box-shadow:0 0 60px rgba(45,212,191,0.15);transform:scale(var(--phone-scale,1));transform-origin:top left;}
+  .scene{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:40px 28px;opacity:0;transition:opacity 0.35s;z-index:1;}
+  .scene.active{opacity:1;z-index:10;}
+
+  /* Step overlay */
+  .step-ov{position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:50;display:flex;gap:5px;align-items:center;opacity:0;transition:opacity 0.3s;}
+  .step-ov.show{opacity:1;}
+  .sd{width:26px;height:26px;border-radius:50%;background:#1E2A35;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#4A5568;transition:all 0.3s;border:2px solid transparent;}
+  .sd.active{background:rgba(45,212,191,0.15);border-color:#2DD4BF;color:#2DD4BF;}
+  .sd.done{background:rgba(34,197,94,0.15);border-color:#22C55E;color:#22C55E;}
+  .sl{width:10px;height:2px;background:#1E2A35;border-radius:1px;}
+  .sl.done{background:#22C55E;}
+
+  /* Step label */
+  .stlbl{font-size:12px;font-weight:800;color:#2DD4BF;background:rgba(45,212,191,0.1);border:1px solid rgba(45,212,191,0.3);padding:4px 12px;border-radius:14px;margin-bottom:14px;opacity:0;transition:opacity 0.3s;}
+  .stlbl.show{opacity:1;}
+
+  /* S0: Hook */
+  .s0{background:radial-gradient(ellipse at center,rgba(45,212,191,0.08) 0%,#0F1419 70%);}
+  .s0 .hook{font-size:28px;font-weight:900;color:#fff;text-align:center;line-height:1.3;opacity:0;transform:scale(0.85);transition:all 0.5s cubic-bezier(0.34,1.56,0.64,1);}
+  .s0 .hook.show{opacity:1;transform:scale(1);}
+  .s0 .hook .teal{color:#2DD4BF;}
+  .s0 .hook .yellow{color:#F59E0B;}
+  .s0 .hsub{font-size:14px;color:#7FA8A3;font-weight:600;margin-top:10px;opacity:0;transition:opacity 0.3s ease 0.3s;}
+  .s0 .hsub.show{opacity:1;}
+  .s0 .hbadge{background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:#F59E0B;font-size:16px;font-weight:900;padding:8px 20px;border-radius:12px;margin-top:16px;opacity:0;transition:all 0.3s ease 0.5s;}
+  .s0 .hbadge.show{opacity:1;}
+
+  /* S1: Buka + Mode PerStar (3-10s) */
+  .s1{padding:60px 24px 40px;justify-content:flex-start;}
+  .mode-box{width:100%;background:#151B22;border:1px solid #1E2A35;border-radius:14px;padding:16px;opacity:0;transform:translateY(15px);transition:all 0.4s ease;}
+  .mode-box.show{opacity:1;transform:translateY(0);}
+  .mode-box h4{font-size:13px;font-weight:800;color:#E6F1EF;margin-bottom:12px;}
+  .mtabs{display:flex;gap:8px;margin-bottom:14px;}
+  .mtab{flex:1;background:#0D1117;border:1px solid #1E2A35;border-radius:10px;padding:10px 6px;text-align:center;transition:all 0.3s;}
+  .mtab .mi{font-size:18px;margin-bottom:3px;}
+  .mtab .mn{font-size:9px;font-weight:700;color:#7FA8A3;}
+  .mtab.active{border-color:#F59E0B;background:rgba(245,158,11,0.06);}
+  .mtab.active .mn{color:#F59E0B;}
+  .mdesc{background:#0D1117;border-radius:10px;padding:12px;font-size:11px;color:#7FA8A3;line-height:1.5;opacity:0;transition:opacity 0.3s;}
+  .mdesc.show{opacity:1;}
+  .mdesc .hl{color:#F59E0B;font-weight:700;}
+
+  /* S2: Pilih Rank (10-20s) */
+  .s2{padding:60px 24px 40px;justify-content:flex-start;}
+  .rank-box{width:100%;opacity:0;transform:translateY(15px);transition:all 0.4s ease;}
+  .rank-box.show{opacity:1;transform:translateY(0);}
+  .rank-box h4{font-size:13px;font-weight:800;color:#E6F1EF;margin-bottom:4px;}
+  .rank-box .rsub{font-size:10px;color:#7FA8A3;margin-bottom:12px;}
+  .rcard{background:#151B22;border:1px solid #1E2A35;border-radius:12px;padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;opacity:0;transform:translateX(-20px);transition:all 0.35s cubic-bezier(0.34,1.56,0.64,1);}
+  .rcard.show{opacity:1;transform:translateX(0);}
+  .rcard.sel{border-color:#F59E0B;background:rgba(245,158,11,0.04);}
+  .ricon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+  .rinfo{flex:1;}
+  .rname{font-size:12px;font-weight:800;color:#E6F1EF;}
+  .rprice{font-size:11px;font-weight:800;color:#F59E0B;}
+  .rorig{font-size:8px;color:#4A5568;text-decoration:line-through;margin-left:4px;}
+  .rdisc{font-size:8px;color:#22C55E;font-weight:800;margin-left:4px;}
+
+  /* S3: Star Quantity (20-28s) */
+  .s3{padding:60px 24px 40px;justify-content:flex-start;gap:16px;}
+  .qty-box{width:100%;background:#151B22;border:1px solid #1E2A35;border-radius:14px;padding:18px;opacity:0;transform:translateY(15px);transition:all 0.4s ease;}
+  .qty-box.show{opacity:1;transform:translateY(0);}
+  .qty-box h4{font-size:13px;font-weight:800;color:#E6F1EF;margin-bottom:14px;}
+  .qty-row{display:flex;align-items:center;justify-content:center;gap:18px;margin-bottom:16px;}
+  .qty-btn{width:40px;height:40px;border-radius:10px;background:#0D1117;border:1px solid #1E2A35;display:flex;align-items:center;justify-content:center;font-size:20px;color:#7FA8A3;font-weight:800;}
+  .qty-btn.active{border-color:#F59E0B;color:#F59E0B;}
+  .qty-num{font-size:48px;font-weight:900;color:#F59E0B;min-width:80px;text-align:center;}
+  .qty-label{font-size:12px;color:#7FA8A3;text-align:center;}
+  .qty-total{background:#0D1117;border-radius:10px;padding:14px;text-align:center;opacity:0;transition:opacity 0.3s;}
+  .qty-total.show{opacity:1;}
+  .qty-total .tprice{font-size:28px;font-weight:900;color:#2DD4BF;}
+  .qty-total .tcalc{font-size:10px;color:#7FA8A3;margin-top:4px;}
+
+  /* S4: Addons + Data (28-43s) */
+  .s4{padding:60px 24px 40px;justify-content:flex-start;gap:10px;}
+  .quick-panel{width:100%;background:#151B22;border:1px solid #1E2A35;border-radius:14px;padding:14px;opacity:0;transform:translateY(12px);transition:all 0.4s ease;}
+  .quick-panel.show{opacity:1;transform:translateY(0);}
+  .quick-panel h4{font-size:12px;font-weight:800;color:#E6F1EF;margin-bottom:10px;}
+  .qrow{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:11px;color:#7FA8A3;}
+  .qrow .qi{font-size:16px;flex-shrink:0;}
+  .qrow .qt{flex:1;font-weight:600;}
+  .qrow .qv{font-size:10px;font-weight:800;color:#22C55E;}
+  .toggle{width:36px;height:20px;border-radius:10px;background:#1E2A35;position:relative;flex-shrink:0;transition:background 0.3s;}
+  .toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#4A5568;transition:all 0.3s;}
+  .toggle.on{background:rgba(245,158,11,0.3);}
+  .toggle.on::after{left:18px;background:#F59E0B;}
+  .sec-badge{display:flex;align-items:center;gap:6px;font-size:10px;color:#22C55E;font-weight:700;margin-top:6px;opacity:0;transition:opacity 0.3s;}
+  .sec-badge.show{opacity:1;}
+
+  /* S5: Payment + Tracking (43-55s) */
+  .s5{padding:60px 24px 40px;justify-content:flex-start;gap:10px;}
+  .pay-box{width:100%;opacity:0;transform:translateY(12px);transition:all 0.4s ease;}
+  .pay-box.show{opacity:1;transform:translateY(0);}
+  .pay-box h4{font-size:12px;font-weight:800;color:#E6F1EF;margin-bottom:10px;}
+  .po{background:#151B22;border:1px solid #1E2A35;border-radius:10px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:10px;opacity:0;transform:translateX(-15px);transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);}
+  .po.show{opacity:1;transform:translateX(0);}
+  .po.sel{border-color:#2DD4BF;background:rgba(45,212,191,0.04);}
+  .poi{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+  .pon{font-size:11px;font-weight:700;color:#E6F1EF;}
+  .pod{font-size:8px;color:#7FA8A3;}
+  .pch{margin-left:auto;font-size:12px;color:#2DD4BF;opacity:0;transition:opacity 0.3s;}
+  .po.sel .pch{opacity:1;}
+  .sum-bar{background:#151B22;border:1px solid rgba(45,212,191,0.2);border-radius:12px;padding:12px;opacity:0;transition:opacity 0.3s;}
+  .sum-bar.show{opacity:1;}
+  .srow{display:flex;justify-content:space-between;font-size:9px;color:#7FA8A3;margin-bottom:3px;}
+  .srow.total{font-size:13px;font-weight:900;color:#2DD4BF;margin-top:5px;padding-top:5px;border-top:1px solid #1E2A35;}
+  .big-btn{width:100%;background:linear-gradient(135deg,#2DD4BF,#7FA8A3);color:#0F1419;font-size:13px;font-weight:800;padding:12px;border-radius:10px;text-align:center;opacity:0;transform:translateY(8px);transition:all 0.3s ease;}
+  .big-btn.show{opacity:1;transform:translateY(0);}
+  .big-btn.ok{background:linear-gradient(135deg,#22C55E,#16A34A);color:#fff;}
+  .track-card{width:100%;background:#151B22;border:1px solid rgba(45,212,191,0.2);border-radius:12px;padding:14px;opacity:0;transition:all 0.4s ease;}
+  .track-card.show{opacity:1;}
+  .track-card h5{font-size:11px;font-weight:800;color:#E6F1EF;margin-bottom:8px;}
+  .tbar{width:100%;height:5px;background:#1E2A35;border-radius:3px;overflow:hidden;margin-bottom:4px;}
+  .tfill{height:100%;width:0%;background:linear-gradient(90deg,#2DD4BF,#22C55E);border-radius:3px;transition:width 1.5s ease;}
+  .tfill.go{width:30%;}
+  .wa-n{margin-top:8px;background:#0D1117;border-radius:8px;padding:8px;opacity:0;transition:opacity 0.3s;}
+  .wa-n.show{opacity:1;}
+  .wa-n .wt{font-size:9px;color:#22C55E;font-weight:700;margin-bottom:2px;}
+  .wa-n .wm{font-size:8px;color:#B8D4CF;line-height:1.3;}
+
+  /* S6: CTA + price (55-60s) */
+  .s6{background:radial-gradient(ellipse at 50% 50%,rgba(245,158,11,0.08) 0%,#0F1419 60%);gap:14px;}
+  .s6 .elogo{font-size:48px;font-weight:900;letter-spacing:6px;background:linear-gradient(135deg,#2DD4BF,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;opacity:0;transform:scale(0.7);transition:all 0.6s cubic-bezier(0.34,1.56,0.64,1);}
+  .s6 .elogo.show{opacity:1;transform:scale(1);}
+  .s6 .eprice{font-size:32px;font-weight:900;color:#F59E0B;opacity:0;transition:opacity 0.3s ease 0.2s;}
+  .s6 .eprice.show{opacity:1;}
+  .s6 .esub{font-size:13px;color:#7FA8A3;font-weight:600;opacity:0;transition:opacity 0.3s ease 0.3s;}
+  .s6 .esub.show{opacity:1;}
+  .s6 .ecta{background:linear-gradient(135deg,#2DD4BF,#7FA8A3);color:#0F1419;font-weight:800;font-size:15px;padding:14px 36px;border-radius:14px;opacity:0;transition:all 0.4s ease 0.4s;}
+  .s6 .ecta.show{opacity:1;animation:ctaP 1.2s ease infinite 0.6s;}
+  @keyframes ctaP{0%,100%{box-shadow:0 0 0 0 rgba(45,212,191,0.4);}50%{box-shadow:0 0 0 12px rgba(45,212,191,0);}}
+
+  /* Shared */
+  .cursor{position:absolute;width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,0.9);box-shadow:0 0 12px rgba(255,255,255,0.4);z-index:40;pointer-events:none;opacity:0;transition:all 0.5s cubic-bezier(0.25,0.1,0.25,1);}
+  .cursor.show{opacity:1;}
+  .cursor.click{animation:cc 0.25s ease;}
+  @keyframes cc{0%,100%{transform:scale(1);}50%{transform:scale(0.6);}}
+  .ripple{position:absolute;width:40px;height:40px;border-radius:50%;border:2px solid #F59E0B;opacity:0;z-index:39;pointer-events:none;}
+  .ripple.show{animation:rp 0.5s ease forwards;}
+  @keyframes rp{0%{opacity:1;transform:scale(0.5);}100%{opacity:0;transform:scale(2);}}
+  .audio-bars{position:absolute;top:16px;right:16px;z-index:200;display:flex;gap:2px;align-items:flex-end;height:14px;opacity:0;transition:opacity 0.3s;}
+  .audio-bars.show{opacity:1;}
+  .audio-bars .ab{width:3px;background:#F59E0B;border-radius:2px;animation:aB 0.7s ease-in-out infinite alternate;}
+  .audio-bars .ab:nth-child(1){height:5px;animation-delay:0s;}
+  .audio-bars .ab:nth-child(2){height:10px;animation-delay:0.12s;}
+  .audio-bars .ab:nth-child(3){height:7px;animation-delay:0.25s;}
+  .audio-bars .ab:nth-child(4){height:12px;animation-delay:0.08s;}
+  @keyframes aB{0%{transform:scaleY(0.4);}100%{transform:scaleY(1);}}
+  .timer-bar{position:absolute;bottom:0;left:0;height:4px;background:linear-gradient(90deg,#F59E0B,#2DD4BF);width:0%;z-index:100;}
+  .controls{display:flex;gap:10px;z-index:100;align-items:center;justify-content:center;}
+  .ctrl-btn{background:#151B22;color:#2DD4BF;border:1px solid #2DD4BF;padding:8px 16px;border-radius:8px;font-family:'Inter',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s;}
+  .ctrl-btn:hover{background:#2DD4BF;color:#0F1419;}
+  .ctrl-btn.recording{background:#EF4444;border-color:#EF4444;color:#fff;}
+  .ctrl-btn.muted{opacity:0.5;}
+  .timer-display{color:#7FA8A3;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;}
+  .hide-controls .controls{display:none;}
+  /* Lucide Icons */
+  [data-lucide]{fill:none;stroke-linecap:round;stroke-linejoin:round;display:block;}
+  .lci[data-lucide]{display:inline-block;vertical-align:middle;margin-right:2px;}
+  .lcl{width:18px;height:18px;stroke-width:2;}
+  .lcm{width:14px;height:14px;stroke-width:2.5;}
+  .lcs{width:10px;height:10px;stroke-width:2;}
+  .lc-teal{stroke:#2DD4BF;}
+  .lc-blue{stroke:#3B82F6;}
+  .lc-green{stroke:#22C55E;}
+  .lc-yellow{stroke:#F59E0B;}
+  .lc-purple{stroke:#A78BFA;}
+  .lc-muted{stroke:#7FA8A3;}
+  .lc-star{stroke:#F59E0B;fill:rgba(245,158,11,0.1);}
+  .mtab .mi [data-lucide]{margin:0 auto;}
+  .qrow .qi [data-lucide]{display:inline-block;}
+  .poi [data-lucide]{margin:0 auto;}
+</head>
+<body>
+<div class="stage" id="stage">
+<div class="phone" id="phone">
+  <div class="audio-bars" id="audioBars"><div class="ab"></div><div class="ab"></div><div class="ab"></div><div class="ab"></div></div>
+  <div class="step-ov" id="stepOv">
+    <div class="sd" id="sd1">1</div><div class="sl" id="sl1"></div>
+    <div class="sd" id="sd2">2</div><div class="sl" id="sl2"></div>
+    <div class="sd" id="sd3">3</div><div class="sl" id="sl3"></div>
+    <div class="sd" id="sd4">4</div><div class="sl" id="sl4"></div>
+    <div class="sd" id="sd5">5</div>
+  </div>
+  <div class="cursor" id="cursor"></div>
+  <div class="ripple" id="ripple"></div>
+
+  <!-- S0: Hook -->
+  <div class="scene s0 active" id="scene0">
+    <div class="hook" id="hookText">Ga perlu push <span class="yellow">full rank</span>.<br>Bisa <span class="teal">per-bintang!</span></div>
+    <div class="hsub" id="hookSub">Mau naik 3 star aja? Bisa.</div>
+    <div class="hbadge" id="hookBadge">Mulai Rp 5.000/star &#x2B50;</div>
+  </div>
+
+  <!-- S1: Buka + Mode PerStar -->
+  <div class="scene s1" id="scene1">
+    <div class="stlbl" id="sl_1">STEP 1 — Pilih Mode Per Bintang</div>
+    <div class="mode-box" id="modeBox">
+      <h4>Pilih Mode Joki</h4>
+      <div class="mtabs">
+        <div class="mtab" id="mtPaket"><div class="mi"><i data-lucide="package" class="lcl lc-teal"></i></div><div class="mn">PAKET</div></div>
+        <div class="mtab active" id="mtStar"><div class="mi"><i data-lucide="star" class="lcl lc-star"></i></div><div class="mn">PER STAR</div></div>
+        <div class="mtab" id="mtGendong"><div class="mi"><i data-lucide="users" class="lcl lc-teal"></i></div><div class="mn">GENDONG</div></div>
+      </div>
+      <div class="mdesc" id="modeDesc">&#x2B50; <span class="hl">Per Bintang</span> — Bayar per star, cocok kalau kamu cuma mau naik beberapa bintang aja. Pilih rank, tentukan jumlah star, selesai!</div>
+    </div>
+  </div>
+
+  <!-- S2: Pilih Rank -->
+  <div class="scene s2" id="scene2">
+    <div class="stlbl" id="sl_2">STEP 2 — Pilih Rank</div>
+    <div class="rank-box" id="rankBox">
+      <h4>Harga Per Star</h4>
+      <div class="rsub">Pilih rank kamu sekarang</div>
+      <div class="rcard" id="r1"><div class="ricon" style="background:rgba(59,130,246,0.12);">&#x1F539;</div><div class="rinfo"><div class="rname">Grand Master</div></div><div><span class="rprice">Rp 5.000/star</span><span class="rorig">Rp 6K</span><span class="rdisc">-17%</span></div></div>
+      <div class="rcard" id="r2"><div class="ricon" style="background:rgba(167,139,250,0.12);">&#x1F7E3;</div><div class="rinfo"><div class="rname">Epic</div></div><div><span class="rprice">Rp 6.500/star</span><span class="rorig">Rp 8K</span><span class="rdisc">-19%</span></div></div>
+      <div class="rcard" id="r3"><div class="ricon" style="background:rgba(245,158,11,0.12);">&#x1F525;</div><div class="rinfo"><div class="rname">Legend</div></div><div><span class="rprice">Rp 7.500/star</span><span class="rorig">Rp 9K</span><span class="rdisc">-17%</span></div></div>
+      <div class="rcard" id="r4"><div class="ricon" style="background:rgba(239,68,68,0.12);">&#x1F451;</div><div class="rinfo"><div class="rname">Mythic</div></div><div><span class="rprice">Rp 18.000/star</span><span class="rorig">Rp 20K</span><span class="rdisc">-10%</span></div></div>
+    </div>
+  </div>
+
+  <!-- S3: Star Quantity -->
+  <div class="scene s3" id="scene3">
+    <div class="stlbl" id="sl_3">STEP 3 — Jumlah Bintang</div>
+    <div class="qty-box" id="qtyBox">
+      <h4>Atur Jumlah Star</h4>
+      <div class="qty-row">
+        <div class="qty-btn" id="qMinus">-</div>
+        <div class="qty-num" id="qNum">3</div>
+        <div class="qty-btn" id="qPlus">+</div>
+      </div>
+      <div class="qty-label">Min 3 star &#x2022; Epic rank</div>
+      <div class="qty-total" id="qTotal">
+        <div class="tprice" id="tPrice">Rp 19.500</div>
+        <div class="tcalc">3 star &#x00D7; Rp 6.500 = Rp 19.500</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S4: Addons + Data -->
+  <div class="scene s4" id="scene4">
+    <div class="stlbl" id="sl_4">STEP 4 — Data &amp; Opsi</div>
+    <div class="quick-panel" id="addonPanel">
+      <h4>&#x26A1; Add-ons</h4>
+      <div class="qrow"><div class="qi"><i data-lucide="zap" class="lcl lc-yellow"></i></div><div class="qt">Express (+20%)</div><div class="toggle" id="tgExp"></div></div>
+      <div class="qrow"><div class="qi"><i data-lucide="crown" class="lcl lc-purple"></i></div><div class="qt">Premium Pilot (+30%)</div><div class="toggle" id="tgPrem"></div></div>
+    </div>
+    <div class="quick-panel" id="dataPanel">
+      <h4>&#x1F3AE; Data Akun</h4>
+      <div class="qrow"><div class="qi"><i data-lucide="user" class="lcl lc-muted"></i></div><div class="qt">User ID &amp; Server</div><div class="qv" id="dv1"></div></div>
+      <div class="qrow"><div class="qi"><i data-lucide="mail" class="lcl lc-muted"></i></div><div class="qt">Email / No HP</div><div class="qv" id="dv2"></div></div>
+      <div class="qrow"><div class="qi"><i data-lucide="lock" class="lcl lc-teal"></i></div><div class="qt">Password</div><div class="qv" id="dv3"></div></div>
+      <div class="sec-badge" id="secBadge">&#x1F512; Dienkripsi AES-256 &middot; Data aman 100%</div>
+    </div>
+  </div>
+
+  <!-- S5: Payment + Tracking -->
+  <div class="scene s5" id="scene5">
+    <div class="stlbl" id="sl_5">STEP 5 — Bayar &amp; Tracking!</div>
+    <div class="pay-box" id="payBox">
+      <h4>Metode Bayar</h4>
+      <div class="po" id="po1"><div class="poi" style="background:rgba(59,130,246,0.12);"><i data-lucide="landmark" class="lcl lc-blue"></i></div><div><div class="pon">Transfer Bank</div><div class="pod">BCA, BNI, Mandiri</div></div><div class="pch">&#x2713;</div></div>
+      <div class="po" id="po2"><div class="poi" style="background:rgba(34,197,94,0.12);"><i data-lucide="credit-card" class="lcl lc-green"></i></div><div><div class="pon">E-Wallet</div><div class="pod">GoPay, OVO, DANA</div></div><div class="pch">&#x2713;</div></div>
+      <div class="po" id="po3"><div class="poi" style="background:rgba(167,139,250,0.12);"><i data-lucide="qr-code" class="lcl lc-purple"></i></div><div><div class="pon">QRIS</div><div class="pod">Scan QR</div></div><div class="pch">&#x2713;</div></div>
+    </div>
+    <div class="big-btn" id="payBtn">&#x1F4B0; BAYAR — Rp 19.500</div>
+    <div class="track-card" id="trackCard">
+      <h5>&#x1F4CA; Tracking Aktif!</h5>
+      <div class="tbar"><div class="tfill" id="tfill"></div></div>
+      <div class="wa-n" id="waN"><div class="wt">&#x2705; ETNYX Bot — WhatsApp</div><div class="wm">Order #4012: Booster assigned. Tracking aktif!</div></div>
+    </div>
+  </div>
+
+  <!-- S6: CTA -->
+  <div class="scene s6" id="scene6">
+    <div class="elogo" id="eLogo">ETNYX</div>
+    <div class="eprice" id="ePrice">Rp 4.000/star &#x2B50;</div>
+    <div class="esub" id="eSub">Push se-dikit atau se-banyak yang kamu mau</div>
+    <div class="ecta" id="eCta">&#x1F449; Link di Bio</div>
+  </div>
+
+  <div class="timer-bar" id="timerBar"></div>
+</div>
+</div>
+
+<div class="controls"><button class="ctrl-btn" id="playBtn" onclick="startAnimation()">&#x25B6; Play</button><button class="ctrl-btn" id="recBtn" onclick="toggleRecMode()">&#x1F534; Rec</button><button class="ctrl-btn" id="muteBtn" onclick="toggleMute()">&#x1F50A;</button><div class="timer-display" id="timerDisplay">0.0s / 60s</div></div>
+
+<script>
+let audioCtx=null,isMuted=false,masterGain=null,bgOsc=null;
+function initAudio(){if(audioCtx)return;audioCtx=new(window.AudioContext||window.webkitAudioContext)();masterGain=audioCtx.createGain();masterGain.gain.value=0.5;masterGain.connect(audioCtx.destination);}
+function toggleMute(){isMuted=!isMuted;const b=document.getElementById('muteBtn');if(isMuted){b.textContent='\uD83D\uDD07';b.classList.add('muted');if(masterGain)masterGain.gain.value=0;}else{b.textContent='\uD83D\uDD0A';b.classList.remove('muted');if(masterGain)masterGain.gain.value=0.5;}}
+function startBG(){if(!audioCtx)return;bgOsc=audioCtx.createOscillator();bgOsc.type='sine';bgOsc.frequency.value=110;const g=audioCtx.createGain();g.gain.value=0.05;const l=audioCtx.createOscillator();l.type='sine';l.frequency.value=1.5;const lg=audioCtx.createGain();lg.gain.value=0.02;l.connect(lg);lg.connect(g.gain);l.start();bgOsc.connect(g);g.connect(masterGain);bgOsc.start();const b=audioCtx.createBuffer(1,audioCtx.sampleRate*2,audioCtx.sampleRate);const d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;const n=audioCtx.createBufferSource();n.buffer=b;n.loop=true;const nf=audioCtx.createBiquadFilter();nf.type='lowpass';nf.frequency.value=160;const ng=audioCtx.createGain();ng.gain.value=0.02;n.connect(nf);nf.connect(ng);ng.connect(masterGain);n.start();bgOsc._l=l;bgOsc._n=n;}
+function stopBG(){if(bgOsc){try{bgOsc.stop();bgOsc._l.stop();bgOsc._n.stop();}catch(e){}bgOsc=null;}}
+function sfx(type){if(!audioCtx)return;const t=audioCtx.currentTime;
+if(type==='whoosh'){const b=audioCtx.createBuffer(1,audioCtx.sampleRate*0.2,audioCtx.sampleRate);const d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(1-i/d.length);const s=audioCtx.createBufferSource();s.buffer=b;const f=audioCtx.createBiquadFilter();f.type='bandpass';f.Q.value=0.5;f.frequency.setValueAtTime(400,t);f.frequency.exponentialRampToValueAtTime(2500,t+0.12);const g=audioCtx.createGain();g.gain.setValueAtTime(0.1,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.15);s.connect(f);f.connect(g);g.connect(masterGain);s.start();}
+else if(type==='click'){const o=audioCtx.createOscillator();o.type='sine';o.frequency.value=1200;const g=audioCtx.createGain();g.gain.setValueAtTime(0.07,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.07);o.connect(g);g.connect(masterGain);o.start();o.stop(t+0.07);}
+else if(type==='slide'){const o=audioCtx.createOscillator();o.type='sine';o.frequency.setValueAtTime(500,t);o.frequency.exponentialRampToValueAtTime(800,t+0.1);const g=audioCtx.createGain();g.gain.setValueAtTime(0.05,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.1);o.connect(g);g.connect(masterGain);o.start();o.stop(t+0.1);}
+else if(type==='ding'){const o=audioCtx.createOscillator();o.type='sine';o.frequency.value=1200;const g=audioCtx.createGain();g.gain.setValueAtTime(0.08,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.25);o.connect(g);g.connect(masterGain);o.start();o.stop(t+0.25);}
+else if(type==='toggle'){const o=audioCtx.createOscillator();o.type='triangle';o.frequency.setValueAtTime(600,t);o.frequency.setValueAtTime(900,t+0.05);const g=audioCtx.createGain();g.gain.setValueAtTime(0.06,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.1);o.connect(g);g.connect(masterGain);o.start();o.stop(t+0.1);}
+else if(type==='success'){[800,1000,1200].forEach((f,i)=>{const o=audioCtx.createOscillator();o.type='sine';o.frequency.value=f;const g=audioCtx.createGain();g.gain.setValueAtTime(0.08,t+i*0.12);g.gain.exponentialRampToValueAtTime(0.001,t+i*0.12+0.3);o.connect(g);g.connect(masterGain);o.start(t+i*0.12);o.stop(t+i*0.12+0.3);});}
+else if(type==='impact'){const o=audioCtx.createOscillator();o.type='sine';o.frequency.setValueAtTime(150,t);o.frequency.exponentialRampToValueAtTime(50,t+0.4);const g=audioCtx.createGain();g.gain.setValueAtTime(0.18,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.4);o.connect(g);g.connect(masterGain);o.start();o.stop(t+0.4);}
+else if(type==='tick'){const o=audioCtx.createOscillator();o.type='triangle';o.frequency.value=900;const g=audioCtx.createGain();g.gain.setValueAtTime(0.05,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.05);o.connect(g);g.connect(masterGain);o.start();o.stop(t+0.05);}
+}
+function moveCur(x,y){const c=document.getElementById('cursor');c.style.left=x+'px';c.style.top=y+'px';}
+function showCur(){document.getElementById('cursor').classList.add('show');}
+function hideCur(){document.getElementById('cursor').classList.remove('show');}
+function clickAt(x,y){const c=document.getElementById('cursor');const r=document.getElementById('ripple');c.classList.add('click');r.style.left=(x-10)+'px';r.style.top=(y-10)+'px';r.classList.remove('show');void r.offsetWidth;r.classList.add('show');sfx('click');setTimeout(()=>c.classList.remove('click'),250);}
+function actStep(n){for(let i=1;i<=5;i++){const d=document.getElementById('sd'+i);if(i<n){d.className='sd done';d.textContent='\u2713';}else if(i===n){d.className='sd active';d.textContent=i;}else{d.className='sd';d.textContent=i;}}for(let i=1;i<=4;i++){document.getElementById('sl'+i).className=i<n?'sl done':'sl';}}
+
+const TOTAL=60000;let playing=false,startTime=0,animFrame=null,fired={};
+const SCENES=[{id:'scene0',start:0,end:3000},{id:'scene1',start:3000,end:10000},{id:'scene2',start:10000,end:20000},{id:'scene3',start:20000,end:28000},{id:'scene4',start:28000,end:43000},{id:'scene5',start:43000,end:55000},{id:'scene6',start:55000,end:60000}];
+
+function startAnimation(){
+  if(playing)return;initAudio();playing=true;fired={};startTime=performance.now();
+  document.getElementById('playBtn').textContent='\u23F8';document.getElementById('playBtn').style.opacity='0.5';
+  document.querySelectorAll('.scene').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.show,.sel,.on,.ok,.go').forEach(el=>el.classList.remove('show','sel','on','ok','go'));
+  for(let i=1;i<=5;i++){const d=document.getElementById('sd'+i);d.className='sd';d.textContent=i;}
+  for(let i=1;i<=4;i++)document.getElementById('sl'+i).className='sl';
+  document.getElementById('timerBar').style.width='0%';
+  document.getElementById('qNum').textContent='3';document.getElementById('tPrice').textContent='Rp 19.500';
+  document.getElementById('payBtn').textContent='\uD83D\uDCB0 BAYAR \u2014 Rp 19.500';document.getElementById('payBtn').className='big-btn';
+  document.getElementById('tfill').style.width='0%';document.getElementById('tfill').classList.remove('go');
+  document.getElementById('dv1').textContent='';document.getElementById('dv2').textContent='';document.getElementById('dv3').textContent='';
+  hideCur();stopBG();startBG();document.getElementById('audioBars').classList.add('show');
+  tick();
+}
+
+function tick(){
+  const e=performance.now()-startTime;const p=Math.min((e/TOTAL)*100,100);
+  document.getElementById('timerBar').style.width=p+'%';
+  document.getElementById('timerDisplay').textContent=(e/1000).toFixed(1)+'s / 60s';
+  SCENES.forEach(sc=>{const el=document.getElementById(sc.id);if(e>=sc.start&&e<sc.end){if(!el.classList.contains('active'))el.classList.add('active');}else{el.classList.remove('active');}});
+
+  // S0: Hook
+  if(e>=200&&!fired.a){fired.a=true;document.getElementById('hookText').classList.add('show');sfx('impact');}
+  if(e>=900&&!fired.b){fired.b=true;document.getElementById('hookSub').classList.add('show');}
+  if(e>=1500&&!fired.c){fired.c=true;document.getElementById('hookBadge').classList.add('show');sfx('ding');}
+  if(e>=2800&&!fired.w0){fired.w0=true;sfx('whoosh');}
+
+  // S1: Mode
+  if(e>=3200&&!fired.s1a){fired.s1a=true;document.getElementById('stepOv').classList.add('show');actStep(1);document.getElementById('sl_1').classList.add('show');document.getElementById('modeBox').classList.add('show');}
+  if(e>=5000&&!fired.s1b){fired.s1b=true;showCur();moveCur(200,169);}
+  if(e>=6000&&!fired.s1c){fired.s1c=true;clickAt(200,169);sfx('click');}
+  if(e>=7000&&!fired.s1d){fired.s1d=true;document.getElementById('modeDesc').classList.add('show');sfx('slide');}
+  if(e>=9800&&!fired.w1){fired.w1=true;sfx('whoosh');hideCur();}
+
+  // S2: Rank
+  if(e>=10200&&!fired.s2a){fired.s2a=true;actStep(2);document.getElementById('sl_2').classList.add('show');document.getElementById('rankBox').classList.add('show');}
+  if(e>=11000&&!fired.s2b){fired.s2b=true;document.getElementById('r1').classList.add('show');sfx('slide');}
+  if(e>=12000&&!fired.s2c){fired.s2c=true;document.getElementById('r2').classList.add('show');sfx('slide');}
+  if(e>=13000&&!fired.s2d){fired.s2d=true;document.getElementById('r3').classList.add('show');sfx('slide');}
+  if(e>=14000&&!fired.s2e){fired.s2e=true;document.getElementById('r4').classList.add('show');sfx('slide');}
+  if(e>=15500&&!fired.s2f){fired.s2f=true;showCur();moveCur(200,238);}
+  if(e>=16500&&!fired.s2g){fired.s2g=true;clickAt(200,238);document.getElementById('r2').classList.add('sel');sfx('ding');}
+  if(e>=19800&&!fired.w2){fired.w2=true;sfx('whoosh');hideCur();}
+
+  // S3: Qty
+  if(e>=20200&&!fired.s3a){fired.s3a=true;actStep(3);document.getElementById('sl_3').classList.add('show');document.getElementById('qtyBox').classList.add('show');}
+  if(e>=21500&&!fired.s3b){fired.s3b=true;showCur();moveCur(273,189);}
+  if(e>=22000&&!fired.s3c){fired.s3c=true;clickAt(273,189);document.getElementById('qPlus').classList.add('active');document.getElementById('qNum').textContent='4';sfx('tick');setTimeout(()=>document.getElementById('qPlus').classList.remove('active'),200);}
+  if(e>=22800&&!fired.s3d){fired.s3d=true;clickAt(273,189);document.getElementById('qPlus').classList.add('active');document.getElementById('qNum').textContent='5';sfx('tick');setTimeout(()=>document.getElementById('qPlus').classList.remove('active'),200);}
+  if(e>=23600&&!fired.s3e){fired.s3e=true;clickAt(273,189);document.getElementById('qNum').textContent='6';sfx('tick');}
+  if(e>=24500&&!fired.s3f){fired.s3f=true;document.getElementById('qTotal').classList.add('show');document.getElementById('tPrice').textContent='Rp 39.000';sfx('ding');}
+  if(e>=27800&&!fired.w3){fired.w3=true;sfx('whoosh');hideCur();}
+
+  // S4: Addons + Data
+  if(e>=28200&&!fired.s4a){fired.s4a=true;actStep(4);document.getElementById('sl_4').classList.add('show');document.getElementById('addonPanel').classList.add('show');}
+  if(e>=30000&&!fired.s4b){fired.s4b=true;showCur();moveCur(330,154);}
+  if(e>=30800&&!fired.s4c){fired.s4c=true;clickAt(330,154);document.getElementById('tgExp').classList.add('on');sfx('toggle');}
+  if(e>=32000&&!fired.s4d){fired.s4d=true;hideCur();document.getElementById('dataPanel').classList.add('show');sfx('slide');}
+  if(e>=34000&&!fired.s4e){fired.s4e=true;document.getElementById('dv1').textContent='\u2705 Verified';sfx('tick');}
+  if(e>=36000&&!fired.s4f){fired.s4f=true;document.getElementById('dv2').textContent='\u2705';sfx('tick');}
+  if(e>=38000&&!fired.s4g){fired.s4g=true;document.getElementById('dv3').textContent='\u2705';sfx('tick');}
+  if(e>=39500&&!fired.s4h){fired.s4h=true;document.getElementById('secBadge').classList.add('show');sfx('ding');}
+  if(e>=42800&&!fired.w4){fired.w4=true;sfx('whoosh');}
+
+  // S5: Payment + Tracking
+  if(e>=43200&&!fired.s5a){fired.s5a=true;actStep(5);document.getElementById('sl_5').classList.add('show');document.getElementById('payBox').classList.add('show');}
+  if(e>=44000&&!fired.s5b){fired.s5b=true;document.getElementById('po1').classList.add('show');sfx('slide');}
+  if(e>=44600&&!fired.s5c){fired.s5c=true;document.getElementById('po2').classList.add('show');sfx('slide');}
+  if(e>=45200&&!fired.s5d){fired.s5d=true;document.getElementById('po3').classList.add('show');sfx('slide');}
+  if(e>=46000&&!fired.s5e){fired.s5e=true;showCur();moveCur(200,200);}
+  if(e>=46800&&!fired.s5f){fired.s5f=true;clickAt(200,200);document.getElementById('po2').classList.add('sel');sfx('ding');hideCur();}
+  if(e>=48000&&!fired.s5g){fired.s5g=true;document.getElementById('payBtn').classList.add('show');}
+  if(e>=49500&&!fired.s5h){fired.s5h=true;const b=document.getElementById('payBtn');b.textContent='\u23F3 Memproses...';b.style.background='#1E2A35';b.style.color='#2DD4BF';b.style.border='1px solid #2DD4BF';}
+  if(e>=50800&&!fired.s5i){fired.s5i=true;const b=document.getElementById('payBtn');b.classList.add('ok');b.textContent='\u2705 Order Berhasil!';b.style.background='';b.style.color='';b.style.border='';sfx('success');}
+  if(e>=51500&&!fired.s5j){fired.s5j=true;document.getElementById('trackCard').classList.add('show');document.getElementById('tfill').classList.add('go');}
+  if(e>=52500&&!fired.s5k){fired.s5k=true;document.getElementById('waN').classList.add('show');sfx('ding');}
+  if(e>=54800&&!fired.w5){fired.w5=true;sfx('whoosh');}
+
+  // S6: CTA
+  if(e>=55200&&!fired.s6a){fired.s6a=true;document.getElementById('stepOv').classList.remove('show');document.getElementById('eLogo').classList.add('show');document.getElementById('ePrice').classList.add('show');document.getElementById('eSub').classList.add('show');document.getElementById('eCta').classList.add('show');sfx('impact');}
+
+  if(e<TOTAL){animFrame=requestAnimationFrame(tick);}else{playing=false;stopBG();document.getElementById('audioBars').classList.remove('show');document.getElementById('playBtn').textContent='\u25B6 Play';document.getElementById('playBtn').style.opacity='1';document.getElementById('timerDisplay').textContent='60.0s / 60s';}
+}
+function toggleRecMode(){const b=document.getElementById('recBtn');document.body.classList.toggle('hide-controls');if(document.body.classList.contains('hide-controls')){b.classList.add('recording');b.textContent='\u2B1B';setTimeout(startAnimation,1000);}else{b.classList.remove('recording');b.textContent='\uD83D\uDD34 Rec';}}
+function updateStageScale(){const s=Math.min((window.innerWidth-32)/390,(window.innerHeight-32)/844,1);document.documentElement.style.setProperty('--phone-scale',String(s));}
+window.addEventListener('resize',updateStageScale);
+document.addEventListener('DOMContentLoaded',()=>{if(typeof lucide!=='undefined')lucide.createIcons();updateStageScale();});
+</script>
+</body>
+</html>

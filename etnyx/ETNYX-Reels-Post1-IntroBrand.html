@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ETNYX Reels — Post 1: Intro Brand (30s) v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #000;
+    display: flex; flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; gap: 16px; padding: 16px 0;
+    font-family: 'Inter', sans-serif;
+    overflow: auto;
+  }
+  .stage {
+    position: relative;
+    width: calc(390px * var(--phone-scale, 1));
+    height: calc(844px * var(--phone-scale, 1));
+    flex: 0 0 auto;
+  }
+
+  .phone {
+    width: 390px;
+    height: 844px;
+    background: #0F1419;
+    position: absolute;
+    top: 0; left: 0;
+    overflow: hidden;
+    border-radius: 40px;
+    box-shadow: 0 0 60px rgba(45,212,191,0.15);
+    transform: scale(var(--phone-scale, 1));
+    transform-origin: top left;
+  }
+
+  .scene {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 30px;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: 1;
+  }
+  .scene.active { opacity: 1; z-index: 10; }
+
+  /* ========== SCENE 1: HOOK (0-3.5s) — Fear + Urgency ========== */
+  .s1 { background: radial-gradient(ellipse at center, rgba(239,68,68,0.15) 0%, #0F1419 70%); }
+  .s1 .hack-icon {
+    font-size: 72px;
+    margin-bottom: 20px;
+    opacity: 0;
+    transform: scale(0) rotate(-20deg);
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .s1 .hack-icon.show { opacity: 1; transform: scale(1) rotate(0deg); }
+
+  .s1 .hook {
+    font-size: 34px;
+    font-weight: 900;
+    color: #fff;
+    text-align: center;
+    line-height: 1.3;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .s1 .hook.show { opacity: 1; transform: scale(1); }
+  .s1 .hook .red { color: #EF4444; }
+
+  .s1 .sub-hook {
+    font-size: 15px;
+    color: #F59E0B;
+    font-weight: 700;
+    margin-top: 14px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .s1 .sub-hook.show { opacity: 1; }
+
+  .warning-flash {
+    position: absolute; inset: 0;
+    background: rgba(239,68,68,0.1);
+    opacity: 0; pointer-events: none;
+  }
+  .warning-flash.flash { animation: flashRed 0.25s ease 3; }
+  @keyframes flashRed {
+    0%, 100% { opacity: 0; } 50% { opacity: 1; }
+  }
+
+  .s1 .shake { animation: shakePhone 0.4s ease; }
+  @keyframes shakePhone {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+  }
+
+  /* ========== SCENE 2: LOGO REVEAL (3.5-8s) — Brand Authority ========== */
+  .s2 { background: radial-gradient(ellipse at 40% 40%, rgba(45,212,191,0.12) 0%, #0F1419 60%); }
+  .s2 .logo-text {
+    font-size: 68px;
+    font-weight: 900;
+    letter-spacing: 10px;
+    background: linear-gradient(135deg, #2DD4BF, #A78BFA);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    opacity: 0;
+    transform: translateY(30px) scale(0.9);
+    transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-shadow: 0 0 40px rgba(45,212,191,0.3);
+  }
+  .s2 .logo-text.show { opacity: 1; transform: translateY(0) scale(1); }
+
+  .s2 .tagline {
+    font-size: 16px;
+    color: #A78BFA;
+    font-weight: 700;
+    margin-top: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity 0.5s ease 0.3s;
+  }
+  .s2 .tagline.show { opacity: 1; }
+
+  .s2 .sub-tagline {
+    font-size: 13px;
+    color: #7FA8A3;
+    font-weight: 600;
+    margin-top: 6px;
+    opacity: 0;
+    transition: opacity 0.4s ease 0.6s;
+  }
+  .s2 .sub-tagline.show { opacity: 1; }
+
+  .s2 .glow-ring {
+    position: absolute;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    border: 2px solid rgba(45,212,191,0.3);
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 1.2s ease;
+  }
+  .s2 .glow-ring.show { opacity: 1; transform: scale(3); border-color: rgba(45,212,191,0); }
+
+  /* Particles */
+  .particles {
+    position: absolute; inset: 0;
+    pointer-events: none; overflow: hidden;
+  }
+  .particle {
+    position: absolute;
+    width: 4px; height: 4px;
+    background: #2DD4BF;
+    border-radius: 50%;
+    opacity: 0;
+  }
+  .particle.burst {
+    animation: particleBurst 1.2s ease-out forwards;
+  }
+  @keyframes particleBurst {
+    0% { opacity: 1; transform: translate(0,0) scale(1); }
+    100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0); }
+  }
+
+  /* ========== SCENE 3: FEATURES (8-15.5s) — Trust Building ========== */
+  .s3 { padding: 60px 28px; justify-content: flex-start; padding-top: 80px; }
+  .s3 .section-counter {
+    font-size: 12px;
+    color: #2DD4BF;
+    font-weight: 800;
+    background: rgba(45,212,191,0.1);
+    border: 1px solid rgba(45,212,191,0.25);
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .s3 .section-counter.show { opacity: 1; }
+
+  .s3 .dash-title {
+    font-size: 14px; color: #7FA8A3;
+    font-weight: 700; text-transform: uppercase;
+    letter-spacing: 3px; margin-bottom: 6px;
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .s3 .dash-title.show { opacity: 1; }
+  .s3 .dash-heading {
+    font-size: 22px; font-weight: 900; color: #fff;
+    margin-bottom: 32px;
+    opacity: 0; transition: opacity 0.3s ease 0.15s;
+  }
+  .s3 .dash-heading.show { opacity: 1; }
+
+  .feature-card {
+    width: 100%;
+    background: #151B22;
+    border: 1px solid #1E2A35;
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    opacity: 0;
+    transform: translateX(-30px);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .feature-card.show { opacity: 1; transform: translateX(0); }
+  .feature-card .shimmer {
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(45,212,191,0.06), transparent);
+    transform: translateX(-100%);
+  }
+  .feature-card.show .shimmer { animation: shimmer 1.5s ease 0.3s forwards; }
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  .feature-card .icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+  }
+  .feature-card .icon.teal { background: rgba(45,212,191,0.15); }
+  .feature-card .icon.blue { background: rgba(59,130,246,0.15); }
+  .feature-card .icon.green { background: rgba(34,197,94,0.15); }
+  .feature-card .feat-title { font-size: 15px; font-weight: 800; color: #E6F1EF; margin-bottom: 2px; }
+  .feature-card .feat-desc { font-size: 11px; color: #7FA8A3; font-weight: 500; }
+  .feature-card .check {
+    margin-left: auto;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: rgba(34,197,94,0.15);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    opacity: 0; transform: scale(0);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s;
+  }
+  .feature-card.show .check { opacity: 1; transform: scale(1); }
+
+  .lock-anim {
+    position: absolute; top: 50px; right: 28px;
+    font-size: 20px; opacity: 0; transition: opacity 0.4s;
+  }
+  .lock-anim.show { opacity: 1; animation: lockPulse 1.5s ease infinite; }
+  @keyframes lockPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+
+  /* ========== SCENE 4: SOCIAL PROOF (15.5-22s) — Numbers + Testimonial ========== */
+  .s4 {
+    background: radial-gradient(ellipse at 50% 40%, rgba(45,212,191,0.08) 0%, #0F1419 65%);
+    gap: 24px;
+  }
+  .stat-block {
+    text-align: center;
+    opacity: 0; transform: translateY(20px);
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .stat-block.show { opacity: 1; transform: translateY(0); }
+  .stat-num {
+    font-size: 64px; font-weight: 900;
+    background: linear-gradient(135deg, #2DD4BF, #7FA8A3);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1;
+  }
+  .stat-label { font-size: 14px; color: #7FA8A3; font-weight: 600; margin-top: 4px; }
+
+  .star-row { display: flex; gap: 5px; justify-content: center; margin-top: 6px; }
+  .star { font-size: 28px; opacity: 0.2; transition: opacity 0.2s, transform 0.3s; }
+  .star.lit { opacity: 1; transform: scale(1.1); }
+  .stat-sub {
+    font-size: 18px; font-weight: 800; color: #F59E0B;
+    margin-top: 4px; opacity: 0; transition: opacity 0.3s;
+  }
+  .stat-sub.show { opacity: 1; }
+
+  /* Testimonial bubble */
+  .testi-bubble {
+    background: #151B22;
+    border: 1px solid rgba(45,212,191,0.2);
+    border-radius: 16px;
+    padding: 14px 18px;
+    max-width: 300px;
+    opacity: 0;
+    transform: translateY(15px);
+    transition: all 0.5s ease;
+  }
+  .testi-bubble.show { opacity: 1; transform: translateY(0); }
+  .testi-bubble .testi-text {
+    font-size: 12px; color: #E6F1EF; font-weight: 600;
+    font-style: italic; line-height: 1.4;
+  }
+  .testi-bubble .testi-author {
+    font-size: 10px; color: #7FA8A3; margin-top: 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .testi-bubble .testi-stars { color: #F59E0B; font-size: 10px; }
+
+  /* ========== SCENE 5: UI MOCKUP (22-27s) — Product Demo ========== */
+  .s5 { padding: 40px 24px; justify-content: flex-start; overflow: hidden; }
+  .mockup-scroll {
+    width: 100%;
+    position: relative;
+    transform: translateY(200px);
+    transition: transform 3.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+  .mockup-scroll.scroll { transform: translateY(-300px); }
+
+  /* Cursor pointer */
+  .cursor-dot {
+    position: absolute;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.9);
+    box-shadow: 0 0 10px rgba(255,255,255,0.5);
+    z-index: 50;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+  }
+  .cursor-dot.show { opacity: 1; }
+  .cursor-dot.click { animation: cursorClick 0.3s ease; }
+  @keyframes cursorClick {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(0.7); }
+  }
+
+  .mock-nav {
+    background: #151B22; border-radius: 12px;
+    padding: 14px 18px;
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .mock-nav .brand {
+    font-size: 18px; font-weight: 900;
+    background: linear-gradient(135deg, #2DD4BF, #7FA8A3);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .mock-nav .nav-links { display: flex; gap: 14px; font-size: 11px; color: #7FA8A3; font-weight: 600; }
+  .mock-hero {
+    background: linear-gradient(135deg, #151B22, rgba(45,212,191,0.08));
+    border: 1px solid #1E2A35;
+    border-radius: 16px; padding: 28px 20px;
+    text-align: center; margin-bottom: 16px;
+  }
+  .mock-hero h2 { font-size: 20px; font-weight: 900; color: #fff; margin-bottom: 6px; }
+  .mock-hero p { font-size: 12px; color: #7FA8A3; margin-bottom: 16px; }
+  .mock-btn {
+    display: inline-block;
+    background: linear-gradient(135deg, #2DD4BF, #7FA8A3);
+    color: #0F1419; font-weight: 800; font-size: 13px;
+    padding: 10px 28px; border-radius: 10px;
+  }
+  .mock-cards { display: flex; gap: 10px; margin-bottom: 16px; }
+  .mock-card {
+    flex: 1; background: #151B22;
+    border: 1px solid #1E2A35;
+    border-radius: 12px; padding: 14px 10px; text-align: center;
+  }
+  .mock-card .mc-icon { font-size: 22px; margin-bottom: 4px; }
+  .mock-card .mc-title { font-size: 11px; font-weight: 800; color: #E6F1EF; }
+  .mock-card .mc-price { font-size: 10px; color: #2DD4BF; font-weight: 700; margin-top: 3px; }
+  .mock-track {
+    background: #151B22;
+    border: 1px solid #1E2A35;
+    border-radius: 16px; padding: 18px; margin-bottom: 16px;
+  }
+  .mock-track .track-title { font-size: 13px; font-weight: 800; color: #E6F1EF; margin-bottom: 10px; }
+  .progress-bar {
+    width: 100%; height: 7px;
+    background: #1E2A35; border-radius: 4px; overflow: hidden; margin-bottom: 6px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #2DD4BF, #22C55E);
+    border-radius: 4px; width: 0%; transition: width 2s ease;
+  }
+  .progress-fill.fill { width: 78%; }
+  .track-steps { display: flex; justify-content: space-between; font-size: 9px; color: #7FA8A3; }
+  .track-steps .done { color: #22C55E; }
+
+  /* ========== SCENE 6: CTA (27-30s) — Urgency + Action ========== */
+  .s6 {
+    background: radial-gradient(ellipse at 50% 50%, rgba(45,212,191,0.12) 0%, #0F1419 60%);
+    gap: 16px;
+  }
+  .s6 .final-logo {
+    font-size: 52px; font-weight: 900; letter-spacing: 6px;
+    background: linear-gradient(135deg, #2DD4BF, #A78BFA);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    opacity: 0; transform: scale(0.7);
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .s6 .final-logo.show { opacity: 1; transform: scale(1); }
+
+  .s6 .quote-text {
+    font-size: 18px; font-weight: 700; color: #E6F1EF;
+    text-align: center;
+    opacity: 0; transition: opacity 0.4s ease 0.2s;
+  }
+  .s6 .quote-text.show { opacity: 1; }
+
+  .s6 .urgency-tag {
+    font-size: 13px; font-weight: 800; color: #EF4444;
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+    padding: 6px 18px; border-radius: 20px;
+    opacity: 0; transition: opacity 0.3s ease 0.4s;
+  }
+  .s6 .urgency-tag.show { opacity: 1; animation: urgencyPulse 1s ease infinite; }
+  @keyframes urgencyPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  .cta-box {
+    background: linear-gradient(135deg, #2DD4BF, #7FA8A3);
+    color: #0F1419; font-weight: 800; font-size: 16px;
+    padding: 16px 40px; border-radius: 14px;
+    opacity: 0; transform: translateY(10px);
+    transition: all 0.4s ease 0.5s;
+    animation: none;
+  }
+  .cta-box.show {
+    opacity: 1; transform: translateY(0);
+    animation: ctaPulse 1.2s ease infinite 0.8s;
+  }
+  @keyframes ctaPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(45,212,191,0.4); }
+    50% { box-shadow: 0 0 0 12px rgba(45,212,191,0); }
+  }
+
+  .s6 .price-tag {
+    font-size: 14px; color: #2DD4BF; font-weight: 700;
+    opacity: 0; transition: opacity 0.3s ease 0.7s;
+  }
+  .s6 .price-tag.show { opacity: 1; }
+  .s6 .badge-row {
+    display: flex; gap: 6px; flex-wrap: wrap; justify-content: center;
+    opacity: 0; transition: opacity 0.3s ease 0.9s;
+  }
+  .s6 .badge-row.show { opacity: 1; }
+  .s6 .mini-badge {
+    background: rgba(45,212,191,0.12); color: #2DD4BF;
+    font-size: 9px; font-weight: 700;
+    padding: 3px 8px; border-radius: 8px;
+    border: 1px solid rgba(45,212,191,0.25);
+  }
+
+  /* ========== TIMER BAR ========== */
+  .timer-bar {
+    position: absolute; bottom: 0; left: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #2DD4BF, #22C55E);
+    width: 0%; z-index: 100;
+    transition: width 0.1s linear;
+  }
+
+  /* ========== AUDIO INDICATOR ========== */
+  .audio-indicator {
+    position: absolute; top: 16px; right: 16px;
+    z-index: 200;
+    display: flex; gap: 2px; align-items: flex-end; height: 16px;
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .audio-indicator.show { opacity: 1; }
+  .audio-indicator .bar {
+    width: 3px; background: #2DD4BF; border-radius: 2px;
+    animation: audioBar 0.8s ease-in-out infinite alternate;
+  }
+  .audio-indicator .bar:nth-child(1) { height: 6px; animation-delay: 0s; }
+  .audio-indicator .bar:nth-child(2) { height: 12px; animation-delay: 0.15s; }
+  .audio-indicator .bar:nth-child(3) { height: 8px; animation-delay: 0.3s; }
+  .audio-indicator .bar:nth-child(4) { height: 14px; animation-delay: 0.1s; }
+  .audio-indicator .bar:nth-child(5) { height: 6px; animation-delay: 0.25s; }
+  @keyframes audioBar {
+    0% { transform: scaleY(0.4); }
+    100% { transform: scaleY(1); }
+  }
+
+  /* ========== CONTROLS ========== */
+  .controls {
+    display: flex; gap: 10px; z-index: 100;
+    align-items: center; justify-content: center;
+  }
+  .ctrl-btn {
+    background: #151B22; color: #2DD4BF;
+    border: 1px solid #2DD4BF;
+    padding: 8px 18px; border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .ctrl-btn:hover { background: #2DD4BF; color: #0F1419; }
+  .ctrl-btn.recording { background: #EF4444; border-color: #EF4444; color: #fff; }
+  .ctrl-btn.muted { opacity: 0.5; }
+  .timer-display {
+    color: #7FA8A3; font-family: 'Inter', sans-serif;
+    font-size: 13px; font-weight: 600;
+    display: flex; align-items: center;
+  }
+  .hide-controls .controls { display: none; }
+  /* Lucide Icons */
+  [data-lucide]{fill:none;stroke-linecap:round;stroke-linejoin:round;display:block;}
+  .lci[data-lucide]{display:inline-block;vertical-align:middle;margin-right:2px;}
+  .lcl{width:22px;height:22px;stroke-width:2;}
+  .lcm{width:15px;height:15px;stroke-width:2.5;}
+  .lcs{width:10px;height:10px;stroke-width:2;}
+  .lc-teal{stroke:#2DD4BF;}
+  .lc-blue{stroke:#3B82F6;}
+  .lc-green{stroke:#22C55E;}
+  .lc-yellow{stroke:#F59E0B;}
+  .lc-purple{stroke:#A78BFA;}
+  .lc-red{stroke:#EF4444;}
+  .lc-muted{stroke:#7FA8A3;}
+  .lc-star{stroke:#F59E0B;fill:rgba(245,158,11,0.1);}
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+<div class="phone" id="phone">
+  <!-- Audio Indicator -->
+  <div class="audio-indicator" id="audioIndicator">
+    <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+  </div>
+
+  <!-- Scene 1: HOOK — Fear-based opener -->
+  <div class="scene s1 active" id="scene1">
+    <div class="warning-flash" id="flash"></div>
+    <div class="hack-icon" id="hackIcon">&#x1F6A8;</div>
+    <div class="hook" id="hookText">
+      Masih pake joki yang bisa<br><span class="red">hack akun</span> kamu?
+    </div>
+    <div class="sub-hook" id="subHook">&#x26A0;&#xFE0F; Banyak akun ML kena hack gara-gara joki abal-abal</div>
+  </div>
+
+  <!-- Scene 2: LOGO — Brand Authority -->
+  <div class="scene s2" id="scene2">
+    <div class="particles" id="particles"></div>
+    <div class="glow-ring" id="glowRing"></div>
+    <div class="logo-text" id="logoText">ETNYX</div>
+    <div class="tagline" id="tagline">JOKI ML #1 INDONESIA</div>
+    <div class="sub-tagline" id="subTagline">Bukan joki biasa. Ini SISTEM.</div>
+  </div>
+
+  <!-- Scene 3: FEATURES — Trust -->
+  <div class="scene s3" id="scene3">
+    <div class="lock-anim" id="lockAnim">&#x1F512;</div>
+    <div class="section-counter" id="sectionCounter">3 ALASAN AKUN KAMU AMAN</div>
+    <div class="dash-title" id="dashTitle">ETNYX SECURITY</div>
+    <div class="dash-heading" id="dashHeading">Kenapa pilih ETNYX?</div>
+
+    <div class="feature-card" id="feat1">
+      <div class="shimmer"></div>
+      <div class="icon teal"><i data-lucide="shield" class="lcl lc-teal"></i></div>
+      <div>
+        <div class="feat-title">Enkripsi AES-256</div>
+        <div class="feat-desc">Password dienkripsi military-grade</div>
+      </div>
+      <div class="check"><i data-lucide="check" class="lcm lc-green"></i></div>
+    </div>
+    <div class="feature-card" id="feat2">
+      <div class="shimmer"></div>
+      <div class="icon blue"><i data-lucide="activity" class="lcl lc-blue"></i></div>
+      <div>
+        <div class="feat-title">Tracking Real-Time</div>
+        <div class="feat-desc">Pantau progress 24/7 dari dashboard</div>
+      </div>
+      <div class="check"><i data-lucide="check" class="lcm lc-green"></i></div>
+    </div>
+    <div class="feature-card" id="feat3">
+      <div class="shimmer"></div>
+      <div class="icon green"><i data-lucide="message-circle" class="lcl lc-green"></i></div>
+      <div>
+        <div class="feat-title">Notif WA Otomatis</div>
+        <div class="feat-desc">Update ke WhatsApp setiap step</div>
+      </div>
+      <div class="check"><i data-lucide="check" class="lcm lc-green"></i></div>
+    </div>
+  </div>
+
+  <!-- Scene 4: SOCIAL PROOF — Numbers + Testimonial -->
+  <div class="scene s4" id="scene4">
+    <div class="stat-block" id="statOrders">
+      <div class="stat-num" id="counterNum">0</div>
+      <div class="stat-label">Order Selesai</div>
+    </div>
+    <div class="stat-block" id="statRating" style="opacity:0;">
+      <div class="star-row">
+        <span class="star" id="star1">&#x2B50;</span>
+        <span class="star" id="star2">&#x2B50;</span>
+        <span class="star" id="star3">&#x2B50;</span>
+        <span class="star" id="star4">&#x2B50;</span>
+        <span class="star" id="star5">&#x2B50;</span>
+      </div>
+      <div class="stat-sub" id="ratingNum">4.9 / 5</div>
+      <div class="stat-label">Customer Rating</div>
+    </div>
+    <div class="testi-bubble" id="testiBubble">
+      <div class="testi-text">"3 hari dari Epic ke Mythic, akun aman 100%. Gila sih ETNYX!"</div>
+      <div class="testi-author">
+        <span>&#x1F464; Reza M.</span>
+        <span class="testi-stars">&#x2B50;&#x2B50;&#x2B50;&#x2B50;&#x2B50;</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scene 5: UI MOCKUP — Product Demo -->
+  <div class="scene s5" id="scene5">
+    <div class="cursor-dot" id="cursorDot"></div>
+    <div class="mockup-scroll" id="mockScroll">
+      <div class="mock-nav">
+        <div class="brand">ETNYX</div>
+        <div class="nav-links">
+          <span>Home</span>
+          <span style="color:#2DD4BF;">Order</span>
+          <span>Track</span>
+        </div>
+      </div>
+      <div class="mock-hero">
+        <h2>Push Rank Tanpa Ribet</h2>
+        <p>Pilih mode, bayar, tracking real-time.</p>
+        <div class="mock-btn">ORDER SEKARANG</div>
+      </div>
+      <div class="mock-cards">
+        <div class="mock-card">
+          <div class="mc-icon"><i data-lucide="package" class="lcl lc-teal" style="margin:0 auto;"></i></div>
+          <div class="mc-title">Paket</div>
+          <div class="mc-price">Rp 95K+</div>
+        </div>
+        <div class="mock-card" style="border-color:rgba(45,212,191,0.4);">
+          <div class="mc-icon"><i data-lucide="star" class="lcl lc-star" style="margin:0 auto;"></i></div>
+          <div class="mc-title">Per Star</div>
+          <div class="mc-price">Rp 5K/star</div>
+        </div>
+        <div class="mock-card">
+          <div class="mc-icon"><i data-lucide="users" class="lcl lc-teal" style="margin:0 auto;"></i></div>
+          <div class="mc-title">Gendong</div>
+          <div class="mc-price">Rp 9K/star</div>
+        </div>
+      </div>
+      <div class="mock-track">
+        <div class="track-title">&#x1F4CA; Order #2847 — Tracking</div>
+        <div class="progress-bar"><div class="progress-fill" id="progFill"></div></div>
+        <div class="track-steps">
+          <span class="done">&#x2705; Matched</span>
+          <span class="done">&#x2705; In Progress</span>
+          <span>&#x23F3; Legend II</span>
+          <span>Mythic</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scene 6: CTA — Urgency + Action -->
+  <div class="scene s6" id="scene6">
+    <div class="final-logo" id="finalLogo">ETNYX</div>
+    <div class="quote-text" id="quoteText">Bukan janji. Ini <span style="color:#2DD4BF;">bukti.</span></div>
+    <div class="urgency-tag" id="urgencyTag">&#x1F525; SLOT TERBATAS MINGGU INI</div>
+    <div class="cta-box" id="ctaBox">&#x1F449; Link di Bio</div>
+    <div class="price-tag" id="priceTag">Mulai dari Rp 5.000/star</div>
+    <div class="badge-row" id="badgeRow">
+      <span class="mini-badge"><i data-lucide="shield-check" class="lcs lci lc-teal"></i> AES-256</span>
+      <span class="mini-badge"><i data-lucide="activity" class="lcs lci lc-teal"></i> Real-time</span>
+      <span class="mini-badge"><i data-lucide="check-circle-2" class="lcs lci lc-teal"></i> 2.847+ order</span>
+      <span class="mini-badge"><i data-lucide="message-circle" class="lcs lci lc-teal"></i> Notif WA</span>
+    </div>
+  </div>
+
+  <div class="timer-bar" id="timerBar"></div>
+</div>
+</div>
+
+<div class="controls" id="controls">
+  <button class="ctrl-btn" id="playBtn" onclick="startAnimation()">&#x25B6; Play</button>
+  <button class="ctrl-btn" id="recBtn" onclick="toggleRecMode()">&#x1F534; Rec Mode</button>
+  <button class="ctrl-btn" id="muteBtn" onclick="toggleMute()">&#x1F50A; Sound</button>
+  <div class="timer-display" id="timerDisplay">0.0s / 30s</div>
+</div>
+
+<script>
+// ===================== WEB AUDIO ENGINE =====================
+// All SFX generated via Web Audio API — no external files needed
+// Styled after ML ambient/gaming vibe
+
+let audioCtx = null;
+let isMuted = false;
+let masterGain = null;
+let bgOsc = null;
+let bgGain = null;
+
+function initAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  masterGain = audioCtx.createGain();
+  masterGain.gain.value = 0.6;
+  masterGain.connect(audioCtx.destination);
+}
+
+function toggleMute() {
+  isMuted = !isMuted;
+  const btn = document.getElementById('muteBtn');
+  if (isMuted) {
+    btn.textContent = '\uD83D\uDD07 Muted';
+    btn.classList.add('muted');
+    if (masterGain) masterGain.gain.value = 0;
+  } else {
+    btn.textContent = '\uD83D\uDD0A Sound';
+    btn.classList.remove('muted');
+    if (masterGain) masterGain.gain.value = 0.6;
+  }
+}
+
+// Background ambient beat — dark electronic pulse (ML lobby vibe)
+function startBGMusic() {
+  if (!audioCtx) return;
+
+  // Sub bass drone
+  bgOsc = audioCtx.createOscillator();
+  bgOsc.type = 'sine';
+  bgOsc.frequency.value = 55; // Low A
+  bgGain = audioCtx.createGain();
+  bgGain.gain.value = 0.08;
+
+  // LFO for pulsing
+  const lfo = audioCtx.createOscillator();
+  lfo.type = 'sine';
+  lfo.frequency.value = 2; // 2Hz pulse = 120 BPM feel
+  const lfoGain = audioCtx.createGain();
+  lfoGain.gain.value = 0.04;
+  lfo.connect(lfoGain);
+  lfoGain.connect(bgGain.gain);
+  lfo.start();
+
+  bgOsc.connect(bgGain);
+  bgGain.connect(masterGain);
+  bgOsc.start();
+
+  // Pad layer — filtered noise for atmosphere
+  const bufferSize = audioCtx.sampleRate * 2;
+  const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
+  const noiseNode = audioCtx.createBufferSource();
+  noiseNode.buffer = noiseBuffer;
+  noiseNode.loop = true;
+
+  const noiseFilter = audioCtx.createBiquadFilter();
+  noiseFilter.type = 'lowpass';
+  noiseFilter.frequency.value = 200;
+  noiseFilter.Q.value = 1;
+
+  const noiseGain = audioCtx.createGain();
+  noiseGain.gain.value = 0.03;
+
+  noiseNode.connect(noiseFilter);
+  noiseFilter.connect(noiseGain);
+  noiseGain.connect(masterGain);
+  noiseNode.start();
+
+  // Store for cleanup
+  bgOsc._lfo = lfo;
+  bgOsc._noise = noiseNode;
+}
+
+function stopBGMusic() {
+  if (bgOsc) {
+    try {
+      bgOsc.stop();
+      bgOsc._lfo.stop();
+      bgOsc._noise.stop();
+    } catch(e) {}
+    bgOsc = null;
+  }
+}
+
+// SFX: Warning alarm (Scene 1)
+function sfxAlarm() {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'square';
+  osc.frequency.value = 800;
+  gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+  osc.connect(gain);
+  gain.connect(masterGain);
+  osc.start();
+  osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+  osc.frequency.setValueAtTime(600, audioCtx.currentTime + 0.1);
+  osc.frequency.setValueAtTime(800, audioCtx.currentTime + 0.2);
+  osc.frequency.setValueAtTime(600, audioCtx.currentTime + 0.3);
+  osc.stop(audioCtx.currentTime + 0.4);
+}
+
+// SFX: Whoosh transition
+function sfxWhoosh() {
+  if (!audioCtx) return;
+  const bufLen = audioCtx.sampleRate * 0.3;
+  const buf = audioCtx.createBuffer(1, bufLen, audioCtx.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < bufLen; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / bufLen);
+
+  const src = audioCtx.createBufferSource();
+  src.buffer = buf;
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = 'bandpass';
+  filter.frequency.value = 1000;
+  filter.Q.value = 0.5;
+  const g = audioCtx.createGain();
+  g.gain.setValueAtTime(0.15, audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
+
+  // Sweep frequency up for whoosh
+  filter.frequency.setValueAtTime(400, audioCtx.currentTime);
+  filter.frequency.exponentialRampToValueAtTime(3000, audioCtx.currentTime + 0.15);
+
+  src.connect(filter);
+  filter.connect(g);
+  g.connect(masterGain);
+  src.start();
+}
+
+// SFX: Logo reveal (deep bass hit + shimmer)
+function sfxLogoReveal() {
+  if (!audioCtx) return;
+  // Bass hit
+  const osc = audioCtx.createOscillator();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(120, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.5);
+  const g = audioCtx.createGain();
+  g.gain.setValueAtTime(0.25, audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
+  osc.connect(g);
+  g.connect(masterGain);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.6);
+
+  // Shimmer
+  const osc2 = audioCtx.createOscillator();
+  osc2.type = 'sine';
+  osc2.frequency.value = 2400;
+  const g2 = audioCtx.createGain();
+  g2.gain.setValueAtTime(0.05, audioCtx.currentTime);
+  g2.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+  osc2.connect(g2);
+  g2.connect(masterGain);
+  osc2.start();
+  osc2.stop(audioCtx.currentTime + 0.8);
+}
+
+// SFX: Card slide in
+function sfxCardSlide() {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(900, audioCtx.currentTime + 0.1);
+  const g = audioCtx.createGain();
+  g.gain.setValueAtTime(0.06, audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+  osc.connect(g);
+  g.connect(masterGain);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.12);
+}
+
+// SFX: Check mark ding
+function sfxDing(pitch) {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  osc.type = 'sine';
+  osc.frequency.value = pitch || 1200;
+  const g = audioCtx.createGain();
+  g.gain.setValueAtTime(0.1, audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+  osc.connect(g);
+  g.connect(masterGain);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.3);
+}
+
+// SFX: Counter tick
+function sfxTick() {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  osc.type = 'square';
+  osc.frequency.value = 1800;
+  const g = audioCtx.createGain();
+  g.gain.setValueAtTime(0.03, audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.03);
+  osc.connect(g);
+  g.connect(masterGain);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.03);
+}
+
+// SFX: Star pop
+function sfxStarPop(pitch) {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  osc.type = 'triangle';
+  osc.frequency.value = pitch || 1000;
+  const g = audioCtx.createGain();
+  g.gain.setValueAtTime(0.08, audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+  osc.connect(g);
+  g.connect(masterGain);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.15);
+}
+
+// SFX: CTA impact
+function sfxCTAImpact() {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.3);
+  const g = audioCtx.createGain();
+  g.gain.setValueAtTime(0.2, audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+  osc.connect(g);
+  g.connect(masterGain);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.4);
+
+  // High chime
+  const osc2 = audioCtx.createOscillator();
+  osc2.type = 'sine';
+  osc2.frequency.value = 1400;
+  const g2 = audioCtx.createGain();
+  g2.gain.setValueAtTime(0.08, audioCtx.currentTime + 0.05);
+  g2.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+  osc2.connect(g2);
+  g2.connect(masterGain);
+  osc2.start();
+  osc2.stop(audioCtx.currentTime + 0.5);
+}
+
+// ===================== PARTICLES =====================
+function spawnParticles() {
+  const container = document.getElementById('particles');
+  container.innerHTML = '';
+  for (let i = 0; i < 20; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const angle = (Math.PI * 2 / 20) * i;
+    const dist = 80 + Math.random() * 120;
+    p.style.left = '50%';
+    p.style.top = '50%';
+    p.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
+    p.style.setProperty('--dy', Math.sin(angle) * dist + 'px');
+    p.style.background = i % 3 === 0 ? '#A78BFA' : '#2DD4BF';
+    container.appendChild(p);
+    setTimeout(() => p.classList.add('burst'), 50);
+  }
+}
+
+// ===================== ANIMATION ENGINE =====================
+const TOTAL = 30000;
+let playing = false;
+let startTime = 0;
+let animFrame = null;
+
+const SCENES = [
+  { id: 'scene1', start: 0,     end: 3500  },
+  { id: 'scene2', start: 3500,  end: 8000  },
+  { id: 'scene3', start: 8000,  end: 15500 },
+  { id: 'scene4', start: 15500, end: 22000 },
+  { id: 'scene5', start: 22000, end: 27000 },
+  { id: 'scene6', start: 27000, end: 30000 },
+];
+
+let fired = {};
+let counterInterval = null;
+
+function startAnimation() {
+  if (playing) return;
+  initAudio();
+  playing = true;
+  fired = {};
+  startTime = performance.now();
+  document.getElementById('playBtn').textContent = '\u23F8 Playing...';
+  document.getElementById('playBtn').style.opacity = '0.5';
+
+  // Reset
+  document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.show, .scroll, .fill, .flash, .lit, .shake, .click, .burst').forEach(el => {
+    el.classList.remove('show', 'scroll', 'fill', 'flash', 'lit', 'shake', 'click', 'burst');
+  });
+  document.getElementById('counterNum').textContent = '0';
+  document.getElementById('timerBar').style.width = '0%';
+  document.getElementById('cursorDot').style.left = '200px';
+  document.getElementById('cursorDot').style.top = '400px';
+  document.getElementById('audioIndicator').classList.remove('show');
+  if (counterInterval) clearInterval(counterInterval);
+
+  stopBGMusic();
+  startBGMusic();
+  document.getElementById('audioIndicator').classList.add('show');
+
+  tick();
+}
+
+function tick() {
+  const elapsed = performance.now() - startTime;
+  const pct = Math.min((elapsed / TOTAL) * 100, 100);
+  document.getElementById('timerBar').style.width = pct + '%';
+  document.getElementById('timerDisplay').textContent =
+    (elapsed / 1000).toFixed(1) + 's / 30s';
+
+  // Activate scenes
+  SCENES.forEach(sc => {
+    const el = document.getElementById(sc.id);
+    if (elapsed >= sc.start && elapsed < sc.end) {
+      if (!el.classList.contains('active')) el.classList.add('active');
+    } else {
+      el.classList.remove('active');
+    }
+  });
+
+  // ---- SCENE 1: Hook ----
+  if (elapsed >= 150 && !fired.s1Icon) {
+    fired.s1Icon = true;
+    document.getElementById('hackIcon').classList.add('show');
+    sfxAlarm();
+  }
+  if (elapsed >= 400 && !fired.s1Hook) {
+    fired.s1Hook = true;
+    document.getElementById('hookText').classList.add('show');
+  }
+  if (elapsed >= 700 && !fired.s1Flash) {
+    fired.s1Flash = true;
+    document.getElementById('flash').classList.add('flash');
+    document.getElementById('phone').classList.add('shake');
+    setTimeout(() => document.getElementById('phone').classList.remove('shake'), 400);
+  }
+  if (elapsed >= 1800 && !fired.s1Sub) {
+    fired.s1Sub = true;
+    document.getElementById('subHook').classList.add('show');
+  }
+
+  // Whoosh transition to Scene 2
+  if (elapsed >= 3300 && !fired.whoosh1) {
+    fired.whoosh1 = true;
+    sfxWhoosh();
+  }
+
+  // ---- SCENE 2: Logo ----
+  if (elapsed >= 3700 && !fired.s2Logo) {
+    fired.s2Logo = true;
+    document.getElementById('logoText').classList.add('show');
+    document.getElementById('glowRing').classList.add('show');
+    spawnParticles();
+    sfxLogoReveal();
+  }
+  if (elapsed >= 4300 && !fired.s2Tag) {
+    fired.s2Tag = true;
+    document.getElementById('tagline').classList.add('show');
+    document.getElementById('subTagline').classList.add('show');
+  }
+
+  // Whoosh to Scene 3
+  if (elapsed >= 7800 && !fired.whoosh2) {
+    fired.whoosh2 = true;
+    sfxWhoosh();
+  }
+
+  // ---- SCENE 3: Features ----
+  if (elapsed >= 8200 && !fired.s3Title) {
+    fired.s3Title = true;
+    document.getElementById('sectionCounter').classList.add('show');
+    document.getElementById('dashTitle').classList.add('show');
+    document.getElementById('dashHeading').classList.add('show');
+    document.getElementById('lockAnim').classList.add('show');
+  }
+  if (elapsed >= 9200 && !fired.s3F1) {
+    fired.s3F1 = true;
+    document.getElementById('feat1').classList.add('show');
+    sfxCardSlide();
+    setTimeout(() => sfxDing(1100), 350);
+  }
+  if (elapsed >= 10800 && !fired.s3F2) {
+    fired.s3F2 = true;
+    document.getElementById('feat2').classList.add('show');
+    sfxCardSlide();
+    setTimeout(() => sfxDing(1250), 350);
+  }
+  if (elapsed >= 12400 && !fired.s3F3) {
+    fired.s3F3 = true;
+    document.getElementById('feat3').classList.add('show');
+    sfxCardSlide();
+    setTimeout(() => sfxDing(1400), 350);
+  }
+
+  // Whoosh to Scene 4
+  if (elapsed >= 15300 && !fired.whoosh3) {
+    fired.whoosh3 = true;
+    sfxWhoosh();
+  }
+
+  // ---- SCENE 4: Social Proof ----
+  if (elapsed >= 15700 && !fired.s4Start) {
+    fired.s4Start = true;
+    document.getElementById('statOrders').classList.add('show');
+    animateCounter();
+  }
+  if (elapsed >= 18500 && !fired.s4Rating) {
+    fired.s4Rating = true;
+    const sr = document.getElementById('statRating');
+    sr.style.opacity = '1';
+    sr.classList.add('show');
+    const pitches = [800, 900, 1000, 1100, 1200];
+    for (let i = 0; i < 5; i++) {
+      setTimeout(() => {
+        document.getElementById('star' + (i + 1)).classList.add('lit');
+        sfxStarPop(pitches[i]);
+      }, i * 180);
+    }
+    setTimeout(() => document.getElementById('ratingNum').classList.add('show'), 950);
+  }
+  if (elapsed >= 19800 && !fired.s4Testi) {
+    fired.s4Testi = true;
+    document.getElementById('testiBubble').classList.add('show');
+    sfxDing(1500);
+  }
+
+  // Whoosh to Scene 5
+  if (elapsed >= 21800 && !fired.whoosh4) {
+    fired.whoosh4 = true;
+    sfxWhoosh();
+  }
+
+  // ---- SCENE 5: UI Mockup ----
+  if (elapsed >= 22200 && !fired.s5Scroll) {
+    fired.s5Scroll = true;
+    const cursor = document.getElementById('cursorDot');
+    cursor.classList.add('show');
+    cursor.style.left = '200px';
+    cursor.style.top = '350px';
+
+    setTimeout(() => {
+      document.getElementById('mockScroll').classList.add('scroll');
+      document.getElementById('progFill').classList.add('fill');
+      // Move cursor to Order button
+      cursor.style.left = '180px';
+      cursor.style.top = '280px';
+    }, 300);
+
+    setTimeout(() => {
+      cursor.classList.add('click');
+      sfxDing(1000);
+      setTimeout(() => cursor.classList.remove('click'), 300);
+    }, 1500);
+
+    setTimeout(() => {
+      cursor.style.left = '250px';
+      cursor.style.top = '200px';
+    }, 2500);
+  }
+
+  // Whoosh to Scene 6
+  if (elapsed >= 26800 && !fired.whoosh5) {
+    fired.whoosh5 = true;
+    sfxWhoosh();
+    document.getElementById('cursorDot').classList.remove('show');
+  }
+
+  // ---- SCENE 6: CTA ----
+  if (elapsed >= 27200 && !fired.s6Logo) {
+    fired.s6Logo = true;
+    sfxCTAImpact();
+    document.getElementById('finalLogo').classList.add('show');
+    document.getElementById('quoteText').classList.add('show');
+    document.getElementById('urgencyTag').classList.add('show');
+    document.getElementById('ctaBox').classList.add('show');
+    document.getElementById('priceTag').classList.add('show');
+    document.getElementById('badgeRow').classList.add('show');
+  }
+
+  if (elapsed < TOTAL) {
+    animFrame = requestAnimationFrame(tick);
+  } else {
+    playing = false;
+    stopBGMusic();
+    document.getElementById('audioIndicator').classList.remove('show');
+    document.getElementById('playBtn').textContent = '\u25B6 Play';
+    document.getElementById('playBtn').style.opacity = '1';
+    document.getElementById('timerDisplay').textContent = '30.0s / 30s';
+  }
+}
+
+function animateCounter() {
+  const target = 2847;
+  const duration = 2200;
+  const el = document.getElementById('counterNum');
+  const start = performance.now();
+  let lastTick = 0;
+
+  function step() {
+    const p = Math.min((performance.now() - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    const val = Math.floor(ease * target);
+    el.textContent = val.toLocaleString() + (p >= 1 ? '+' : '');
+
+    // Tick sound every ~200 numbers
+    if (val - lastTick > 200) {
+      lastTick = val;
+      sfxTick();
+    }
+
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function toggleRecMode() {
+  const btn = document.getElementById('recBtn');
+  document.body.classList.toggle('hide-controls');
+  if (document.body.classList.contains('hide-controls')) {
+    btn.classList.add('recording');
+    btn.textContent = '\u2B1B Exit Rec';
+    setTimeout(startAnimation, 1000);
+  } else {
+    btn.classList.remove('recording');
+    btn.textContent = '\uD83D\uDD34 Rec Mode';
+  }
+}
+function updateStageScale(){const s=Math.min((window.innerWidth-32)/390,(window.innerHeight-32)/844,1);document.documentElement.style.setProperty('--phone-scale',String(s));}
+window.addEventListener('resize',updateStageScale);
+document.addEventListener('DOMContentLoaded',()=>{if(typeof lucide!=='undefined')lucide.createIcons();});
+document.addEventListener('DOMContentLoaded',updateStageScale);
+</script>
+
+</body>
+</html>

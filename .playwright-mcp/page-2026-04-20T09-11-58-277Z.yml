@@ -1,0 +1,803 @@
+- generic [active] [ref=e1]:
+  - link "Lompat ke isi" [ref=e2] [cursor=pointer]:
+    - /url: "#bodyContent"
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - navigation "Situs" [ref=e6]:
+        - generic "Menu utama" [ref=e7]:
+          - button "Menu utama" [ref=e8] [cursor=pointer]
+          - generic [ref=e11]: Menu utama
+      - link "Wikipedia Ensiklopedia Bebas" [ref=e12] [cursor=pointer]:
+        - /url: /wiki/Halaman_Utama
+        - img [ref=e13]
+        - generic [ref=e14]:
+          - img "Wikipedia" [ref=e15]
+          - img "Ensiklopedia Bebas" [ref=e16]
+    - generic [ref=e17]:
+      - search [ref=e18]:
+        - link "Pencarian" [ref=e19] [cursor=pointer]:
+          - /url: /wiki/Istimewa:Pencarian
+          - generic [ref=e21]: Pencarian
+      - navigation "Perkakas pribadi" [ref=e22]:
+        - generic [ref=e23]:
+          - navigation "Tampilan" [ref=e24]:
+            - generic "Change the appearance of the page's font size, width, and color" [ref=e25]:
+              - button "Tampilan" [ref=e26] [cursor=pointer]
+              - generic [ref=e29]: Tampilan
+          - list [ref=e32]:
+            - listitem [ref=e33]:
+              - link "Menyumbang" [ref=e34] [cursor=pointer]:
+                - /url: https://donate.wikimedia.org/?wmf_source=donate&wmf_medium=sidebar&wmf_campaign=id.wikipedia.org&uselang=id
+                - generic [ref=e36]: Menyumbang
+            - listitem [ref=e37]:
+              - link "Buat akun baru" [ref=e38] [cursor=pointer]:
+                - /url: /w/index.php?title=Istimewa:Buat_akun&returnto=OpenClaw
+            - listitem [ref=e39]:
+              - link "Masuk log" [ref=e40] [cursor=pointer]:
+                - /url: /w/index.php?title=Istimewa:Masuk_log&returnto=OpenClaw
+  - generic [ref=e42]:
+    - generic [ref=e44]:
+      - generic [ref=e47]:
+        - generic [ref=e48]:
+          - paragraph [ref=e49]: Sejak Februari 2026, akses pendaftaran dan masuk log ke Wikipedia serta proyek-proyek Wikimedia telah dibatasi di Indonesia. Kami mengajak Anda untuk mendorong Kemkomdigi mencabut pembatasan tersebut agar kita dapat bersama-sama terus membebaskan pengetahuan!
+          - paragraph [ref=e50]:
+            - link "Baca selengkapnya →" [ref=e51] [cursor=pointer]:
+              - /url: https://id.wikipedia.org/wiki/Wikipedia:Pernyataan_resmi_komunitas_Wikipedia_bahasa_Indonesia_terhadap_pembatasan_akses_auth.wikimedia.org_di_Indonesia
+        - img "Скрыть" [ref=e53] [cursor=pointer]
+      - generic [ref=e57]:
+        - generic [ref=e59]:
+          - text: Ikuti Wikipedia bahasa Indonesia di
+          - link [ref=e61] [cursor=pointer]:
+            - /url: https://t.me/idwiki
+            - img [ref=e62]
+          - link "Telegram" [ref=e65] [cursor=pointer]:
+            - /url: https://t.me/idwiki
+          - text: ","
+          - link [ref=e67] [cursor=pointer]:
+            - /url: https://www.facebook.com/idwiki
+            - img [ref=e68]
+          - link "Facebook" [ref=e71] [cursor=pointer]:
+            - /url: https://www.facebook.com/idwiki
+          - text: ","
+          - link [ref=e73] [cursor=pointer]:
+            - /url: https://x.com/idwiki
+            - img [ref=e74]
+          - link "Twitter/X" [ref=e77] [cursor=pointer]:
+            - /url: https://x.com/idwiki
+          - text: ","
+          - link [ref=e79] [cursor=pointer]:
+            - /url: https://instagram.com/idwikipedia
+            - img [ref=e80]
+          - link "Instagram" [ref=e83] [cursor=pointer]:
+            - /url: https://instagram.com/idwikipedia
+          - text: ", dan"
+          - link [ref=e85] [cursor=pointer]:
+            - /url: https://discord.com/invite/z6bgha2jAA
+            - img [ref=e86]
+          - link "Discord" [ref=e89] [cursor=pointer]:
+            - /url: https://discord.com/invite/z6bgha2jAA
+        - button "Tutup" [ref=e90]
+    - main [ref=e92]:
+      - generic [ref=e93]:
+        - navigation "Daftar isi" [ref=e94]:
+          - generic "Daftar Isi" [ref=e95]:
+            - button "Gulingkan daftar isi" [ref=e96] [cursor=pointer]
+            - generic [ref=e99]: Gulingkan daftar isi
+        - heading "OpenClaw" [level=1] [ref=e100]:
+          - generic [ref=e101]: OpenClaw
+        - generic [ref=e102]:
+          - button "Pergi ke artikel dalam bahasa lain. Terdapat 22 bahasa" [ref=e103] [cursor=pointer]
+          - generic [ref=e106]: 22 bahasa
+      - generic [ref=e108]:
+        - navigation "Ruang nama" [ref=e110]:
+          - generic [ref=e111]:
+            - generic:
+              - list:
+                - listitem [ref=e112]:
+                  - link "Halaman" [ref=e113] [cursor=pointer]:
+                    - /url: /wiki/OpenClaw
+                    - generic [ref=e114]: Halaman
+                - listitem [ref=e115]:
+                  - link "Pembicaraan" [ref=e116] [cursor=pointer]:
+                    - /url: /w/index.php?title=Pembicaraan:OpenClaw&action=edit&redlink=1
+                    - generic [ref=e117]: Pembicaraan
+        - generic [ref=e118]:
+          - navigation "Tampilan" [ref=e119]:
+            - generic [ref=e120]:
+              - generic:
+                - list:
+                  - listitem [ref=e121]:
+                    - link "Baca" [ref=e122] [cursor=pointer]:
+                      - /url: /wiki/OpenClaw
+                      - generic [ref=e123]: Baca
+                  - listitem [ref=e124]:
+                    - link "Sunting" [ref=e125] [cursor=pointer]:
+                      - /url: /w/index.php?title=OpenClaw&veaction=edit
+                      - generic [ref=e126]: Sunting
+                  - listitem [ref=e127]:
+                    - link "Sunting sumber" [ref=e128] [cursor=pointer]:
+                      - /url: /w/index.php?title=OpenClaw&action=edit
+                      - generic [ref=e129]: Sunting sumber
+                  - listitem [ref=e130]:
+                    - link "Lihat riwayat" [ref=e131] [cursor=pointer]:
+                      - /url: /w/index.php?title=OpenClaw&action=history
+                      - generic [ref=e132]: Lihat riwayat
+          - navigation "Peralatan halaman" [ref=e133]:
+            - generic [ref=e134]:
+              - button "Perkakas" [ref=e135] [cursor=pointer]
+              - generic [ref=e137] [cursor=pointer]: Perkakas
+      - generic "OpenClaw" [ref=e138]:
+        - generic [ref=e140]: Dari Wikipedia bahasa Indonesia, ensiklopedia bebas
+        - generic [ref=e142]:
+          - generic [ref=e143]:
+            - table [ref=e144]:
+              - rowgroup [ref=e145]:
+                - row "OpenClaw" [ref=e146]:
+                  - columnheader "OpenClaw" [ref=e147]
+                - row [ref=e148]:
+                  - cell [ref=e149]:
+                    - link [ref=e151] [cursor=pointer]:
+                      - /url: //id.wikipedia.org/wiki/Berkas:Openclaw-logo-text-dark.png
+                      - img [ref=e152]
+                - row "Nama lain Clawdbot (awalnya) Moltbot (berganti nama pada 27 Januari 2026)" [ref=e153]:
+                  - rowheader "Nama lain" [ref=e154]
+                  - cell "Clawdbot (awalnya) Moltbot (berganti nama pada 27 Januari 2026)" [ref=e155]:
+                    - text: Clawdbot (awalnya)
+                    - text: Moltbot (berganti nama pada
+                    - text: 27 Januari 2026)
+                - row "Pengembang Peter Steinberger" [ref=e156]:
+                  - rowheader "Pengembang" [ref=e157]:
+                    - link "Pengembang" [ref=e158] [cursor=pointer]:
+                      - /url: //id.wikipedia.org/wiki/Pemrogram
+                  - cell "Peter Steinberger" [ref=e159]:
+                    - link "Peter Steinberger" [ref=e160] [cursor=pointer]:
+                      - /url: //id.wikipedia.org/wiki/Peter_Steinberger_(programmer)?action=edit&redlink=1
+                - row "Rilis awal November 24, 2025; 4 bulan lalu (sebagai Clawdbot)" [ref=e161]:
+                  - rowheader "Rilis awal" [ref=e162]
+                  - cell "November 24, 2025; 4 bulan lalu (sebagai Clawdbot)" [ref=e163]:
+                    - text: November 24, 2025
+                    - generic [ref=e164]: ; 4 bulan lalu
+                    - text: (sebagai Clawdbot)
+                - row "Ditulis dalam TypeScript Swift" [ref=e165]:
+                  - rowheader "Ditulis dalam" [ref=e166]
+                  - cell "TypeScript Swift" [ref=e167]:
+                    - link "TypeScript" [ref=e168] [cursor=pointer]:
+                      - /url: //id.wikipedia.org/wiki/TypeScript?action=edit&redlink=1
+                    - link "Swift" [ref=e169] [cursor=pointer]:
+                      - /url: //id.wikipedia.org/wiki/Swift_(bahasa_pemprograman)?action=edit&redlink=1
+                - row "Sistem operasi Lintas-platform" [ref=e170]:
+                  - rowheader "Sistem operasi" [ref=e171]:
+                    - link "Sistem operasi" [ref=e172] [cursor=pointer]:
+                      - /url: //id.wikipedia.org/wiki/Sistem_operasi
+                  - cell "Lintas-platform" [ref=e173]
+                - row "Jenis Agen AI Agen otonom Personal otonom asisten" [ref=e174]:
+                  - rowheader "Jenis" [ref=e175]:
+                    - link "Jenis" [ref=e176] [cursor=pointer]:
+                      - /url: //id.wikipedia.org/wiki/Kategori_perangkat_lunak#Pendekatan_kategorisasi
+                  - cell "Agen AI Agen otonom Personal otonom asisten" [ref=e177]:
+                    - link "Agen AI" [ref=e178] [cursor=pointer]:
+                      - /url: //id.wikipedia.org/wiki/Agen_AI
+                    - link "Agen otonom" [ref=e179] [cursor=pointer]:
+                      - /url: //id.wikipedia.org/wiki/Agen_otonom
+                    - text: Personal otonom
+                    - text: asisten
+                - row "Lisensi MIT License" [ref=e180]:
+                  - rowheader "Lisensi" [ref=e181]:
+                    - link "Lisensi" [ref=e182] [cursor=pointer]:
+                      - /url: //id.wikipedia.org/wiki/Lisensi_perangkat_lunak
+                  - cell "MIT License" [ref=e183]:
+                    - link "MIT License" [ref=e184] [cursor=pointer]:
+                      - /url: //id.wikipedia.org/wiki/MIT_License
+                - row "Situs web openclaw.ai" [ref=e185]:
+                  - rowheader "Situs web" [ref=e186]
+                  - cell "openclaw.ai" [ref=e187]:
+                    - link "openclaw.ai" [ref=e189] [cursor=pointer]:
+                      - /url: https://openclaw.ai/
+                      - text: openclaw
+                      - text: .ai
+                - row "Repositori github.com/openclaw/openclaw" [ref=e190]:
+                  - rowheader "Repositori" [ref=e191]:
+                    - link "Repositori" [ref=e192] [cursor=pointer]:
+                      - /url: //id.wikipedia.org/wiki/Repositori_(kontrol_versi)
+                  - cell "github.com/openclaw/openclaw" [ref=e193]:
+                    - link "github.com/openclaw/openclaw" [ref=e195] [cursor=pointer]:
+                      - /url: https://github.com/openclaw/openclaw
+                      - text: github
+                      - text: .com
+                      - text: /openclaw
+                      - text: /openclaw
+            - paragraph [ref=e196]:
+              - text: OpenClaw (dulunya Clawdbot, Moltbot, dan Molty) adalah sebuah
+              - link "agen" [ref=e197] [cursor=pointer]:
+                - /url: //id.wikipedia.org/wiki/Agen_AI
+              - link "kecerdasan buatan" [ref=e198] [cursor=pointer]:
+                - /url: //id.wikipedia.org/wiki/Kecerdasan_buatan
+              - link "otonom" [ref=e199] [cursor=pointer]:
+                - /url: //id.wikipedia.org/wiki/Agen_otonom
+              - link "bebas dan sumber terbuka" [ref=e200] [cursor=pointer]:
+                - /url: //id.wikipedia.org/wiki/Perangkat_lunak_bebas_dan_sumber_terbuka
+              - text: yang dapat menjalankan tugas lewat
+              - link "model bahasa besar" [ref=e201] [cursor=pointer]:
+                - /url: //id.wikipedia.org/wiki/Model_bahasa_besar
+              - text: (LLMs), memakai platform-platform perpesanan sebagai antarmuka pengguna utamanya.
+          - region "Riwayat" [ref=e202]:
+            - generic [ref=e203]:
+              - heading "Riwayat" [level=2] [ref=e204]
+              - generic [ref=e205]:
+                - text: "["
+                - link "sunting" [ref=e206] [cursor=pointer]:
+                  - /url: //id.wikipedia.org/w/index.php?title=OpenClaw&veaction=edit&section=1
+                - text: "|"
+                - link "sunting sumber" [ref=e207] [cursor=pointer]:
+                  - /url: //id.wikipedia.org/w/index.php?title=OpenClaw&action=edit&section=1
+                - text: "]"
+            - figure "Peter Steinberger (kanan) dan Tomas Taylor (kiri) di ClawCon, San Francisco, pada 4 Februari 2026" [ref=e208]:
+              - link [ref=e209] [cursor=pointer]:
+                - /url: //id.wikipedia.org/wiki/Berkas:Peter_Steinberger_and_Tomas_Taylor_at_ClawCon_2026.jpg
+                - img [ref=e210]
+              - generic [ref=e211]: Peter Steinberger (kanan) dan Tomas Taylor (kiri) di ClawCon, San Francisco, pada 4 Februari 2026
+            - paragraph [ref=e212]:
+              - text: Dikembangkan oleh
+              - link "pengkode perasaan" [ref=e213] [cursor=pointer]:
+                - /url: //id.wikipedia.org/wiki/Pengkodean_perasaan
+              - text: Austria
+              - superscript [ref=e214]:
+                - link "[1]" [ref=e215] [cursor=pointer]:
+                  - /url: "#cite_note-Steinberger-1"
+                  - generic: "[1]"
+              - link "Peter Steinberger" [ref=e216] [cursor=pointer]:
+                - /url: //id.wikipedia.org/wiki/Peter_Steinberger_(programmer)?action=edit&redlink=1
+              - text: ", OpenClaw mula-mula dipublikasikan pada November 2025 dengan nama Clawdbot. Perangkat lunak tersebut berasal dari Clawd (kini Molty), sebuah asisten virtual berbasis AI yang dikembangkan olehnya, yang alat itu sendiri mengambil nama dari"
+              - link "bot obrolan" [ref=e217] [cursor=pointer]:
+                - /url: //id.wikipedia.org/wiki/Bot_obrolan
+              - link "Anthropic" [ref=e218] [cursor=pointer]:
+                - /url: //id.wikipedia.org/wiki/Anthropic
+              - link "Claude" [ref=e219] [cursor=pointer]:
+                - /url: //id.wikipedia.org/wiki/Claude_(model_bahasa)
+              - text: .
+              - superscript [ref=e220]:
+                - link "[2]" [ref=e221] [cursor=pointer]:
+                  - /url: "#cite_note-Heim-2026-2"
+                  - generic: "[2]"
+              - text: "Dalam dua bulan, produk tersebut berganti nama sebanyak dua kali: mula-mula menjadi \"Moltbot\" (mempertahankan tema"
+              - link "lobster" [ref=e222] [cursor=pointer]:
+                - /url: //id.wikipedia.org/wiki/Lobster
+              - text: ) pada 27 Januari 2026, menyusul keluhan
+              - link "markah dagang" [ref=e223] [cursor=pointer]:
+                - /url: //id.wikipedia.org/wiki/Markah_dagang?action=edit&redlink=1
+              - text: oleh Anthropic, dan lalu tiga hari kemudian menjadi "OpenClaw" karena Steinberger mendapati bahwa Moltbot "tak terdengar terlalu jelas."
+              - superscript [ref=e224]:
+                - link "[3]" [ref=e225] [cursor=pointer]:
+                  - /url: "#cite_note-Butts-2026-3"
+                  - generic: "[3]"
+              - superscript [ref=e226]:
+                - link "[4]" [ref=e227] [cursor=pointer]:
+                  - /url: "#cite_note-4"
+                  - generic: "[4]"
+          - region "Referensi" [ref=e228]:
+            - generic [ref=e229]:
+              - heading "Referensi" [level=2] [ref=e230]
+              - generic [ref=e231]:
+                - text: "["
+                - link "sunting" [ref=e232] [cursor=pointer]:
+                  - /url: //id.wikipedia.org/w/index.php?title=OpenClaw&veaction=edit&section=2
+                - text: "|"
+                - link "sunting sumber" [ref=e233] [cursor=pointer]:
+                  - /url: //id.wikipedia.org/w/index.php?title=OpenClaw&action=edit&section=2
+                - text: "]"
+            - list [ref=e236]:
+              - listitem [ref=e237]:
+                - link "Ke atas" [ref=e239] [cursor=pointer]:
+                  - /url: "#cite_ref-Steinberger_1-0"
+                  - text: ^
+                - generic [ref=e240]:
+                  - generic [ref=e241]:
+                    - text: Steinberger, Peter.
+                    - link "\"About | Peter Steinberger\"" [ref=e242] [cursor=pointer]:
+                      - /url: https://steipete.me/about
+                    - text: . steipete.me (dalam bahasa Inggris).
+                    - link "Diarsipkan" [ref=e243] [cursor=pointer]:
+                      - /url: https://web.archive.org/web/20260218204658/https://steipete.me/about
+                    - text: dari versi aslinya tanggal February 18, 2026
+                    - generic [ref=e244]: . Diakses tanggal 2026-02-16
+                    - text: .
+                  - generic "ctx_ver=Z39.88-2004&rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Ajournal&rft.genre=unknown&rft.jtitle=steipete.me&rft.atitle=About+%7C+Peter+Steinberger&rft.aulast=Steinberger&rft.aufirst=Peter&rft_id=https%3A%2F%2Fsteipete.me%2Fabout&rfr_id=info%3Asid%2Fid.wikipedia.org%3AOpenClaw"
+              - listitem [ref=e245]:
+                - link "Ke atas" [ref=e247] [cursor=pointer]:
+                  - /url: "#cite_ref-Heim-2026_2-0"
+                  - text: ^
+                - generic [ref=e248]:
+                  - generic [ref=e249]:
+                    - text: Heim, Anna (2026-01-28).
+                    - link "\"Everything you need to know about viral personal AI assistant Clawdbot (now Moltbot)\"" [ref=e250] [cursor=pointer]:
+                      - /url: https://techcrunch.com/2026/01/27/everything-you-need-to-know-about-viral-personal-ai-assistant-clawdbot-now-moltbot/
+                    - text: . TechCrunch (dalam bahasa American English)
+                    - generic [ref=e251]: . Diakses tanggal 2026-02-05
+                    - text: .
+                  - generic "ctx_ver=Z39.88-2004&rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Ajournal&rft.genre=unknown&rft.jtitle=TechCrunch&rft.atitle=Everything+you+need+to+know+about+viral+personal+AI+assistant+Clawdbot+%28now+Moltbot%29&rft.date=2026-01-28&rft.aulast=Heim&rft.aufirst=Anna&rft_id=https%3A%2F%2Ftechcrunch.com%2F2026%2F01%2F27%2Feverything-you-need-to-know-about-viral-personal-ai-assistant-clawdbot-now-moltbot%2F&rfr_id=info%3Asid%2Fid.wikipedia.org%3AOpenClaw"
+              - listitem [ref=e252]:
+                - link "Ke atas" [ref=e254] [cursor=pointer]:
+                  - /url: "#cite_ref-Butts-2026_3-0"
+                  - text: ^
+                - generic [ref=e255]:
+                  - generic [ref=e256]:
+                    - text: Butts, Dylan; Chin, Matthew (2026-02-02).
+                    - 'link "\"From Clawdbot to Moltbot to OpenClaw: Meet the AI agent generating buzz and fear globally\"" [ref=e257] [cursor=pointer]':
+                      - /url: https://www.cnbc.com/2026/02/02/openclaw-open-source-ai-agent-rise-controversy-clawdbot-moltbot-moltbook.html
+                    - text: .
+                    - link "CNBC" [ref=e259] [cursor=pointer]:
+                      - /url: //id.wikipedia.org/wiki/CNBC
+                    - text: (dalam bahasa Inggris).
+                    - link "Diarsipkan" [ref=e260] [cursor=pointer]:
+                      - /url: https://web.archive.org/web/20260203150511/https://www.cnbc.com/2026/02/02/openclaw-open-source-ai-agent-rise-controversy-clawdbot-moltbot-moltbook.html
+                    - text: dari versi aslinya tanggal February 3, 2026
+                    - generic [ref=e261]: . Diakses tanggal 2026-02-05
+                    - text: .
+                  - generic "ctx_ver=Z39.88-2004&rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Ajournal&rft.genre=unknown&rft.jtitle=CNBC&rft.atitle=From+Clawdbot+to+Moltbot+to+OpenClaw%3A+Meet+the+AI+agent+generating+buzz+and+fear+globally&rft.date=2026-02-02&rft.aulast=Butts&rft.aufirst=Dylan&rft.au=Chin%2C+Matthew&rft_id=https%3A%2F%2Fwww.cnbc.com%2F2026%2F02%2F02%2Fopenclaw-open-source-ai-agent-rise-controversy-clawdbot-moltbot-moltbook.html&rfr_id=info%3Asid%2Fid.wikipedia.org%3AOpenClaw"
+              - listitem [ref=e262]:
+                - link "Ke atas" [ref=e264] [cursor=pointer]:
+                  - /url: "#cite_ref-4"
+                  - text: ^
+                - generic [ref=e265]:
+                  - generic [ref=e266]:
+                    - text: Forlini, Emily (2026-02-02).
+                    - link "\"OpenClaw Is the Hot New AI Agent, But Is It Safe to Use?\"" [ref=e267] [cursor=pointer]:
+                      - /url: https://www.pcmag.com/news/openclaw-is-the-hot-new-ai-agent-but-is-it-safe-to-use?test_uuid=04IpBmWGZleS0I0J3epvMrC&test_variant=B
+                    - text: . PCMAG (dalam bahasa Inggris).
+                    - link "Diarsipkan" [ref=e268] [cursor=pointer]:
+                      - /url: https://web.archive.org/web/20260215112716/https://www.pcmag.com/news/openclaw-is-the-hot-new-ai-agent-but-is-it-safe-to-use?test_variant=B&test_uuid=04IpBmWGZleS0I0J3epvMrC
+                    - text: dari versi aslinya tanggal February 15, 2026
+                    - generic [ref=e269]: . Diakses tanggal 2026-02-05
+                    - text: .
+                  - generic "ctx_ver=Z39.88-2004&rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Ajournal&rft.genre=unknown&rft.jtitle=PCMAG&rft.atitle=OpenClaw+Is+the+Hot+New+AI+Agent%2C+But+Is+It+Safe+to+Use%3F&rft.date=2026-02-02&rft.aulast=Forlini&rft.aufirst=Emily&rft_id=https%3A%2F%2Fwww.pcmag.com%2Fnews%2Fopenclaw-is-the-hot-new-ai-agent-but-is-it-safe-to-use%3Ftest_uuid%3D04IpBmWGZleS0I0J3epvMrC%26test_variant%3DB&rfr_id=info%3Asid%2Fid.wikipedia.org%3AOpenClaw"
+          - region "Pranala luar" [ref=e270]:
+            - generic [ref=e271]:
+              - heading "Pranala luar" [level=2] [ref=e272]
+              - generic [ref=e273]:
+                - text: "["
+                - link "sunting" [ref=e274] [cursor=pointer]:
+                  - /url: //id.wikipedia.org/w/index.php?title=OpenClaw&veaction=edit&section=3
+                - text: "|"
+                - link "sunting sumber" [ref=e275] [cursor=pointer]:
+                  - /url: //id.wikipedia.org/w/index.php?title=OpenClaw&action=edit&section=3
+                - text: "]"
+            - list [ref=e276]:
+              - listitem [ref=e277]:
+                - link "Situs web resmi" [ref=e280] [cursor=pointer]:
+                  - /url: https://openclaw.ai
+              - listitem [ref=e281]:
+                - text: Repositori
+                - link "OpenClaw" [ref=e282] [cursor=pointer]:
+                  - /url: https://github.com/https://github.com/openclaw/openclaw
+                - text: di
+                - link "GitHub" [ref=e283] [cursor=pointer]:
+                  - /url: //id.wikipedia.org/wiki/GitHub
+            - navigation "AI generatif" [ref=e284]:
+              - table [ref=e285]:
+                - rowgroup [ref=e286]:
+                  - row "[sembunyi] l · b · s AI generatif" [ref=e287]:
+                    - columnheader "[sembunyi] l · b · s AI generatif" [ref=e288]:
+                      - button "[sembunyi]" [expanded] [ref=e289] [cursor=pointer]
+                      - list [ref=e291]:
+                        - listitem [ref=e292]:
+                          - link "l" [ref=e293] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/Templat:AI_generatif
+                          - text: ·
+                        - listitem [ref=e294]:
+                          - link "b" [ref=e295] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/Pembicaraan_Templat:AI_generatif?action=edit&redlink=1
+                          - text: ·
+                        - listitem [ref=e296]:
+                          - link "s" [ref=e297] [cursor=pointer]:
+                            - /url: https://id.wikipedia.org/w/index.php?title=Templat:AI_generatif&action=edit
+                      - link "AI generatif" [ref=e299] [cursor=pointer]:
+                        - /url: //id.wikipedia.org/wiki/Kecerdasan_buatan_generatif
+                  - row "Konsep Autopenyandi · Pemelajaran dalam · Jaringan permusuhan generatif · Pentransformasi praterlatih generatif · Model bahasa besar · Jaringan saraf tiruan · Rekayasa perintah · Retrieval-augmented generation · Reinforcement learning from human feedback · Pemelajaran terawasi mandiri · Transformer · Variational autoencoder · Vision transformer · Word embedding" [ref=e300]:
+                    - rowheader "Konsep" [ref=e301]
+                    - cell "Autopenyandi · Pemelajaran dalam · Jaringan permusuhan generatif · Pentransformasi praterlatih generatif · Model bahasa besar · Jaringan saraf tiruan · Rekayasa perintah · Retrieval-augmented generation · Reinforcement learning from human feedback · Pemelajaran terawasi mandiri · Transformer · Variational autoencoder · Vision transformer · Word embedding" [ref=e302]:
+                      - list [ref=e304]:
+                        - listitem [ref=e305]:
+                          - link "Autopenyandi" [ref=e306] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/Autopenyandi
+                          - text: ·
+                        - listitem [ref=e307]:
+                          - link "Pemelajaran dalam" [ref=e308] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/Pemelajaran_dalam
+                          - text: ·
+                        - listitem [ref=e309]:
+                          - link "Jaringan permusuhan generatif" [ref=e310] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/Jaringan_permusuhan_generatif?action=edit&redlink=1
+                          - text: ·
+                        - listitem [ref=e311]:
+                          - link "Pentransformasi praterlatih generatif" [ref=e312] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/Pentransformasi_praterlatih_generatif
+                          - text: ·
+                        - listitem [ref=e313]:
+                          - link "Model bahasa besar" [ref=e314] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/Model_bahasa_besar
+                          - text: ·
+                        - listitem [ref=e315]:
+                          - link "Jaringan saraf tiruan" [ref=e316] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/Jaringan_saraf_tiruan
+                          - text: ·
+                        - listitem [ref=e317]:
+                          - link "Rekayasa perintah" [ref=e318] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/Rekayasa_perintah?action=edit&redlink=1
+                          - text: ·
+                        - listitem [ref=e319]:
+                          - link "Retrieval-augmented generation" [ref=e320] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/Retrieval-augmented_generation
+                          - text: ·
+                        - listitem [ref=e321]:
+                          - link "Reinforcement learning from human feedback" [ref=e322] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/Reinforcement_learning_from_human_feedback?action=edit&redlink=1
+                          - text: ·
+                        - listitem [ref=e323]:
+                          - link "Pemelajaran terawasi mandiri" [ref=e324] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/Pemelajaran_terawasi_mandiri
+                          - text: ·
+                        - listitem [ref=e325]:
+                          - link "Transformer" [ref=e326] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/Transformer_(deep_learning_architecture)?action=edit&redlink=1
+                          - text: ·
+                        - listitem [ref=e327]:
+                          - link "Variational autoencoder" [ref=e328] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/Variational_autoencoder?action=edit&redlink=1
+                          - text: ·
+                        - listitem [ref=e329]:
+                          - link "Vision transformer" [ref=e330] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/Vision_transformer?action=edit&redlink=1
+                          - text: ·
+                        - listitem [ref=e331]:
+                          - link "Word embedding" [ref=e332] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/Word_embedding?action=edit&redlink=1
+                  - row "Model Teks Claude · DBRX · DeepSeek · Gemini · GPT (1 · 2 · 3 · J · ChatGPT · 4 · 4o · o1 · o3 · 4.5) · Grok · Granite · Llama · Mistral Large · PanGu-Σ · Qwen Gambar Aurora · DALL-E · Firefly · Flux · Ideogram · Imagen · Midjourney · Stable Diffusion Video Dream Machine · Gen-3 Alpha · Hailuo AI · Kling · Sora · Veo · VideoPoet Musik Endel · Udio · Suno AI" [ref=e333]:
+                    - rowheader "Model" [ref=e334]
+                    - cell "Teks Claude · DBRX · DeepSeek · Gemini · GPT (1 · 2 · 3 · J · ChatGPT · 4 · 4o · o1 · o3 · 4.5) · Grok · Granite · Llama · Mistral Large · PanGu-Σ · Qwen Gambar Aurora · DALL-E · Firefly · Flux · Ideogram · Imagen · Midjourney · Stable Diffusion Video Dream Machine · Gen-3 Alpha · Hailuo AI · Kling · Sora · Veo · VideoPoet Musik Endel · Udio · Suno AI" [ref=e335]:
+                      - table [ref=e336]:
+                        - rowgroup [ref=e337]:
+                          - row "Teks Claude · DBRX · DeepSeek · Gemini · GPT (1 · 2 · 3 · J · ChatGPT · 4 · 4o · o1 · o3 · 4.5) · Grok · Granite · Llama · Mistral Large · PanGu-Σ · Qwen" [ref=e338]:
+                            - rowheader "Teks" [ref=e339]
+                            - cell "Claude · DBRX · DeepSeek · Gemini · GPT (1 · 2 · 3 · J · ChatGPT · 4 · 4o · o1 · o3 · 4.5) · Grok · Granite · Llama · Mistral Large · PanGu-Σ · Qwen" [ref=e340]:
+                              - list [ref=e342]:
+                                - listitem [ref=e343]:
+                                  - link "Claude" [ref=e344] [cursor=pointer]:
+                                    - /url: //id.wikipedia.org/wiki/Claude_(model_bahasa)
+                                  - text: ·
+                                - listitem [ref=e345]:
+                                  - link "DBRX" [ref=e346] [cursor=pointer]:
+                                    - /url: //id.wikipedia.org/wiki/DBRX?action=edit&redlink=1
+                                  - text: ·
+                                - listitem [ref=e347]:
+                                  - link "DeepSeek" [ref=e348] [cursor=pointer]:
+                                    - /url: //id.wikipedia.org/wiki/DeepSeek_(bot_percakapan)
+                                  - text: ·
+                                - listitem [ref=e349]:
+                                  - link "Gemini" [ref=e350] [cursor=pointer]:
+                                    - /url: //id.wikipedia.org/wiki/Gemini_(bot_percakapan)
+                                  - text: ·
+                                - listitem [ref=e351]:
+                                  - link "GPT" [ref=e352] [cursor=pointer]:
+                                    - /url: //id.wikipedia.org/wiki/Pentransformasi_praterlatih_generatif
+                                  - list [ref=e353]:
+                                    - listitem [ref=e354]:
+                                      - text: (
+                                      - link "1" [ref=e355] [cursor=pointer]:
+                                        - /url: //id.wikipedia.org/wiki/GPT-1?action=edit&redlink=1
+                                      - text: ·
+                                    - listitem [ref=e356]:
+                                      - link "2" [ref=e357] [cursor=pointer]:
+                                        - /url: //id.wikipedia.org/wiki/GPT-2?action=edit&redlink=1
+                                      - text: ·
+                                    - listitem [ref=e358]:
+                                      - link "3" [ref=e359] [cursor=pointer]:
+                                        - /url: //id.wikipedia.org/wiki/GPT-3?action=edit&redlink=1
+                                      - text: ·
+                                    - listitem [ref=e360]:
+                                      - link "J" [ref=e361] [cursor=pointer]:
+                                        - /url: //id.wikipedia.org/wiki/GPT-J
+                                      - text: ·
+                                    - listitem [ref=e362]:
+                                      - link "ChatGPT" [ref=e363] [cursor=pointer]:
+                                        - /url: //id.wikipedia.org/wiki/ChatGPT
+                                      - text: ·
+                                    - listitem [ref=e364]:
+                                      - link "4" [ref=e365] [cursor=pointer]:
+                                        - /url: //id.wikipedia.org/wiki/GPT-4?action=edit&redlink=1
+                                      - text: ·
+                                    - listitem [ref=e366]:
+                                      - link "4o" [ref=e367] [cursor=pointer]:
+                                        - /url: //id.wikipedia.org/wiki/GPT-4o?action=edit&redlink=1
+                                      - text: ·
+                                    - listitem [ref=e368]:
+                                      - link "o1" [ref=e369] [cursor=pointer]:
+                                        - /url: //id.wikipedia.org/wiki/OpenAI_o1?action=edit&redlink=1
+                                      - text: ·
+                                    - listitem [ref=e370]:
+                                      - link "o3" [ref=e371] [cursor=pointer]:
+                                        - /url: //id.wikipedia.org/wiki/OpenAI_o3?action=edit&redlink=1
+                                      - text: ·
+                                    - listitem [ref=e372]:
+                                      - link "4.5" [ref=e373] [cursor=pointer]:
+                                        - /url: //id.wikipedia.org/wiki/GPT-4.5?action=edit&redlink=1
+                                      - text: )
+                                  - text: ·
+                                - listitem [ref=e374]:
+                                  - link "Grok" [ref=e375] [cursor=pointer]:
+                                    - /url: //id.wikipedia.org/wiki/Grok_(bot_percakapan)
+                                  - text: ·
+                                - listitem [ref=e376]:
+                                  - link "Granite" [ref=e377] [cursor=pointer]:
+                                    - /url: //id.wikipedia.org/wiki/IBM_Granite?action=edit&redlink=1
+                                  - text: ·
+                                - listitem [ref=e378]:
+                                  - link "Llama" [ref=e379] [cursor=pointer]:
+                                    - /url: //id.wikipedia.org/wiki/Llama_(model_bahasa)?action=edit&redlink=1
+                                  - text: ·
+                                - listitem [ref=e380]:
+                                  - link "Mistral Large" [ref=e381] [cursor=pointer]:
+                                    - /url: //id.wikipedia.org/wiki/Mistral_AI?action=edit&redlink=1#Mistral_Large
+                                  - text: ·
+                                - listitem [ref=e382]:
+                                  - link "PanGu-Σ" [ref=e383] [cursor=pointer]:
+                                    - /url: //id.wikipedia.org/wiki/Huawei_PanGu?action=edit&redlink=1
+                                  - text: ·
+                                - listitem [ref=e384]:
+                                  - link "Qwen" [ref=e385] [cursor=pointer]:
+                                    - /url: //id.wikipedia.org/wiki/Qwen
+                          - row "Gambar Aurora · DALL-E · Firefly · Flux · Ideogram · Imagen · Midjourney · Stable Diffusion" [ref=e386]:
+                            - rowheader "Gambar" [ref=e387]:
+                              - link "Gambar" [ref=e388] [cursor=pointer]:
+                                - /url: //id.wikipedia.org/wiki/Model_teks-ke-gambar
+                            - cell "Aurora · DALL-E · Firefly · Flux · Ideogram · Imagen · Midjourney · Stable Diffusion" [ref=e389]:
+                              - list [ref=e391]:
+                                - listitem [ref=e392]:
+                                  - link "Aurora" [ref=e393] [cursor=pointer]:
+                                    - /url: //id.wikipedia.org/wiki/Aurora_(model_teks-ke-gambar)?action=edit&redlink=1
+                                  - text: ·
+                                - listitem [ref=e394]:
+                                  - link "DALL-E" [ref=e395] [cursor=pointer]:
+                                    - /url: //id.wikipedia.org/wiki/DALL-E
+                                  - text: ·
+                                - listitem [ref=e396]:
+                                  - link "Firefly" [ref=e397] [cursor=pointer]:
+                                    - /url: //id.wikipedia.org/wiki/Adobe_Firefly?action=edit&redlink=1
+                                  - text: ·
+                                - listitem [ref=e398]:
+                                  - link "Flux" [ref=e399] [cursor=pointer]:
+                                    - /url: //id.wikipedia.org/wiki/Flux_(model_teks-ke-gambar)
+                                  - text: ·
+                                - listitem [ref=e400]:
+                                  - link "Ideogram" [ref=e401] [cursor=pointer]:
+                                    - /url: //id.wikipedia.org/wiki/Ideogram_(model_teks-ke-gambar)
+                                  - text: ·
+                                - listitem [ref=e402]:
+                                  - link "Imagen" [ref=e403] [cursor=pointer]:
+                                    - /url: //id.wikipedia.org/wiki/Imagen_(model_teks-ke-gambar)
+                                  - text: ·
+                                - listitem [ref=e404]:
+                                  - link "Midjourney" [ref=e405] [cursor=pointer]:
+                                    - /url: //id.wikipedia.org/wiki/Midjourney
+                                  - text: ·
+                                - listitem [ref=e406]:
+                                  - link "Stable Diffusion" [ref=e407] [cursor=pointer]:
+                                    - /url: //id.wikipedia.org/wiki/Stable_Diffusion
+                          - row "Video Dream Machine · Gen-3 Alpha · Hailuo AI · Kling · Sora · Veo · VideoPoet" [ref=e408]:
+                            - rowheader "Video" [ref=e409]:
+                              - link "Video" [ref=e410] [cursor=pointer]:
+                                - /url: //id.wikipedia.org/wiki/Model_teks-ke-video
+                            - cell "Dream Machine · Gen-3 Alpha · Hailuo AI · Kling · Sora · Veo · VideoPoet" [ref=e411]:
+                              - list [ref=e413]:
+                                - listitem [ref=e414]:
+                                  - link "Dream Machine" [ref=e415] [cursor=pointer]:
+                                    - /url: //id.wikipedia.org/wiki/Dream_Machine_(model_teks-ke-video)
+                                  - text: ·
+                                - listitem [ref=e416]:
+                                  - link "Gen-3 Alpha" [ref=e417] [cursor=pointer]:
+                                    - /url: //id.wikipedia.org/wiki/Runway_(perusahaan)?action=edit&redlink=1#Gen-3_Alpha
+                                  - text: ·
+                                - listitem [ref=e418]:
+                                  - link "Hailuo AI" [ref=e419] [cursor=pointer]:
+                                    - /url: //id.wikipedia.org/wiki/MiniMax_(perusahaan)#Hailuo_AI
+                                  - text: ·
+                                - listitem [ref=e420]:
+                                  - link "Kling" [ref=e421] [cursor=pointer]:
+                                    - /url: //id.wikipedia.org/wiki/Kling_(model_teks-ke-video)?action=edit&redlink=1
+                                  - text: ·
+                                - listitem [ref=e422]:
+                                  - link "Sora" [ref=e423] [cursor=pointer]:
+                                    - /url: //id.wikipedia.org/wiki/Sora_(model_teks-ke-video)
+                                  - text: ·
+                                - listitem [ref=e424]:
+                                  - link "Veo" [ref=e425] [cursor=pointer]:
+                                    - /url: //id.wikipedia.org/wiki/Google_DeepMind#Video_model
+                                  - text: ·
+                                - listitem [ref=e426]:
+                                  - link "VideoPoet" [ref=e427] [cursor=pointer]:
+                                    - /url: //id.wikipedia.org/wiki/VideoPoet
+                          - row "Musik Endel · Udio · Suno AI" [ref=e428]:
+                            - rowheader "Musik" [ref=e429]
+                            - cell "Endel · Udio · Suno AI" [ref=e430]:
+                              - list [ref=e432]:
+                                - listitem [ref=e433]:
+                                  - link "Endel" [ref=e434] [cursor=pointer]:
+                                    - /url: //id.wikipedia.org/wiki/Endel_(aplikasi)
+                                  - text: ·
+                                - listitem [ref=e435]:
+                                  - link "Udio" [ref=e436] [cursor=pointer]:
+                                    - /url: //id.wikipedia.org/wiki/Udio
+                                  - text: ·
+                                - listitem [ref=e437]:
+                                  - link "Suno AI" [ref=e438] [cursor=pointer]:
+                                    - /url: //id.wikipedia.org/wiki/Suno_AI
+                  - row "Perusahaan 01.AI · Alibaba · Anthropic · Baichuan · DeepSeek · ElevenLabs · Google DeepMind · Hugging Face · Kuaishou · Meta AI · MiniMax · Mistral AI · Moonshot AI · OpenAI · Runway · Stability AI · Synthesia · xAI · Zhipu AI" [ref=e439]:
+                    - rowheader "Perusahaan" [ref=e440]
+                    - cell "01.AI · Alibaba · Anthropic · Baichuan · DeepSeek · ElevenLabs · Google DeepMind · Hugging Face · Kuaishou · Meta AI · MiniMax · Mistral AI · Moonshot AI · OpenAI · Runway · Stability AI · Synthesia · xAI · Zhipu AI" [ref=e441]:
+                      - list [ref=e443]:
+                        - listitem [ref=e444]:
+                          - link "01.AI" [ref=e445] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/01.AI?action=edit&redlink=1
+                          - text: ·
+                        - listitem [ref=e446]:
+                          - link "Alibaba" [ref=e447] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/Alibaba_Group
+                          - text: ·
+                        - listitem [ref=e448]:
+                          - link "Anthropic" [ref=e449] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/Anthropic
+                          - text: ·
+                        - listitem [ref=e450]:
+                          - link "Baichuan" [ref=e451] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/Baichuan
+                          - text: ·
+                        - listitem [ref=e452]:
+                          - link "DeepSeek" [ref=e453] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/DeepSeek
+                          - text: ·
+                        - listitem [ref=e454]:
+                          - link "ElevenLabs" [ref=e455] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/ElevenLabs?action=edit&redlink=1
+                          - text: ·
+                        - listitem [ref=e456]:
+                          - link "Google DeepMind" [ref=e457] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/Google_DeepMind
+                          - text: ·
+                        - listitem [ref=e458]:
+                          - link "Hugging Face" [ref=e459] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/Hugging_Face
+                          - text: ·
+                        - listitem [ref=e460]:
+                          - link "Kuaishou" [ref=e461] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/Kuaishou
+                          - text: ·
+                        - listitem [ref=e462]:
+                          - link "Meta AI" [ref=e463] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/Meta_AI
+                          - text: ·
+                        - listitem [ref=e464]:
+                          - link "MiniMax" [ref=e465] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/MiniMax_(perusahaan)
+                          - text: ·
+                        - listitem [ref=e466]:
+                          - link "Mistral AI" [ref=e467] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/Mistral_AI?action=edit&redlink=1
+                          - text: ·
+                        - listitem [ref=e468]:
+                          - link "Moonshot AI" [ref=e469] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/Moonshot_AI
+                          - text: ·
+                        - listitem [ref=e470]:
+                          - link "OpenAI" [ref=e471] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/OpenAI
+                          - text: ·
+                        - listitem [ref=e472]:
+                          - link "Runway" [ref=e473] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/Runway_(perusahaan)?action=edit&redlink=1
+                          - text: ·
+                        - listitem [ref=e474]:
+                          - link "Stability AI" [ref=e475] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/Stability_AI
+                          - text: ·
+                        - listitem [ref=e476]:
+                          - link "Synthesia" [ref=e477] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/Synthesia_(perusahaan)
+                          - text: ·
+                        - listitem [ref=e478]:
+                          - link "xAI" [ref=e479] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/XAI_(perusahaan)
+                          - text: ·
+                        - listitem [ref=e480]:
+                          - link "Zhipu AI" [ref=e481] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/Zhipu_AI
+                  - row "Category Kategori · Commons page Commons" [ref=e482]:
+                    - cell "Category Kategori · Commons page Commons" [ref=e483]:
+                      - list [ref=e485]:
+                        - listitem [ref=e486]:
+                          - link "Category" [ref=e488] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/Berkas:Symbol_category_class.svg
+                            - img "Category" [ref=e489]
+                          - link "Kategori" [ref=e491] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/Kategori:Kecerdasan_buatan_generatif
+                          - text: ·
+                        - listitem [ref=e492]:
+                          - link "Commons page" [ref=e494] [cursor=pointer]:
+                            - /url: //id.wikipedia.org/wiki/Berkas:Commons-logo.svg
+                            - img "Commons page" [ref=e495]
+                          - link "Commons" [ref=e497] [cursor=pointer]:
+                            - /url: https://commons.wikimedia.org/wiki/Kategori:Kecerdasan%20buatan%20generatif
+            - note [ref=e498]:
+              - link "Ikon rintisan" [ref=e500] [cursor=pointer]:
+                - /url: //id.wikipedia.org/wiki/Berkas:Emblem-system-2-blue.svg
+                - img "Ikon rintisan" [ref=e501]
+              - paragraph [ref=e502]:
+                - text: Artikel bertopik teknologi ini adalah sebuah
+                - link "rintisan" [ref=e503] [cursor=pointer]:
+                  - /url: //id.wikipedia.org/wiki/Wikipedia:Rintisan
+                - text: . Anda dapat membantu Wikipedia dengan
+                - link "mengembangkannya" [ref=e504] [cursor=pointer]:
+                  - /url: https://id.wikipedia.org/w/index.php?title=OpenClaw&action=edit
+                - text: .
+              - text: · ·
+        - generic [ref=e506]:
+          - link "Kategori" [ref=e507] [cursor=pointer]:
+            - /url: /wiki/Istimewa:Daftar_kategori
+          - text: ":"
+          - list [ref=e508]:
+            - listitem [ref=e509]:
+              - link "Perangkat lunak AI" [ref=e510] [cursor=pointer]:
+                - /url: /w/index.php?title=Kategori:Perangkat_lunak_AI&action=edit&redlink=1
+    - contentinfo [ref=e512]:
+      - list [ref=e513]:
+        - listitem [ref=e514]: Halaman ini terakhir diubah pada 31 Maret 2026, pukul 04.25.
+        - listitem [ref=e515]:
+          - text: Halaman dirender menggunakan
+          - link "Parsoid" [ref=e516] [cursor=pointer]:
+            - /url: https://www.mediawiki.org/wiki/Special:MyLanguage/Parsoid
+          - text: .
+        - listitem [ref=e517]:
+          - text: Teks tersedia di bawah
+          - link "Lisensi Atribusi-BerbagiSerupa Creative Commons" [ref=e518] [cursor=pointer]:
+            - /url: https://creativecommons.org/licenses/by-sa/4.0/deed.en
+          - text: ; ketentuan tambahan mungkin berlaku. Lihat
+          - link "Ketentuan Penggunaan" [ref=e519] [cursor=pointer]:
+            - /url: https://foundation.wikimedia.org/wiki/Special:MyLanguage/Policy:Terms_of_Use
+          - text: untuk rincian.
+      - list:
+        - listitem [ref=e520]:
+          - link "Kebijakan privasi" [ref=e521] [cursor=pointer]:
+            - /url: https://foundation.wikimedia.org/wiki/Special:MyLanguage/Policy:Privacy_policy
+        - listitem [ref=e522]:
+          - link "Tentang Wikipedia" [ref=e523] [cursor=pointer]:
+            - /url: /wiki/Wikipedia:Perihal
+        - listitem [ref=e524]:
+          - link "Penyangkalan" [ref=e525] [cursor=pointer]:
+            - /url: /wiki/Wikipedia:Penyangkalan_umum
+        - listitem [ref=e526]:
+          - link "Kontak hukum & keamanan" [ref=e527] [cursor=pointer]:
+            - /url: https://foundation.wikimedia.org/wiki/Special:MyLanguage/Legal:Wikimedia_Foundation_Legal_and_Safety_Contact_Information
+        - listitem [ref=e528]:
+          - link "Kode Etik" [ref=e529] [cursor=pointer]:
+            - /url: https://foundation.wikimedia.org/wiki/Special:MyLanguage/Policy:Universal_Code_of_Conduct
+        - listitem [ref=e530]:
+          - link "Pengembang" [ref=e531] [cursor=pointer]:
+            - /url: https://developer.wikimedia.org
+        - listitem [ref=e532]:
+          - link "Statistik" [ref=e533] [cursor=pointer]:
+            - /url: https://stats.wikimedia.org/#/id.wikipedia.org
+        - listitem [ref=e534]:
+          - link "Pernyataan kuki" [ref=e535] [cursor=pointer]:
+            - /url: https://foundation.wikimedia.org/wiki/Special:MyLanguage/Policy:Cookie_statement
+        - listitem [ref=e536]:
+          - link "Tampilan seluler" [ref=e537] [cursor=pointer]:
+            - /url: //id.wikipedia.org/w/index.php?title=OpenClaw&mobileaction=toggle_view_mobile
+      - list [ref=e538]:
+        - listitem [ref=e539]:
+          - link "Wikimedia Foundation" [ref=e540] [cursor=pointer]:
+            - /url: https://www.wikimedia.org/
+            - img "Wikimedia Foundation" [ref=e542]
+        - listitem [ref=e543]:
+          - link "Powered by MediaWiki" [ref=e544] [cursor=pointer]:
+            - /url: https://www.mediawiki.org/
+            - img "Powered by MediaWiki" [ref=e546]
+  - generic [ref=e547]:
+    - list

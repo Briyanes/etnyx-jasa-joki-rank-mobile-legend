@@ -1,0 +1,209 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - banner [ref=e4]:
+        - generic [ref=e5]:
+          - link "ETNYX" [ref=e6] [cursor=pointer]:
+            - /url: /
+            - img [ref=e7]
+            - img "ETNYX" [ref=e9]
+          - generic [ref=e10]:
+            - generic [ref=e11]:
+              - img [ref=e12]
+              - text: Aman
+            - generic [ref=e14]:
+              - img [ref=e15]
+              - text: Cepat
+            - generic [ref=e17]:
+              - img [ref=e18]
+              - text: 24/7
+            - button "🇮🇩 ID" [ref=e20]:
+              - generic [ref=e21]: 🇮🇩
+              - generic [ref=e22]: ID
+      - generic [ref=e25]:
+        - button "Pilih Paket" [ref=e387] [cursor=pointer]:
+          - img [ref=e388]
+          - generic [ref=e29]: Pilih Paket
+        - button "2 Data Akun & Kontak" [ref=e32] [cursor=pointer]:
+          - generic [ref=e33]: "2"
+          - generic [ref=e34]: Data Akun & Kontak
+        - button "3 Opsi & Pembayaran" [disabled] [ref=e37]:
+          - generic [ref=e38]: "3"
+          - generic [ref=e39]: Opsi & Pembayaran
+        - button "4 Konfirmasi" [disabled] [ref=e42]:
+          - generic [ref=e43]: "4"
+          - generic [ref=e44]: Konfirmasi
+    - generic [ref=e45]:
+      - generic [ref=e391]:
+        - generic [ref=e392]:
+          - generic [ref=e393]: "2"
+          - heading "Data Akun & Jadwal Mabar" [level=2] [ref=e394]
+        - generic [ref=e395]:
+          - generic [ref=e396]:
+            - img [ref=e397]
+            - paragraph [ref=e399]: Mode Gendong tidak perlu login akun — kamu main bareng booster pakai akun sendiri
+          - generic [ref=e400]:
+            - generic [ref=e401]: MASUKKAN ID DAN SERVER
+            - generic [ref=e402]:
+              - generic [ref=e403]:
+                - generic [ref=e405]:
+                  - generic [ref=e406]: (
+                  - 'textbox "Contoh: 123456789" [ref=e407]': "44950290"
+                  - generic [ref=e408]: )
+                - generic [ref=e410]:
+                  - generic [ref=e411]: (
+                  - 'textbox "Contoh: 1234" [ref=e412]': "2071"
+                  - generic [ref=e413]: )
+              - button "Cek Akun" [ref=e414]:
+                - img [ref=e515]
+                - text: Cek Akun
+            - generic [ref=e518]:
+              - img [ref=e519]
+              - generic [ref=e521]: ʙ ʀ ɪ ʏ ᴀ ɴ
+              - generic [ref=e522]: — Akun terverifikasi
+          - generic [ref=e420]:
+            - generic [ref=e421]: Nickname / IGN *
+            - textbox "Nickname / IGN *" [ref=e422]:
+              - /placeholder: Nickname dalam game
+              - text: ʙ ʀ ɪ ʏ ᴀ ɴ
+          - generic [ref=e423]:
+            - generic [ref=e424]:
+              - img [ref=e425]
+              - text: Role yang Kamu Mainkan
+              - generic [ref=e434]: "*"
+            - generic [ref=e435]:
+              - button "EXP Laner" [ref=e436]:
+                - img [ref=e438]
+                - generic [ref=e447]: EXP Laner
+              - button "Roamer" [ref=e448]:
+                - img [ref=e450]
+                - generic [ref=e452]: Roamer
+              - button "Mid Laner" [ref=e453]:
+                - img [ref=e455]
+                - generic [ref=e458]: Mid Laner
+              - button "Jungler Khusus Booster" [disabled] [ref=e459]:
+                - img [ref=e461]
+                - generic [ref=e463]: Jungler
+                - generic [ref=e464]: Khusus Booster
+              - button "Gold Laner Khusus Booster" [disabled] [ref=e465]:
+                - img [ref=e467]
+                - generic [ref=e472]: Gold Laner
+                - generic [ref=e473]: Khusus Booster
+            - paragraph [ref=e474]:
+              - img [ref=e475]
+              - text: Jungler & Gold Lane khusus booster
+          - generic [ref=e478]:
+            - generic [ref=e479]:
+              - img [ref=e480]
+              - text: Jadwal Main
+              - generic [ref=e484]: "*"
+            - generic [ref=e485]:
+              - combobox [ref=e486] [cursor=pointer]:
+                - option "Pilih jadwal main kamu" [disabled] [selected]
+                - option "Pagi (08:00-12:00)"
+                - option "Siang (12:00-16:00)"
+                - option "Sore (16:00-19:00)"
+                - option "Malam (19:00-22:00)"
+                - option "Larut Malam (22:00-02:00)"
+                - option "Weekend Seharian"
+                - option "Fleksibel (Kapan Saja)"
+              - img
+            - paragraph [ref=e487]:
+              - img [ref=e488]
+              - text: Worker akan menyesuaikan jadwal kamu
+          - generic [ref=e491]:
+            - generic [ref=e492]: Request Hero (Min. 3 Hero)
+            - textbox "Request Hero (Min. 3 Hero)" [ref=e493]:
+              - /placeholder: "Contoh: Lancelot, Fanny, Ling"
+          - generic [ref=e494]:
+            - generic [ref=e495]: Catatan Untuk Penjoki
+            - textbox "Catatan Untuk Penjoki" [ref=e496]:
+              - /placeholder: Catatan khusus (opsional)
+          - heading "Kontak & Pembayaran" [level=3] [ref=e498]:
+            - img [ref=e499]
+            - text: Kontak & Pembayaran
+          - generic [ref=e501]:
+            - generic [ref=e502]: Nomor WhatsApp *
+            - generic [ref=e503]:
+              - generic [ref=e504]:
+                - img [ref=e505]
+                - text: "+62"
+              - textbox "Nomor WhatsApp *" [ref=e507]:
+                - /placeholder: "8123456789"
+          - generic [ref=e508]:
+            - generic [ref=e509]: Email (Opsional)
+            - textbox "Email (Opsional)" [ref=e510]:
+              - /placeholder: email@contoh.com
+            - paragraph [ref=e511]: Untuk menerima invoice & notifikasi
+      - generic [ref=e199]:
+        - button "Kembali" [ref=e512]:
+          - img [ref=e513]
+          - text: Kembali
+        - button "Lanjut" [disabled] [ref=e200]:
+          - text: Lanjut
+          - img [ref=e201]
+    - contentinfo [ref=e203]:
+      - generic [ref=e206]:
+        - generic [ref=e207]:
+          - img "ETNYX" [ref=e208]
+          - paragraph [ref=e209]: Jasa joki & gendong Mobile Legends terpercaya. Tinggal order, booster kami yang push rank kamu.
+          - generic [ref=e210]:
+            - link "Instagram" [ref=e211] [cursor=pointer]:
+              - /url: https://instagram.com/etnyx.id
+              - img [ref=e212]
+            - link "Facebook" [ref=e215] [cursor=pointer]:
+              - /url: https://facebook.com/etnyx.id
+              - img [ref=e216]
+            - link "TikTok" [ref=e219] [cursor=pointer]:
+              - /url: https://tiktok.com/@etnyx.id
+              - img [ref=e220]
+            - link "YouTube" [ref=e223] [cursor=pointer]:
+              - /url: https://youtube.com/@etnyx_id
+              - img [ref=e224]
+        - generic [ref=e227]:
+          - generic [ref=e228]:
+            - heading "Navigasi" [level=4] [ref=e229]
+            - link "Order Joki" [ref=e230] [cursor=pointer]:
+              - /url: /order
+            - link "Lacak Order" [ref=e231] [cursor=pointer]:
+              - /url: /track
+            - link "Paket Harga" [ref=e232] [cursor=pointer]:
+              - /url: /#pricing
+            - link "FAQ" [ref=e233] [cursor=pointer]:
+              - /url: /#faq
+          - generic [ref=e234]:
+            - heading "Legal" [level=4] [ref=e235]
+            - link "Syarat & Ketentuan" [ref=e236] [cursor=pointer]:
+              - /url: /terms
+            - link "Kebijakan Privasi" [ref=e237] [cursor=pointer]:
+              - /url: /privacy
+            - link "Kebijakan Refund" [ref=e238] [cursor=pointer]:
+              - /url: /refund-policy
+          - generic [ref=e239]:
+            - heading "Kontak" [level=4] [ref=e240]
+            - link "WhatsApp" [ref=e241] [cursor=pointer]:
+              - /url: https://wa.me/6281515141452
+            - link "support@etnyx.id" [ref=e242] [cursor=pointer]:
+              - /url: mailto:support@etnyx.id
+        - generic [ref=e244]:
+          - paragraph [ref=e245]: PT Sumber Arto Moro Abadi Kreatif
+          - paragraph [ref=e246]: Jl. Yos Sudarso, Ngambak, Beru, Kec. Wlingi, Kabupaten Blitar, Jawa Timur 66184
+          - paragraph [ref=e247]: "Email: support@etnyx.id • WhatsApp: 081515141540"
+        - generic [ref=e250]:
+          - paragraph [ref=e251]: © 2026 ETNYX. All rights reserved.
+          - generic [ref=e252]: •
+          - paragraph [ref=e253]: Designed & Developed by Briyanes
+  - button "Toggle theme" [ref=e345]:
+    - img [ref=e346]
+  - generic [ref=e258] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e259]:
+      - img [ref=e260]
+    - generic [ref=e352]:
+      - button "Open issues overlay" [ref=e353]:
+        - generic [ref=e354]:
+          - generic [ref=e355]: "0"
+          - generic [ref=e356]: "1"
+        - generic [ref=e357]: Issue
+      - button "Collapse issues badge" [ref=e358]:
+        - img [ref=e359]
+  - alert [ref=e361]

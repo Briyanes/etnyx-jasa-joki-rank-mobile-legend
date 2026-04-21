@@ -1,0 +1,426 @@
+- generic [active] [ref=e1]:
+  - generic:
+    - generic:
+      - link "Lewati ke konten utama" [ref=e2] [cursor=pointer]
+      - link "Bantuan aksesibilitas" [ref=e3] [cursor=pointer]:
+        - /url: https://support.google.com/websearch/answer/181196?hl=id
+      - link "Masukan aksesibilitas" [ref=e4] [cursor=pointer]
+  - generic [ref=e9]:
+    - search [ref=e10]:
+      - generic [ref=e12]:
+        - link "Ke Beranda Google" [ref=e14] [cursor=pointer]:
+          - /url: https://www.google.com/webhp?hl=id&sa=X&ved=0ahUKEwi1j7XtivyTAxXdnSYFHaLTFrQQPAgJ
+          - img [ref=e15]
+        - generic [ref=e22]:
+          - generic [ref=e23]:
+            - combobox "Cari" [ref=e26]: openclauw openclauw
+            - generic [ref=e27]:
+              - button "Hapus" [ref=e29] [cursor=pointer]:
+                - img [ref=e31]
+              - generic [ref=e34]:
+                - button "Telusuri dengan suara" [ref=e35] [cursor=pointer]:
+                  - img [ref=e36]
+                - button "Telusuri pakai gambar" [ref=e38] [cursor=pointer]:
+                  - img [ref=e39]
+          - button "Telusuri" [ref=e41] [cursor=pointer]:
+            - img [ref=e44]
+    - generic [ref=e46]:
+      - button "Setelan" [ref=e48] [cursor=pointer]:
+        - img [ref=e51]
+      - generic [ref=e54]:
+        - button "Aplikasi Google" [ref=e56] [cursor=pointer]:
+          - img [ref=e57]
+        - link "Login" [ref=e61] [cursor=pointer]:
+          - /url: https://accounts.google.com/ServiceLogin?hl=id&passive=true&continue=https://www.google.com/search%3Fq%3Dopenclauw%26sei%3DqO3lafzAGN-pqtsPoJLdmQo&ec=futura_srp_og_si_72236_p
+  - generic [ref=e63]:
+    - navigation [ref=e69]:
+      - generic [ref=e75]:
+        - list [ref=e76]:
+          - listitem [ref=e77]:
+            - link "Mode AI" [ref=e80] [cursor=pointer]:
+              - /url: /search?q=openclauw&sca_esv=5230b4c598b5ac93&udm=50&fbs=ADc_l-ZfIPzv45NHkpmEx1uvAy1YOCyuGSShVoj_GTJ0JKGnTwdBsd8ORv_SiQSe9cb02NvaNFHdfsJ68ABjckjtwUc1mW2SOHGG0gk5IkMLylXJTKUE-BBUVT52286EiI_kMQl2dsICAvQ2GFCx-OvvEf5AYMfBPw8uC-AL0bdn7Deeln716pG0_mVrt0EicfFlpBKvabJzhogcF1tXihjF1SccuigDSg&aep=1&ntc=1&sa=X&ved=2ahUKEwi1j7XtivyTAxXdnSYFHaLTFrQQ2J8OegQIGhAI
+              - generic [ref=e83]: Mode AI
+          - listitem [ref=e84]:
+            - link "Semua" [disabled] [ref=e85]:
+              - generic [ref=e87]: Semua
+          - listitem [ref=e88]:
+            - link "Gambar" [ref=e89] [cursor=pointer]:
+              - /url: /search?sca_esv=5230b4c598b5ac93&udm=2&fbs=ADc_l-ZfIPzv45NHkpmEx1uvAy1YOCyuGSShVoj_GTJ0JKGnTwdBsd8ORv_SiQSe9cb02NvaNFHdfsJ68ABjckjtwUc1mW2SOHGG0gk5IkMLylXJTKUE-BBUVT52286EiI_kMQl2dsICAvQ2GFCx-OvvEf5AYMfBPw8uC-AL0bdn7Deeln716pG0_mVrt0EicfFlpBKvabJzhogcF1tXihjF1SccuigDSg&q=openclauw&sa=X&ved=2ahUKEwi1j7XtivyTAxXdnSYFHaLTFrQQtKgLegQIHRAB
+              - generic [ref=e91]: Gambar
+          - listitem [ref=e92]:
+            - link "Video" [ref=e93] [cursor=pointer]:
+              - /url: /search?sca_esv=5230b4c598b5ac93&udm=7&fbs=ADc_l-ZfIPzv45NHkpmEx1uvAy1YOCyuGSShVoj_GTJ0JKGnTwdBsd8ORv_SiQSe9cb02NvaNFHdfsJ68ABjckjtwUc1mW2SOHGG0gk5IkMLylXJTKUE-BBUVT52286EiI_kMQl2dsICAvQ2GFCx-OvvEf5AYMfBPw8uC-AL0bdn7Deeln716pG0_mVrt0EicfFlpBKvabJzhogcF1tXihjF1SccuigDSg&q=openclauw&sa=X&ved=2ahUKEwi1j7XtivyTAxXdnSYFHaLTFrQQtKgLegQIHxAB
+              - generic [ref=e95]: Video
+          - listitem [ref=e96]:
+            - link "Berita" [ref=e97] [cursor=pointer]:
+              - /url: /search?sca_esv=5230b4c598b5ac93&q=openclauw&tbm=nws&source=lnms&fbs=ADc_l-ZfIPzv45NHkpmEx1uvAy1YOCyuGSShVoj_GTJ0JKGnTwdBsd8ORv_SiQSe9cb02NvaNFHdfsJ68ABjckjtwUc1mW2SOHGG0gk5IkMLylXJTKUE-BBUVT52286EiI_kMQl2dsICAvQ2GFCx-OvvEf5AYMfBPw8uC-AL0bdn7Deeln716pG0_mVrt0EicfFlpBKvabJzhogcF1tXihjF1SccuigDSg&sa=X&ved=2ahUKEwi1j7XtivyTAxXdnSYFHaLTFrQQ0pQJegQIHhAB
+              - generic [ref=e99]: Berita
+          - listitem [ref=e100]:
+            - link "Shopping" [ref=e101] [cursor=pointer]:
+              - /url: /search?sca_esv=5230b4c598b5ac93&udm=28&fbs=ADc_l-ZfIPzv45NHkpmEx1uvAy1YOCyuGSShVoj_GTJ0JKGnTwdBsd8ORv_SiQSe9cb02NvaNFHdfsJ68ABjckjtwUc1mW2SOHGG0gk5IkMLylXJTKUE-BBUVT52286EiI_kMQl2dsICAvQ2GFCx-OvvEf5AYMfBPw8uC-AL0bdn7Deeln716pG0_mVrt0EicfFlpBKvabJzhogcF1tXihjF1SccuigDSg&q=openclauw&ved=1t:220175&ictx=111
+              - generic [ref=e103]: Shopping
+          - listitem [ref=e104]:
+            - link "Video singkat" [ref=e105] [cursor=pointer]:
+              - /url: /search?sca_esv=5230b4c598b5ac93&udm=39&fbs=ADc_l-ZfIPzv45NHkpmEx1uvAy1YOCyuGSShVoj_GTJ0JKGnTwdBsd8ORv_SiQSe9cb02NvaNFHdfsJ68ABjckjtwUc1mW2SOHGG0gk5IkMLylXJTKUE-BBUVT52286EiI_kMQl2dsICAvQ2GFCx-OvvEf5AYMfBPw8uC-AL0bdn7Deeln716pG0_mVrt0EicfFlpBKvabJzhogcF1tXihjF1SccuigDSg&q=openclauw&sa=X&ved=2ahUKEwi1j7XtivyTAxXdnSYFHaLTFrQQs6gLegQIIBAB
+              - generic [ref=e107]: Video singkat
+          - listitem [ref=e108]:
+            - button "Filter lainnya" [ref=e109] [cursor=pointer]:
+              - generic "Filter lainnya" [ref=e110]:
+                - generic [ref=e111]:
+                  - generic [ref=e112]: Lainnya
+                  - img [ref=e114]
+        - button "Alat" [ref=e117] [cursor=pointer]:
+          - generic [ref=e119]:
+            - generic [ref=e120]: Alat
+            - img [ref=e122]
+    - heading "Hasil Telusur" [level=1] [ref=e125]
+    - main [ref=e131]:
+      - 'heading "Mungkin maksud Anda adalah: openflow" [level=2] [ref=e135]':
+        - text: "Mungkin maksud Anda adalah:"
+        - link "openflow" [ref=e136] [cursor=pointer]:
+          - /url: /search?sca_esv=5230b4c598b5ac93&q=openflow&spell=1&sa=X&ved=2ahUKEwi1j7XtivyTAxXdnSYFHaLTFrQQBSgAegQIDBAB
+          - generic [ref=e137]: openflow
+      - generic [ref=e141]:
+        - generic [ref=e144]:
+          - heading "Hasil Web dengan Sitelink" [level=2] [ref=e145]
+          - generic [ref=e146]:
+            - generic [ref=e150]:
+              - generic [ref=e152]:
+                - link "OpenClaw — Personal AI Assistant OpenClaw AI https://openclaw.ai" [ref=e154] [cursor=pointer]:
+                  - /url: https://openclaw.ai/
+                  - heading "OpenClaw — Personal AI Assistant" [level=3] [ref=e155]
+                  - generic [ref=e160]:
+                    - generic [ref=e162]: OpenClaw AI
+                    - generic [ref=e164]: https://openclaw.ai
+                - generic [ref=e165]:
+                  - generic [ref=e166]: ·
+                  - link "Terjemahkan halaman ini" [ref=e167] [cursor=pointer]:
+                    - /url: https://openclaw.ai/
+                - button "Tentang hasil ini" [ref=e168] [cursor=pointer]:
+                  - img [ref=e171]
+              - generic [ref=e174]: OpenClaw. The AI that actually does things. Clears your inbox, sends emails, manages your calendar, checks you in for flights. All from WhatsApp, Telegram, ...
+            - group "Rekomendasi yang dipersonalisasi berdasarkan histori Anda" [ref=e175]:
+              - rowgroup [ref=e176]:
+                - row "Introducing OpenClaw OpenClaw is an open agent platform that runs on your ..." [ref=e177]:
+                  - cell "Introducing OpenClaw OpenClaw is an open agent platform that runs on your ..." [ref=e178]:
+                    - generic [ref=e183]:
+                      - heading "Introducing OpenClaw" [level=3] [ref=e184]:
+                        - link "Introducing OpenClaw" [ref=e185] [cursor=pointer]:
+                          - /url: https://openclaw.ai/blog/introducing-openclaw
+                          - text: Introducing OpenClaw
+                      - generic [ref=e188]: OpenClaw is an open agent platform that runs on your ...
+                - row "Install The fastest way to install. It detects your OS, installs Node if needed ..." [ref=e189]:
+                  - cell "Install The fastest way to install. It detects your OS, installs Node if needed ..." [ref=e190]:
+                    - generic [ref=e195]:
+                      - heading "Install" [level=3] [ref=e196]:
+                        - link "Install" [ref=e197] [cursor=pointer]:
+                          - /url: https://docs.openclaw.ai/install
+                          - text: Install
+                      - generic [ref=e200]: The fastest way to install. It detects your OS, installs Node if needed ...
+                - row "OpenClaw Docs OpenClaw is a self-hosted gateway that connects your ..." [ref=e201]:
+                  - cell "OpenClaw Docs OpenClaw is a self-hosted gateway that connects your ..." [ref=e202]:
+                    - generic [ref=e207]:
+                      - heading "OpenClaw Docs" [level=3] [ref=e208]:
+                        - link "OpenClaw Docs" [ref=e209] [cursor=pointer]:
+                          - /url: https://docs.openclaw.ai/
+                          - text: OpenClaw Docs
+                      - generic [ref=e212]: OpenClaw is a self-hosted gateway that connects your ...
+                - row "Showcase — What People Are ... A full OpenClaw setup clearing 10,000 emails, reviewing decks ..." [ref=e213]:
+                  - cell "Showcase — What People Are ... A full OpenClaw setup clearing 10,000 emails, reviewing decks ..." [ref=e214]:
+                    - generic [ref=e219]:
+                      - heading "Showcase — What People Are ..." [level=3] [ref=e220]:
+                        - link "Showcase — What People Are ..." [ref=e221] [cursor=pointer]:
+                          - /url: https://openclaw.ai/showcase
+                          - text: Showcase — What People Are ...
+                      - generic [ref=e224]: A full OpenClaw setup clearing 10,000 emails, reviewing decks ...
+                - row "Dashboard Dashboard (Control UI). The Gateway dashboard is the ..." [ref=e225]:
+                  - cell "Dashboard Dashboard (Control UI). The Gateway dashboard is the ..." [ref=e226]:
+                    - generic [ref=e231]:
+                      - heading "Dashboard" [level=3] [ref=e232]:
+                        - link "Dashboard" [ref=e233] [cursor=pointer]:
+                          - /url: https://docs.openclaw.ai/web/dashboard
+                          - text: Dashboard
+                      - generic [ref=e236]: Dashboard (Control UI). The Gateway dashboard is the ...
+                - row "Telusuran lainnya dari openclaw.ai »" [ref=e238]:
+                  - cell "Telusuran lainnya dari openclaw.ai »" [ref=e239]:
+                    - link "Telusuran lainnya dari openclaw.ai »" [ref=e241] [cursor=pointer]:
+                      - /url: /search?q=openclauw+site:openclaw.ai&sca_esv=5230b4c598b5ac93&sa=X&ved=2ahUKEwi1j7XtivyTAxXdnSYFHaLTFrQQrAN6BAgOEAE
+        - generic [ref=e242]:
+          - generic [ref=e246]:
+            - generic [ref=e249]:
+              - link "OpenClaw — Personal AI Assistant GitHub https://github.com › openclaw" [ref=e251] [cursor=pointer]:
+                - /url: https://github.com/openclaw/openclaw
+                - heading "OpenClaw — Personal AI Assistant" [level=3] [ref=e252]
+                - generic [ref=e257]:
+                  - generic [ref=e259]: GitHub
+                  - generic [ref=e261]: https://github.com › openclaw
+              - generic [ref=e262]:
+                - generic [ref=e263]: ·
+                - link "Terjemahkan halaman ini" [ref=e264] [cursor=pointer]:
+                  - /url: https://github.com/openclaw/openclaw
+              - button "Tentang hasil ini" [ref=e265] [cursor=pointer]:
+                - img [ref=e268]
+            - generic [ref=e271]:
+              - generic [ref=e272]: 10 jam yang lalu —
+              - generic [ref=e273]:
+                - text: OpenClaw is a
+                - emphasis [ref=e274]: personal AI assistant you run on your own devices
+                - text: . It answers you on the channels you already use. It can speak and listen on ...
+          - generic [ref=e278]:
+            - generic [ref=e281]:
+              - 'link "OpenClaw: AnyClaw Asisten AI - Aplikasi di Google Play Google Play https://play.google.com › store › apps › details" [ref=e283] [cursor=pointer]':
+                - /url: https://play.google.com/store/apps/details?id=gptos.intelligence.assistant&hl=id
+                - 'heading "OpenClaw: AnyClaw Asisten AI - Aplikasi di Google Play" [level=3] [ref=e284]'
+                - generic [ref=e289]:
+                  - generic [ref=e291]: Google Play
+                  - generic [ref=e293]: https://play.google.com › store › apps › details
+              - button "Tentang hasil ini" [ref=e294] [cursor=pointer]:
+                - img [ref=e297]
+            - generic [ref=e301]:
+              - text: OpenClaw —
+              - emphasis [ref=e302]: asisten AI pribadi dengan routing multi-agen, skill, Canvas, dan dashboard lengkap
+              - text: . Ngobrol dengan AI, buat tugas terjadwal, kelola sesi, dan ...
+          - generic [ref=e306]:
+            - generic [ref=e309]:
+              - link "OpenClaw - Wikipedia bahasa Indonesia, ensiklopedia ... Wikipedia https://id.wikipedia.org › wiki › OpenClaw" [ref=e311] [cursor=pointer]:
+                - /url: https://id.wikipedia.org/wiki/OpenClaw
+                - heading "OpenClaw - Wikipedia bahasa Indonesia, ensiklopedia ..." [level=3] [ref=e312]
+                - generic [ref=e317]:
+                  - generic [ref=e319]: Wikipedia
+                  - generic [ref=e321]: https://id.wikipedia.org › wiki › OpenClaw
+              - button "Tentang hasil ini" [ref=e322] [cursor=pointer]:
+                - img [ref=e325]
+            - generic [ref=e329]:
+              - text: OpenClaw (dulunya Clawdbot, Moltbot, dan Molty) adalah sebuah
+              - emphasis [ref=e330]: agen kecerdasan buatan otonom bebas dan sumber terbuka
+              - text: yang dapat menjalankan tugas lewat ...
+          - generic [ref=e334]:
+            - generic [ref=e337]:
+              - link "1-click OpenClaw, AI assistant nonstop 24/7 Hostinger https://www.hostinger.com › openclaw" [ref=e339] [cursor=pointer]:
+                - /url: https://www.hostinger.com/id/openclaw
+                - heading "1-click OpenClaw, AI assistant nonstop 24/7" [level=3] [ref=e340]
+                - generic [ref=e345]:
+                  - generic [ref=e347]: Hostinger
+                  - generic [ref=e349]: https://www.hostinger.com › openclaw
+              - button "Tentang hasil ini" [ref=e350] [cursor=pointer]:
+                - img [ref=e353]
+            - generic [ref=e357]:
+              - text: OpenClaw adalah
+              - emphasis [ref=e358]: AI assistant pribadi yang bekerja nonstop 24/7
+              - text: ", bahkan saat laptop dimatikan. Hubungkan OpenClaw ke aplikasi chat favorit, seperti WhatsApp, ..."
+          - generic [ref=e362]:
+            - generic [ref=e364]:
+              - heading "Video" [level=2] [ref=e365]
+              - button "Tentang hasil ini" [ref=e366] [cursor=pointer]:
+                - img [ref=e369]
+            - generic [ref=e372]:
+              - generic [ref=e378]:
+                - generic [ref=e379]:
+                  - generic [ref=e380]:
+                    - link "Membuat AI Assistant dengan OpenClaw YouTube Programmer Zaman Now 23 Feb 2026" [ref=e382] [cursor=pointer]:
+                      - /url: https://www.youtube.com/watch?v=efkl2pfbrJE
+                      - heading "Membuat AI Assistant dengan OpenClaw YouTube Programmer Zaman Now 23 Feb 2026" [level=3] [ref=e383]:
+                        - generic [ref=e386]: Membuat AI Assistant dengan OpenClaw
+                        - generic [ref=e388]:
+                          - generic [ref=e389]:
+                            - text: YouTube
+                            - generic [ref=e390]: · Programmer Zaman Now
+                          - generic [ref=e391]: 23 Feb 2026
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - text: YouTube
+                              - generic: · Programmer Zaman Now
+                        - button "Tentang hasil ini" [ref=e392] [cursor=pointer]:
+                          - img [ref=e395]
+                  - button "Membuat AI Assistant dengan OpenClaw oleh Programmer Zaman Now di YouTube. Putar di Google. 31:06" [ref=e397] [cursor=pointer]:
+                    - generic [ref=e398]:
+                      - img [ref=e404]
+                      - generic [ref=e407]:
+                        - generic [ref=e408]: 31:06
+                        - img [ref=e411]
+                - button "7 momen penting di video ini" [ref=e417] [cursor=pointer]:
+                  - generic [ref=e426]:
+                    - generic [ref=e429]: 7 momen penting di video ini
+                    - img [ref=e431]
+              - generic [ref=e438]:
+                - generic [ref=e439]:
+                  - link "Apa Itu OpenClaw? Dan Bagaimana Cara Kerjanya ... YouTube Metics Media | Indonesia 10 Feb 2026" [ref=e441] [cursor=pointer]:
+                    - /url: https://www.youtube.com/watch?v=9XqFgGaS0sw
+                    - heading "Apa Itu OpenClaw? Dan Bagaimana Cara Kerjanya ... YouTube Metics Media | Indonesia 10 Feb 2026" [level=3] [ref=e442]:
+                      - generic [ref=e445]: Apa Itu OpenClaw? Dan Bagaimana Cara Kerjanya ...
+                      - generic [ref=e447]:
+                        - generic [ref=e448]:
+                          - text: YouTube
+                          - generic [ref=e449]: · Metics Media | Indonesia
+                        - generic [ref=e450]: 10 Feb 2026
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic:
+                            - text: YouTube
+                            - generic: · Metics Media | Indonesia
+                      - button "Tentang hasil ini" [ref=e451] [cursor=pointer]:
+                        - img [ref=e454]
+                - button "Apa Itu OpenClaw? Dan Bagaimana Cara Kerjanya ... oleh Metics Media | Indonesia di YouTube. Putar di Google. 9:06" [ref=e456] [cursor=pointer]:
+                  - generic [ref=e457]:
+                    - img [ref=e460]
+                    - generic [ref=e463]:
+                      - generic [ref=e464]: 9:06
+                      - img [ref=e467]
+              - generic [ref=e474]:
+                - generic [ref=e475]:
+                  - link "Cara Setup Openclaw AI Agent Di PC/Laptop/VPS YouTube Dea Afrizal 1 bulan lalu" [ref=e477] [cursor=pointer]:
+                    - /url: https://www.youtube.com/watch?v=BHDpo_49yhE
+                    - heading "Cara Setup Openclaw AI Agent Di PC/Laptop/VPS YouTube Dea Afrizal 1 bulan lalu" [level=3] [ref=e478]:
+                      - generic [ref=e481]: Cara Setup Openclaw AI Agent Di PC/Laptop/VPS
+                      - generic [ref=e483]:
+                        - generic [ref=e484]:
+                          - text: YouTube
+                          - generic [ref=e485]: · Dea Afrizal
+                        - generic [ref=e486]: 1 bulan lalu
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - generic:
+                            - text: YouTube
+                            - generic: · Dea Afrizal
+                      - button "Tentang hasil ini" [ref=e487] [cursor=pointer]:
+                        - img [ref=e490]
+                - button "Cara Setup Openclaw AI Agent Di PC/Laptop/VPS oleh Dea Afrizal di YouTube. Putar di Google. 20:56" [ref=e492] [cursor=pointer]:
+                  - generic [ref=e493]:
+                    - img [ref=e496]
+                    - generic [ref=e499]:
+                      - generic [ref=e500]: 20:56
+                      - img [ref=e503]
+            - link "Lihat semua video" [ref=e507] [cursor=pointer]:
+              - /url: /search?sca_esv=5230b4c598b5ac93&udm=7&q=openclauw&sa=X&ved=2ahUKEwi1j7XtivyTAxXdnSYFHaLTFrQQ8ccDKAJ6BAg9EAQ
+              - separator [ref=e508]
+              - generic [ref=e509]:
+                - generic [ref=e510]: Lihat semua
+                - img [ref=e512]
+          - generic [ref=e517]:
+            - generic [ref=e520]:
+              - link "OpenClaw GitHub https://github.com › openclaw" [ref=e522] [cursor=pointer]:
+                - /url: https://github.com/openclaw
+                - heading "OpenClaw" [level=3] [ref=e523]
+                - generic [ref=e528]:
+                  - generic [ref=e530]: GitHub
+                  - generic [ref=e532]: https://github.com › openclaw
+              - generic [ref=e533]:
+                - generic [ref=e534]: ·
+                - link "Terjemahkan halaman ini" [ref=e535] [cursor=pointer]:
+                  - /url: https://github.com/openclaw
+              - button "Tentang hasil ini" [ref=e536] [cursor=pointer]:
+                - img [ref=e539]
+            - generic [ref=e543]:
+              - text: Your personal, open source AI assistant.
+              - emphasis [ref=e544]: openclaw
+              - text: has 24 repositories available. Follow their code on GitHub.
+      - generic [ref=e546]:
+        - generic [ref=e551]:
+          - heading "Orang lain juga menelusuri" [level=2] [ref=e553]
+          - generic [ref=e555]:
+            - generic [ref=e556]:
+              - link "OpenClaw" [ref=e560] [cursor=pointer]:
+                - /url: /search?sca_esv=5230b4c598b5ac93&q=OpenClaw&sa=X&ved=2ahUKEwi1j7XtivyTAxXdnSYFHaLTFrQQ1QJ6BAgtEAE
+                - generic [ref=e561]:
+                  - generic [ref=e566]: OpenClaw
+                  - img [ref=e570]
+              - link "OpenClaw WhatsApp" [ref=e575] [cursor=pointer]:
+                - /url: /search?sca_esv=5230b4c598b5ac93&q=OpenClaw+WhatsApp&sa=X&ved=2ahUKEwi1j7XtivyTAxXdnSYFHaLTFrQQ1QJ6BAgwEAE
+                - generic [ref=e576]:
+                  - generic [ref=e581]: OpenClaw WhatsApp
+                  - img [ref=e585]
+              - link "Clawbot" [ref=e590] [cursor=pointer]:
+                - /url: /search?sca_esv=5230b4c598b5ac93&q=Clawbot&sa=X&ved=2ahUKEwi1j7XtivyTAxXdnSYFHaLTFrQQ1QJ6BAg2EAE
+                - generic [ref=e591]:
+                  - generic [ref=e596]: Clawbot
+                  - img [ref=e600]
+              - link "Moltbook" [ref=e605] [cursor=pointer]:
+                - /url: /search?sca_esv=5230b4c598b5ac93&q=Moltbook&sa=X&ved=2ahUKEwi1j7XtivyTAxXdnSYFHaLTFrQQ1QJ6BAgxEAE
+                - generic [ref=e606]:
+                  - generic [ref=e611]: Moltbook
+                  - img [ref=e615]
+            - generic [ref=e617]:
+              - link "OpenClaw free" [ref=e621] [cursor=pointer]:
+                - /url: /search?sca_esv=5230b4c598b5ac93&q=OpenClaw+free&sa=X&ved=2ahUKEwi1j7XtivyTAxXdnSYFHaLTFrQQ1QJ6BAgzEAE
+                - generic [ref=e622]:
+                  - generic [ref=e627]: OpenClaw free
+                  - img [ref=e631]
+              - link "OpenClaw hub" [ref=e636] [cursor=pointer]:
+                - /url: /search?sca_esv=5230b4c598b5ac93&q=OpenClaw+hub&sa=X&ved=2ahUKEwi1j7XtivyTAxXdnSYFHaLTFrQQ1QJ6BAgvEAE
+                - generic [ref=e637]:
+                  - generic [ref=e642]: OpenClaw hub
+                  - img [ref=e646]
+              - link "Openclaw doc" [ref=e651] [cursor=pointer]:
+                - /url: /search?sca_esv=5230b4c598b5ac93&q=Openclaw+doc&sa=X&ved=2ahUKEwi1j7XtivyTAxXdnSYFHaLTFrQQ1QJ6BAguEAE
+                - generic [ref=e652]:
+                  - generic [ref=e657]: Openclaw doc
+                  - img [ref=e661]
+              - link "OpenClaw Antigravity" [ref=e666] [cursor=pointer]:
+                - /url: /search?sca_esv=5230b4c598b5ac93&q=OpenClaw+Antigravity&sa=X&ved=2ahUKEwi1j7XtivyTAxXdnSYFHaLTFrQQ1QJ6BAgsEAE
+                - generic [ref=e667]:
+                  - generic [ref=e672]: OpenClaw Antigravity
+                  - img [ref=e676]
+        - navigation [ref=e678]:
+          - heading "Navigasi Halaman" [level=1] [ref=e679]
+          - text: "1"
+          - link "Page 2" [ref=e682] [cursor=pointer]:
+            - /url: /search?q=openclauw&sca_esv=5230b4c598b5ac93&ei=qe3lafWWFd27mtkPoqfboAs&start=10&sa=N&sstk=Af77f_dDQWIGk9Uyczrq2Xnk9H4c0OJ46UnW158MA8k-mU_np9EukFPpzBxZrZv3VYyt_CC5N5DxeGCBq8J1GGdjpf-1ppUVUlxEWQ&ved=2ahUKEwi1j7XtivyTAxXdnSYFHaLTFrQQ8tMDegQIKhAE
+            - text: "2"
+          - link "Page 3" [ref=e684] [cursor=pointer]:
+            - /url: /search?q=openclauw&sca_esv=5230b4c598b5ac93&ei=qe3lafWWFd27mtkPoqfboAs&start=20&sa=N&sstk=Af77f_dDQWIGk9Uyczrq2Xnk9H4c0OJ46UnW158MA8k-mU_np9EukFPpzBxZrZv3VYyt_CC5N5DxeGCBq8J1GGdjpf-1ppUVUlxEWQ&ved=2ahUKEwi1j7XtivyTAxXdnSYFHaLTFrQQ8tMDegQIKhAG
+            - text: "3"
+          - link "Page 4" [ref=e686] [cursor=pointer]:
+            - /url: /search?q=openclauw&sca_esv=5230b4c598b5ac93&ei=qe3lafWWFd27mtkPoqfboAs&start=30&sa=N&sstk=Af77f_dDQWIGk9Uyczrq2Xnk9H4c0OJ46UnW158MA8k-mU_np9EukFPpzBxZrZv3VYyt_CC5N5DxeGCBq8J1GGdjpf-1ppUVUlxEWQ&ved=2ahUKEwi1j7XtivyTAxXdnSYFHaLTFrQQ8tMDegQIKhAI
+            - text: "4"
+          - link "Page 5" [ref=e688] [cursor=pointer]:
+            - /url: /search?q=openclauw&sca_esv=5230b4c598b5ac93&ei=qe3lafWWFd27mtkPoqfboAs&start=40&sa=N&sstk=Af77f_dDQWIGk9Uyczrq2Xnk9H4c0OJ46UnW158MA8k-mU_np9EukFPpzBxZrZv3VYyt_CC5N5DxeGCBq8J1GGdjpf-1ppUVUlxEWQ&ved=2ahUKEwi1j7XtivyTAxXdnSYFHaLTFrQQ8tMDegQIKhAK
+            - text: "5"
+          - link "Page 6" [ref=e690] [cursor=pointer]:
+            - /url: /search?q=openclauw&sca_esv=5230b4c598b5ac93&ei=qe3lafWWFd27mtkPoqfboAs&start=50&sa=N&sstk=Af77f_dDQWIGk9Uyczrq2Xnk9H4c0OJ46UnW158MA8k-mU_np9EukFPpzBxZrZv3VYyt_CC5N5DxeGCBq8J1GGdjpf-1ppUVUlxEWQ&ved=2ahUKEwi1j7XtivyTAxXdnSYFHaLTFrQQ8tMDegQIKhAM
+            - text: "6"
+          - link "Page 7" [ref=e692] [cursor=pointer]:
+            - /url: /search?q=openclauw&sca_esv=5230b4c598b5ac93&ei=qe3lafWWFd27mtkPoqfboAs&start=60&sa=N&sstk=Af77f_dDQWIGk9Uyczrq2Xnk9H4c0OJ46UnW158MA8k-mU_np9EukFPpzBxZrZv3VYyt_CC5N5DxeGCBq8J1GGdjpf-1ppUVUlxEWQ&ved=2ahUKEwi1j7XtivyTAxXdnSYFHaLTFrQQ8tMDegQIKhAO
+            - text: "7"
+          - link "Page 8" [ref=e694] [cursor=pointer]:
+            - /url: /search?q=openclauw&sca_esv=5230b4c598b5ac93&ei=qe3lafWWFd27mtkPoqfboAs&start=70&sa=N&sstk=Af77f_dDQWIGk9Uyczrq2Xnk9H4c0OJ46UnW158MA8k-mU_np9EukFPpzBxZrZv3VYyt_CC5N5DxeGCBq8J1GGdjpf-1ppUVUlxEWQ&ved=2ahUKEwi1j7XtivyTAxXdnSYFHaLTFrQQ8tMDegQIKhAQ
+            - text: "8"
+          - link "Page 9" [ref=e696] [cursor=pointer]:
+            - /url: /search?q=openclauw&sca_esv=5230b4c598b5ac93&ei=qe3lafWWFd27mtkPoqfboAs&start=80&sa=N&sstk=Af77f_dDQWIGk9Uyczrq2Xnk9H4c0OJ46UnW158MA8k-mU_np9EukFPpzBxZrZv3VYyt_CC5N5DxeGCBq8J1GGdjpf-1ppUVUlxEWQ&ved=2ahUKEwi1j7XtivyTAxXdnSYFHaLTFrQQ8tMDegQIKhAS
+            - text: "9"
+          - link "Page 10" [ref=e698] [cursor=pointer]:
+            - /url: /search?q=openclauw&sca_esv=5230b4c598b5ac93&ei=qe3lafWWFd27mtkPoqfboAs&start=90&sa=N&sstk=Af77f_dDQWIGk9Uyczrq2Xnk9H4c0OJ46UnW158MA8k-mU_np9EukFPpzBxZrZv3VYyt_CC5N5DxeGCBq8J1GGdjpf-1ppUVUlxEWQ&ved=2ahUKEwi1j7XtivyTAxXdnSYFHaLTFrQQ8tMDegQIKhAU
+            - text: "10"
+          - heading "Berikutnya" [level=2] [ref=e700]:
+            - link "Berikutnya" [ref=e701] [cursor=pointer]:
+              - /url: /search?q=openclauw&sca_esv=5230b4c598b5ac93&ei=qe3lafWWFd27mtkPoqfboAs&start=10&sa=N&sstk=Af77f_dDQWIGk9Uyczrq2Xnk9H4c0OJ46UnW158MA8k-mU_np9EukFPpzBxZrZv3VYyt_CC5N5DxeGCBq8J1GGdjpf-1ppUVUlxEWQ&ved=2ahUKEwi1j7XtivyTAxXdnSYFHaLTFrQQ8NMDegQIKhAW
+              - generic [ref=e703]: Berikutnya
+      - navigation
+    - contentinfo [ref=e704]:
+      - heading "Link Footer" [level=1] [ref=e705]
+      - generic [ref=e709]:
+        - generic [ref=e711]:
+          - text: Indonesia
+          - generic [ref=e713]:
+            - button "Depok, Daerah Istimewa Yogyakarta - Dari alamat IP Anda" [ref=e715] [cursor=pointer]:
+              - generic [ref=e716]: Depok, Daerah Istimewa Yogyakarta
+              - generic [ref=e718]:
+                - text: "-"
+                - generic [ref=e719]: Dari alamat IP Anda
+            - text: "-"
+            - button "Perbarui lokasi" [ref=e721] [cursor=pointer]: Perbarui lokasi
+        - generic [ref=e724]:
+          - link "Bantuan" [ref=e725] [cursor=pointer]:
+            - /url: https://support.google.com/websearch/?p=ws_results_help&hl=id&fg=1
+          - link "Kirim masukan" [ref=e726] [cursor=pointer]:
+            - /url: "#"
+          - link "Privasi" [ref=e727] [cursor=pointer]:
+            - /url: https://policies.google.com/privacy?hl=id&fg=1
+          - link "Persyaratan" [ref=e728] [cursor=pointer]:
+            - /url: https://policies.google.com/terms?hl=id&fg=1

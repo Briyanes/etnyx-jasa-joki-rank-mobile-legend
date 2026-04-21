@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ETNYX Reels — Post 4: Pain Point POV Carry (15s)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#000;display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:100vh;gap:16px;padding:16px 0;font-family:'Inter',sans-serif;overflow:auto;}
+  .stage{position:relative;width:calc(390px * var(--phone-scale,1));height:calc(844px * var(--phone-scale,1));flex:0 0 auto;}
+  .phone{width:390px;height:844px;background:#0F1419;position:absolute;top:0;left:0;overflow:hidden;border-radius:40px;box-shadow:0 0 60px rgba(45,212,191,0.15);transform:scale(var(--phone-scale,1));transform-origin:top left;}
+  .scene{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:40px 28px;opacity:0;transition:opacity 0.3s;z-index:1;}
+  .scene.active{opacity:1;z-index:10;}
+
+  /* S1: Hook POV */
+  .s1{background:#0F1419;}
+  .s1 .pov-label{font-size:12px;font-weight:800;color:#EF4444;text-transform:uppercase;letter-spacing:3px;margin-bottom:12px;opacity:0;transition:opacity 0.3s;}
+  .s1 .pov-label.show{opacity:1;}
+  .s1 .pov-text{font-size:36px;font-weight:900;color:#fff;text-align:center;line-height:1.2;opacity:0;transform:scale(0.85);transition:all 0.5s cubic-bezier(0.34,1.56,0.64,1);}
+  .s1 .pov-text.show{opacity:1;transform:scale(1);}
+  .s1 .pov-text .yellow{color:#F59E0B;}
+  .s1 .pov-sub{font-size:14px;color:#7FA8A3;font-weight:600;margin-top:10px;opacity:0;transition:opacity 0.3s;}
+  .s1 .pov-sub.show{opacity:1;}
+
+  /* S2: Tim Kamu (frustration) */
+  .s2{background:radial-gradient(ellipse at center,rgba(239,68,68,0.08) 0%,#0F1419 70%);gap:12px;}
+  .s2 .team-label{font-size:14px;font-weight:800;color:#EF4444;opacity:0;transition:opacity 0.3s;}
+  .s2 .team-label.show{opacity:1;}
+  .scoreboard{width:100%;background:#151B22;border:1px solid #1E2A35;border-radius:14px;overflow:hidden;opacity:0;transform:translateY(15px);transition:all 0.4s ease;}
+  .scoreboard.show{opacity:1;transform:translateY(0);}
+  .sb-header{background:#0D1117;padding:10px 14px;display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:#EF4444;}
+  .sb-header .defeat{font-size:13px;}
+  .sb-row{display:flex;align-items:center;padding:8px 14px;gap:10px;border-bottom:1px solid #1E2A35;}
+  .sb-row.you{background:rgba(245,158,11,0.06);}
+  .sb-hero{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+  .sb-name{font-size:11px;font-weight:700;color:#E6F1EF;flex:1;}
+  .sb-name .tag{font-size:8px;color:#F59E0B;font-weight:800;margin-left:4px;}
+  .sb-kda{font-size:12px;font-weight:800;text-align:right;min-width:70px;}
+  .sb-kda.good{color:#22C55E;}
+  .sb-kda.bad{color:#EF4444;}
+  .sb-kda.afk{color:#4A5568;font-style:italic;}
+  .star-loss{font-size:28px;font-weight:900;color:#EF4444;text-align:center;opacity:0;transform:scale(0.8);transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1);}
+  .star-loss.show{opacity:1;transform:scale(1);}
+
+  /* S3: Meanwhile ETNYX */
+  .s3{background:radial-gradient(ellipse at center,rgba(45,212,191,0.08) 0%,#0F1419 70%);gap:14px;}
+  .s3 .meanwhile{font-size:13px;font-weight:800;color:#7FA8A3;text-transform:uppercase;letter-spacing:2px;opacity:0;transition:opacity 0.3s;}
+  .s3 .meanwhile.show{opacity:1;}
+  .win-card{width:100%;background:#151B22;border:1px solid rgba(45,212,191,0.2);border-radius:14px;padding:20px;text-align:center;opacity:0;transform:scale(0.9);transition:all 0.5s cubic-bezier(0.34,1.56,0.64,1);}
+  .win-card.show{opacity:1;transform:scale(1);}
+  .win-card .rank-badge{font-size:48px;margin-bottom:8px;}
+  .win-card .rank-text{font-size:22px;font-weight:900;background:linear-gradient(135deg,#2DD4BF,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .win-card .rank-sub{font-size:12px;color:#7FA8A3;margin-top:4px;}
+  .streak-bar{width:100%;display:flex;gap:6px;justify-content:center;opacity:0;transition:opacity 0.3s;}
+  .streak-bar.show{opacity:1;}
+  .streak-item{background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.25);border-radius:8px;padding:4px 10px;font-size:10px;font-weight:800;color:#22C55E;}
+  .contrast-text{font-size:24px;font-weight:900;color:#fff;text-align:center;opacity:0;transition:opacity 0.4s;}
+  .contrast-text.show{opacity:1;}
+  .contrast-text .teal{color:#2DD4BF;}
+
+  /* S4: CTA */
+  .s4{background:radial-gradient(ellipse at 50% 50%,rgba(45,212,191,0.1) 0%,#0F1419 60%);gap:14px;}
+  .s4 .end-logo{font-size:48px;font-weight:900;letter-spacing:6px;background:linear-gradient(135deg,#2DD4BF,#A78BFA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;opacity:0;transform:scale(0.7);transition:all 0.6s cubic-bezier(0.34,1.56,0.64,1);}
+  .s4 .end-logo.show{opacity:1;transform:scale(1);}
+  .s4 .end-text{font-size:16px;font-weight:700;color:#E6F1EF;text-align:center;opacity:0;transition:opacity 0.3s ease 0.2s;}
+  .s4 .end-text.show{opacity:1;}
+  .s4 .end-cta{background:linear-gradient(135deg,#2DD4BF,#7FA8A3);color:#0F1419;font-weight:800;font-size:14px;padding:12px 32px;border-radius:12px;opacity:0;transition:all 0.3s ease 0.4s;}
+  .s4 .end-cta.show{opacity:1;animation:ctaP 1.2s ease infinite 0.6s;}
+  @keyframes ctaP{0%,100%{box-shadow:0 0 0 0 rgba(45,212,191,0.4);}50%{box-shadow:0 0 0 10px rgba(45,212,191,0);}}
+
+  /* Shake */
+  .shake{animation:shk 0.4s ease;}
+  @keyframes shk{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}50%{transform:translateX(6px);}75%{transform:translateX(-4px);}}
+
+  /* Audio bars */
+  .audio-bars{position:absolute;top:16px;right:16px;z-index:200;display:flex;gap:2px;align-items:flex-end;height:14px;opacity:0;transition:opacity 0.3s;}
+  .audio-bars.show{opacity:1;}
+  .audio-bars .ab{width:3px;background:#2DD4BF;border-radius:2px;animation:aB 0.7s ease-in-out infinite alternate;}
+  .audio-bars .ab:nth-child(1){height:5px;animation-delay:0s;}
+  .audio-bars .ab:nth-child(2){height:10px;animation-delay:0.12s;}
+  .audio-bars .ab:nth-child(3){height:7px;animation-delay:0.25s;}
+  .audio-bars .ab:nth-child(4){height:12px;animation-delay:0.08s;}
+  @keyframes aB{0%{transform:scaleY(0.4);}100%{transform:scaleY(1);}}
+
+  .timer-bar{position:absolute;bottom:0;left:0;height:4px;background:linear-gradient(90deg,#EF4444,#F59E0B);width:0%;z-index:100;}
+  .controls{display:flex;gap:10px;z-index:100;align-items:center;justify-content:center;}
+  .ctrl-btn{background:#151B22;color:#2DD4BF;border:1px solid #2DD4BF;padding:8px 16px;border-radius:8px;font-family:'Inter',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s;}
+  .ctrl-btn:hover{background:#2DD4BF;color:#0F1419;}
+  .ctrl-btn.recording{background:#EF4444;border-color:#EF4444;color:#fff;}
+  .ctrl-btn.muted{opacity:0.5;}
+  .timer-display{color:#7FA8A3;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;}
+  .hide-controls .controls{display:none;}
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+<div class="phone" id="phone">
+  <div class="audio-bars" id="audioBars"><div class="ab"></div><div class="ab"></div><div class="ab"></div><div class="ab"></div></div>
+
+  <!-- S1: Hook -->
+  <div class="scene s1 active" id="scene1">
+    <div class="pov-label" id="povLabel">POV</div>
+    <div class="pov-text" id="povText">Carry <span class="yellow">15 kill</span><br>di ranked</div>
+    <div class="pov-sub" id="povSub">...tapi tetep kalah &#x1F480;</div>
+  </div>
+
+  <!-- S2: Tim Kamu -->
+  <div class="scene s2" id="scene2">
+    <div class="team-label" id="teamLabel">Tim kamu:</div>
+    <div class="scoreboard" id="scoreboard">
+      <div class="sb-header"><span class="defeat">DEFEAT</span><span>14:23</span></div>
+      <div class="sb-row you">
+        <div class="sb-hero" style="background:rgba(245,158,11,0.15);">&#x2694;&#xFE0F;</div>
+        <div class="sb-name">Kamu <span class="tag">MVP</span></div>
+        <div class="sb-kda good">15 / 2 / 8</div>
+      </div>
+      <div class="sb-row">
+        <div class="sb-hero" style="background:rgba(239,68,68,0.1);">&#x1F6E1;&#xFE0F;</div>
+        <div class="sb-name">Player2</div>
+        <div class="sb-kda bad">0 / 8 / 1</div>
+      </div>
+      <div class="sb-row">
+        <div class="sb-hero" style="background:rgba(239,68,68,0.1);">&#x1F9D9;</div>
+        <div class="sb-name">Player3</div>
+        <div class="sb-kda bad">2 / 9 / 0</div>
+      </div>
+      <div class="sb-row">
+        <div class="sb-hero" style="background:rgba(239,68,68,0.1);">&#x1F3F9;</div>
+        <div class="sb-name">Player4</div>
+        <div class="sb-kda bad">1 / 7 / 3</div>
+      </div>
+      <div class="sb-row">
+        <div class="sb-hero" style="background:rgba(75,85,99,0.15);">&#x1F4A4;</div>
+        <div class="sb-name" style="color:#4A5568;">Player5</div>
+        <div class="sb-kda afk">AFK</div>
+      </div>
+    </div>
+    <div class="star-loss" id="starLoss">&#x2B50; -1 &nbsp; Lagi. Dan lagi.</div>
+  </div>
+
+  <!-- S3: Meanwhile ETNYX -->
+  <div class="scene s3" id="scene3">
+    <div class="meanwhile" id="meanwhile">Meanwhile yang pake ETNYX:</div>
+    <div class="win-card" id="winCard">
+      <div class="rank-badge">&#x1F451;</div>
+      <div class="rank-text">MYTHIC</div>
+      <div class="rank-sub">Reached in 4 days</div>
+    </div>
+    <div class="streak-bar" id="streakBar">
+      <div class="streak-item">&#x2705; W</div>
+      <div class="streak-item">&#x2705; W</div>
+      <div class="streak-item">&#x2705; W</div>
+      <div class="streak-item">&#x2705; W</div>
+      <div class="streak-item">&#x2705; W</div>
+      <div class="streak-item">&#x2705; W</div>
+    </div>
+    <div class="contrast-text" id="contrastText">Beda cerita. <span class="teal">&#x1F60E;</span></div>
+  </div>
+
+  <!-- S4: CTA -->
+  <div class="scene s4" id="scene4">
+    <div class="end-logo" id="endLogo">ETNYX</div>
+    <div class="end-text" id="endText">etnyx.com &#x2014; link di bio &#x1F447;</div>
+    <div class="end-cta" id="endCta">&#x1F449; ORDER SEKARANG</div>
+  </div>
+
+  <div class="timer-bar" id="timerBar"></div>
+</div>
+</div>
+
+<div class="controls" id="controls">
+  <button class="ctrl-btn" id="playBtn" onclick="startAnimation()">&#x25B6; Play</button>
+  <button class="ctrl-btn" id="recBtn" onclick="toggleRecMode()">&#x1F534; Rec</button>
+  <button class="ctrl-btn" id="muteBtn" onclick="toggleMute()">&#x1F50A;</button>
+  <div class="timer-display" id="timerDisplay">0.0s / 15s</div>
+</div>
+
+<script>
+let audioCtx=null,isMuted=false,masterGain=null,bgOsc=null;
+function initAudio(){if(audioCtx)return;audioCtx=new(window.AudioContext||window.webkitAudioContext)();masterGain=audioCtx.createGain();masterGain.gain.value=0.5;masterGain.connect(audioCtx.destination);}
+function toggleMute(){isMuted=!isMuted;const b=document.getElementById('muteBtn');if(isMuted){b.textContent='\uD83D\uDD07';b.classList.add('muted');if(masterGain)masterGain.gain.value=0;}else{b.textContent='\uD83D\uDD0A';b.classList.remove('muted');if(masterGain)masterGain.gain.value=0.5;}}
+function startBG(){if(!audioCtx)return;bgOsc=audioCtx.createOscillator();bgOsc.type='sawtooth';bgOsc.frequency.value=55;const g=audioCtx.createGain();g.gain.value=0.04;const f=audioCtx.createBiquadFilter();f.type='lowpass';f.frequency.value=150;bgOsc.connect(f);f.connect(g);g.connect(masterGain);bgOsc.start();const b=audioCtx.createBuffer(1,audioCtx.sampleRate*2,audioCtx.sampleRate);const d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1);const n=audioCtx.createBufferSource();n.buffer=b;n.loop=true;const nf=audioCtx.createBiquadFilter();nf.type='lowpass';nf.frequency.value=120;const ng=audioCtx.createGain();ng.gain.value=0.025;n.connect(nf);nf.connect(ng);ng.connect(masterGain);n.start();bgOsc._n=n;}
+function stopBG(){if(bgOsc){try{bgOsc.stop();bgOsc._n.stop();}catch(e){}bgOsc=null;}}
+function sfxBoom(){if(!audioCtx)return;const o=audioCtx.createOscillator();o.type='sine';o.frequency.setValueAtTime(180,audioCtx.currentTime);o.frequency.exponentialRampToValueAtTime(30,audioCtx.currentTime+0.5);const g=audioCtx.createGain();g.gain.setValueAtTime(0.25,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.5);o.connect(g);g.connect(masterGain);o.start();o.stop(audioCtx.currentTime+0.5);}
+function sfxBuzz(){if(!audioCtx)return;const o=audioCtx.createOscillator();o.type='square';o.frequency.value=120;const g=audioCtx.createGain();g.gain.setValueAtTime(0.08,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.3);o.connect(g);g.connect(masterGain);o.start();o.stop(audioCtx.currentTime+0.3);}
+function sfxWin(){if(!audioCtx)return;[800,1000,1300].forEach((f,i)=>{const o=audioCtx.createOscillator();o.type='sine';o.frequency.value=f;const g=audioCtx.createGain();g.gain.setValueAtTime(0.08,audioCtx.currentTime+i*0.1);g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+i*0.1+0.3);o.connect(g);g.connect(masterGain);o.start(audioCtx.currentTime+i*0.1);o.stop(audioCtx.currentTime+i*0.1+0.3);});}
+function sfxWhoosh(){if(!audioCtx)return;const b=audioCtx.createBuffer(1,audioCtx.sampleRate*0.2,audioCtx.sampleRate);const d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(1-i/d.length);const s=audioCtx.createBufferSource();s.buffer=b;const f=audioCtx.createBiquadFilter();f.type='bandpass';f.Q.value=0.5;f.frequency.setValueAtTime(400,audioCtx.currentTime);f.frequency.exponentialRampToValueAtTime(2500,audioCtx.currentTime+0.1);const g=audioCtx.createGain();g.gain.setValueAtTime(0.1,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.15);s.connect(f);f.connect(g);g.connect(masterGain);s.start();}
+function sfxImpact(){if(!audioCtx)return;const o=audioCtx.createOscillator();o.type='sine';o.frequency.setValueAtTime(150,audioCtx.currentTime);o.frequency.exponentialRampToValueAtTime(50,audioCtx.currentTime+0.4);const g=audioCtx.createGain();g.gain.setValueAtTime(0.2,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.4);o.connect(g);g.connect(masterGain);o.start();o.stop(audioCtx.currentTime+0.4);}
+
+const TOTAL=15000;let playing=false,startTime=0,animFrame=null,fired={};
+const SCENES=[{id:'scene1',start:0,end:3000},{id:'scene2',start:3000,end:8500},{id:'scene3',start:8500,end:13000},{id:'scene4',start:13000,end:15000}];
+
+function startAnimation(){
+  if(playing)return;initAudio();playing=true;fired={};startTime=performance.now();
+  document.getElementById('playBtn').textContent='\u23F8';document.getElementById('playBtn').style.opacity='0.5';
+  document.querySelectorAll('.scene').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.show').forEach(el=>el.classList.remove('show'));
+  document.getElementById('timerBar').style.width='0%';
+  stopBG();startBG();document.getElementById('audioBars').classList.add('show');
+  tick();
+}
+function tick(){
+  const e=performance.now()-startTime;const p=Math.min((e/TOTAL)*100,100);
+  document.getElementById('timerBar').style.width=p+'%';
+  document.getElementById('timerDisplay').textContent=(e/1000).toFixed(1)+'s / 15s';
+  SCENES.forEach(sc=>{const el=document.getElementById(sc.id);if(e>=sc.start&&e<sc.end){if(!el.classList.contains('active'))el.classList.add('active');}else{el.classList.remove('active');}});
+
+  if(e>=150&&!fired.a){fired.a=true;document.getElementById('povLabel').classList.add('show');}
+  if(e>=400&&!fired.b){fired.b=true;document.getElementById('povText').classList.add('show');sfxBoom();}
+  if(e>=1500&&!fired.c){fired.c=true;document.getElementById('povSub').classList.add('show');}
+  if(e>=2800&&!fired.w1){fired.w1=true;sfxWhoosh();}
+  if(e>=3200&&!fired.d){fired.d=true;document.getElementById('teamLabel').classList.add('show');}
+  if(e>=3600&&!fired.e){fired.e=true;document.getElementById('scoreboard').classList.add('show');sfxBuzz();}
+  if(e>=5500&&!fired.f){fired.f=true;document.getElementById('phone').classList.add('shake');setTimeout(()=>document.getElementById('phone').classList.remove('shake'),400);}
+  if(e>=6500&&!fired.g){fired.g=true;document.getElementById('starLoss').classList.add('show');sfxBuzz();}
+  if(e>=8300&&!fired.w2){fired.w2=true;sfxWhoosh();}
+  if(e>=8700&&!fired.h){fired.h=true;document.getElementById('meanwhile').classList.add('show');}
+  if(e>=9200&&!fired.i){fired.i=true;document.getElementById('winCard').classList.add('show');sfxWin();}
+  if(e>=10500&&!fired.j){fired.j=true;document.getElementById('streakBar').classList.add('show');}
+  if(e>=11500&&!fired.k){fired.k=true;document.getElementById('contrastText').classList.add('show');}
+  if(e>=12800&&!fired.w3){fired.w3=true;sfxWhoosh();}
+  if(e>=13200&&!fired.l){fired.l=true;document.getElementById('endLogo').classList.add('show');document.getElementById('endText').classList.add('show');document.getElementById('endCta').classList.add('show');sfxImpact();}
+
+  if(e<TOTAL){animFrame=requestAnimationFrame(tick);}else{playing=false;stopBG();document.getElementById('audioBars').classList.remove('show');document.getElementById('playBtn').textContent='\u25B6 Play';document.getElementById('playBtn').style.opacity='1';document.getElementById('timerDisplay').textContent='15.0s / 15s';}
+}
+function toggleRecMode(){const b=document.getElementById('recBtn');document.body.classList.toggle('hide-controls');if(document.body.classList.contains('hide-controls')){b.classList.add('recording');b.textContent='\u2B1B';setTimeout(startAnimation,1000);}else{b.classList.remove('recording');b.textContent='\uD83D\uDD34 Rec';}}
+function updateStageScale(){const s=Math.min((window.innerWidth-32)/390,(window.innerHeight-32)/844,1);document.documentElement.style.setProperty('--phone-scale',String(s));}
+window.addEventListener('resize',updateStageScale);
+document.addEventListener('DOMContentLoaded',()=>{if(typeof lucide!=='undefined')lucide.createIcons();});
+document.addEventListener('DOMContentLoaded',updateStageScale);
+</script>
+</body>
+</html>

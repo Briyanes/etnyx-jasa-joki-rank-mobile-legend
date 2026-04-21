@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ETNYX &mdash; 90-Day Content: Bulan 3 (Post 38-49)</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+  @page { margin: 14mm 12mm; size: A4; }
+  * { box-sizing: border-box; }
+  html, body { background: #0F1419; }
+  body { font-family: 'Inter', -apple-system, sans-serif; max-width: 900px; margin: 0 auto; padding: 30px; color: #E6F1EF; line-height: 1.7; font-size: 13px; }
+  .header { text-align: center; padding: 40px 30px; border: 2px solid #2DD4BF; border-radius: 16px; background: linear-gradient(135deg, #151B22, #0F1419); margin-bottom: 40px; position: relative; overflow: hidden; }
+  .header::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 30% 30%, rgba(45,212,191,0.08) 0%, transparent 50%); }
+  .header h1 { color: #2DD4BF; font-size: 28px; font-weight: 900; margin: 0 0 5px; letter-spacing: 2px; position: relative; }
+  .header .subtitle { color: #7FA8A3; font-size: 16px; font-weight: 500; margin: 0 0 20px; position: relative; }
+  .header .meta { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 15px; position: relative; }
+  .header .meta span { background: rgba(45,212,191,0.12); color: #2DD4BF; padding: 5px 14px; border-radius: 20px; font-size: 11px; font-weight: 600; border: 1px solid rgba(45,212,191,0.2); }
+  h1 { color: #2DD4BF; font-size: 22px; font-weight: 800; border-bottom: 2px solid #2DD4BF; padding-bottom: 8px; margin-top: 40px; }
+  h2 { color: #E6F1EF; font-size: 18px; font-weight: 700; margin-top: 35px; padding: 12px 16px; background: linear-gradient(90deg, rgba(45,212,191,0.15), transparent); border-left: 4px solid #2DD4BF; border-radius: 0 8px 8px 0; }
+  h3 { color: #2DD4BF; font-size: 15px; font-weight: 700; margin-top: 25px; }
+  .month-divider { text-align: center; padding: 30px; margin: 50px 0 30px; background: linear-gradient(135deg, #151B22, rgba(45,212,191,0.08)); border: 2px solid #2DD4BF; border-radius: 16px; }
+  .month-divider h2 { background: none; border: none; padding: 0; margin: 0; font-size: 22px; color: #2DD4BF; }
+  .month-divider .goal { color: #7FA8A3; font-size: 12px; margin-top: 10px; }
+  .month-divider .target { display: inline-flex; gap: 15px; margin-top: 10px; }
+  .month-divider .target span { background: rgba(45,212,191,0.12); color: #2DD4BF; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .week-header { padding: 16px 20px; margin: 30px 0 16px; border-radius: 12px; border: 1px solid; }
+  .week-header.pain { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.25); }
+  .week-header.trust { background: rgba(59,130,246,0.08); border-color: rgba(59,130,246,0.25); }
+  .week-header.value { background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.25); }
+  .week-header.push { background: rgba(168,85,247,0.08); border-color: rgba(168,85,247,0.25); }
+  .week-header h3 { margin: 0 0 4px; font-size: 16px; }
+  .week-header .week-meta { font-size: 12px; color: #7FA8A3; }
+  .week-header.pain h3 { color: #EF4444; }
+  .week-header.trust h3 { color: #3B82F6; }
+  .week-header.value h3 { color: #22C55E; }
+  .week-header.push h3 { color: #A78BFA; }
+  .post-card { background: #151B22; border: 1px solid #1E2A35; border-radius: 12px; padding: 24px; margin: 20px 0; page-break-inside: avoid; }
+  .post-card:hover { border-color: rgba(45,212,191,0.3); }
+  .post-title { font-size: 16px; font-weight: 800; color: #E6F1EF; margin: 0 0 12px; }
+  .post-info { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .badge { padding: 3px 10px; border-radius: 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  .badge.awareness { background: rgba(239,68,68,0.15); color: #EF4444; border: 1px solid rgba(239,68,68,0.3); }
+  .badge.consideration { background: rgba(59,130,246,0.15); color: #3B82F6; border: 1px solid rgba(59,130,246,0.3); }
+  .badge.conversion { background: rgba(34,197,94,0.15); color: #22C55E; border: 1px solid rgba(34,197,94,0.3); }
+  .badge.format { background: rgba(45,212,191,0.12); color: #2DD4BF; border: 1px solid rgba(45,212,191,0.25); }
+  .badge.pillar { background: rgba(127,168,163,0.12); color: #7FA8A3; border: 1px solid rgba(127,168,163,0.25); }
+  .badge.day { background: rgba(255,255,255,0.06); color: #98A8A3; border: 1px solid rgba(255,255,255,0.1); }
+  .brief-box { background: rgba(45,212,191,0.06); border: 1px solid rgba(45,212,191,0.2); border-radius: 10px; padding: 14px 18px; margin: 12px 0; font-size: 12.5px; color: #B8D4CF; }
+  .brief-box .label { color: #2DD4BF; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; display: block; }
+  .slide-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin: 12px 0; }
+  .slide-card { background: #0D1117; border: 1px solid #1E2A35; border-radius: 10px; padding: 14px; }
+  .slide-card .slide-num { color: #2DD4BF; font-weight: 800; font-size: 11px; margin-bottom: 6px; }
+  .slide-card .slide-content { color: #B8D4CF; font-size: 11.5px; line-height: 1.6; white-space: pre-wrap; }
+  .caption-box { background: #0D1117; border: 1px solid #1E2A35; border-radius: 10px; padding: 16px 18px; margin: 12px 0; }
+  .caption-box .label { color: #22C55E; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block; }
+  .caption-box .text { color: #B8D4CF; font-size: 12px; line-height: 1.8; white-space: pre-wrap; }
+  .thumb-box { background: rgba(168,85,247,0.06); border: 1px solid rgba(168,85,247,0.2); border-radius: 10px; padding: 14px 18px; margin: 12px 0; }
+  .thumb-box .label { color: #A78BFA; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; display: block; }
+  .thumb-box .desc { color: #B8D4CF; font-size: 12px; line-height: 1.6; white-space: pre-wrap; }
+  .img-brief { background: rgba(59,130,246,0.06); border: 1px solid rgba(59,130,246,0.2); border-radius: 10px; padding: 14px 18px; margin: 12px 0; }
+  .img-brief .label { color: #3B82F6; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; display: block; }
+  .img-brief .desc { color: #B8D4CF; font-size: 12px; line-height: 1.6; white-space: pre-wrap; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 12px; }
+  th { background: #1E2A35; color: #2DD4BF; padding: 10px 12px; text-align: left; font-weight: 700; font-size: 11px; text-transform: uppercase; }
+  td { border: 1px solid #1E2A35; padding: 8px 12px; color: #B8D4CF; background: #151B22; }
+  tr:hover td { background: #1A2332; }
+  code { background: rgba(45,212,191,0.1); color: #2DD4BF; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
+  hr { border: none; height: 1px; background: linear-gradient(90deg, #2DD4BF, transparent); margin: 30px 0; }
+  strong { color: #E6F1EF; } ul, ol { padding-left: 20px; } li { margin: 4px 0; color: #B8D4CF; } p { margin: 6px 0; }
+  @media print { body { background: white; color: #1a1a1a; padding: 0; } .post-card { border-color: #ddd; background: #fafafa; } .month-divider, .header { border-color: #14B8A6; } h1, h3, .header h1 { color: #0d9488; } h2 { background: rgba(20,184,166,0.08); color: #0d9488; } th { background: #0f172a; } td { background: white; color: #333; border-color: #ddd; } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>ETNYX</h1>
+  <p class="subtitle">Bulan 3: W11-W13 &mdash; Dominate, UGC, grand finale</p>
+  <div class="meta">
+    <span>W11-W13 (Post 38-49)</span>
+    <span>Fokus Carousel + Image</span>
+    <span>19:00-21:00 WIB</span>
+  </div>
+  <div class="meta" style="margin-top:10px;">
+    <span>&#x1F5BC;&#xFE0F; 6 Carousel</span>
+    <span>&#x1F4F8; 6 Single Image</span>
+    <span>&#x1F3AC; 0 Video Thumbnail</span>
+    <span>&#x1F4F1; Lanjutan dari 9-Post Launch Grid</span>
+  </div>
+</div>
+
+<div class="month-divider">
+  <h2>BULAN 3 &mdash; DOMINATE &amp; SYSTEMIZE</h2>
+  <div class="goal">Week 11-13 &mdash; Market dominance, UGC, collab, grand finale</div>
+  <div class="target">
+    <span>&#x1F3AF; 10.000 followers</span>
+    <span>&#x1F4AC; 3.000 WA leads</span>
+    <span>&#x1F4E6; 400 orders</span>
+  </div>
+</div>
+
+<div class="week-header value" id="w11">
+
+  <h3>&#x1F4C5; W11 &mdash; VALUE WEEK (Cycle 3)</h3>
+
+  <div class="week-meta">Build guide, gameplay, deep guide</div>
+
+</div>
+
+<div class="post-card">
+  <div class="post-title">POST 38 &#x2726; &ldquo;Build Guide: Hero Meta Season Ini&rdquo;</div>
+  <div class="post-info">
+    <span class="badge awareness">Awareness</span>
+    <span class="badge pillar">Education</span>
+    <span class="badge format">Carousel 7 Slides</span>
+    <span class="badge day">Day 71 / W11</span>
+  </div>
+  <div class="brief-box">
+    <span class="label">&#x1F3AF; Brief Designer</span>
+    CAROUSEL build guide 1 hero meta. Emblem + build path + skill combo + tips. HIGH SAVE content.
+  </div>
+  <div class="slide-grid">
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 1 &mdash; COVER</div>
+      <div class="slide-content">&#x1F3AE; &ldquo;BUILD GUIDE&rdquo;
+&ldquo;[HERO META] &mdash; Season [X]&rdquo; [turquoise]
+&ldquo;Build dari Booster Mythic Glory &#x1F4CC;&rdquo;</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 2 &mdash; EMBLEM</div>
+      <div class="slide-content">&#x1F537; EMBLEM:
+[Emblem name + talent]
+Kenapa: [penjelasan singkat]</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 3 &mdash; BUILD</div>
+      <div class="slide-content">&#x1F527; BUILD PATH:
+1. [Item 1] &mdash; early game
+2. [Item 2] &mdash; core
+3. [Item 3] &mdash; core
+4. [Item 4] &mdash; situational
+5. [Item 5] &mdash; defense
+6. [Item 6] &mdash; luxury</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 4 &mdash; SPELL</div>
+      <div class="slide-content">&#x2728; BATTLE SPELL:
+[Spell] &mdash; [kenapa]
+
+Alternatif: [Spell 2] kalau [situasi]</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 5 &mdash; COMBO</div>
+      <div class="slide-content">&#x2694;&#xFE0F; SKILL COMBO:
+[Combo sequence]
+&ldquo;Timing: [kapan engage]&rdquo;
+&ldquo;Tips: [1 tip kunci]&rdquo;</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 6 &mdash; TIPS</div>
+      <div class="slide-content">&#x1F4A1; PRO TIPS:
+1. [Tip dari booster]
+2. [Tip dari booster]
+3. [Counter info]</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 7 &mdash; CTA</div>
+      <div class="slide-content">Mau push rank pake hero ini?
+
+ETNYX &mdash; booster Mythic Glory
+Mulai Rp 4.000/star
+
+Save guide ini! &#x1F4CC;
+&#x1F449; Link di bio</div>
+    </div>
+  </div>
+  <div class="caption-box">
+    <span class="label">&#x1F4CB; Caption (Copy-Paste Ready)</span>
+    <div class="text">&#x1F3AE; BUILD GUIDE: [HERO META] Season [X]
+
+Build dari Booster Mythic Glory! Save &#x1F4CC;
+
+&#x1F537; Emblem: [emblem]
+&#x1F527; Build: [items]
+&#x2728; Spell: [spell]
+&#x2694;&#xFE0F; Combo: [sequence]
+
+Mau push rank? ETNYX bantu &#x1F4AA;
+&#x1F449; Link di bio
+
+#BuildGuide #MobileLegends #MetaML #HeroGuide #MLBB #ETNYX #TipsML</div>
+  </div>
+</div>
+
+<div class="post-card">
+  <div class="post-title">POST 39 &#x2726; Gameplay Highlight &mdash; Savage oleh Booster</div>
+  <div class="post-info">
+    <span class="badge awareness">Awareness</span>
+    <span class="badge pillar">Proof</span>
+    <span class="badge format">Single Image 4:5</span>
+    <span class="badge day">Day 72 / W11</span>
+  </div>
+  <div class="brief-box">
+    <span class="label">&#x1F3AF; Brief Designer</span>
+    SINGLE IMAGE gameplay screenshot. Savage/Maniac moment oleh booster ETNYX.
+  </div>
+  <div class="img-brief">
+    <span class="label">&#x1F4D0; Image Design Brief</span>
+    <div class="desc">LAYOUT: Gameplay showcase
+ATAS: &ldquo;&#x1F525; SAVAGE&rdquo; [merah besar 40px]
+TENGAH: Screenshot gameplay savage moment
+OVERLAY: KDA overlay (18/2/10)
+BADGE: &ldquo;BOOSTER ETNYX&rdquo; [turquoise badge]
+HERO: &ldquo;[Hero Name]&rdquo; [putih]
+RANK: &ldquo;Mythic Glory&rdquo; [turquoise]
+BAWAH: &ldquo;Ini level booster ETNYX. &#x1F3C6;&rdquo; [putih]
+FOOTER: Logo + @etnyx.id
+BG: #0F1419 frame
+Export: 1080x1350px PNG</div>
+  </div>
+  <div class="caption-box">
+    <span class="label">&#x1F4CB; Caption (Copy-Paste Ready)</span>
+    <div class="text">&#x1F525; SAVAGE &mdash; Booster ETNYX in action!
+
+Hero: [Hero]
+KDA: 18/2/10
+Rank: Mythic Glory
+
+Ini level booster yang handle order kamu. &#x1F3C6;
+
+Mau rank naik? Booster kami yang push.
+&#x1F449; Link di bio
+
+#Savage #MobileLegends #Gameplay #MLBB #ETNYX #BoosterML #MythicGlory</div>
+  </div>
+</div>
+
+<div class="post-card">
+  <div class="post-title">POST 40 &#x2726; &ldquo;Panduan Lengkap: 3 Mode Order di ETNYX&rdquo;</div>
+  <div class="post-info">
+    <span class="badge conversion">Conversion</span>
+    <span class="badge pillar">Education</span>
+    <span class="badge format">Carousel 8 Slides</span>
+    <span class="badge day">Day 74 / W11</span>
+  </div>
+  <div class="brief-box">
+    <span class="label">&#x1F3AF; Brief Designer</span>
+    CAROUSEL deep-dive 3 mode order. 2 slides per mode + intro + CTA. Saveable guide.
+  </div>
+  <div class="slide-grid">
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 1 &mdash; COVER</div>
+      <div class="slide-content">&#x1F4D6; &ldquo;PANDUAN LENGKAP&rdquo;
+&ldquo;3 Mode Order di ETNYX&rdquo; [turquoise]
+&ldquo;Biar ga bingung &#x1F60A; Swipe &#x1F449;&rdquo;</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 2 &mdash; PAKET INTRO</div>
+      <div class="slide-content">&#x1F4E6; MODE 1: JOKI PAKET
+&ldquo;Serahin akun, terima beres.&rdquo;
+Cocok: yang mau cepet &amp; praktis
+Harga: Fix per paket rank</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 3 &mdash; PAKET DETAIL</div>
+      <div class="slide-content">&#x1F4E6; PAKET &mdash; DETAIL:
+&#x2705; Harga fix (Epic&#x2192;Legend = Rp 95K)
+&#x2705; Estimasi 2-5 hari
+&#x2705; Password dienkripsi AES-256
+&#x2705; Tracking real-time
+&#x2705; Notif WA setiap update</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 4 &mdash; PERSTAR INTRO</div>
+      <div class="slide-content">&#x2B50; MODE 2: PER BINTANG
+&ldquo;Bayar sesuai kebutuhan.&rdquo;
+Cocok: budget limited / butuh dikit
+Harga: Per star (Rp 4K-10K)</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 5 &mdash; PERSTAR DETAIL</div>
+      <div class="slide-content">&#x2B50; PER STAR &mdash; DETAIL:
+&#x2705; Min order 3 star
+&#x2705; Harga per star sesuai rank
+&#x2705; Flexibility tinggi
+&#x2705; Cocok buat &ldquo;sisa beberapa star lagi&rdquo;</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 6 &mdash; GENDONG INTRO</div>
+      <div class="slide-content">&#x1F91D; MODE 3: GENDONG
+&ldquo;Main bareng booster.&rdquo;
+Cocok: ga mau kasih password / mau belajar
+Harga: Premium per star</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 7 &mdash; GENDONG DETAIL</div>
+      <div class="slide-content">&#x1F91D; GENDONG &mdash; DETAIL:
+&#x2705; NO PASSWORD needed
+&#x2705; Main bareng booster Mythic
+&#x2705; Belajar tips &amp; trick
+&#x2705; Fun experience
+&#x2705; Pilih role &amp; jadwal</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 8 &mdash; CTA</div>
+      <div class="slide-content">Udah tau mana yang cocok?
+
+&#x1F4E6; Cepet &amp; praktis &#x2192; PAKET
+&#x2B50; Bayar dikit &#x2192; PER STAR
+&#x1F91D; Aman &amp; belajar &#x2192; GENDONG
+
+etnyx.com/order &#xB7; Link di bio &#x1F4F2;</div>
+    </div>
+  </div>
+  <div class="caption-box">
+    <span class="label">&#x1F4CB; Caption (Copy-Paste Ready)</span>
+    <div class="text">&#x1F4D6; Panduan Lengkap: 3 Mode Order di ETNYX
+
+Biar ga bingung! Swipe &#x1F449;
+
+&#x1F4E6; PAKET &mdash; serahin akun, harga fix
+&#x2B50; PER STAR &mdash; bayar per bintang, flexible
+&#x1F91D; GENDONG &mdash; main bareng, NO password
+
+Save buat nanti! &#x1F4CC;
+
+&#x1F449; Link di bio
+&#x1F4AC; DM &ldquo;TANYA&rdquo; kalau masih bingung
+
+#ETNYX #JokiML #CaraOrder #MobileLegends #Guide #MLBB</div>
+  </div>
+</div>
+
+<div class="post-card">
+  <div class="post-title">POST 41 &#x2726; Promo Repeat Customer &mdash; Extra Diskon!</div>
+  <div class="post-info">
+    <span class="badge conversion">Conversion</span>
+    <span class="badge pillar">Selling</span>
+    <span class="badge format">Single Image 4:5</span>
+    <span class="badge day">Day 75 / W11</span>
+  </div>
+  <div class="brief-box">
+    <span class="label">&#x1F3AF; Brief Designer</span>
+    SINGLE IMAGE loyalty promo. Khusus yang udah pernah order. VIP feel.
+  </div>
+  <div class="img-brief">
+    <span class="label">&#x1F4D0; Image Design Brief</span>
+    <div class="desc">LAYOUT: VIP card style
+ATAS: &ldquo;&#x1F451; KHUSUS REPEAT CUSTOMER&rdquo; [emas 28px]
+TENGAH: &ldquo;EXTRA DISKON 15%&rdquo; [turquoise 48px]
+&ldquo;Udah pernah order? Ini reward kamu!&rdquo; [putih 16px]
+DETAIL:
+&ldquo;+ Bonus reward points&rdquo;
+&ldquo;+ Prioritas slot booster&rdquo;
+BADGE: &ldquo;VIP CUSTOMER &#x1F451;&rdquo; [emas badge]
+BAWAH: &ldquo;DM 'REPEAT' buat klaim &#xB7; Link di bio&rdquo;
+BG: #0F1419 + gold accent
+Export: 1080x1350px PNG</div>
+  </div>
+  <div class="caption-box">
+    <span class="label">&#x1F4CB; Caption (Copy-Paste Ready)</span>
+    <div class="text">&#x1F451; KHUSUS REPEAT CUSTOMER!
+
+Udah pernah order di ETNYX? Ini reward kamu:
+
+&#x2705; Extra diskon 15%
+&#x2705; Bonus reward points
+&#x2705; Prioritas slot booster
+
+Karena loyalty harus dihargai &#x1F64F;
+
+&#x1F4AC; DM &ldquo;REPEAT&rdquo; buat klaim
+&#x1F449; Link di bio
+
+#RepeatCustomer #VIP #ETNYX #JokiML #MobileLegends #CustomerLoyalty #MLBB</div>
+  </div>
+</div>
+
+<div class="week-header push" id="w12">
+
+  <h3>&#x1F4C5; W12 &mdash; PUSH WEEK (Cycle 3)</h3>
+
+  <div class="week-meta">UGC, season end, MEGA SALE</div>
+
+</div>
+
+<div class="post-card">
+  <div class="post-title">POST 42 &#x2726; &ldquo;UGC Spotlight: Customer Rank Up Stories&rdquo;</div>
+  <div class="post-info">
+    <span class="badge consideration">Consideration</span>
+    <span class="badge pillar">Proof</span>
+    <span class="badge format">Carousel 5 Slides</span>
+    <span class="badge day">Day 78 / W12</span>
+  </div>
+  <div class="brief-box">
+    <span class="label">&#x1F3AF; Brief Designer</span>
+    CAROUSEL UGC/customer content. Repost customer stories with brand frame.
+  </div>
+  <div class="slide-grid">
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 1 &mdash; COVER</div>
+      <div class="slide-content">&#x1F31F; &ldquo;CUSTOMER SPOTLIGHT&rdquo;
+&ldquo;Rank up stories dari komunitas ETNYX&rdquo; [turquoise]
+&ldquo;Cerita mereka. Hasil nyata.&rdquo;</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 2</div>
+      <div class="slide-content">&#x1F3C6; @[customer1]
+&ldquo;Dari Epic stuck 3 bulan &#x2192; Mythic 3 hari&rdquo;
+Mode: Joki Paket
+[Customer screenshot + ETNYX frame]</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 3</div>
+      <div class="slide-content">&#x1F3C6; @[customer2]
+&ldquo;First time pake joki, langsung Legend&rdquo;
+Mode: Per Bintang (10 star)
+[Customer screenshot + frame]</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 4</div>
+      <div class="slide-content">&#x1F3C6; @[customer3]
+&ldquo;Gendong seru banget, booster jago&rdquo;
+Mode: Gendong
+[Customer screenshot + frame]</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 5 &mdash; CTA</div>
+      <div class="slide-content">Mau di-feature juga?
+
+Order &#x2192; share result &#x2192; tag @etnyx.id
+Kami repost + kasih reward! &#x1F381;
+
+etnyx.com &#xB7; Link di bio &#x1F4F2;</div>
+    </div>
+  </div>
+  <div class="caption-box">
+    <span class="label">&#x1F4CB; Caption (Copy-Paste Ready)</span>
+    <div class="text">&#x1F31F; CUSTOMER SPOTLIGHT &mdash; Rank up stories!
+
+&#x1F3C6; Epic stuck 3 bulan &#x2192; Mythic 3 hari
+&#x1F3C6; First time joki &#x2192; langsung Legend
+&#x1F3C6; Gendong seru, booster jago
+
+Mau di-feature? Order &#x2192; share &#x2192; tag @etnyx.id
+Kami repost + kasih reward! &#x1F381;
+
+&#x1F449; Link di bio
+
+#CustomerSpotlight #UGC #ETNYX #JokiML #MobileLegends #Community #MLBB</div>
+  </div>
+</div>
+
+<div class="post-card">
+  <div class="post-title">POST 43 &#x2726; End of Season &mdash; Push Sekarang atau Nyesel</div>
+  <div class="post-info">
+    <span class="badge conversion">Conversion</span>
+    <span class="badge pillar">Urgency</span>
+    <span class="badge format">Single Image 4:5</span>
+    <span class="badge day">Day 79 / W12</span>
+  </div>
+  <div class="brief-box">
+    <span class="label">&#x1F3AF; Brief Designer</span>
+    SINGLE IMAGE max urgency. Season reset countdown. Rank drop visual dramatic.
+  </div>
+  <div class="img-brief">
+    <span class="label">&#x1F4D0; Image Design Brief</span>
+    <div class="desc">LAYOUT: Urgency poster
+ATAS: &ldquo;&#x26A0;&#xFE0F; SEASON RESET&rdquo; [merah 36px]
+TENGAH: &ldquo;[X] HARI LAGI&rdquo; [putih Inter Black 64px, glow merah]
+
+RANK DROP:
+&ldquo;Mythic &#x2192; Legend&rdquo;
+&ldquo;Legend &#x2192; Epic&rdquo;
+&ldquo;Epic &#x2192; Grandmaster&rdquo; [panah turun merah]
+
+BAWAH: &ldquo;Push SEKARANG.&rdquo;
+&ldquo;Promo: Diskon 25% semua mode&rdquo; [turquoise]
+&ldquo;etnyx.com/order &#xB7; Link di bio&rdquo;
+BG: #0F1419 + red vignette
+Export: 1080x1350px PNG</div>
+  </div>
+  <div class="caption-box">
+    <span class="label">&#x1F4CB; Caption (Copy-Paste Ready)</span>
+    <div class="text">&#x26A0;&#xFE0F; SEASON RESET [X] HARI LAGI!
+
+Rank kamu SIAP TURUN? &#x1F4C9;
+
+Mythic &#x2192; Legend
+Legend &#x2192; Epic
+Epic &#x2192; Grandmaster
+
+Berminggu-minggu push = HILANG.
+
+&#x1F525; Promo End Season: Diskon 25%!
+Push sekarang atau nyesel.
+
+&#x1F449; Link di bio &#xB7; DM &ldquo;RESET&rdquo;
+
+#SeasonReset #PushRank #ETNYX #MobileLegends #Urgency #MLBB #LastChance</div>
+  </div>
+</div>
+
+<div class="post-card">
+  <div class="post-title">POST 44 &#x2726; MEGA SALE &mdash; End of Season 35% Off &#x1F525;</div>
+  <div class="post-info">
+    <span class="badge conversion">Conversion</span>
+    <span class="badge pillar">Selling</span>
+    <span class="badge format">Carousel 5 Slides</span>
+    <span class="badge day">Day 81 / W12</span>
+  </div>
+  <div class="brief-box">
+    <span class="label">&#x1F3AF; Brief Designer</span>
+    CAROUSEL BIGGEST PROMO of quarter. 35% ALL modes. Max production value.
+  </div>
+  <div class="slide-grid">
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 1 &mdash; COVER</div>
+      <div class="slide-content">&#x1F525; &ldquo;MEGA SALE&rdquo; [kuning Inter Black 56px]
+&ldquo;END OF SEASON &mdash; 35% OFF&rdquo; [turquoise 28px]
+&ldquo;Promo TERBESAR quarter ini!&rdquo;</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 2 &mdash; PAKET</div>
+      <div class="slide-content">&#x1F4E6; PAKET &mdash; 35% OFF
+
+Epic &#x2192; Legend: <s>95K</s> &#x2192; 62K
+Legend &#x2192; Mythic: <s>180K</s> &#x2192; 117K
+Epic &#x2192; Mythic: <s>250K</s> &#x2192; 163K</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 3 &mdash; PERSTAR</div>
+      <div class="slide-content">&#x2B50; PER STAR &mdash; 35% OFF
+
+Epic: <s>4K</s> &#x2192; 2.600/star
+Legend: <s>6K</s> &#x2192; 3.900/star
+Mythic: <s>10K</s> &#x2192; 6.500/star</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 4 &mdash; GENDONG</div>
+      <div class="slide-content">&#x1F91D; GENDONG &mdash; 35% OFF
+
+Epic: <s>8K</s> &#x2192; 5.200/star
+Legend: <s>12K</s> &#x2192; 7.800/star
+
+&#x2705; NO password needed!</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 5 &mdash; CTA</div>
+      <div class="slide-content">&#x23F0; BERLAKU 5 HARI!
+
+Senin depan = harga normal.
+Jangan sampai nyesel.
+
+etnyx.com/order &#xB7; Link di bio &#x1F4F2;
+DM &ldquo;MEGA&rdquo; buat order &#x1F525;</div>
+    </div>
+  </div>
+  <div class="caption-box">
+    <span class="label">&#x1F4CB; Caption (Copy-Paste Ready)</span>
+    <div class="text">&#x1F525; MEGA SALE &mdash; END OF SEASON 35% OFF! &#x1F525;
+
+Promo TERBESAR quarter ini:
+
+&#x1F4E6; Paket: Epic&#x2192;Mythic <s>250K</s> &#x2192; 163K
+&#x2B50; PerStar: mulai <s>4K</s> &#x2192; 2.600/star
+&#x1F91D; Gendong: mulai <s>8K</s> &#x2192; 5.200/star
+
+&#x23F0; 5 HARI AJA. Senin harga normal.
+
+&#x1F449; Link di bio &#xB7; DM &ldquo;MEGA&rdquo;
+
+#MegaSale #EndSeason #ETNYX #JokiML #DiskonBesar #MobileLegends #MLBB</div>
+  </div>
+</div>
+
+<div class="post-card">
+  <div class="post-title">POST 45 &#x2726; Countdown: MEGA SALE Sisa 2 Hari</div>
+  <div class="post-info">
+    <span class="badge conversion">Conversion</span>
+    <span class="badge pillar">Urgency</span>
+    <span class="badge format">Single Image 4:5</span>
+    <span class="badge day">Day 83 / W12</span>
+  </div>
+  <div class="brief-box">
+    <span class="label">&#x1F3AF; Brief Designer</span>
+    SINGLE IMAGE countdown follow-up. SISA 2 HARI. Urgency max.
+  </div>
+  <div class="img-brief">
+    <span class="label">&#x1F4D0; Image Design Brief</span>
+    <div class="desc">LAYOUT: Countdown
+ATAS: &ldquo;&#x23F0; MEGA SALE&rdquo; [kuning 32px]
+TENGAH: &ldquo;SISA 2 HARI&rdquo; [putih Inter Black 56px]
+&ldquo;SENIN HARGA NORMAL&rdquo; [merah 20px, blink feel]
+DETAIL: &ldquo;35% OFF semua mode&rdquo; [turquoise]
+BAWAH: &ldquo;Terakhir order sebelum reset.&rdquo;
+&ldquo;etnyx.com/order &#xB7; Link di bio&rdquo;
+BG: #0F1419 + amber vignette
+Export: 1080x1350px PNG</div>
+  </div>
+  <div class="caption-box">
+    <span class="label">&#x1F4CB; Caption (Copy-Paste Ready)</span>
+    <div class="text">&#x23F0; MEGA SALE &mdash; SISA 2 HARI!
+
+35% OFF semua mode.
+SENIN HARGA NORMAL.
+
+Ini terakhir sebelum season reset.
+Jangan tunggu besok.
+
+&#x1F449; Link di bio &#xB7; DM &ldquo;MEGA&rdquo;
+
+#Countdown #MegaSale #ETNYX #LastChance #MobileLegends #MLBB</div>
+  </div>
+</div>
+
+<div class="week-header pain" id="w13">
+
+  <h3>&#x1F4C5; W13 &mdash; CLOSING WEEK</h3>
+
+  <div class="week-meta">3-month milestone, quarter report, teaser, final CTA</div>
+
+</div>
+
+<div class="post-card">
+  <div class="post-title">POST 46 &#x2726; &ldquo;3 Bulan ETNYX &mdash; Perjalanan Kita&rdquo; &#x2B50; MILESTONE</div>
+  <div class="post-info">
+    <span class="badge awareness">Awareness</span>
+    <span class="badge pillar">Branding</span>
+    <span class="badge format">Carousel 6 Slides</span>
+    <span class="badge day">Day 85 / W13</span>
+  </div>
+  <div class="brief-box">
+    <span class="label">&#x1F3AF; Brief Designer</span>
+    CAROUSEL milestone celebration. 3-month recap. Stats + best moments.
+  </div>
+  <div class="slide-grid">
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 1 &mdash; COVER</div>
+      <div class="slide-content">&#x1F389; &ldquo;3 BULAN ETNYX&rdquo;
+&ldquo;Perjalanan kita.&rdquo; [turquoise]
+&ldquo;Terima kasih, fam. &#x1F64F;&rdquo;</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 2 &mdash; BULAN 1</div>
+      <div class="slide-content">&#x1F4C5; BULAN 1 &mdash; Build Foundation
+
+[X] orders &#x2705;
+[X] followers &#x1F4F1;
+First viral post: [X]K views
+&ldquo;Kita mulai dari NOL.&rdquo;</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 3 &mdash; BULAN 2</div>
+      <div class="slide-content">&#x1F4C5; BULAN 2 &mdash; Scale &amp; Optimize
+
+[X] orders &#x2705;
+[X] followers &#x1F4F1;
+[X] repeat customers &#x1F501;
+&ldquo;Kita mulai dikenal.&rdquo;</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 4 &mdash; BULAN 3</div>
+      <div class="slide-content">&#x1F4C5; BULAN 3 &mdash; Dominate
+
+[X] orders &#x2705;
+[X] followers &#x1F4F1;
+[X] referrals &#x1F381;
+&ldquo;Kita jadi pilihan utama.&rdquo;</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 5 &mdash; STATS</div>
+      <div class="slide-content">&#x1F4CA; TOTAL 3 BULAN:
+
+[X]+ total orders &#x2705;
+4.9/5 rating &#x2B50;
+0 akun bermasalah &#x1F512;
+[X] happy customers &#x1F60A;
+
+&ldquo;Ini bukan tentang kita.
+Ini tentang KALIAN.&rdquo; &#x1F64F;</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 6 &mdash; WHAT'S NEXT</div>
+      <div class="slide-content">&#x1F680; WHAT'S NEXT?
+
+&ldquo;INI BARU PERMULAAN.&rdquo;
+
+Season baru. Fitur baru. Tim lebih besar.
+
+Join the journey.
+etnyx.com &#xB7; Link di bio &#x1F4F2;</div>
+    </div>
+  </div>
+  <div class="caption-box">
+    <span class="label">&#x1F4CB; Caption (Copy-Paste Ready)</span>
+    <div class="text">&#x1F389; 3 BULAN ETNYX &mdash; Perjalanan kita.
+
+&#x1F4C5; Bulan 1: [X] orders, mulai dari nol
+&#x1F4C5; Bulan 2: [X] orders, mulai dikenal
+&#x1F4C5; Bulan 3: [X] orders, jadi pilihan utama
+
+&#x1F4CA; Total: [X]+ orders &#xB7; 4.9 rating &#xB7; 0 akun bermasalah
+
+Ini bukan tentang kita. Ini tentang KALIAN. &#x1F64F;
+
+Dan ini BARU PERMULAAN. &#x1F680;
+
+&#x1F449; Link di bio
+
+#ETNYX #Milestone #3Bulan #JokiML #MobileLegends #ThankYou #MLBB</div>
+  </div>
+</div>
+
+<div class="post-card">
+  <div class="post-title">POST 47 &#x2726; Quarter Report &mdash; Infographic</div>
+  <div class="post-info">
+    <span class="badge consideration">Consideration</span>
+    <span class="badge pillar">Proof</span>
+    <span class="badge format">Single Image 4:5</span>
+    <span class="badge day">Day 86 / W13</span>
+  </div>
+  <div class="brief-box">
+    <span class="label">&#x1F3AF; Brief Designer</span>
+    SINGLE IMAGE quarter infographic. Professional stats card. Clean data visualization.
+  </div>
+  <div class="img-brief">
+    <span class="label">&#x1F4D0; Image Design Brief</span>
+    <div class="desc">LAYOUT: Infographic report
+ATAS: &ldquo;&#x1F4CA; QUARTER REPORT&rdquo; [turquoise 28px]
+&ldquo;Q2 2026 &mdash; @etnyx.id&rdquo; [muted]
+
+STATS (3 kolom):
+KOL 1: &ldquo;Total Orders&rdquo; + &ldquo;[X]+&rdquo; [besar turquoise]
+KOL 2: &ldquo;Completion&rdquo; + &ldquo;[X]%&rdquo; [besar hijau]
+KOL 3: &ldquo;Rating&rdquo; + &ldquo;4.9/5&rdquo; [besar kuning]
+
+FUN STATS:
+&ldquo;&#x26A1; Fastest order: [X] jam&rdquo;
+&ldquo;&#x1F525; Longest winstreak: [X]&rdquo;
+&ldquo;&#x1F451; Most popular: Joki Paket&rdquo;
+&ldquo;&#x1F91D; Repeat rate: [X]%&rdquo;
+
+BAWAH: &ldquo;Data is king. Results don't lie.&rdquo;
+BG: #0F1419
+Export: 1080x1350px PNG</div>
+  </div>
+  <div class="caption-box">
+    <span class="label">&#x1F4CB; Caption (Copy-Paste Ready)</span>
+    <div class="text">&#x1F4CA; QUARTER REPORT &mdash; Q2 2026
+
+&#x2705; [X]+ total orders
+&#x2705; [X]% completion rate
+&#x2705; 4.9/5 rating
+
+Fun stats:
+&#x26A1; Fastest: [X] jam
+&#x1F525; Winstreak: [X]
+&#x1F451; Most popular: Joki Paket
+&#x1F91D; Repeat rate: [X]%
+
+Data is king. Results don't lie. &#x1F4CA;
+
+&#x1F449; Link di bio
+
+#QuarterReport #ETNYX #JokiML #MobileLegends #Stats #MLBB</div>
+  </div>
+</div>
+
+<div class="post-card">
+  <div class="post-title">POST 48 &#x2726; &ldquo;What's Coming Next &mdash; ETNYX Season Baru&rdquo;</div>
+  <div class="post-info">
+    <span class="badge awareness">Awareness</span>
+    <span class="badge pillar">Branding</span>
+    <span class="badge format">Carousel 5 Slides</span>
+    <span class="badge day">Day 88 / W13</span>
+  </div>
+  <div class="brief-box">
+    <span class="label">&#x1F3AF; Brief Designer</span>
+    CAROUSEL teaser upcoming. Build anticipation.
+  </div>
+  <div class="slide-grid">
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 1 &mdash; COVER</div>
+      <div class="slide-content">&#x1F680; &ldquo;WHAT'S COMING NEXT?&rdquo;
+&ldquo;Season baru. Update baru.&rdquo; [turquoise]
+&ldquo;Swipe buat preview &#x1F449;&rdquo;</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 2</div>
+      <div class="slide-content">&#x1F4F1; FITUR BARU:
+&ldquo;Dashboard upgrade&rdquo;
+&ldquo;More payment options&rdquo;
+&ldquo;Faster matching&rdquo;
+[Teaser mockup UI]</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 3</div>
+      <div class="slide-content">&#x1F3AE; SEASON BARU:
+&ldquo;Meta baru = content baru&rdquo;
+&ldquo;Hero tier list update&rdquo;
+&ldquo;Build guide series lanjut&rdquo;</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 4</div>
+      <div class="slide-content">&#x1F381; PROMO SEASON BARU:
+&ldquo;Opening promo &mdash; detail soon&rdquo;
+&ldquo;Follow biar ga ketinggalan!&rdquo;
+[Surprise box icon]</div>
+    </div>
+    <div class="slide-card">
+      <div class="slide-num">SLIDE 5 &mdash; CTA</div>
+      <div class="slide-content">STAY TUNED. &#x1F680;
+
+Follow @etnyx.id
+Turn on notifications &#x1F514;
+
+&ldquo;The best is yet to come.&rdquo;</div>
+    </div>
+  </div>
+  <div class="caption-box">
+    <span class="label">&#x1F4CB; Caption (Copy-Paste Ready)</span>
+    <div class="text">&#x1F680; WHAT'S COMING NEXT? Season baru, update baru!
+
+&#x1F4F1; Dashboard upgrade
+&#x1F3AE; New meta content
+&#x1F381; Opening promo &mdash; SOON
+
+Follow @etnyx.id + turn on notifications &#x1F514;
+Biar ga ketinggalan!
+
+The best is yet to come. &#x1F680;
+
+#ComingSoon #ETNYX #NewSeason #MobileLegends #MLBB #StayTuned</div>
+  </div>
+</div>
+
+<div class="post-card">
+  <div class="post-title">POST 49 &#x2726; Final CTA: Promo Penutup Quarter</div>
+  <div class="post-info">
+    <span class="badge conversion">Conversion</span>
+    <span class="badge pillar">Selling</span>
+    <span class="badge format">Single Image 4:5</span>
+    <span class="badge day">Day 90 / W13</span>
+  </div>
+  <div class="brief-box">
+    <span class="label">&#x1F3AF; Brief Designer</span>
+    SINGLE IMAGE final promo. Last push. Clean, confident, bold.
+  </div>
+  <div class="img-brief">
+    <span class="label">&#x1F4D0; Image Design Brief</span>
+    <div class="desc">LAYOUT: Final CTA poster
+ATAS: &ldquo;&#x1F3C6; PENUTUP QUARTER&rdquo; [turquoise 32px]
+TENGAH: &ldquo;DISKON 30%&rdquo; [putih Inter Black 56px]
+&ldquo;LAST CHANCE&rdquo; [merah 24px]
+DETAIL:
+&ldquo;Semua mode. 48 jam terakhir.&rdquo;
+&ldquo;Besok harga NAIK.&rdquo; [kuning]
+BAWAH: &ldquo;etnyx.com/order &#xB7; Link di bio &#x1F4F2;&rdquo;
+BADGE: &ldquo;FINAL&rdquo; [merah badge]
+BG: #0F1419
+Export: 1080x1350px PNG</div>
+  </div>
+  <div class="caption-box">
+    <span class="label">&#x1F4CB; Caption (Copy-Paste Ready)</span>
+    <div class="text">&#x1F3C6; PENUTUP QUARTER &mdash; DISKON 30%!
+
+LAST CHANCE. 48 jam terakhir.
+Semua mode kena diskon 30%.
+
+Besok harga NAIK. Serius.
+
+&#x1F449; Link di bio &#xB7; DM &ldquo;FINAL&rdquo;
+
+#FinalSale #ETNYX #JokiML #MobileLegends #LastChance #Diskon #MLBB</div>
+  </div>
+</div>
+
+
+<div class="month-divider">
+  <h2>APPENDIX</h2>
+  <div class="goal">Hashtag sets, urgency templates, story schedule, highlight structure, content mix</div>
+</div>
+
+<h2>A. Hashtag Sets (Rotasi)</h2>
+<table>
+<thead><tr><th>Set</th><th>Hashtags</th><th>Dipakai di</th></tr></thead>
+<tbody>
+<tr><td><strong>A &mdash; General</strong></td><td><code>#JokiML #MobileLegends #PushRank #ETNYX #JokiMobileLegends #RankBoost #MLBB #JokiRank #GamersIndonesia</code></td><td>Semua post</td></tr>
+<tr><td><strong>B &mdash; Problem</strong></td><td><code>#SoloQueue #StuckRank #EpicHell #TimToxic #RelatableML #MLMeme #GamingMeme</code></td><td>Pain Week</td></tr>
+<tr><td><strong>C &mdash; Trust</strong></td><td><code>#JokiAman #Terpercaya #AES256 #CustomerReview #Testimonial #BeforeAfter #SocialProof</code></td><td>Trust Week</td></tr>
+<tr><td><strong>D &mdash; Education</strong></td><td><code>#TipsML #TutorialML #CaraPushRank #BelajarML #MetaML #TierList #BuildGuide</code></td><td>Value Week</td></tr>
+<tr><td><strong>E &mdash; Promo</strong></td><td><code>#PromoJoki #DiskonML #FlashSale #JokiMurah #PromoML #OrderSekarang</code></td><td>Push Week</td></tr>
+</tbody>
+</table>
+
+<h2>B. IG Story Daily Template (3-5 story/hari)</h2>
+<table>
+<thead><tr><th>Jam</th><th>Content</th><th>Type</th></tr></thead>
+<tbody>
+<tr><td><strong>09:00</strong></td><td>Screenshot bukti kerja / testi chat</td><td>Proof</td></tr>
+<tr><td><strong>12:00</strong></td><td>Tips ML mini / poll / quiz</td><td>Engagement</td></tr>
+<tr><td><strong>15:00</strong></td><td>Promo reminder / countdown</td><td>Conversion</td></tr>
+<tr><td><strong>19:00</strong></td><td>Before-after screenshot</td><td>Proof</td></tr>
+<tr><td><strong>21:00</strong></td><td>&ldquo;Slot tersisa [X]&rdquo; / urgency</td><td>Conversion</td></tr>
+</tbody>
+</table>
+
+<h2>C. IG Highlight Structure</h2>
+<table>
+<thead><tr><th>Highlight</th><th>Icon</th><th>Content</th></tr></thead>
+<tbody>
+<tr><td>Cara Order</td><td>&#x1F4E6;</td><td>Step-by-step tutorial</td></tr>
+<tr><td>Testimoni</td><td>&#x2B50;</td><td>Customer reviews</td></tr>
+<tr><td>Promo</td><td>&#x1F48E;</td><td>Active discounts</td></tr>
+<tr><td>FAQ</td><td>&#x2753;</td><td>Common questions</td></tr>
+<tr><td>Tracking</td><td>&#x1F4CA;</td><td>Dashboard demo</td></tr>
+</tbody>
+</table>
+
+<h2>D. Content Mix Target per Bulan</h2>
+<table>
+<thead><tr><th>Format</th><th>Bulan 1</th><th>Bulan 2</th><th>Bulan 3</th></tr></thead>
+<tbody>
+<tr><td>Carousel</td><td>5</td><td>6</td><td>5</td></tr>
+<tr><td>Single Image</td><td>5</td><td>7</td><td>5</td></tr>
+<tr><td>Video Thumbnail</td><td>1</td><td>1</td><td>0</td></tr>
+<tr><td>Story (Daily)</td><td>90+</td><td>120+</td><td>150+</td></tr>
+<tr><td><strong>TOTAL Feed Posts</strong></td><td><strong>~12</strong></td><td><strong>~16</strong></td><td><strong>~12</strong></td></tr>
+</tbody>
+</table>
+
+<h2>E. Repost Checklist</h2>
+<table>
+<thead><tr><th>Platform</th><th>Action</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><strong>IG Feed</strong></td><td>Primary post</td><td>Original upload</td></tr>
+<tr><td><strong>Facebook</strong></td><td>Carousel as album / image repost</td><td>Caption lebih panjang + link langsung</td></tr>
+<tr><td><strong>Twitter/X</strong></td><td>Image + thread</td><td>Thread versi text dari carousel</td></tr>
+<tr><td><strong>WA Status</strong></td><td>Image repost</td><td>3x sehari (proof, promo, urgency)</td></tr>
+<tr><td><strong>Telegram</strong></td><td>Image + caption</td><td>Channel broadcast</td></tr>
+</tbody>
+</table>
+
+
+<hr>
+<div style="text-align:center;padding:30px;margin-top:40px;border-top:2px solid #2DD4BF;">
+  <p style="color:#2DD4BF;font-size:18px;font-weight:800;letter-spacing:2px;">ETNYX</p>
+  <p style="color:#7FA8A3;font-size:12px;">90-Day Content Plan &mdash; Q2 2026 &mdash; Fokus Carousel &amp; Image</p>
+  <p style="color:#7FA8A3;font-size:11px;margin-top:10px;">Execute consistently. Measure every week. Scale what works.</p>
+</div>
+
+</body>
+</html>
