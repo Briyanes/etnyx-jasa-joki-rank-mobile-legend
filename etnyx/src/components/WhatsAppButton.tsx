@@ -29,7 +29,7 @@ export default function WhatsAppButton() {
     fetch("/api/settings?keys=social_links,site_info")
       .then(r => r.json())
       .then(d => {
-        const num = d.social_links?.whatsapp || d.site_info?.phone;
+        const num = d.site_info?.phone || d.social_links?.whatsapp;
         if (num) {
           // Normalize to international format (strip +, convert 08xxx → 628xxx)
           const normalized = String(num).replace(/\D/g, "").replace(/^0/, "62");
