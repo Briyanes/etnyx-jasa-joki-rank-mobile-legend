@@ -33,13 +33,25 @@ export async function GET(request: NextRequest) {
 
     const { data, error } = await supabase
       .from("orders")
-      .select("order_id, account_login, account_password, login_method, package_title, notes")
+      .select("id, order_id, account_login, account_password, login_method, package_title, notes")
       .eq("id", orderId)
       .single();
 
     if (error || !data) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
+
+    // Audit log: record who accessed credentials and when (non-blocking)
+    void (async () => {
+      try {
+        await supabase.from("order_logs").insert({
+          order_id: data.id,
+          action: "credentials_accessed",
+          notes: `Credentials viewed by ${auth.user!.name || auth.user!.email} (${auth.user!.role})`,
+          created_by: auth.user!.email,
+        });
+      } catch { /* ignore log failures */ }
+    })();
 
     const isGendong = data.package_title?.includes("Gendong") || data.package_title?.includes("Duo Boost");
 
