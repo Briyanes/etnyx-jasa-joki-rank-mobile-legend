@@ -1,10 +1,36 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { createAdminClient } from "@/lib/supabase-server";
+import { timingSafeEqual, createHash } from "crypto";
 
-export async function POST() {
+function safeCompare(a: string, b: string): boolean {
   try {
-    const password = "etnyx_admin_2026";
+    const ha = createHash("sha256").update(a).digest();
+    const hb = createHash("sha256").update(b).digest();
+    return ha.length === hb.length && timingSafeEqual(ha, hb);
+  } catch {
+    return false;
+  }
+}
+
+export async function POST(request: NextRequest) {
+  // Require CRON_SECRET to protect this endpoint
+  const cronSecret = process.env.CRON_SECRET;
+  if (!cronSecret) {
+    return NextResponse.json({ error: "Endpoint disabled (CRON_SECRET not configured)" }, { status: 503 });
+  }
+  const authHeader = request.headers.get("authorization") || "";
+  if (!safeCompare(authHeader, `Bearer ${cronSecret}`)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Password must come from env var — never hardcoded
+  const password = process.env.ADMIN_INITIAL_PASSWORD;
+  if (!password || password.length < 12) {
+    return NextResponse.json({ error: "ADMIN_INITIAL_PASSWORD env var not set or too short (min 12 chars)" }, { status: 400 });
+  }
+
+  try {
     const hash = bcrypt.hashSync(password, 10);
 
     const supabase = await createAdminClient();

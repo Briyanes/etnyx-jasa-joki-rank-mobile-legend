@@ -84,7 +84,8 @@ interface PackageProfit {
 // ============================================================
 //  CONSTANTS
 // ============================================================
-const FINANCE_PIN = process.env.FINANCE_PIN || process.env.ADMIN_JWT_SECRET?.slice(0, 12) || "etnyx2026!";
+// Finance PIN is verified server-side via /api/admin/finance-pin
+const FINANCE_PIN = "";
 
 const MONTHS = [
   "Januari", "Februari", "Maret", "April", "Mei", "Juni",
@@ -269,24 +270,37 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
   const [error, setError] = useState("");
   const [attempts, setAttempts] = useState(0);
   const [locked, setLocked] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (locked) return;
-
-    if (pin === FINANCE_PIN) {
-      sessionStorage.setItem("finance_unlocked", "true");
-      onUnlock();
-    } else {
-      const newAttempts = attempts + 1;
-      setAttempts(newAttempts);
-      setError(`PIN salah (${newAttempts}/5)`);
-      setPin("");
-      if (newAttempts >= 5) {
-        setLocked(true);
-        setError("Terlalu banyak percobaan. Coba lagi dalam 5 menit.");
-        setTimeout(() => { setLocked(false); setAttempts(0); setError(""); }, 300000);
+    if (locked || loading) return;
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/finance-pin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pin }),
+      });
+      if (res.ok) {
+        sessionStorage.setItem("finance_unlocked", "true");
+        onUnlock();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        const newAttempts = attempts + 1;
+        setAttempts(newAttempts);
+        setError(data.error || `PIN salah (${newAttempts}/5)`);
+        setPin("");
+        if (newAttempts >= 5) {
+          setLocked(true);
+          setError("Terlalu banyak percobaan. Coba lagi dalam 5 menit.");
+          setTimeout(() => { setLocked(false); setAttempts(0); setError(""); }, 300000);
+        }
       }
+    } catch {
+      setError("Gagal menghubungi server. Coba lagi.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -326,10 +340,10 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
 
             <button
               type="submit"
-              disabled={!pin || locked}
+              disabled={!pin || locked || loading}
               className="w-full bg-accent text-white rounded-lg py-3 font-medium hover:bg-accent/90 transition disabled:opacity-50"
             >
-              {locked ? "Terkunci" : "Buka Dashboard"}
+              {locked ? "Terkunci" : loading ? "Memverifikasi..." : "Buka Dashboard"}
             </button>
           </form>
         </div>

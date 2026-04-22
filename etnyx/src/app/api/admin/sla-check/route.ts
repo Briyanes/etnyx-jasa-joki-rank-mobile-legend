@@ -1,5 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
+import { timingSafeEqual, createHash } from "crypto";
+
+function safeCompare(a: string, b: string): boolean {
+  try {
+    const ha = createHash("sha256").update(a).digest();
+    const hb = createHash("sha256").update(b).digest();
+    return ha.length === hb.length && timingSafeEqual(ha, hb);
+  } catch {
+    return false;
+  }
+}
 
 // SLA durations in hours based on package type
 const SLA_HOURS: Record<string, number> = {
@@ -13,10 +24,10 @@ const SLA_HOURS: Record<string, number> = {
 export async function POST(request: NextRequest) {
   try {
     // Verify cron secret or admin auth
-    const authHeader = request.headers.get("authorization");
+    const authHeader = request.headers.get("authorization") || "";
     const cronSecret = process.env.CRON_SECRET;
 
-    if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+    if (!cronSecret || !safeCompare(authHeader, `Bearer ${cronSecret}`)) {
       // Check admin auth as fallback
       const { verifyAdmin } = await import("@/lib/admin-auth");
       const admin = await verifyAdmin();
