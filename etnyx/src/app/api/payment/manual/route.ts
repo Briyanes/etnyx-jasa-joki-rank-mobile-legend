@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     // Fetch order
     const { data: order, error: orderError } = await supabase
       .from("orders")
-      .select("id, order_id, total_price, status, payment_status, payment_method, username")
+      .select("id, order_id, total_price, status, payment_status, payment_method, username, moota_va_number, moota_bank_type, payment_expired_at")
       .eq("order_id", orderId)
       .single();
 
@@ -53,6 +53,9 @@ export async function GET(request: NextRequest) {
         payment_status: order.payment_status,
         payment_method: order.payment_method,
         username: order.username,
+        moota_va_number: order.moota_va_number,
+        moota_bank_type: order.moota_bank_type,
+        payment_expired_at: order.payment_expired_at,
       },
       bankAccounts,
       hasProof: (existingProofs?.length || 0) > 0,

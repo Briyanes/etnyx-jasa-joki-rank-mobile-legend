@@ -7,32 +7,10 @@ import crypto from "crypto";
 // Re-export for backward compatibility
 export { decryptField } from "@/lib/encryption";
 
-const IPAYMU_API_KEY = process.env.IPAYMU_API_KEY || "";
-const IPAYMU_VA = process.env.IPAYMU_VA || "";
-const IPAYMU_IS_PRODUCTION = process.env.IPAYMU_IS_PRODUCTION === "true";
+const MOOTA_API_TOKEN = process.env.MOOTA_API_TOKEN || "";
+const MOOTA_BANK_TYPE = process.env.MOOTA_BANK_TYPE || "bca";
+const MOOTA_EXPIRED_MINUTES = parseInt(process.env.MOOTA_EXPIRED_MINUTES || "1440");
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://etnyx.com");
-
-function getIpaymuUrl(isProduction: boolean) {
-  return isProduction
-    ? "https://my.ipaymu.com/api/v2/payment"
-    : "https://sandbox.ipaymu.com/api/v2/payment";
-}
-
-function generateIpaymuSignature(body: object, va: string, apiKey: string): string {
-  const bodyHash = crypto.createHash("sha256").update(JSON.stringify(body)).digest("hex");
-  const stringToSign = `POST:${va}:${bodyHash}:${apiKey}`;
-  return crypto.createHmac("sha256", apiKey).update(stringToSign).digest("hex");
-}
-
-function getIpaymuTimestamp(): string {
-  const now = new Date();
-  return now.getFullYear().toString() +
-    String(now.getMonth() + 1).padStart(2, "0") +
-    String(now.getDate()).padStart(2, "0") +
-    String(now.getHours()).padStart(2, "0") +
-    String(now.getMinutes()).padStart(2, "0") +
-    String(now.getSeconds()).padStart(2, "0");
-}
 
 // Simple in-memory rate limiter
 const orderRateLimit = new Map<string, number[]>();
@@ -454,7 +432,7 @@ export async function POST(request: NextRequest) {
         gclid,
         ttclid,
         referrer_url: referrerUrl,
-        payment_method: body.paymentMethod === "manual_transfer" ? "manual_transfer" : "ipaymu",
+        payment_method: body.paymentMethod === "manual_transfer" ? "manual_transfer" : "moota",
       })
       .select("id, order_id, total_price")
       .single();
@@ -498,104 +476,57 @@ export async function POST(request: NextRequest) {
       if (refErr) console.error("Referral insert error:", refErr);
     }
 
-    // Create iPaymu payment (only for auto/ipaymu payment method)
-    let paymentUrl: string | undefined;
+    // Create Moota PG transaction (only for moota payment method)
+    let mootaVaNumber: string | undefined;
+    let mootaBankType: string | undefined;
+    let paymentExpiredAt: string | undefined;
     const isManualTransfer = body.paymentMethod === "manual_transfer";
 
-    if (!isManualTransfer) {
-    // Get iPaymu keys: prefer database (admin dashboard) over env
-    let ipaymuApiKey = IPAYMU_API_KEY;
-    let ipaymuVa = IPAYMU_VA;
-    let ipaymuIsProduction = IPAYMU_IS_PRODUCTION;
-    try {
-      const { data: intSettings } = await supabase
-        .from("settings")
-        .select("value")
-        .eq("key", "integrations")
-        .single();
-      if (intSettings?.value?.ipaymuApiKey) {
-        ipaymuApiKey = intSettings.value.ipaymuApiKey;
-      }
-      if (intSettings?.value?.ipaymuVa) {
-        ipaymuVa = intSettings.value.ipaymuVa;
-      }
-      if (intSettings?.value?.ipaymuIsProduction !== undefined) {
-        ipaymuIsProduction = intSettings.value.ipaymuIsProduction;
-      }
-    } catch { /* fallback to env */ }
-
-    const ipaymuApiUrl = getIpaymuUrl(ipaymuIsProduction);
-
-    if (ipaymuApiKey && ipaymuVa) {
+    if (!isManualTransfer && MOOTA_API_TOKEN) {
       try {
-        const ipaymuRefId = `ETN-${orderId}-${Date.now()}`;
-
-        const ipaymuBody = {
-          product: [`Joki ML: ${normCurrent} to ${normTarget}`],
-          qty: ["1"],
-          price: [String(verifiedTotalPrice)],
-          amount: String(verifiedTotalPrice),
-          returnUrl: `${SITE_URL}/payment/success?order_id=${orderId}`,
-          cancelUrl: `${SITE_URL}/payment/success?order_id=${orderId}&transaction_status=cancel`,
-          notifyUrl: `${SITE_URL}/api/payment/notification`,
-          referenceId: ipaymuRefId,
-          buyerName: sanitizedNickname,
-          buyerPhone: `+62${cleanWhatsapp}`,
-          buyerEmail: sanitizedEmail || "customer@etnyx.com",
-        };
-
-        const signature = generateIpaymuSignature(ipaymuBody, ipaymuVa, ipaymuApiKey);
-
-        const ipaymuRes = await fetch(ipaymuApiUrl, {
+        const mootaRes = await fetch("https://app.moota.co/api/v2/pg/transactions", {
           method: "POST",
           headers: {
-            Accept: "application/json",
             "Content-Type": "application/json",
-            va: ipaymuVa,
-            signature,
-            timestamp: getIpaymuTimestamp(),
+            "Accept": "application/json",
+            "Authorization": `Bearer ${MOOTA_API_TOKEN}`,
           },
-          body: JSON.stringify(ipaymuBody),
+          body: JSON.stringify({
+            amount: verifiedTotalPrice,
+            bank_type: MOOTA_BANK_TYPE,
+            note: orderId,
+            expired: MOOTA_EXPIRED_MINUTES,
+          }),
         });
 
-        const ipaymuData = await ipaymuRes.json();
+        const mootaData = await mootaRes.json();
 
-        if (ipaymuRes.ok && ipaymuData.Status === 200 && ipaymuData.Data?.Url) {
-          paymentUrl = ipaymuData.Data.Url;
+        if (mootaRes.ok && mootaData.account_number) {
+          mootaVaNumber = mootaData.account_number;
+          mootaBankType = mootaData.bank_type || MOOTA_BANK_TYPE;
+          paymentExpiredAt = mootaData.expired_time || new Date(Date.now() + MOOTA_EXPIRED_MINUTES * 60_000).toISOString();
 
-          // Save payment info to order
           await supabase
             .from("orders")
             .update({
-              payment_token: ipaymuData.Data.SessionId || null,
-              payment_url: ipaymuData.Data.Url,
-              midtrans_order_id: ipaymuRefId,
+              moota_transaction_id: mootaData.uuid,
+              moota_va_number: mootaVaNumber,
+              moota_bank_type: mootaBankType,
+              payment_expired_at: paymentExpiredAt,
             })
             .eq("id", order.id);
         } else {
-          console.error("iPaymu error:", ipaymuRes.status, JSON.stringify(ipaymuData), "URL:", ipaymuApiUrl, "VA:", ipaymuVa?.slice(0,6) + "...");
-          // iPaymu failed — fallback to manual transfer
-          await supabase
-            .from("orders")
-            .update({ payment_method: "manual_transfer" })
-            .eq("id", order.id);
+          console.error("Moota PG error:", mootaData);
         }
       } catch (e) {
-        console.error("iPaymu payment creation error:", e);
-        // iPaymu failed — fallback to manual transfer
-        await supabase
-          .from("orders")
-          .update({ payment_method: "manual_transfer" })
-          .eq("id", order.id);
+        console.error("Moota PG creation error:", e);
       }
     }
-    } // end if (!isManualTransfer)
 
-    // If iPaymu was selected but failed (no paymentUrl), send follow-up WA for manual payment
-    const ipaymuFailed = !isManualTransfer && !paymentUrl;
-    if (ipaymuFailed) {
+    // If Moota was selected but VA not created, send follow-up WA for manual payment
+    const mootaFailed = !isManualTransfer && !mootaVaNumber;
+    if (mootaFailed) {
       try {
-        // Fetch bank accounts for the follow-up message
         let paymentInfo = "";
         try {
           const { data: bankSettings } = await supabase
@@ -621,7 +552,7 @@ export async function POST(request: NextRequest) {
         const { sendWhatsAppMessage } = await import("@/lib/notifications");
         await sendWhatsAppMessage(`+62${cleanWhatsapp}`, fallbackMsg, uploadUrl);
       } catch (e) {
-        console.error("iPaymu fallback WA error:", e);
+        console.error("Moota fallback WA error:", e);
       }
     }
 
@@ -630,7 +561,7 @@ export async function POST(request: NextRequest) {
       order_id: order.id,
       action: "created",
       new_value: "pending",
-      notes: `Order created via website. ${isManualTransfer ? "Manual transfer." : paymentUrl ? "Payment link generated." : "iPaymu gagal, fallback ke manual transfer."}`,
+      notes: `Order created via website. ${isManualTransfer ? "Manual transfer." : mootaVaNumber ? "Moota PG VA created." : "Moota gagal, fallback ke manual transfer."}`,
       created_by: "system",
     });
 
@@ -651,7 +582,7 @@ export async function POST(request: NextRequest) {
           whatsapp: `+62${cleanWhatsapp}`,
           email: sanitizedEmail || undefined,
           status: "pending",
-          payment_url: paymentUrl,
+          payment_url: undefined,
         }),
         notifyAdminNewOrder({
           order_id: order.order_id,
@@ -681,9 +612,11 @@ export async function POST(request: NextRequest) {
         orderId: order.order_id,
         totalPrice: verifiedTotalPrice,
         discount: verifiedDiscount,
-        paymentUrl,
-        paymentMethod: isManualTransfer || (!isManualTransfer && !paymentUrl) ? "manual_transfer" : "ipaymu",
-        ipaymuFailed: !isManualTransfer && !paymentUrl,
+        mootaVaNumber,
+        mootaBankType,
+        paymentExpiredAt,
+        paymentMethod: "manual_transfer",
+        mootaFailed: !isManualTransfer && !mootaVaNumber,
       },
       { status: 201 }
     );

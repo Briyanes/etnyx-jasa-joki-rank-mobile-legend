@@ -80,6 +80,9 @@ interface OrderInfo {
   payment_status: string;
   payment_method: string;
   username: string;
+  moota_va_number?: string;
+  moota_bank_type?: string;
+  payment_expired_at?: string;
 }
 
 function LangToggle() {
@@ -104,6 +107,35 @@ function ManualPaymentContent() {
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [mootaTimeLeft, setMootaTimeLeft] = useState<number | null>(null);
+
+  // Moota: countdown timer + auto-poll for payment
+  useEffect(() => {
+    if (!order?.moota_va_number || !order.payment_expired_at) return;
+    const expiry = new Date(order.payment_expired_at).getTime();
+    const tick = () => setMootaTimeLeft(Math.max(0, Math.floor((expiry - Date.now()) / 1000)));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [order?.moota_va_number, order?.payment_expired_at]);
+
+  // Moota: poll payment status every 5s until paid
+  useEffect(() => {
+    if (!order?.moota_va_number || !orderId || order.payment_status === "paid") return;
+    const poll = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/payment?order_id=${encodeURIComponent(orderId)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.payment_status === "paid") {
+            setOrder((prev) => prev ? { ...prev, payment_status: "paid", status: "confirmed" } : prev);
+            clearInterval(poll);
+          }
+        }
+      } catch { /* ignore */ }
+    }, 5000);
+    return () => clearInterval(poll);
+  }, [order?.moota_va_number, orderId, order?.payment_status]);
 
   // Upload state
   const [file, setFile] = useState<File | null>(null);
@@ -394,7 +426,88 @@ function ManualPaymentContent() {
           </div>
         </div>
 
-        {/* Steps */}
+        {/* Moota PG: Virtual Account Section */}
+        {order.moota_va_number && (
+          <div className="bg-surface rounded-2xl border border-accent/30 p-5 space-y-4">
+            {order.payment_status === "paid" ? (
+              <div className="text-center space-y-3">
+                <div className="w-14 h-14 mx-auto rounded-full bg-green-500/20 flex items-center justify-center">
+                  <CheckCircle className="w-8 h-8 text-green-400" />
+                </div>
+                <p className="text-green-400 font-bold text-lg">Pembayaran Diterima!</p>
+                <p className="text-text-muted text-sm">Order kamu sudah dikonfirmasi.</p>
+                <a href={`/track?order_id=${order.order_id}`} className="block w-full gradient-primary py-3 rounded-xl text-white font-semibold text-sm">
+                  Track Order →
+                </a>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center">
+                      <Landmark className="w-4 h-4 text-accent" />
+                    </div>
+                    <div>
+                      <p className="text-text font-semibold text-sm">Virtual Account {(order.moota_bank_type || "").toUpperCase()}</p>
+                      <p className="text-text-muted text-xs">Transfer ke nomor VA berikut</p>
+                    </div>
+                  </div>
+                  {mootaTimeLeft !== null && mootaTimeLeft > 0 && (
+                    <div className="flex items-center gap-1 text-yellow-400 text-xs bg-yellow-400/10 px-2 py-1 rounded-full">
+                      <Clock className="w-3 h-3" />
+                      <span className="font-mono">
+                        {String(Math.floor(mootaTimeLeft / 3600)).padStart(2, "0")}:
+                        {String(Math.floor((mootaTimeLeft % 3600) / 60)).padStart(2, "0")}:
+                        {String(mootaTimeLeft % 60).padStart(2, "0")}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* VA Number */}
+                <div className="bg-background rounded-xl p-4">
+                  <p className="text-text-muted text-xs mb-1">Nomor Virtual Account</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-mono text-accent font-bold text-xl tracking-wider">{order.moota_va_number}</p>
+                    <button
+                      onClick={() => handleCopy(order.moota_va_number!, "va")}
+                      className="flex items-center gap-1 px-3 py-1.5 bg-accent/20 text-accent rounded-lg text-xs font-medium hover:bg-accent/30 transition-colors flex-shrink-0"
+                    >
+                      {copiedAccount === "va" ? <><Check className="w-3 h-3" /> Tersalin!</> : <><Copy className="w-3 h-3" /> Salin</>}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Amount */}
+                <div className="bg-background rounded-xl p-4">
+                  <p className="text-text-muted text-xs mb-1">Jumlah Transfer (TEPAT)</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="gradient-text font-bold text-xl">{formatRupiah(order.total_price)}</p>
+                    <button
+                      onClick={() => handleCopy(String(order.total_price), "amount")}
+                      className="flex items-center gap-1 px-3 py-1.5 bg-accent/20 text-accent rounded-lg text-xs font-medium hover:bg-accent/30 transition-colors flex-shrink-0"
+                    >
+                      {copiedAccount === "amount" ? <><Check className="w-3 h-3" /> Tersalin!</> : <><Copy className="w-3 h-3" /> Salin</>}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2 bg-yellow-500/10 rounded-xl p-3">
+                  <AlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
+                  <p className="text-yellow-300 text-xs">Transfer <strong>TEPAT</strong> sesuai nominal di atas. Pembayaran akan terverifikasi <strong>otomatis</strong> oleh sistem.</p>
+                </div>
+
+                <div className="flex items-center gap-2 text-text-muted text-xs justify-center">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  Menunggu konfirmasi pembayaran otomatis...
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Steps (only show for manual / non-moota) */}
+        {!order.moota_va_number && (
         <div className="flex items-center justify-between text-xs text-text-muted bg-surface rounded-xl border border-white/5 p-3">
           <div className="flex flex-col items-center gap-1 flex-1">
             <div className="w-7 h-7 rounded-full bg-accent/20 text-accent flex items-center justify-center font-bold text-sm">1</div>
@@ -411,8 +524,11 @@ function ManualPaymentContent() {
             <span className="text-center text-[10px] leading-tight">Upload<br/>Bukti</span>
           </div>
         </div>
+        )}
 
-        {/* Bank Accounts */}
+        {/* Bank Accounts (manual transfer only) */}
+        {!order.moota_va_number && (
+        <>
         <div className="bg-surface rounded-2xl border border-white/5 p-4">
           <h2 className="text-text font-bold text-sm mb-3">{t.transferTo}</h2>
           
@@ -570,8 +686,11 @@ function ManualPaymentContent() {
             <p className="text-text-muted text-xs mt-1">{t.importantDesc}</p>
           </div>
         </div>
+        </>
+        )}
 
-        {/* Upload Proof */}
+        {/* Upload Proof (manual transfer only) */}
+        {!order.moota_va_number && (
         <div className="bg-surface rounded-2xl border border-white/5 p-4">
           <h2 className="text-text font-bold text-sm mb-3 flex items-center gap-2">
             <Upload className="w-4 h-4 text-accent" />
@@ -670,6 +789,7 @@ function ManualPaymentContent() {
             </button>
           </div>
         </div>
+        )}
       </div>
     </div>
   );
