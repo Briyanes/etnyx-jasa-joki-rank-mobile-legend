@@ -709,8 +709,8 @@ function OrderPageContent() {
   const [promoMessage, setPromoMessage] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
   const [promoLoading, setPromoLoading] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<"moota" | "manual_transfer">("manual_transfer");
-  const [mootaEnabled, setMootaEnabled] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"ipaymu" | "manual_transfer">("manual_transfer");
+  const [ipaymuEnabled, setIpaymuEnabled] = useState(false);
   const [tierDiscount, setTierDiscount] = useState(0);
   const [customerTier, setCustomerTier] = useState<string | null>(null);
   const [selectedPackage, setSelectedPackage] = useState<ProductPackage | null>(
@@ -881,7 +881,7 @@ function OrderPageContent() {
   useEffect(() => {
     fetch("/api/payment-methods")
       .then((res) => res.json())
-      .then((data) => { if (data.mootaEnabled) setMootaEnabled(true); })
+      .then((data) => { if (data.ipaymuEnabled) setIpaymuEnabled(true); })
       .catch(() => {/* keep manual only */});
   }, []);
 
@@ -3012,7 +3012,7 @@ function OrderPageContent() {
                   <p className="text-text-muted text-xs mb-3 uppercase tracking-wider">
                     Metode Pembayaran
                   </p>
-                  <div className={`grid grid-cols-1 ${mootaEnabled ? "sm:grid-cols-2" : ""} gap-3`}>
+                  <div className={`grid grid-cols-1 ${ipaymuEnabled ? "sm:grid-cols-2" : ""} gap-3`}>
                     <button
                       type="button"
                       onClick={() => setPaymentMethod("manual_transfer")}
@@ -3033,25 +3033,25 @@ function OrderPageContent() {
                         Bank (BCA, BRI, BNI, Mandiri, Jago), E-Wallet, QRIS
                       </p>
                     </button>
-                    {mootaEnabled && (
+                    {ipaymuEnabled && (
                     <button
                       type="button"
-                      onClick={() => setPaymentMethod("moota")}
+                      onClick={() => setPaymentMethod("ipaymu")}
                       className={`relative p-4 rounded-xl border-2 text-left transition-all ${
-                        paymentMethod === "moota"
+                        paymentMethod === "ipaymu"
                           ? "border-accent bg-accent/10"
                           : "border-white/10 hover:border-white/20"
                       }`}
                     >
-                      {paymentMethod === "moota" && (
+                      {paymentMethod === "ipaymu" && (
                         <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-accent flex items-center justify-center">
                           <Check className="w-3 h-3 text-white" />
                         </div>
                       )}
                       <Zap className="w-5 h-5 text-green-400 mb-2" />
-                      <p className="text-text font-semibold text-sm">Virtual Account (Moota)</p>
+                      <p className="text-text font-semibold text-sm">Otomatis (iPaymu)</p>
                       <p className="text-text-muted text-xs mt-0.5">
-                        VA BRI, BCA, BNI, Mandiri, dan lainnya
+                        QRIS, VA, GoPay, ShopeePay, Kartu Kredit
                       </p>
                     </button>
                     )}
