@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import crypto from "crypto";
-import { sendPaymentConfirmedWA, notifyWorkerConfirmedOrder, notifyAdminPaymentConfirmed, sendPaymentConfirmedEmail } from "@/lib/notifications";
+import { sendPaymentConfirmedWA, notifyWorkerConfirmedOrder, notifyAdminPaymentConfirmed, sendPaymentConfirmedEmail, sendWhatsAppMessage, sendTelegramMessage } from "@/lib/notifications";
 import { sendMetaCAPI } from "@/lib/meta-capi";
 
 // Get iPaymu settings from DB or env
@@ -159,6 +159,35 @@ export async function POST(request: NextRequest) {
         updated_at: new Date().toISOString(),
       })
       .eq("id", order.id);
+
+    // Notify customer and admin for underpaid payments
+    if (paymentStatus === "underpaid") {
+      const paidAmount = Number(verifiedTrx.Amount ?? 0);
+      const missing = order.total_price - paidAmount;
+      const manualUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.com"}/payment/manual/?order_id=${order.order_id}`;
+      const underpaidMsg = `Halo kak!\n\nPembayaran untuk order *${order.order_id}* kurang.\n\n💰 *Jumlah dibayar:* Rp ${paidAmount.toLocaleString("id-ID")}\n💰 *Yang seharusnya:* Rp ${order.total_price.toLocaleString("id-ID")}\n⚠️ *Kurang:* Rp ${missing.toLocaleString("id-ID")}\n\nMohon lunasi kekurangannya dan upload bukti transfer baru di:\n${manualUrl}\n\nAtau hubungi CS kami untuk bantuan.\n\n_ETNYX - Push Rank, Tanpa Main_`;
+      const waNumber = order.whatsapp?.startsWith("+") ? order.whatsapp : `+62${order.whatsapp}`;
+      Promise.allSettled([
+        sendWhatsAppMessage(waNumber, underpaidMsg, manualUrl),
+        // Notify admin via Telegram
+        (async () => {
+          const { data: intSettings } = await supabase.from("settings").select("value").eq("key", "integrations").single();
+          const chatId = intSettings?.value?.telegramAdminGroupId;
+          if (chatId) {
+            const adminMsg = `⚠️ <b>PEMBAYARAN KURANG</b>\n\n<b>Order ID:</b> ${order.order_id}\n<b>Username:</b> ${order.username}\n<b>Dibayar:</b> Rp ${paidAmount.toLocaleString("id-ID")}\n<b>Seharusnya:</b> Rp ${order.total_price.toLocaleString("id-ID")}\n<b>Kurang:</b> Rp ${missing.toLocaleString("id-ID")}`;
+            await sendTelegramMessage(chatId, adminMsg);
+          }
+        })(),
+      ]).catch(console.error);
+    }
+
+    // Notify customer when payment expires or fails
+    if (paymentStatus === "failed") {
+      const waNumber = order.whatsapp?.startsWith("+") ? order.whatsapp : `+62${order.whatsapp}`;
+      const manualUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.com"}/payment/manual/?order_id=${order.order_id}`;
+      const failedMsg = `Halo kak!\n\nSayang sekali, pembayaran untuk order *${order.order_id}* gagal atau sudah kedaluwarsa.\n\nKamu masih bisa melanjutkan dengan transfer manual:\n${manualUrl}\n\nAtau hubungi CS kami untuk bantuan.\n\n_ETNYX - Push Rank, Tanpa Main_`;
+      sendWhatsAppMessage(waNumber, failedMsg, manualUrl).catch(console.error);
+    }
 
     // Send notifications when payment is confirmed
     if (paymentStatus === "paid" && order.status !== "confirmed") {

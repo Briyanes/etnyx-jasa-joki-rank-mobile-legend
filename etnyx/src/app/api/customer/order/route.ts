@@ -591,40 +591,6 @@ export async function POST(request: NextRequest) {
     }
     } // end if (!isManualTransfer)
 
-    // If iPaymu was selected but failed (no paymentUrl), send follow-up WA for manual payment
-    const ipaymuFailed = !isManualTransfer && !paymentUrl;
-    if (ipaymuFailed) {
-      try {
-        // Fetch bank accounts for the follow-up message
-        let paymentInfo = "";
-        try {
-          const { data: bankSettings } = await supabase
-            .from("settings")
-            .select("value")
-            .eq("key", "bank_accounts")
-            .single();
-          if (bankSettings?.value && Array.isArray(bankSettings.value)) {
-            const activeAccounts = (bankSettings.value as { bank: string; account_number: string; account_name: string; is_active: boolean }[])
-              .filter((a) => a.is_active);
-            if (activeAccounts.length > 0) {
-              const bankList = activeAccounts
-                .map((a) => `• *${a.bank}*: ${a.account_number} (a.n. ${a.account_name})`)
-                .join("\n");
-              paymentInfo = `\n\n💳 *Transfer ke salah satu rekening berikut:*\n${bankList}`;
-            }
-          }
-        } catch { /* no bank accounts configured */ }
-
-        const uploadUrl = `${SITE_URL}/payment/manual/?order_id=${orderId}`;
-        const fallbackMsg = `Halo kak!\n\nIni dari *ETNYX*. Pembayaran otomatis sedang bermasalah, mohon maaf atas ketidaknyamanannya.\n\nSilakan lakukan pembayaran manual untuk order berikut:\n\n*Order ID:* ${orderId}\n*Paket:* ${sanitizedPackageTitle || packageName}\n*Total:* Rp ${verifiedTotalPrice.toLocaleString("id-ID")}${paymentInfo}\n\nSetelah transfer, upload bukti di sini:\n${uploadUrl}\n\nAda pertanyaan? Balas pesan ini aja~\n\n_ETNYX - Push Rank, Tanpa Main_`;
-
-        const { sendWhatsAppMessage } = await import("@/lib/notifications");
-        await sendWhatsAppMessage(`+62${cleanWhatsapp}`, fallbackMsg, uploadUrl);
-      } catch (e) {
-        console.error("iPaymu fallback WA error:", e);
-      }
-    }
-
     // Log order creation
     await supabase.from("order_logs").insert({
       order_id: order.id,
