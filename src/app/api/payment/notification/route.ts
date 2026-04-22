@@ -1,86 +1,86 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
-import crypto from "crypto";
 
-const MIDTRANS_SERVER_KEY = process.env.MIDTRANS_SERVER_KEY || "";
-
-// Verify Midtrans signature
-function verifySignature(orderId: string, statusCode: string, grossAmount: string, signatureKey: string): boolean {
-  const hash = crypto
-    .createHash("sha512")
-    .update(`${orderId}${statusCode}${grossAmount}${MIDTRANS_SERVER_KEY}`)
-    .digest("hex");
-  return hash === signatureKey;
-}
-
+// Moota mengirim webhook: { transactions: [{ uuid, amount, type, bank_type, note, status, ... }] }
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const {
-      order_id,
-      status_code,
-      gross_amount,
-      signature_key,
-      transaction_status,
-      fraud_status,
-      payment_type,
-    } = body;
 
-    // Verify signature
-    if (!verifySignature(order_id, status_code, gross_amount, signature_key)) {
-      console.error("Invalid signature for order:", order_id);
-      return NextResponse.json({ error: "Invalid signature" }, { status: 403 });
+    // Validasi webhook token dari Moota (opsional, set di header X-Moota-Token)
+    const webhookToken = request.headers.get("x-moota-token") ?? request.headers.get("authorization");
+    const expectedToken = process.env.MOOTA_WEBHOOK_TOKEN;
+    if (expectedToken && webhookToken !== expectedToken && webhookToken !== `Bearer ${expectedToken}`) {
+      console.warn("Moota webhook: invalid token");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { transactions } = body as { transactions: MootaTransaction[] };
+
+    // Moota "Check URL" test sends empty body — return 200 so validation passes
+    if (!transactions || !Array.isArray(transactions) || transactions.length === 0) {
+      return NextResponse.json({ success: true, message: "Webhook OK" });
     }
 
     const supabase = await createAdminClient();
 
-    // Find order by Midtrans order ID
-    const { data: order, error } = await supabase
-      .from("orders")
-      .select("id, order_id, status")
-      .eq("midtrans_order_id", order_id)
-      .single();
+    for (const tx of transactions) {
+      // Hanya proses transaksi kredit (masuk) yang sukses
+      if (tx.type !== "CR" && tx.type !== "credit") continue;
+      if (tx.status !== "success" && tx.status !== "approved") continue;
 
-    if (error || !order) {
-      console.error("Order not found for Midtrans ID:", order_id);
-      return NextResponse.json({ error: "Order not found" }, { status: 404 });
-    }
+      // Cari order berdasarkan moota_transaction_id atau note (order_id)
+      const { data: order } = await supabase
+        .from("orders")
+        .select("id, order_id, status, payment_status, total_price")
+        .or(`moota_transaction_id.eq.${tx.uuid},order_id.eq.${tx.note}`)
+        .single();
 
-    // Determine payment status
-    let paymentStatus = "pending";
-    let orderStatus = order.status;
-
-    if (transaction_status === "capture" || transaction_status === "settlement") {
-      if (fraud_status === "accept" || !fraud_status) {
-        paymentStatus = "paid";
-        orderStatus = "confirmed"; // Auto-confirm when paid
-      } else {
-        paymentStatus = "challenge";
+      if (!order) {
+        console.warn(`Moota webhook: order tidak ditemukan untuk uuid=${tx.uuid} note=${tx.note}`);
+        continue;
       }
-    } else if (transaction_status === "pending") {
-      paymentStatus = "pending";
-    } else if (transaction_status === "deny" || transaction_status === "cancel" || transaction_status === "expire") {
-      paymentStatus = "failed";
-    } else if (transaction_status === "refund") {
-      paymentStatus = "refunded";
+
+      if (order.payment_status === "paid") {
+        continue; // Sudah diproses
+      }
+
+      // Update order: tandai sebagai paid dan konfirmasi
+      await supabase
+        .from("orders")
+        .update({
+          payment_status: "paid",
+          payment_type: tx.bank_type,
+          status: "confirmed",
+          paid_at: new Date().toISOString(),
+        })
+        .eq("id", order.id);
+
+      // Simpan log pembayaran
+      await supabase.from("payment_logs").insert({
+        order_id: order.id,
+        midtrans_order_id: tx.uuid, // pakai kolom yg ada untuk simpan moota uuid
+        transaction_status: tx.status,
+        payment_type: tx.bank_type,
+        gross_amount: tx.amount,
+        raw_response: tx as unknown as Record<string, unknown>,
+      });
+
+      console.log(`Moota webhook: Order ${order.order_id} terkonfirmasi (Rp ${tx.amount})`);
     }
-
-    // Update order
-    await supabase
-      .from("orders")
-      .update({
-        payment_status: paymentStatus,
-        payment_type: payment_type,
-        status: orderStatus,
-        paid_at: paymentStatus === "paid" ? new Date().toISOString() : null,
-      })
-      .eq("id", order.id);
-
-    console.log(`Payment notification: Order ${order.order_id} - ${transaction_status} - ${paymentStatus}`);
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Payment notification error:", error);
-    return NextResponse.json({ error: "Notification processing failed" }, { status: 500 });
+    console.error("Moota webhook error:", error);
+    return NextResponse.json({ error: "Webhook processing failed" }, { status: 500 });
   }
+}
+
+interface MootaTransaction {
+  uuid: string;
+  amount: number;
+  type: string;
+  bank_type: string;
+  note: string;
+  status: string;
+  created_at?: string;
 }

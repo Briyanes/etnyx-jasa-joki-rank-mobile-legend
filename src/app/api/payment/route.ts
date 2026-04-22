@@ -1,27 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
-import crypto from "crypto";
 
-const MIDTRANS_SERVER_KEY = process.env.MIDTRANS_SERVER_KEY || "";
-const MIDTRANS_IS_PRODUCTION = process.env.MIDTRANS_IS_PRODUCTION === "true";
-const MIDTRANS_API_URL = MIDTRANS_IS_PRODUCTION
-  ? "https://app.midtrans.com/snap/v1/transactions"
-  : "https://app.sandbox.midtrans.com/snap/v1/transactions";
+const MOOTA_API_TOKEN = process.env.MOOTA_API_TOKEN || "";
+const MOOTA_API_URL = "https://app.moota.co/api/v2";
+const MOOTA_BANK_TYPE = process.env.MOOTA_BANK_TYPE || "bca";
+const MOOTA_EXPIRED_MINUTES = parseInt(process.env.MOOTA_EXPIRED_MINUTES || "1440"); // 24 jam
 
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createAdminClient();
     const body = await request.json();
-    const { orderId, amount, customerName, customerEmail, customerPhone, itemName } = body;
+    const { orderId } = body;
 
-    if (!orderId || !amount) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    if (!orderId) {
+      return NextResponse.json({ error: "Order ID required" }, { status: 400 });
     }
 
-    // Check if order exists
     const { data: order, error: orderError } = await supabase
       .from("orders")
-      .select("id, order_id, total_price, status")
+      .select("id, order_id, total_price, status, payment_status")
       .eq("order_id", orderId)
       .single();
 
@@ -33,69 +30,50 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Order already processed" }, { status: 400 });
     }
 
-    // Prepare Midtrans request
-    const transactionDetails = {
-      order_id: `ETN-${orderId}-${Date.now()}`,
-      gross_amount: amount,
-    };
-
-    const customerDetails = {
-      first_name: customerName || "Customer",
-      email: customerEmail || "customer@email.com",
-      phone: customerPhone || "",
-    };
-
-    const itemDetails = [
-      {
-        id: orderId,
-        price: amount,
-        quantity: 1,
-        name: itemName || "Joki ML Service",
-      },
-    ];
-
-    const payload = {
-      transaction_details: transactionDetails,
-      customer_details: customerDetails,
-      item_details: itemDetails,
-      callbacks: {
-        finish: `${process.env.NEXT_PUBLIC_SITE_URL}/payment/success?order_id=${orderId}`,
-      },
-    };
-
-    // Create Midtrans transaction
-    const auth = Buffer.from(`${MIDTRANS_SERVER_KEY}:`).toString("base64");
-
-    const response = await fetch(MIDTRANS_API_URL, {
+    // Buat transaksi Moota Payment Gateway
+    const response = await fetch(`${MOOTA_API_URL}/pg/transactions`, {
       method: "POST",
       headers: {
+        Authorization: `Bearer ${MOOTA_API_TOKEN}`,
         "Content-Type": "application/json",
-        Authorization: `Basic ${auth}`,
+        Accept: "application/json",
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        amount: order.total_price,
+        bank_type: MOOTA_BANK_TYPE,
+        note: order.order_id,
+        expired: MOOTA_EXPIRED_MINUTES,
+      }),
     });
 
     const data = await response.json();
 
     if (!response.ok) {
-      console.error("Midtrans error:", data);
+      console.error("Moota PG error:", data);
       return NextResponse.json({ error: "Payment initialization failed" }, { status: 500 });
     }
 
-    // Save payment token to order
+    // Simpan info transaksi Moota ke order
     await supabase
       .from("orders")
-      .update({ 
-        payment_token: data.token,
-        payment_url: data.redirect_url,
-        midtrans_order_id: transactionDetails.order_id
+      .update({
+        moota_transaction_id: data.uuid,
+        bank_account_number: data.account_number,
+        bank_type: MOOTA_BANK_TYPE,
+        payment_status: "unpaid",
+        payment_expired_at: data.expired_time,
       })
       .eq("id", order.id);
 
     return NextResponse.json({
       success: true,
-      token: data.token,
-      redirect_url: data.redirect_url,
+      transaction: {
+        uuid: data.uuid,
+        account_number: data.account_number,
+        bank_type: data.bank_type ?? MOOTA_BANK_TYPE,
+        amount: data.amount ?? order.total_price,
+        expired_time: data.expired_time,
+      },
     });
   } catch (error) {
     console.error("Payment error:", error);
@@ -103,7 +81,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Get payment status
+// Cek status pembayaran order
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -116,7 +94,7 @@ export async function GET(request: NextRequest) {
     const supabase = await createAdminClient();
     const { data: order } = await supabase
       .from("orders")
-      .select("status, payment_status, midtrans_order_id")
+      .select("status, payment_status, bank_account_number, bank_type, payment_expired_at, total_price")
       .eq("order_id", orderId)
       .single();
 
@@ -124,9 +102,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       status: order.status,
-      payment_status: order.payment_status 
+      payment_status: order.payment_status,
+      bank_account_number: order.bank_account_number,
+      bank_type: order.bank_type,
+      payment_expired_at: order.payment_expired_at,
+      amount: order.total_price,
     });
   } catch (error) {
     console.error("Get payment status error:", error);

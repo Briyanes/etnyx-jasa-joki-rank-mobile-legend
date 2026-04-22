@@ -4,9 +4,19 @@ import { pricingTiers } from "@/lib/constants";
 import { createWhatsAppUrl } from "@/utils/helpers";
 
 export default function PricingSection() {
-  const handleOrder = (tierName: string, price: string) => {
-    const packageDetails = `${tierName} - Rp ${price}`;
-    window.open(createWhatsAppUrl(packageDetails), "_blank", "noopener,noreferrer");
+  const handleOrderOnline = (tierName: string) => {
+    const rankMap: Record<string, { from: string; to: string }> = {
+      Basic: { from: "epic", to: "legend" },
+      Standard: { from: "legend", to: "mythic" },
+      Express: { from: "legend", to: "mythic" },
+    };
+    const ranks = rankMap[tierName] || { from: "epic", to: "mythic" };
+    const params = new URLSearchParams({
+      current_rank: ranks.from,
+      target_rank: ranks.to,
+      express: tierName === "Express" ? "1" : "0",
+    });
+    window.location.href = `/checkout?${params.toString()}`;
   };
 
   return (
@@ -73,17 +83,28 @@ export default function PricingSection() {
                 ))}
               </ul>
 
-              {/* CTA Button */}
-              <button
-                onClick={() => handleOrder(tier.name, tier.price)}
-                className={`w-full py-3.5 rounded-xl font-semibold transition-all duration-200 ${
-                  tier.highlighted
-                    ? "gradient-primary text-white hover:opacity-90"
-                    : "border border-primary text-primary hover:bg-primary hover:text-white"
-                }`}
-              >
-                Pilih {tier.name}
-              </button>
+              {/* CTA Buttons */}
+              <div className="space-y-2">
+                <button
+                  onClick={() => handleOrderOnline(tier.name)}
+                  className={`w-full py-3.5 rounded-xl font-semibold transition-all duration-200 ${
+                    tier.highlighted
+                      ? "gradient-primary text-white hover:opacity-90"
+                      : "border border-primary text-primary hover:bg-primary hover:text-white"
+                  }`}
+                >
+                  💳 Bayar Online
+                </button>
+                <button
+                  onClick={() => {
+                    const packageDetails = `${tier.name} - Rp ${tier.price}`;
+                    window.open(createWhatsAppUrl(packageDetails), "_blank", "noopener,noreferrer");
+                  }}
+                  className="w-full py-2.5 rounded-xl font-medium text-sm border border-green-500/30 text-green-400 hover:bg-green-500/10 transition-colors"
+                >
+                  💬 via WhatsApp
+                </button>
+              </div>
             </div>
           ))}
         </div>

@@ -98,6 +98,17 @@ export default function CalculatorSection() {
     window.open(createWhatsAppUrl(packageDetails), "_blank", "noopener,noreferrer");
   }, [currentRank, targetRank, isExpress, isPremium, price, promoApplied, promoCode, promoDiscount]);
 
+  const handleOrderOnline = useCallback(() => {
+    const params = new URLSearchParams({
+      current_rank: currentRank,
+      target_rank: targetRank,
+      express: isExpress ? "1" : "0",
+      premium: isPremium ? "1" : "0",
+      ...(promoApplied && promoCode ? { promo: promoCode } : {}),
+    });
+    window.location.href = `/checkout?${params.toString()}`;
+  }, [currentRank, targetRank, isExpress, isPremium, promoApplied, promoCode]);
+
   return (
     <section id="calculator" className="py-20 px-4">
       <div className="max-w-4xl mx-auto">
@@ -265,14 +276,23 @@ export default function CalculatorSection() {
             )}
           </div>
 
-          {/* Order Button */}
-          <button
-            onClick={handleOrder}
-            disabled={!isValidProgression}
-            className="w-full gradient-primary py-4 rounded-2xl text-white font-bold text-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Order Sekarang via WhatsApp
-          </button>
+          {/* Order Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={handleOrderOnline}
+              disabled={!isValidProgression}
+              className="flex-1 gradient-primary py-4 rounded-2xl text-white font-bold text-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              💳 Bayar Online
+            </button>
+            <button
+              onClick={handleOrder}
+              disabled={!isValidProgression}
+              className="flex-1 py-4 rounded-2xl border border-green-500/50 text-green-400 font-bold text-lg hover:bg-green-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              💬 via WhatsApp
+            </button>
+          </div>
         </div>
       </div>
     </section>
