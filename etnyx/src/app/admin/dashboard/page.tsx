@@ -13,7 +13,7 @@ import {
   Plus, Pencil, Trash2, Save, Search, Filter, RefreshCw, LogOut,
   MessageCircle, Send, BookOpen, Copy, Gift, Wallet, CalendarDays,
   Flame, Target, Lightbulb, Ban, HelpCircle, Menu, FileDown,
-  KeyRound, Check, X,
+  KeyRound, Check, X, ListChecks, History,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import SettingsTab from "./SettingsTab";
@@ -226,6 +226,17 @@ export default function AdminDashboard() {
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [customerSearch, setCustomerSearch] = useState("");
   const [assigningWorker, setAssigningWorker] = useState<string | null>(null);
+
+  // Bulk select state
+  const [selectedOrders, setSelectedOrders] = useState<Set<string>>(new Set());
+  const [bulkWorker, setBulkWorker] = useState<string>("");
+  const [bulkLoading, setBulkLoading] = useState(false);
+
+  // Order log viewer state
+  interface OrderLog { action: string; old_value: string | null; new_value: string | null; notes: string | null; created_by: string | null; created_at: string }
+  const [orderLogsModal, setOrderLogsModal] = useState<{ orderId: string; orderDisplayId: string } | null>(null);
+  const [orderLogs, setOrderLogs] = useState<OrderLog[]>([]);
+  const [orderLogsLoading, setOrderLogsLoading] = useState(false);
 
   // Payment proof review state
   interface PaymentProof { id: string; order_id: string; image_url: string; sender_name: string | null; sender_bank: string | null; amount: number | null; status: string; created_at: string; reject_reason?: string | null }
@@ -529,7 +540,83 @@ export default function AdminDashboard() {
     searchDebounceRef.current = setTimeout(() => fetchOrders(), 500);
   };
 
-  // Payment proof functions
+  // Bulk operations
+  const toggleSelectOrder = (id: string) => {
+    setSelectedOrders(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+  const toggleSelectAll = () => {
+    if (selectedOrders.size === orders.length) {
+      setSelectedOrders(new Set());
+    } else {
+      setSelectedOrders(new Set(orders.map(o => o.id)));
+    }
+  };
+  const clearSelection = () => { setSelectedOrders(new Set()); setBulkWorker(""); };
+
+  const bulkConfirmPayment = async () => {
+    const targets = orders.filter(o => selectedOrders.has(o.id) && o.status === "pending" && o.payment_method === "manual_transfer");
+    if (targets.length === 0) { toast("Tidak ada order pending manual transfer yang dipilih"); return; }
+    if (!confirm(`Konfirmasi pembayaran untuk ${targets.length} order?`)) return;
+    setBulkLoading(true);
+    let ok = 0;
+    for (const o of targets) {
+      const res = await fetch("/api/admin/orders", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: o.id, status: "confirmed" }) });
+      if (res.ok) ok++;
+    }
+    toastSuccess(`${ok}/${targets.length} order berhasil dikonfirmasi`);
+    clearSelection(); fetchOrders(); fetchStats();
+    setBulkLoading(false);
+  };
+
+  const bulkAssignWorker = async () => {
+    if (!bulkWorker) { toast("Pilih worker terlebih dahulu"); return; }
+    const targets = orders.filter(o => selectedOrders.has(o.id) && o.payment_status === "paid");
+    if (targets.length === 0) { toast("Tidak ada order dengan pembayaran confirmed yang dipilih"); return; }
+    if (!confirm(`Assign ke worker yang sama untuk ${targets.length} order?`)) return;
+    setBulkLoading(true);
+    let ok = 0;
+    for (const o of targets) {
+      const res = await fetch("/api/admin/orders", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: o.id, assigned_worker_id: bulkWorker }) });
+      if (res.ok) ok++;
+    }
+    toastSuccess(`${ok}/${targets.length} order berhasil di-assign`);
+    clearSelection(); fetchOrders();
+    setBulkLoading(false);
+  };
+
+  const bulkCancel = async () => {
+    const targets = orders.filter(o => selectedOrders.has(o.id) && ["pending", "confirmed"].includes(o.status));
+    if (targets.length === 0) { toast("Pilih order pending/confirmed untuk dibatalkan"); return; }
+    if (!confirm(`Batalkan ${targets.length} order? Tindakan ini tidak dapat diurungkan.`)) return;
+    setBulkLoading(true);
+    let ok = 0;
+    for (const o of targets) {
+      const res = await fetch("/api/admin/orders", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: o.id, status: "cancelled" }) });
+      if (res.ok) ok++;
+    }
+    toastSuccess(`${ok}/${targets.length} order dibatalkan`);
+    clearSelection(); fetchOrders(); fetchStats();
+    setBulkLoading(false);
+  };
+
+  // Order log viewer
+  const openOrderLogs = async (orderId: string, orderDisplayId: string) => {
+    setOrderLogsModal({ orderId, orderDisplayId });
+    setOrderLogsLoading(true);
+    setOrderLogs([]);
+    try {
+      const res = await fetch(`/api/admin/orders/logs?id=${orderId}`);
+      const data = await res.json();
+      setOrderLogs(data.logs || []);
+    } catch { setOrderLogs([]); }
+    setOrderLogsLoading(false);
+  };
+
+
   const openProofModal = async (orderId: string, orderDisplayId: string) => {
     setProofModal({ orderId, orderDisplayId });
     setProofsLoading(true);
@@ -1173,7 +1260,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {["all", "pending", "confirmed", "in_progress", "completed", "cancelled"].map((s) => (
-                    <button key={s} onClick={() => { setStatusFilter(s); setOrdersPage(1); }}
+                    <button key={s} onClick={() => { setStatusFilter(s); setOrdersPage(1); clearSelection(); }}
                       className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${statusFilter === s ? "gradient-primary text-white shadow-lg shadow-accent/20" : "bg-surface border border-white/5 text-text-muted hover:text-text"}`}>
                       {s === "all" ? "All" : getStatusLabel(s)}
                     </button>
@@ -1181,11 +1268,51 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
+              {/* Bulk Action Bar */}
+              {selectedOrders.size > 0 && (
+                <div className="flex flex-wrap items-center gap-3 bg-accent/10 border border-accent/30 rounded-xl px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    <ListChecks className="w-4 h-4 text-accent" />
+                    <span className="text-sm font-medium text-accent">{selectedOrders.size} order dipilih</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2 flex-1">
+                    <button onClick={bulkConfirmPayment} disabled={bulkLoading}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-green-500/20 text-green-400 hover:bg-green-500/30 disabled:opacity-50 transition-colors">
+                      {bulkLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />} Konfirmasi Bayar
+                    </button>
+                    <div className="flex items-center gap-1">
+                      <select value={bulkWorker} onChange={(e) => setBulkWorker(e.target.value)}
+                        className="bg-background border border-white/10 rounded-lg px-2 py-1.5 text-xs text-text focus:border-accent focus:outline-none">
+                        <option value="">— Pilih Worker —</option>
+                        {staffUsers.filter(s => s.role === "worker" && s.is_active).map(s => (
+                          <option key={s.id} value={s.id}>{s.name}</option>
+                        ))}
+                      </select>
+                      <button onClick={bulkAssignWorker} disabled={bulkLoading || !bulkWorker}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 disabled:opacity-50 transition-colors">
+                        {bulkLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Users className="w-3 h-3" />} Assign
+                      </button>
+                    </div>
+                    <button onClick={bulkCancel} disabled={bulkLoading}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-red-500/20 text-red-400 hover:bg-red-500/30 disabled:opacity-50 transition-colors">
+                      {bulkLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <XCircle className="w-3 h-3" />} Cancel
+                    </button>
+                  </div>
+                  <button onClick={clearSelection} className="text-text-muted hover:text-text transition-colors">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+
               <div className="bg-surface rounded-xl border border-white/5 overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-white/5 bg-white/[0.02]">
+                        <th className="px-4 py-3 w-8">
+                          <input type="checkbox" checked={selectedOrders.size === orders.length && orders.length > 0} onChange={toggleSelectAll}
+                            className="w-3.5 h-3.5 accent-accent cursor-pointer" />
+                        </th>
                         <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Order</th>
                         <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Customer</th>
                         <th className="text-left text-text-muted text-xs font-medium px-4 py-3">Package</th>
@@ -1200,9 +1327,17 @@ export default function AdminDashboard() {
                       {orders.length === 0 ? (
                         <tr><td colSpan={8} className="text-center py-12 text-text-muted">No orders found</td></tr>
                       ) : orders.map((o) => (
-                        <tr key={o.id} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                        <tr key={o.id} className={`border-b border-white/5 hover:bg-white/[0.02] transition-colors ${selectedOrders.has(o.id) ? "bg-accent/5" : ""}`}>
+                          <td className="px-4 py-3 w-8">
+                            <input type="checkbox" checked={selectedOrders.has(o.id)} onChange={() => toggleSelectOrder(o.id)}
+                              className="w-3.5 h-3.5 accent-accent cursor-pointer" />
+                          </td>
                           <td className="px-4 py-3">
-                            <span className="font-mono text-accent text-xs">{o.order_id}</span>
+                            <button onClick={() => openOrderLogs(o.id, o.order_id)}
+                              className="flex items-center gap-1 font-mono text-accent text-xs hover:text-accent/70 transition-colors group">
+                              {o.order_id}
+                              <History className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </button>
                             <p className="text-text-muted text-[10px]">{new Date(o.created_at).toLocaleDateString("id-ID")}</p>
                           </td>
                           <td className="px-4 py-3">
@@ -2791,6 +2926,53 @@ export default function AdminDashboard() {
                 <Save className="w-4 h-4 inline mr-1" /> Simpan
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Order Log Viewer Modal */}
+      {orderLogsModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setOrderLogsModal(null)}>
+          <div className="bg-surface rounded-xl p-5 w-full max-w-lg border border-white/10 max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <History className="w-4 h-4 text-accent" />
+                <h3 className="text-sm font-bold text-text">Audit Trail — {orderLogsModal.orderDisplayId}</h3>
+              </div>
+              <button onClick={() => setOrderLogsModal(null)} className="text-text-muted hover:text-text text-lg">×</button>
+            </div>
+            {orderLogsLoading ? (
+              <div className="text-center py-8"><Loader2 className="w-6 h-6 animate-spin text-accent mx-auto" /></div>
+            ) : orderLogs.length === 0 ? (
+              <div className="text-center py-8">
+                <History className="w-8 h-8 text-text-muted mx-auto mb-2" />
+                <p className="text-text-muted text-sm">Belum ada log untuk order ini.</p>
+              </div>
+            ) : (
+              <div className="relative pl-6 space-y-4">
+                <div className="absolute left-2.5 top-0 bottom-0 w-px bg-white/10" />
+                {orderLogs.map((log, i) => (
+                  <div key={i} className="relative">
+                    <div className="absolute -left-[18px] top-1.5 w-2 h-2 rounded-full bg-accent" />
+                    <div className="bg-background rounded-xl p-3 border border-white/5 space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold text-accent capitalize">{log.action.replace(/_/g, " ")}</span>
+                        <span className="text-[10px] text-text-muted">{new Date(log.created_at).toLocaleString("id-ID")}</span>
+                      </div>
+                      {(log.old_value || log.new_value) && (
+                        <div className="flex items-center gap-2 text-[10px]">
+                          {log.old_value && <span className="text-red-400 line-through">{log.old_value}</span>}
+                          {log.old_value && log.new_value && <span className="text-text-muted">→</span>}
+                          {log.new_value && <span className="text-green-400">{log.new_value}</span>}
+                        </div>
+                      )}
+                      {log.notes && <p className="text-[10px] text-text-muted">{log.notes}</p>}
+                      {log.created_by && <p className="text-[10px] text-text-muted">by: {log.created_by}</p>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
