@@ -14,7 +14,7 @@
   .scene{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:40px 28px;opacity:0;transition:opacity 0.35s;z-index:1;}
   .scene.active{opacity:1;z-index:10;}
 
-  .step-ov{position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:50;display:flex;gap:5px;align-items:center;opacity:0;transition:opacity 0.3s;}
+  .step-ov{position:absolute;top:56px;left:50%;transform:translateX(-50%);z-index:50;display:flex;gap:5px;align-items:center;opacity:0;transition:opacity 0.3s;}
   .step-ov.show{opacity:1;}
   .sd{width:26px;height:26px;border-radius:50%;background:#1E2A35;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#4A5568;transition:all 0.3s;border:2px solid transparent;}
   .sd.active{background:rgba(167,139,250,0.15);border-color:#A78BFA;color:#A78BFA;}
@@ -38,7 +38,7 @@
   .s0 .hb-tag2{background:rgba(45,212,191,0.1);border:1px solid rgba(45,212,191,0.3);color:#2DD4BF;font-size:12px;font-weight:900;padding:6px 14px;border-radius:10px;}
 
   /* S1: Mode Gendong (3-10s) */
-  .s1{padding:60px 24px 40px;justify-content:flex-start;}
+  .s1{padding:110px 24px 40px;justify-content:flex-start;}
   .mode-box{width:100%;background:#151B22;border:1px solid #1E2A35;border-radius:14px;padding:16px;opacity:0;transform:translateY(15px);transition:all 0.4s ease;}
   .mode-box.show{opacity:1;transform:translateY(0);}
   .mode-box h4{font-size:13px;font-weight:800;color:#E6F1EF;margin-bottom:12px;}
@@ -55,7 +55,7 @@
   .no-pw.show{opacity:1;}
 
   /* S2: Pilih Rank + Harga Gendong (10-20s) */
-  .s2{padding:60px 24px 40px;justify-content:flex-start;}
+  .s2{padding:110px 24px 40px;justify-content:flex-start;}
   .rank-box{width:100%;opacity:0;transform:translateY(15px);transition:all 0.4s ease;}
   .rank-box.show{opacity:1;transform:translateY(0);}
   .rank-box h4{font-size:13px;font-weight:800;color:#E6F1EF;margin-bottom:4px;}
@@ -69,7 +69,7 @@
   .rprice{font-size:11px;font-weight:800;color:#A78BFA;}
 
   /* S3: Role + Schedule (20-32s) */
-  .s3{padding:60px 24px 40px;justify-content:flex-start;gap:12px;}
+  .s3{padding:110px 24px 40px;justify-content:flex-start;gap:12px;}
   .role-box{width:100%;background:#151B22;border:1px solid #1E2A35;border-radius:14px;padding:14px;opacity:0;transform:translateY(15px);transition:all 0.4s ease;}
   .role-box.show{opacity:1;transform:translateY(0);}
   .role-box h4{font-size:12px;font-weight:800;color:#E6F1EF;margin-bottom:10px;}
@@ -89,7 +89,7 @@
   .sch.sel{border-color:#2DD4BF;color:#2DD4BF;background:rgba(45,212,191,0.06);}
 
   /* S4: Data Akun — NO PASSWORD (32-43s) */
-  .s4{padding:60px 24px 40px;justify-content:flex-start;gap:10px;}
+  .s4{padding:110px 24px 40px;justify-content:flex-start;gap:10px;}
   .quick-panel{width:100%;background:#151B22;border:1px solid #1E2A35;border-radius:14px;padding:14px;opacity:0;transform:translateY(12px);transition:all 0.4s ease;}
   .quick-panel.show{opacity:1;transform:translateY(0);}
   .quick-panel h4{font-size:12px;font-weight:800;color:#E6F1EF;margin-bottom:10px;}
@@ -104,7 +104,7 @@
   .no-pw-big .npsub{font-size:10px;color:#7FA8A3;margin-top:4px;}
 
   /* S5: Payment + Tracking (43-55s) */
-  .s5{padding:60px 24px 40px;justify-content:flex-start;gap:10px;}
+  .s5{padding:110px 24px 40px;justify-content:flex-start;gap:10px;}
   .pay-box{width:100%;opacity:0;transform:translateY(12px);transition:all 0.4s ease;}
   .pay-box.show{opacity:1;transform:translateY(0);}
   .pay-box h4{font-size:12px;font-weight:800;color:#E6F1EF;margin-bottom:10px;}
@@ -172,6 +172,7 @@
   .lc-purple{stroke:#A78BFA;}
   .lc-star{stroke:#F59E0B;fill:rgba(245,158,11,0.1);}
   .mtab .mi [data-lucide]{margin:0 auto;}
+</style>
 </head>
 <body>
 <div class="stage" id="stage">
@@ -215,10 +216,10 @@
     <div class="rank-box" id="rankBox">
       <h4>Harga Gendong / Star</h4>
       <div class="rsub">Pilih rank kamu sekarang</div>
-      <div class="rcard" id="r1"><div class="ricon" style="background:rgba(59,130,246,0.12);">&#x1F539;</div><div class="rinfo"><div class="rname">Grand Master</div></div><div class="rprice">Rp 9.000/star</div></div>
-      <div class="rcard" id="r2"><div class="ricon" style="background:rgba(167,139,250,0.12);">&#x1F7E3;</div><div class="rinfo"><div class="rname">Epic</div></div><div class="rprice">Rp 10.000/star</div></div>
-      <div class="rcard" id="r3"><div class="ricon" style="background:rgba(245,158,11,0.12);">&#x1F525;</div><div class="rinfo"><div class="rname">Legend</div></div><div class="rprice">Rp 11.000/star</div></div>
-      <div class="rcard" id="r4"><div class="ricon" style="background:rgba(239,68,68,0.12);">&#x1F451;</div><div class="rinfo"><div class="rname">Mythic</div></div><div class="rprice">Rp 21.000/star</div></div>
+      <div class="rcard" id="r1"><div class="ricon" style="background:rgba(59,130,246,0.12);"><img src="public/icons-tier/Grandmaster.webp" width="24" height="24" style="object-fit:contain;"></div><div class="rinfo"><div class="rname">Grand Master</div></div><div class="rprice">Rp 9.000/star</div></div>
+      <div class="rcard" id="r2"><div class="ricon" style="background:rgba(167,139,250,0.12);"><img src="public/icons-tier/Epic.webp" width="24" height="24" style="object-fit:contain;"></div><div class="rinfo"><div class="rname">Epic</div></div><div class="rprice">Rp 10.000/star</div></div>
+      <div class="rcard" id="r3"><div class="ricon" style="background:rgba(245,158,11,0.12);"><img src="public/icons-tier/Legend.webp" width="24" height="24" style="object-fit:contain;"></div><div class="rinfo"><div class="rname">Legend</div></div><div class="rprice">Rp 11.000/star</div></div>
+      <div class="rcard" id="r4"><div class="ricon" style="background:rgba(239,68,68,0.12);"><img src="public/icons-tier/Mythic.webp" width="24" height="24" style="object-fit:contain;"></div><div class="rinfo"><div class="rname">Mythic</div></div><div class="rprice">Rp 21.000/star</div></div>
     </div>
   </div>
 
@@ -291,14 +292,12 @@
 </div>
 </div>
 
-<div class="controls"><button class="ctrl-btn" id="playBtn" onclick="startAnimation()">&#x25B6; Play</button><button class="ctrl-btn" id="recBtn" onclick="toggleRecMode()">&#x1F534; Rec</button><button class="ctrl-btn" id="muteBtn" onclick="toggleMute()">&#x1F50A;</button><div class="timer-display" id="timerDisplay">0.0s / 60s</div></div>
-
 <script>
 let audioCtx=null,isMuted=false,masterGain=null,bgOsc=null;
-function initAudio(){if(audioCtx)return;audioCtx=new(window.AudioContext||window.webkitAudioContext)();masterGain=audioCtx.createGain();masterGain.gain.value=0.5;masterGain.connect(audioCtx.destination);}
-function toggleMute(){isMuted=!isMuted;const b=document.getElementById('muteBtn');if(isMuted){b.textContent='\uD83D\uDD07';b.classList.add('muted');if(masterGain)masterGain.gain.value=0;}else{b.textContent='\uD83D\uDD0A';b.classList.remove('muted');if(masterGain)masterGain.gain.value=0.5;}}
-function startBG(){if(!audioCtx)return;bgOsc=audioCtx.createOscillator();bgOsc.type='sine';bgOsc.frequency.value=130;const g=audioCtx.createGain();g.gain.value=0.04;const l=audioCtx.createOscillator();l.type='sine';l.frequency.value=1.8;const lg=audioCtx.createGain();lg.gain.value=0.02;l.connect(lg);lg.connect(g.gain);l.start();bgOsc.connect(g);g.connect(masterGain);bgOsc.start();const b=audioCtx.createBuffer(1,audioCtx.sampleRate*2,audioCtx.sampleRate);const d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;const n=audioCtx.createBufferSource();n.buffer=b;n.loop=true;const nf=audioCtx.createBiquadFilter();nf.type='lowpass';nf.frequency.value=180;const ng=audioCtx.createGain();ng.gain.value=0.02;n.connect(nf);nf.connect(ng);ng.connect(masterGain);n.start();bgOsc._l=l;bgOsc._n=n;}
-function stopBG(){if(bgOsc){try{bgOsc.stop();bgOsc._l.stop();bgOsc._n.stop();}catch(e){}bgOsc=null;}}
+function initAudio(){if(audioCtx)return;audioCtx=new(window.AudioContext||window.webkitAudioContext)();masterGain=audioCtx.createGain();masterGain.gain.value=0.6;masterGain.connect(audioCtx.destination);}
+function toggleMute(){isMuted=!isMuted;const b=document.getElementById('muteBtn');if(isMuted){b.textContent='\uD83D\uDD07';b.classList.add('muted');if(masterGain)masterGain.gain.value=0;}else{b.textContent='\uD83D\uDD0A';b.classList.remove('muted');if(masterGain)masterGain.gain.value=0.6;}}
+function startBG(){if(!audioCtx)return;bgOsc=audioCtx.createOscillator();bgOsc.type='sine';bgOsc.frequency.value=55;const bgG=audioCtx.createGain();bgG.gain.value=0.08;const lfo=audioCtx.createOscillator();lfo.type='sine';lfo.frequency.value=2;const lfoG=audioCtx.createGain();lfoG.gain.value=0.04;lfo.connect(lfoG);lfoG.connect(bgG.gain);lfo.start();bgOsc.connect(bgG);bgG.connect(masterGain);bgOsc.start();const bufSize=audioCtx.sampleRate*2;const noiseBuf=audioCtx.createBuffer(1,bufSize,audioCtx.sampleRate);const ndata=noiseBuf.getChannelData(0);for(let i=0;i<bufSize;i++)ndata[i]=Math.random()*2-1;const noiseNode=audioCtx.createBufferSource();noiseNode.buffer=noiseBuf;noiseNode.loop=true;const nf=audioCtx.createBiquadFilter();nf.type='lowpass';nf.frequency.value=200;nf.Q.value=1;const ng=audioCtx.createGain();ng.gain.value=0.03;noiseNode.connect(nf);nf.connect(ng);ng.connect(masterGain);noiseNode.start();bgOsc._lfo=lfo;bgOsc._noise=noiseNode;}
+function stopBG(){if(bgOsc){try{bgOsc.stop();bgOsc._lfo.stop();bgOsc._noise.stop();}catch(e){}bgOsc=null;}}
 function sfx(type){if(!audioCtx)return;const t=audioCtx.currentTime;
 if(type==='whoosh'){const b=audioCtx.createBuffer(1,audioCtx.sampleRate*0.2,audioCtx.sampleRate);const d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(1-i/d.length);const s=audioCtx.createBufferSource();s.buffer=b;const f=audioCtx.createBiquadFilter();f.type='bandpass';f.Q.value=0.5;f.frequency.setValueAtTime(400,t);f.frequency.exponentialRampToValueAtTime(2500,t+0.12);const g=audioCtx.createGain();g.gain.setValueAtTime(0.1,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.15);s.connect(f);f.connect(g);g.connect(masterGain);s.start();}
 else if(type==='click'){const o=audioCtx.createOscillator();o.type='sine';o.frequency.value=1200;const g=audioCtx.createGain();g.gain.setValueAtTime(0.07,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.07);o.connect(g);g.connect(masterGain);o.start();o.stop(t+0.07);}
@@ -347,8 +346,8 @@ function tick(){
 
   // S1: Mode Gendong
   if(e>=3200&&!fired.s1a){fired.s1a=true;document.getElementById('stepOv').classList.add('show');actStep(1);document.getElementById('sl_1').classList.add('show');document.getElementById('modeBox').classList.add('show');}
-  if(e>=5000&&!fired.s1b){fired.s1b=true;showCur();moveCur(300,169);}
-  if(e>=6000&&!fired.s1c){fired.s1c=true;clickAt(300,169);sfx('click');}
+  if(e>=5000&&!fired.s1b){fired.s1b=true;showCur();moveCur(290,207);}
+  if(e>=6000&&!fired.s1c){fired.s1c=true;clickAt(300,222);}
   if(e>=7000&&!fired.s1d){fired.s1d=true;document.getElementById('modeDesc').classList.add('show');sfx('slide');}
   if(e>=8200&&!fired.s1e){fired.s1e=true;document.getElementById('noPw').classList.add('show');sfx('ding');}
   if(e>=9800&&!fired.w1){fired.w1=true;sfx('whoosh');hideCur();}
@@ -359,8 +358,8 @@ function tick(){
   if(e>=12000&&!fired.s2c){fired.s2c=true;document.getElementById('r2').classList.add('show');sfx('slide');}
   if(e>=13000&&!fired.s2d){fired.s2d=true;document.getElementById('r3').classList.add('show');sfx('slide');}
   if(e>=14000&&!fired.s2e){fired.s2e=true;document.getElementById('r4').classList.add('show');sfx('slide');}
-  if(e>=15500&&!fired.s2f){fired.s2f=true;showCur();moveCur(200,238);}
-  if(e>=16500&&!fired.s2g){fired.s2g=true;clickAt(200,238);document.getElementById('r2').classList.add('sel');sfx('ding');}
+  if(e>=15500&&!fired.s2f){fired.s2f=true;showCur();moveCur(186,280);}
+  if(e>=16500&&!fired.s2g){fired.s2g=true;clickAt(196,295);document.getElementById('r2').classList.add('sel');sfx('ding');}
   if(e>=19800&&!fired.w2){fired.w2=true;sfx('whoosh');hideCur();}
 
   // S3: Role + Schedule
@@ -368,12 +367,12 @@ function tick(){
   if(e>=21500&&!fired.s3b){fired.s3b=true;document.getElementById('rl1').classList.add('show');sfx('pop');}
   if(e>=22000&&!fired.s3c){fired.s3c=true;document.getElementById('rl2').classList.add('show');sfx('pop');}
   if(e>=22500&&!fired.s3d){fired.s3d=true;document.getElementById('rl3').classList.add('show');sfx('pop');}
-  if(e>=23500&&!fired.s3e){fired.s3e=true;showCur();moveCur(180,173);}
-  if(e>=24000&&!fired.s3f){fired.s3f=true;clickAt(180,173);document.getElementById('rl2').classList.add('sel');sfx('ding');}
+  if(e>=23500&&!fired.s3e){fired.s3e=true;showCur();moveCur(138,222);}
+  if(e>=24000&&!fired.s3f){fired.s3f=true;clickAt(148,237);document.getElementById('rl2').classList.add('sel');sfx('ding');}
   if(e>=25500&&!fired.s3g){fired.s3g=true;document.getElementById('schedBox').classList.add('show');hideCur();}
   if(e>=26500&&!fired.s3h){fired.s3h=true;['sc1','sc2','sc3','sc4','sc5','sc6','sc7'].forEach((id,i)=>setTimeout(()=>{document.getElementById(id).classList.add('show');sfx('pop');},i*200));}
-  if(e>=28500&&!fired.s3i){fired.s3i=true;showCur();moveCur(198,276);}
-  if(e>=29200&&!fired.s3j){fired.s3j=true;clickAt(198,276);document.getElementById('sc4').classList.add('sel');sfx('toggle');}
+  if(e>=28500&&!fired.s3i){fired.s3i=true;showCur();moveCur(203,335);}
+  if(e>=29200&&!fired.s3j){fired.s3j=true;clickAt(213,350);document.getElementById('sc4').classList.add('sel');sfx('toggle');}
   if(e>=31800&&!fired.w3){fired.w3=true;sfx('whoosh');hideCur();}
 
   // S4: Data — No password
@@ -388,8 +387,8 @@ function tick(){
   if(e>=44000&&!fired.s5b){fired.s5b=true;document.getElementById('po1').classList.add('show');sfx('slide');}
   if(e>=44600&&!fired.s5c){fired.s5c=true;document.getElementById('po2').classList.add('show');sfx('slide');}
   if(e>=45200&&!fired.s5d){fired.s5d=true;document.getElementById('po3').classList.add('show');sfx('slide');}
-  if(e>=46000&&!fired.s5e){fired.s5e=true;showCur();moveCur(200,200);}
-  if(e>=46800&&!fired.s5f){fired.s5f=true;clickAt(200,200);document.getElementById('po2').classList.add('sel');sfx('ding');hideCur();}
+  if(e>=46000&&!fired.s5e){fired.s5e=true;showCur();moveCur(185,256);}
+  if(e>=46800&&!fired.s5f){fired.s5f=true;clickAt(195,271);document.getElementById('po2').classList.add('sel');sfx('ding');hideCur();}
   if(e>=48000&&!fired.s5g){fired.s5g=true;document.getElementById('payBtn').classList.add('show');}
   if(e>=49500&&!fired.s5h){fired.s5h=true;const b=document.getElementById('payBtn');b.textContent='\u23F3 Matching booster...';b.style.background='#1E2A35';b.style.color='#A78BFA';b.style.border='1px solid #A78BFA';}
   if(e>=50800&&!fired.s5i){fired.s5i=true;const b=document.getElementById('payBtn');b.classList.add('ok');b.textContent='\u2705 Booster Found!';b.style.background='';b.style.color='';b.style.border='';sfx('success');}
@@ -402,10 +401,11 @@ function tick(){
 
   if(e<TOTAL){animFrame=requestAnimationFrame(tick);}else{playing=false;stopBG();document.getElementById('audioBars').classList.remove('show');document.getElementById('playBtn').textContent='\u25B6 Play';document.getElementById('playBtn').style.opacity='1';document.getElementById('timerDisplay').textContent='60.0s / 60s';}
 }
-function toggleRecMode(){const b=document.getElementById('recBtn');document.body.classList.toggle('hide-controls');if(document.body.classList.contains('hide-controls')){b.classList.add('recording');b.textContent='\u2B1B';setTimeout(startAnimation,1000);}else{b.classList.remove('recording');b.textContent='\uD83D\uDD34 Rec';}}
+function toggleRecMode(){const b=document.getElementById('recBtn');document.body.classList.toggle('hide-controls');if(document.body.classList.contains('hide-controls')){b.classList.add('recording');b.textContent='\u2B1B';initAudio();if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();setTimeout(startAnimation,1000);}else{b.classList.remove('recording');b.textContent='\uD83D\uDD34 Rec';}}
 function updateStageScale(){const s=Math.min((window.innerWidth-32)/390,(window.innerHeight-32)/844,1);document.documentElement.style.setProperty('--phone-scale',String(s));}
 window.addEventListener('resize',updateStageScale);
 document.addEventListener('DOMContentLoaded',()=>{if(typeof lucide!=='undefined')lucide.createIcons();updateStageScale();});
 </script>
+<div id="__ghost" style="display:none!important;position:absolute;pointer-events:none"><button id="playBtn"></button><button id="recBtn"></button><button id="muteBtn"></button><div id="timerDisplay"></div></div>
 </body>
 </html>

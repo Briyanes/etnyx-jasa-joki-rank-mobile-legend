@@ -42,7 +42,7 @@
 
   /* ========== STEP INDICATOR (persistent overlay) ========== */
   .step-overlay {
-    position:absolute; top:16px; left:50%; transform:translateX(-50%);
+    position:absolute; top:56px; left:50%; transform:translateX(-50%);
     z-index:50;
     display:flex; gap:6px; align-items:center;
     opacity:0; transition:opacity 0.3s;
@@ -165,7 +165,7 @@
   }
 
   /* ========== SCENE 1: Buka Website + Klik Order (3-10s) ========== */
-  .s1 { padding:60px 24px 40px; justify-content:flex-start; overflow:hidden; }
+  .s1 { padding:110px 24px 40px; justify-content:flex-start; overflow:hidden; }
   .step-label {
     font-size:12px; font-weight:800; color:#2DD4BF;
     background:rgba(45,212,191,0.1);
@@ -266,7 +266,7 @@
   }
 
   /* ========== SCENE 2: Pilih Mode Paket (10-18s) ========== */
-  .s2 { padding:60px 24px 40px; justify-content:flex-start; }
+  .s2 { padding:110px 24px 40px; justify-content:flex-start; }
   .mode-panel {
     width:100%; background:#151B22;
     border:1px solid #1E2A35;
@@ -304,7 +304,7 @@
   .mode-desc .highlight { color:#2DD4BF; font-weight:700; }
 
   /* ========== SCENE 3: Pilih Paket Rank (18-28s) ========== */
-  .s3 { padding:60px 24px 40px; justify-content:flex-start; }
+  .s3 { padding:110px 24px 40px; justify-content:flex-start; }
   .rank-panel {
     width:100%; opacity:0; transform:translateY(15px);
     transition:all 0.4s ease;
@@ -352,7 +352,7 @@
   }
 
   /* ========== SCENE 4: Express / Premium Add-ons (28-35s) ========== */
-  .s4 { padding:60px 24px 40px; justify-content:flex-start; }
+  .s4 { padding:110px 24px 40px; justify-content:flex-start; }
   .addon-panel {
     width:100%; opacity:0; transform:translateY(15px);
     transition:all 0.4s ease;
@@ -399,7 +399,7 @@
   .toggle-sw.on::after { left:21px; background:#2DD4BF; }
 
   /* ========== SCENE 5: Data Akun (35-43s) ========== */
-  .s5 { padding:60px 24px 40px; justify-content:flex-start; }
+  .s5 { padding:110px 24px 40px; justify-content:flex-start; }
   .form-panel {
     width:100%; opacity:0; transform:translateY(15px);
     transition:all 0.4s ease;
@@ -439,7 +439,7 @@
   .security-badge.show { opacity:1; }
 
   /* ========== SCENE 6: Pembayaran (43-50s) ========== */
-  .s6 { padding:60px 24px 40px; justify-content:flex-start; }
+  .s6 { padding:110px 24px 40px; justify-content:flex-start; }
   .pay-panel {
     width:100%; opacity:0; transform:translateY(15px);
     transition:all 0.4s ease;
@@ -497,7 +497,7 @@
   }
 
   /* ========== SCENE 7: Bayar + Tracking (50-57s) ========== */
-  .s7 { padding:60px 24px 40px; justify-content:flex-start; gap:14px; }
+  .s7 { padding:110px 24px 40px; justify-content:flex-start; gap:14px; }
   .confirm-panel {
     width:100%; opacity:0; transform:translateY(15px);
     transition:all 0.4s ease;
@@ -664,6 +664,7 @@
   .mode-tab .tab-icon [data-lucide]{margin:0 auto;}
   .addon-icon [data-lucide]{margin:0 auto;}
   .pay-icon [data-lucide]{margin:0 auto;}
+</style>
 </head>
 <body>
 
@@ -703,9 +704,6 @@
     <div class="hook-sub show" id="hookSub">Cuma 2 menit selesai.</div>
     <div class="hook-badge show" id="hookBadge">&#x1F4F1; Tutorial Step-by-Step</div>
   </div>
-
-  <button class="preview-launch" id="previewLaunch" onclick="startAnimation()">&#x25B6; Preview Video</button>
-  <div class="preview-note" id="previewNote">Klik untuk mulai preview</div>
 
   <!-- Scene 1: Buka Website -->
   <div class="scene s1" id="scene1">
@@ -762,7 +760,7 @@
       <div class="rank-sub">Harga sudah termasuk semua star</div>
 
       <div class="rank-card" id="rank1">
-        <div class="rank-icon" style="background:rgba(59,130,246,0.15);">&#x1F539;</div>
+        <div class="rank-icon" style="background:rgba(59,130,246,0.15);"><img src="public/icons-tier/Grandmaster.webp" width="24" height="24" style="object-fit:contain;"></div>
         <div class="rank-info">
           <div class="rank-name">Epic V &#x2192; Legend V</div>
           <div class="rank-route">~20 star &middot; Est. 2-3 hari</div>
@@ -773,7 +771,7 @@
       </div>
 
       <div class="rank-card" id="rank2">
-        <div class="rank-icon" style="background:rgba(167,139,250,0.15);">&#x1F7E3;</div>
+        <div class="rank-icon" style="background:rgba(167,139,250,0.15);"><img src="public/icons-tier/Epic.webp" width="24" height="24" style="object-fit:contain;"></div>
         <div class="rank-info">
           <div class="rank-name">Legend V &#x2192; Mythic</div>
           <div class="rank-route">~25 star &middot; Est. 3-5 hari</div>
@@ -784,7 +782,7 @@
       </div>
 
       <div class="rank-card selected" id="rank3">
-        <div class="rank-icon" style="background:rgba(245,158,11,0.15);">&#x1F525;</div>
+        <div class="rank-icon" style="background:rgba(245,158,11,0.15);"><img src="public/icons-tier/Legend.webp" width="24" height="24" style="object-fit:contain;"></div>
         <div class="rank-info">
           <div class="rank-name">Epic V &#x2192; Mythic</div>
           <div class="rank-route">~45 star &middot; Est. 4-7 hari</div>
@@ -931,18 +929,7 @@
 </div>
 </div>
 
-<div class="preview-floating show" id="previewFloating">
-  <button class="pf-btn" type="button" onclick="startAnimation()">&#x25B6; Preview</button>
-  <div class="pf-text">Kalau panel kecil, pakai tombol ini</div>
-</div>
 
-<!-- Controls -->
-<div class="controls" id="controls">
-  <button class="ctrl-btn" id="playBtn" onclick="startAnimation()">&#x25B6; Play</button>
-  <button class="ctrl-btn" id="recBtn" onclick="toggleRecMode()">&#x1F534; Rec Mode</button>
-  <button class="ctrl-btn" id="muteBtn" onclick="toggleMute()">&#x1F50A; Sound</button>
-  <div class="timer-display" id="timerDisplay">0.0s / 60s</div>
-</div>
 
 <script>
 // ============ WEB AUDIO ENGINE ============
@@ -952,7 +939,7 @@ function initAudio() {
   if(audioCtx) return;
   audioCtx = new (window.AudioContext||window.webkitAudioContext)();
   masterGain = audioCtx.createGain();
-  masterGain.gain.value = 0.5;
+  masterGain.gain.value = 0.6;
   masterGain.connect(audioCtx.destination);
 }
 
@@ -960,34 +947,35 @@ function toggleMute() {
   isMuted=!isMuted;
   const btn=document.getElementById('muteBtn');
   if(isMuted){ btn.textContent='\uD83D\uDD07 Muted'; btn.classList.add('muted'); if(masterGain)masterGain.gain.value=0; }
-  else{ btn.textContent='\uD83D\uDD0A Sound'; btn.classList.remove('muted'); if(masterGain)masterGain.gain.value=0.5; }
+  else{ btn.textContent='\uD83D\uDD0A Sound'; btn.classList.remove('muted'); if(masterGain)masterGain.gain.value=0.6; }
 }
 
-// BG Music — chill electronic tutorial vibe
+// BG Music — dark electronic pulse (ML lobby vibe) — sama dengan Post 1
 function startBG() {
   if(!audioCtx) return;
-  // Soft pad
+  // Sub bass drone
   bgOsc = audioCtx.createOscillator();
-  bgOsc.type='sine'; bgOsc.frequency.value=110;
-  const bg = audioCtx.createGain(); bg.gain.value=0.06;
+  bgOsc.type='sine'; bgOsc.frequency.value=55; // Low A
+  const bgG = audioCtx.createGain(); bgG.gain.value=0.08;
+  // LFO — 120 BPM pulse feel
   const lfo = audioCtx.createOscillator();
-  lfo.type='sine'; lfo.frequency.value=1.5;
-  const lfoG = audioCtx.createGain(); lfoG.gain.value=0.03;
-  lfo.connect(lfoG); lfoG.connect(bg.gain); lfo.start();
-  bgOsc.connect(bg); bg.connect(masterGain); bgOsc.start();
-
-  // Ambient noise
-  const buf = audioCtx.createBuffer(1, audioCtx.sampleRate*2, audioCtx.sampleRate);
-  const d = buf.getChannelData(0);
-  for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1);
-  const ns = audioCtx.createBufferSource(); ns.buffer=buf; ns.loop=true;
-  const nf = audioCtx.createBiquadFilter(); nf.type='lowpass'; nf.frequency.value=180;
-  const ng = audioCtx.createGain(); ng.gain.value=0.02;
-  ns.connect(nf); nf.connect(ng); ng.connect(masterGain); ns.start();
-  bgOsc._lfo=lfo; bgOsc._ns=ns;
+  lfo.type='sine'; lfo.frequency.value=2;
+  const lfoG = audioCtx.createGain(); lfoG.gain.value=0.04;
+  lfo.connect(lfoG); lfoG.connect(bgG.gain); lfo.start();
+  bgOsc.connect(bgG); bgG.connect(masterGain); bgOsc.start();
+  // Atmosphere pad (filtered noise)
+  const bufferSize=audioCtx.sampleRate*2;
+  const noiseBuffer=audioCtx.createBuffer(1,bufferSize,audioCtx.sampleRate);
+  const data=noiseBuffer.getChannelData(0);
+  for(let i=0;i<bufferSize;i++) data[i]=Math.random()*2-1;
+  const noiseNode=audioCtx.createBufferSource(); noiseNode.buffer=noiseBuffer; noiseNode.loop=true;
+  const noiseFilter=audioCtx.createBiquadFilter(); noiseFilter.type='lowpass'; noiseFilter.frequency.value=200; noiseFilter.Q.value=1;
+  const noiseGain=audioCtx.createGain(); noiseGain.gain.value=0.03;
+  noiseNode.connect(noiseFilter); noiseFilter.connect(noiseGain); noiseGain.connect(masterGain); noiseNode.start();
+  bgOsc._lfo=lfo; bgOsc._noise=noiseNode;
 }
 function stopBG() {
-  if(bgOsc){ try{bgOsc.stop();bgOsc._lfo.stop();bgOsc._ns.stop();}catch(e){} bgOsc=null; }
+  if(bgOsc){ try{bgOsc.stop();bgOsc._lfo.stop();bgOsc._noise.stop();}catch(e){} bgOsc=null; }
 }
 
 // SFX functions
@@ -1207,15 +1195,15 @@ function tick() {
   if(elapsed>=4500 && !fired.s1Cursor){
     fired.s1Cursor=true;
     showCursor();
-    moveCursor(310,155);
+    moveCursor(310,205);
   }
   if(elapsed>=5500 && !fired.s1Move){
     fired.s1Move=true;
-    moveCursor(318,155);
+    moveCursor(318,205);
   }
   if(elapsed>=6500 && !fired.s1Click){
     fired.s1Click=true;
-    clickAt(318,155);
+    clickAt(318,205);
     document.getElementById('pulseRing').classList.add('show');
   }
 
@@ -1231,11 +1219,11 @@ function tick() {
   if(elapsed>=12000 && !fired.s2Cursor){
     fired.s2Cursor=true;
     showCursor();
-    moveCursor(89,169);
+    moveCursor(89,219);
   }
   if(elapsed>=13000 && !fired.s2Click){
     fired.s2Click=true;
-    clickAt(89,169);
+    clickAt(89,219);
     document.getElementById('tabPaket').style.transform='scale(0.95)';
     setTimeout(()=>document.getElementById('tabPaket').style.transform='',150);
   }
@@ -1272,11 +1260,11 @@ function tick() {
   if(elapsed>=23500 && !fired.s3Cursor){
     fired.s3Cursor=true;
     showCursor();
-    moveCursor(200,352);
+    moveCursor(200,402);
   }
   if(elapsed>=24500 && !fired.s3Select){
     fired.s3Select=true;
-    clickAt(200,352);
+    clickAt(200,402);
     document.getElementById('rank3').classList.add('selected');
     sfxDing(1100);
   }
@@ -1303,11 +1291,11 @@ function tick() {
   if(elapsed>=31500 && !fired.s4Cursor){
     fired.s4Cursor=true;
     showCursor();
-    moveCursor(330,186);
+    moveCursor(330,236);
   }
   if(elapsed>=32500 && !fired.s4Toggle){
     fired.s4Toggle=true;
-    clickAt(330,186);
+    clickAt(330,236);
     document.getElementById('toggleExpress').classList.add('on');
     document.getElementById('addon1').classList.add('toggled');
     sfxToggle();
@@ -1380,11 +1368,11 @@ function tick() {
   }
   if(elapsed>=46500 && !fired.s6Select){
     fired.s6Select=true;
-    showCursor(); moveCursor(200,250);
+    showCursor(); moveCursor(200,300);
   }
   if(elapsed>=47200 && !fired.s6Click){
     fired.s6Click=true;
-    clickAt(200,250);
+    clickAt(200,300);
     document.getElementById('pay2').classList.add('selected');
     sfxDing(1000);
   }
@@ -1407,11 +1395,11 @@ function tick() {
   }
   if(elapsed>=51500 && !fired.s7Cursor){
     fired.s7Cursor=true;
-    showCursor(); moveCursor(200,133);
+    showCursor(); moveCursor(200,183);
   }
   if(elapsed>=52000 && !fired.s7Pay){
     fired.s7Pay=true;
-    clickAt(200,133);
+    clickAt(200,183);
     const btn=document.getElementById('payBtn');
     btn.classList.add('processing');
     btn.textContent='\u23F3 Memproses...';
@@ -1470,6 +1458,7 @@ function toggleRecMode() {
   if(document.body.classList.contains('hide-controls')){
     btn.classList.add('recording');
     btn.textContent='\u2B1B Exit Rec';
+    initAudio();if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();
     setTimeout(startAnimation,1000);
   } else {
     btn.classList.remove('recording');
@@ -1477,9 +1466,8 @@ function toggleRecMode() {
   }
 }
 window.addEventListener('resize', updateStageScale);
-document.addEventListener('DOMContentLoaded',()=>{if(typeof lucide!=='undefined')lucide.createIcons();});
-document.addEventListener('DOMContentLoaded',updateStageScale);
+document.addEventListener('DOMContentLoaded',()=>{if(typeof lucide!=='undefined')lucide.createIcons();updateStageScale();});
 </script>
-
+<div id="__ghost" style="display:none!important;position:absolute;pointer-events:none"><button id="playBtn"></button><button id="recBtn"></button><button id="muteBtn"></button><div id="timerDisplay"></div><div id="previewLaunch"></div><div id="previewNote"></div><div id="previewFloating"></div></div>
 </body>
 </html>

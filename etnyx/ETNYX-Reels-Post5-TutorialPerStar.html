@@ -15,7 +15,7 @@
   .scene.active{opacity:1;z-index:10;}
 
   /* Step overlay */
-  .step-ov{position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:50;display:flex;gap:5px;align-items:center;opacity:0;transition:opacity 0.3s;}
+  .step-ov{position:absolute;top:56px;left:50%;transform:translateX(-50%);z-index:50;display:flex;gap:5px;align-items:center;opacity:0;transition:opacity 0.3s;}
   .step-ov.show{opacity:1;}
   .sd{width:26px;height:26px;border-radius:50%;background:#1E2A35;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#4A5568;transition:all 0.3s;border:2px solid transparent;}
   .sd.active{background:rgba(45,212,191,0.15);border-color:#2DD4BF;color:#2DD4BF;}
@@ -39,7 +39,7 @@
   .s0 .hbadge.show{opacity:1;}
 
   /* S1: Buka + Mode PerStar (3-10s) */
-  .s1{padding:60px 24px 40px;justify-content:flex-start;}
+  .s1{padding:110px 24px 40px;justify-content:flex-start;}
   .mode-box{width:100%;background:#151B22;border:1px solid #1E2A35;border-radius:14px;padding:16px;opacity:0;transform:translateY(15px);transition:all 0.4s ease;}
   .mode-box.show{opacity:1;transform:translateY(0);}
   .mode-box h4{font-size:13px;font-weight:800;color:#E6F1EF;margin-bottom:12px;}
@@ -54,7 +54,7 @@
   .mdesc .hl{color:#F59E0B;font-weight:700;}
 
   /* S2: Pilih Rank (10-20s) */
-  .s2{padding:60px 24px 40px;justify-content:flex-start;}
+  .s2{padding:110px 24px 40px;justify-content:flex-start;}
   .rank-box{width:100%;opacity:0;transform:translateY(15px);transition:all 0.4s ease;}
   .rank-box.show{opacity:1;transform:translateY(0);}
   .rank-box h4{font-size:13px;font-weight:800;color:#E6F1EF;margin-bottom:4px;}
@@ -70,7 +70,7 @@
   .rdisc{font-size:8px;color:#22C55E;font-weight:800;margin-left:4px;}
 
   /* S3: Star Quantity (20-28s) */
-  .s3{padding:60px 24px 40px;justify-content:flex-start;gap:16px;}
+  .s3{padding:110px 24px 40px;justify-content:flex-start;gap:16px;}
   .qty-box{width:100%;background:#151B22;border:1px solid #1E2A35;border-radius:14px;padding:18px;opacity:0;transform:translateY(15px);transition:all 0.4s ease;}
   .qty-box.show{opacity:1;transform:translateY(0);}
   .qty-box h4{font-size:13px;font-weight:800;color:#E6F1EF;margin-bottom:14px;}
@@ -85,7 +85,7 @@
   .qty-total .tcalc{font-size:10px;color:#7FA8A3;margin-top:4px;}
 
   /* S4: Addons + Data (28-43s) */
-  .s4{padding:60px 24px 40px;justify-content:flex-start;gap:10px;}
+  .s4{padding:110px 24px 40px;justify-content:flex-start;gap:10px;}
   .quick-panel{width:100%;background:#151B22;border:1px solid #1E2A35;border-radius:14px;padding:14px;opacity:0;transform:translateY(12px);transition:all 0.4s ease;}
   .quick-panel.show{opacity:1;transform:translateY(0);}
   .quick-panel h4{font-size:12px;font-weight:800;color:#E6F1EF;margin-bottom:10px;}
@@ -101,7 +101,7 @@
   .sec-badge.show{opacity:1;}
 
   /* S5: Payment + Tracking (43-55s) */
-  .s5{padding:60px 24px 40px;justify-content:flex-start;gap:10px;}
+  .s5{padding:110px 24px 40px;justify-content:flex-start;gap:10px;}
   .pay-box{width:100%;opacity:0;transform:translateY(12px);transition:all 0.4s ease;}
   .pay-box.show{opacity:1;transform:translateY(0);}
   .pay-box h4{font-size:12px;font-weight:800;color:#E6F1EF;margin-bottom:10px;}
@@ -183,6 +183,7 @@
   .mtab .mi [data-lucide]{margin:0 auto;}
   .qrow .qi [data-lucide]{display:inline-block;}
   .poi [data-lucide]{margin:0 auto;}
+</style>
 </head>
 <body>
 <div class="stage" id="stage">
@@ -225,10 +226,10 @@
     <div class="rank-box" id="rankBox">
       <h4>Harga Per Star</h4>
       <div class="rsub">Pilih rank kamu sekarang</div>
-      <div class="rcard" id="r1"><div class="ricon" style="background:rgba(59,130,246,0.12);">&#x1F539;</div><div class="rinfo"><div class="rname">Grand Master</div></div><div><span class="rprice">Rp 5.000/star</span><span class="rorig">Rp 6K</span><span class="rdisc">-17%</span></div></div>
-      <div class="rcard" id="r2"><div class="ricon" style="background:rgba(167,139,250,0.12);">&#x1F7E3;</div><div class="rinfo"><div class="rname">Epic</div></div><div><span class="rprice">Rp 6.500/star</span><span class="rorig">Rp 8K</span><span class="rdisc">-19%</span></div></div>
-      <div class="rcard" id="r3"><div class="ricon" style="background:rgba(245,158,11,0.12);">&#x1F525;</div><div class="rinfo"><div class="rname">Legend</div></div><div><span class="rprice">Rp 7.500/star</span><span class="rorig">Rp 9K</span><span class="rdisc">-17%</span></div></div>
-      <div class="rcard" id="r4"><div class="ricon" style="background:rgba(239,68,68,0.12);">&#x1F451;</div><div class="rinfo"><div class="rname">Mythic</div></div><div><span class="rprice">Rp 18.000/star</span><span class="rorig">Rp 20K</span><span class="rdisc">-10%</span></div></div>
+      <div class="rcard" id="r1"><div class="ricon" style="background:rgba(59,130,246,0.12);"><img src="public/icons-tier/Grandmaster.webp" width="24" height="24" style="object-fit:contain;"></div><div class="rinfo"><div class="rname">Grand Master</div></div><div><span class="rprice">Rp 5.000/star</span><span class="rorig">Rp 6K</span><span class="rdisc">-17%</span></div></div>
+      <div class="rcard" id="r2"><div class="ricon" style="background:rgba(167,139,250,0.12);"><img src="public/icons-tier/Epic.webp" width="24" height="24" style="object-fit:contain;"></div><div class="rinfo"><div class="rname">Epic</div></div><div><span class="rprice">Rp 6.500/star</span><span class="rorig">Rp 8K</span><span class="rdisc">-19%</span></div></div>
+      <div class="rcard" id="r3"><div class="ricon" style="background:rgba(245,158,11,0.12);"><img src="public/icons-tier/Legend.webp" width="24" height="24" style="object-fit:contain;"></div><div class="rinfo"><div class="rname">Legend</div></div><div><span class="rprice">Rp 7.500/star</span><span class="rorig">Rp 9K</span><span class="rdisc">-17%</span></div></div>
+      <div class="rcard" id="r4"><div class="ricon" style="background:rgba(239,68,68,0.12);"><img src="public/icons-tier/Mythic.webp" width="24" height="24" style="object-fit:contain;"></div><div class="rinfo"><div class="rname">Mythic</div></div><div><span class="rprice">Rp 18.000/star</span><span class="rorig">Rp 20K</span><span class="rdisc">-10%</span></div></div>
     </div>
   </div>
 
@@ -296,14 +297,12 @@
 </div>
 </div>
 
-<div class="controls"><button class="ctrl-btn" id="playBtn" onclick="startAnimation()">&#x25B6; Play</button><button class="ctrl-btn" id="recBtn" onclick="toggleRecMode()">&#x1F534; Rec</button><button class="ctrl-btn" id="muteBtn" onclick="toggleMute()">&#x1F50A;</button><div class="timer-display" id="timerDisplay">0.0s / 60s</div></div>
-
 <script>
 let audioCtx=null,isMuted=false,masterGain=null,bgOsc=null;
-function initAudio(){if(audioCtx)return;audioCtx=new(window.AudioContext||window.webkitAudioContext)();masterGain=audioCtx.createGain();masterGain.gain.value=0.5;masterGain.connect(audioCtx.destination);}
-function toggleMute(){isMuted=!isMuted;const b=document.getElementById('muteBtn');if(isMuted){b.textContent='\uD83D\uDD07';b.classList.add('muted');if(masterGain)masterGain.gain.value=0;}else{b.textContent='\uD83D\uDD0A';b.classList.remove('muted');if(masterGain)masterGain.gain.value=0.5;}}
-function startBG(){if(!audioCtx)return;bgOsc=audioCtx.createOscillator();bgOsc.type='sine';bgOsc.frequency.value=110;const g=audioCtx.createGain();g.gain.value=0.05;const l=audioCtx.createOscillator();l.type='sine';l.frequency.value=1.5;const lg=audioCtx.createGain();lg.gain.value=0.02;l.connect(lg);lg.connect(g.gain);l.start();bgOsc.connect(g);g.connect(masterGain);bgOsc.start();const b=audioCtx.createBuffer(1,audioCtx.sampleRate*2,audioCtx.sampleRate);const d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;const n=audioCtx.createBufferSource();n.buffer=b;n.loop=true;const nf=audioCtx.createBiquadFilter();nf.type='lowpass';nf.frequency.value=160;const ng=audioCtx.createGain();ng.gain.value=0.02;n.connect(nf);nf.connect(ng);ng.connect(masterGain);n.start();bgOsc._l=l;bgOsc._n=n;}
-function stopBG(){if(bgOsc){try{bgOsc.stop();bgOsc._l.stop();bgOsc._n.stop();}catch(e){}bgOsc=null;}}
+function initAudio(){if(audioCtx)return;audioCtx=new(window.AudioContext||window.webkitAudioContext)();masterGain=audioCtx.createGain();masterGain.gain.value=0.6;masterGain.connect(audioCtx.destination);}
+function toggleMute(){isMuted=!isMuted;const b=document.getElementById('muteBtn');if(isMuted){b.textContent='\uD83D\uDD07';b.classList.add('muted');if(masterGain)masterGain.gain.value=0;}else{b.textContent='\uD83D\uDD0A';b.classList.remove('muted');if(masterGain)masterGain.gain.value=0.6;}}
+function startBG(){if(!audioCtx)return;bgOsc=audioCtx.createOscillator();bgOsc.type='sine';bgOsc.frequency.value=55;const bgG=audioCtx.createGain();bgG.gain.value=0.08;const lfo=audioCtx.createOscillator();lfo.type='sine';lfo.frequency.value=2;const lfoG=audioCtx.createGain();lfoG.gain.value=0.04;lfo.connect(lfoG);lfoG.connect(bgG.gain);lfo.start();bgOsc.connect(bgG);bgG.connect(masterGain);bgOsc.start();const bufSize=audioCtx.sampleRate*2;const noiseBuf=audioCtx.createBuffer(1,bufSize,audioCtx.sampleRate);const ndata=noiseBuf.getChannelData(0);for(let i=0;i<bufSize;i++)ndata[i]=Math.random()*2-1;const noiseNode=audioCtx.createBufferSource();noiseNode.buffer=noiseBuf;noiseNode.loop=true;const nf=audioCtx.createBiquadFilter();nf.type='lowpass';nf.frequency.value=200;nf.Q.value=1;const ng=audioCtx.createGain();ng.gain.value=0.03;noiseNode.connect(nf);nf.connect(ng);ng.connect(masterGain);noiseNode.start();bgOsc._lfo=lfo;bgOsc._noise=noiseNode;}
+function stopBG(){if(bgOsc){try{bgOsc.stop();bgOsc._lfo.stop();bgOsc._noise.stop();}catch(e){}bgOsc=null;}}
 function sfx(type){if(!audioCtx)return;const t=audioCtx.currentTime;
 if(type==='whoosh'){const b=audioCtx.createBuffer(1,audioCtx.sampleRate*0.2,audioCtx.sampleRate);const d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(1-i/d.length);const s=audioCtx.createBufferSource();s.buffer=b;const f=audioCtx.createBiquadFilter();f.type='bandpass';f.Q.value=0.5;f.frequency.setValueAtTime(400,t);f.frequency.exponentialRampToValueAtTime(2500,t+0.12);const g=audioCtx.createGain();g.gain.setValueAtTime(0.1,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.15);s.connect(f);f.connect(g);g.connect(masterGain);s.start();}
 else if(type==='click'){const o=audioCtx.createOscillator();o.type='sine';o.frequency.value=1200;const g=audioCtx.createGain();g.gain.setValueAtTime(0.07,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.07);o.connect(g);g.connect(masterGain);o.start();o.stop(t+0.07);}
@@ -353,8 +352,8 @@ function tick(){
 
   // S1: Mode
   if(e>=3200&&!fired.s1a){fired.s1a=true;document.getElementById('stepOv').classList.add('show');actStep(1);document.getElementById('sl_1').classList.add('show');document.getElementById('modeBox').classList.add('show');}
-  if(e>=5000&&!fired.s1b){fired.s1b=true;showCur();moveCur(200,169);}
-  if(e>=6000&&!fired.s1c){fired.s1c=true;clickAt(200,169);sfx('click');}
+  if(e>=5000&&!fired.s1b){fired.s1b=true;showCur();moveCur(185,207);}
+  if(e>=6000&&!fired.s1c){fired.s1c=true;clickAt(195,222);}
   if(e>=7000&&!fired.s1d){fired.s1d=true;document.getElementById('modeDesc').classList.add('show');sfx('slide');}
   if(e>=9800&&!fired.w1){fired.w1=true;sfx('whoosh');hideCur();}
 
@@ -364,23 +363,23 @@ function tick(){
   if(e>=12000&&!fired.s2c){fired.s2c=true;document.getElementById('r2').classList.add('show');sfx('slide');}
   if(e>=13000&&!fired.s2d){fired.s2d=true;document.getElementById('r3').classList.add('show');sfx('slide');}
   if(e>=14000&&!fired.s2e){fired.s2e=true;document.getElementById('r4').classList.add('show');sfx('slide');}
-  if(e>=15500&&!fired.s2f){fired.s2f=true;showCur();moveCur(200,238);}
-  if(e>=16500&&!fired.s2g){fired.s2g=true;clickAt(200,238);document.getElementById('r2').classList.add('sel');sfx('ding');}
+  if(e>=15500&&!fired.s2f){fired.s2f=true;showCur();moveCur(186,280);}
+  if(e>=16500&&!fired.s2g){fired.s2g=true;clickAt(196,295);document.getElementById('r2').classList.add('sel');sfx('ding');}
   if(e>=19800&&!fired.w2){fired.w2=true;sfx('whoosh');hideCur();}
 
   // S3: Qty
   if(e>=20200&&!fired.s3a){fired.s3a=true;actStep(3);document.getElementById('sl_3').classList.add('show');document.getElementById('qtyBox').classList.add('show');}
-  if(e>=21500&&!fired.s3b){fired.s3b=true;showCur();moveCur(273,189);}
-  if(e>=22000&&!fired.s3c){fired.s3c=true;clickAt(273,189);document.getElementById('qPlus').classList.add('active');document.getElementById('qNum').textContent='4';sfx('tick');setTimeout(()=>document.getElementById('qPlus').classList.remove('active'),200);}
-  if(e>=22800&&!fired.s3d){fired.s3d=true;clickAt(273,189);document.getElementById('qPlus').classList.add('active');document.getElementById('qNum').textContent='5';sfx('tick');setTimeout(()=>document.getElementById('qPlus').classList.remove('active'),200);}
-  if(e>=23600&&!fired.s3e){fired.s3e=true;clickAt(273,189);document.getElementById('qNum').textContent='6';sfx('tick');}
+  if(e>=21500&&!fired.s3b){fired.s3b=true;showCur();moveCur(263,230);}
+  if(e>=22000&&!fired.s3c){fired.s3c=true;clickAt(273,245);document.getElementById('qPlus').classList.add('active');document.getElementById('qNum').textContent='4';sfx('tick');setTimeout(()=>document.getElementById('qPlus').classList.remove('active'),200);}
+  if(e>=22800&&!fired.s3d){fired.s3d=true;clickAt(273,245);document.getElementById('qPlus').classList.add('active');document.getElementById('qNum').textContent='5';sfx('tick');setTimeout(()=>document.getElementById('qPlus').classList.remove('active'),200);}
+  if(e>=23600&&!fired.s3e){fired.s3e=true;clickAt(273,245);document.getElementById('qNum').textContent='6';sfx('tick');}
   if(e>=24500&&!fired.s3f){fired.s3f=true;document.getElementById('qTotal').classList.add('show');document.getElementById('tPrice').textContent='Rp 39.000';sfx('ding');}
   if(e>=27800&&!fired.w3){fired.w3=true;sfx('whoosh');hideCur();}
 
   // S4: Addons + Data
   if(e>=28200&&!fired.s4a){fired.s4a=true;actStep(4);document.getElementById('sl_4').classList.add('show');document.getElementById('addonPanel').classList.add('show');}
-  if(e>=30000&&!fired.s4b){fired.s4b=true;showCur();moveCur(330,154);}
-  if(e>=30800&&!fired.s4c){fired.s4c=true;clickAt(330,154);document.getElementById('tgExp').classList.add('on');sfx('toggle');}
+  if(e>=30000&&!fired.s4b){fired.s4b=true;showCur();moveCur(323,206);}
+  if(e>=30800&&!fired.s4c){fired.s4c=true;clickAt(333,216);document.getElementById('tgExp').classList.add('on');sfx('toggle');}
   if(e>=32000&&!fired.s4d){fired.s4d=true;hideCur();document.getElementById('dataPanel').classList.add('show');sfx('slide');}
   if(e>=34000&&!fired.s4e){fired.s4e=true;document.getElementById('dv1').textContent='\u2705 Verified';sfx('tick');}
   if(e>=36000&&!fired.s4f){fired.s4f=true;document.getElementById('dv2').textContent='\u2705';sfx('tick');}
@@ -393,8 +392,8 @@ function tick(){
   if(e>=44000&&!fired.s5b){fired.s5b=true;document.getElementById('po1').classList.add('show');sfx('slide');}
   if(e>=44600&&!fired.s5c){fired.s5c=true;document.getElementById('po2').classList.add('show');sfx('slide');}
   if(e>=45200&&!fired.s5d){fired.s5d=true;document.getElementById('po3').classList.add('show');sfx('slide');}
-  if(e>=46000&&!fired.s5e){fired.s5e=true;showCur();moveCur(200,200);}
-  if(e>=46800&&!fired.s5f){fired.s5f=true;clickAt(200,200);document.getElementById('po2').classList.add('sel');sfx('ding');hideCur();}
+  if(e>=46000&&!fired.s5e){fired.s5e=true;showCur();moveCur(185,262);}
+  if(e>=46800&&!fired.s5f){fired.s5f=true;clickAt(195,272);document.getElementById('po2').classList.add('sel');sfx('ding');hideCur();}
   if(e>=48000&&!fired.s5g){fired.s5g=true;document.getElementById('payBtn').classList.add('show');}
   if(e>=49500&&!fired.s5h){fired.s5h=true;const b=document.getElementById('payBtn');b.textContent='\u23F3 Memproses...';b.style.background='#1E2A35';b.style.color='#2DD4BF';b.style.border='1px solid #2DD4BF';}
   if(e>=50800&&!fired.s5i){fired.s5i=true;const b=document.getElementById('payBtn');b.classList.add('ok');b.textContent='\u2705 Order Berhasil!';b.style.background='';b.style.color='';b.style.border='';sfx('success');}
@@ -407,10 +406,11 @@ function tick(){
 
   if(e<TOTAL){animFrame=requestAnimationFrame(tick);}else{playing=false;stopBG();document.getElementById('audioBars').classList.remove('show');document.getElementById('playBtn').textContent='\u25B6 Play';document.getElementById('playBtn').style.opacity='1';document.getElementById('timerDisplay').textContent='60.0s / 60s';}
 }
-function toggleRecMode(){const b=document.getElementById('recBtn');document.body.classList.toggle('hide-controls');if(document.body.classList.contains('hide-controls')){b.classList.add('recording');b.textContent='\u2B1B';setTimeout(startAnimation,1000);}else{b.classList.remove('recording');b.textContent='\uD83D\uDD34 Rec';}}
+function toggleRecMode(){const b=document.getElementById('recBtn');document.body.classList.toggle('hide-controls');if(document.body.classList.contains('hide-controls')){b.classList.add('recording');b.textContent='\u2B1B';initAudio();if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();setTimeout(startAnimation,1000);}else{b.classList.remove('recording');b.textContent='\uD83D\uDD34 Rec';}}
 function updateStageScale(){const s=Math.min((window.innerWidth-32)/390,(window.innerHeight-32)/844,1);document.documentElement.style.setProperty('--phone-scale',String(s));}
 window.addEventListener('resize',updateStageScale);
 document.addEventListener('DOMContentLoaded',()=>{if(typeof lucide!=='undefined')lucide.createIcons();updateStageScale();});
 </script>
+<div id="__ghost" style="display:none!important;position:absolute;pointer-events:none"><button id="playBtn"></button><button id="recBtn"></button><button id="muteBtn"></button><div id="timerDisplay"></div></div>
 </body>
 </html>

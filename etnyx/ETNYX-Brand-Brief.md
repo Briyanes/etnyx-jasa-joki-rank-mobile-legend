@@ -291,4 +291,102 @@ Hover Glow: rgba(45, 212, 191, 0.15)
 
 ---
 
-*Brief ini bisa diupdate sesuai perkembangan brand. Last updated: 9 April 2026.*
+---
+
+## 14. TABEL HARGA LAYANAN (Pricing Reference)
+
+> Gunakan data ini sebagai referensi saat membuat konten promo, caption, Story, atau Reels.
+> Semua harga dalam **Rupiah (Rp)** dan sudah termasuk diskon promo aktif.
+
+---
+
+### 🎯 A. Joki Per Bintang (Per Star)
+> Mode: booster push rank tanpa kamu main. Harga dihitung per bintang.
+
+| Rank | Harga / Bintang | Harga Normal | Hemat |
+|------|-----------------|--------------|-------|
+| Grand Master | **Rp 5.000** | ~~Rp 6.000~~ | 17% |
+| Epic | **Rp 6.500** | ~~Rp 8.000~~ | 19% |
+| Legend | **Rp 7.500** | ~~Rp 9.000~~ | 17% |
+| Mythic Grading | **Rp 20.000** | ~~Rp 22.000~~ | 9% |
+| Mythic | **Rp 18.000** | ~~Rp 20.000~~ | 10% |
+| Mythic Honor | **Rp 21.000** | ~~Rp 23.000~~ | 9% |
+| Mythic Glory | **Rp 26.000** | ~~Rp 28.000~~ | 7% |
+| Mythic Immortal | **Rp 31.000** | ~~Rp 33.000~~ | 6% |
+
+**Contoh copy:** *"Push 5 bintang Epic? Cuma Rp 32.500. Link di bio! ⚡"*
+
+---
+
+### 🤝 B. Joki Gendong (Duo Carry)
+> Mode: kamu main bareng booster pro. Lebih mahal karena lebih intens & kamu tetap aktif main.
+
+| Rank | Harga / Bintang | Harga Normal | Hemat |
+|------|-----------------|--------------|-------|
+| Grand Master | **Rp 9.000** | ~~Rp 11.000~~ | 18% |
+| Epic | **Rp 10.000** | ~~Rp 12.000~~ | 17% |
+| Legend | **Rp 11.000** | ~~Rp 13.000~~ | 15% |
+| Mythic Grading | **Rp 23.000** | ~~Rp 26.000~~ | 12% |
+| Mythic | **Rp 21.000** | ~~Rp 24.000~~ | 13% |
+| Mythic Honor | **Rp 25.000** | ~~Rp 28.000~~ | 11% |
+| Mythic Glory | **Rp 30.000** | ~~Rp 34.000~~ | 12% |
+| Mythic Immortal | **Rp 35.000** | ~~Rp 40.000~~ | 13% |
+
+**Contoh copy:** *"Main bareng booster Legend cuma Rp 11K/bintang. GG banget kan? 🎮"*
+
+---
+
+### 📦 C. Joki Paket (Full Push Rank)
+> Mode: booster push dari rank awal ke rank target. Harga flat per paket.
+
+#### Rush Paket Populer (5 & 9 Bintang)
+| Paket | Deskripsi | Harga |
+|-------|-----------|-------|
+| Rush 5⭐ Epic | Push 5 bintang di Epic | **Rp 32.000** |
+| Rush 5⭐ Legend | Push 5 bintang di Legend | **Rp 37.000** |
+| Rush 9⭐ Epic | Push 9 bintang di Epic | **Rp 58.000** |
+| Rush 9⭐ Legend | Push 9 bintang di Legend | **Rp 68.000** |
+| Rush 5⭐ Mythic | Push 5 bintang di Mythic | **Rp 95.000** |
+| Rush 5⭐ Honor | Push 5 bintang di Mythic Honor | **Rp 105.000** |
+| Rush 5⭐ Glory | Push 5 bintang di Mythic Glory | **Rp 130.000** |
+| Rush 9⭐ Mythic | Push 9 bintang di Mythic | **Rp 171.000** |
+| Rush 9⭐ Honor | Push 9 bintang di Mythic Honor | **Rp 189.000** |
+| Rush 9⭐ Glory | Push 9 bintang di Mythic Glory | **Rp 234.000** |
+
+#### Paket Naik Rank (Rank Progression)
+| Dari → Ke | Harga |
+|-----------|-------|
+| Warrior III → Elite III | Rp 25.089 |
+| Warrior III → Grand Master V | Rp 149.089 |
+| Warrior III → Epic V | Rp 282.089 |
+| Warrior III → Legend V | Rp 459.089 |
+| Warrior I → Mythic | Rp 645.089 |
+| Elite III → Mythic | Rp 635.089 |
+| Master IV → Mythic | Rp 590.089 |
+| Grand Master V → Epic V | Rp 113.089 |
+| Grand Master V → Mythic | Rp 428.089 |
+| Epic V → Legend V | Rp 146.089 |
+| Epic I → Mythic | Rp 198.089 |
+| Epic V → Mythic | Rp 315.089 |
+| Legend I → Mythic | Rp 34.089 |
+| Legend V → Mythic | Rp 169.089 |
+| Mythic → Mythic Honor | Rp 342.089 |
+| Mythic → Mythic Glory | Rp 815.089 |
+| Mythic → Mythic Immortal | Rp 1.985.089 |
+| Mythic Honor → Glory | Rp 473.089 |
+| Mythic Glory → Immortal | Rp 1.170.089 |
+
+**Contoh copy:** *"Dari Legend V ke Mythic cuma Rp 169K. Booster langsung gas 🔥 — etnyx.id/order"*
+
+---
+
+### 💡 Tips Konten Pricing
+- **Fokus pada value terendah** untuk hook: *"mulai dari Rp 5.000/bintang"*
+- **Bandingkan dengan harga kompetitor** tanpa menyebut nama: *"harga transparan, tanpa biaya tersembunyi"*
+- **Contoh konkrit** selalu lebih menarik daripada tabel: *"5 bintang Epic? Rp 32.500 doang"*
+- **Urgency** untuk promo: *"harga spesial, slot terbatas!"*
+- **Tier tertinggi** untuk aspirasi: *"Mythic dalam 2 hari — mulai Rp 18K/bintang"*
+
+---
+
+*Brief ini bisa diupdate sesuai perkembangan brand. Last updated: 21 April 2026.*

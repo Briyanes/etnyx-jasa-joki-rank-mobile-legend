@@ -97,11 +97,11 @@
 
   .s1 .shake { animation: shakePhone 0.4s ease; }
   @keyframes shakePhone {
-    0%, 100% { transform: translateX(0); }
-    20% { transform: translateX(-8px); }
-    40% { transform: translateX(8px); }
-    60% { transform: translateX(-5px); }
-    80% { transform: translateX(5px); }
+    0%, 100% { transform: scale(var(--phone-scale,1)) translateX(0); }
+    20% { transform: scale(var(--phone-scale,1)) translateX(-8px); }
+    40% { transform: scale(var(--phone-scale,1)) translateX(8px); }
+    60% { transform: scale(var(--phone-scale,1)) translateX(-5px); }
+    80% { transform: scale(var(--phone-scale,1)) translateX(5px); }
   }
 
   /* ========== SCENE 2: LOGO REVEAL (3.5-8s) — Brand Authority ========== */
@@ -690,13 +690,6 @@
 </div>
 </div>
 
-<div class="controls" id="controls">
-  <button class="ctrl-btn" id="playBtn" onclick="startAnimation()">&#x25B6; Play</button>
-  <button class="ctrl-btn" id="recBtn" onclick="toggleRecMode()">&#x1F534; Rec Mode</button>
-  <button class="ctrl-btn" id="muteBtn" onclick="toggleMute()">&#x1F50A; Sound</button>
-  <div class="timer-display" id="timerDisplay">0.0s / 30s</div>
-</div>
-
 <script>
 // ===================== WEB AUDIO ENGINE =====================
 // All SFX generated via Web Audio API — no external files needed
@@ -1242,6 +1235,7 @@ function toggleRecMode() {
   if (document.body.classList.contains('hide-controls')) {
     btn.classList.add('recording');
     btn.textContent = '\u2B1B Exit Rec';
+    initAudio(); if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
     setTimeout(startAnimation, 1000);
   } else {
     btn.classList.remove('recording');
@@ -1250,9 +1244,8 @@ function toggleRecMode() {
 }
 function updateStageScale(){const s=Math.min((window.innerWidth-32)/390,(window.innerHeight-32)/844,1);document.documentElement.style.setProperty('--phone-scale',String(s));}
 window.addEventListener('resize',updateStageScale);
-document.addEventListener('DOMContentLoaded',()=>{if(typeof lucide!=='undefined')lucide.createIcons();});
-document.addEventListener('DOMContentLoaded',updateStageScale);
+document.addEventListener('DOMContentLoaded',()=>{if(typeof lucide!=='undefined')lucide.createIcons();updateStageScale();});
 </script>
-
+<div id="__ghost" style="display:none!important;position:absolute;pointer-events:none"><button id="playBtn"></button><button id="recBtn"></button><button id="muteBtn"></button><div id="timerDisplay"></div></div>
 </body>
 </html>

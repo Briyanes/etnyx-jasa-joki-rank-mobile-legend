@@ -26,9 +26,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Order not found" }, { status: 404 });
   }
 
-  // Verify token if provided
-  if (token && order.review_token !== token) {
-    return NextResponse.json({ error: "Invalid token" }, { status: 403 });
+  // Verify token — required for review access
+  if (!token || order.review_token !== token) {
+    return NextResponse.json({ error: "Token tidak valid" }, { status: 403 });
   }
 
   if (order.status !== "completed") {
@@ -113,8 +113,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    if (token && order.review_token !== token) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 403 });
+    if (!token || order.review_token !== token) {
+      return NextResponse.json({ error: "Token tidak valid" }, { status: 403 });
     }
 
     if (order.status !== "completed") {

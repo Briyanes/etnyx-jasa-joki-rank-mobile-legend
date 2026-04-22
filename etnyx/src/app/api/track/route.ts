@@ -1,7 +1,25 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 
+// Simple in-memory rate limit: max 10 req/min per IP
+const trackRateLimit = new Map<string, number[]>();
+function checkTrackRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const window = 60_000;
+  const max = 10;
+  const hits = (trackRateLimit.get(ip) || []).filter(t => now - t < window);
+  if (hits.length >= max) return false;
+  hits.push(now);
+  trackRateLimit.set(ip, hits);
+  return true;
+}
+
 export async function GET(request: Request) {
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  if (!checkTrackRateLimit(ip)) {
+    return NextResponse.json({ error: "Terlalu banyak permintaan" }, { status: 429 });
+  }
+
   const { searchParams } = new URL(request.url);
   const orderId = searchParams.get("id");
 
@@ -16,7 +34,7 @@ export async function GET(request: Request) {
     const supabase = await createAdminClient();
     const { data, error } = await supabase
       .from("orders")
-      .select("id, order_id, username, current_rank, target_rank, current_star, target_star, package, package_title, status, progress, current_progress_rank, is_express, is_premium, created_at, updated_at")
+      .select("id, order_id, current_rank, target_rank, current_star, target_star, package, package_title, status, progress, current_progress_rank, is_express, is_premium, created_at, updated_at")
       .eq("order_id", sanitizedId)
       .single();
 
@@ -39,7 +57,7 @@ export async function GET(request: Request) {
       .in("action", ["status_change", "status_confirmed", "status_in_progress", "status_completed", "status_cancelled", "payment_confirmed", "created", "assigned"])
       .order("created_at", { ascending: true });
 
-    // Strip internal id from response
+    // Strip internal id from response, also strip username for privacy
     const { id: _id, ...orderData } = data;
 
     return NextResponse.json({ ...orderData, submissions: submissions || [], status_logs: logs || [] });

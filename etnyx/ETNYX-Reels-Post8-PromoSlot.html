@@ -128,6 +128,13 @@
   .proof .pi [data-lucide]{margin:0 auto;width:20px;height:20px;}
   .phone.urgent{animation:edgeGlow 2s ease infinite;}
   @keyframes edgeGlow{0%,100%{box-shadow:0 0 60px rgba(239,68,68,0.15);}50%{box-shadow:0 0 80px rgba(239,68,68,0.35);}}
+  .cursor{position:absolute;width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,0.9);box-shadow:0 0 12px rgba(255,255,255,0.4);z-index:40;pointer-events:none;opacity:0;transition:all 0.5s cubic-bezier(0.25,0.1,0.25,1);}
+  .cursor.show{opacity:1;}
+  .cursor.click{animation:cc 0.25s ease;}
+  .ripple{position:absolute;width:40px;height:40px;border-radius:50%;border:2px solid #EF4444;opacity:0;z-index:39;pointer-events:none;}
+  .ripple.show{animation:rp 0.5s ease forwards;}
+  @keyframes cc{0%,100%{transform:scale(1);}50%{transform:scale(0.6);}}
+  @keyframes rp{0%{opacity:1;transform:scale(0.5);}100%{opacity:0;transform:scale(2);}}
 </style>
 </head>
 <body>
@@ -203,18 +210,18 @@
     </div>
   </div>
 
+  <div class="cursor" id="cursor"></div>
+  <div class="ripple" id="ripple"></div>
   <div class="timer-bar" id="timerBar"></div>
 </div>
 </div>
 
-<div class="controls"><button class="ctrl-btn" id="playBtn" onclick="startAnimation()">&#x25B6; Play</button><button class="ctrl-btn" id="recBtn" onclick="toggleRecMode()">&#x1F534; Rec</button><button class="ctrl-btn" id="muteBtn" onclick="toggleMute()">&#x1F50A;</button><div class="timer-display" id="timerDisplay">0.0s / 30s</div></div>
-
 <script>
 let audioCtx=null,isMuted=false,masterGain=null,bgOsc=null;
-function initAudio(){if(audioCtx)return;audioCtx=new(window.AudioContext||window.webkitAudioContext)();masterGain=audioCtx.createGain();masterGain.gain.value=0.5;masterGain.connect(audioCtx.destination);}
-function toggleMute(){isMuted=!isMuted;const b=document.getElementById('muteBtn');if(isMuted){b.textContent='\uD83D\uDD07';b.classList.add('muted');if(masterGain)masterGain.gain.value=0;}else{b.textContent='\uD83D\uDD0A';b.classList.remove('muted');if(masterGain)masterGain.gain.value=0.5;}}
-function startBG(){if(!audioCtx)return;bgOsc=audioCtx.createOscillator();bgOsc.type='sawtooth';bgOsc.frequency.value=80;const g=audioCtx.createGain();g.gain.value=0.03;const f=audioCtx.createBiquadFilter();f.type='lowpass';f.frequency.value=200;bgOsc.connect(f);f.connect(g);g.connect(masterGain);bgOsc.start();const b=audioCtx.createBuffer(1,audioCtx.sampleRate*2,audioCtx.sampleRate);const d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;const n=audioCtx.createBufferSource();n.buffer=b;n.loop=true;const nf=audioCtx.createBiquadFilter();nf.type='lowpass';nf.frequency.value=120;const ng=audioCtx.createGain();ng.gain.value=0.03;n.connect(nf);nf.connect(ng);ng.connect(masterGain);n.start();bgOsc._n=n;}
-function stopBG(){if(bgOsc){try{bgOsc.stop();bgOsc._n.stop();}catch(e){}bgOsc=null;}}
+function initAudio(){if(audioCtx)return;audioCtx=new(window.AudioContext||window.webkitAudioContext)();masterGain=audioCtx.createGain();masterGain.gain.value=0.6;masterGain.connect(audioCtx.destination);}
+function toggleMute(){isMuted=!isMuted;const b=document.getElementById('muteBtn');if(isMuted){b.textContent='\uD83D\uDD07';b.classList.add('muted');if(masterGain)masterGain.gain.value=0;}else{b.textContent='\uD83D\uDD0A';b.classList.remove('muted');if(masterGain)masterGain.gain.value=0.6;}}
+function startBG(){if(!audioCtx)return;bgOsc=audioCtx.createOscillator();bgOsc.type='sine';bgOsc.frequency.value=55;const bgG=audioCtx.createGain();bgG.gain.value=0.08;const lfo=audioCtx.createOscillator();lfo.type='sine';lfo.frequency.value=2;const lfoG=audioCtx.createGain();lfoG.gain.value=0.04;lfo.connect(lfoG);lfoG.connect(bgG.gain);lfo.start();bgOsc.connect(bgG);bgG.connect(masterGain);bgOsc.start();const bufSize=audioCtx.sampleRate*2;const noiseBuf=audioCtx.createBuffer(1,bufSize,audioCtx.sampleRate);const ndata=noiseBuf.getChannelData(0);for(let i=0;i<bufSize;i++)ndata[i]=Math.random()*2-1;const noiseNode=audioCtx.createBufferSource();noiseNode.buffer=noiseBuf;noiseNode.loop=true;const nf=audioCtx.createBiquadFilter();nf.type='lowpass';nf.frequency.value=200;nf.Q.value=1;const ng=audioCtx.createGain();ng.gain.value=0.03;noiseNode.connect(nf);nf.connect(ng);ng.connect(masterGain);noiseNode.start();bgOsc._lfo=lfo;bgOsc._noise=noiseNode;}
+function stopBG(){if(bgOsc){try{bgOsc.stop();bgOsc._lfo.stop();bgOsc._noise.stop();}catch(e){}bgOsc=null;}}
 function sfx(type){if(!audioCtx)return;const t=audioCtx.currentTime;
 if(type==='alarm'){const o=audioCtx.createOscillator();o.type='square';o.frequency.setValueAtTime(800,t);o.frequency.setValueAtTime(600,t+0.1);o.frequency.setValueAtTime(800,t+0.2);const g=audioCtx.createGain();g.gain.setValueAtTime(0.07,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.3);o.connect(g);g.connect(masterGain);o.start();o.stop(t+0.3);}
 else if(type==='whoosh'){const b=audioCtx.createBuffer(1,audioCtx.sampleRate*0.2,audioCtx.sampleRate);const d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(1-i/d.length);const s=audioCtx.createBufferSource();s.buffer=b;const f=audioCtx.createBiquadFilter();f.type='bandpass';f.Q.value=0.5;f.frequency.setValueAtTime(400,t);f.frequency.exponentialRampToValueAtTime(2500,t+0.12);const g=audioCtx.createGain();g.gain.setValueAtTime(0.1,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.15);s.connect(f);f.connect(g);g.connect(masterGain);s.start();}
@@ -224,7 +231,12 @@ else if(type==='slide'){const o=audioCtx.createOscillator();o.type='sine';o.freq
 else if(type==='tick'){const o=audioCtx.createOscillator();o.type='triangle';o.frequency.value=900;const g=audioCtx.createGain();g.gain.setValueAtTime(0.05,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.05);o.connect(g);g.connect(masterGain);o.start();o.stop(t+0.05);}
 else if(type==='urgency'){const o=audioCtx.createOscillator();o.type='sawtooth';o.frequency.setValueAtTime(200,t);o.frequency.linearRampToValueAtTime(800,t+0.3);const g=audioCtx.createGain();g.gain.setValueAtTime(0.06,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.35);o.connect(g);g.connect(masterGain);o.start();o.stop(t+0.35);}
 else if(type==='success'){[800,1000,1200].forEach((f,i)=>{const o=audioCtx.createOscillator();o.type='sine';o.frequency.value=f;const g=audioCtx.createGain();g.gain.setValueAtTime(0.08,t+i*0.1);g.gain.exponentialRampToValueAtTime(0.001,t+i*0.1+0.25);o.connect(g);g.connect(masterGain);o.start(t+i*0.1);o.stop(t+i*0.1+0.25);});}
+else if(type==='click'){const o=audioCtx.createOscillator();o.type='sine';o.frequency.value=1200;const g=audioCtx.createGain();g.gain.setValueAtTime(0.07,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.07);o.connect(g);g.connect(masterGain);o.start();o.stop(t+0.07);}
 }
+function moveCur(x,y){const c=document.getElementById('cursor');c.style.left=x+'px';c.style.top=y+'px';}
+function showCur(){document.getElementById('cursor').classList.add('show');}
+function hideCur(){document.getElementById('cursor').classList.remove('show','click');}
+function clickAt(x,y){const c=document.getElementById('cursor');const r=document.getElementById('ripple');c.classList.add('click');r.style.left=(x-10)+'px';r.style.top=(y-10)+'px';r.classList.remove('show');void r.offsetWidth;r.classList.add('show');sfx('click');setTimeout(()=>c.classList.remove('click'),250);}
 const TOTAL=30000;let playing=false,startTime=0,animFrame=null,fired={};
 const SCENES=[{id:'scene0',start:0,end:5000},{id:'scene1',start:5000,end:12000},{id:'scene2',start:12000,end:20000},{id:'scene3',start:20000,end:30000}];
 
@@ -236,7 +248,7 @@ function startAnimation(){
   document.getElementById('timerBar').style.width='0%';
   document.getElementById('smfill').style.width='0%';
   document.getElementById('phone').classList.remove('urgent');
-  stopBG();startBG();document.getElementById('audioBars').classList.add('show');
+  hideCur();stopBG();startBG();document.getElementById('audioBars').classList.add('show');
   tick();
 }
 
@@ -277,14 +289,18 @@ function tick(){
   if(e>=22500&&!fired.s3c){fired.s3c=true;document.getElementById('cPrice').classList.add('show');}
   if(e>=23500&&!fired.s3d){fired.s3d=true;document.getElementById('cSub').classList.add('show');}
   if(e>=24500&&!fired.s3e){fired.s3e=true;document.getElementById('cBtn').classList.add('show');sfx('success');}
+  if(e>=25200&&!fired.cs){fired.cs=true;showCur();moveCur(195,490);}
+  if(e>=25900&&!fired.ck){fired.ck=true;clickAt(195,490);}
   if(e>=26000&&!fired.s3f){fired.s3f=true;document.getElementById('cUrgent').classList.add('show');sfx('alarm');}
+  if(e>=27200&&!fired.ch){fired.ch=true;hideCur();}
 
-  if(e<TOTAL){animFrame=requestAnimationFrame(tick);}else{playing=false;stopBG();document.getElementById('audioBars').classList.remove('show');document.getElementById('playBtn').textContent='\u25B6 Play';document.getElementById('playBtn').style.opacity='1';document.getElementById('timerDisplay').textContent='30.0s / 30s';}
+  if(e<TOTAL){animFrame=requestAnimationFrame(tick);}else{playing=false;hideCur();stopBG();document.getElementById('audioBars').classList.remove('show');document.getElementById('playBtn').textContent='\u25B6 Play';document.getElementById('playBtn').style.opacity='1';document.getElementById('timerDisplay').textContent='30.0s / 30s';}
 }
-function toggleRecMode(){const b=document.getElementById('recBtn');document.body.classList.toggle('hide-controls');if(document.body.classList.contains('hide-controls')){b.classList.add('recording');b.textContent='\u2B1B';setTimeout(startAnimation,1000);}else{b.classList.remove('recording');b.textContent='\uD83D\uDD34 Rec';}}
+function toggleRecMode(){const b=document.getElementById('recBtn');document.body.classList.toggle('hide-controls');if(document.body.classList.contains('hide-controls')){b.classList.add('recording');b.textContent='\u2B1B';initAudio();if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();setTimeout(startAnimation,1000);}else{b.classList.remove('recording');b.textContent='\uD83D\uDD34 Rec';}}
 function updateStageScale(){const s=Math.min((window.innerWidth-32)/390,(window.innerHeight-32)/844,1);document.documentElement.style.setProperty('--phone-scale',String(s));}
 window.addEventListener('resize',updateStageScale);
 document.addEventListener('DOMContentLoaded',()=>{if(typeof lucide!=='undefined')lucide.createIcons();updateStageScale();});
 </script>
+<div id="__ghost" style="display:none!important;position:absolute;pointer-events:none"><button id="playBtn"></button><button id="recBtn"></button><button id="muteBtn"></button><div id="timerDisplay"></div></div>
 </body>
 </html>

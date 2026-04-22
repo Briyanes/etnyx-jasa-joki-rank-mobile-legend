@@ -1,0 +1,12 @@
+import { chromium } from '@playwright/test';
+const ROOT = process.cwd();
+const b = await chromium.launch({ headless: true });
+const p = await b.newPage();
+const allMsgs = [];
+p.on('pageerror', e => allMsgs.push('PAGEERROR: ' + e.message + '\n' + e.stack));
+p.on('console', m => allMsgs.push(`[${m.type()}] ${m.text()}`));
+await p.goto(`file://${ROOT}/ETNYX-Reels-Post2-TutorialPaket.html`);
+await p.waitForLoadState('networkidle');
+await p.waitForTimeout(1000);
+console.log('All messages:', allMsgs.join('\n') || 'NONE');
+await b.close();

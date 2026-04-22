@@ -84,7 +84,7 @@ interface PackageProfit {
 // ============================================================
 //  CONSTANTS
 // ============================================================
-const FINANCE_PIN = "etnyx2026!";
+const FINANCE_PIN = process.env.FINANCE_PIN || process.env.ADMIN_JWT_SECRET?.slice(0, 12) || "etnyx2026!";
 
 const MONTHS = [
   "Januari", "Februari", "Maret", "April", "Mei", "Juni",
