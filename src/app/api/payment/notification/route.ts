@@ -4,21 +4,26 @@ import { createAdminClient } from "@/lib/supabase-server";
 // Moota mengirim webhook: { transactions: [{ uuid, amount, type, bank_type, note, status, ... }] }
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    let body: { transactions?: MootaTransaction[] } = {};
+    try {
+      body = await request.json();
+    } catch {
+      // empty body (Moota "Check URL" test ping)
+    }
 
-    // Validasi webhook token dari Moota (opsional, set di header X-Moota-Token)
+    const { transactions } = body;
+
+    // Moota "Check URL" sends empty body — return 200 immediately
+    if (!transactions || !Array.isArray(transactions) || transactions.length === 0) {
+      return NextResponse.json({ success: true, message: "Webhook OK" });
+    }
+
+    // Validate token only for real webhook calls with transactions
     const webhookToken = request.headers.get("x-moota-token") ?? request.headers.get("authorization");
     const expectedToken = process.env.MOOTA_WEBHOOK_TOKEN;
     if (expectedToken && webhookToken !== expectedToken && webhookToken !== `Bearer ${expectedToken}`) {
       console.warn("Moota webhook: invalid token");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const { transactions } = body as { transactions: MootaTransaction[] };
-
-    // Moota "Check URL" test sends empty body — return 200 so validation passes
-    if (!transactions || !Array.isArray(transactions) || transactions.length === 0) {
-      return NextResponse.json({ success: true, message: "Webhook OK" });
     }
 
     const supabase = await createAdminClient();
