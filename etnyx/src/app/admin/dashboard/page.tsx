@@ -218,7 +218,7 @@ export default function AdminDashboard() {
   const ORDERS_PER_PAGE = 25;
   const [showModal, setShowModal] = useState<string | null>(null);
   const [editItem, setEditItem] = useState<Testimonial | Portfolio | PromoCode | Booster | null>(null);
-  const [credentials, setCredentials] = useState<{ order_id: string; account_login: string | null; account_password: string | null } | null>(null);
+  const [credentials, setCredentials] = useState<{ order_id: string; account_login: string | null; account_password: string | null; is_gendong?: boolean; notes?: string | null } | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [followUpLoading, setFollowUpLoading] = useState<string | null>(null);
@@ -317,7 +317,7 @@ export default function AdminDashboard() {
   }, []);
   const fetchOrders = useCallback(async () => {
     try {
-      const params = new URLSearchParams({ status: statusFilter, page: String(ordersPage), limit: String(ORDERS_PER_PAGE) });
+      const params = new URLSearchParams({ status: statusFilter, offset: String((ordersPage - 1) * ORDERS_PER_PAGE), limit: String(ORDERS_PER_PAGE) });
       if (searchQuery.trim()) params.set("search", searchQuery.trim());
       const res = await fetch(`/api/admin/orders?${params}`);
       const d = await res.json();
@@ -428,7 +428,8 @@ export default function AdminDashboard() {
   };
   const handleDeactivateStaff = async (id: string) => {
     if (!confirm("Nonaktifkan staff ini?")) return;
-    await fetch("/api/staff/users", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+    const res = await fetch("/api/staff/users", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+    if (!res.ok) { toastError("Gagal menonaktifkan staff"); return; }
     fetchStaffUsers();
   };
 
@@ -575,7 +576,7 @@ export default function AdminDashboard() {
   const bulkAssignWorker = async () => {
     if (!bulkWorker) { toast("Pilih worker terlebih dahulu"); return; }
     const targets = orders.filter(o => selectedOrders.has(o.id) && o.payment_status === "paid");
-    if (targets.length === 0) { toast("Tidak ada order dengan pembayaran confirmed yang dipilih"); return; }
+    if (targets.length === 0) { toast("Tidak ada order dengan pembayaran lunas (paid) yang dipilih"); return; }
     if (!confirm(`Assign ke worker yang sama untuk ${targets.length} order?`)) return;
     setBulkLoading(true);
     let ok = 0;
@@ -610,9 +611,10 @@ export default function AdminDashboard() {
     setOrderLogs([]);
     try {
       const res = await fetch(`/api/admin/orders/logs?id=${orderId}`);
+      if (!res.ok) { toastError("Gagal memuat log order"); setOrderLogsLoading(false); return; }
       const data = await res.json();
       setOrderLogs(data.logs || []);
-    } catch { setOrderLogs([]); }
+    } catch { toastError("Network error"); }
     setOrderLogsLoading(false);
   };
 
@@ -622,9 +624,10 @@ export default function AdminDashboard() {
     setProofsLoading(true);
     try {
       const res = await fetch(`/api/admin/payment-proof?order_id=${orderId}`);
+      if (!res.ok) { toastError("Gagal memuat bukti transfer"); setProofs([]); setProofsLoading(false); return; }
       const data = await res.json();
       setProofs(data.proofs || []);
-    } catch { setProofs([]); }
+    } catch { toastError("Network error"); setProofs([]); }
     setProofsLoading(false);
   };
 
@@ -654,53 +657,62 @@ export default function AdminDashboard() {
 
   const copyOrderInfo = (o: Order) => {
     const text = `Order: ${o.order_id}\nCustomer: ${o.username}\nGame ID: ${o.game_id}\nRank: ${o.current_rank} → ${o.target_rank}\nStatus: ${o.status}\nProgress: ${o.progress}%\nWA: ${o.whatsapp || "-"}\nHarga: ${formatRupiah(o.total_price)}`;
-    navigator.clipboard.writeText(text);
-    toastSuccess("Info order disalin!");
+    navigator.clipboard.writeText(text)
+      .then(() => toastSuccess("Info order disalin!"))
+      .catch(() => toastError("Gagal copy ke clipboard"));
   };
 
   // CRUD handlers
   const handleSaveTestimonial = async (data: Partial<Testimonial>) => {
     const method = editItem ? "PUT" : "POST";
     const body = editItem ? { ...data, id: editItem.id } : data;
-    await fetch("/api/admin/testimonials", { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const res = await fetch("/api/admin/testimonials", { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    if (!res.ok) { const d = await res.json(); toastError(d.error || "Gagal menyimpan testimonial"); return; }
     fetchTestimonials(); setShowModal(null); setEditItem(null);
   };
   const handleDeleteTestimonial = async (id: string) => {
     if (!confirm("Hapus testimonial ini?")) return;
-    await fetch("/api/admin/testimonials", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+    const res = await fetch("/api/admin/testimonials", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+    if (!res.ok) { toastError("Gagal menghapus testimonial"); return; }
     fetchTestimonials();
   };
   const handleSavePortfolio = async (data: Partial<Portfolio>) => {
     const method = editItem ? "PUT" : "POST";
     const body = editItem ? { ...data, id: editItem.id } : data;
-    await fetch("/api/admin/portfolio", { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const res = await fetch("/api/admin/portfolio", { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    if (!res.ok) { const d = await res.json(); toastError(d.error || "Gagal menyimpan portfolio"); return; }
     fetchPortfolios(); setShowModal(null); setEditItem(null);
   };
   const handleDeletePortfolio = async (id: string) => {
     if (!confirm("Hapus portfolio ini?")) return;
-    await fetch("/api/admin/portfolio", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+    const res = await fetch("/api/admin/portfolio", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+    if (!res.ok) { toastError("Gagal menghapus portfolio"); return; }
     fetchPortfolios();
   };
   const handleSavePromoCode = async (data: Partial<PromoCode>) => {
     const method = editItem ? "PUT" : "POST";
     const body = editItem ? { ...data, id: editItem.id } : data;
-    await fetch("/api/admin/promo-codes", { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const res = await fetch("/api/admin/promo-codes", { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    if (!res.ok) { const d = await res.json(); toastError(d.error || "Gagal menyimpan promo code"); return; }
     fetchPromoCodes(); setShowModal(null); setEditItem(null);
   };
   const handleDeletePromoCode = async (id: string) => {
     if (!confirm("Hapus promo code ini?")) return;
-    await fetch("/api/admin/promo-codes", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+    const res = await fetch("/api/admin/promo-codes", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+    if (!res.ok) { toastError("Gagal menghapus promo code"); return; }
     fetchPromoCodes();
   };
   const handleSaveBooster = async (data: Partial<Booster>) => {
     const method = editItem ? "PUT" : "POST";
     const body = editItem ? { ...data, id: editItem.id } : data;
-    await fetch("/api/admin/boosters", { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const res = await fetch("/api/admin/boosters", { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    if (!res.ok) { const d = await res.json(); toastError(d.error || "Gagal menyimpan booster"); return; }
     fetchBoosters(); setShowModal(null); setEditItem(null);
   };
   const handleDeleteBooster = async (id: string) => {
     if (!confirm("Hapus booster ini?")) return;
-    await fetch("/api/admin/boosters", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+    const res = await fetch("/api/admin/boosters", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+    if (!res.ok) { toastError("Gagal menghapus booster"); return; }
     fetchBoosters();
   };
 
@@ -2277,7 +2289,9 @@ export default function AdminDashboard() {
                         <td className="px-4 py-3 text-text-muted text-xs">{p.used_count}/{p.max_uses || "∞"}</td>
                         <td className="px-4 py-3 text-text-muted text-xs">{p.expires_at ? new Date(p.expires_at).toLocaleDateString("id-ID") : "Never"}</td>
                         <td className="px-4 py-3">
-                          <span className={`px-2 py-0.5 rounded text-[10px] ${p.is_active ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>{p.is_active ? "Active" : "Inactive"}</span>
+                          <span className={`px-2 py-0.5 rounded text-[10px] ${p.is_active && !(p.max_uses && p.used_count >= p.max_uses) ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
+                            {!p.is_active ? "Inactive" : (p.max_uses && p.used_count >= p.max_uses) ? "Habis" : "Active"}
+                          </span>
                         </td>
                         <td className="px-4 py-3">
                           <button onClick={() => { setEditItem(p); setShowModal("promo"); }} className="text-accent text-xs mr-2 hover:underline">Edit</button>
@@ -2449,7 +2463,8 @@ export default function AdminDashboard() {
                                 }} className="p-1.5 rounded-lg hover:bg-white/5 text-text-muted hover:text-accent"><Pencil className="w-3.5 h-3.5" /></button>
                                 <button onClick={async () => {
                                   if (!confirm(`Hapus "${item.name}"?`)) return;
-                                  await fetch("/api/admin/rewards/catalog", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: item.id }) });
+                                  const delRes = await fetch("/api/admin/rewards/catalog", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: item.id }) });
+                                  if (!delRes.ok) { toastError("Gagal menghapus item reward"); return; }
                                   fetchRewardsCatalog();
                                 }} className="p-1.5 rounded-lg hover:bg-white/5 text-text-muted hover:text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>
                               </div>
@@ -2499,12 +2514,14 @@ export default function AdminDashboard() {
                             {r.status === "pending" && (
                               <div className="flex items-center gap-1">
                                 <button onClick={async () => {
-                                  await fetch("/api/admin/rewards/catalog", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ redemptionId: r.id, status: "processing" }) });
+                                  const rr = await fetch("/api/admin/rewards/catalog", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ redemptionId: r.id, status: "processing" }) });
+                                  if (!rr.ok) { toastError("Gagal memproses redemption"); return; }
                                   fetchRedemptions();
                                 }} className="px-2 py-1 rounded text-xs bg-blue-500/10 text-blue-400 hover:bg-blue-500/20">Proses</button>
                                 <button onClick={async () => {
                                   if (!confirm("Tolak dan refund poin?")) return;
-                                  await fetch("/api/admin/rewards/catalog", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ redemptionId: r.id, status: "rejected", adminNotes: "Ditolak oleh admin" }) });
+                                  const rr = await fetch("/api/admin/rewards/catalog", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ redemptionId: r.id, status: "rejected", adminNotes: "Ditolak oleh admin" }) });
+                                  if (!rr.ok) { toastError("Gagal menolak redemption"); return; }
                                   fetchRedemptions();
                                 }} className="px-2 py-1 rounded text-xs bg-red-500/10 text-red-400 hover:bg-red-500/20">Tolak</button>
                               </div>
@@ -2512,7 +2529,9 @@ export default function AdminDashboard() {
                             {r.status === "processing" && (
                               <button onClick={async () => {
                                 const notes = prompt("Catatan (opsional, contoh: Skin sudah dikirim):");
-                                await fetch("/api/admin/rewards/catalog", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ redemptionId: r.id, status: "completed", adminNotes: notes || "Hadiah sudah dikirim" }) });
+                                if (notes === null) return;
+                                const rr = await fetch("/api/admin/rewards/catalog", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ redemptionId: r.id, status: "completed", adminNotes: notes || "Hadiah sudah dikirim" }) });
+                                if (!rr.ok) { toastError("Gagal menyelesaikan redemption"); return; }
                                 fetchRedemptions();
                               }} className="px-2 py-1 rounded text-xs bg-green-500/10 text-green-400 hover:bg-green-500/20">Selesai</button>
                             )}
@@ -2729,7 +2748,8 @@ export default function AdminDashboard() {
                           <div className="flex gap-1 flex-wrap">
                             <button
                               onClick={async () => {
-                                await fetch("/api/admin/reviews", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: r.id, is_visible: !r.is_visible }) });
+                                const res = await fetch("/api/admin/reviews", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: r.id, is_visible: !r.is_visible }) });
+                                if (!res.ok) { toastError("Gagal update visibility"); return; }
                                 fetchReviews();
                               }}
                               className={`text-xs px-2 py-1 rounded ${r.is_visible ? "text-accent" : "text-text-muted"} hover:underline`}
@@ -2739,7 +2759,8 @@ export default function AdminDashboard() {
                             </button>
                             <button
                               onClick={async () => {
-                                await fetch("/api/admin/reviews", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: r.id, google_reviewed: !r.google_reviewed }) });
+                                const res = await fetch("/api/admin/reviews", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: r.id, google_reviewed: !r.google_reviewed }) });
+                                if (!res.ok) { toastError("Gagal update google reviewed"); return; }
                                 fetchReviews();
                               }}
                               className={`text-[10px] px-2 py-1 rounded font-medium ${r.google_reviewed ? "bg-green-500/10 text-green-400" : "bg-white/5 text-text-muted"} hover:opacity-80`}
@@ -2750,7 +2771,8 @@ export default function AdminDashboard() {
                             {r.has_worker_report && r.report_status === "pending" && (
                               <button
                                 onClick={async () => {
-                                  await fetch("/api/admin/reviews", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: r.id, report_status: "reviewed" }) });
+                                  const res = await fetch("/api/admin/reviews", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: r.id, report_status: "reviewed" }) });
+                                  if (!res.ok) { toastError("Gagal update report status"); return; }
                                   fetchReviews();
                                 }}
                                 className="text-xs px-2 py-1 rounded text-yellow-400 hover:underline"
@@ -2838,16 +2860,25 @@ export default function AdminDashboard() {
           <div className="bg-surface rounded-xl border border-white/10 p-5 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-sm font-bold text-text mb-0.5">Account Credentials</h3>
             <p className="text-text-muted text-xs mb-4">Order: <span className="font-mono text-accent">{credentials.order_id}</span></p>
-            <div className="space-y-3">
-              <div>
-                <label className="text-[10px] text-text-muted">Login / Email</label>
-                <div className="bg-background rounded-lg px-3 py-2 font-mono text-xs text-text break-all">{credentials.account_login || <span className="text-text-muted italic">N/A</span>}</div>
+            {credentials.is_gendong ? (
+              <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 mb-3">
+                <p className="text-sm text-blue-400 font-medium mb-1">🎮 Order Gendong / Duo Boost</p>
+                <p className="text-xs text-text-muted">Order ini tidak memerlukan login/password. Kamu bermain bersama customer di akun mereka.</p>
+                {credentials.notes && <p className="text-xs text-text mt-2">Catatan: {credentials.notes}</p>}
               </div>
-              <div>
-                <label className="text-[10px] text-text-muted">Password</label>
-                <div className="bg-background rounded-lg px-3 py-2 font-mono text-xs text-text break-all">{credentials.account_password || <span className="text-text-muted italic">N/A</span>}</div>
+            ) : (
+              <div className="space-y-3">
+                <div>
+                  <label className="text-[10px] text-text-muted">Login / Email</label>
+                  <div className="bg-background rounded-lg px-3 py-2 font-mono text-xs text-text break-all">{credentials.account_login || <span className="text-text-muted italic">N/A</span>}</div>
+                </div>
+                <div>
+                  <label className="text-[10px] text-text-muted">Password</label>
+                  <div className="bg-background rounded-lg px-3 py-2 font-mono text-xs text-text break-all">{credentials.account_password || <span className="text-text-muted italic">N/A</span>}</div>
+                </div>
+                {credentials.notes && <div><label className="text-[10px] text-text-muted">Catatan</label><div className="bg-background rounded-lg px-3 py-2 text-xs text-text">{credentials.notes}</div></div>}
               </div>
-            </div>
+            )}
             <p className="text-[10px] text-yellow-400/80 mt-3"><AlertTriangle className="w-3 h-3 inline" /> Jangan bagikan data ini.</p>
             <button onClick={() => setCredentials(null)} className="w-full mt-3 px-3 py-2 border border-white/10 rounded-lg text-text-muted text-xs hover:bg-white/5 transition">Tutup</button>
           </div>
