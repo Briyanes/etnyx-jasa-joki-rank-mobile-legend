@@ -1304,11 +1304,8 @@ function OrderPageContent() {
         return;
       }
 
-      // Redirect to manual payment (either chosen or iPaymu fallback)
+      // Redirect to manual payment
       if (data.paymentMethod === "manual_transfer") {
-        if (data.ipaymuFailed) {
-          toast("Pembayaran otomatis sedang gangguan, dialihkan ke transfer manual.");
-        }
         window.location.href = `/payment/manual?order_id=${data.orderId}`;
         return;
       }

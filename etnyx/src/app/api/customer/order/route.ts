@@ -574,19 +574,11 @@ export async function POST(request: NextRequest) {
             .eq("id", order.id);
         } else {
           console.error("iPaymu error:", ipaymuRes.status, JSON.stringify(ipaymuData), "URL:", ipaymuApiUrl, "VA:", ipaymuVa?.slice(0,6) + "...");
-          // iPaymu failed — fallback to manual transfer
-          await supabase
-            .from("orders")
-            .update({ payment_method: "manual_transfer" })
-            .eq("id", order.id);
+          return NextResponse.json({ error: "Gagal memproses pembayaran iPaymu. Silakan coba lagi atau pilih transfer manual." }, { status: 502 });
         }
       } catch (e) {
         console.error("iPaymu payment creation error:", e);
-        // iPaymu failed — fallback to manual transfer
-        await supabase
-          .from("orders")
-          .update({ payment_method: "manual_transfer" })
-          .eq("id", order.id);
+        return NextResponse.json({ error: "Gagal menghubungi iPaymu. Silakan coba lagi atau pilih transfer manual." }, { status: 502 });
       }
     }
     } // end if (!isManualTransfer)
@@ -596,7 +588,7 @@ export async function POST(request: NextRequest) {
       order_id: order.id,
       action: "created",
       new_value: "pending",
-      notes: `Order created via website. ${isManualTransfer ? "Manual transfer." : paymentUrl ? "Payment link generated." : "iPaymu gagal, fallback ke manual transfer."}`,
+      notes: `Order created via website. ${isManualTransfer ? "Manual transfer." : "Payment link generated via iPaymu."}`,
       created_by: "system",
     });
 
@@ -648,8 +640,7 @@ export async function POST(request: NextRequest) {
         totalPrice: verifiedTotalPrice,
         discount: verifiedDiscount,
         paymentUrl,
-        paymentMethod: isManualTransfer || (!isManualTransfer && !paymentUrl) ? "manual_transfer" : "ipaymu",
-        ipaymuFailed: !isManualTransfer && !paymentUrl,
+        paymentMethod: isManualTransfer ? "manual_transfer" : "ipaymu",
       },
       { status: 201 }
     );
