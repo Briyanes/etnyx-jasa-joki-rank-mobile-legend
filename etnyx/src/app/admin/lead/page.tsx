@@ -394,19 +394,26 @@ export default function LeadDashboard() {
     setUploading(true);
     try {
       const results = await Promise.all(files.map(async (file) => {
-        const formData = new FormData();
-        formData.append("file", file);
-        const res = await fetch("/api/staff/upload", { method: "POST", body: formData });
-        const data = await res.json();
-        if (res.ok && data.url) return data.url as string;
-        toast(data.error || `Upload ${file.name} gagal`);
-        return null;
+        try {
+          const formData = new FormData();
+          formData.append("file", file);
+          const res = await fetch("/api/staff/upload", { method: "POST", body: formData });
+          let data: { url?: string; error?: string } = {};
+          try { data = await res.json(); } catch { /* non-JSON response */ }
+          if (res.ok && data.url) return data.url;
+          toast(data.error || `Upload ${file.name} gagal`);
+          return null;
+        } catch {
+          toastError(`Upload ${file.name} gagal`);
+          return null;
+        }
       }));
       const urls = results.filter((u): u is string => u !== null);
       if (urls.length) setScreenshots(prev => [...prev, ...urls]);
-    } catch { toastError("Upload gagal"); }
-    setUploading(false);
-    if (fileRef.current) fileRef.current.value = "";
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
   };
 
   // Submit result (lead submits on behalf of worker)
