@@ -534,6 +534,17 @@ export default function AdminDashboard() {
     setAssigningWorker(null);
   };
 
+  const deleteOrder = async (orderId: string, orderDisplayId: string) => {
+    if (!confirm(`Hapus permanen order ${orderDisplayId}? Tindakan ini tidak bisa dibatalkan.`)) return;
+    try {
+      const res = await fetch(`/api/admin/orders?id=${orderId}`, { method: "DELETE" });
+      const d = await res.json();
+      if (!res.ok) { toast(d.error || "Gagal hapus order"); return; }
+      toast(`Order ${orderDisplayId} berhasil dihapus.`);
+      fetchOrders(); fetchStats();
+    } catch { toastError("Network error"); }
+  };
+
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
     setOrdersPage(1);
@@ -1523,7 +1534,7 @@ export default function AdminDashboard() {
                                 )}
                               </>)}
 
-                              {/* Universal: WA + Copy */}
+                              {/* Universal: WA + Copy + Delete */}
                               <div className="flex gap-1 pt-1 border-t border-white/5">
                                 {o.whatsapp && (
                                   <button onClick={() => openWhatsApp(o.whatsapp!, `Halo kak, ini dari ETNYX terkait order ${o.order_id}. `)}
@@ -1534,6 +1545,10 @@ export default function AdminDashboard() {
                                 <button onClick={() => copyOrderInfo(o)}
                                   className="flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded text-[9px] bg-surface text-text-muted hover:text-text transition-colors" title="Copy Info">
                                   <Copy className="w-2.5 h-2.5" /> Copy
+                                </button>
+                                <button onClick={() => deleteOrder(o.id, o.order_id)}
+                                  className="flex items-center justify-center gap-1 px-2 py-1 rounded text-[9px] bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors" title="Hapus Order">
+                                  <Trash2 className="w-2.5 h-2.5" />
                                 </button>
                               </div>
                             </div>

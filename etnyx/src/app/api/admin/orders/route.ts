@@ -502,3 +502,47 @@ export async function PATCH(request: Request) {
     );
   }
 }
+
+export async function DELETE(request: Request) {
+  const auth = await verifyAdmin();
+  if (!auth.authenticated) return auth.error!;
+
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json({ error: "Missing order id" }, { status: 400 });
+    }
+
+    const supabase = await createAdminClient();
+
+    const { data: order } = await supabase
+      .from("orders")
+      .select("order_id, status")
+      .eq("id", id)
+      .single();
+
+    if (!order) {
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+
+    // Hard  cascade will clean up related rows (logs, assignments, etc.)delete 
+    const { error } = await supabase.from("orders").delete().eq("id", id);
+
+    if (error) throw error;
+
+    logAdminAction({
+      admin_email: auth.user!.email,
+      action: "delete",
+      resource_type: "order",
+      resource_id: order.order_id,
+      details: `Deleted order ${order.order_id} (status: ${order.status})`,
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Order delete error:", error);
+    return NextResponse.json({ error: "Failed to delete order" }, { status: 500 });
+  }
+}
