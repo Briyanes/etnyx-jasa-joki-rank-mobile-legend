@@ -546,17 +546,27 @@ export async function POST(request: NextRequest) {
 
         const signature = generateIpaymuSignature(ipaymuBody, ipaymuVa, ipaymuApiKey);
 
-        const ipaymuRes = await fetch(ipaymuApiUrl, {
-          method: "POST",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-            va: ipaymuVa,
-            signature,
-            timestamp: getIpaymuTimestamp(),
-          },
-          body: JSON.stringify(ipaymuBody),
-        });
+        // 15 second timeout to prevent hanging requests
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+        let ipaymuRes: Response;
+        try {
+          ipaymuRes = await fetch(ipaymuApiUrl, {
+            method: "POST",
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+              va: ipaymuVa,
+              signature,
+              timestamp: getIpaymuTimestamp(),
+            },
+            body: JSON.stringify(ipaymuBody),
+            signal: controller.signal,
+          });
+        } finally {
+          clearTimeout(timeoutId);
+        }
 
         const ipaymuData = await ipaymuRes.json();
 
@@ -574,11 +584,20 @@ export async function POST(request: NextRequest) {
             .eq("id", order.id);
         } else {
           console.error("iPaymu error:", ipaymuRes.status, JSON.stringify(ipaymuData), "URL:", ipaymuApiUrl, "VA:", ipaymuVa?.slice(0,6) + "...");
+          // Delete orphaned order so customer can retry cleanly
+          await supabase.from("orders").delete().eq("id", order.id);
           return NextResponse.json({ error: "Gagal memproses pembayaran iPaymu. Silakan coba lagi atau pilih transfer manual." }, { status: 502 });
         }
       } catch (e) {
         console.error("iPaymu payment creation error:", e);
-        return NextResponse.json({ error: "Gagal menghubungi iPaymu. Silakan coba lagi atau pilih transfer manual." }, { status: 502 });
+        // Delete orphaned order so customer can retry cleanly
+        await supabase.from("orders").delete().eq("id", order.id);
+        const isTimeout = e instanceof Error && e.name === "AbortError";
+        return NextResponse.json({
+          error: isTimeout
+            ? "Koneksi ke iPaymu timeout. Silakan coba lagi atau pilih transfer manual."
+            : "Gagal menghubungi iPaymu. Silakan coba lagi atau pilih transfer manual.",
+        }, { status: 502 });
       }
     }
     } // end if (!isManualTransfer)
