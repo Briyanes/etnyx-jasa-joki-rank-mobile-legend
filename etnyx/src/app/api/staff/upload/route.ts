@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase-server";
+import { createServiceClient } from "@/lib/supabase-server";
 import { verifyStaff } from "@/lib/staff-auth";
 
 // POST /api/staff/upload — Upload screenshot to Supabase Storage
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Ukuran file maksimal 5MB" }, { status: 400 });
   }
 
-  const supabase = await createAdminClient();
+  const supabase = createServiceClient();
   // Use MIME type for extension (don't trust user filename like "photo.jpg.exe")
   const mimeToExt: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
   const safeExt = mimeToExt[file.type] || "jpg";
