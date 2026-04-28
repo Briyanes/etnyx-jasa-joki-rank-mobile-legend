@@ -389,19 +389,21 @@ export default function LeadDashboard() {
 
   // Screenshot upload
   const handleUploadScreenshot = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch("/api/staff/upload", { method: "POST", body: formData });
-      const data = await res.json();
-      if (res.ok && data.url) {
-        setScreenshots(prev => [...prev, data.url]);
-      } else {
-        toast(data.error || "Upload gagal");
-      }
+      const results = await Promise.all(files.map(async (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        const res = await fetch("/api/staff/upload", { method: "POST", body: formData });
+        const data = await res.json();
+        if (res.ok && data.url) return data.url as string;
+        toast(data.error || `Upload ${file.name} gagal`);
+        return null;
+      }));
+      const urls = results.filter((u): u is string => u !== null);
+      if (urls.length) setScreenshots(prev => [...prev, ...urls]);
     } catch { toastError("Upload gagal"); }
     setUploading(false);
     if (fileRef.current) fileRef.current.value = "";
@@ -831,16 +833,6 @@ export default function LeadDashboard() {
                           <MessageSquare className="w-3.5 h-3.5" /> Catatan
                         </button>
 
-                        {/* Submissions */}
-                        {order.assigned_worker_id && (
-                          <button
-                            onClick={() => { setSubmissionsOrder(submissionsOrder === order.id ? null : order.id); if (submissionsOrder !== order.id) fetchSubmissions(order.id); }}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-purple-500/10 text-purple-400 rounded-lg text-xs hover:bg-purple-500/20 transition-colors"
-                          >
-                            <Camera className="w-3.5 h-3.5" /> Hasil ({submissions[order.id]?.length || 0})
-                          </button>
-                        )}
-
                         {/* Submit Hasil (lead inputs on behalf of worker) */}
                         {order.assigned_worker_id && ["in_progress", "completed"].includes(order.status) && (
                           <button
@@ -1012,7 +1004,7 @@ export default function LeadDashboard() {
                                 </div>
                               ))}
                             </div>
-                            <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleUploadScreenshot} className="hidden" />
+                            <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={handleUploadScreenshot} className="hidden" />
                             <button
                               onClick={() => fileRef.current?.click()}
                               disabled={uploading}
@@ -1043,150 +1035,6 @@ export default function LeadDashboard() {
                             <button onClick={() => { setSubmittingOrder(null); setScreenshots([]); setForm({ starsGained: 0, mvpCount: 0, savageCount: 0, maniacCount: 0, matchesPlayed: 0, winCount: 0, durationMinutes: 0, notes: "" }); }}
                               className="px-4 py-2 bg-surface border border-white/10 rounded-lg text-text-muted text-sm">Batal</button>
                           </div>
-                        </div>
-                      )}
-
-                      {/* Submissions Panel */}
-                      {submissionsOrder === order.id && (
-                        <div className="bg-background rounded-lg p-4 space-y-3">
-                          <h4 className="text-text font-medium text-sm flex items-center gap-2">
-                            <Camera className="w-4 h-4 text-purple-400" /> Hasil Boosting Worker
-                          </h4>
-                          {!submissions[order.id] || submissions[order.id].length === 0 ? (
-                            <p className="text-text-muted text-xs text-center py-2">Belum ada hasil submit</p>
-                          ) : (
-                            <>
-                              {/* Aggregate Stats */}
-                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                                {[
-                                  { label: "Match", value: submissions[order.id].reduce((s, x) => s + x.matches_played, 0), icon: Swords },
-                                  { label: "Win", value: submissions[order.id].reduce((s, x) => s + x.win_count, 0), icon: Trophy },
-                                  { label: "Bintang", value: submissions[order.id].reduce((s, x) => s + x.stars_gained, 0), icon: Star },
-                                  { label: "Menit", value: submissions[order.id].reduce((s, x) => s + x.duration_minutes, 0), icon: Timer },
-                                ].map(({ label, value, icon: Icon }) => (
-                                  <div key={label} className="bg-surface rounded-lg p-2 text-center">
-                                    <Icon className="w-3.5 h-3.5 text-accent mx-auto mb-1" />
-                                    <div className="text-text font-bold text-sm">{value}</div>
-                                    <div className="text-text-muted text-[10px]">{label}</div>
-                                  </div>
-                                ))}
-                              </div>
-                              {/* Winrate */}
-                              {(() => {
-                                const totalMatches = submissions[order.id].reduce((s, x) => s + x.matches_played, 0);
-                                const totalWins = submissions[order.id].reduce((s, x) => s + x.win_count, 0);
-                                const wr = totalMatches > 0 ? ((totalWins / totalMatches) * 100).toFixed(1) : "0";
-                                return (
-                                  <div className="flex items-center gap-2 text-xs">
-                                    <Target className="w-3.5 h-3.5 text-accent" />
-                                    <span className="text-text-muted">Winrate:</span>
-                                    <span className={`font-bold ${Number(wr) >= 70 ? "text-green-400" : Number(wr) >= 50 ? "text-yellow-400" : "text-red-400"}`}>{wr}%</span>
-                                    <span className="text-text-muted">({totalWins}/{totalMatches})</span>
-                                  </div>
-                                );
-                              })()}
-                              {/* Per-session list */}
-                              <div className="space-y-2 max-h-60 overflow-y-auto">
-                                {submissions[order.id].map((sub, idx) => (
-                                  <div key={sub.id} className="bg-surface rounded-lg p-2.5 text-xs">
-                                    {editingSubmission === sub.id ? (
-                                      /* Edit Submission Form */
-                                      <div className="space-y-3">
-                                        <h5 className="text-text font-medium text-xs">Edit Submission</h5>
-                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                                          <div>
-                                            <label className="text-text-muted text-[10px]">Stars</label>
-                                            <input type="number" min={0} value={editForm.starsGained} onChange={(e) => setEditForm(p => ({ ...p, starsGained: Number(e.target.value) }))}
-                                              className="w-full bg-background border border-white/10 rounded px-2 py-1 text-text text-xs focus:border-accent focus:outline-none" />
-                                          </div>
-                                          <div>
-                                            <label className="text-text-muted text-[10px]">Matches</label>
-                                            <input type="number" min={0} value={editForm.matchesPlayed} onChange={(e) => setEditForm(p => ({ ...p, matchesPlayed: Number(e.target.value) }))}
-                                              className="w-full bg-background border border-white/10 rounded px-2 py-1 text-text text-xs focus:border-accent focus:outline-none" />
-                                          </div>
-                                          <div>
-                                            <label className="text-text-muted text-[10px]">Wins</label>
-                                            <input type="number" min={0} value={editForm.winCount} onChange={(e) => setEditForm(p => ({ ...p, winCount: Number(e.target.value) }))}
-                                              className="w-full bg-background border border-white/10 rounded px-2 py-1 text-text text-xs focus:border-accent focus:outline-none" />
-                                          </div>
-                                          <div>
-                                            <label className="text-text-muted text-[10px]">MVP</label>
-                                            <input type="number" min={0} value={editForm.mvpCount} onChange={(e) => setEditForm(p => ({ ...p, mvpCount: Number(e.target.value) }))}
-                                              className="w-full bg-background border border-white/10 rounded px-2 py-1 text-text text-xs focus:border-accent focus:outline-none" />
-                                          </div>
-                                          <div>
-                                            <label className="text-text-muted text-[10px]">Savage</label>
-                                            <input type="number" min={0} value={editForm.savageCount} onChange={(e) => setEditForm(p => ({ ...p, savageCount: Number(e.target.value) }))}
-                                              className="w-full bg-background border border-white/10 rounded px-2 py-1 text-text text-xs focus:border-accent focus:outline-none" />
-                                          </div>
-                                          <div>
-                                            <label className="text-text-muted text-[10px]">Maniac</label>
-                                            <input type="number" min={0} value={editForm.maniacCount} onChange={(e) => setEditForm(p => ({ ...p, maniacCount: Number(e.target.value) }))}
-                                              className="w-full bg-background border border-white/10 rounded px-2 py-1 text-text text-xs focus:border-accent focus:outline-none" />
-                                          </div>
-                                          <div>
-                                            <label className="text-text-muted text-[10px]">Durasi (min)</label>
-                                            <input type="number" min={0} value={editForm.durationMinutes} onChange={(e) => setEditForm(p => ({ ...p, durationMinutes: Number(e.target.value) }))}
-                                              className="w-full bg-background border border-white/10 rounded px-2 py-1 text-text text-xs focus:border-accent focus:outline-none" />
-                                          </div>
-                                        </div>
-                                        <div className="flex gap-2">
-                                          <button onClick={() => handleEditSubmission(sub.id)} disabled={editLoading}
-                                            className="px-3 py-1 gradient-primary rounded text-white text-xs font-medium disabled:opacity-50 flex items-center gap-1">
-                                            {editLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />} Simpan
-                                          </button>
-                                          <button onClick={() => setEditingSubmission(null)} className="px-3 py-1 bg-background border border-white/10 rounded text-text-muted text-xs">Batal</button>
-                                        </div>
-                                      </div>
-                                    ) : (
-                                      /* View Submission */
-                                      <>
-                                    <div className="flex items-center justify-between mb-1">
-                                      <span className="text-text font-medium">Sesi {idx + 1}</span>
-                                          <div className="flex items-center gap-2">
-                                      <span className="text-text-muted">{new Date(sub.submitted_at).toLocaleDateString("id-ID", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
-                                            <button onClick={() => {
-                                              setEditingSubmission(sub.id);
-                                              setEditForm({
-                                                starsGained: sub.stars_gained, mvpCount: sub.mvp_count, savageCount: sub.savage_count,
-                                                maniacCount: sub.maniac_count, matchesPlayed: sub.matches_played, winCount: sub.win_count,
-                                                durationMinutes: sub.duration_minutes, notes: "",
-                                              });
-                                            }} className="text-blue-400 hover:text-blue-300 transition-colors" title="Edit">
-                                              <Edit3 className="w-3.5 h-3.5" />
-                                            </button>
-                                            <button onClick={() => handleDeleteSubmission(sub.id, order.id)} disabled={deleteLoading === sub.id}
-                                              className="text-red-400 hover:text-red-300 transition-colors" title="Hapus">
-                                              {deleteLoading === sub.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
-                                            </button>
-                                          </div>
-                                    </div>
-                                    <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-text-muted">
-                                      <span><Star className="w-3 h-3 inline mr-0.5" />{sub.stars_gained} bintang</span>
-                                      <span><Gamepad2 className="w-3 h-3 inline mr-0.5" />{sub.matches_played} match</span>
-                                      <span><CheckCircle className="w-3 h-3 inline mr-0.5" />{sub.win_count} win</span>
-                                      <span><Timer className="w-3 h-3 inline mr-0.5" />{sub.duration_minutes} menit</span>
-                                      {sub.mvp_count > 0 && <span><Trophy className="w-3 h-3 inline mr-0.5" />{sub.mvp_count} MVP</span>}
-                                      {sub.savage_count > 0 && <span><Flame className="w-3 h-3 inline mr-0.5" />{sub.savage_count} Savage</span>}
-                                      {sub.maniac_count > 0 && <span><Zap className="w-3 h-3 inline mr-0.5" />{sub.maniac_count} Maniac</span>}
-                                    </div>
-                                    {sub.screenshots && sub.screenshots.length > 0 && (
-                                      <div className="flex gap-1 mt-1.5 overflow-x-auto">
-                                        {sub.screenshots.map((ss, si) => (
-                                          <a key={si} href={ss} target="_blank" rel="noopener noreferrer"
-                                            className="flex-shrink-0 w-16 h-16 rounded border border-white/10 overflow-hidden hover:border-accent transition-colors">
-                                            <Image src={ss} alt={`Screenshot ${si + 1}`} width={64} height={64} unoptimized className="w-full h-full object-cover" />
-                                          </a>
-                                        ))}
-                                      </div>
-                                    )}
-                                      </>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            </>
-                          )}
                         </div>
                       )}
 
