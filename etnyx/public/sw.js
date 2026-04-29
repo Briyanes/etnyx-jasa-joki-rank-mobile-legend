@@ -52,8 +52,10 @@ self.addEventListener('fetch', (event) => {
         return response;
       })
       .catch(() => {
-        // Fallback to cache
-        return caches.match(event.request);
+        // Fallback to cache — must return a valid Response, not undefined
+        return caches.match(event.request).then((cached) => {
+          return cached || new Response('', { status: 408, statusText: 'Offline' });
+        });
       })
   );
 });
