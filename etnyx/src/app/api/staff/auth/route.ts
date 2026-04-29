@@ -11,8 +11,25 @@ function getJwtSecret() {
   return new TextEncoder().encode(secret);
 }
 
+// Rate limit: 5 attempts per 15 minutes per IP
+const staffLoginRateLimit = new Map<string, number[]>();
+function checkLoginRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const windowMs = 15 * 60_000;
+  const maxAttempts = 5;
+  const timestamps = (staffLoginRateLimit.get(ip) || []).filter((t) => now - t < windowMs);
+  if (timestamps.length >= maxAttempts) return false;
+  timestamps.push(now);
+  staffLoginRateLimit.set(ip, timestamps);
+  return true;
+}
+
 // POST /api/staff/auth — Login
 export async function POST(request: NextRequest) {
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  if (!checkLoginRateLimit(ip)) {
+    return NextResponse.json({ error: "Terlalu banyak percobaan login. Coba lagi dalam 15 menit." }, { status: 429 });
+  }
   try {
     const { email, password } = await request.json();
 

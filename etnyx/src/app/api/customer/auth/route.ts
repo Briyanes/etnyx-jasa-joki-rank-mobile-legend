@@ -1,9 +1,22 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 import { logCustomerActivity } from "@/lib/activity-log";
+
+// Rate limit: 10 attempts per 15 minutes per IP
+const customerLoginRateLimit = new Map<string, number[]>();
+function checkLoginRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const windowMs = 15 * 60_000;
+  const maxAttempts = 10;
+  const timestamps = (customerLoginRateLimit.get(ip) || []).filter((t) => now - t < windowMs);
+  if (timestamps.length >= maxAttempts) return false;
+  timestamps.push(now);
+  customerLoginRateLimit.set(ip, timestamps);
+  return true;
+}
 
 function getJwtSecret() {
   if (!process.env.JWT_SECRET) {
@@ -33,7 +46,11 @@ async function verifyPassword(password: string, hash: string): Promise<boolean> 
 }
 
 // POST - Register or Login
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  if (!checkLoginRateLimit(ip)) {
+    return NextResponse.json({ error: "Terlalu banyak percobaan. Coba lagi dalam 15 menit." }, { status: 429 });
+  }
   try {
     if (!process.env.JWT_SECRET) {
       return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
