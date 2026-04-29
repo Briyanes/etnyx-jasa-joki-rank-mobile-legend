@@ -64,8 +64,16 @@ const BRIEFS = [
   {
     category: "System & Brand",
     items: [
+      { file: "ETNYX-Brand-Brief.md", title: "Brand Brief", badge: "Brand", color: "#2DD4BF" },
       { file: "ETNYX-System-Guide-v2.html", title: "System Guide v2", badge: "Internal", color: "#7FA8A3" },
       { file: "ETNYX-System-Guide.html", title: "System Guide v1", badge: "Internal", color: "#7FA8A3" },
+    ],
+  },
+  {
+    category: "Content & Video",
+    items: [
+      { file: "INSTAGRAM-CONTENT-PLAN.md", title: "Instagram Content Plan", badge: "Konten", color: "#A78BFA" },
+      { file: "VIDEO-SCRIPT-HOW-TO-ORDER.md", title: "Video Script — How to Order", badge: "Script", color: "#22C55E" },
     ],
   },
 ];
