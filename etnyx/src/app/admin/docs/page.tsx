@@ -2226,10 +2226,12 @@ function buildCategories(): DocCategory[] {
                 <h4 className="text-text font-medium text-sm mb-3">Notification Trigger Map</h4>
                 <Table headers={["Event", "Telegram", "WhatsApp", "Email"]} rows={[
                   ["Order dibuat (belum bayar)", "Admin: ORDER BARU! + tombol Konfirmasi/Tolak", "Konfirmasi order + info rekening + link upload bukti", "Invoice"],
-                  ["Bayar dikonfirmasi (confirmed)", "Worker: ORDER DIKONFIRMASI!", "Pembayaran Dikonfirmasi + track link + reminder keamanan", "Pembayaran Dikonfirmasi"],
+                  ["Customer upload bukti transfer", "Admin: BUKTI TRANSFER BARU + tombol Approve/Reject", "—", "—"],
+                  ["Bayar dikonfirmasi (confirmed)", "Admin: PEMBAYARAN DIKONFIRMASI! + Worker: ORDER DIKONFIRMASI!", "Pembayaran Dikonfirmasi + track link + reminder keamanan", "Pembayaran Dikonfirmasi"],
                   ["Order di-assign ke worker", "Worker: ORDER DITUGASKAN", "—", "—"],
-                  ["Mulai dikerjakan (in_progress)", "—", "Sedang Dikerjakan + jangan login + track link", "—"],
-                  ["Order selesai (completed)", "Admin: ORDER SELESAI!", "Selesai + ganti password + link review", "—"],
+                  ["Mulai dikerjakan (in_progress)", "Admin + Worker: ORDER SEDANG DIKERJAKAN + tombol Selesaikan", "Sedang Dikerjakan + jangan login + track link", "—"],
+                  ["Order dibatalkan (cancelled)", "Admin + Worker: ORDER DIBATALKAN", "Order Dibatalkan", "—"],
+                  ["Order selesai (completed)", "Admin + Worker: ORDER SELESAI!", "Selesai + ganti password + link review", "—"],
                   ["Review masuk", "Admin + Review: REVIEW BARU! + Show/Hide", "—", "—"],
                   ["Worker di-report", "Admin + Report: WORKER REPORT! + nama worker + Resolved/Dismiss", "—", "—"],
                 ]} />
