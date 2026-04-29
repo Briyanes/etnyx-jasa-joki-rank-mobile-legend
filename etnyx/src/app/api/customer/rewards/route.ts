@@ -22,7 +22,8 @@ export async function GET(request: NextRequest) {
   try {
     const customerId = await getCustomerId();
     if (!customerId) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+      // Return empty state for guests — order page uses this to check tier discount
+      return NextResponse.json({ reward_tier: null, reward_points: 0, transactions: [] });
     }
 
     const { searchParams } = new URL(request.url);
