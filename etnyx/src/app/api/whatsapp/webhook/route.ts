@@ -205,6 +205,14 @@ async function handleIncomingMessage(
     return sendCSInfo(from, settings);
   }
 
+  if (["bayar", "pembayaran", "transfer", "upload", "bukti"].some(k => lower.includes(k))) {
+    return sendPaymentHelp(from, settings);
+  }
+
+  if (["order", "pesan", "beli", "joki", "boost"].some(k => lower.includes(k))) {
+    return sendOrderHelp(from, settings);
+  }
+
   if (["4", "review", "ulasan", "testimoni"].some(k => lower.includes(k))) {
     return sendReviewInfo(from, settings);
   }
@@ -379,6 +387,47 @@ async function sendPromoInfo(
   } catch {
     return sendTextMessage(from, "Maaf, tidak bisa mengambil info promo saat ini. Coba lagi nanti ya!", settings);
   }
+}
+
+async function sendPaymentHelp(
+  from: string,
+  settings: { phoneNumberId: string; accessToken: string }
+) {
+  try {
+    const supabase = await createAdminClient();
+    const phoneVariants = [from, `+${from}`, `0${from.slice(2)}`];
+    const { data: orders } = await supabase
+      .from("orders")
+      .select("order_id, status, total_price, package_title, current_rank, target_rank")
+      .in("whatsapp", phoneVariants)
+      .eq("status", "pending")
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    const csLink = `https://wa.me/${WA_CS}`;
+
+    if (orders && orders.length > 0) {
+      const o = orders[0];
+      const paymentLink = `${SITE_URL}/payment/manual/?order_id=${o.order_id}`;
+      const rankDisplay = o.package_title || `${o.current_rank} → ${o.target_rank}`;
+      const message = `Halo kak!\n\nAda order yang menunggu pembayaran:\n\n📋 *Order ID:* ${o.order_id}\n🎮 *Paket:* ${rankDisplay}\n💰 *Total:* Rp ${(o.total_price || 0).toLocaleString("id-ID")}\n\n💳 *Upload bukti transfer di sini:*\n${paymentLink}\n\n📞 *Butuh bantuan?* Hubungi CS ETNYX:\n${csLink}\n\n_ETNYX - Push Rank, Tanpa Main_\n\n[ Ini adalah pesan otomatis ]\n💬 _Balas *menu* untuk bantuan otomatis_`;
+      return sendTextMessage(from, message, settings);
+    }
+
+    const message = `Halo kak!\n\nUntuk melakukan pembayaran, kamu perlu membuat order terlebih dahulu.\n\n📱 *Order & pilih paket di sini:*\n${SITE_URL}/order\n\nSetelah order dibuat, kamu akan mendapat link untuk upload bukti transfer atau bayar via iPaymu.\n\n📞 *Butuh bantuan?* Hubungi CS ETNYX:\n${csLink}\n\n_ETNYX - Push Rank, Tanpa Main_\n\n[ Ini adalah pesan otomatis ]\n💬 _Balas *menu* untuk bantuan otomatis_`;
+    return sendTextMessage(from, message, settings);
+  } catch {
+    return sendTextMessage(from, "Maaf, tidak bisa mengecek info pembayaran saat ini. Coba lagi nanti ya!", settings);
+  }
+}
+
+async function sendOrderHelp(
+  from: string,
+  settings: { phoneNumberId: string; accessToken: string }
+) {
+  const csLink = `https://wa.me/${WA_CS}`;
+  const message = `Halo kak!\n\nIngin order joki rank ML? 🎮\n\n*Cara order:*\n1️⃣ Buka ${SITE_URL}/order\n2️⃣ Pilih paket & rank\n3️⃣ Isi data akun\n4️⃣ Pilih metode bayar\n5️⃣ Selesaikan pembayaran\n\n*Layanan tersedia:*\n• Push Rank (Warrior → Mythic Glory)\n• Per Bintang\n• Gendong / Duo Boost\n\n*Mode:* Standard, Express, Premium\n\n📞 *Butuh bantuan?* Hubungi CS ETNYX:\n${csLink}\n\n_ETNYX - Push Rank, Tanpa Main_\n\n[ Ini adalah pesan otomatis ]\n💬 _Balas *menu* untuk bantuan otomatis_`;
+  return sendTextMessage(from, message, settings);
 }
 
 async function sendUnknownMessage(
