@@ -26,8 +26,7 @@ function PaymentSuccessContent() {
       firedRef.current = true;
       const value = grossAmount ? parseInt(grossAmount, 10) : 0;
       if (value > 0) {
-        // eventId matches server-side CAPI → Meta deduplicates automatically
-        trackPurchase({ orderId, value, eventId: `purchase_${orderId}` });
+        trackPurchase({ orderId, value });
       }
     }
   }, [isSuccess, orderId, grossAmount]);

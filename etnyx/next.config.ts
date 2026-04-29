@@ -60,29 +60,6 @@ const nextConfig: NextConfig = {
           },
         ],
       },
-      // Internal brief hub — relaxed CSP to allow Lucide CDN + Google Fonts
-      {
-        source: "/internal/:path*",
-        headers: [
-          {
-            key: "Content-Security-Policy",
-            value: [
-              "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' https://unpkg.com",
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-              "font-src 'self' https://fonts.gstatic.com",
-              "img-src 'self' data: https:",
-              "connect-src 'self'",
-              "frame-ancestors 'none'",
-              "base-uri 'self'",
-            ].join("; "),
-          },
-          {
-            key: "X-Robots-Tag",
-            value: "noindex, nofollow",
-          },
-        ],
-      },
     ];
   },
   // Image optimization

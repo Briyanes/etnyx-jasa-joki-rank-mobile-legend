@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { createServerSupabase } from "@/lib/supabase-server";
+import { createServiceClient } from "@/lib/supabase-server";
 
 // Public endpoint: returns which payment methods are available
 export async function GET() {
-  const supabase = await createServerSupabase();
+  const supabase = createServiceClient();
 
   let ipaymuEnabled = false;
 

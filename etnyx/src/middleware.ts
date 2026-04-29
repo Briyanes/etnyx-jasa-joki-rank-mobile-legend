@@ -74,31 +74,6 @@ export function middleware(request: NextRequest) {
   const response = NextResponse.next();
   const { pathname } = request.nextUrl;
 
-  // ── Internal brief access protection ─────────────────────────────────────
-  if (
-    pathname.startsWith("/internal") &&
-    pathname !== "/internal/login" &&
-    !pathname.startsWith("/internal/login")
-  ) {
-    const secret = process.env.INTERNAL_BRIEF_SECRET;
-    const token = request.cookies.get("etnyx_internal")?.value;
-
-    // Reject if secret not configured, cookie absent, or token malformed
-    const looksValid =
-      !!secret &&
-      typeof token === "string" &&
-      token.length === 64 &&
-      /^[0-9a-f]+$/.test(token);
-
-    if (!looksValid) {
-      const loginUrl = request.nextUrl.clone();
-      loginUrl.pathname = "/internal/login";
-      loginUrl.searchParams.set("next", pathname);
-      return NextResponse.redirect(loginUrl);
-    }
-  }
-  // ── End internal brief protection ────────────────────────────────────────
-
   // Rate limiting — enforce on API routes
   const clientIp = getRateLimitKey(request);
   if (pathname.startsWith("/api/")) {

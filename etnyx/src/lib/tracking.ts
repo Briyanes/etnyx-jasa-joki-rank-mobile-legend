@@ -18,19 +18,18 @@ interface ConversionData {
   orderId: string;
   value: number;       // IDR
   currency?: string;
-  eventId?: string;    // for Meta deduplication with CAPI
 }
 
 /** Fire Purchase event to all pixel platforms */
-export function trackPurchase({ orderId, value, currency = "IDR", eventId }: ConversionData) {
-  // Meta Pixel — Purchase (event_id deduplicates with server-side CAPI)
+export function trackPurchase({ orderId, value, currency = "IDR" }: ConversionData) {
+  // Meta Pixel — Purchase
   if (typeof window.fbq === "function") {
     window.fbq("track", "Purchase", {
       value,
       currency,
       content_ids: [orderId],
       content_type: "product",
-    }, { eventID: eventId || `purchase_${orderId}` });
+    });
   }
 
   // Google Ads + GA4 — purchase

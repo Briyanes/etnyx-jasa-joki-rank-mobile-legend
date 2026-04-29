@@ -26,16 +26,9 @@ export default function WhatsAppButton() {
   const whatsappUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent(txt.message)}`;
 
   useEffect(() => {
-    fetch("/api/settings?keys=social_links,site_info")
+    fetch("/api/settings?keys=social_links")
       .then(r => r.json())
-      .then(d => {
-        const num = d.site_info?.phone || d.social_links?.whatsapp;
-        if (num) {
-          // Normalize to international format (strip +, convert 08xxx → 628xxx)
-          const normalized = String(num).replace(/\D/g, "").replace(/^0/, "62");
-          setWaNumber(normalized);
-        }
-      })
+      .then(d => { if (d.social_links?.whatsapp) setWaNumber(d.social_links.whatsapp); })
       .catch(() => {});
   }, []);
 
