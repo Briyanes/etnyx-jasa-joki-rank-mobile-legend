@@ -1640,7 +1640,7 @@ function buildCategories(): DocCategory[] {
                 { q: "Customer bilang belum terima WA notifikasi?", a: "Cek Fonnte API token di Settings > Integrations. Cek nomor WA customer sudah benar (format 628xxx). Test via POST /api/admin/test-notifications." },
                 { q: "Telegram bot tidak merespon command?", a: "Cek bot token di Settings > Integrations. Pastikan webhook terdaftar: buka /api/telegram/webhook?action=register. Cek bot sudah ditambahkan ke grup." },
                 { q: "Link di WA tidak bisa diklik (tidak biru)?", a: "Pastikan URL ada di baris sendiri (tidak nempel emoji/teks lain). URL harus punya trailing slash sebelum query params, contoh: /track/?id=xxx bukan /track?id=xxx." },
-                { q: "iPaymu payment tidak auto-confirm?", a: "Cek API Key & VA di Settings > Integrations. Pastikan Notification URL di iPaymu Dashboard mengarah ke /api/payment/notification. Cek environment (Sandbox vs Production). Jika iPaymu down saat order dibuat, sistem otomatis fallback ke manual transfer + kirim WA ke customer." },
+                { q: "iPaymu payment tidak auto-confirm?", a: "Cek API Key & VA di Settings > Integrations. Pastikan Notification URL di iPaymu Dashboard → Integrasi → Notify URL mengarah ke https://etnyx.com/api/payment/notification. Cek environment (Sandbox vs Production) — key sandbox BERBEDA dengan production. Jika iPaymu down saat order dibuat, sistem otomatis fallback ke manual transfer + kirim WA ke customer." },
                 { q: "Worker tidak bisa lihat order?", a: "Worker hanya bisa lihat order yang memiliki record di tabel order_assignments (assigned_to = worker ID). Pastikan order sudah di-assign via Lead Dashboard atau Admin Dashboard. Tanpa record assignment, order tidak muncul di dashboard worker." },
                 { q: "Tidak bisa assign worker?", a: "Worker hanya bisa di-assign setelah pembayaran dikonfirmasi (payment_status = paid). Pastikan order sudah dibayar dan dikonfirmasi terlebih dahulu." },
                 { q: "Tombol Konfirmasi Bayar tidak muncul?", a: "Tombol Konfirmasi Bayar hanya muncul untuk order dengan metode manual transfer. Order iPaymu dikonfirmasi otomatis via webhook — tidak perlu konfirmasi manual." },
@@ -2352,7 +2352,7 @@ function buildCategories(): DocCategory[] {
               <Table headers={["Layer", "Mekanisme", "Detail"]} rows={[
                 ["Auth", "JWT (JOSE)", "HTTPOnly cookie, expire 24h (staff) / 7d (customer)"],
                 ["Password", "Bcrypt (12 rounds)", "Hash stored, never plaintext. Legacy SHA-256 fallback."],
-                ["Rate Limiting", "Sliding window", "100 req/60s general, 10 req/5min auth endpoints"],
+                ["Rate Limiting", "Sliding window in-memory", "Order: 5/mnt. Auth (admin/staff/customer): 5–10/15mnt per IP. ML check: 15/mnt."],
                 ["Input", "Sanitize + DOMPurify", "XSS, SQLi, template injection blocking"],
                 ["Credentials", "AES-256-GCM", "Game login encrypted at rest, auth tag verified"],
                 ["Middleware", "Pattern matching", "Block path traversal, bot paths, injection attempts"],
@@ -2360,6 +2360,7 @@ function buildCategories(): DocCategory[] {
                 ["Headers", "CSP, HSTS, X-Frame", "next.config.ts — whitelist tracking domains"],
                 ["Audit", "logAdminAction()", "Admin actions logged to admin_audit_log"],
                 ["Signature", "SHA-256 HMAC", "iPaymu payment webhook verification"],
+                ["Storage Client", "createServiceClient()", "Semua operasi Supabase Storage wajib pakai service role key, bukan anon/SSR cookie."],
               ]} />
               <div className="bg-background rounded-lg p-4 border border-white/5">
                 <h4 className="text-text font-medium text-sm mb-3 flex items-center gap-2"><Lock className="w-4 h-4" /> Credential Encryption (AES-256-GCM)</h4>
