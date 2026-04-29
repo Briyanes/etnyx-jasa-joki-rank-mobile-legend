@@ -169,7 +169,7 @@ export async function POST(request: NextRequest) {
   await supabase.from("orders").update(updateData).eq("id", orderId);
 
   // Log
-  const { data: order } = await supabase.from("orders").select("order_id").eq("id", orderId).single();
+  const { data: order } = await supabase.from("orders").select("order_id, username, current_rank, target_rank, current_star, target_star, package, package_title, total_price, whatsapp, customer_email, is_express, is_premium, notes").eq("id", orderId).single();
   await supabase.from("order_logs").insert({
     order_id: orderId,
     action: "assigned",
@@ -177,6 +177,16 @@ export async function POST(request: NextRequest) {
     notes: notes || `Assigned by ${user.name}`,
     created_by: user.name,
   });
+
+  // WA Follow Up 3: Notify customer that order is being worked on
+  if (order?.whatsapp) {
+    sendOrderStartedWA({
+      order_id: order.order_id, username: order.username, current_rank: order.current_rank,
+      target_rank: order.target_rank, current_star: order.current_star, target_star: order.target_star,
+      package: order.package, package_title: order.package_title, price: order.total_price,
+      whatsapp: order.whatsapp, email: order.customer_email, status: "in_progress",
+    }).catch(console.error);
+  }
 
   // Notify worker + admin via Telegram
   const settings = await getSettings();
@@ -385,22 +395,8 @@ export async function PUT(request: NextRequest) {
 
   // === Notifications on status change ===
   if (newStatus === "in_progress") {
-    // WA to customer: "Sedang Dikerjakan"
-    try {
-      const { data: order } = await supabase.from("orders")
-        .select("order_id, username, current_rank, target_rank, current_star, target_star, package, package_title, total_price, whatsapp, customer_email, is_express, is_premium, notes")
-        .eq("id", orderId).single();
-      if (order) {
-        sendOrderStartedWA({
-          order_id: order.order_id, username: order.username, current_rank: order.current_rank,
-          target_rank: order.target_rank, current_star: order.current_star, target_star: order.target_star,
-          package: order.package, package_title: order.package_title, price: order.total_price,
-          whatsapp: order.whatsapp, email: order.customer_email, status: "in_progress",
-        }).catch(console.error);
-      }
-    } catch { /* non-blocking */ }
-
-    // Telegram to admin + worker group
+    // WA "Sedang Dikerjakan" dikirim saat Lead assign ke worker (POST route), bukan di sini
+    // Telegram only (worker click mulai or admin/lead reopen)
     const settings = await getSettings();
     if (settings.telegramBotToken) {
       const { data: order } = await supabase.from("orders").select("order_id, username").eq("id", orderId).single();
@@ -415,12 +411,13 @@ export async function PUT(request: NextRequest) {
   }
 
   if (newStatus === "completed") {
-    // WA to customer: "Order Selesai" + link review
+    // WA "Order Selesai" hanya dikirim oleh Lead/Admin, bukan Worker
+    // Worker selesai → Telegram only
     try {
       const { data: order } = await supabase.from("orders")
         .select("order_id, username, current_rank, target_rank, current_star, target_star, package, package_title, total_price, whatsapp, customer_email, assigned_worker_id, is_express, is_premium, notes")
         .eq("id", orderId).single();
-      if (order) {
+      if (order && user.role !== "worker") {
         sendOrderCompletedWA({
           order_id: order.order_id, username: order.username, current_rank: order.current_rank,
           target_rank: order.target_rank, current_star: order.current_star, target_star: order.target_star,
