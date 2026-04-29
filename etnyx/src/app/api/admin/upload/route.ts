@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase-server";
+import { createServiceClient } from "@/lib/supabase-server";
 import { verifyAdmin } from "@/lib/admin-auth";
 import { logAdminAction } from "@/lib/audit-log";
 
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = await createAdminClient();
+    const supabase = createServiceClient();
 
     // Generate unique filename
     const ext = file.name.split(".").pop() || "jpg";

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase-server";
+import { createServiceClient } from "@/lib/supabase-server";
 import { verifyAdmin } from "@/lib/admin-auth";
 
 export async function POST(request: NextRequest) {
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "File too large (max 5MB)" }, { status: 400 });
   }
 
-  const supabase = await createAdminClient();
+  const supabase = createServiceClient();
   const ext = file.name.split(".").pop() || "png";
   const fileName = `qris-${Date.now()}.${ext}`;
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase-server";
+import { createAdminClient, createServiceClient } from "@/lib/supabase-server";
 import { sendNewOrderNotifications } from "@/lib/notifications";
 
 // GET: Fetch order info + bank accounts for manual payment page
@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Pembayaran sudah dikonfirmasi" }, { status: 409 });
     }
 
-    // Upload file to Supabase Storage
+    // Upload file to Supabase Storage (use service client — no cookie session dependency)
     // Use MIME type for extension (don't trust user filename)
     const mimeToExt: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
     const safeExt = mimeToExt[file.type] || "jpg";
@@ -146,7 +146,8 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    const { error: uploadError } = await supabase.storage
+    const storageClient = createServiceClient();
+    const { error: uploadError } = await storageClient.storage
       .from("payment-proofs")
       .upload(fileName, buffer, {
         contentType: file.type,
@@ -155,12 +156,11 @@ export async function POST(request: NextRequest) {
 
     if (uploadError) {
       console.error("Upload error:", uploadError);
-      // Fallback: try creating the bucket first, then retry
       return NextResponse.json({ error: "Failed to upload. Make sure 'payment-proofs' storage bucket exists in Supabase." }, { status: 500 });
     }
 
     // Get public URL
-    const { data: { publicUrl } } = supabase.storage.from("payment-proofs").getPublicUrl(fileName);
+    const { data: { publicUrl } } = storageClient.storage.from("payment-proofs").getPublicUrl(fileName);
 
     // Sanitize inputs
     const sanitizedSenderName = senderName ? String(senderName).replace(/<[^>]*>/g, "").slice(0, 100) : null;
