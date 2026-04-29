@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient, createServiceClient } from "@/lib/supabase-server";
-import { sendNewOrderNotifications } from "@/lib/notifications";
+import { notifyAdminPaymentProof } from "@/lib/notifications";
 
 // GET: Fetch order info + bank accounts for manual payment page
 export async function GET(request: NextRequest) {
@@ -200,7 +200,6 @@ export async function POST(request: NextRequest) {
 
     // Send Telegram notification to admin about new payment proof
     try {
-      const { notifyAdminPaymentProof } = await import("@/lib/notifications");
       await notifyAdminPaymentProof(
         {
           order_id: order.order_id,
