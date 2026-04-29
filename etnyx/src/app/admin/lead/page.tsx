@@ -74,19 +74,6 @@ interface Note {
   created_at: string;
 }
 
-interface Submission {
-  id: string;
-  stars_gained: number;
-  mvp_count: number;
-  savage_count: number;
-  maniac_count: number;
-  matches_played: number;
-  win_count: number;
-  duration_minutes: number;
-  screenshots: string[];
-  submitted_at: string;
-  staff_users: { id: string; name: string } | null;
-}
 
 interface Credentials {
   order_id: string;
@@ -149,10 +136,6 @@ export default function LeadDashboard() {
   const [newNote, setNewNote] = useState("");
   const [noteSending, setNoteSending] = useState(false);
 
-  // Submissions
-  const [submissionsOrder, setSubmissionsOrder] = useState<string | null>(null);
-  const [submissions, setSubmissions] = useState<Record<string, Submission[]>>({});
-
   // Submission form (lead submits on behalf of worker)
   const [submittingOrder, setSubmittingOrder] = useState<string | null>(null);
   const [form, setForm] = useState({ starsGained: 0, mvpCount: 0, savageCount: 0, maniacCount: 0, matchesPlayed: 0, winCount: 0, durationMinutes: 0, notes: "" });
@@ -165,12 +148,6 @@ export default function LeadDashboard() {
   const [credentials, setCredentials] = useState<Record<string, Credentials>>({});
   const [showCredentials, setShowCredentials] = useState<string | null>(null);
   const [loadingCreds, setLoadingCreds] = useState(false);
-
-  // Edit/Delete submission
-  const [editingSubmission, setEditingSubmission] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState({ starsGained: 0, mvpCount: 0, savageCount: 0, maniacCount: 0, matchesPlayed: 0, winCount: 0, durationMinutes: 0, notes: "" });
-  const [editLoading, setEditLoading] = useState(false);
-  const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -248,14 +225,6 @@ export default function LeadDashboard() {
     } catch { setNotes([]); }
   }, []);
 
-  const fetchSubmissions = useCallback(async (orderId: string) => {
-    try {
-      const res = await fetch(`/api/staff/submissions?orderId=${orderId}`);
-      const data = await res.json();
-      setSubmissions(prev => ({ ...prev, [orderId]: data.submissions || [] }));
-    } catch (e) { console.error(e); }
-  }, []);
-
   useEffect(() => {
     (async () => {
       const user = await checkAuth();
@@ -276,12 +245,12 @@ export default function LeadDashboard() {
     if (loading) return;
     const interval = setInterval(() => {
       // Skip refresh when user has active forms/panels open
-      if (assigningOrder || submittingOrder || editingSubmission || bulkAssigning) return;
+      if (assigningOrder || submittingOrder || bulkAssigning) return;
       fetchOrders();
       fetchWorkers();
     }, 30000);
     return () => clearInterval(interval);
-  }, [loading, fetchOrders, fetchWorkers, assigningOrder, submittingOrder, editingSubmission, bulkAssigning]);
+  }, [loading, fetchOrders, fetchWorkers, assigningOrder, submittingOrder, bulkAssigning]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -442,64 +411,12 @@ export default function LeadDashboard() {
         setForm({ starsGained: 0, mvpCount: 0, savageCount: 0, maniacCount: 0, matchesPlayed: 0, winCount: 0, durationMinutes: 0, notes: "" });
         setScreenshots([]);
         await fetchOrders();
-        await fetchSubmissions(orderId);
       } else {
         const data = await res.json();
         toast(data.error || "Gagal submit");
       }
     } catch { toastError("Network error"); }
     setSubmitting(false);
-  };
-
-  // Edit submission
-  const handleEditSubmission = async (submissionId: string) => {
-    setEditLoading(true);
-    try {
-      const res = await fetch("/api/staff/submissions", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: submissionId,
-          starsGained: editForm.starsGained,
-          mvpCount: editForm.mvpCount,
-          savageCount: editForm.savageCount,
-          maniacCount: editForm.maniacCount,
-          matchesPlayed: editForm.matchesPlayed,
-          winCount: editForm.winCount,
-          durationMinutes: editForm.durationMinutes,
-          notes: editForm.notes || undefined,
-        }),
-      });
-      if (res.ok) {
-        setEditingSubmission(null);
-        // Refresh submissions for the current expanded order
-        if (submissionsOrder) await fetchSubmissions(submissionsOrder);
-      } else {
-        const data = await res.json();
-        toast(data.error || "Gagal update");
-      }
-    } catch { toastError("Network error"); }
-    setEditLoading(false);
-  };
-
-  // Delete submission
-  const handleDeleteSubmission = async (submissionId: string, orderId: string) => {
-    if (!confirm("Yakin hapus submission ini?")) return;
-    setDeleteLoading(submissionId);
-    try {
-      const res = await fetch("/api/staff/submissions", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: submissionId }),
-      });
-      if (res.ok) {
-        await fetchSubmissions(orderId);
-      } else {
-        const data = await res.json();
-        toast(data.error || "Gagal hapus");
-      }
-    } catch { toastError("Network error"); }
-    setDeleteLoading(null);
   };
 
   const formatPrice = (n: number) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(n);
@@ -704,7 +621,6 @@ export default function LeadDashboard() {
                     <div className="flex-1 min-w-0 cursor-pointer" onClick={() => { 
                       const newExpanded = isExpanded ? null : order.id;
                       setExpandedOrder(newExpanded);
-                      if (newExpanded && order.assigned_worker_id && !submissions[order.id]) fetchSubmissions(order.id);
                     }}>
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-text font-mono text-sm font-medium">{order.order_id}</span>
@@ -741,7 +657,6 @@ export default function LeadDashboard() {
                     <button onClick={() => {
                       const newExpanded = isExpanded ? null : order.id;
                       setExpandedOrder(newExpanded);
-                      if (newExpanded && order.assigned_worker_id && !submissions[order.id]) fetchSubmissions(order.id);
                     }} className="shrink-0">
                       {isExpanded ? <ChevronUp className="w-4 h-4 text-text-muted" /> : <ChevronDown className="w-4 h-4 text-text-muted" />}
                     </button>
