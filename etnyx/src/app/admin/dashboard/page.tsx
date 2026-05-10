@@ -5,7 +5,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { formatRupiah } from "@/utils/helpers";
+import { formatRupiah, loginMethodLabel } from "@/utils/helpers";
 import {
   BarChart3, Zap, Gamepad2, Star, CheckCircle, XCircle, Crown,
   Settings2, Package, Users, Shield, Trophy, Tag, Eye, TrendingUp,
@@ -218,7 +218,15 @@ export default function AdminDashboard() {
   const ORDERS_PER_PAGE = 25;
   const [showModal, setShowModal] = useState<string | null>(null);
   const [editItem, setEditItem] = useState<Testimonial | Portfolio | PromoCode | Booster | null>(null);
-  const [credentials, setCredentials] = useState<{ order_id: string; account_login: string | null; account_password: string | null; is_gendong?: boolean; notes?: string | null } | null>(null);
+  const [credentials, setCredentials] = useState<{
+    order_id: string;
+    login_method?: string | null;
+    game_id?: string | null;
+    account_login: string | null;
+    account_password: string | null;
+    is_gendong?: boolean;
+    notes?: string | null;
+  } | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [followUpLoading, setFollowUpLoading] = useState<string | null>(null);
@@ -2884,7 +2892,19 @@ export default function AdminDashboard() {
             ) : (
               <div className="space-y-3">
                 <div>
-                  <label className="text-[10px] text-text-muted">Login / Email</label>
+                  <label className="text-[10px] text-text-muted">Login dengan</label>
+                  <div className="bg-background rounded-lg px-3 py-2 text-xs text-text font-medium">
+                    {loginMethodLabel(credentials.login_method)}
+                  </div>
+                </div>
+                {credentials.game_id ? (
+                  <div>
+                    <label className="text-[10px] text-text-muted">User ID (zona)</label>
+                    <div className="bg-background rounded-lg px-3 py-2 font-mono text-xs text-text break-all">{credentials.game_id}</div>
+                  </div>
+                ) : null}
+                <div>
+                  <label className="text-[10px] text-text-muted">Email / akun terikat</label>
                   <div className="bg-background rounded-lg px-3 py-2 font-mono text-xs text-text break-all">{credentials.account_login || <span className="text-text-muted italic">N/A</span>}</div>
                 </div>
                 <div>

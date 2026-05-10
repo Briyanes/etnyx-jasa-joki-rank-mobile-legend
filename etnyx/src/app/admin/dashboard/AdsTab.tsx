@@ -1,5 +1,6 @@
 "use client";
 
+import { toastSuccess, toastError } from "@/components/ToastProvider";
 import { useState, useEffect, useCallback } from "react";
 import {
   TrendingUp, TrendingDown, DollarSign, ShoppingCart,
@@ -38,6 +39,18 @@ interface AdsData {
   dateTo: string;
 }
 
+/** Parse IDR from form: supports 100000, 100.000, 1.000.000 (dots as thousand sep). */
+function parseIdrInput(raw: string): number | null {
+  const s = String(raw ?? "")
+    .trim()
+    .replace(/\s/g, "")
+    .replace(/\./g, "")
+    .replace(/,/g, "");
+  if (!s) return null;
+  const n = Number.parseInt(s, 10);
+  return Number.isFinite(n) && n >= 0 ? n : null;
+}
+
 const PLATFORM_CONFIG: Record<string, { label: string; color: string; icon: typeof FaFacebook }> = {
   meta: { label: "Meta Ads", color: "text-blue-400", icon: FaFacebook },
   google: { label: "Google Ads", color: "text-yellow-400", icon: FaGoogle },
@@ -72,9 +85,15 @@ export default function AdsTab() {
     try {
       const res = await fetch(`/api/admin/ads?from=${dateFrom}&to=${dateTo}`);
       const json = await res.json();
+      if (!res.ok) {
+        toastError(typeof json.error === "string" ? json.error : "Gagal memuat data Ads.");
+        setData(null);
+        return;
+      }
       setData(json);
     } catch {
-      /* */
+      toastError("Gagal memuat data Ads.");
+      setData(null);
     } finally {
       setLoading(false);
     }
@@ -83,26 +102,63 @@ export default function AdsTab() {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const handleAddSpend = async () => {
-    if (!spendForm.spend || !spendForm.date) return;
+    if (!spendForm.date) {
+      toastError("Pilih tanggal.");
+      return;
+    }
+    const spendAmount = parseIdrInput(spendForm.spend);
+    if (spendAmount === null) {
+      toastError("Masukkan nominal spend yang valid (contoh: 100000 atau 100.000).");
+      return;
+    }
+    const impressions = spendForm.impressions ? Number.parseInt(String(spendForm.impressions).replace(/\D/g, ""), 10) : 0;
+    const clicks = spendForm.clicks ? Number.parseInt(String(spendForm.clicks).replace(/\D/g, ""), 10) : 0;
+    const savedDate = spendForm.date;
+
     setSaving(true);
     try {
-      await fetch("/api/admin/ads", {
+      const res = await fetch("/api/admin/ads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          date: spendForm.date,
+          date: savedDate,
           platform: spendForm.platform,
           campaign_name: spendForm.campaign_name || null,
-          spend: parseInt(spendForm.spend, 10),
-          impressions: spendForm.impressions ? parseInt(spendForm.impressions, 10) : 0,
-          clicks: spendForm.clicks ? parseInt(spendForm.clicks, 10) : 0,
+          spend: spendAmount,
+          impressions: Number.isFinite(impressions) ? impressions : 0,
+          clicks: Number.isFinite(clicks) ? clicks : 0,
         }),
       });
-      setSpendForm({ date: new Date().toISOString().split("T")[0], platform: "meta", campaign_name: "", spend: "", impressions: "", clicks: "" });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        toastError(typeof json.error === "string" ? json.error : "Gagal menyimpan ad spend.");
+        return;
+      }
+      toastSuccess("Ad spend tersimpan.");
+      setSpendForm({
+        date: new Date().toISOString().split("T")[0],
+        platform: "meta",
+        campaign_name: "",
+        spend: "",
+        impressions: "",
+        clicks: "",
+      });
       setShowAddSpend(false);
-      fetchData();
+
+      let expandedRange = false;
+      if (savedDate < dateFrom) {
+        setDateFrom(savedDate);
+        expandedRange = true;
+      }
+      if (savedDate > dateTo) {
+        setDateTo(savedDate);
+        expandedRange = true;
+      }
+      if (!expandedRange) {
+        await fetchData();
+      }
     } catch {
-      /* */
+      toastError("Gagal menyimpan ad spend.");
     } finally {
       setSaving(false);
     }
@@ -110,8 +166,18 @@ export default function AdsTab() {
 
   const handleDeleteSpend = async (id: string) => {
     if (!confirm("Hapus entry ini?")) return;
-    await fetch(`/api/admin/ads?id=${id}`, { method: "DELETE" });
-    fetchData();
+    try {
+      const res = await fetch(`/api/admin/ads?id=${id}`, { method: "DELETE" });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        toastError(typeof json.error === "string" ? json.error : "Gagal menghapus entry.");
+        return;
+      }
+      toastSuccess("Entry dihapus.");
+      fetchData();
+    } catch {
+      toastError("Gagal menghapus entry.");
+    }
   };
 
   if (loading && !data) {
@@ -318,7 +384,7 @@ export default function AdsTab() {
             </div>
             <div className="flex justify-end gap-2">
               <button onClick={() => setShowAddSpend(false)} className="px-4 py-2 text-text-muted text-xs hover:text-text">Batal</button>
-              <button onClick={handleAddSpend} disabled={saving || !spendForm.spend}
+              <button onClick={handleAddSpend} disabled={saving || !String(spendForm.spend).trim()}
                 className="px-4 py-2 bg-accent text-background rounded-lg text-xs font-medium disabled:opacity-50">
                 {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : "Simpan"}
               </button>

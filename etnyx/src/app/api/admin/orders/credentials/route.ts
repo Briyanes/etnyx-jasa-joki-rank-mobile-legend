@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
 
     const { data, error } = await supabase
       .from("orders")
-      .select("id, order_id, account_login, account_password, package_title, notes")
+      .select("id, order_id, account_login, account_password, package_title, notes, login_method, game_id")
       .eq("id", orderId)
       .single();
 
@@ -32,6 +32,8 @@ export async function GET(request: NextRequest) {
     // Decrypt sensitive fields
     const credentials = {
       order_id: data.order_id,
+      login_method: data.login_method,
+      game_id: data.game_id || null,
       account_login: data.account_login ? decryptField(data.account_login) : null,
       account_password: data.account_password ? decryptField(data.account_password) : null,
       is_gendong: !!isGendong,

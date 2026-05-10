@@ -503,7 +503,7 @@ export default function PayrollTab() {
       approved: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
       paid: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
       cancelled: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-      draft: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300",
+      draft: "bg-white/10 text-text-muted border border-white/10",
     };
     return <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${colors[status] || colors.pending}`}>{status.replace("_", " ")}</span>;
   };
@@ -529,21 +529,21 @@ export default function PayrollTab() {
   ];
 
   if (loading) {
-    return <div className="flex items-center justify-center p-12"><Loader2 className="w-8 h-8 animate-spin text-blue-500" /></div>;
+    return <div className="flex items-center justify-center p-12"><Loader2 className="w-8 h-8 animate-spin text-accent" /></div>;
   }
 
   return (
-    <div className="space-y-6">
-      {/* Sub-tabs */}
-      <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1 overflow-x-auto">
+    <div className="space-y-6 text-text">
+      {/* Sub-tabs — surface tokens so text always matches dashboard theme */}
+      <div className="flex gap-1 bg-background rounded-lg p-1 border border-white/10 overflow-x-auto">
         {SUB_TABS.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setSubTab(tab.id)}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors ${
               subTab === tab.id
-                ? "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm"
-                : "text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+                ? "bg-surface text-accent border border-accent/30 shadow-sm"
+                : "text-text-muted hover:text-text hover:bg-white/5"
             }`}
           >
             <tab.icon className="w-4 h-4" />
@@ -556,25 +556,25 @@ export default function PayrollTab() {
       {subTab === "overview" && overview && (
         <div className="space-y-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-              <div className="text-sm text-gray-500 dark:text-gray-400">Komisi Pending</div>
-              <div className="text-xl font-bold mt-1">{formatRupiah(overview.pendingCommissions)}</div>
-              <div className="text-xs text-gray-400 mt-1">{overview.pendingCommissionCount} items</div>
+            <div className="bg-surface rounded-xl p-4 border border-white/10">
+              <div className="text-sm text-text-muted">Komisi Pending</div>
+              <div className="text-xl font-bold mt-1 text-text tabular-nums">{formatRupiah(overview.pendingCommissions)}</div>
+              <div className="text-xs text-text-muted mt-1">{overview.pendingCommissionCount} items</div>
             </div>
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-              <div className="text-sm text-gray-500 dark:text-gray-400">Komisi Bulan Ini</div>
-              <div className="text-xl font-bold mt-1">{formatRupiah(overview.monthCommissionTotal)}</div>
-              <div className="text-xs text-green-500 mt-1">{formatRupiah(overview.monthCommissionPaid)} paid</div>
+            <div className="bg-surface rounded-xl p-4 border border-white/10">
+              <div className="text-sm text-text-muted">Komisi Bulan Ini</div>
+              <div className="text-xl font-bold mt-1 text-text tabular-nums">{formatRupiah(overview.monthCommissionTotal)}</div>
+              <div className="text-xs text-success mt-1">{formatRupiah(overview.monthCommissionPaid)} paid</div>
             </div>
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-              <div className="text-sm text-gray-500 dark:text-gray-400">Payout Pending</div>
-              <div className="text-xl font-bold mt-1">{formatRupiah(overview.pendingPayouts)}</div>
-              <div className="text-xs text-gray-400 mt-1">{overview.pendingPayoutCount} batches</div>
+            <div className="bg-surface rounded-xl p-4 border border-white/10">
+              <div className="text-sm text-text-muted">Payout Pending</div>
+              <div className="text-xl font-bold mt-1 text-text tabular-nums">{formatRupiah(overview.pendingPayouts)}</div>
+              <div className="text-xs text-text-muted mt-1">{overview.pendingPayoutCount} batches</div>
             </div>
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-              <div className="text-sm text-gray-500 dark:text-gray-400">Total Dibayar Bulan Ini</div>
-              <div className="text-xl font-bold mt-1 text-green-600">{formatRupiah(overview.totalPaidThisMonth)}</div>
-              <div className="text-xs text-gray-400 mt-1">{overview.activeStaffWithSalary} staff aktif</div>
+            <div className="bg-surface rounded-xl p-4 border border-white/10">
+              <div className="text-sm text-text-muted">Total Dibayar Bulan Ini</div>
+              <div className="text-xl font-bold mt-1 text-success tabular-nums">{formatRupiah(overview.totalPaidThisMonth)}</div>
+              <div className="text-xs text-text-muted mt-1">{overview.activeStaffWithSalary} staff aktif</div>
             </div>
           </div>
 
@@ -607,7 +607,7 @@ export default function PayrollTab() {
                 <button
                   key={s}
                   onClick={() => setCommissionStatus(s)}
-                  className={`px-3 py-1.5 rounded-lg text-sm ${commissionStatus === s ? "bg-blue-600 text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"}`}
+                  className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${commissionStatus === s ? "gradient-primary text-white shadow-md shadow-accent/20" : "bg-background border border-white/10 text-text-muted hover:text-text"}`}
                 >
                   {s === "all" ? "Semua" : s}
                 </button>
@@ -627,11 +627,11 @@ export default function PayrollTab() {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-x-auto">
+          <div className="bg-surface rounded-xl border border-white/10 overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-200 dark:border-gray-700">
-                  <th className="p-3 text-left w-8">
+                <tr className="border-b border-white/10 bg-white/[0.02]">
+                  <th className="p-3 text-left w-8 text-text-muted font-medium">
                     <input
                       type="checkbox"
                       onChange={(e) => {
@@ -644,22 +644,22 @@ export default function PayrollTab() {
                       className="rounded"
                     />
                   </th>
-                  <th className="p-3 text-left">Order</th>
-                  <th className="p-3 text-left">Worker</th>
-                  <th className="p-3 text-right">Order Total</th>
-                  <th className="p-3 text-right">Rate</th>
-                  <th className="p-3 text-right">Komisi</th>
-                  <th className="p-3 text-right">Bonus</th>
-                  <th className="p-3 text-right">Total</th>
-                  <th className="p-3 text-center">Status</th>
-                  <th className="p-3 text-left">Period</th>
+                  <th className="p-3 text-left text-text-muted font-medium">Order</th>
+                  <th className="p-3 text-left text-text-muted font-medium">Worker</th>
+                  <th className="p-3 text-right text-text-muted font-medium">Order Total</th>
+                  <th className="p-3 text-right text-text-muted font-medium">Rate</th>
+                  <th className="p-3 text-right text-text-muted font-medium">Komisi</th>
+                  <th className="p-3 text-right text-text-muted font-medium">Bonus</th>
+                  <th className="p-3 text-right text-text-muted font-medium">Total</th>
+                  <th className="p-3 text-center text-text-muted font-medium">Status</th>
+                  <th className="p-3 text-left text-text-muted font-medium">Period</th>
                 </tr>
               </thead>
               <tbody>
                 {commissions.length === 0 ? (
-                  <tr><td colSpan={10} className="p-8 text-center text-gray-400">Belum ada komisi. Klik Generate untuk membuat dari order completed.</td></tr>
+                  <tr><td colSpan={10} className="p-8 text-center text-text-muted">Belum ada komisi. Klik Generate untuk membuat dari order completed.</td></tr>
                 ) : commissions.map((c) => (
-                  <tr key={c.id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                  <tr key={c.id} className="border-b border-white/5 hover:bg-white/[0.03]">
                     <td className="p-3">
                       {c.status === "pending" && (
                         <input
@@ -684,7 +684,7 @@ export default function PayrollTab() {
                     <td className="p-3 text-right">{c.bonus_amount > 0 ? formatRupiah(c.bonus_amount) : "—"}</td>
                     <td className="p-3 text-right font-semibold">{formatRupiah(c.total_amount)}</td>
                     <td className="p-3 text-center">{statusBadge(c.status)}</td>
-                    <td className="p-3 text-xs text-gray-500">{c.period_start} ~ {c.period_end}</td>
+                    <td className="p-3 text-xs text-text-muted">{c.period_start} ~ {c.period_end}</td>
                   </tr>
                 ))}
               </tbody>
@@ -699,7 +699,7 @@ export default function PayrollTab() {
           {/* Salary Configs */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold">Konfigurasi Gaji</h3>
+              <h3 className="text-lg font-semibold text-text">Konfigurasi Gaji</h3>
               <button
                 onClick={() => setShowSalaryForm(!showSalaryForm)}
                 className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm"
@@ -716,7 +716,7 @@ export default function PayrollTab() {
                     <select
                       value={salaryForm.staffId}
                       onChange={(e) => setSalaryForm({ ...salaryForm, staffId: e.target.value })}
-                      className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
+                      className="w-full p-2 rounded-lg border border-white/10 bg-background text-text text-sm"
                     >
                       <option value="">Pilih staff...</option>
                       {staffList.filter(s => s.role !== "worker").map((s) => (
@@ -731,7 +731,7 @@ export default function PayrollTab() {
                       value={salaryForm.baseSalary || ""}
                       onChange={(e) => setSalaryForm({ ...salaryForm, baseSalary: parseInt(e.target.value) || 0 })}
                       placeholder="e.g. 2000000"
-                      className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
+                      className="w-full p-2 rounded-lg border border-white/10 bg-background text-text text-sm"
                     />
                   </div>
                   <div>
@@ -741,7 +741,7 @@ export default function PayrollTab() {
                       value={salaryForm.notes}
                       onChange={(e) => setSalaryForm({ ...salaryForm, notes: e.target.value })}
                       placeholder="Opsional"
-                      className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
+                      className="w-full p-2 rounded-lg border border-white/10 bg-background text-text text-sm"
                     />
                   </div>
                 </div>
@@ -749,32 +749,32 @@ export default function PayrollTab() {
                   <button onClick={saveSalaryConfig} disabled={actionLoading} className="flex items-center gap-1 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm disabled:opacity-50">
                     <Save className="w-4 h-4" /> Simpan
                   </button>
-                  <button onClick={() => setShowSalaryForm(false)} className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg text-sm">Batal</button>
+                  <button onClick={() => setShowSalaryForm(false)} className="px-4 py-2 bg-white/10 text-text rounded-lg text-sm hover:bg-white/15">Batal</button>
                 </div>
               </div>
             )}
 
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-x-auto">
+            <div className="bg-surface rounded-xl border border-white/10 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 dark:border-gray-700">
-                    <th className="p-3 text-left">Nama</th>
-                    <th className="p-3 text-left">Role</th>
-                    <th className="p-3 text-right">Gaji Pokok</th>
-                    <th className="p-3 text-left">Berlaku Sejak</th>
-                    <th className="p-3 text-left">Catatan</th>
+                  <tr className="border-b border-white/10 bg-white/[0.02]">
+                    <th className="p-3 text-left text-text-muted font-medium">Nama</th>
+                    <th className="p-3 text-left text-text-muted font-medium">Role</th>
+                    <th className="p-3 text-right text-text-muted font-medium">Gaji Pokok</th>
+                    <th className="p-3 text-left text-text-muted font-medium">Berlaku Sejak</th>
+                    <th className="p-3 text-left text-text-muted font-medium">Catatan</th>
                   </tr>
                 </thead>
                 <tbody>
                   {salaryConfigs.length === 0 ? (
-                    <tr><td colSpan={5} className="p-8 text-center text-gray-400">Belum ada konfigurasi gaji</td></tr>
+                    <tr><td colSpan={5} className="p-8 text-center text-text-muted">Belum ada konfigurasi gaji</td></tr>
                   ) : salaryConfigs.map((c) => (
-                    <tr key={c.id} className="border-b border-gray-100 dark:border-gray-700/50">
+                    <tr key={c.id} className="border-b border-white/5 hover:bg-white/[0.03]">
                       <td className="p-3 font-medium">{c.staff_users?.name || "—"}</td>
                       <td className="p-3">{c.staff_users?.role || "—"}</td>
-                      <td className="p-3 text-right font-semibold">{formatRupiah(c.base_salary)}</td>
+                      <td className="p-3 text-right font-semibold tabular-nums">{formatRupiah(c.base_salary)}</td>
                       <td className="p-3 text-sm">{c.effective_from}</td>
-                      <td className="p-3 text-sm text-gray-500">{c.notes || "—"}</td>
+                      <td className="p-3 text-sm text-text-muted">{c.notes || "—"}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -785,7 +785,7 @@ export default function PayrollTab() {
           {/* Salary Records */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold">Record Gaji Bulan Ini</h3>
+              <h3 className="text-lg font-semibold text-text">Record Gaji Bulan Ini</h3>
               <button
                 onClick={generateSalaries}
                 disabled={actionLoading}
@@ -795,11 +795,11 @@ export default function PayrollTab() {
               </button>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-x-auto">
+            <div className="bg-surface rounded-xl border border-white/10 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 dark:border-gray-700">
-                    <th className="p-3 text-left w-8">
+                  <tr className="border-b border-white/10 bg-white/[0.02]">
+                    <th className="p-3 text-left w-8 text-text-muted font-medium">
                       <input
                         type="checkbox"
                         onChange={(e) => {
@@ -812,21 +812,21 @@ export default function PayrollTab() {
                         className="rounded"
                       />
                     </th>
-                    <th className="p-3 text-left">Nama</th>
-                    <th className="p-3 text-left">Role</th>
-                    <th className="p-3 text-right">Gaji Pokok</th>
-                    <th className="p-3 text-right">Tunjangan</th>
-                    <th className="p-3 text-right">Potongan</th>
-                    <th className="p-3 text-right">Bonus</th>
-                    <th className="p-3 text-right">Total</th>
-                    <th className="p-3 text-center">Status</th>
+                    <th className="p-3 text-left text-text-muted font-medium">Nama</th>
+                    <th className="p-3 text-left text-text-muted font-medium">Role</th>
+                    <th className="p-3 text-right text-text-muted font-medium">Gaji Pokok</th>
+                    <th className="p-3 text-right text-text-muted font-medium">Tunjangan</th>
+                    <th className="p-3 text-right text-text-muted font-medium">Potongan</th>
+                    <th className="p-3 text-right text-text-muted font-medium">Bonus</th>
+                    <th className="p-3 text-right text-text-muted font-medium">Total</th>
+                    <th className="p-3 text-center text-text-muted font-medium">Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {salaryRecords.length === 0 ? (
-                    <tr><td colSpan={9} className="p-8 text-center text-gray-400">Belum ada record. Klik Generate.</td></tr>
+                    <tr><td colSpan={9} className="p-8 text-center text-text-muted">Belum ada record. Klik Generate.</td></tr>
                   ) : salaryRecords.map((r) => (
-                    <tr key={r.id} className="border-b border-gray-100 dark:border-gray-700/50">
+                    <tr key={r.id} className="border-b border-white/5 hover:bg-white/[0.03]">
                       <td className="p-3">
                         {r.status === "pending" && (
                           <input
@@ -847,9 +847,9 @@ export default function PayrollTab() {
                       <td className="p-3">{r.staff_users?.role || "—"}</td>
                       <td className="p-3 text-right">{formatRupiah(r.base_salary)}</td>
                       <td className="p-3 text-right">{r.allowances_total > 0 ? formatRupiah(r.allowances_total) : "—"}</td>
-                      <td className="p-3 text-right text-red-500">{r.deductions > 0 ? `-${formatRupiah(r.deductions)}` : "—"}</td>
-                      <td className="p-3 text-right text-green-500">{r.bonus_amount > 0 ? `+${formatRupiah(r.bonus_amount)}` : "—"}</td>
-                      <td className="p-3 text-right font-semibold">{formatRupiah(r.total_amount)}</td>
+                      <td className="p-3 text-right text-error">{r.deductions > 0 ? `-${formatRupiah(r.deductions)}` : "—"}</td>
+                      <td className="p-3 text-right text-success">{r.bonus_amount > 0 ? `+${formatRupiah(r.bonus_amount)}` : "—"}</td>
+                      <td className="p-3 text-right font-semibold tabular-nums">{formatRupiah(r.total_amount)}</td>
                       <td className="p-3 text-center">{statusBadge(r.status)}</td>
                     </tr>
                   ))}
@@ -880,7 +880,7 @@ export default function PayrollTab() {
               <button
                 key={s}
                 onClick={() => setPayoutStatus(s)}
-                className={`px-3 py-1.5 rounded-lg text-sm ${payoutStatus === s ? "bg-blue-600 text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"}`}
+                className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${payoutStatus === s ? "gradient-primary text-white shadow-md shadow-accent/20" : "bg-background border border-white/10 text-text-muted hover:text-text"}`}
               >
                 {s === "all" ? "Semua" : s.replace("_", " ")}
               </button>
@@ -889,37 +889,37 @@ export default function PayrollTab() {
 
           <div className="space-y-3">
             {payouts.length === 0 ? (
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-8 text-center text-gray-400 border border-gray-200 dark:border-gray-700">
+              <div className="bg-surface rounded-xl p-8 text-center text-text-muted border border-white/10">
                 Belum ada payout. Pilih komisi/gaji lalu create payout.
               </div>
             ) : payouts.map((p) => (
-              <div key={p.id} className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+              <div key={p.id} className="bg-surface rounded-xl p-4 border border-white/10">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono font-semibold">{p.payout_code}</span>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-mono font-semibold text-text">{p.payout_code}</span>
                       {statusBadge(p.status)}
-                      <span className="text-xs text-gray-500 px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded">{p.type}</span>
+                      <span className="text-xs text-text-muted px-2 py-0.5 bg-white/5 rounded border border-white/10">{p.type}</span>
                     </div>
-                    <div className="text-sm text-gray-500 mt-1">
+                    <div className="text-sm text-text-muted mt-1">
                       {p.period_label} · {p.total_items} items · Created by {p.created_by}
                     </div>
-                    {p.approved_by && <div className="text-xs text-gray-400 mt-0.5">Approved by {p.approved_by} at {new Date(p.approved_at!).toLocaleString("id-ID")}</div>}
+                    {p.approved_by && <div className="text-xs text-text-muted mt-0.5">Approved by {p.approved_by} at {new Date(p.approved_at!).toLocaleString("id-ID")}</div>}
                     {p.paid_at && (
-                      <div className="text-xs text-green-500 mt-0.5">
+                      <div className="text-xs text-success mt-0.5">
                         Paid at {new Date(p.paid_at).toLocaleString("id-ID")} by {p.paid_by}
                         {p.payment_method_label && <span className="ml-1">via <strong>{p.payment_method_label}</strong></span>}
                         {p.payment_reference && <span className="ml-1">(Ref: {p.payment_reference})</span>}
                       </div>
                     )}
                     {p.recipient_info && (
-                      <div className="text-xs text-gray-400 mt-0.5">
+                      <div className="text-xs text-text-muted mt-0.5">
                         Ke: {p.recipient_info.name} — {p.recipient_info.method} {p.recipient_info.account}
                       </div>
                     )}
                   </div>
                   <div className="text-right">
-                    <div className="text-xl font-bold">{formatRupiah(p.total_amount)}</div>
+                    <div className="text-xl font-bold text-text tabular-nums">{formatRupiah(p.total_amount)}</div>
                     <div className="flex gap-2 mt-2">
                       {p.status === "pending_approval" && (
                         <button onClick={() => updatePayoutStatus(p.id, "approve")} className="flex items-center gap-1 px-3 py-1 bg-blue-600 text-white rounded-lg text-xs">
@@ -952,8 +952,8 @@ export default function PayrollTab() {
       {subTab === "settings" && (
         <div className="space-y-6">
           {/* Commission Settings */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><Receipt className="w-5 h-5" /> Pengaturan Komisi</h3>
+          <div className="bg-surface rounded-xl p-6 border border-white/10">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-text"><Receipt className="w-5 h-5" /> Pengaturan Komisi</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Worker Rate (%)</label>
@@ -972,9 +972,9 @@ export default function PayrollTab() {
                       },
                     });
                   }}
-                  className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900"
+                  className="w-full p-2 rounded-lg border border-white/10 bg-background text-text text-sm"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-text-muted mt-1">
                   Worker: {((settings.commission?.worker_rate ?? 0.6) * 100).toFixed(0)}% | ETNYX: {((settings.commission?.company_rate ?? 0.4) * 100).toFixed(0)}%
                 </p>
               </div>
@@ -983,7 +983,7 @@ export default function PayrollTab() {
                 <select
                   value={settings.commission?.base_on || "total_price"}
                   onChange={(e) => setSettings({ ...settings, commission: { ...settings.commission!, base_on: e.target.value } })}
-                  className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900"
+                  className="w-full p-2 rounded-lg border border-white/10 bg-background text-text text-sm"
                 >
                   <option value="total_price">Total Price (termasuk express/premium)</option>
                   <option value="base_price">Base Price (sebelum surcharge)</option>
@@ -996,10 +996,10 @@ export default function PayrollTab() {
               <h4 className="text-sm font-medium mb-2">Bonus Performance</h4>
               <div className="space-y-2">
                 {(settings.commission?.bonus_tiers || []).map((tier, i) => (
-                  <div key={i} className="flex items-center gap-3 text-sm bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2">
-                    <span className="font-medium">{tier.name}</span>
-                    <span className="text-gray-500">→</span>
-                    <span className="text-green-600 font-medium">
+                  <div key={i} className="flex items-center gap-3 text-sm bg-white/5 rounded-lg p-2 border border-white/5">
+                    <span className="font-medium text-text">{tier.name}</span>
+                    <span className="text-text-muted">→</span>
+                    <span className="text-success font-medium">
                       {tier.bonus_rate ? `+${(tier.bonus_rate * 100).toFixed(0)}%` : `+${formatRupiah(tier.bonus_amount || 0)}`}
                     </span>
                   </div>
@@ -1018,13 +1018,13 @@ export default function PayrollTab() {
 
           {/* Info Box */}
           <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
-            <h4 className="font-semibold mb-2">Alur Payroll</h4>
-            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 flex-wrap">
-              <span className="bg-white dark:bg-gray-800 px-2 py-1 rounded">Order Completed</span>
-              <ArrowRight className="w-4 h-4" />
-              <span className="bg-white dark:bg-gray-800 px-2 py-1 rounded">Auto Commission</span>
-              <ArrowRight className="w-4 h-4" />
-              <span className="bg-white dark:bg-gray-800 px-2 py-1 rounded">Create Payout</span>
+            <h4 className="font-semibold mb-2 text-text">Alur Payroll</h4>
+            <div className="flex items-center gap-2 text-sm text-text-muted flex-wrap">
+              <span className="bg-white/5 border border-white/10 px-2 py-1 rounded text-text">Order Completed</span>
+              <ArrowRight className="w-4 h-4 shrink-0" />
+              <span className="bg-white/5 border border-white/10 px-2 py-1 rounded text-text">Auto Commission</span>
+              <ArrowRight className="w-4 h-4 shrink-0" />
+              <span className="bg-white/5 border border-white/10 px-2 py-1 rounded text-text">Create Payout</span>
               <ArrowRight className="w-4 h-4" />
               <span className="bg-yellow-100 dark:bg-yellow-900/30 px-2 py-1 rounded">Pending Approval</span>
               <ArrowRight className="w-4 h-4" />
@@ -1032,7 +1032,7 @@ export default function PayrollTab() {
               <ArrowRight className="w-4 h-4" />
               <span className="bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded flex items-center gap-1"><CreditCard className="w-3 h-3" /> Transfer Manual <CheckCircle className="w-3 h-3" /></span>
             </div>
-            <div className="mt-3 text-sm text-gray-500">
+            <div className="mt-3 text-sm text-text-muted">
               <p>• <strong>Worker:</strong> Komisi per order ({((settings.commission?.worker_rate ?? 0.6) * 100).toFixed(0)}%) — payout setiap 2 minggu (tgl 1 & 16)</p>
               <p>• <strong>Staff (Lead/Admin):</strong> Gaji bulanan — payout tgl 28</p>
               <p>• Komisi otomatis dibuat saat order di-complete</p>
@@ -1041,9 +1041,9 @@ export default function PayrollTab() {
           </div>
 
           {/* Payment Accounts Management */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+          <div className="bg-surface rounded-xl p-6 border border-white/10">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold flex items-center gap-2"><CreditCard className="w-5 h-5" /> Akun Pembayaran Staff</h3>
+              <h3 className="text-lg font-semibold flex items-center gap-2 text-text"><CreditCard className="w-5 h-5" /> Akun Pembayaran Staff</h3>
               <button
                 onClick={() => setShowAddAccountForm(!showAddAccountForm)}
                 className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm"
@@ -1060,7 +1060,7 @@ export default function PayrollTab() {
                     <select
                       value={accountForm.staffId}
                       onChange={(e) => setAccountForm({ ...accountForm, staffId: e.target.value })}
-                      className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm"
+                      className="w-full p-2 rounded-lg border border-white/10 bg-background text-text text-sm"
                     >
                       <option value="">Pilih staff...</option>
                       {staffList.map((s) => (
@@ -1076,7 +1076,7 @@ export default function PayrollTab() {
                         const m = availablePaymentMethods.find(pm => pm.id === e.target.value);
                         setAccountForm({ ...accountForm, method: e.target.value, label: m?.label || "" });
                       }}
-                      className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm"
+                      className="w-full p-2 rounded-lg border border-white/10 bg-background text-text text-sm"
                     >
                       <option value="">Pilih metode...</option>
                       {availablePaymentMethods.map((m) => (
@@ -1091,7 +1091,7 @@ export default function PayrollTab() {
                       value={accountForm.accountName}
                       onChange={(e) => setAccountForm({ ...accountForm, accountName: e.target.value })}
                       placeholder="Nama di rekening/e-wallet"
-                      className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm"
+                      className="w-full p-2 rounded-lg border border-white/10 bg-background text-text text-sm"
                     />
                   </div>
                   <div>
@@ -1101,7 +1101,7 @@ export default function PayrollTab() {
                       value={accountForm.accountNumber}
                       onChange={(e) => setAccountForm({ ...accountForm, accountNumber: e.target.value })}
                       placeholder="e.g. 081234567890"
-                      className="w-full p-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm"
+                      className="w-full p-2 rounded-lg border border-white/10 bg-background text-text text-sm"
                     />
                   </div>
                   <div className="flex items-end gap-3">
@@ -1120,13 +1120,13 @@ export default function PayrollTab() {
                   <button onClick={savePaymentAccount} disabled={actionLoading} className="flex items-center gap-1 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm disabled:opacity-50">
                     <Save className="w-4 h-4" /> Simpan
                   </button>
-                  <button onClick={() => setShowAddAccountForm(false)} className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg text-sm">Batal</button>
+                  <button onClick={() => setShowAddAccountForm(false)} className="px-4 py-2 bg-white/10 text-text rounded-lg text-sm hover:bg-white/15">Batal</button>
                 </div>
               </div>
             )}
 
             {paymentAccounts.length === 0 ? (
-              <p className="text-sm text-gray-400 text-center py-4">Belum ada akun pembayaran. Tambahkan agar bisa transfer manual.</p>
+              <p className="text-sm text-text-muted text-center py-4">Belum ada akun pembayaran. Tambahkan agar bisa transfer manual.</p>
             ) : (
               <div className="space-y-2">
                 {/* Group by staff */}
@@ -1134,18 +1134,18 @@ export default function PayrollTab() {
                   const accounts = paymentAccounts.filter(a => a.staff_id === staff.id);
                   if (accounts.length === 0) return null;
                   return (
-                    <div key={staff.id} className="border border-gray-100 dark:border-gray-700 rounded-lg p-3">
-                      <div className="font-medium text-sm mb-2">{staff.name} <span className="text-xs text-gray-500">({staff.role})</span></div>
+                    <div key={staff.id} className="border border-white/10 rounded-lg p-3 bg-white/[0.02]">
+                      <div className="font-medium text-sm mb-2 text-text">{staff.name} <span className="text-xs text-text-muted">({staff.role})</span></div>
                       <div className="flex flex-wrap gap-2">
                         {accounts.map((acc) => (
-                          <div key={acc.id} className="flex items-center gap-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg px-3 py-2 text-sm">
+                          <div key={acc.id} className="flex items-center gap-2 bg-white/5 rounded-lg px-3 py-2 text-sm border border-white/5">
                             {paymentMethodIcon(availablePaymentMethods.find(m => m.id === acc.method)?.type)}
                             <div>
                               <div className="font-medium flex items-center gap-1">
                                 {acc.label}
                                 {acc.is_primary && <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />}
                               </div>
-                              <div className="text-xs text-gray-500">{acc.account_name} · {acc.account_number}</div>
+                              <div className="text-xs text-text-muted">{acc.account_name} · {acc.account_number}</div>
                             </div>
                             <button onClick={() => deletePaymentAccount(acc.id)} className="ml-2 text-red-400 hover:text-red-600">
                               <Trash2 className="w-3.5 h-3.5" />
@@ -1165,8 +1165,8 @@ export default function PayrollTab() {
       {/* ============ PAYOUT CREATION MODAL ============ */}
       {showPayoutForm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full">
-            <h3 className="text-lg font-semibold mb-4">Create Payout Batch</h3>
+          <div className="bg-surface rounded-2xl p-6 max-w-md w-full border border-white/10 text-text">
+            <h3 className="text-lg font-semibold mb-4 text-text">Create Payout Batch</h3>
             <div className="space-y-3 text-sm">
               {selectedCommissions.length > 0 && (
                 <div className="flex justify-between">
@@ -1205,7 +1205,7 @@ export default function PayrollTab() {
               </button>
               <button
                 onClick={() => setShowPayoutForm(false)}
-                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg text-sm"
+                className="px-4 py-2 bg-white/10 text-text rounded-lg text-sm hover:bg-white/15"
               >
                 Batal
               </button>
@@ -1217,9 +1217,9 @@ export default function PayrollTab() {
       {/* ============ PAYMENT MODAL (Mark Paid) ============ */}
       {showPaymentModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-semibold mb-1">Pembayaran Manual</h3>
-            <p className="text-sm text-gray-500 mb-4">
+          <div className="bg-surface rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto border border-white/10 text-text">
+            <h3 className="text-lg font-semibold mb-1 text-text">Pembayaran Manual</h3>
+            <p className="text-sm text-text-muted mb-4">
               Payout: <strong>{payouts.find(p => p.id === showPaymentModal)?.payout_code}</strong> — {formatRupiah(payouts.find(p => p.id === showPaymentModal)?.total_amount || 0)}
             </p>
 
@@ -1233,8 +1233,8 @@ export default function PayrollTab() {
                     onClick={() => setPaymentForm({ ...paymentForm, method: m.id, methodLabel: m.label })}
                     className={`flex flex-col items-center gap-1 p-3 rounded-xl border-2 text-xs transition-colors ${
                       paymentForm.method === m.id
-                        ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400"
-                        : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
+                        ? "border-accent bg-accent/10 text-accent"
+                        : "border-white/10 hover:border-white/20 text-text"
                     }`}
                   >
                     {paymentMethodIcon(m.type)}
@@ -1261,18 +1261,18 @@ export default function PayrollTab() {
                           onClick={() => setPaymentForm({ ...paymentForm, accountId: acc.id })}
                           className={`w-full flex items-center gap-3 p-3 rounded-lg border-2 text-left text-sm transition-colors ${
                             paymentForm.accountId === acc.id
-                              ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                              : "border-gray-200 dark:border-gray-600 hover:border-gray-300"
+                              ? "border-accent bg-accent/10"
+                              : "border-white/10 hover:border-white/20"
                           }`}
                         >
                           {paymentMethodIcon(availablePaymentMethods.find(m => m.id === acc.method)?.type)}
                           <div className="flex-1">
                             <div className="font-medium flex items-center gap-1">
                               {acc.staff_users?.name || "Staff"}
-                              <span className="text-xs text-gray-500">— {acc.label}</span>
+                              <span className="text-xs text-text-muted">— {acc.label}</span>
                               {acc.is_primary && <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />}
                             </div>
-                            <div className="text-xs text-gray-500">{acc.account_name} · {acc.account_number}</div>
+                            <div className="text-xs text-text-muted">{acc.account_name} · {acc.account_number}</div>
                           </div>
                         </button>
                       ))}
@@ -1291,7 +1291,7 @@ export default function PayrollTab() {
                 value={paymentForm.reference}
                 onChange={(e) => setPaymentForm({ ...paymentForm, reference: e.target.value })}
                 placeholder="Opsional — No. transaksi dari app/bank"
-                className="w-full p-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm"
+                className="w-full p-2.5 rounded-lg border border-white/10 bg-background text-text text-sm"
               />
             </div>
 
@@ -1310,7 +1310,7 @@ export default function PayrollTab() {
                   setShowPaymentModal(null);
                   setPaymentForm({ method: "", methodLabel: "", reference: "", accountId: "" });
                 }}
-                className="px-4 py-2.5 bg-gray-200 dark:bg-gray-700 rounded-lg text-sm"
+                className="px-4 py-2.5 bg-white/10 text-text rounded-lg text-sm hover:bg-white/15"
               >
                 Batal
               </button>

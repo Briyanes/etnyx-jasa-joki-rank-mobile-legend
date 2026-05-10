@@ -85,12 +85,20 @@ export async function POST(request: NextRequest) {
 
     const { date, platform, campaign_name, ad_set_name, spend, impressions, clicks, notes } = body;
 
-    if (!date || !platform || spend === undefined) {
+    if (!date || !platform || spend === undefined || spend === null) {
       return NextResponse.json({ error: "date, platform, spend are required" }, { status: 400 });
     }
 
     if (!["meta", "google", "tiktok", "other"].includes(platform)) {
       return NextResponse.json({ error: "Invalid platform" }, { status: 400 });
+    }
+
+    const spendNum =
+      typeof spend === "number"
+        ? spend
+        : Number.parseInt(String(spend).replace(/\s/g, "").replace(/\./g, "").replace(/,/g, ""), 10);
+    if (!Number.isFinite(spendNum) || spendNum < 0) {
+      return NextResponse.json({ error: "Invalid spend amount" }, { status: 400 });
     }
 
     const { data, error } = await supabase
@@ -100,7 +108,7 @@ export async function POST(request: NextRequest) {
         platform,
         campaign_name: campaign_name || null,
         ad_set_name: ad_set_name || null,
-        spend: Math.round(Number(spend)),
+        spend: Math.round(spendNum),
         impressions: impressions ? Math.round(Number(impressions)) : 0,
         clicks: clicks ? Math.round(Number(clicks)) : 0,
         notes: notes || null,

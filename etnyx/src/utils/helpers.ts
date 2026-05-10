@@ -133,3 +133,19 @@ Mohon info harga & estimasi ya 🙏`;
 
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 }
+
+/** Human-readable login method — matches options on /order (detail akun). */
+export function loginMethodLabel(method: string | null | undefined): string {
+  if (!method || !String(method).trim()) return "—";
+  const key = String(method).toLowerCase().trim();
+  const map: Record<string, string> = {
+    moonton: "Moonton",
+    facebook: "Facebook",
+    google: "Google",
+    tiktok: "TikTok",
+    vk: "VK",
+    apple: "Apple ID",
+    userid: "User ID",
+  };
+  return map[key] || key.charAt(0).toUpperCase() + key.slice(1);
+}
