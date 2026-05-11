@@ -71,6 +71,7 @@ interface IntegrationSettings {
   resendApiKey: string; resendFromEmail: string;
   metaWaPhoneNumberId: string; metaWaAccessToken: string; metaWaVerifyToken: string; metaWaEnabled: boolean;
   telegramBotToken: string; telegramAdminGroupId: string; telegramWorkerGroupId: string; telegramReviewGroupId: string; telegramReportGroupId: string; telegramAlertGroupId: string;
+  metaAdsAdAccountId: string; metaAdsAccessToken: string;
 }
 
 type SettingsSubTab = "cms-sections" | "hero" | "banner" | "faq" | "team" | "social" | "site" | "pixels" | "integrations" | "gendong" | "general";
@@ -116,6 +117,7 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
     resendApiKey: "", resendFromEmail: "noreply@etnyx.com",
     metaWaPhoneNumberId: "", metaWaAccessToken: "", metaWaVerifyToken: "", metaWaEnabled: false,
     telegramBotToken: "", telegramAdminGroupId: "", telegramWorkerGroupId: "", telegramReviewGroupId: "", telegramReportGroupId: "", telegramAlertGroupId: "",
+    metaAdsAdAccountId: "", metaAdsAccessToken: "",
   });
   const [bankAccounts, setBankAccounts] = useState(DEFAULT_BANK_ACCOUNTS);
   const [qrisUploading, setQrisUploading] = useState(false);
@@ -796,6 +798,32 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
               <code className="text-accent text-xs break-all">{typeof window !== 'undefined' ? `${window.location.origin}/api/whatsapp/webhook` : '/api/whatsapp/webhook'}</code>
             </div>
             <p className="text-text-muted text-xs"><BookOpen className="w-3 h-3 inline mr-1" /> Setup di <a href="https://business.facebook.com/latest/whatsapp_manager" target="_blank" rel="noopener" className="text-accent hover:underline">Meta WhatsApp Manager</a></p>
+          </div>
+
+          {/* Meta Ads Auto-Sync */}
+          <div className="bg-surface rounded-xl border border-white/5 p-6 space-y-4">
+            <div>
+              <h3 className="text-text font-bold text-sm flex items-center gap-2"><BarChart3 className="w-4 h-4 text-blue-400" /> Meta Ads Auto-Sync (Cron Harian)</h3>
+              <p className="text-text-muted text-xs mt-0.5">Token & Ad Account ID untuk sync otomatis data iklan setiap hari pukul 09:00 WIB</p>
+            </div>
+            <div>
+              <label className="block text-sm text-text-muted mb-1.5">Ad Account ID</label>
+              <input type="text" value={integrations.metaAdsAdAccountId} onChange={(e) => setIntegrations({ ...integrations, metaAdsAdAccountId: e.target.value })}
+                placeholder="act_1775587809520083" className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
+              <p className="text-text-muted text-xs mt-1">Meta Business Suite → Ad Accounts → lihat ID (format: act_XXXXXXXXX)</p>
+            </div>
+            <div>
+              <label className="block text-sm text-text-muted mb-1.5">Access Token Ads <span className="text-blue-400">(dari ETNYX BM, bukan BM WA)</span></label>
+              <input type="password" value={integrations.metaAdsAccessToken} onChange={(e) => setIntegrations({ ...integrations, metaAdsAccessToken: e.target.value })}
+                placeholder="EAAxxxxxxx..." className="w-full bg-background border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
+              <p className="text-text-muted text-xs mt-1">System User Token dengan permission <code className="text-accent">ads_read</code> dari ETNYX Business Manager</p>
+            </div>
+            <div className="bg-blue-500/5 border border-blue-500/10 rounded-lg p-3 text-xs text-text-muted space-y-1">
+              <p className="text-blue-400 font-medium">Jadwal auto-sync: setiap hari pukul 09:00 WIB</p>
+              <p>• Sync otomatis mengambil data kemarin dari Meta API</p>
+              <p>• Simpan token di sini agar tidak perlu input manual setiap hari</p>
+              <p>• Data di-upsert — tidak ada duplikat meski sync dijalankan berkali-kali</p>
+            </div>
           </div>
 
           {/* Telegram */}
