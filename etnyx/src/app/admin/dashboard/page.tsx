@@ -10,9 +10,9 @@ import {
   BarChart3, Zap, Gamepad2, Star, CheckCircle, XCircle, Crown,
   Settings2, Package, Users, Shield, Trophy, Tag, Eye, TrendingUp,
   ShoppingCart, DollarSign, Clock, Activity, Loader2, AlertTriangle,
-  Plus, Pencil, Trash2, Save, Search, Filter, RefreshCw, LogOut,
+  Plus, Pencil, Trash2, Save, Search, RefreshCw, LogOut,
   MessageCircle, Send, BookOpen, Copy, Gift, Wallet, CalendarDays,
-  Flame, Target, Lightbulb, Ban, HelpCircle, Menu, FileDown,
+  Flame, Target, Lightbulb, Menu, FileDown,
   KeyRound, Check, X, ListChecks, History,
 } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -564,7 +564,8 @@ export default function AdminDashboard() {
   const toggleSelectOrder = (id: string) => {
     setSelectedOrders(prev => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
   };
@@ -922,13 +923,6 @@ export default function AdminDashboard() {
     setPricingCatalog(newCatalog);
     savePricingCatalog(newCatalog);
     if (activePricingCat === catId && newCatalog.length > 0) setActivePricingCat(newCatalog[0].id);
-  };
-
-  // Update category title
-  const updateCategoryTitle = (catId: string, newTitle: string) => {
-    const newCatalog = pricingCatalog.map(cat => cat.id !== catId ? cat : { ...cat, title: newTitle });
-    setPricingCatalog(newCatalog);
-    savePricingCatalog(newCatalog);
   };
 
   // Helpers
@@ -1356,7 +1350,7 @@ export default function AdminDashboard() {
                     </thead>
                     <tbody>
                       {orders.length === 0 ? (
-                        <tr><td colSpan={8} className="text-center py-12 text-text-muted">No orders found</td></tr>
+                        <tr><td colSpan={9} className="text-center py-12 text-text-muted">No orders found</td></tr>
                       ) : orders.map((o) => (
                         <tr key={o.id} className={`border-b border-white/5 hover:bg-white/[0.02] transition-colors ${selectedOrders.has(o.id) ? "bg-accent/5" : ""}`}>
                           <td className="px-4 py-3 w-8">

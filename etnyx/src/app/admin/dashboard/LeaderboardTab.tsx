@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import {
   Trophy, Star, Loader2, Crown, Medal,
-  Swords, Target, Clock, Award, Flame,
+  Swords, Target, Award, Flame,
   TrendingUp, Gamepad2, ChevronUp, ChevronDown,
 } from "lucide-react";
 

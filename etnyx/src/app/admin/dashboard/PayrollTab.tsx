@@ -3,9 +3,9 @@
 import { toast, toastSuccess, toastError } from "@/components/ToastProvider";
 import { useEffect, useState, useCallback } from "react";
 import {
-  DollarSign, Users, Clock, CheckCircle, Loader2, RefreshCw,
+  DollarSign, CheckCircle, Loader2, RefreshCw,
   Plus, ArrowRight, Ban, Receipt, Wallet, TrendingUp, Calendar,
-  ChevronDown, Search, Filter, Save, CreditCard, Building2, Banknote,
+  Save, CreditCard, Building2, Banknote,
   Smartphone, Trash2, Star,
 } from "lucide-react";
 import { formatRupiah } from "@/utils/helpers";

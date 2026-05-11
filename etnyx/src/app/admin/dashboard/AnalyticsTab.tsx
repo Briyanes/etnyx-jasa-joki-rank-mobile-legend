@@ -228,7 +228,6 @@ export default function AnalyticsTab() {
               {packageStats
                 .slice((pkgPage - 1) * ITEMS_PER_PAGE, pkgPage * ITEMS_PER_PAGE)
                 .map((pkg, i) => {
-                  const maxRev = packageStats[0]?.revenue || 1;
                   const globalIdx = (pkgPage - 1) * ITEMS_PER_PAGE + i;
                   return (
                     <div key={pkg.name} className="flex items-center justify-between py-1">
@@ -311,7 +310,7 @@ export default function AnalyticsTab() {
             <Trophy className="w-4 h-4 text-purple-400" /> Popular Rank Push
           </h3>
           <div className="space-y-2">
-            {popularRanks.slice(0, 7).map((r, i) => {
+            {popularRanks.slice(0, 7).map((r) => {
               const maxCount = popularRanks[0]?.count || 1;
               return (
                 <div key={r.pair}>

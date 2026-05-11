@@ -44,6 +44,20 @@ const PAYMENT_LOGOS: Record<string, string> = {
   QRIS: "/logo/payment/qris-logo.png",
 };
 
+const DEFAULT_BANK_ACCOUNTS: { bank: string; category: string; account_number: string; account_name: string; is_active: boolean; qris_image_url?: string }[] = [
+  { bank: "BCA", category: "bank", account_number: "", account_name: "", is_active: true },
+  { bank: "BRI", category: "bank", account_number: "", account_name: "", is_active: true },
+  { bank: "BNI", category: "bank", account_number: "", account_name: "", is_active: true },
+  { bank: "Mandiri", category: "bank", account_number: "", account_name: "", is_active: true },
+  { bank: "Jago", category: "bank", account_number: "", account_name: "", is_active: true },
+  { bank: "DANA", category: "ewallet", account_number: "081515141540", account_name: "", is_active: true },
+  { bank: "GoPay", category: "ewallet", account_number: "081515141540", account_name: "", is_active: true },
+  { bank: "OVO", category: "ewallet", account_number: "081515141540", account_name: "", is_active: true },
+  { bank: "ShopeePay", category: "ewallet", account_number: "081515141540", account_name: "", is_active: true },
+  { bank: "LinkAja", category: "ewallet", account_number: "081515141540", account_name: "", is_active: true },
+  { bank: "QRIS", category: "qris", account_number: "", account_name: "", is_active: true },
+];
+
 // ---- Types ----
 interface HeroSettings { headline: string; subheadline: string; ctaPrimary: string; ctaSecondary: string; isVisible: boolean }
 interface PromoBannerSettings { text: string; link: string; isVisible: boolean }
@@ -103,19 +117,6 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
     metaWaPhoneNumberId: "", metaWaAccessToken: "", metaWaVerifyToken: "", metaWaEnabled: false,
     telegramBotToken: "", telegramAdminGroupId: "", telegramWorkerGroupId: "", telegramReviewGroupId: "", telegramReportGroupId: "", telegramAlertGroupId: "",
   });
-  const DEFAULT_BANK_ACCOUNTS: { bank: string; category: string; account_number: string; account_name: string; is_active: boolean; qris_image_url?: string }[] = [
-    { bank: "BCA", category: "bank", account_number: "", account_name: "", is_active: true },
-    { bank: "BRI", category: "bank", account_number: "", account_name: "", is_active: true },
-    { bank: "BNI", category: "bank", account_number: "", account_name: "", is_active: true },
-    { bank: "Mandiri", category: "bank", account_number: "", account_name: "", is_active: true },
-    { bank: "Jago", category: "bank", account_number: "", account_name: "", is_active: true },
-    { bank: "DANA", category: "ewallet", account_number: "081515141540", account_name: "", is_active: true },
-    { bank: "GoPay", category: "ewallet", account_number: "081515141540", account_name: "", is_active: true },
-    { bank: "OVO", category: "ewallet", account_number: "081515141540", account_name: "", is_active: true },
-    { bank: "ShopeePay", category: "ewallet", account_number: "081515141540", account_name: "", is_active: true },
-    { bank: "LinkAja", category: "ewallet", account_number: "081515141540", account_name: "", is_active: true },
-    { bank: "QRIS", category: "qris", account_number: "", account_name: "", is_active: true },
-  ];
   const [bankAccounts, setBankAccounts] = useState(DEFAULT_BANK_ACCOUNTS);
   const [qrisUploading, setQrisUploading] = useState(false);
 
