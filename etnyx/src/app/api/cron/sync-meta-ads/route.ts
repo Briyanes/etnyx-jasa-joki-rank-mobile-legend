@@ -53,11 +53,10 @@ export async function GET(request: Request) {
   const yesterdayWib = new Date(nowWib);
   yesterdayWib.setDate(yesterdayWib.getDate() - 1);
   const dateStr = yesterdayWib.toISOString().split("T")[0];
-  const todayStr = nowWib.toISOString().split("T")[0];
 
   const accountId = adAccountId.startsWith("act_") ? adAccountId : `act_${adAccountId}`;
   const fields = "campaign_name,adset_name,spend,impressions,clicks";
-  const timeRange = JSON.stringify({ since: dateStr, until: todayStr });
+  const timeRange = JSON.stringify({ since: dateStr, until: dateStr });
   const metaUrl = `https://graph.facebook.com/v21.0/${accountId}/insights?fields=${fields}&level=campaign&time_increment=1&time_range=${encodeURIComponent(timeRange)}&limit=500&access_token=${token}`;
 
   const metaRes = await fetch(metaUrl);
@@ -111,12 +110,12 @@ export async function GET(request: Request) {
       const { error } = await supabase.from("ad_spend").upsert(row, { onConflict: "date,platform,campaign_name" });
       if (!error) count++;
     }
-    return NextResponse.json({ imported: count, period: `${dateStr} to ${todayStr}` });
+    return NextResponse.json({ imported: count, period: dateStr });
   }
 
-  console.log(`[cron/sync-meta-ads] Imported ${inserted?.length ?? rows.length} rows for ${dateStr} to ${todayStr}`);
+  console.log(`[cron/sync-meta-ads] Imported ${inserted?.length ?? rows.length} rows for ${dateStr}`);
   return NextResponse.json({
     imported: inserted?.length ?? rows.length,
-    period: `${dateStr} to ${todayStr}`,
+    period: dateStr,
   });
 }
