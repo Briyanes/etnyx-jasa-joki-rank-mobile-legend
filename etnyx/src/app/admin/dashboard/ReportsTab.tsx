@@ -147,7 +147,7 @@ export default function ReportsTab() {
     <div className="space-y-6">
       {/* Sub-tabs */}
       <div className="flex items-center justify-between">
-        <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+        <div className="flex gap-1 bg-surface border border-white/10 rounded-lg p-1">
           {([
             { id: "pnl" as SubTab, label: "Profit & Loss", icon: TrendingUp },
             { id: "workers" as SubTab, label: "Worker Performance", icon: Users },
@@ -158,8 +158,8 @@ export default function ReportsTab() {
               onClick={() => setSubTab(tab.id)}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors ${
                 subTab === tab.id
-                  ? "bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm"
-                  : "text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+                  ? "bg-accent/10 text-accent shadow-sm"
+                  : "text-text-muted hover:text-text"
               }`}
             >
               <tab.icon className="w-4 h-4" />
@@ -170,14 +170,14 @@ export default function ReportsTab() {
 
         {/* Month Navigator */}
         {subTab !== "export" && (
-          <div className="flex items-center gap-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 px-2 py-1">
-            <button onClick={prevMonth} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+          <div className="flex items-center gap-2 bg-surface rounded-lg border border-white/10 px-2 py-1">
+            <button onClick={prevMonth} className="p-1 hover:bg-white/5 rounded">
               <ChevronLeft className="w-4 h-4" />
             </button>
             <span className="text-sm font-medium min-w-[120px] text-center">
               {MONTHS[month - 1]} {year}
             </span>
-            <button onClick={nextMonth} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+            <button onClick={nextMonth} className="p-1 hover:bg-white/5 rounded">
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
@@ -189,100 +189,100 @@ export default function ReportsTab() {
         <div className="space-y-6">
           {/* Summary Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+            <div className="bg-surface rounded-xl p-4 border border-white/10">
               <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-500 dark:text-gray-400">Revenue</div>
+                <div className="text-sm text-text-muted">Revenue</div>
                 {pnl.revenueGrowth !== 0 && (
-                  <span className={`flex items-center text-xs font-medium ${pnl.revenueGrowth > 0 ? "text-green-600" : "text-red-600"}`}>
+                  <span className={`flex items-center text-xs font-medium ${pnl.revenueGrowth > 0 ? "text-green-400" : "text-red-400"}`}>
                     {pnl.revenueGrowth > 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                     {Math.abs(pnl.revenueGrowth)}%
                   </span>
                 )}
               </div>
-              <div className="text-xl font-bold mt-1 text-green-600">{formatRupiah(pnl.totalRevenue)}</div>
-              <div className="text-xs text-gray-400 mt-1">{pnl.completedOrders} orders completed</div>
+              <div className="text-xl font-bold mt-1 text-green-400">{formatRupiah(pnl.totalRevenue)}</div>
+              <div className="text-xs text-text-muted mt-1">{pnl.completedOrders} orders completed</div>
             </div>
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-              <div className="text-sm text-gray-500 dark:text-gray-400">Total Expenses</div>
-              <div className="text-xl font-bold mt-1 text-red-600">{formatRupiah(pnl.totalExpenses)}</div>
-              <div className="text-xs text-gray-400 mt-1">Komisi + Gaji</div>
+            <div className="bg-surface rounded-xl p-4 border border-white/10">
+              <div className="text-sm text-text-muted">Total Expenses</div>
+              <div className="text-xl font-bold mt-1 text-red-400">{formatRupiah(pnl.totalExpenses)}</div>
+              <div className="text-xs text-text-muted mt-1">Komisi + Gaji</div>
             </div>
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-              <div className="text-sm text-gray-500 dark:text-gray-400">Net Profit</div>
-              <div className={`text-xl font-bold mt-1 ${pnl.netProfit >= 0 ? "text-green-600" : "text-red-600"}`}>
+            <div className="bg-surface rounded-xl p-4 border border-white/10">
+              <div className="text-sm text-text-muted">Net Profit</div>
+              <div className={`text-xl font-bold mt-1 ${pnl.netProfit >= 0 ? "text-green-400" : "text-red-400"}`}>
                 {formatRupiah(pnl.netProfit)}
               </div>
-              <div className="text-xs text-gray-400 mt-1">Margin: {pnl.profitMargin}%</div>
+              <div className="text-xs text-text-muted mt-1">Margin: {pnl.profitMargin}%</div>
             </div>
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-              <div className="text-sm text-gray-500 dark:text-gray-400">Sudah Dibayar</div>
+            <div className="bg-surface rounded-xl p-4 border border-white/10">
+              <div className="text-sm text-text-muted">Sudah Dibayar</div>
               <div className="text-xl font-bold mt-1">{formatRupiah(pnl.totalPaidOut)}</div>
-              <div className="text-xs text-gray-400 mt-1">{pnl.payoutCount} payouts</div>
+              <div className="text-xs text-text-muted mt-1">{pnl.payoutCount} payouts</div>
             </div>
           </div>
 
           {/* Detailed Breakdown */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Revenue Breakdown */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+            <div className="bg-surface rounded-xl p-5 border border-white/10">
               <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-green-600" /> Revenue Breakdown
+                <TrendingUp className="w-5 h-5 text-green-400" /> Revenue Breakdown
               </h3>
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Harga Dasar (Base Price)</span>
+                  <span className="text-text-muted">Harga Dasar (Base Price)</span>
                   <span className="font-medium">{formatRupiah(pnl.totalBasePrice)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Express + Premium Surcharge</span>
-                  <span className="font-medium text-blue-600">+{formatRupiah(pnl.totalExpressPremium)}</span>
+                  <span className="text-text-muted">Express + Premium Surcharge</span>
+                  <span className="font-medium text-accent">+{formatRupiah(pnl.totalExpressPremium)}</span>
                 </div>
                 {pnl.totalPromoDiscount > 0 && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Diskon Promo</span>
-                    <span className="font-medium text-red-600">-{formatRupiah(pnl.totalPromoDiscount)}</span>
+                    <span className="text-text-muted">Diskon Promo</span>
+                    <span className="font-medium text-red-400">-{formatRupiah(pnl.totalPromoDiscount)}</span>
                   </div>
                 )}
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-2 flex justify-between font-semibold">
+                <div className="border-t border-white/10 pt-2 flex justify-between font-semibold">
                   <span>Total Revenue</span>
-                  <span className="text-green-600">{formatRupiah(pnl.totalRevenue)}</span>
+                  <span className="text-green-400">{formatRupiah(pnl.totalRevenue)}</span>
                 </div>
               </div>
             </div>
 
             {/* Expense Breakdown */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+            <div className="bg-surface rounded-xl p-5 border border-white/10">
               <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
-                <TrendingDown className="w-5 h-5 text-red-600" /> Expense Breakdown
+                <TrendingDown className="w-5 h-5 text-red-400" /> Expense Breakdown
               </h3>
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Komisi Worker ({pnl.commissionCount} records)</span>
+                  <span className="text-text-muted">Komisi Worker ({pnl.commissionCount} records)</span>
                   <span className="font-medium">{formatRupiah(pnl.totalCommission)}</span>
                 </div>
                 <div className="pl-4 space-y-1">
-                  <div className="flex justify-between text-xs text-gray-400">
+                  <div className="flex justify-between text-xs text-text-muted">
                     <span>Sudah dibayar</span>
                     <span className="text-green-500">{formatRupiah(pnl.paidCommission)}</span>
                   </div>
-                  <div className="flex justify-between text-xs text-gray-400">
+                  <div className="flex justify-between text-xs text-text-muted">
                     <span>Belum dibayar</span>
                     <span className="text-yellow-500">{formatRupiah(pnl.pendingCommission)}</span>
                   </div>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Gaji Staff ({pnl.salaryCount} records)</span>
+                  <span className="text-text-muted">Gaji Staff ({pnl.salaryCount} records)</span>
                   <span className="font-medium">{formatRupiah(pnl.totalSalary)}</span>
                 </div>
                 <div className="pl-4">
-                  <div className="flex justify-between text-xs text-gray-400">
+                  <div className="flex justify-between text-xs text-text-muted">
                     <span>Sudah dibayar</span>
                     <span className="text-green-500">{formatRupiah(pnl.paidSalary)}</span>
                   </div>
                 </div>
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-2 flex justify-between font-semibold">
+                <div className="border-t border-white/10 pt-2 flex justify-between font-semibold">
                   <span>Total Expenses</span>
-                  <span className="text-red-600">{formatRupiah(pnl.totalExpenses)}</span>
+                  <span className="text-red-400">{formatRupiah(pnl.totalExpenses)}</span>
                 </div>
               </div>
             </div>
@@ -290,7 +290,7 @@ export default function ReportsTab() {
 
           {/* P&L Trend (last 6 months) - Simple bar chart */}
           {trends.length > 0 && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+            <div className="bg-surface rounded-xl p-5 border border-white/10">
               <h3 className="text-base font-semibold mb-4 flex items-center gap-2">
                 <BarChart3 className="w-5 h-5" /> Tren 6 Bulan Terakhir
               </h3>
@@ -298,7 +298,7 @@ export default function ReportsTab() {
                 {trends.map((t) => (
                   <div key={t.label} className="space-y-1">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500 w-20">{t.label}</span>
+                      <span className="text-text-muted w-20">{t.label}</span>
                       <div className="flex-1 mx-3 space-y-1">
                         <div className="flex items-center gap-2">
                           <div
@@ -315,13 +315,13 @@ export default function ReportsTab() {
                           <span className="text-xs text-red-500 whitespace-nowrap">{formatRupiah(t.expenses)}</span>
                         </div>
                       </div>
-                      <span className={`text-sm font-semibold w-28 text-right ${t.profit >= 0 ? "text-green-600" : "text-red-600"}`}>
+                      <span className={`text-sm font-semibold w-28 text-right ${t.profit >= 0 ? "text-green-400" : "text-red-400"}`}>
                         {formatRupiah(t.profit)}
                       </span>
                     </div>
                   </div>
                 ))}
-                <div className="flex items-center gap-4 text-xs text-gray-400 mt-2 pt-2 border-t border-gray-100 dark:border-gray-700">
+                <div className="flex items-center gap-4 text-xs text-text-muted mt-2 pt-2 border-t border-white/5">
                   <span className="flex items-center gap-1"><span className="w-3 h-3 bg-green-500/80 rounded-sm" /> Revenue</span>
                   <span className="flex items-center gap-1"><span className="w-3 h-3 bg-red-400/80 rounded-sm" /> Expenses</span>
                   <span className="ml-auto">Angka kanan = Net Profit</span>
@@ -332,13 +332,13 @@ export default function ReportsTab() {
 
           {/* Quick Export */}
           <div className="flex gap-2">
-            <button onClick={() => exportCSV("commissions")} className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm hover:bg-gray-200 dark:hover:bg-gray-700">
+            <button onClick={() => exportCSV("commissions")} className="flex items-center gap-1 px-3 py-1.5 bg-surface border border-white/10 rounded-lg text-sm hover:bg-white/5 text-text">
               <Download className="w-4 h-4" /> Export Komisi
             </button>
-            <button onClick={() => exportCSV("salaries")} className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm hover:bg-gray-200 dark:hover:bg-gray-700">
+            <button onClick={() => exportCSV("salaries")} className="flex items-center gap-1 px-3 py-1.5 bg-surface border border-white/10 rounded-lg text-sm hover:bg-white/5 text-text">
               <Download className="w-4 h-4" /> Export Gaji
             </button>
-            <button onClick={() => exportCSV("payouts")} className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm hover:bg-gray-200 dark:hover:bg-gray-700">
+            <button onClick={() => exportCSV("payouts")} className="flex items-center gap-1 px-3 py-1.5 bg-surface border border-white/10 rounded-lg text-sm hover:bg-white/5 text-text">
               <Download className="w-4 h-4" /> Export Payouts
             </button>
           </div>
@@ -349,27 +349,27 @@ export default function ReportsTab() {
       {subTab === "workers" && (
         <div className="space-y-4">
           {workers.length === 0 ? (
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-8 text-center text-gray-400 border border-gray-200 dark:border-gray-700">
+            <div className="bg-surface rounded-xl p-8 text-center text-text-muted border border-white/10">
               Tidak ada worker aktif.
             </div>
           ) : (
             <>
               {/* Summary Cards */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-                  <div className="text-sm text-gray-500">Total Workers</div>
+                <div className="bg-surface rounded-xl p-4 border border-white/10">
+                  <div className="text-sm text-text-muted">Total Workers</div>
                   <div className="text-2xl font-bold mt-1">{workers.length}</div>
                 </div>
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-                  <div className="text-sm text-gray-500">Total Orders (Bulan Ini)</div>
+                <div className="bg-surface rounded-xl p-4 border border-white/10">
+                  <div className="text-sm text-text-muted">Total Orders (Bulan Ini)</div>
                   <div className="text-2xl font-bold mt-1">{workers.reduce((s, w) => s + w.monthCompleted, 0)}</div>
                 </div>
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-                  <div className="text-sm text-gray-500">Total Earnings (Bulan Ini)</div>
+                <div className="bg-surface rounded-xl p-4 border border-white/10">
+                  <div className="text-sm text-text-muted">Total Earnings (Bulan Ini)</div>
                   <div className="text-2xl font-bold mt-1">{formatRupiah(workers.reduce((s, w) => s + w.monthEarnings, 0))}</div>
                 </div>
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-                  <div className="text-sm text-gray-500">Avg Winrate</div>
+                <div className="bg-surface rounded-xl p-4 border border-white/10">
+                  <div className="text-sm text-text-muted">Avg Winrate</div>
                   <div className="text-2xl font-bold mt-1">
                     {workers.length > 0 ? (workers.reduce((s, w) => s + w.monthWinrate, 0) / workers.length).toFixed(1) : 0}%
                   </div>
@@ -377,10 +377,10 @@ export default function ReportsTab() {
               </div>
 
               {/* Worker Table */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-x-auto">
+              <div className="bg-surface rounded-xl border border-white/10 overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-gray-200 dark:border-gray-700">
+                    <tr className="border-b border-white/10">
                       <th className="p-3 text-left">#</th>
                       <th className="p-3 text-left">Worker</th>
                       <th className="p-3 text-center">Orders</th>
@@ -394,47 +394,47 @@ export default function ReportsTab() {
                   </thead>
                   <tbody>
                     {workers.map((w, i) => (
-                      <tr key={w.id} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                      <tr key={w.id} className="border-b border-white/5 hover:bg-white/[0.02]">
                         <td className="p-3">
                           {i === 0 && <Trophy className="w-4 h-4 text-yellow-500" />}
-                          {i === 1 && <Trophy className="w-4 h-4 text-gray-400" />}
+                          {i === 1 && <Trophy className="w-4 h-4 text-text-muted" />}
                           {i === 2 && <Trophy className="w-4 h-4 text-amber-700" />}
-                          {i > 2 && <span className="text-gray-400">{i + 1}</span>}
+                          {i > 2 && <span className="text-text-muted">{i + 1}</span>}
                         </td>
                         <td className="p-3">
                           <div className="font-medium">{w.name}</div>
-                          <div className="text-xs text-gray-400">{w.email}</div>
+                          <div className="text-xs text-text-muted">{w.email}</div>
                         </td>
                         <td className="p-3 text-center">
                           <span className="font-semibold">{w.monthCompleted}</span>
-                          <span className="text-gray-400">/{w.monthTotal}</span>
+                          <span className="text-text-muted">/{w.monthTotal}</span>
                         </td>
                         <td className="p-3 text-center">
                           <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                            w.monthWinrate >= 90 ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" :
-                            w.monthWinrate >= 70 ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400" :
-                            "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+                            w.monthWinrate >= 90 ? "bg-green-500/10 text-green-400" :
+                            w.monthWinrate >= 70 ? "bg-yellow-500/10 text-yellow-400" :
+                            "bg-red-500/10 text-red-400"
                           }`}>
                             {w.monthWinrate}%
                           </span>
                         </td>
                         <td className="p-3 text-right">{formatRupiah(w.monthRevenue)}</td>
                         <td className="p-3 text-right font-semibold">{formatRupiah(w.monthEarnings)}</td>
-                        <td className="p-3 text-right text-green-600">{formatRupiah(w.paidEarnings)}</td>
+                        <td className="p-3 text-right text-green-400">{formatRupiah(w.paidEarnings)}</td>
                         <td className="p-3 text-center">
                           {w.avgRating > 0 ? (
                             <span className="flex items-center justify-center gap-1">
                               <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
                               <span className="font-medium">{w.avgRating}</span>
-                              <span className="text-xs text-gray-400">({w.totalReviews})</span>
+                              <span className="text-xs text-text-muted">({w.totalReviews})</span>
                             </span>
                           ) : (
-                            <span className="text-gray-400">—</span>
+                            <span className="text-text-muted">—</span>
                           )}
                         </td>
                         <td className="p-3 text-center text-xs">
                           <div>{w.allTimeCompleted} orders</div>
-                          <div className="text-gray-400">{w.allTimeWinrate}% WR</div>
+                          <div className="text-text-muted">{w.allTimeWinrate}% WR</div>
                         </td>
                       </tr>
                     ))}
@@ -443,15 +443,15 @@ export default function ReportsTab() {
               </div>
 
               {/* Per-Worker Earnings Bar */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+              <div className="bg-surface rounded-xl p-5 border border-white/10">
                 <h3 className="text-base font-semibold mb-4">Earnings Bulan Ini</h3>
                 <div className="space-y-3">
                   {workers.map((w) => {
                     const maxEarning = Math.max(...workers.map(x => x.monthEarnings), 1);
                     return (
                       <div key={w.id} className="flex items-center gap-3">
-                        <span className="text-sm w-24 truncate">{w.name}</span>
-                        <div className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-full h-6 overflow-hidden">
+                        <span className="text-sm text-text w-24 truncate">{w.name}</span>
+                        <div className="flex-1 bg-white/10 rounded-full h-6 overflow-hidden">
                           <div
                             className="bg-blue-500 h-full rounded-full flex items-center justify-end pr-2 transition-all"
                             style={{ width: `${Math.max((w.monthEarnings / maxEarning) * 100, 5)}%` }}
@@ -495,14 +495,14 @@ export default function ReportsTab() {
                   }
                   window.open(`/api/admin/export?${params}`, "_blank");
                 }}
-                className="flex items-start gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 transition-colors text-left"
+                className="flex items-start gap-3 p-4 bg-surface rounded-xl border border-white/10 hover:border-accent/30 transition-colors text-left"
               >
-                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                  <item.icon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                <div className="p-2 bg-accent/10 rounded-lg">
+                  <item.icon className="w-5 h-5 text-accent" />
                 </div>
                 <div>
                   <div className="font-medium">{item.label}</div>
-                  <div className="text-xs text-gray-500 mt-0.5">{item.desc}</div>
+                  <div className="text-xs text-text-muted mt-0.5">{item.desc}</div>
                   <div className="text-xs text-blue-500 mt-1 flex items-center gap-1">
                     <Download className="w-3 h-3" /> Download CSV
                   </div>
@@ -512,8 +512,8 @@ export default function ReportsTab() {
           </div>
 
           {/* Month selector for payroll exports */}
-          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+          <div className="bg-accent/5 rounded-xl p-4 border border-accent/20">
+            <p className="text-sm text-text-muted">
               Export Komisi dan Gaji menggunakan periode <strong>{MONTHS[month - 1]} {year}</strong>.
               Gunakan navigator bulan di atas untuk mengubah periode.
             </p>

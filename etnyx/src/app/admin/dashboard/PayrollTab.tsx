@@ -498,11 +498,11 @@ export default function PayrollTab() {
   // ---- Helpers ----
   const statusBadge = (status: string) => {
     const colors: Record<string, string> = {
-      pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-      pending_approval: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400",
-      approved: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-      paid: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-      cancelled: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+      pending: "bg-yellow-500/10 text-yellow-400",
+      pending_approval: "bg-orange-500/10 text-orange-400",
+      approved: "bg-accent/10 text-accent",
+      paid: "bg-green-500/10 text-green-400",
+      cancelled: "bg-red-500/10 text-red-400",
       draft: "bg-white/10 text-text-muted border border-white/10",
     };
     return <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${colors[status] || colors.pending}`}>{status.replace("_", " ")}</span>;
@@ -709,7 +709,7 @@ export default function PayrollTab() {
             </div>
 
             {showSalaryForm && (
-              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 mb-4 border border-blue-200 dark:border-blue-800">
+              <div className="bg-accent/5 rounded-xl p-4 mb-4 border border-accent/20">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium mb-1">Staff</label>
@@ -1017,7 +1017,7 @@ export default function PayrollTab() {
           </div>
 
           {/* Info Box */}
-          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
+          <div className="bg-accent/5 rounded-xl p-4 border border-accent/20">
             <h4 className="font-semibold mb-2 text-text">Alur Payroll</h4>
             <div className="flex items-center gap-2 text-sm text-text-muted flex-wrap">
               <span className="bg-white/5 border border-white/10 px-2 py-1 rounded text-text">Order Completed</span>
@@ -1026,11 +1026,11 @@ export default function PayrollTab() {
               <ArrowRight className="w-4 h-4 shrink-0" />
               <span className="bg-white/5 border border-white/10 px-2 py-1 rounded text-text">Create Payout</span>
               <ArrowRight className="w-4 h-4" />
-              <span className="bg-yellow-100 dark:bg-yellow-900/30 px-2 py-1 rounded">Pending Approval</span>
+              <span className="bg-yellow-500/10 text-yellow-400 px-2 py-1 rounded">Pending Approval</span>
               <ArrowRight className="w-4 h-4" />
-              <span className="bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded">Approved</span>
+              <span className="bg-accent/10 text-accent px-2 py-1 rounded">Approved</span>
               <ArrowRight className="w-4 h-4" />
-              <span className="bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded flex items-center gap-1"><CreditCard className="w-3 h-3" /> Transfer Manual <CheckCircle className="w-3 h-3" /></span>
+              <span className="bg-green-500/10 text-green-400 px-2 py-1 rounded flex items-center gap-1"><CreditCard className="w-3 h-3" /> Transfer Manual <CheckCircle className="w-3 h-3" /></span>
             </div>
             <div className="mt-3 text-sm text-text-muted">
               <p>• <strong>Worker:</strong> Komisi per order ({((settings.commission?.worker_rate ?? 0.6) * 100).toFixed(0)}%) — payout setiap 2 minggu (tgl 1 & 16)</p>
@@ -1053,7 +1053,7 @@ export default function PayrollTab() {
             </div>
 
             {showAddAccountForm && (
-              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 mb-4 border border-blue-200 dark:border-blue-800">
+              <div className="bg-accent/5 rounded-xl p-4 mb-4 border border-accent/20">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                   <div>
                     <label className="block text-sm font-medium mb-1">Staff</label>
