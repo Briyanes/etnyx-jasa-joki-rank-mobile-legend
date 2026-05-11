@@ -23,6 +23,7 @@ const ALLOWED_KEYS = [
   "gendong_pricing",
   "bank_accounts",
   "season_pricing",
+  "gendong_settings",
 ];
 
 // GET /api/admin/settings?key=hero or GET all

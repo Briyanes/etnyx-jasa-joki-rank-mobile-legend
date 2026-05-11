@@ -522,7 +522,7 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-bold text-text">Integrasi API</h2>
-              <p className="text-text-muted text-xs mt-1">Setup Payment Gateway, Email, dan WhatsApp API</p>
+              <p className="text-text-muted text-xs mt-1">Setup Payment Gateway, Email, WhatsApp API, dan Meta Ads Auto-Sync</p>
             </div>
             <CmsSaveButton settingKey="integrations" value={integrations} />
           </div>
@@ -993,16 +993,17 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
       {settingsSubTab === "general" && (
         <div className="max-w-2xl space-y-4">
           <div className="bg-surface rounded-xl p-5 border border-white/5">
-            <h3 className="text-sm font-semibold text-text mb-1">Site Configuration</h3>
-            <p className="text-text-muted text-xs mb-4">Dikelola via environment variables.</p>
+            <h3 className="text-sm font-semibold text-text mb-1">Environment Variables</h3>
+            <p className="text-text-muted text-xs mb-4">Dikelola via environment variables di Vercel dashboard.</p>
             <div className="space-y-2">
-              {["NEXT_PUBLIC_WHATSAPP_NUMBER", "ADMIN_EMAIL", "ENCRYPTION_KEY", "IPAYMU_API_KEY", "IPAYMU_VA"].map((key) => (
+              {["NEXT_PUBLIC_SITE_URL", "CRON_SECRET", "SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "ADMIN_EMAIL"].map((key) => (
                 <div key={key} className="flex justify-between items-center py-2 border-b border-white/5 last:border-0">
                   <span className="text-xs text-text-muted font-mono">{key}</span>
                   <CheckCircle className="w-3.5 h-3.5 text-green-400" />
                 </div>
               ))}
             </div>
+            <p className="text-text-muted text-[10px] mt-3">API keys lainnya (iPaymu, WA, Telegram, Meta Ads) dikelola di tab <strong className="text-accent">Integrasi</strong>.</p>
           </div>
           <div className="bg-surface rounded-xl p-5 border border-white/5">
             <h3 className="text-sm font-semibold text-text mb-3 flex items-center gap-2"><Download className="w-4 h-4" /> Export Data (CSV)</h3>
