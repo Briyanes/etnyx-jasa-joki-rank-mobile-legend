@@ -99,6 +99,7 @@ export default function AdsTab() {
   // Meta API Sync
   const [showMetaSync, setShowMetaSync] = useState(false);
   const [metaAccountId, setMetaAccountId] = useState("");
+  const [metaAdsToken, setMetaAdsToken] = useState("");
   const [metaSyncing, setMetaSyncing] = useState(false);
   const [importResult, setImportResult] = useState<{ imported: number; skipped?: number; errors?: string[]; message?: string } | null>(null);
 
@@ -204,7 +205,7 @@ export default function AdsTab() {
       const res = await fetch("/api/admin/ads/import", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "meta_api", adAccountId: metaAccountId.trim(), dateFrom, dateTo }),
+        body: JSON.stringify({ type: "meta_api", adAccountId: metaAccountId.trim(), dateFrom, dateTo, ...(metaAdsToken.trim() ? { accessToken: metaAdsToken.trim() } : {}) }),
       });
       const json = await res.json();
       if (!res.ok) { toastError(json.error || "Gagal sync Meta API"); return; }
@@ -454,8 +455,8 @@ export default function AdsTab() {
             <button onClick={() => setShowMetaSync(false)}><X className="w-4 h-4 text-text-muted" /></button>
           </div>
           <p className="text-text-muted text-xs">Otomatis tarik data iklan dari Meta berdasarkan Ad Account ID. Access token diambil dari Settings &gt; Integrations (harus punya permission <code className="text-accent">ads_read</code>).</p>
-          <div className="flex gap-3 items-end">
-            <div className="flex-1">
+          <div className="flex gap-3 items-end flex-wrap">
+            <div className="flex-1 min-w-[200px]">
               <label className="block text-text-muted text-[10px] mb-1">Ad Account ID</label>
               <input
                 type="text"
@@ -464,7 +465,18 @@ export default function AdsTab() {
                 placeholder="act_123456789 atau 123456789"
                 className="w-full bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-xs"
               />
-              <p className="text-text-muted text-[10px] mt-1">Meta Business Suite → Settings → Ad Accounts → pilih akun → lihat ID</p>
+              <p className="text-text-muted text-[10px] mt-1">Meta Business Suite → Ad accounts → lihat ID</p>
+            </div>
+            <div className="flex-1 min-w-[200px]">
+              <label className="block text-text-muted text-[10px] mb-1">Access Token Ads <span className="text-accent">(dari BM iklan, bukan BM WA)</span></label>
+              <input
+                type="password"
+                value={metaAdsToken}
+                onChange={(e) => setMetaAdsToken(e.target.value)}
+                placeholder="Token dari ETNYX BM → Conversions API System User"
+                className="w-full bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-xs"
+              />
+              <p className="text-text-muted text-[10px] mt-1">Token ini hanya dipakai untuk sync, tidak disimpan</p>
             </div>
             <div>
               <label className="block text-text-muted text-[10px] mb-1">Periode</label>
