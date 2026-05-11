@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from "react";
 import {
   TrendingUp, TrendingDown, DollarSign, ShoppingCart,
   Target, Plus, Trash2, BarChart3, Loader2,
-  Calendar, ChevronDown, Lightbulb,
+  Calendar, ChevronDown, Lightbulb, Upload, RefreshCw, X, CheckCircle, AlertCircle,
 } from "lucide-react";
 import { formatRupiah } from "@/utils/helpers";
 import { FaFacebook, FaGoogle, FaTiktok } from "react-icons/fa";
@@ -14,6 +14,16 @@ interface SourceStats {
   orders: number;
   revenue: number;
   campaigns: Record<string, { orders: number; revenue: number }>;
+}
+
+interface CsvImportRow {
+  date: string;
+  platform: string;
+  campaign_name: string | null;
+  ad_set_name: string | null;
+  spend: number;
+  impressions: number;
+  clicks: number;
 }
 
 interface AdSpendEntry {
@@ -79,6 +89,132 @@ export default function AdsTab() {
   });
   const [saving, setSaving] = useState(false);
   const [expandedSource, setExpandedSource] = useState<string | null>(null);
+
+  // CSV Import
+  const [showCsvImport, setShowCsvImport] = useState(false);
+  const [csvFile, setCsvFile] = useState<File | null>(null);
+  const [csvPreview, setCsvPreview] = useState<{ rows: CsvImportRow[]; errors: string[] } | null>(null);
+  const [csvImporting, setCsvImporting] = useState(false);
+
+  // Meta API Sync
+  const [showMetaSync, setShowMetaSync] = useState(false);
+  const [metaAccountId, setMetaAccountId] = useState("");
+  const [metaSyncing, setMetaSyncing] = useState(false);
+  const [importResult, setImportResult] = useState<{ imported: number; skipped?: number; errors?: string[]; message?: string } | null>(null);
+
+  // ── CSV Parser ────────────────────────────────────────────
+  const parseCsvFile = (file: File) => {
+    setCsvFile(file);
+    setCsvPreview(null);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const text = e.target?.result as string;
+        const lines = text.split(/\r?\n/).filter(Boolean);
+        if (lines.length < 2) { setCsvPreview({ rows: [], errors: ["File CSV kosong atau tidak valid"] }); return; }
+
+        const rawHeader = lines[0].split(",");
+        const header = rawHeader.map((h) => h.replace(/^"|"$/g, "").trim().toLowerCase());
+
+        // Map column names (support EN + ID Meta export)
+        const col = (names: string[]) => {
+          for (const n of names) {
+            const idx = header.findIndex((h) => h.includes(n));
+            if (idx !== -1) return idx;
+          }
+          return -1;
+        };
+
+        const idxDate = col(["day", "hari", "date", "tanggal"]);
+        const idxCampaign = col(["campaign name", "nama kampanye", "campaign"]);
+        const idxAdset = col(["ad set name", "nama set iklan", "adset"]);
+        const idxSpend = col(["amount spent", "jumlah yang dibelanjakan", "spend", "pengeluaran"]);
+        const idxImpr = col(["impressions", "tayangan"]);
+        const idxClicks = col(["link clicks", "clicks", "klik"]);
+
+        if (idxDate === -1 || idxSpend === -1) {
+          setCsvPreview({ rows: [], errors: ["Kolom 'Day/Hari' dan 'Amount Spent' wajib ada. Pastikan kamu export dari Meta Ads Manager."] });
+          return;
+        }
+
+        const rows: CsvImportRow[] = [];
+        const errors: string[] = [];
+
+        for (let i = 1; i < Math.min(lines.length, 501); i++) {
+          const cells = lines[i].match(/(?:"([^"]*)"|([^,]*))/g)?.map((c) => c.replace(/^"|"$/g, "").trim()) ?? lines[i].split(",");
+          const rawDate = idxDate !== -1 ? cells[idxDate] : "";
+          // Normalize date: DD/MM/YYYY or MM/DD/YYYY → YYYY-MM-DD
+          let date = rawDate;
+          if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(rawDate)) {
+            const parts = rawDate.split("/");
+            // Meta usually exports as MM/DD/YYYY
+            date = `${parts[2]}-${parts[0].padStart(2, "0")}-${parts[1].padStart(2, "0")}`;
+          }
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { errors.push(`Baris ${i}: format tanggal tidak dikenal (${rawDate})`); continue; }
+
+          const spendRaw = idxSpend !== -1 ? cells[idxSpend] : "";
+          const spend = parseFloat(spendRaw.replace(/[^\d.]/g, ""));
+          if (!Number.isFinite(spend)) { errors.push(`Baris ${i}: spend tidak valid (${spendRaw})`); continue; }
+
+          rows.push({
+            date,
+            platform: "meta",
+            campaign_name: idxCampaign !== -1 ? cells[idxCampaign] || null : null,
+            ad_set_name: idxAdset !== -1 ? cells[idxAdset] || null : null,
+            spend: Math.round(spend),
+            impressions: idxImpr !== -1 ? Math.round(Number(cells[idxImpr]?.replace(/[^\d]/g, ""))) || 0 : 0,
+            clicks: idxClicks !== -1 ? Math.round(Number(cells[idxClicks]?.replace(/[^\d]/g, ""))) || 0 : 0,
+          });
+        }
+        setCsvPreview({ rows, errors });
+      } catch {
+        setCsvPreview({ rows: [], errors: ["Gagal parse CSV. Pastikan format file benar."] });
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleCsvImport = async () => {
+    if (!csvPreview?.rows.length) return;
+    setCsvImporting(true);
+    setImportResult(null);
+    try {
+      const res = await fetch("/api/admin/ads/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "csv", rows: csvPreview.rows }),
+      });
+      const json = await res.json();
+      if (!res.ok) { toastError(json.error || "Gagal import CSV"); return; }
+      setImportResult(json);
+      toastSuccess(`Import berhasil: ${json.imported} baris tersimpan.`);
+      setShowCsvImport(false);
+      setCsvFile(null);
+      setCsvPreview(null);
+      fetchData();
+    } catch { toastError("Gagal import CSV."); }
+    finally { setCsvImporting(false); }
+  };
+
+  const handleMetaSync = async () => {
+    if (!metaAccountId.trim()) { toastError("Masukkan Ad Account ID"); return; }
+    setMetaSyncing(true);
+    setImportResult(null);
+    try {
+      const res = await fetch("/api/admin/ads/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "meta_api", adAccountId: metaAccountId.trim(), dateFrom, dateTo }),
+      });
+      const json = await res.json();
+      if (!res.ok) { toastError(json.error || "Gagal sync Meta API"); return; }
+      setImportResult(json);
+      toastSuccess(`Sync berhasil: ${json.imported} baris diimport.`);
+      setShowMetaSync(false);
+      fetchData();
+    } catch { toastError("Gagal sync Meta API."); }
+    finally { setMetaSyncing(false); }
+  };
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -210,8 +346,141 @@ export default function AdsTab() {
           <span className="text-text-muted text-xs">—</span>
           <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
             className="bg-background border border-white/10 rounded-lg px-3 py-1.5 text-text text-xs" />
+          <button onClick={() => { setShowCsvImport(!showCsvImport); setShowMetaSync(false); }}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-white/10 rounded-lg text-text text-xs hover:bg-white/5">
+            <Upload className="w-3.5 h-3.5" /> Import CSV
+          </button>
+          <button onClick={() => { setShowMetaSync(!showMetaSync); setShowCsvImport(false); }}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-lg text-blue-400 text-xs hover:bg-blue-500/20">
+            <RefreshCw className="w-3.5 h-3.5" /> Sync Meta API
+          </button>
         </div>
       </div>
+
+      {/* Import Result Banner */}
+      {importResult && (
+        <div className={`flex items-start gap-3 p-4 rounded-xl border text-sm ${importResult.imported > 0 ? "bg-green-500/10 border-green-500/20 text-green-400" : "bg-yellow-500/10 border-yellow-500/20 text-yellow-400"}`}>
+          {importResult.imported > 0 ? <CheckCircle className="w-4 h-4 mt-0.5 shrink-0" /> : <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />}
+          <div className="flex-1">
+            <span className="font-medium">
+              {importResult.message || `${importResult.imported} baris diimport${importResult.skipped ? `, ${importResult.skipped} dilewati` : ""}`}
+            </span>
+            {importResult.errors && importResult.errors.length > 0 && (
+              <ul className="mt-1 text-xs opacity-75 space-y-0.5">
+                {importResult.errors.slice(0, 5).map((e, i) => <li key={i}>• {e}</li>)}
+                {importResult.errors.length > 5 && <li>• ...dan {importResult.errors.length - 5} error lainnya</li>}
+              </ul>
+            )}
+          </div>
+          <button onClick={() => setImportResult(null)}><X className="w-4 h-4" /></button>
+        </div>
+      )}
+
+      {/* CSV Import Panel */}
+      {showCsvImport && (
+        <div className="bg-surface rounded-xl border border-white/10 p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-text font-bold text-sm flex items-center gap-2"><Upload className="w-4 h-4 text-accent" /> Import CSV Meta Ads</h3>
+            <button onClick={() => { setShowCsvImport(false); setCsvFile(null); setCsvPreview(null); }}><X className="w-4 h-4 text-text-muted" /></button>
+          </div>
+          <p className="text-text-muted text-xs">Export dari Meta Ads Manager → pilih kolom: Day, Campaign name, Ad set name, Amount spent, Impressions, Clicks → Download CSV → upload di sini.</p>
+          <div
+            className="border-2 border-dashed border-white/10 rounded-lg p-6 text-center hover:border-accent/30 transition-colors cursor-pointer"
+            onClick={() => document.getElementById("csv-file-input")?.click()}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) parseCsvFile(f); }}
+          >
+            <input id="csv-file-input" type="file" accept=".csv" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) parseCsvFile(f); }} />
+            {csvFile ? (
+              <span className="text-text text-xs">{csvFile.name}</span>
+            ) : (
+              <span className="text-text-muted text-xs">Drag & drop atau klik untuk pilih file CSV</span>
+            )}
+          </div>
+          {csvPreview && (
+            <div className="space-y-2">
+              {csvPreview.errors.length > 0 && (
+                <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-xs text-red-400 space-y-0.5">
+                  {csvPreview.errors.slice(0, 5).map((e, i) => <div key={i}>⚠ {e}</div>)}
+                </div>
+              )}
+              {csvPreview.rows.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-text-muted text-xs">{csvPreview.rows.length} baris valid ditemukan (preview 5 pertama):</p>
+                  <div className="overflow-x-auto rounded-lg border border-white/10">
+                    <table className="w-full text-xs">
+                      <thead><tr className="text-text-muted border-b border-white/5 bg-background">
+                        <th className="text-left px-3 py-2 font-medium">Tanggal</th>
+                        <th className="text-left px-3 py-2 font-medium">Campaign</th>
+                        <th className="text-right px-3 py-2 font-medium">Spend</th>
+                        <th className="text-right px-3 py-2 font-medium">Impr.</th>
+                        <th className="text-right px-3 py-2 font-medium">Clicks</th>
+                      </tr></thead>
+                      <tbody className="divide-y divide-white/5">
+                        {csvPreview.rows.slice(0, 5).map((r, i) => (
+                          <tr key={i}>
+                            <td className="px-3 py-2 text-text">{r.date}</td>
+                            <td className="px-3 py-2 text-text-muted truncate max-w-[200px]">{r.campaign_name || "—"}</td>
+                            <td className="px-3 py-2 text-text text-right">{formatRupiah(r.spend)}</td>
+                            <td className="px-3 py-2 text-text-muted text-right">{r.impressions.toLocaleString()}</td>
+                            <td className="px-3 py-2 text-text-muted text-right">{r.clicks.toLocaleString()}</td>
+                          </tr>
+                        ))}
+                        {csvPreview.rows.length > 5 && (
+                          <tr><td colSpan={5} className="px-3 py-2 text-text-muted text-center">...dan {csvPreview.rows.length - 5} baris lainnya</td></tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="flex justify-end">
+                    <button onClick={handleCsvImport} disabled={csvImporting}
+                      className="flex items-center gap-2 px-4 py-2 bg-accent text-background rounded-lg text-xs font-medium disabled:opacity-50">
+                      {csvImporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                      Import {csvPreview.rows.length} Baris
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Meta API Sync Panel */}
+      {showMetaSync && (
+        <div className="bg-surface rounded-xl border border-blue-500/20 p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-text font-bold text-sm flex items-center gap-2"><RefreshCw className="w-4 h-4 text-blue-400" /> Sync Meta Marketing API</h3>
+            <button onClick={() => setShowMetaSync(false)}><X className="w-4 h-4 text-text-muted" /></button>
+          </div>
+          <p className="text-text-muted text-xs">Otomatis tarik data iklan dari Meta berdasarkan Ad Account ID. Access token diambil dari Settings &gt; Integrations (harus punya permission <code className="text-accent">ads_read</code>).</p>
+          <div className="flex gap-3 items-end">
+            <div className="flex-1">
+              <label className="block text-text-muted text-[10px] mb-1">Ad Account ID</label>
+              <input
+                type="text"
+                value={metaAccountId}
+                onChange={(e) => setMetaAccountId(e.target.value)}
+                placeholder="act_123456789 atau 123456789"
+                className="w-full bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-xs"
+              />
+              <p className="text-text-muted text-[10px] mt-1">Meta Business Suite → Settings → Ad Accounts → pilih akun → lihat ID</p>
+            </div>
+            <div>
+              <label className="block text-text-muted text-[10px] mb-1">Periode</label>
+              <p className="text-text text-xs py-2">{dateFrom} — {dateTo}</p>
+            </div>
+            <button onClick={handleMetaSync} disabled={metaSyncing || !metaAccountId.trim()}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg text-xs font-medium disabled:opacity-50 shrink-0">
+              {metaSyncing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+              Sync Sekarang
+            </button>
+          </div>
+          <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3 text-xs text-yellow-400">
+            ⚠ Jika muncul error permission, buka Meta Business Settings → System Users → pilih system user → Edit → tambahkan permission <strong>ads_read</strong> → Generate New Token → update di Settings.
+          </div>
+        </div>
+      )}
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
