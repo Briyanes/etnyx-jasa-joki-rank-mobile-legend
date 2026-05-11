@@ -94,6 +94,7 @@ const SECTION_LABELS: Record<string, string> = {
   hero: "Hero Section", pricing: "Paket Harga",
   whyChooseUs: "Kenapa Pilih Kami", teamShowcase: "Tim Booster", testimonials: "Testimoni",
   portfolio: "Portfolio", tracking: "Tracking", faq: "FAQ", cta: "Call to Action",
+  trust: "Trust & Social Proof", howItWorks: "Cara Kerja", liveCounter: "Live Counter",
 };
 
 interface SettingsTabProps {
