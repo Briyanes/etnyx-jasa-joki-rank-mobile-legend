@@ -621,53 +621,44 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
                     <p className={`text-xs font-semibold mb-2 uppercase tracking-wider ${group.color} flex items-center gap-1.5`}>
                       <group.icon className="w-3.5 h-3.5" /> {group.label}
                     </p>
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       {items.map((bank) => (
-                        <div key={bank._idx} className="bg-background rounded-lg p-4 border border-white/5 space-y-3">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
+                        <div key={bank._idx} className="bg-background rounded-lg px-3 py-2.5 border border-white/5">
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2 w-24 shrink-0">
                               {(() => {
                                 const logo = PAYMENT_LOGOS[bank.bank];
                                 if (logo) {
-                                  return <Image src={logo} alt={bank.bank} width={20} height={20} className="w-5 h-5 object-contain" />;
+                                  return <Image src={logo} alt={bank.bank} width={16} height={16} className="w-4 h-4 object-contain" />;
                                 }
                                 const bi = BANK_ICONS[bank.bank];
                                 if (bi) {
                                   const BIcon = bi.icon;
-                                  return <BIcon className={`w-4 h-4 ${bi.color}`} />;
+                                  return <BIcon className={`w-3.5 h-3.5 ${bi.color}`} />;
                                 }
-                                return <CreditCard className="w-4 h-4 text-accent" />;
+                                return <CreditCard className="w-3.5 h-3.5 text-accent" />;
                               })()}
-                              <span className="text-text font-bold text-sm">{bank.bank}</span>
-                              {bank.is_active && bank.account_number && <span className="w-2 h-2 rounded-full bg-green-400" />}
+                              <span className="text-text font-semibold text-xs">{bank.bank}</span>
+                              {bank.is_active && bank.account_number && <span className="w-1.5 h-1.5 rounded-full bg-green-400 shrink-0" />}
                             </div>
-                            <div className="flex items-center gap-3">
-                              <label className="flex items-center gap-2 cursor-pointer select-none">
-                                <input type="checkbox" checked={bank.is_active}
-                                  onChange={(e) => { const updated = [...bankAccounts]; updated[bank._idx] = { ...updated[bank._idx], is_active: e.target.checked }; setBankAccounts(updated); }}
-                                  className="w-4 h-4 rounded border-white/20 bg-surface text-accent focus:ring-accent cursor-pointer" />
-                                <span className="text-text-muted text-xs">Aktif</span>
-                              </label>
-                              <button onClick={() => setBankAccounts(bankAccounts.filter((_, i) => i !== bank._idx))}
-                                className="text-red-400/60 hover:text-red-400 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
-                            </div>
+                            <input type="text" value={bank.account_number}
+                              onChange={(e) => { const updated = [...bankAccounts]; updated[bank._idx] = { ...updated[bank._idx], account_number: e.target.value }; setBankAccounts(updated); }}
+                              placeholder={group.key === "ewallet" ? "081515141540" : group.key === "qris" ? "Merchant ID" : "No. Rekening"}
+                              className="flex-1 bg-surface border border-white/10 rounded-lg px-3 py-1.5 text-text text-xs focus:border-accent focus:outline-none font-mono" />
+                            <input type="text" value={bank.account_name}
+                              onChange={(e) => { const updated = [...bankAccounts]; updated[bank._idx] = { ...updated[bank._idx], account_name: e.target.value }; setBankAccounts(updated); }}
+                              placeholder="Atas nama"
+                              className="flex-1 bg-surface border border-white/10 rounded-lg px-3 py-1.5 text-text text-xs focus:border-accent focus:outline-none" />
+                            <label className="flex items-center gap-1.5 cursor-pointer select-none shrink-0">
+                              <input type="checkbox" checked={bank.is_active}
+                                onChange={(e) => { const updated = [...bankAccounts]; updated[bank._idx] = { ...updated[bank._idx], is_active: e.target.checked }; setBankAccounts(updated); }}
+                                className="w-3.5 h-3.5 rounded border-white/20 bg-surface text-accent focus:ring-accent cursor-pointer" />
+                              <span className="text-text-muted text-xs">Aktif</span>
+                            </label>
+                            <button onClick={() => setBankAccounts(bankAccounts.filter((_, i) => i !== bank._idx))}
+                              className="text-red-400/60 hover:text-red-400 transition-colors shrink-0"><Trash2 className="w-3.5 h-3.5" /></button>
                           </div>
-                          <div className="grid grid-cols-2 gap-3">
-                            <div>
-                              <label className="block text-xs text-text-muted mb-1">{group.key === "ewallet" ? "No. HP" : group.key === "qris" ? "Merchant ID (opsional)" : "No. Rekening"}</label>
-                              <input type="text" value={bank.account_number}
-                                onChange={(e) => { const updated = [...bankAccounts]; updated[bank._idx] = { ...updated[bank._idx], account_number: e.target.value }; setBankAccounts(updated); }}
-                                placeholder={group.key === "ewallet" ? "081515141540" : "1234567890"}
-                                className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm focus:border-accent focus:outline-none font-mono" />
-                            </div>
-                            <div>
-                              <label className="block text-xs text-text-muted mb-1">Atas Nama</label>
-                              <input type="text" value={bank.account_name}
-                                onChange={(e) => { const updated = [...bankAccounts]; updated[bank._idx] = { ...updated[bank._idx], account_name: e.target.value }; setBankAccounts(updated); }}
-                                placeholder="Nama pemilik" className="w-full bg-surface border border-white/10 rounded-lg px-3 py-2 text-text text-sm focus:border-accent focus:outline-none" />
-                            </div>
-                          </div>
-                          {/* QRIS Image Upload */}
+                          {/* QRIS Image Upload — kept below for QRIS entries */}
                           {group.key === "qris" && (
                             <div className="mt-3">
                               <label className="block text-xs text-text-muted mb-1.5">Gambar QR Code</label>
