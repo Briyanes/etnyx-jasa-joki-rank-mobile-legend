@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
     // Fetch proof
     const { data: proof, error: proofError } = await supabase
       .from("payment_proofs")
-      .select("*, orders!inner(id, order_id, status, payment_status, total_price, username, whatsapp, current_rank, target_rank, package, is_express, is_premium, notes, customer_email)")
+      .select("*, orders!inner(id, order_id, status, payment_status, total_price, username, whatsapp, current_rank, target_rank, current_star, target_star, package, package_title, is_express, is_premium, notes, customer_email)")
       .eq("id", proofId)
       .single();
 
@@ -121,7 +121,10 @@ export async function POST(request: NextRequest) {
             username: order.username,
             current_rank: order.current_rank,
             target_rank: order.target_rank,
+            current_star: order.current_star ?? null,
+            target_star: order.target_star ?? null,
             package: order.package,
+            package_title: order.package_title ?? null,
             price: order.total_price,
             whatsapp: order.whatsapp,
             email: order.customer_email,
@@ -129,7 +132,6 @@ export async function POST(request: NextRequest) {
             is_express: order.is_express,
             is_premium: order.is_premium,
             notes: order.notes,
-            package_title: order.package_title,
             db_id: order.id,
           };
           // WA to customer: "Pembayaran Dikonfirmasi"
