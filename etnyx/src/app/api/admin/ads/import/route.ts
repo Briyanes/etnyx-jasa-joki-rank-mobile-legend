@@ -141,10 +141,10 @@ export async function POST(request: NextRequest) {
       // Normalize ad account ID — ensure it starts with "act_"
       const accountId = adAccountId.startsWith("act_") ? adAccountId : `act_${adAccountId}`;
 
-      // Call Meta Marketing API Insights
+      // Call Meta Marketing API Insights with campaign-level breakdown
       const fields = "campaign_name,adset_name,spend,impressions,clicks";
       const timeRange = JSON.stringify({ since: dateFrom, until: dateTo });
-      const metaUrl = `https://graph.facebook.com/v21.0/${accountId}/insights?fields=${fields}&time_increment=1&time_range=${encodeURIComponent(timeRange)}&limit=500&access_token=${token}`;
+      const metaUrl = `https://graph.facebook.com/v21.0/${accountId}/insights?fields=${fields}&level=campaign&time_increment=1&time_range=${encodeURIComponent(timeRange)}&limit=500&access_token=${token}`;
 
       const metaRes = await fetch(metaUrl);
       const metaBody = await metaRes.json();
