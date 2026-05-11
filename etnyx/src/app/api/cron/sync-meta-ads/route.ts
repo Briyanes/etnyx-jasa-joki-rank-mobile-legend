@@ -45,11 +45,15 @@ export async function GET(request: Request) {
     });
   }
 
-  // Sync yesterday (and today to cover late reporting)
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  const dateStr = yesterday.toISOString().split("T")[0];
-  const todayStr = new Date().toISOString().split("T")[0];
+  // Sync yesterday in WIB (UTC+7)
+  // Cron runs at 18:00 UTC = 01:00 WIB next day
+  // so "now" in WIB is today; "yesterday" in WIB is the day we want
+  const WIB_OFFSET_MS = 7 * 60 * 60 * 1000;
+  const nowWib = new Date(Date.now() + WIB_OFFSET_MS);
+  const yesterdayWib = new Date(nowWib);
+  yesterdayWib.setDate(yesterdayWib.getDate() - 1);
+  const dateStr = yesterdayWib.toISOString().split("T")[0];
+  const todayStr = nowWib.toISOString().split("T")[0];
 
   const accountId = adAccountId.startsWith("act_") ? adAccountId : `act_${adAccountId}`;
   const fields = "campaign_name,adset_name,spend,impressions,clicks";
