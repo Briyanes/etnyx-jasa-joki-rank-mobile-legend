@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// DELETE: Remove ad spend entry
+// DELETE: Remove ad spend entry (single ?id= or bulk ?ids=id1,id2,...)
 export async function DELETE(request: NextRequest) {
   const auth = await verifyAdmin();
   if (!auth.authenticated) return auth.error!;
@@ -135,9 +135,16 @@ export async function DELETE(request: NextRequest) {
     const supabase = await createAdminClient();
     const url = new URL(request.url);
     const id = url.searchParams.get("id");
+    const ids = url.searchParams.get("ids");
 
-    if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
+    if (ids) {
+      const idList = ids.split(",").map((s) => s.trim()).filter(Boolean);
+      if (idList.length === 0) return NextResponse.json({ error: "ids required" }, { status: 400 });
+      await supabase.from("ad_spend").delete().in("id", idList);
+      return NextResponse.json({ success: true, deleted: idList.length });
+    }
 
+    if (!id) return NextResponse.json({ error: "id or ids required" }, { status: 400 });
     await supabase.from("ad_spend").delete().eq("id", id);
     return NextResponse.json({ success: true });
   } catch {

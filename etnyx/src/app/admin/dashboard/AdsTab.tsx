@@ -103,6 +103,10 @@ export default function AdsTab() {
   const [metaSyncing, setMetaSyncing] = useState(false);
   const [importResult, setImportResult] = useState<{ imported: number; skipped?: number; errors?: string[]; message?: string } | null>(null);
 
+  // Bulk select
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+
   // ── CSV Parser ────────────────────────────────────────────
   const parseCsvFile = (file: File) => {
     setCsvFile(file);
@@ -219,6 +223,7 @@ export default function AdsTab() {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
+    setSelectedIds(new Set());
     try {
       const res = await fetch(`/api/admin/ads?from=${dateFrom}&to=${dateTo}`);
       const json = await res.json();
@@ -311,9 +316,31 @@ export default function AdsTab() {
         return;
       }
       toastSuccess("Entry dihapus.");
+      setSelectedIds((prev) => { const next = new Set(prev); next.delete(id); return next; });
       fetchData();
     } catch {
       toastError("Gagal menghapus entry.");
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return;
+    if (!confirm(`Hapus ${selectedIds.size} entry yang dipilih?`)) return;
+    setBulkDeleting(true);
+    try {
+      const res = await fetch(`/api/admin/ads?ids=${[...selectedIds].join(",")}`, { method: "DELETE" });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        toastError(typeof json.error === "string" ? json.error : "Gagal menghapus.");
+        return;
+      }
+      toastSuccess(`${selectedIds.size} entry dihapus.`);
+      setSelectedIds(new Set());
+      fetchData();
+    } catch {
+      toastError("Gagal menghapus.");
+    } finally {
+      setBulkDeleting(false);
     }
   };
 
@@ -612,7 +639,19 @@ export default function AdsTab() {
       {/* Ad Spend Log */}
       <div className="bg-surface rounded-xl border border-white/5 p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-text font-bold text-sm">Ad Spend Log</h3>
+          <div className="flex items-center gap-3">
+            <h3 className="text-text font-bold text-sm">Ad Spend Log</h3>
+            {selectedIds.size > 0 && (
+              <button
+                onClick={handleBulkDelete}
+                disabled={bulkDeleting}
+                className="flex items-center gap-1.5 px-3 py-1 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-xs hover:bg-red-500/20 disabled:opacity-50"
+              >
+                {bulkDeleting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />}
+                Hapus {selectedIds.size} dipilih
+              </button>
+            )}
+          </div>
           <button
             onClick={() => setShowAddSpend(!showAddSpend)}
             className="flex items-center gap-1.5 text-accent text-xs font-medium hover:opacity-80"
@@ -679,6 +718,17 @@ export default function AdsTab() {
             <table className="w-full text-xs">
               <thead>
                 <tr className="text-text-muted border-b border-white/5">
+                  <th className="py-2 pr-2 w-6">
+                    <input
+                      type="checkbox"
+                      className="accent-accent"
+                      checked={data.spend.length > 0 && selectedIds.size === data.spend.length}
+                      onChange={(e) => {
+                        if (e.target.checked) setSelectedIds(new Set(data.spend.map((s) => s.id)));
+                        else setSelectedIds(new Set());
+                      }}
+                    />
+                  </th>
                   <th className="text-left py-2 font-medium">Tanggal</th>
                   <th className="text-left py-2 font-medium">Platform</th>
                   <th className="text-left py-2 font-medium">Campaign</th>
@@ -693,8 +743,24 @@ export default function AdsTab() {
                 {data.spend.map((entry) => {
                   const config = PLATFORM_CONFIG[entry.platform] || PLATFORM_CONFIG.other;
                   const ctr = entry.impressions > 0 ? ((entry.clicks / entry.impressions) * 100).toFixed(2) : "—";
+                  const isSelected = selectedIds.has(entry.id);
                   return (
-                    <tr key={entry.id} className="hover:bg-white/[0.02]">
+                    <tr key={entry.id} className={`hover:bg-white/[0.02] ${isSelected ? "bg-accent/5" : ""}`}>
+                      <td className="py-2 pr-2">
+                        <input
+                          type="checkbox"
+                          className="accent-accent"
+                          checked={isSelected}
+                          onChange={(e) => {
+                            setSelectedIds((prev) => {
+                              const next = new Set(prev);
+                              if (e.target.checked) next.add(entry.id);
+                              else next.delete(entry.id);
+                              return next;
+                            });
+                          }}
+                        />
+                      </td>
                       <td className="py-2 text-text">{entry.date}</td>
                       <td className="py-2">
                         <span className={`flex items-center gap-1.5 ${config.color}`}>
