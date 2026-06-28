@@ -1,106 +1,61 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
-import crypto from "crypto";
-import { sendPaymentConfirmedWA, notifyWorkerConfirmedOrder, notifyAdminPaymentConfirmed, sendPaymentConfirmedEmail, sendWhatsAppMessage, sendTelegramMessage } from "@/lib/notifications";
+import {
+  sendPaymentConfirmedWA,
+  notifyWorkerConfirmedOrder,
+  notifyAdminPaymentConfirmed,
+  sendPaymentConfirmedEmail,
+  sendWhatsAppMessage,
+  sendTelegramMessage,
+} from "@/lib/notifications";
 import { sendMetaCAPI } from "@/lib/meta-capi";
 
-// Get iPaymu settings from DB or env
-async function getIpaymuSettings(): Promise<{ apiKey: string; va: string; isProduction: boolean }> {
-  try {
-    const supabase = await createAdminClient();
-    const { data } = await supabase
-      .from("settings")
-      .select("value")
-      .eq("key", "integrations")
-      .single();
-    
-    return {
-      apiKey: data?.value?.ipaymuApiKey || process.env.IPAYMU_API_KEY || "",
-      va: data?.value?.ipaymuVa || process.env.IPAYMU_VA || "",
-      isProduction: data?.value?.ipaymuIsProduction ?? (process.env.IPAYMU_IS_PRODUCTION === "true"),
-    };
-  } catch {
-    return {
-      apiKey: process.env.IPAYMU_API_KEY || "",
-      va: process.env.IPAYMU_VA || "",
-      isProduction: process.env.IPAYMU_IS_PRODUCTION === "true",
-    };
-  }
-}
+// ============================================
+// DompetX Webhook Handler
+// Payload format (per official docs):
+// {
+//   "data": {
+//     "id": "c2489739-...",
+//     "amount": 500,
+//     "status": "paid",
+//     "currency": "IDR",
+//     "reference": "order-100-2"
+//   },
+//   "eventType": "deposit",
+//   "paymentId": "c2489739-..."
+// }
+//
+// No signature verification required by DompetX.
+// Order matching is done via data.reference field.
+// Must respond with HTTP 200 to acknowledge receipt.
+// ============================================
 
-// Verify iPaymu callback by checking transaction status via API
-async function verifyIpaymuTransaction(trxId: string | number, settings: { apiKey: string; va: string; isProduction: boolean }): Promise<Record<string, unknown> | null> {
-  const url = settings.isProduction
-    ? "https://my.ipaymu.com/api/v2/transaction"
-    : "https://sandbox.ipaymu.com/api/v2/transaction";
-
-  const body = { transactionId: String(trxId) };
-  const bodyHash = crypto.createHash("sha256").update(JSON.stringify(body)).digest("hex");
-  const stringToSign = `POST:${settings.va}:${bodyHash}:${settings.apiKey}`;
-  const signature = crypto.createHmac("sha256", settings.apiKey).update(stringToSign).digest("hex");
-
-  const now = new Date();
-  const timestamp = now.getFullYear().toString() +
-    String(now.getMonth() + 1).padStart(2, "0") +
-    String(now.getDate()).padStart(2, "0") +
-    String(now.getHours()).padStart(2, "0") +
-    String(now.getMinutes()).padStart(2, "0") +
-    String(now.getSeconds()).padStart(2, "0");
-
-  const res = await fetch(url, {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      va: settings.va,
-      signature,
-      timestamp,
-    },
-    body: JSON.stringify(body),
-  });
-
-  const data = await res.json();
-  if (res.ok && data.Status === 200 && data.Data) {
-    return data.Data as Record<string, unknown>;
-  }
-  return null;
-}
-
-// GET handler for URL verification
+// GET handler for URL verification (DompetX may ping this)
 export async function GET() {
-  return NextResponse.json({ status: "ok", endpoint: "payment-notification" });
+  return NextResponse.json({ status: "ok", endpoint: "dompetx-payment-notification" });
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const {
-      trx_id,
-      sid,
-      reference_id,
-      status_code,
-      status,
-      via,
-    } = body;
+    const rawBody = await request.text();
+    const body = JSON.parse(rawBody);
 
-    // iPaymu sends: trx_id, sid, reference_id, status_code, status, via, channel, amount
-    if (!trx_id && !reference_id) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-    }
+    // DompetX official payload structure
+    const dataObj = body.data || {};
+    const refId: string = dataObj.reference || body.reference || "";
+    const trxId: string = dataObj.id || body.paymentId || body.id || "";
+    const dompetxStatus: string = String(dataObj.status || body.status || "").toLowerCase();
+    const amount: number = Number(dataObj.amount || body.amount || 0);
+    const eventType: string = body.eventType || "";
 
-    const settings = await getIpaymuSettings();
-
-    // Verify transaction with iPaymu API (server-side check)
-    const verifiedTrx = await verifyIpaymuTransaction(trx_id, settings);
-    if (!verifiedTrx) {
-      console.error("iPaymu transaction verification failed for trx_id:", trx_id);
-      return NextResponse.json({ error: "Transaction verification failed" }, { status: 403 });
+    if (!refId) {
+      console.error("DompetX webhook: missing reference in payload");
+      return NextResponse.json({ error: "Missing reference" }, { status: 400 });
     }
 
     const supabase = await createAdminClient();
 
-    // Find order by reference ID (legacy column name: midtrans_order_id, now used for iPaymu ref)
-    const refId = reference_id || String(verifiedTrx.ReferenceId || "");
+    // Find order by reference ID (stored in midtrans_order_id column)
     const { data: order, error } = await supabase
       .from("orders")
       .select("*")
@@ -108,51 +63,46 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error || !order) {
-      console.error("Order not found for iPaymu ref:", refId);
-      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+      console.error("Order not found for DompetX ref:", refId);
+      // Still return 200 to stop retries for unknown refs
+      return NextResponse.json({ success: true, message: "Order not found" });
     }
 
-    // Determine payment status from iPaymu status_code
-    // iPaymu status_code: 1 = success, 0 = pending, -1 = expired/failed
-    const ipaymuStatusCode = Number(verifiedTrx.StatusCode ?? status_code);
-    const ipaymuStatus = String(verifiedTrx.Status ?? status ?? "").toLowerCase();
-
-    // Idempotency: skip if order already paid (prevent stale webhooks from overwriting)
+    // Idempotency: skip if order already paid (prevent stale webhooks)
     if (order.payment_status === "paid") {
       return NextResponse.json({ success: true, message: "Already processed" });
     }
 
+    // Determine payment status
+    // DompetX status values: "paid" (confirmed), others (pending/failed/expired)
     let paymentStatus = "pending";
     let orderStatus = order.status;
 
-    if (ipaymuStatusCode === 1 || ipaymuStatus === "berhasil" || ipaymuStatus === "success") {
-      // Verify payment amount — never trust unverified body.amount
-      const paidAmount = Number(verifiedTrx.Amount ?? 0);
-      if (paidAmount === 0) {
-        console.error(`Amount missing from verified transaction for ${refId}`);
+    if (dompetxStatus === "paid" || dompetxStatus === "success" || dompetxStatus === "settlement" || dompetxStatus === "completed") {
+      // Verify payment amount
+      if (amount === 0) {
+        console.error(`Amount missing from DompetX webhook for ${refId}`);
         paymentStatus = "pending";
-      } else if (paidAmount < order.total_price) {
-        console.error(`Amount mismatch for ${refId}: paid ${paidAmount}, expected ${order.total_price}`);
+      } else if (amount < order.total_price) {
+        console.error(`Amount mismatch for ${refId}: paid ${amount}, expected ${order.total_price}`);
         paymentStatus = "underpaid";
       } else {
         paymentStatus = "paid";
         orderStatus = "confirmed";
       }
-    } else if (ipaymuStatusCode === 0 || ipaymuStatus === "pending") {
+    } else if (dompetxStatus === "pending" || dompetxStatus === "waiting") {
       paymentStatus = "pending";
     } else {
-      // -1 or other = expired/failed/canceled
+      // failed | expired | canceled
       paymentStatus = "failed";
     }
-
-    const paymentType = String(via || verifiedTrx.Channel || verifiedTrx.Via || "ipaymu");
 
     // Update order
     await supabase
       .from("orders")
       .update({
         payment_status: paymentStatus,
-        payment_type: paymentType,
+        payment_type: `dompetx_${eventType || "deposit"}`,
         status: orderStatus,
         paid_at: paymentStatus === "paid" ? new Date().toISOString() : null,
         confirmed_at: paymentStatus === "paid" ? new Date().toISOString() : undefined,
@@ -162,19 +112,17 @@ export async function POST(request: NextRequest) {
 
     // Notify customer and admin for underpaid payments
     if (paymentStatus === "underpaid") {
-      const paidAmount = Number(verifiedTrx.Amount ?? 0);
-      const missing = order.total_price - paidAmount;
+      const missing = order.total_price - amount;
       const manualUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.com"}/payment/manual/?order_id=${order.order_id}`;
-      const underpaidMsg = `Halo kak!\n\nPembayaran untuk order *${order.order_id}* kurang.\n\n💰 *Jumlah dibayar:* Rp ${paidAmount.toLocaleString("id-ID")}\n💰 *Yang seharusnya:* Rp ${order.total_price.toLocaleString("id-ID")}\n⚠️ *Kurang:* Rp ${missing.toLocaleString("id-ID")}\n\nMohon lunasi kekurangannya dan upload bukti transfer baru di:\n${manualUrl}\n\nAtau hubungi CS kami untuk bantuan.\n\n_ETNYX - Push Rank, Tanpa Main_`;
+      const underpaidMsg = `Halo kak!\n\nPembayaran untuk order *${order.order_id}* kurang.\n\n💰 *Jumlah dibayar:* Rp ${amount.toLocaleString("id-ID")}\n💰 *Yang seharusnya:* Rp ${order.total_price.toLocaleString("id-ID")}\n⚠️ *Kurang:* Rp ${missing.toLocaleString("id-ID")}\n\nMohon lunasi kekurangannya dan upload bukti transfer baru di:\n${manualUrl}\n\nAtau hubungi CS kami untuk bantuan.\n\n_ETNYX - Push Rank, Tanpa Main_`;
       const waNumber = order.whatsapp?.startsWith("+") ? order.whatsapp : `+62${order.whatsapp}`;
       Promise.allSettled([
         sendWhatsAppMessage(waNumber, underpaidMsg, manualUrl),
-        // Notify admin via Telegram
         (async () => {
           const { data: intSettings } = await supabase.from("settings").select("value").eq("key", "integrations").single();
           const chatId = intSettings?.value?.telegramAdminGroupId;
           if (chatId) {
-            const adminMsg = `⚠️ <b>PEMBAYARAN KURANG</b>\n\n<b>Order ID:</b> ${order.order_id}\n<b>Username:</b> ${order.username}\n<b>Dibayar:</b> Rp ${paidAmount.toLocaleString("id-ID")}\n<b>Seharusnya:</b> Rp ${order.total_price.toLocaleString("id-ID")}\n<b>Kurang:</b> Rp ${missing.toLocaleString("id-ID")}`;
+            const adminMsg = `⚠️ <b>PEMBAYARAN KURANG</b>\n\n<b>Order ID:</b> ${order.order_id}\n<b>Username:</b> ${order.username}\n<b>Dibayar:</b> Rp ${amount.toLocaleString("id-ID")}\n<b>Seharusnya:</b> Rp ${order.total_price.toLocaleString("id-ID")}\n<b>Kurang:</b> Rp ${missing.toLocaleString("id-ID")}`;
             await sendTelegramMessage(chatId, adminMsg);
           }
         })(),
@@ -209,7 +157,7 @@ export async function POST(request: NextRequest) {
         notes: order.notes,
         db_id: order.id,
       };
-      
+
       // Send payment confirmed notifications (WA + Telegram worker + admin + email)
       Promise.allSettled([
         sendPaymentConfirmedWA(orderData),
@@ -242,12 +190,16 @@ export async function POST(request: NextRequest) {
             pixelSettings.value
           ).catch(console.error);
         }
-      } catch { /* pixel settings not configured */ }
+      } catch {
+        /* pixel settings not configured */
+      }
     }
 
+    // Always return 200 to acknowledge receipt (prevents retries)
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Payment notification error:", error);
-    return NextResponse.json({ error: "Notification processing failed" }, { status: 500 });
+    // Return 200 even on error to prevent infinite retries from DompetX
+    return NextResponse.json({ success: true, error: "processed" });
   }
 }

@@ -1,6 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyAdmin } from "@/lib/admin-auth";
 import crypto from "crypto";
+import { verifyAdmin } from "@/lib/admin-auth";
+
+// ============================================
+// DompetX connection test
+// Validates API key by calling GET /saldo with DompetX auth headers
+// ============================================
+
+function buildAuthHeaders(apiKey: string, bodyString: string = "") {
+  const timestamp = Math.floor(Date.now() / 1000).toString();
+  const signature = crypto
+    .createHmac("sha256", apiKey)
+    .update(timestamp + bodyString)
+    .digest("hex");
+
+  return {
+    Accept: "application/json",
+    "X-DOMPAY-API-Key": apiKey,
+    "X-DOMPAY-Signature": signature,
+    "X-DOMPAY-Timestamp": timestamp,
+  };
+}
 
 export async function POST(req: NextRequest) {
   const admin = await verifyAdmin();
@@ -8,51 +28,42 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
   try {
-    const { apiKey, va, isProduction: isProd } = await req.json();
+    const { apiKey, baseUrl } = await req.json();
 
-    if (!apiKey || !va) {
-      return NextResponse.json({ success: false, error: "API Key dan VA belum diisi" }, { status: 400 });
+    if (!apiKey) {
+      return NextResponse.json({ success: false, error: "API Key belum diisi" }, { status: 400 });
     }
 
-    const isProduction = isProd ?? false;
-    const url = isProduction
-      ? "https://my.ipaymu.com/api/v2/balance"
-      : "https://sandbox.ipaymu.com/api/v2/balance";
+    const apiBaseUrl = baseUrl || "https://api.dompetx.com/v1";
+    const authHeaders = buildAuthHeaders(apiKey);
 
-    const body = { account: va };
-    const bodyHash = crypto.createHash("sha256").update(JSON.stringify(body)).digest("hex");
-    const stringToSign = `POST:${va}:${bodyHash}:${apiKey}`;
-    const signature = crypto.createHmac("sha256", apiKey).update(stringToSign).digest("hex");
+    // Test connection by fetching balance via GET /saldo
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-    const now = new Date();
-    const timestamp = now.getFullYear().toString() +
-      String(now.getMonth() + 1).padStart(2, "0") +
-      String(now.getDate()).padStart(2, "0") +
-      String(now.getHours()).padStart(2, "0") +
-      String(now.getMinutes()).padStart(2, "0") +
-      String(now.getSeconds()).padStart(2, "0");
-
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        va,
-        signature,
-        timestamp,
-      },
-      body: JSON.stringify(body),
-    });
-
-    const data = await res.json();
-
-    if (res.ok && data.Status === 200) {
-      return NextResponse.json({ success: true });
+    let res: Response;
+    try {
+      res = await fetch(`${apiBaseUrl}/saldo`, {
+        method: "GET",
+        headers: authHeaders,
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeoutId);
     }
 
+    if (res.ok) {
+      const data = await res.json().catch(() => ({}));
+      return NextResponse.json({
+        success: true,
+        balance: data.balance ?? data.data?.balance ?? null,
+      });
+    }
+
+    const errorData = await res.json().catch(() => ({}));
     return NextResponse.json({
       success: false,
-      error: data.Message || `HTTP ${res.status}`,
+      error: errorData.message || `HTTP ${res.status}`,
     });
   } catch (e) {
     return NextResponse.json({

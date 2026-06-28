@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase-server";
 import crypto from "crypto";
+import { createAdminClient } from "@/lib/supabase-server";
 
-// Get iPaymu settings from database or env
-async function getIpaymuSettings() {
+// ============================================
+// DompetX Basic Merchant - Create Payment Link
+// Endpoint: POST /payments/checkout
+// Returns payment_link URL for customer redirect
+// ============================================
+
+async function getDompetxSettings() {
   try {
     const supabase = await createAdminClient();
     const { data } = await supabase
@@ -11,36 +16,35 @@ async function getIpaymuSettings() {
       .select("value")
       .eq("key", "integrations")
       .single();
-    
+
     const settings = data?.value || {};
     return {
-      apiKey: settings.ipaymuApiKey || process.env.IPAYMU_API_KEY || "",
-      va: settings.ipaymuVa || process.env.IPAYMU_VA || "",
-      isProduction: settings.ipaymuIsProduction ?? (process.env.IPAYMU_IS_PRODUCTION === "true"),
+      apiKey: settings.dompetxApiKey || process.env.DOMPETX_API_KEY || "",
+      baseUrl: settings.dompetxBaseUrl || process.env.DOMPETX_BASE_URL || "https://api.dompetx.com/v1",
     };
   } catch {
     return {
-      apiKey: process.env.IPAYMU_API_KEY || "",
-      va: process.env.IPAYMU_VA || "",
-      isProduction: process.env.IPAYMU_IS_PRODUCTION === "true",
+      apiKey: process.env.DOMPETX_API_KEY || "",
+      baseUrl: process.env.DOMPETX_BASE_URL || "https://api.dompetx.com/v1",
     };
   }
 }
 
-function generateSignature(body: object, va: string, apiKey: string): string {
-  const bodyHash = crypto.createHash("sha256").update(JSON.stringify(body)).digest("hex");
-  const stringToSign = `POST:${va}:${bodyHash}:${apiKey}`;
-  return crypto.createHmac("sha256", apiKey).update(stringToSign).digest("hex");
-}
+// Build DompetX auth headers (3 required headers)
+function buildAuthHeaders(apiKey: string, bodyString: string) {
+  const timestamp = Math.floor(Date.now() / 1000).toString();
+  const signature = crypto
+    .createHmac("sha256", apiKey)
+    .update(timestamp + bodyString)
+    .digest("hex");
 
-function getTimestamp(): string {
-  const now = new Date();
-  return now.getFullYear().toString() +
-    String(now.getMonth() + 1).padStart(2, "0") +
-    String(now.getDate()).padStart(2, "0") +
-    String(now.getHours()).padStart(2, "0") +
-    String(now.getMinutes()).padStart(2, "0") +
-    String(now.getSeconds()).padStart(2, "0");
+  return {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+    "X-DOMPAY-API-Key": apiKey,
+    "X-DOMPAY-Signature": signature,
+    "X-DOMPAY-Timestamp": timestamp,
+  };
 }
 
 export async function POST(request: NextRequest) {
@@ -68,68 +72,98 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Order already processed" }, { status: 400 });
     }
 
-    // Get iPaymu settings
-    const ipaymu = await getIpaymuSettings();
-    const apiUrl = ipaymu.isProduction
-      ? "https://my.ipaymu.com/api/v2/payment"
-      : "https://sandbox.ipaymu.com/api/v2/payment";
+    // Get DompetX settings
+    const dompetx = await getDompetxSettings();
+
+    if (!dompetx.apiKey) {
+      return NextResponse.json({ error: "DompetX belum dikonfigurasi" }, { status: 500 });
+    }
 
     // Use verified price from database
     const verifiedAmount = order.total_price;
     const refId = `ETN-${orderId}-${Date.now()}`;
 
-    const ipaymuBody = {
-      product: [itemName || "Joki ML Service"],
-      qty: ["1"],
-      price: [String(verifiedAmount)],
-      amount: String(verifiedAmount),
-      returnUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/payment/success?order_id=${orderId}`,
-      cancelUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/payment/success?order_id=${orderId}&transaction_status=cancel`,
-      notifyUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/api/payment/notification`,
-      referenceId: refId,
-      buyerName: customerName || "Customer",
-      buyerPhone: customerPhone || "",
-      buyerEmail: customerEmail || "customer@email.com",
+    // Build DompetX checkout payload (POST /payments/checkout format)
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.com";
+    const checkoutBody = {
+      amount: verifiedAmount,
+      currency: "IDR",
+      reference: refId,
+      redirectUrl: `${siteUrl}/payment/success?order_id=${orderId}`,
+      metadata: {
+        order_name: `${itemName || "Joki ML Service"} - ${orderId}`,
+        product_name: itemName || "Joki Mobile Legends",
+        customer_name: customerName || order.username || "",
+        customer_email: customerEmail || order.customer_email || "",
+        notes: "Order akan diproses otomatis setelah pembayaran berhasil.",
+        items: [
+          {
+            name: itemName || `Joki ${order.package_title || order.package || ""}`,
+            quantity: 1,
+            price: verifiedAmount,
+          },
+        ],
+      },
     };
 
-    const signature = generateSignature(ipaymuBody, ipaymu.va, ipaymu.apiKey);
+    const bodyString = JSON.stringify(checkoutBody);
+    const authHeaders = buildAuthHeaders(dompetx.apiKey, bodyString);
 
-    const response = await fetch(apiUrl, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        va: ipaymu.va,
-        signature,
-        timestamp: getTimestamp(),
-      },
-      body: JSON.stringify(ipaymuBody),
-    });
+    // 20 second timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 20000);
 
-    const data = await response.json();
-
-    if (!response.ok || data.Status !== 200 || !data.Data?.Url) {
-      console.error("iPaymu error:", data);
-      return NextResponse.json({ error: "Payment initialization failed" }, { status: 500 });
+    let dompetxRes: Response;
+    try {
+      dompetxRes = await fetch(`${dompetx.baseUrl}/payments/checkout`, {
+        method: "POST",
+        headers: authHeaders,
+        body: bodyString,
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeoutId);
     }
 
-    // Save payment token to order
+    const data = await dompetxRes.json();
+
+    if (!dompetxRes.ok) {
+      console.error("DompetX error:", dompetxRes.status, JSON.stringify(data));
+      const errMsg = (data && (data.message || data.error)) || "Payment initialization failed";
+      return NextResponse.json({ error: errMsg }, { status: 502 });
+    }
+
+    // Response: { id, status, payment_link, amount, currency, expiresAt, ... }
+    const transactionId = data.id || "";
+    const paymentLink = data.payment_link || "";
+
+    if (!paymentLink) {
+      console.error("DompetX: no payment_link in response:", JSON.stringify(data));
+      return NextResponse.json({ error: "No payment link returned" }, { status: 502 });
+    }
+
+    // Save payment info to order
     await supabase
       .from("orders")
       .update({
-        payment_token: data.Data.SessionId || null,
-        payment_url: data.Data.Url,
+        payment_token: transactionId || null,
+        payment_url: paymentLink,
         midtrans_order_id: refId,
+        payment_type: "dompetx_checkout",
       })
       .eq("id", order.id);
 
     return NextResponse.json({
       success: true,
-      redirect_url: data.Data.Url,
+      redirect_url: paymentLink,
+      transaction_id: transactionId,
     });
   } catch (error) {
     console.error("Payment error:", error);
-    return NextResponse.json({ error: "Payment initialization failed" }, { status: 500 });
+    const isTimeout = error instanceof Error && error.name === "AbortError";
+    return NextResponse.json({
+      error: isTimeout ? "Koneksi ke DompetX timeout" : "Payment initialization failed",
+    }, { status: 500 });
   }
 }
 
@@ -154,9 +188,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       status: order.status,
-      payment_status: order.payment_status 
+      payment_status: order.payment_status,
     });
   } catch (error) {
     console.error("Get payment status error:", error);

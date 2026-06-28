@@ -709,8 +709,8 @@ function OrderPageContent() {
   const [promoMessage, setPromoMessage] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
   const [promoLoading, setPromoLoading] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<"ipaymu" | "manual_transfer">("manual_transfer");
-  const [ipaymuEnabled, setIpaymuEnabled] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"dompetx" | "manual_transfer">("manual_transfer");
+  const [dompetxEnabled, setDompetxEnabled] = useState(false);
   const [tierDiscount, setTierDiscount] = useState(0);
   const [customerTier, setCustomerTier] = useState<string | null>(null);
   const [selectedPackage, setSelectedPackage] = useState<ProductPackage | null>(
@@ -881,7 +881,7 @@ function OrderPageContent() {
   useEffect(() => {
     fetch("/api/payment-methods")
       .then((res) => res.json())
-      .then((data) => { if (data.ipaymuEnabled) setIpaymuEnabled(true); })
+      .then((data) => { if (data.dompetxEnabled) setDompetxEnabled(true); })
       .catch(() => {/* keep manual only */});
   }, []);
 
@@ -1298,7 +1298,7 @@ function OrderPageContent() {
         paymentMethod: data.paymentMethod,
       });
 
-      // Auto-redirect to iPaymu payment page
+      // Auto-redirect to DompetX payment page
       if (data.paymentUrl && data.paymentMethod !== "manual_transfer") {
         window.location.href = data.paymentUrl;
         return;
@@ -2723,7 +2723,7 @@ function OrderPageContent() {
                 <div className="flex items-start gap-2 bg-accent/5 border border-accent/20 rounded-xl px-4 py-3">
                   <CreditCard className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
                   <p className="text-xs text-text-muted">
-                    Pembayaran dilakukan setelah konfirmasi order. Kami mendukung QRIS, Bank Transfer (BCA, BNI, Mandiri), GoPay, ShopeePay, dan lainnya melalui iPaymu.
+                    Pembayaran dilakukan setelah konfirmasi order. Kami mendukung QRIS, Virtual Account, dan Bank Transfer melalui DompetX.
                   </p>
                 </div>
               </div>
@@ -3009,7 +3009,7 @@ function OrderPageContent() {
                   <p className="text-text-muted text-xs mb-3 uppercase tracking-wider">
                     Metode Pembayaran
                   </p>
-                  <div className={`grid grid-cols-1 ${ipaymuEnabled ? "sm:grid-cols-2" : ""} gap-3`}>
+                  <div className={`grid grid-cols-1 ${dompetxEnabled ? "sm:grid-cols-2" : ""} gap-3`}>
                     <button
                       type="button"
                       onClick={() => setPaymentMethod("manual_transfer")}
@@ -3030,25 +3030,25 @@ function OrderPageContent() {
                         Bank (BCA, BRI, BNI, Mandiri, Jago), E-Wallet, QRIS
                       </p>
                     </button>
-                    {ipaymuEnabled && (
+                    {dompetxEnabled && (
                     <button
                       type="button"
-                      onClick={() => setPaymentMethod("ipaymu")}
+                      onClick={() => setPaymentMethod("dompetx")}
                       className={`relative p-4 rounded-xl border-2 text-left transition-all ${
-                        paymentMethod === "ipaymu"
+                        paymentMethod === "dompetx"
                           ? "border-accent bg-accent/10"
                           : "border-white/10 hover:border-white/20"
                       }`}
                     >
-                      {paymentMethod === "ipaymu" && (
+                      {paymentMethod === "dompetx" && (
                         <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-accent flex items-center justify-center">
                           <Check className="w-3 h-3 text-white" />
                         </div>
                       )}
                       <Zap className="w-5 h-5 text-green-400 mb-2" />
-                      <p className="text-text font-semibold text-sm">Otomatis (iPaymu)</p>
+                      <p className="text-text font-semibold text-sm">Otomatis (DompetX)</p>
                       <p className="text-text-muted text-xs mt-0.5">
-                        QRIS, VA, GoPay, ShopeePay, Kartu Kredit
+                        QRIS, Virtual Account, Bank Transfer
                       </p>
                     </button>
                     )}

@@ -7,32 +7,9 @@ import crypto from "crypto";
 // Re-export for backward compatibility
 export { decryptField } from "@/lib/encryption";
 
-const IPAYMU_API_KEY = process.env.IPAYMU_API_KEY || "";
-const IPAYMU_VA = process.env.IPAYMU_VA || "";
-const IPAYMU_IS_PRODUCTION = process.env.IPAYMU_IS_PRODUCTION === "true";
+const DOMPETX_API_KEY = process.env.DOMPETX_API_KEY || "";
+const DOMPETX_BASE_URL = process.env.DOMPETX_BASE_URL || "https://api.dompetx.com/v1";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://etnyx.com");
-
-function getIpaymuUrl(isProduction: boolean) {
-  return isProduction
-    ? "https://my.ipaymu.com/api/v2/payment"
-    : "https://sandbox.ipaymu.com/api/v2/payment";
-}
-
-function generateIpaymuSignature(body: object, va: string, apiKey: string): string {
-  const bodyHash = crypto.createHash("sha256").update(JSON.stringify(body)).digest("hex");
-  const stringToSign = `POST:${va}:${bodyHash}:${apiKey}`;
-  return crypto.createHmac("sha256", apiKey).update(stringToSign).digest("hex");
-}
-
-function getIpaymuTimestamp(): string {
-  const now = new Date();
-  return now.getFullYear().toString() +
-    String(now.getMonth() + 1).padStart(2, "0") +
-    String(now.getDate()).padStart(2, "0") +
-    String(now.getHours()).padStart(2, "0") +
-    String(now.getMinutes()).padStart(2, "0") +
-    String(now.getSeconds()).padStart(2, "0");
-}
 
 // Simple in-memory rate limiter
 const orderRateLimit = new Map<string, number[]>();
@@ -176,7 +153,6 @@ export async function POST(request: NextRequest) {
     // Normalize rank aliases to canonical form
     const normalizeRank = (r: string) => {
       const s = r.toLowerCase();
-      // Per-star short IDs → full rank names
       if (s === "grading") return "mythicgrading";
       if (s === "honor") return "mythichonor";
       if (s === "glory") return "mythicglory";
@@ -207,7 +183,6 @@ export async function POST(request: NextRequest) {
 
     // Validate WhatsApp
     const rawWhatsapp = whatsapp.replace(/\D/g, "");
-    // Strip leading 0 so "+62" prefix works correctly (081... → 81...)
     const cleanWhatsapp = rawWhatsapp.startsWith("0") ? rawWhatsapp.slice(1) : rawWhatsapp.startsWith("62") ? rawWhatsapp.slice(2) : rawWhatsapp;
     if (!isValidPhone(rawWhatsapp)) {
       return NextResponse.json(
@@ -257,7 +232,6 @@ export async function POST(request: NextRequest) {
     const supabase = await createAdminClient();
 
     // ===== SERVER-SIDE PRICE VERIFICATION =====
-    // Load CMS pricing from database (takes priority over hardcoded)
     let cmsPricing: { perstar?: Record<string, number>; gendong?: Record<string, number>; catalog?: Record<string, number> } | undefined;
     let seasonMultiplier = 1;
     try {
@@ -297,7 +271,6 @@ export async function POST(request: NextRequest) {
       }
     } catch { /* fallback to hardcoded prices */ }
 
-    // Calculate raw item price from order params
     const serverRawPrice = calculateServerPrice(body, cmsPricing);
     if (serverRawPrice === null) {
       return NextResponse.json(
@@ -306,16 +279,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Apply season, express, premium multipliers (same as frontend)
     let serverBasePrice = serverRawPrice;
     if (seasonMultiplier !== 1) serverBasePrice *= seasonMultiplier;
     if (isExpress) serverBasePrice *= 1.2;
     if (isPremium) serverBasePrice *= 1.3;
     serverBasePrice = Math.round(serverBasePrice);
 
-    // Compare server base price with client totalPrice (before discounts are applied server-side)
-    // Client sends totalPrice = basePrice - promoDiscount - tierDiscount
-    // So totalPrice <= serverBasePrice. We allow tolerance for rounding.
     const tolerance = Math.max(serverBasePrice * 0.02, 500);
     if (totalPrice > serverBasePrice + tolerance) {
       console.warn(`Price manipulation: client=${totalPrice}, serverBase=${serverBasePrice}, order=${body.orderType}/${body.packageId || body.perStarRankId}`);
@@ -334,7 +303,6 @@ export async function POST(request: NextRequest) {
     if (body.promoCode) {
       const sanitizedPromoCode = String(body.promoCode).replace(/[^a-zA-Z0-9-]/g, "").toUpperCase();
 
-      // Try promo code first
       const { data: promoResult } = await supabase.rpc("validate_promo_code", {
         p_code: sanitizedPromoCode,
         p_order_amount: serverBasePrice,
@@ -345,7 +313,6 @@ export async function POST(request: NextRequest) {
         verifiedPromoCode = sanitizedPromoCode;
         promoId = promoResult[0].promo_id;
       } else {
-        // Try referral code
         const { data: referrer } = await supabase
           .from("customers")
           .select("id, referral_code")
@@ -353,7 +320,6 @@ export async function POST(request: NextRequest) {
           .single();
 
         if (referrer) {
-          // Self-referral check: compare by customer ID or email
           let isSelfReferral = false;
           if (sanitizedEmail) {
             const { data: selfCheck } = await supabase
@@ -365,7 +331,6 @@ export async function POST(request: NextRequest) {
           }
 
           if (!isSelfReferral) {
-            // Check duplicate: has this whatsapp already used this referral?
             const { data: existingReferral } = await supabase
               .from("referrals")
               .select("id")
@@ -374,7 +339,7 @@ export async function POST(request: NextRequest) {
               .limit(1);
 
             if (!existingReferral || existingReferral.length === 0) {
-              verifiedDiscount = Math.round(serverBasePrice * 0.1); // 10% referral discount
+              verifiedDiscount = Math.round(serverBasePrice * 0.1);
               verifiedPromoCode = sanitizedPromoCode;
               referrerId = referrer.id;
             }
@@ -383,8 +348,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Recalculate final price server-side (never trust client totalPrice with discount)
-    // Tier discount: look up customer tier by email or whatsapp
     let verifiedTierDiscount = 0;
     let verifiedTierName: string | null = null;
     if (sanitizedEmail || cleanWhatsapp) {
@@ -404,11 +367,9 @@ export async function POST(request: NextRequest) {
       } catch { /* not a member or not found */ }
     }
 
-    // Use server-calculated base price, not client totalPrice
     const verifiedBasePrice = serverBasePrice;
     const verifiedTotalPrice = Math.max(0, serverBasePrice - verifiedDiscount - verifiedTierDiscount);
 
-    // Minimum price floor — prevent zero-price exploits
     if (verifiedTotalPrice < 1000) {
       return NextResponse.json(
         { error: "Harga terlalu rendah setelah diskon" },
@@ -454,7 +415,7 @@ export async function POST(request: NextRequest) {
         gclid,
         ttclid,
         referrer_url: referrerUrl,
-        payment_method: body.paymentMethod === "manual_transfer" ? "manual_transfer" : "ipaymu",
+        payment_method: body.paymentMethod === "manual_transfer" ? "manual_transfer" : "dompetx",
       })
       .select("id, order_id, total_price")
       .single();
@@ -467,26 +428,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Atomic promo usage: increment only if used_count < max_uses
     if (promoId) {
       const { data: promoUsed, error: rpcErr } = await supabase.rpc("try_use_promo_code", { p_promo_id: promoId });
       if (rpcErr) {
         console.error("Failed to use promo code:", rpcErr);
       }
       if (!promoUsed) {
-        // Promo exhausted (race condition: another user used the last slot)
         const correctedPrice = Math.max(1000, verifiedBasePrice - verifiedTierDiscount);
         await supabase.from("orders").update({
           promo_code: null,
           promo_discount: 0,
           total_price: correctedPrice,
         }).eq("id", order.id);
-        // Update local variable for iPaymu payment
         Object.assign(order, { total_price: correctedPrice });
       }
     }
 
-    // Create referral record if referral was used
     if (referrerId) {
       const { error: refErr } = await supabase.from("referrals").insert({
         referrer_id: referrerId,
@@ -498,120 +455,124 @@ export async function POST(request: NextRequest) {
       if (refErr) console.error("Referral insert error:", refErr);
     }
 
-    // Create iPaymu payment (only for auto/ipaymu payment method)
+    // Create DompetX payment (only for auto/dompetx payment method)
     let paymentUrl: string | undefined;
     const isManualTransfer = body.paymentMethod === "manual_transfer";
 
     if (!isManualTransfer) {
-    // Get iPaymu keys: prefer database (admin dashboard) over env
-    let ipaymuApiKey = IPAYMU_API_KEY;
-    let ipaymuVa = IPAYMU_VA;
-    let ipaymuIsProduction = IPAYMU_IS_PRODUCTION;
-    try {
-      const { data: intSettings } = await supabase
-        .from("settings")
-        .select("value")
-        .eq("key", "integrations")
-        .single();
-      if (intSettings?.value?.ipaymuApiKey) {
-        ipaymuApiKey = intSettings.value.ipaymuApiKey;
-      }
-      if (intSettings?.value?.ipaymuVa) {
-        ipaymuVa = intSettings.value.ipaymuVa;
-      }
-      if (intSettings?.value?.ipaymuIsProduction !== undefined) {
-        ipaymuIsProduction = intSettings.value.ipaymuIsProduction;
-      }
-    } catch { /* fallback to env */ }
-
-    const ipaymuApiUrl = getIpaymuUrl(ipaymuIsProduction);
-
-    if (ipaymuApiKey && ipaymuVa) {
+      let dompetxApiKey = DOMPETX_API_KEY;
+      let dompetxBaseUrl = DOMPETX_BASE_URL;
       try {
-        const ipaymuRefId = `ETN-${orderId}-${Date.now()}`;
+        const { data: intSettings } = await supabase
+          .from("settings")
+          .select("value")
+          .eq("key", "integrations")
+          .single();
+        if (intSettings?.value?.dompetxApiKey) {
+          dompetxApiKey = intSettings.value.dompetxApiKey;
+        }
+        if (intSettings?.value?.dompetxBaseUrl) {
+          dompetxBaseUrl = intSettings.value.dompetxBaseUrl;
+        }
+      } catch { /* fallback to env */ }
 
-        const ipaymuBody = {
-          product: [`Joki ML: ${normCurrent} to ${normTarget}`],
-          qty: ["1"],
-          price: [String(verifiedTotalPrice)],
-          amount: String(verifiedTotalPrice),
-          returnUrl: `${SITE_URL}/payment/success?order_id=${orderId}`,
-          cancelUrl: `${SITE_URL}/payment/success?order_id=${orderId}&transaction_status=cancel`,
-          notifyUrl: `${SITE_URL}/api/payment/notification`,
-          referenceId: ipaymuRefId,
-          buyerName: sanitizedNickname,
-          buyerPhone: `+62${cleanWhatsapp}`,
-          buyerEmail: sanitizedEmail || "customer@etnyx.com",
-        };
-
-        const signature = generateIpaymuSignature(ipaymuBody, ipaymuVa, ipaymuApiKey);
-
-        // 15 second timeout to prevent hanging requests
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000);
-
-        let ipaymuRes: Response;
+      if (dompetxApiKey) {
         try {
-          ipaymuRes = await fetch(ipaymuApiUrl, {
-            method: "POST",
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-              va: ipaymuVa,
-              signature,
-              timestamp: getIpaymuTimestamp(),
+          const dompetxRefId = `ETN-${orderId}-${Date.now()}`;
+
+          // Build DompetX checkout payload (POST /payments/checkout format)
+          const dompetxCheckoutBody = {
+            amount: verifiedTotalPrice,
+            currency: "IDR",
+            reference: dompetxRefId,
+            redirectUrl: `${SITE_URL}/payment/success?order_id=${orderId}`,
+            metadata: {
+              order_name: `Joki ML ${orderId}`,
+              product_name: `Joki ML: ${normCurrent} to ${normTarget}`,
+              customer_name: sanitizedNickname,
+              customer_email: sanitizedEmail || "",
+              notes: "Order akan diproses otomatis setelah pembayaran berhasil.",
+              items: [
+                {
+                  name: `Joki ${sanitizedPackageTitle || packageName}`,
+                  quantity: 1,
+                  price: verifiedTotalPrice,
+                },
+              ],
             },
-            body: JSON.stringify(ipaymuBody),
-            signal: controller.signal,
-          });
-        } finally {
-          clearTimeout(timeoutId);
-        }
+          };
 
-        const ipaymuData = await ipaymuRes.json();
+          const dompetxBodyString = JSON.stringify(dompetxCheckoutBody);
 
-        if (ipaymuRes.ok && ipaymuData.Status === 200 && ipaymuData.Data?.Url) {
-          paymentUrl = ipaymuData.Data.Url;
+          // Build DompetX auth headers (3 required headers)
+          const dompetxTimestamp = Math.floor(Date.now() / 1000).toString();
+          const dompetxSignature = crypto
+            .createHmac("sha256", dompetxApiKey)
+            .update(dompetxTimestamp + dompetxBodyString)
+            .digest("hex");
 
-          // Save payment info to order
-          await supabase
-            .from("orders")
-            .update({
-              payment_token: ipaymuData.Data.SessionId || null,
-              payment_url: ipaymuData.Data.Url,
-              midtrans_order_id: ipaymuRefId,
-            })
-            .eq("id", order.id);
-        } else {
-          console.error("iPaymu error:", ipaymuRes.status, JSON.stringify(ipaymuData), "URL:", ipaymuApiUrl, "VA:", ipaymuVa?.slice(0,6) + "...");
-          // Delete orphaned order so customer can retry cleanly
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 20000);
+
+          let dompetxRes: Response;
+          try {
+            dompetxRes = await fetch(`${dompetxBaseUrl}/payments/checkout`, {
+              method: "POST",
+              headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                "X-DOMPAY-API-Key": dompetxApiKey,
+                "X-DOMPAY-Signature": dompetxSignature,
+                "X-DOMPAY-Timestamp": dompetxTimestamp,
+              },
+              body: dompetxBodyString,
+              signal: controller.signal,
+            });
+          } finally {
+            clearTimeout(timeoutId);
+          }
+
+          const dompetxData = await dompetxRes.json();
+
+          if (dompetxRes.ok && dompetxData.payment_link) {
+            const trxId = dompetxData.id || "";
+            paymentUrl = dompetxData.payment_link;
+
+            await supabase
+              .from("orders")
+              .update({
+                payment_token: trxId || null,
+                payment_url: paymentUrl,
+                midtrans_order_id: dompetxRefId,
+                payment_type: "dompetx_checkout",
+              })
+              .eq("id", order.id);
+          } else {
+            console.error("DompetX error:", dompetxRes.status, JSON.stringify(dompetxData));
+            await supabase.from("orders").delete().eq("id", order.id);
+            return NextResponse.json({ error: "Gagal memproses pembayaran DompetX. Silakan coba lagi atau pilih transfer manual." }, { status: 502 });
+          }
+        } catch (e) {
+          console.error("DompetX payment creation error:", e);
           await supabase.from("orders").delete().eq("id", order.id);
-          return NextResponse.json({ error: "Gagal memproses pembayaran iPaymu. Silakan coba lagi atau pilih transfer manual." }, { status: 502 });
+          const isTimeout = e instanceof Error && e.name === "AbortError";
+          return NextResponse.json({
+            error: isTimeout
+              ? "Koneksi ke DompetX timeout. Silakan coba lagi atau pilih transfer manual."
+              : "Gagal menghubungi DompetX. Silakan coba lagi atau pilih transfer manual.",
+          }, { status: 502 });
         }
-      } catch (e) {
-        console.error("iPaymu payment creation error:", e);
-        // Delete orphaned order so customer can retry cleanly
-        await supabase.from("orders").delete().eq("id", order.id);
-        const isTimeout = e instanceof Error && e.name === "AbortError";
-        return NextResponse.json({
-          error: isTimeout
-            ? "Koneksi ke iPaymu timeout. Silakan coba lagi atau pilih transfer manual."
-            : "Gagal menghubungi iPaymu. Silakan coba lagi atau pilih transfer manual.",
-        }, { status: 502 });
       }
     }
-    } // end if (!isManualTransfer)
 
-    // Log order creation
     await supabase.from("order_logs").insert({
       order_id: order.id,
       action: "created",
       new_value: "pending",
-      notes: `Order created via website. ${isManualTransfer ? "Manual transfer." : "Payment link generated via iPaymu."}`,
+      notes: `Order created via website. ${isManualTransfer ? "Manual transfer." : "Payment link generated via DompetX."}`,
       created_by: "system",
     });
 
-    // Send WA confirmation + Telegram admin notification for new order
     try {
       const { sendOrderConfirmationWA, notifyAdminNewOrder } = await import("@/lib/notifications");
       await Promise.allSettled([
@@ -659,7 +620,7 @@ export async function POST(request: NextRequest) {
         totalPrice: verifiedTotalPrice,
         discount: verifiedDiscount,
         paymentUrl,
-        paymentMethod: isManualTransfer ? "manual_transfer" : "ipaymu",
+        paymentMethod: isManualTransfer ? "manual_transfer" : "dompetx",
       },
       { status: 201 }
     );

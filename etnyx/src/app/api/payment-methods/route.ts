@@ -1,15 +1,20 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase-server";
 
+// ============================================
 // Public endpoint: returns which payment methods are available
+// DompetX Basic Merchant - customer picks method on DompetX checkout page
+// so we only expose the "is DompetX enabled" flag.
+// ============================================
+
 export async function GET() {
   const supabase = createServiceClient();
 
-  let ipaymuEnabled = false;
+  let dompetxEnabled = false;
 
-  // Check env vars first
-  if (process.env.IPAYMU_API_KEY && process.env.IPAYMU_VA) {
-    ipaymuEnabled = true;
+  // Check env var first
+  if (process.env.DOMPETX_API_KEY) {
+    dompetxEnabled = true;
   }
 
   // Check database integrations (admin dashboard config overrides)
@@ -22,19 +27,19 @@ export async function GET() {
 
     if (data?.value) {
       const integrations = data.value;
-      // If API key and VA are filled in dashboard, iPaymu is enabled
-      if (integrations.ipaymuApiKey && integrations.ipaymuVa) {
-        ipaymuEnabled = true;
+      // If API key is filled in dashboard, DompetX is enabled
+      if (integrations.dompetxApiKey) {
+        dompetxEnabled = true;
       }
-      // If dashboard explicitly has empty keys, disable even if env has keys
-      if (integrations.ipaymuApiKey === "" || integrations.ipaymuVa === "") {
-        ipaymuEnabled = false;
+      // If dashboard explicitly has empty key, disable even if env has key
+      if (integrations.dompetxApiKey === "") {
+        dompetxEnabled = false;
       }
     }
   } catch { /* no integrations setting yet */ }
 
   return NextResponse.json(
-    { ipaymuEnabled, manualTransferEnabled: true },
+    { dompetxEnabled, manualTransferEnabled: true },
     { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } }
   );
 }

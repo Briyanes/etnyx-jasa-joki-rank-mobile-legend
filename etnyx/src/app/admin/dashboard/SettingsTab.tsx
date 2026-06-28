@@ -67,7 +67,7 @@ interface TrackingPixels { metaPixelId: string; metaAccessToken: string; googleA
 interface SocialLinks { instagram: string; facebook: string; tiktok: string; youtube: string; whatsapp: string }
 interface SiteInfo { siteName: string; taglineId: string; taglineEn: string; supportEmail: string; companyName: string; address: string; phone: string }
 interface IntegrationSettings {
-  ipaymuApiKey: string; ipaymuVa: string; ipaymuIsProduction: boolean;
+  dompetxApiKey: string; dompetxBaseUrl: string;
   resendApiKey: string; resendFromEmail: string;
   metaWaPhoneNumberId: string; metaWaAccessToken: string; metaWaVerifyToken: string; metaWaEnabled: boolean;
   telegramBotToken: string; telegramAdminGroupId: string; telegramWorkerGroupId: string; telegramReviewGroupId: string; telegramReportGroupId: string; telegramAlertGroupId: string;
@@ -114,7 +114,7 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
   const [socialLinks, setSocialLinks] = useState<SocialLinks>({ instagram: "", facebook: "", tiktok: "", youtube: "", whatsapp: "" });
   const [siteInfo, setSiteInfo] = useState<SiteInfo>({ siteName: "", taglineId: "", taglineEn: "", supportEmail: "", companyName: "", address: "", phone: "" });
   const [integrations, setIntegrations] = useState<IntegrationSettings>({
-    ipaymuApiKey: "", ipaymuVa: "", ipaymuIsProduction: false,
+    dompetxApiKey: "", dompetxBaseUrl: "https://api.dompetx.com/v1",
     resendApiKey: "", resendFromEmail: "noreply@etnyx.com",
     metaWaPhoneNumberId: "", metaWaAccessToken: "", metaWaVerifyToken: "", metaWaEnabled: false,
     telegramBotToken: "", telegramAdminGroupId: "", telegramWorkerGroupId: "", telegramReviewGroupId: "", telegramReportGroupId: "", telegramAlertGroupId: "",
@@ -528,35 +528,17 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
             <CmsSaveButton settingKey="integrations" value={integrations} />
           </div>
 
-          {/* iPaymu */}
+          {/* DompetX */}
           <div className="bg-surface rounded-xl border border-white/5 p-6 space-y-5">
             <div>
-              <h3 className="text-text font-bold text-sm flex items-center gap-2"><CreditCard className="w-4 h-4 text-accent" /> iPaymu Payment Gateway</h3>
-              <p className="text-text-muted text-xs mt-0.5">Konfigurasi dan monitoring payment gateway</p>
-            </div>
-            <div className="bg-background rounded-lg p-4 border border-white/5">
-              <p className="text-text-muted text-xs font-semibold mb-2 uppercase tracking-wider">Environment</p>
-              <div className="flex gap-2">
-                <button onClick={() => setIntegrations({ ...integrations, ipaymuIsProduction: false })}
-                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${!integrations.ipaymuIsProduction ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30" : "bg-background border border-white/10 text-text-muted hover:text-text"}`}>
-                  Sandbox
-                </button>
-                <button onClick={() => setIntegrations({ ...integrations, ipaymuIsProduction: true })}
-                  className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${integrations.ipaymuIsProduction ? "bg-green-500/20 text-green-400 border border-green-500/30" : "bg-background border border-white/10 text-text-muted hover:text-text"}`}>
-                  Production
-                </button>
-              </div>
-              {integrations.ipaymuIsProduction && (
-                <p className="text-yellow-400 text-xs mt-2 flex items-center gap-1">
-                  <AlertTriangle className="w-3.5 h-3.5" /> Mode Production — transaksi menggunakan uang asli
-                </p>
-              )}
+              <h3 className="text-text font-bold text-sm flex items-center gap-2"><CreditCard className="w-4 h-4 text-accent" /> DompetX Payment Gateway</h3>
+              <p className="text-text-muted text-xs mt-0.5">Konfigurasi dan monitoring payment gateway (Basic Merchant)</p>
             </div>
             <div className="bg-background rounded-lg p-4 border border-white/5 space-y-3">
               <p className="text-text-muted text-xs font-semibold uppercase tracking-wider">API Credentials</p>
               {[
-                { label: "Virtual Account (VA)", value: integrations.ipaymuVa, key: "ipaymuVa", type: "text", placeholder: "1179000899" },
-                { label: "API Key", value: integrations.ipaymuApiKey, key: "ipaymuApiKey", type: "password", placeholder: "QbGcoO0Qds9sQFDmY0MWg1Tq.xtuh1" },
+                { label: "API Key", value: integrations.dompetxApiKey, key: "dompetxApiKey", type: "password", placeholder: "dompk_xxxxxxxxxxxx" },
+                { label: "Base URL", value: integrations.dompetxBaseUrl, key: "dompetxBaseUrl", type: "text", placeholder: "https://api.dompetx.com/v1" },
               ].map((f) => (
                 <div key={f.key}>
                   <label className="block text-sm text-text-muted mb-1.5">{f.label}</label>
@@ -566,8 +548,8 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
               ))}
             </div>
             <div className="bg-background rounded-lg p-4 border border-white/5 space-y-2">
-              <p className="text-text-muted text-xs font-semibold uppercase tracking-wider">Notification URL (Webhook)</p>
-              <p className="text-text-muted text-xs">Daftarkan URL ini di iPaymu Dashboard → Integrasi → Notify URL</p>
+              <p className="text-text-muted text-xs font-semibold uppercase tracking-wider">Webhook / Callback URL</p>
+              <p className="text-text-muted text-xs">Daftarkan URL ini di DompetX Dashboard → Settings → Webhook/Callback URL</p>
               <div className="flex gap-2">
                 <input type="text" readOnly value={`${typeof window !== "undefined" ? window.location.origin : ""}/api/payment/notification`}
                   className="flex-1 bg-surface border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm font-mono focus:outline-none" />
@@ -577,22 +559,22 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
                 </button>
               </div>
               <p className="text-yellow-400/80 text-xs mt-1">
-                <AlertTriangle className="w-3.5 h-3.5 inline shrink-0" /> <strong>Penting:</strong> Setelah deploy ke production, copy URL di atas dan paste ke iPaymu Dashboard agar status pembayaran otomatis terupdate.
+                <AlertTriangle className="w-3.5 h-3.5 inline shrink-0" /> <strong>Penting:</strong> Setelah deploy ke production, copy URL di atas dan paste ke DompetX Dashboard agar status pembayaran otomatis terupdate.
               </p>
             </div>
             <div className="flex items-center gap-3">
               <button onClick={async () => {
-                if (!integrations.ipaymuApiKey || !integrations.ipaymuVa) { toast("API Key dan VA belum diisi!"); return; }
+                if (!integrations.dompetxApiKey) { toast("API Key belum diisi!"); return; }
                 try {
-                  const res = await fetch("/api/payment/test-connection", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ apiKey: integrations.ipaymuApiKey, va: integrations.ipaymuVa, isProduction: integrations.ipaymuIsProduction }) });
+                  const res = await fetch("/api/payment/test-connection", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ apiKey: integrations.dompetxApiKey, baseUrl: integrations.dompetxBaseUrl }) });
                   const data = await res.json();
-                  toast(data.success ? "✅ Koneksi berhasil! iPaymu aktif dan siap menerima pembayaran." : `❌ Gagal: ${data.error}\n\nPastikan API Key dan VA benar dan environment sesuai.`);
+                  toast(data.success ? "✅ Koneksi berhasil! DompetX aktif dan siap menerima pembayaran." : `❌ Gagal: ${data.error}\n\nPastikan API Key benar.`);
                 } catch (e) { toast(`❌ Error koneksi: ${e instanceof Error ? e.message : "Network error"}`); }
               }} className="px-4 py-2.5 rounded-lg border border-white/10 text-text text-sm font-medium hover:bg-white/5 transition-colors flex items-center gap-2">
                 <Plug className="w-4 h-4" /> Test Connection
               </button>
               <p className="text-text-muted text-xs">
-                <BookOpen className="w-3 h-3 inline mr-1" /> Dapatkan credentials di <a href="https://my.ipaymu.com" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">my.ipaymu.com</a>
+                <BookOpen className="w-3 h-3 inline mr-1" /> Dapatkan credentials di <a href="https://dompetx.com" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">dompetx.com Dashboard</a>
               </p>
             </div>
           </div>
@@ -1004,7 +986,7 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
                 </div>
               ))}
             </div>
-            <p className="text-text-muted text-[10px] mt-3">API keys lainnya (iPaymu, WA, Telegram, Meta Ads) dikelola di tab <strong className="text-accent">Integrasi</strong>.</p>
+            <p className="text-text-muted text-[10px] mt-3">API keys lainnya (DompetX, WA, Telegram, Meta Ads) dikelola di tab <strong className="text-accent">Integrasi</strong>.</p>
           </div>
           <div className="bg-surface rounded-xl p-5 border border-white/5">
             <h3 className="text-sm font-semibold text-text mb-3 flex items-center gap-2"><Download className="w-4 h-4" /> Export Data (CSV)</h3>
