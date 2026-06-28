@@ -181,10 +181,15 @@ export async function POST(request: NextRequest) {
 
     // CONFIRMED DompetX checkout URL pattern (from production):
     // https://checkout.dompetx.com/checkoutV2?refId={ID}
+    // The {ID} can be: checkout UUID, payment ID, or the reference we sent.
     let constructedLink = "";
-    if (!paymentLink && transactionId) {
-      constructedLink = `https://checkout.dompetx.com/checkoutV2?refId=${transactionId}`;
-      console.warn("DompetX: constructed checkout URL from ID:", constructedLink);
+    if (!paymentLink) {
+      // Try checkout ID first, then fall back to our reference
+      const refForLink = transactionId || refId;
+      if (refForLink) {
+        constructedLink = `https://checkout.dompetx.com/checkoutV2?refId=${refForLink}`;
+        console.warn("DompetX: constructed checkout URL from", transactionId ? "ID" : "reference", ":", constructedLink);
+      }
     }
 
     const finalLink = paymentLink || constructedLink;

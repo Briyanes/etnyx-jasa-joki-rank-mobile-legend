@@ -655,12 +655,15 @@ export async function POST(request: NextRequest) {
               : dompetxData;
 
           // Try every known field name for checkout ID
+          // Includes payment_checkout_id (confirmed from DompetX email receipts)
           const trxId = String(
             checkoutData.id ||
             checkoutData.checkout_id ||
             checkoutData.checkoutId ||
             checkoutData.payment_id ||
             checkoutData.paymentId ||
+            checkoutData.payment_checkout_id ||
+            checkoutData.paymentCheckoutId ||
             checkoutData.transaction_id ||
             checkoutData.transactionId ||
             dompetxData.id ||
@@ -693,11 +696,17 @@ export async function POST(request: NextRequest) {
 
           // CONFIRMED DompetX checkout URL pattern (from production):
           // https://checkout.dompetx.com/checkoutV2?refId={ID}
-          // Use this as fallback if API doesn't return a direct link.
+          // The {ID} can be: checkout UUID, payment ID, or the reference we sent.
+          // From DompetX email receipts: both "Payment Checkout ID" (UUID)
+          // and "Reference" (ETN-ETX-...) work as refId.
           let constructedLink = "";
-          if (!extractedLink && trxId && dompetxRes.ok) {
-            constructedLink = `https://checkout.dompetx.com/checkoutV2?refId=${trxId}`;
-            console.warn("DompetX: constructed checkout URL from ID:", constructedLink, "Raw response:", dompetxRawText.slice(0, 500));
+          if (!extractedLink && dompetxRes.ok) {
+            // Try checkout ID first, then fall back to our reference
+            const refForLink = trxId || dompetxRefId;
+            if (refForLink) {
+              constructedLink = `https://checkout.dompetx.com/checkoutV2?refId=${refForLink}`;
+              console.warn("DompetX: constructed checkout URL from", trxId ? "ID" : "reference", ":", constructedLink, "Raw response:", dompetxRawText.slice(0, 500));
+            }
           }
 
           const finalLink = extractedLink || constructedLink;

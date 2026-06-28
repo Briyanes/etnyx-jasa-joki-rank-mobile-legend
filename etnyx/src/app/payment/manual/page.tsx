@@ -113,7 +113,33 @@ function ManualPaymentContent() {
   const [uploading, setUploading] = useState(false);
   const [uploaded, setUploaded] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
+  const [recovering, setRecovering] = useState(false);
+  const [recoveryMsg, setRecoveryMsg] = useState("");
   const trackedRef = useRef(false);
+
+  const handleRetryDompetX = async () => {
+    if (!orderId || recovering) return;
+    setRecovering(true);
+    setRecoveryMsg("");
+    try {
+      const res = await fetch("/api/payment/recover", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success && data.redirect_url) {
+        setRecoveryMsg(locale === "id" ? "Link pembayaran ditemukan! Mengalihkan..." : "Payment link found! Redirecting...");
+        setTimeout(() => { window.location.href = data.redirect_url; }, 800);
+        return;
+      }
+      setRecoveryMsg(data.error || (locale === "id" ? "Gagal mengambil link. Transfer manual di bawah." : "Failed to get link. Use manual transfer below."));
+    } catch {
+      setRecoveryMsg(locale === "id" ? "Gagal menghubungi server. Transfer manual di bawah." : "Failed to contact server. Use manual transfer below.");
+    } finally {
+      setRecovering(false);
+    }
+  };
 
   const t = locale === "id"
     ? {
@@ -392,6 +418,33 @@ function ManualPaymentContent() {
             <p className="text-text-muted text-[10px] uppercase tracking-wider mb-1">{t.totalPayment}</p>
             <p className="gradient-text text-3xl font-bold tracking-tight">{formatRupiah(order.total_price)}</p>
           </div>
+
+          {/* Retry DompetX Payment — for cases where auto-payment failed but checkout was created */}
+          {order.payment_method === "dompetx" && (
+            <div className="mt-3 pt-3 border-t border-white/5">
+              <p className="text-text-muted text-[11px] mb-2 leading-relaxed">
+                {locale === "id"
+                  ? "Pembayaran otomatis DompetX bermasalah? Coba ambil link pembayaran lagi:"
+                  : "DompetX auto-payment issue? Try retrieving the payment link again:"}
+              </p>
+              <button
+                onClick={handleRetryDompetX}
+                disabled={recovering}
+                className="w-full flex items-center justify-center gap-2 bg-accent/10 hover:bg-accent/20 text-accent font-semibold text-sm px-4 py-2.5 rounded-xl border border-accent/20 transition-colors disabled:opacity-50"
+              >
+                {recovering ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" /> {locale === "id" ? "Mengambil..." : "Retrieving..."}</>
+                ) : (
+                  <><CreditCard className="w-4 h-4" /> {locale === "id" ? "Coba Bayar dengan DompetX" : "Retry DompetX Payment"}</>
+                )}
+              </button>
+              {recoveryMsg && (
+                <p className={`text-[11px] mt-2 text-center ${recoveryMsg.includes("ditemukan") || recoveryMsg.includes("found") ? "text-green-400" : "text-text-muted"}`}>
+                  {recoveryMsg}
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Steps */}
