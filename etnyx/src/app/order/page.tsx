@@ -411,6 +411,25 @@ const BUNDLE_TIERS = [
   },
 ] as const;
 
+// Rush 10 Star promotional packages — clickable quick-select cards
+const RUSH_PACKAGES: {
+  id: string;
+  rankId: string;
+  rankLabel: string;
+  title: string;
+  price: number;
+  originalPrice: number;
+  bonusStars: number;
+  icon: string;
+}[] = [
+  { id: "rush-epic", rankId: "epic", rankLabel: "Epic", title: "Rush 10 Epic + Bonus 2", price: 68500, originalPrice: 70000, bonusStars: 2, icon: "/icons-tier/Epic.webp" },
+  { id: "rush-legend", rankId: "legend", rankLabel: "Legend", title: "Rush 10 Legend + Bonus 2", price: 78500, originalPrice: 80000, bonusStars: 2, icon: "/icons-tier/Legend.webp" },
+  { id: "rush-mythic", rankId: "mythic", rankLabel: "Mythic", title: "Rush 10 Mythic + Bonus 2", price: 188500, originalPrice: 190000, bonusStars: 2, icon: "/icons-tier/Mythic.webp" },
+  { id: "rush-honor", rankId: "mythichonor", rankLabel: "Mythic Honor", title: "Rush 10 Honor + Bonus 2", price: 238500, originalPrice: 240000, bonusStars: 2, icon: "/icons-tier/Mythical_Honor.webp" },
+  { id: "rush-glory", rankId: "mythicglory", rankLabel: "Mythic Glory", title: "Rush 10 Glory + Bonus 2", price: 268500, originalPrice: 270000, bonusStars: 2, icon: "/icons-tier/Mythical_Glory.webp" },
+  { id: "rush-immortal", rankId: "mythicimmortal", rankLabel: "Mythic Immortal", title: "Rush 10 Immortal + Bonus 2", price: 298500, originalPrice: 300000, bonusStars: 2, icon: "/icons-tier/Mythical_Immortal.webp" },
+];
+
 // Get division options based on rank (dynamic)
 function getDivisionOptions(rankId: string): { value: number; label: string }[] {
   const config = RANK_DIVISION_CONFIG[rankId];
@@ -2171,6 +2190,82 @@ function OrderPageContent() {
                       </div>
                     </div>
                   )}
+
+                  {/* Rush 10 Star Promotional Cards */}
+                  <div className="mt-4">
+                    <p className="text-text-muted text-xs font-semibold mb-3 uppercase tracking-wider flex items-center gap-1.5">
+                      <Zap className="w-3.5 h-3.5 text-yellow-400" />
+                      {locale === "id" ? "Rush 10 Star + Bonus" : "Rush 10 Star + Bonus"}
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {RUSH_PACKAGES.map((pkg) => {
+                        const isActive = form.currentRank === pkg.rankId && form.targetRank === pkg.rankId;
+                        return (
+                          <button
+                            key={pkg.id}
+                            onClick={() => {
+                              // Set current & target rank to same tier
+                              updateForm({ currentRank: pkg.rankId as RankTier, targetRank: pkg.rankId as RankTier });
+                              // Set divisions for ranks with divisions
+                              const cfg = RANK_DIVISION_CONFIG[pkg.rankId];
+                              if (cfg) {
+                                setCurrentStar(cfg.divisions); // lowest division
+                                setTargetStar(1); // highest division
+                                setCurrentDivisionStar(1);
+                              }
+                              // Set mythic stars for same-tier 10-star order
+                              const mythicCfg = MYTHIC_STAR_CONFIG[pkg.rankId];
+                              if (mythicCfg) {
+                                setCurrentMythicStars(mythicCfg.min);
+                                setTargetMythicStars(Math.min(mythicCfg.max, mythicCfg.min + 10));
+                              }
+                            }}
+                            className={`relative text-left rounded-xl border-2 transition-all duration-200 hover:scale-[1.02] overflow-hidden flex flex-col ${
+                              isActive
+                                ? "border-yellow-400 shadow-lg shadow-yellow-400/20"
+                                : "border-white/5 hover:border-white/15"
+                            }`}
+                          >
+                            <div className="p-4 bg-gradient-to-br from-slate-700/80 to-slate-800/80 flex-1">
+                              <p className="text-white text-xs font-semibold mb-2">
+                                {pkg.rankLabel}
+                              </p>
+                              <div className="flex items-center gap-3">
+                                <Image
+                                  src={pkg.icon}
+                                  alt={pkg.rankLabel}
+                                  width={36}
+                                  height={36}
+                                  className="w-9 h-9 object-contain flex-shrink-0 drop-shadow-lg"
+                                />
+                                <div>
+                                  <p className="text-yellow-400 font-bold text-base leading-tight">
+                                    {formatRupiah(pkg.price)}
+                                  </p>
+                                  <p className="text-red-400/70 text-[10px] line-through">
+                                    {formatRupiah(pkg.originalPrice)}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="px-3 py-2 bg-slate-800/60 flex items-center justify-between gap-1">
+                              <span className="bg-yellow-500/20 text-yellow-400 px-1.5 py-0.5 rounded text-[9px] font-bold flex items-center gap-0.5">
+                                <Star className="w-2 h-2 fill-current" /> +{pkg.bonusStars} BONUS
+                              </span>
+                              <span className="bg-teal-600/30 text-teal-300 px-1.5 py-0.5 rounded text-[9px] font-bold">
+                                10★
+                              </span>
+                            </div>
+                            {isActive && (
+                              <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-yellow-400 flex items-center justify-center">
+                                <Check className="w-3 h-3 text-black" />
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </>
               )}
 
