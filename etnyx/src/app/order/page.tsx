@@ -413,7 +413,9 @@ function getRankDivisionOptions(): { value: string; label: string; rankId: strin
 function calculateTotalStars(
   currentRank: string, currentDiv: number,
   targetRank: string, targetDiv: number,
-  divisionStar: number = 0
+  divisionStar: number = 0,
+  currentMythicStars: number = 0,
+  targetMythicStars: number = 0
 ): number {
   const ci = RANK_ORDER.indexOf(currentRank);
   const ti = RANK_ORDER.indexOf(targetRank);
@@ -426,14 +428,21 @@ function calculateTotalStars(
         return (currentDiv - targetDiv) * cfg.starsPerDiv - divisionStar;
       }
     }
+    // Same mythic tier: difference in stars
+    if (ci === ti && MYTHIC_STAR_CONFIG[currentRank] && targetMythicStars > currentMythicStars) {
+      return targetMythicStars - currentMythicStars;
+    }
     return 0;
   }
 
   let stars = 0;
-  // Stars remaining in current rank (from current division to I)
+  // Stars remaining in current rank (from current position to top of tier)
   if (RANKS_WITH_STARS.includes(currentRank)) {
     const cfg = RANK_DIVISION_CONFIG[currentRank];
     if (cfg) stars += currentDiv * cfg.starsPerDiv - divisionStar;
+  } else if (MYTHIC_STAR_CONFIG[currentRank]) {
+    const mCfg = MYTHIC_STAR_CONFIG[currentRank];
+    stars += mCfg.max - currentMythicStars;
   }
   // Full ranks in between
   for (let i = ci + 1; i < ti; i++) {
@@ -449,13 +458,15 @@ function calculateTotalStars(
       }
     }
   }
-  // Stars needed in target rank (from max division to target division)
+  // Stars needed in target rank
   if (RANKS_WITH_STARS.includes(targetRank)) {
     const cfg = RANK_DIVISION_CONFIG[targetRank];
     if (cfg) {
-      // Target division: e.g. if target is Legend V(5), need 0 extra. Legend I(1) need (divisions-1)*starsPerDiv
       stars += (cfg.divisions - targetDiv) * cfg.starsPerDiv;
     }
+  } else if (MYTHIC_STAR_CONFIG[targetRank]) {
+    const mCfg = MYTHIC_STAR_CONFIG[targetRank];
+    stars += targetMythicStars - mCfg.min;
   }
   return stars;
 }
@@ -468,9 +479,10 @@ function autoCalcPackagePrice(
   targetDiv: number,
   currentDivisionStar: number,
   perStarPrices: PerStarRank[],
-  mythicStars: number = 0
+  currentMythicStars: number = 0,
+  targetMythicStars: number = 0
 ): { price: number; totalStars: number; originalPrice: number; discountPercent: number } {
-  const totalStars = calculateTotalStars(currentRank, currentDiv, targetRank, targetDiv, RANKS_WITH_STARS.includes(currentRank) ? currentDivisionStar : 0);
+  const totalStars = calculateTotalStars(currentRank, currentDiv, targetRank, targetDiv, RANKS_WITH_STARS.includes(currentRank) ? currentDivisionStar : 0, currentMythicStars, targetMythicStars);
   if (totalStars <= 0) return { price: 0, totalStars: 0, originalPrice: 0, discountPercent: 0 };
 
   // Map rank to per-star price lookup key
@@ -495,8 +507,13 @@ function autoCalcPackagePrice(
     if (RANKS_WITH_STARS.includes(currentRank)) {
       const cfg = RANK_DIVISION_CONFIG[currentRank];
       starsInThisRank = cfg ? (cfg.starsPerDiv - currentDivisionStar) + (currentDiv - 1) * cfg.starsPerDiv : 0;
-    } else if (currentRank === targetRank) {
-      starsInThisRank = mythicStars - (MYTHIC_STAR_CONFIG[currentRank]?.min || 0);
+    } else if (MYTHIC_STAR_CONFIG[currentRank]) {
+      const mCfg = MYTHIC_STAR_CONFIG[currentRank];
+      if (currentRank === targetRank) {
+        starsInThisRank = targetMythicStars - currentMythicStars;
+      } else {
+        starsInThisRank = mCfg.max - currentMythicStars;
+      }
     } else {
       starsInThisRank = 0;
     }
@@ -529,9 +546,11 @@ function autoCalcPackagePrice(
     if (RANKS_WITH_STARS.includes(targetRank)) {
       const cfg = RANK_DIVISION_CONFIG[targetRank];
       starsInThisRank = cfg ? (cfg.divisions - targetDiv) * cfg.starsPerDiv : 0;
-    } else {
+    } else if (MYTHIC_STAR_CONFIG[targetRank]) {
       const mCfg = MYTHIC_STAR_CONFIG[targetRank];
-      starsInThisRank = mCfg ? mythicStars - mCfg.min : 0;
+      starsInThisRank = targetMythicStars - mCfg.min;
+    } else {
+      starsInThisRank = 0;
     }
     originalTotal += pricePerStar * Math.max(0, starsInThisRank);
   } else if (ci === ti && RANKS_WITH_STARS.includes(currentRank)) {
@@ -837,6 +856,7 @@ function OrderPageContent() {
   const [currentDivisionStar, setCurrentDivisionStar] = useState(1);
   // Mythic+ star count for current rank
   const [currentMythicStars, setCurrentMythicStars] = useState(0);
+  const [targetMythicStars, setTargetMythicStars] = useState(0);
 
   // Account verification (Cek Akun)
   const [accountCheckLoading, setAccountCheckLoading] = useState(false);
@@ -1052,7 +1072,7 @@ function OrderPageContent() {
 
   // Auto-calculated package price for paket mode (real-time)
   const autoCalcResult = orderMode === "paket"
-    ? autoCalcPackagePrice(form.currentRank, currentStar, form.targetRank, targetStar, currentDivisionStar, perStarRanks, currentMythicStars)
+    ? autoCalcPackagePrice(form.currentRank, currentStar, form.targetRank, targetStar, currentDivisionStar, perStarRanks, currentMythicStars, targetMythicStars)
     : { price: 0, totalStars: 0, originalPrice: 0, discountPercent: 0 };
 
   // Auto-set selectedPackage when rank changes in paket mode (no manual selection needed)
@@ -1060,8 +1080,12 @@ function OrderPageContent() {
     if (orderMode === "paket" && autoCalcResult.price > 0) {
       const currentLabel = RANK_LIST.find(r => r.id === form.currentRank)?.label || form.currentRank;
       const targetLabel = RANK_LIST.find(r => r.id === form.targetRank)?.label || form.targetRank;
-      const currentDivLabel = RANKS_WITH_STARS.includes(form.currentRank) ? ` ${getDivisionOptions(form.currentRank).find(s => s.value === currentStar)?.label || ""}` : "";
-      const targetDivLabel = RANKS_WITH_STARS.includes(form.targetRank) ? ` ${getDivisionOptions(form.targetRank).find(s => s.value === targetStar)?.label || ""}` : "";
+      const currentDivLabel = RANKS_WITH_STARS.includes(form.currentRank)
+        ? ` ${getDivisionOptions(form.currentRank).find(s => s.value === currentStar)?.label || ""}`
+        : MYTHIC_STAR_CONFIG[form.currentRank] ? ` (${currentMythicStars})` : "";
+      const targetDivLabel = RANKS_WITH_STARS.includes(form.targetRank)
+        ? ` ${getDivisionOptions(form.targetRank).find(s => s.value === targetStar)?.label || ""}`
+        : MYTHIC_STAR_CONFIG[form.targetRank] ? ` (${targetMythicStars})` : "";
       const virtualPkg: ProductPackage = {
         id: `auto-${form.currentRank}${currentStar}-${form.targetRank}${targetStar}`,
         title: `${currentLabel}${currentDivLabel} → ${targetLabel}${targetDivLabel}`,
@@ -1074,7 +1098,7 @@ function OrderPageContent() {
       };
       setSelectedPackage(virtualPkg);
     }
-  }, [orderMode, autoCalcResult.price, autoCalcResult.originalPrice, autoCalcResult.discountPercent, form.currentRank, form.targetRank, currentStar, targetStar, currentDivisionStar, currentMythicStars]);
+  }, [orderMode, autoCalcResult.price, autoCalcResult.originalPrice, autoCalcResult.discountPercent, form.currentRank, form.targetRank, currentStar, targetStar, currentDivisionStar, currentMythicStars, targetMythicStars]);
 
   // Raw item price (before season/express/premium)
   const rawItemPrice = (() => {
@@ -1376,6 +1400,8 @@ function OrderPageContent() {
           targetRank: orderMode === "paket" ? (selectedPackage?.targetRank || form.targetRank) : (orderMode === "perstar" ? (selectedStarRank?.id || form.targetRank) : (selectedGendongRank?.id || form.targetRank)),
           currentStar: orderMode === "paket" && RANKS_WITH_STARS.includes(selectedPackage?.currentRank || form.currentRank) ? currentStar : null,
           targetStar: orderMode === "paket" && RANKS_WITH_STARS.includes(selectedPackage?.targetRank || form.targetRank) ? targetStar : null,
+          currentMythicStars: orderMode === "paket" && MYTHIC_STAR_CONFIG[selectedPackage?.currentRank || form.currentRank] ? currentMythicStars : undefined,
+          targetMythicStars: orderMode === "paket" && MYTHIC_STAR_CONFIG[selectedPackage?.targetRank || form.targetRank] ? targetMythicStars : undefined,
           packageTitle: orderMode === "paket" ? selectedPackage?.title : (orderMode === "gendong" ? `Gendong ${selectedGendongRank?.name} x${gendongQuantity} ${selectedGendongRank?.id === "grading" ? "match" : "star"}` : (orderMode === "perstar" && selectedStarRank ? `${selectedStarRank.name} × ${starQuantity} ${selectedStarRank.id === "grading" ? "match" : "star"}` : undefined)),
           packageId: orderMode === "paket" ? selectedPackage?.id : undefined,
           perStarRankId: orderMode === "perstar" ? selectedStarRank?.id : (orderMode === "gendong" ? selectedGendongRank?.id : undefined),
@@ -1878,6 +1904,10 @@ function OrderPageContent() {
                           setTargetStar(div);
                           setSelectedPackage(null);
                           setShowPackages(false);
+                          if (!RANKS_WITH_STARS.includes(rankId)) {
+                            const mythicCfg = MYTHIC_STAR_CONFIG[rankId];
+                            if (mythicCfg) setTargetMythicStars(mythicCfg.min);
+                          }
                         }}
                         className="w-full bg-surface border border-white/10 rounded-xl px-4 py-3 text-text text-sm font-medium appearance-none cursor-pointer focus:border-accent focus:outline-none transition-colors pr-10"
                       >
@@ -1887,6 +1917,7 @@ function OrderPageContent() {
                             const oi = RANK_ORDER.indexOf(opt.rankId);
                             if (oi > ci) return true;
                             if (oi === ci && RANKS_WITH_STARS.includes(opt.rankId) && opt.division < currentStar) return true;
+                            if (oi === ci && MYTHIC_STAR_CONFIG[opt.rankId]) return true;
                             return false;
                           })
                           .map((opt) => (
@@ -1897,6 +1928,48 @@ function OrderPageContent() {
                         <Image src={rankIcons[form.targetRank] || "/icons-tier/warrior.webp"} alt={`Rank ${form.targetRank}`} width={24} height={24} className="w-6 h-6 object-contain" />
                       </div>
                     </div>
+                    {/* Target Mythic Star Input */}
+                    {MYTHIC_STAR_CONFIG[form.targetRank] && (
+                      <div className="flex items-center gap-2 mt-3">
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={() => setTargetMythicStars(s => Math.max(MYTHIC_STAR_CONFIG[form.targetRank].min, s - 1))}
+                            disabled={targetMythicStars <= MYTHIC_STAR_CONFIG[form.targetRank].min}
+                            className="w-8 h-8 rounded-lg bg-surface border border-white/10 text-white flex items-center justify-center hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed"
+                          >
+                            <Minus className="w-3.5 h-3.5" />
+                          </button>
+                          <input
+                            type="number"
+                            value={targetMythicStars}
+                            onChange={(e) => {
+                              const v = parseInt(e.target.value) || MYTHIC_STAR_CONFIG[form.targetRank].min;
+                              const cfg = MYTHIC_STAR_CONFIG[form.targetRank];
+                              setTargetMythicStars(Math.max(cfg.min, Math.min(cfg.max, v)));
+                            }}
+                            className="w-16 h-10 text-center bg-surface text-text rounded-lg border border-white/10 focus:outline-none focus:border-accent text-sm font-bold"
+                          />
+                          <button
+                            onClick={() => setTargetMythicStars(s => Math.min(MYTHIC_STAR_CONFIG[form.targetRank].max, s + 1))}
+                            disabled={targetMythicStars >= MYTHIC_STAR_CONFIG[form.targetRank].max}
+                            className="w-8 h-8 rounded-lg bg-surface border border-white/10 text-white flex items-center justify-center hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed"
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                        <span className="text-text-muted text-xs whitespace-nowrap flex items-center gap-1">
+                          {MYTHIC_STAR_CONFIG[form.targetRank].label === "Match" ? "Match" : <><Star className="w-3 h-3 text-yellow-400" /> {locale === "id" ? "Bintang Tujuan" : "Target Stars"}</>}
+                        </span>
+                      </div>
+                    )}
+                    {MYTHIC_STAR_CONFIG[form.targetRank] && (
+                      <p className="text-text-muted text-[10px] mt-2">
+                        {form.targetRank === "mythicgrading"
+                          ? (locale === "id" ? `Target match Mythic Grading (${MYTHIC_STAR_CONFIG[form.targetRank].min}-${MYTHIC_STAR_CONFIG[form.targetRank].max})` : `Target Mythic Grading matches (${MYTHIC_STAR_CONFIG[form.targetRank].min}-${MYTHIC_STAR_CONFIG[form.targetRank].max})`)
+                          : (locale === "id" ? `${RANK_LIST.find(r => r.id === form.targetRank)?.label}: pilih target ${MYTHIC_STAR_CONFIG[form.targetRank].min}-${MYTHIC_STAR_CONFIG[form.targetRank].max} bintang` : `${RANK_LIST.find(r => r.id === form.targetRank)?.label}: choose target ${MYTHIC_STAR_CONFIG[form.targetRank].min}-${MYTHIC_STAR_CONFIG[form.targetRank].max} stars`)
+                        }
+                      </p>
+                    )}
                   </div>
 
                   {/* Selected Rank Flow Display */}
@@ -1906,6 +1979,7 @@ function OrderPageContent() {
                       <span className="text-text text-sm font-medium">
                         {RANK_LIST.find(r => r.id === form.currentRank)?.label}
                         {RANKS_WITH_STARS.includes(form.currentRank) && <span className="text-text-muted ml-1">{getDivisionOptions(form.currentRank).find(s => s.value === currentStar)?.label}</span>}
+                        {MYTHIC_STAR_CONFIG[form.currentRank] && <span className="text-text-muted ml-1">({currentMythicStars}★)</span>}
                       </span>
                     </div>
                     <ArrowRight className="w-4 h-4 text-accent flex-shrink-0" />
@@ -1914,13 +1988,14 @@ function OrderPageContent() {
                       <span className="text-yellow-400 text-sm font-bold">
                         {RANK_LIST.find(r => r.id === form.targetRank)?.label}
                         {RANKS_WITH_STARS.includes(form.targetRank) && <span className="text-yellow-300 ml-1">{getDivisionOptions(form.targetRank).find(s => s.value === targetStar)?.label}</span>}
+                        {MYTHIC_STAR_CONFIG[form.targetRank] && <span className="text-yellow-300 ml-1">({targetMythicStars}★)</span>}
                       </span>
                     </div>
                   </div>
 
                   {/* Star Summary Card */}
                   {(() => {
-                    const totalStars = calculateTotalStars(form.currentRank, currentStar, form.targetRank, targetStar, RANKS_WITH_STARS.includes(form.currentRank) ? currentDivisionStar : 0);
+                    const totalStars = calculateTotalStars(form.currentRank, currentStar, form.targetRank, targetStar, RANKS_WITH_STARS.includes(form.currentRank) ? currentDivisionStar : 0, currentMythicStars, targetMythicStars);
                     if (totalStars <= 0) return null;
                     return (
                       <div className="flex items-center justify-between p-3 mb-4 bg-accent/5 border border-accent/20 rounded-xl">

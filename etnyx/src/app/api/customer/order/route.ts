@@ -105,6 +105,8 @@ function calculateAutoPaketPriceServer(
   const targetRank = String(body.targetRank || "").toLowerCase();
   const currentDiv = Number(body.currentStar || 5);
   const targetDiv = Number(body.targetStar || 5);
+  const currentMythicStars = Number(body.currentMythicStars || 0);
+  const targetMythicStars = Number(body.targetMythicStars || 0);
 
   const ci = RANK_ORDER_SERVER.indexOf(currentRank);
   const ti = RANK_ORDER_SERVER.indexOf(targetRank);
@@ -123,6 +125,12 @@ function calculateAutoPaketPriceServer(
     if (cfg) {
       const starsInThisRank = currentDiv * cfg.starsPerDiv;
       originalTotal += getPricePerStar(currentRank) * starsInThisRank;
+    }
+  } else {
+    // Mythic tier current: stars from current position to max of tier
+    const mCfg = MYTHIC_STAR_CONFIG_SERVER[currentRank];
+    if (mCfg) {
+      originalTotal += getPricePerStar(currentRank) * (mCfg.max - currentMythicStars);
     }
   }
 
@@ -146,8 +154,9 @@ function calculateAutoPaketPriceServer(
       originalTotal += getPricePerStar(targetRank) * starsInThisRank;
     }
   } else {
+    // Mythic tier target: stars from min of tier to target position
     const mCfg = MYTHIC_STAR_CONFIG_SERVER[targetRank];
-    if (mCfg) originalTotal += getPricePerStar(targetRank) * (mCfg.max - mCfg.min);
+    if (mCfg) originalTotal += getPricePerStar(targetRank) * (targetMythicStars - mCfg.min);
   }
 
   // Bundle discount: 10% cheaper than per-star
