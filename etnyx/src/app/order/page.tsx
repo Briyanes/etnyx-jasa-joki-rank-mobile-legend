@@ -351,7 +351,7 @@ const RANK_LIST = [
   { id: "grandmaster", label: "Grand Master" },
   { id: "epic", label: "Epic" },
   { id: "legend", label: "Legend" },
-  { id: "mythicgrading", label: "Mythic Grading" },
+  { id: "mythicgrading", label: "Mythic Grading (15★)" },
   { id: "mythic", label: "Mythic" },
   { id: "mythichonor", label: "Mythic Honor" },
   { id: "mythicglory", label: "Mythic Glory" },
@@ -446,7 +446,8 @@ function calculateTotalStars(
   targetRank: string, targetDiv: number,
   divisionStar: number = 0,
   currentMythicStars: number = 0,
-  targetMythicStars: number = 0
+  targetMythicStars: number = 0,
+  targetDivisionStar: number = 0
 ): number {
   const ci = RANK_ORDER.indexOf(currentRank);
   const ti = RANK_ORDER.indexOf(targetRank);
