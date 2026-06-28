@@ -709,8 +709,9 @@ function OrderPageContent() {
   const [promoMessage, setPromoMessage] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
   const [promoLoading, setPromoLoading] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<"dompetx" | "manual_transfer">("manual_transfer");
+  const [paymentMethod, setPaymentMethod] = useState<"dompetx" | "manual_transfer">("dompetx");
   const [dompetxEnabled, setDompetxEnabled] = useState(false);
+  const [showManualTransfer, setShowManualTransfer] = useState(false);
   const [tierDiscount, setTierDiscount] = useState(0);
   const [customerTier, setCustomerTier] = useState<string | null>(null);
   const [selectedPackage, setSelectedPackage] = useState<ProductPackage | null>(
@@ -881,7 +882,12 @@ function OrderPageContent() {
   useEffect(() => {
     fetch("/api/payment-methods")
       .then((res) => res.json())
-      .then((data) => { if (data.dompetxEnabled) setDompetxEnabled(true); })
+      .then((data) => {
+        if (data.dompetxEnabled) {
+          setDompetxEnabled(true);
+          setPaymentMethod("dompetx");
+        }
+      })
       .catch(() => {/* keep manual only */});
   }, []);
 
@@ -3014,50 +3020,88 @@ function OrderPageContent() {
                   <p className="text-text-muted text-xs mb-3 uppercase tracking-wider">
                     Metode Pembayaran
                   </p>
-                  <div className={`grid grid-cols-1 ${dompetxEnabled ? "sm:grid-cols-2" : ""} gap-3`}>
-                    <button
-                      type="button"
-                      onClick={() => setPaymentMethod("manual_transfer")}
-                      className={`relative p-4 rounded-xl border-2 text-left transition-all ${
-                        paymentMethod === "manual_transfer"
-                          ? "border-accent bg-accent/10"
-                          : "border-white/10 hover:border-white/20"
-                      }`}
-                    >
-                      {paymentMethod === "manual_transfer" && (
-                        <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-accent flex items-center justify-center">
-                          <Check className="w-3 h-3 text-white" />
-                        </div>
-                      )}
-                      <CreditCard className="w-5 h-5 text-yellow-400 mb-2" />
-                      <p className="text-text font-semibold text-sm">Transfer Manual</p>
-                      <p className="text-text-muted text-xs mt-0.5">
-                        Bank (BCA, BRI, BNI, Mandiri, Jago), E-Wallet, QRIS
-                      </p>
-                    </button>
-                    {dompetxEnabled && (
+
+                  {/* Primary: DompetX Auto-Payment (default & recommended) */}
+                  {dompetxEnabled && (
                     <button
                       type="button"
                       onClick={() => setPaymentMethod("dompetx")}
-                      className={`relative p-4 rounded-xl border-2 text-left transition-all ${
+                      className={`relative w-full p-4 rounded-xl border-2 text-left transition-all mb-3 ${
                         paymentMethod === "dompetx"
-                          ? "border-accent bg-accent/10"
+                          ? "border-green-500 bg-green-500/10"
                           : "border-white/10 hover:border-white/20"
                       }`}
                     >
                       {paymentMethod === "dompetx" && (
-                        <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-accent flex items-center justify-center">
+                        <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
                           <Check className="w-3 h-3 text-white" />
                         </div>
                       )}
-                      <Zap className="w-5 h-5 text-green-400 mb-2" />
-                      <p className="text-text font-semibold text-sm">Otomatis (DompetX)</p>
-                      <p className="text-text-muted text-xs mt-0.5">
-                        QRIS, Virtual Account, Bank Transfer
-                      </p>
+                      <span className="absolute top-3 right-10 bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                        ★ REKOMENDASI
+                      </span>
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 flex items-center justify-center">
+                          <Zap className="w-5 h-5 text-green-400" />
+                        </div>
+                        <div>
+                          <p className="text-text font-bold text-sm">Bayar Otomatis (DompetX)</p>
+                          <p className="text-text-muted text-xs mt-0.5">
+                            QRIS • Virtual Account • Bank Transfer — Instan & Otomatis
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        <span className="bg-white/5 text-text-muted px-2 py-0.5 rounded text-[10px] font-medium">⚡ Auto-confirmed</span>
+                        <span className="bg-white/5 text-text-muted px-2 py-0.5 rounded text-[10px] font-medium">🔒 Aman</span>
+                        <span className="bg-white/5 text-text-muted px-2 py-0.5 rounded text-[10px] font-medium">📱 QRIS Support</span>
+                      </div>
                     </button>
-                    )}
-                  </div>
+                  )}
+
+                  {/* Collapsible: Manual Transfer (secondary option) */}
+                  <button
+                    type="button"
+                    onClick={() => setShowManualTransfer(!showManualTransfer)}
+                    className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-text-muted text-xs font-medium transition-colors"
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <CreditCard className="w-3.5 h-3.5" />
+                      {dompetxEnabled ? "Pembayaran Lainnya (Transfer Manual)" : "Pilih Metode Pembayaran"}
+                    </span>
+                    <ChevronDown className={`w-4 h-4 transition-transform ${showManualTransfer ? "rotate-180" : ""}`} />
+                  </button>
+
+                  {showManualTransfer && (
+                    <div className="mt-3">
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod("manual_transfer")}
+                        className={`relative w-full p-4 rounded-xl border-2 text-left transition-all ${
+                          paymentMethod === "manual_transfer"
+                            ? "border-accent bg-accent/10"
+                            : "border-white/10 hover:border-white/20"
+                        }`}
+                      >
+                        {paymentMethod === "manual_transfer" && (
+                          <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-accent flex items-center justify-center">
+                            <Check className="w-3 h-3 text-white" />
+                          </div>
+                        )}
+                        <CreditCard className="w-5 h-5 text-yellow-400 mb-2" />
+                        <p className="text-text font-semibold text-sm">Transfer Manual</p>
+                        <p className="text-text-muted text-xs mt-0.5">
+                          Bank (BCA, BRI, BNI, Mandiri, Jago), E-Wallet, QRIS — Konfirmasi manual
+                        </p>
+                      </button>
+                    </div>
+                  )}
+
+                  {!dompetxEnabled && !showManualTransfer && (
+                    <p className="text-text-muted text-xs mt-2 text-center">
+                      Klik tombol di atas untuk memilih metode pembayaran
+                    </p>
+                  )}
                 </div>
 
                 {/* Terms acceptance */}
