@@ -232,6 +232,7 @@ export async function POST(request: NextRequest) {
       isExpress,
       isPremium,
       totalPrice,
+      bonusStars,
     } = body;
 
     const isGendong = body.orderType === "gendong";
@@ -311,6 +312,10 @@ export async function POST(request: NextRequest) {
     const sanitizedPackageTitle = body.packageTitle
       ? sanitizeInput(body.packageTitle)
       : null;
+    // Append bonus stars info to package title for admin visibility (no DB migration needed)
+    const finalPackageTitle = bonusStars && Number(bonusStars) > 0
+      ? `${sanitizedPackageTitle || ""} (+${Number(bonusStars)} BONUS ★)`.trim()
+      : sanitizedPackageTitle;
 
     // Encrypt sensitive credentials (skip for gendong/mabar - no login needed)
     const encryptedPassword = accountPassword ? encryptField(accountPassword) : null;
@@ -490,7 +495,7 @@ export async function POST(request: NextRequest) {
         current_star: body.currentStar ?? null,
         target_star: body.targetStar ?? null,
         package: packageName,
-        package_title: sanitizedPackageTitle,
+        package_title: finalPackageTitle,
         is_express: !!isExpress,
         is_premium: !!isPremium,
         base_price: verifiedBasePrice,
@@ -593,7 +598,7 @@ export async function POST(request: NextRequest) {
               notes: "Order akan diproses otomatis setelah pembayaran berhasil.",
               items: [
                 {
-                  name: `Joki ${sanitizedPackageTitle || packageName}`,
+                  name: `Joki ${finalPackageTitle || packageName}`,
                   quantity: 1,
                   price: verifiedTotalPrice,
                 },
@@ -809,7 +814,7 @@ export async function POST(request: NextRequest) {
           current_star: body.currentStar ?? null,
           target_star: body.targetStar ?? null,
           package: packageName,
-          package_title: sanitizedPackageTitle,
+          package_title: finalPackageTitle,
           price: verifiedTotalPrice,
           whatsapp: `+62${cleanWhatsapp}`,
           email: sanitizedEmail || undefined,
@@ -824,7 +829,7 @@ export async function POST(request: NextRequest) {
           current_star: body.currentStar ?? null,
           target_star: body.targetStar ?? null,
           package: packageName,
-          package_title: sanitizedPackageTitle,
+          package_title: finalPackageTitle,
           price: verifiedTotalPrice,
           whatsapp: `+62${cleanWhatsapp}`,
           email: sanitizedEmail || undefined,

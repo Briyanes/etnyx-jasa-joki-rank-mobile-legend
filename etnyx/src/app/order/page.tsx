@@ -380,6 +380,37 @@ const MYTHIC_STAR_CONFIG: Record<string, { min: number; max: number; label: stri
   mythicimmortal: { min: 100, max: 999, label: "Stars" },
 };
 
+// Bundle Tiers — volume-based bonus stars to incentivize larger orders
+const BUNDLE_TIERS = [
+  {
+    id: "starter",
+    name: "Starter Pack",
+    minStars: 3,
+    bonusStars: 0,
+    icon: "🥉",
+    color: "from-slate-600/20 to-slate-700/10",
+    borderColor: "border-slate-500/30",
+  },
+  {
+    id: "value",
+    name: "Value Pack",
+    minStars: 10,
+    bonusStars: 2,
+    icon: "🥈",
+    color: "from-blue-500/20 to-cyan-500/10",
+    borderColor: "border-blue-400/40",
+  },
+  {
+    id: "mega",
+    name: "Mega Pack",
+    minStars: 25,
+    bonusStars: 5,
+    icon: "🥇",
+    color: "from-yellow-500/20 to-amber-500/10",
+    borderColor: "border-yellow-400/50",
+  },
+] as const;
+
 // Get division options based on rank (dynamic)
 function getDivisionOptions(rankId: string): { value: number; label: string }[] {
   const config = RANK_DIVISION_CONFIG[rankId];
@@ -1404,6 +1435,11 @@ function OrderPageContent() {
           targetMythicStars: orderMode === "paket" && MYTHIC_STAR_CONFIG[selectedPackage?.targetRank || form.targetRank] ? targetMythicStars : undefined,
           packageTitle: orderMode === "paket" ? selectedPackage?.title : (orderMode === "gendong" ? `Gendong ${selectedGendongRank?.name} x${gendongQuantity} ${selectedGendongRank?.id === "grading" ? "match" : "star"}` : (orderMode === "perstar" && selectedStarRank ? `${selectedStarRank.name} × ${starQuantity} ${selectedStarRank.id === "grading" ? "match" : "star"}` : undefined)),
           packageId: orderMode === "paket" ? selectedPackage?.id : undefined,
+          bonusStars: orderMode === "paket" ? (() => {
+            const ts = calculateTotalStars(form.currentRank, currentStar, form.targetRank, targetStar, RANKS_WITH_STARS.includes(form.currentRank) ? currentDivisionStar : 0, currentMythicStars, targetMythicStars);
+            const tier = [...BUNDLE_TIERS].reverse().find(t => ts >= t.minStars);
+            return tier?.bonusStars || 0;
+          })() : 0,
           perStarRankId: orderMode === "perstar" ? selectedStarRank?.id : (orderMode === "gendong" ? selectedGendongRank?.id : undefined),
           starQuantity: orderMode === "perstar" ? starQuantity : (orderMode === "gendong" ? gendongQuantity : undefined),
           orderType: orderMode,
@@ -1999,18 +2035,93 @@ function OrderPageContent() {
                     </div>
                   </div>
 
-                  {/* Star Summary Card */}
+                  {/* Star Summary Card + Bonus Stars */}
                   {(() => {
                     const totalStars = calculateTotalStars(form.currentRank, currentStar, form.targetRank, targetStar, RANKS_WITH_STARS.includes(form.currentRank) ? currentDivisionStar : 0, currentMythicStars, targetMythicStars);
                     if (totalStars <= 0) return null;
+                    // Determine active bundle tier
+                    const activeTier = [...BUNDLE_TIERS].reverse().find(t => totalStars >= t.minStars) || BUNDLE_TIERS[0];
+                    const bonusStars = activeTier?.bonusStars || 0;
                     return (
-                      <div className="flex items-center justify-between p-3 mb-4 bg-accent/5 border border-accent/20 rounded-xl">
+                      <div className="flex items-center justify-between p-3 mb-3 bg-accent/5 border border-accent/20 rounded-xl">
                         <span className="text-text text-sm font-medium">
                           {locale === "id" ? "Total Bintang" : "Total Stars"}
                         </span>
-                        <span className="text-yellow-400 font-bold text-lg flex items-center gap-1">
+                        <span className="text-yellow-400 font-bold text-lg flex items-center gap-1.5">
                           {totalStars} <Star className="w-4 h-4" />
+                          {bonusStars > 0 && (
+                            <span className="text-green-400 text-sm font-semibold ml-1">
+                              +{bonusStars} {locale === "id" ? "BONUS" : "BONUS"}
+                            </span>
+                          )}
                         </span>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Bundle Tier Cards — upsell incentive */}
+                  {(() => {
+                    const totalStars = calculateTotalStars(form.currentRank, currentStar, form.targetRank, targetStar, RANKS_WITH_STARS.includes(form.currentRank) ? currentDivisionStar : 0, currentMythicStars, targetMythicStars);
+                    if (totalStars <= 0) return null;
+                    const activeTier = [...BUNDLE_TIERS].reverse().find(t => totalStars >= t.minStars) || BUNDLE_TIERS[0];
+                    return (
+                      <div className="mb-3">
+                        <p className="text-text-muted text-xs font-semibold mb-2 uppercase tracking-wider flex items-center gap-1.5">
+                          <Sparkles className="w-3.5 h-3.5 text-yellow-400" />
+                          {locale === "id" ? "Bonus Bintang Aktif" : "Active Star Bonus"}
+                        </p>
+                        <div className="grid grid-cols-3 gap-2">
+                          {BUNDLE_TIERS.map((tier) => {
+                            const isActive = activeTier?.id === tier.id;
+                            const isUnlocked = totalStars >= tier.minStars;
+                            return (
+                              <div
+                                key={tier.id}
+                                className={`relative p-3 rounded-xl border-2 bg-gradient-to-br ${tier.color} transition-all ${
+                                  isActive
+                                    ? `${tier.borderColor} shadow-lg scale-105`
+                                    : isUnlocked
+                                      ? "border-white/10 opacity-60"
+                                      : "border-white/5 opacity-50"
+                                }`}
+                              >
+                                {isActive && (
+                                  <span className="absolute -top-2 -right-2 bg-green-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                                    <Check className="w-2 h-2" /> AKTIF
+                                  </span>
+                                )}
+                                <div className="text-center">
+                                  <span className="text-xl block">{tier.icon}</span>
+                                  <p className="text-text text-[11px] font-bold mt-1">{tier.name}</p>
+                                  <p className="text-text-muted text-[9px] mt-0.5">
+                                    {tier.minStars}★ {locale === "id" ? "minimal" : "min"}
+                                  </p>
+                                  {tier.bonusStars > 0 ? (
+                                    <p className="text-green-400 text-xs font-bold mt-1 flex items-center justify-center gap-0.5">
+                                      +{tier.bonusStars}<Star className="w-2.5 h-2.5 fill-current" />
+                                    </p>
+                                  ) : (
+                                    <p className="text-text-muted text-[9px] mt-1">Base</p>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        {/* Upsell hint */}
+                        {(() => {
+                          const nextTier = BUNDLE_TIERS.find(t => t.minStars > totalStars);
+                          if (!nextTier) return null;
+                          const starsNeeded = nextTier.minStars - totalStars;
+                          return (
+                            <p className="text-center text-xs text-accent/80 mt-2 flex items-center justify-center gap-1.5">
+                              <Sparkles className="w-3 h-3" />
+                              {locale === "id"
+                                ? `Tambah ${starsNeeded} bintang lagi untuk dapat +${nextTier.bonusStars} bonus (${nextTier.name})`
+                                : `Add ${starsNeeded} more stars for +${nextTier.bonusStars} bonus (${nextTier.name})`}
+                            </p>
+                          );
+                        })()}
                       </div>
                     );
                   })()}
