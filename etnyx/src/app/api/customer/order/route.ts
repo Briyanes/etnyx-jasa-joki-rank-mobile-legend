@@ -72,6 +72,89 @@ const SERVER_PACKAGE_PRICES: Record<string, number> = {
   "glory-immortal": 1170089,
 };
 
+// Server-side auto-calculation for paket mode (mirrors frontend autoCalcPackagePrice)
+const RANK_ORDER_SERVER = ["warrior","elite","master","grandmaster","epic","legend","mythicgrading","mythic","mythichonor","mythicglory","mythicimmortal"];
+const RANKS_WITH_STARS_SERVER = ["warrior","elite","master","grandmaster","epic","legend"];
+const RANK_DIVISION_CONFIG_SERVER: Record<string, { divisions: number; starsPerDiv: number }> = {
+  warrior: { divisions: 3, starsPerDiv: 3 },
+  elite: { divisions: 3, starsPerDiv: 4 },
+  master: { divisions: 4, starsPerDiv: 4 },
+  grandmaster: { divisions: 5, starsPerDiv: 5 },
+  epic: { divisions: 5, starsPerDiv: 5 },
+  legend: { divisions: 5, starsPerDiv: 5 },
+};
+const MYTHIC_STAR_CONFIG_SERVER: Record<string, { min: number; max: number }> = {
+  mythicgrading: { min: 0, max: 10 },
+  mythic: { min: 0, max: 25 },
+  mythichonor: { min: 25, max: 49 },
+  mythicglory: { min: 50, max: 99 },
+  mythicimmortal: { min: 100, max: 999 },
+};
+const RANK_TO_PRICE_KEY: Record<string, string> = {
+  warrior: "grandmaster", elite: "grandmaster", master: "grandmaster",
+  grandmaster: "grandmaster", epic: "epic", legend: "legend",
+  mythicgrading: "grading", mythic: "mythic", mythichonor: "honor",
+  mythicglory: "glory", mythicimmortal: "immortal",
+};
+
+function calculateAutoPaketPriceServer(
+  body: Record<string, unknown>,
+  cmsPricing?: { perstar?: Record<string, number>; gendong?: Record<string, number>; catalog?: Record<string, number> }
+): number | null {
+  const currentRank = String(body.currentRank || "").toLowerCase();
+  const targetRank = String(body.targetRank || "").toLowerCase();
+  const currentDiv = Number(body.currentStar || 5);
+  const targetDiv = Number(body.targetStar || 5);
+
+  const ci = RANK_ORDER_SERVER.indexOf(currentRank);
+  const ti = RANK_ORDER_SERVER.indexOf(targetRank);
+  if (ci < 0 || ti < 0 || ci >= ti) return null;
+
+  const getPricePerStar = (rank: string): number => {
+    const key = RANK_TO_PRICE_KEY[rank] || "grandmaster";
+    return cmsPricing?.perstar?.[key] ?? SERVER_PER_STAR_PRICES[key] ?? 5000;
+  };
+
+  let originalTotal = 0;
+
+  // Segment 1: current rank remaining stars
+  if (RANKS_WITH_STARS_SERVER.includes(currentRank)) {
+    const cfg = RANK_DIVISION_CONFIG_SERVER[currentRank];
+    if (cfg) {
+      const starsInThisRank = currentDiv * cfg.starsPerDiv;
+      originalTotal += getPricePerStar(currentRank) * starsInThisRank;
+    }
+  }
+
+  // Segments in between
+  for (let i = ci + 1; i < ti; i++) {
+    const rank = RANK_ORDER_SERVER[i];
+    if (RANKS_WITH_STARS_SERVER.includes(rank)) {
+      const cfg = RANK_DIVISION_CONFIG_SERVER[rank];
+      if (cfg) originalTotal += getPricePerStar(rank) * (cfg.divisions * cfg.starsPerDiv);
+    } else {
+      const mCfg = MYTHIC_STAR_CONFIG_SERVER[rank];
+      if (mCfg) originalTotal += getPricePerStar(rank) * (mCfg.max - mCfg.min);
+    }
+  }
+
+  // Segment last: target rank stars needed
+  if (RANKS_WITH_STARS_SERVER.includes(targetRank)) {
+    const cfg = RANK_DIVISION_CONFIG_SERVER[targetRank];
+    if (cfg) {
+      const starsInThisRank = (cfg.divisions - targetDiv) * cfg.starsPerDiv;
+      originalTotal += getPricePerStar(targetRank) * starsInThisRank;
+    }
+  } else {
+    const mCfg = MYTHIC_STAR_CONFIG_SERVER[targetRank];
+    if (mCfg) originalTotal += getPricePerStar(targetRank) * (mCfg.max - mCfg.min);
+  }
+
+  // Bundle discount: 10% cheaper than per-star
+  const BUNDLE_DISCOUNT = 0.10;
+  return Math.round(originalTotal * (1 - BUNDLE_DISCOUNT));
+}
+
 function calculateServerPrice(body: Record<string, unknown>, cmsPricing?: { perstar?: Record<string, number>; gendong?: Record<string, number>; catalog?: Record<string, number> }): number | null {
   const orderType = String(body.orderType || "");
   const isGendong = orderType === "gendong";
@@ -88,6 +171,14 @@ function calculateServerPrice(body: Record<string, unknown>, cmsPricing?: { pers
 
   if (orderType === "paket") {
     const packageId = String(body.packageId || "");
+
+    // Auto-calculated packages (new flow): packageId starts with "auto-"
+    // Calculate price server-side from currentRank/targetRank + per-star rates
+    if (packageId.startsWith("auto-")) {
+      return calculateAutoPaketPriceServer(body, cmsPricing);
+    }
+
+    // Legacy: static catalog lookup
     const price = cmsPricing?.catalog?.[packageId] ?? SERVER_PACKAGE_PRICES[packageId];
     return price ?? null;
   }

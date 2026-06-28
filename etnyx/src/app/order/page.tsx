@@ -460,6 +460,96 @@ function calculateTotalStars(
   return stars;
 }
 
+// Auto-calculate package price from rank selections (bundle discount vs per-star)
+function autoCalcPackagePrice(
+  currentRank: string,
+  currentDiv: number,
+  targetRank: string,
+  targetDiv: number,
+  currentDivisionStar: number,
+  perStarPrices: PerStarRank[],
+  mythicStars: number = 0
+): { price: number; totalStars: number; originalPrice: number; discountPercent: number } {
+  const totalStars = calculateTotalStars(currentRank, currentDiv, targetRank, targetDiv, RANKS_WITH_STARS.includes(currentRank) ? currentDivisionStar : 0);
+  if (totalStars <= 0) return { price: 0, totalStars: 0, originalPrice: 0, discountPercent: 0 };
+
+  // Map rank to per-star price lookup key
+  const rankToPriceKey: Record<string, string> = {
+    warrior: "grandmaster", elite: "grandmaster", master: "grandmaster",
+    grandmaster: "grandmaster", epic: "epic", legend: "legend",
+    mythicgrading: "grading", mythic: "mythic", mythichonor: "honor",
+    mythicglory: "glory", mythicimmortal: "immortal",
+  };
+
+  // Iterate each rank segment and sum weighted cost
+  let originalTotal = 0;
+  const ci = RANK_ORDER.indexOf(currentRank);
+  const ti = RANK_ORDER.indexOf(targetRank);
+
+  // Segment 1: current rank remaining stars
+  {
+    const key = rankToPriceKey[currentRank] || "grandmaster";
+    const priceEntry = perStarPrices.find(r => r.id === key);
+    const pricePerStar = priceEntry?.price || 5000;
+    let starsInThisRank: number;
+    if (RANKS_WITH_STARS.includes(currentRank)) {
+      const cfg = RANK_DIVISION_CONFIG[currentRank];
+      starsInThisRank = cfg ? (cfg.starsPerDiv - currentDivisionStar) + (currentDiv - 1) * cfg.starsPerDiv : 0;
+    } else if (currentRank === targetRank) {
+      starsInThisRank = mythicStars - (MYTHIC_STAR_CONFIG[currentRank]?.min || 0);
+    } else {
+      starsInThisRank = 0;
+    }
+    originalTotal += pricePerStar * Math.max(0, starsInThisRank);
+  }
+
+  // Segments in between
+  for (let i = ci + 1; i < ti; i++) {
+    const rank = RANK_ORDER[i];
+    const key = rankToPriceKey[rank] || "grandmaster";
+    const priceEntry = perStarPrices.find(r => r.id === key);
+    const pricePerStar = priceEntry?.price || 5000;
+    let starsInThisRank: number;
+    if (RANKS_WITH_STARS.includes(rank)) {
+      const cfg = RANK_DIVISION_CONFIG[rank];
+      starsInThisRank = cfg ? cfg.divisions * cfg.starsPerDiv : 0;
+    } else {
+      const mCfg = MYTHIC_STAR_CONFIG[rank];
+      starsInThisRank = mCfg ? mCfg.max - mCfg.min : 0;
+    }
+    originalTotal += pricePerStar * starsInThisRank;
+  }
+
+  // Segment last: target rank stars needed
+  if (ci < ti) {
+    const key = rankToPriceKey[targetRank] || "grandmaster";
+    const priceEntry = perStarPrices.find(r => r.id === key);
+    const pricePerStar = priceEntry?.price || 5000;
+    let starsInThisRank: number;
+    if (RANKS_WITH_STARS.includes(targetRank)) {
+      const cfg = RANK_DIVISION_CONFIG[targetRank];
+      starsInThisRank = cfg ? (cfg.divisions - targetDiv) * cfg.starsPerDiv : 0;
+    } else {
+      const mCfg = MYTHIC_STAR_CONFIG[targetRank];
+      starsInThisRank = mCfg ? mythicStars - mCfg.min : 0;
+    }
+    originalTotal += pricePerStar * Math.max(0, starsInThisRank);
+  } else if (ci === ti && RANKS_WITH_STARS.includes(currentRank)) {
+    // Same rank, division difference only — already covered in segment 1
+  }
+
+  // Bundle discount: paket mode is ~10% cheaper than buying per-star individually
+  const BUNDLE_DISCOUNT = 0.10;
+  const bundlePrice = Math.round(originalTotal * (1 - BUNDLE_DISCOUNT));
+
+  return {
+    price: bundlePrice,
+    totalStars,
+    originalPrice: originalTotal,
+    discountPercent: BUNDLE_DISCOUNT * 100,
+  };
+}
+
 // Fallback static options (max 5 divisions) — used if no rank selected yet
 const STAR_OPTIONS = [
   { value: 5, label: "V" },
@@ -959,6 +1049,32 @@ function OrderPageContent() {
       }
     }
   }, [searchParams, catalog]);
+
+  // Auto-calculated package price for paket mode (real-time)
+  const autoCalcResult = orderMode === "paket"
+    ? autoCalcPackagePrice(form.currentRank, currentStar, form.targetRank, targetStar, currentDivisionStar, perStarRanks, currentMythicStars)
+    : { price: 0, totalStars: 0, originalPrice: 0, discountPercent: 0 };
+
+  // Auto-set selectedPackage when rank changes in paket mode (no manual selection needed)
+  useEffect(() => {
+    if (orderMode === "paket" && autoCalcResult.price > 0) {
+      const currentLabel = RANK_LIST.find(r => r.id === form.currentRank)?.label || form.currentRank;
+      const targetLabel = RANK_LIST.find(r => r.id === form.targetRank)?.label || form.targetRank;
+      const currentDivLabel = RANKS_WITH_STARS.includes(form.currentRank) ? ` ${getDivisionOptions(form.currentRank).find(s => s.value === currentStar)?.label || ""}` : "";
+      const targetDivLabel = RANKS_WITH_STARS.includes(form.targetRank) ? ` ${getDivisionOptions(form.targetRank).find(s => s.value === targetStar)?.label || ""}` : "";
+      const virtualPkg: ProductPackage = {
+        id: `auto-${form.currentRank}${currentStar}-${form.targetRank}${targetStar}`,
+        title: `${currentLabel}${currentDivLabel} → ${targetLabel}${targetDivLabel}`,
+        price: autoCalcResult.price,
+        originalPrice: autoCalcResult.originalPrice > autoCalcResult.price ? autoCalcResult.originalPrice : undefined,
+        discountPercent: autoCalcResult.discountPercent > 0 ? autoCalcResult.discountPercent : undefined,
+        rankKey: form.targetRank,
+        currentRank: form.currentRank,
+        targetRank: form.targetRank,
+      };
+      setSelectedPackage(virtualPkg);
+    }
+  }, [orderMode, autoCalcResult.price, autoCalcResult.originalPrice, autoCalcResult.discountPercent, form.currentRank, form.targetRank, currentStar, targetStar, currentDivisionStar, currentMythicStars]);
 
   // Raw item price (before season/express/premium)
   const rawItemPrice = (() => {
@@ -1818,116 +1934,37 @@ function OrderPageContent() {
                     );
                   })()}
 
-                  {/* Hitung Harga Button */}
-                  <button
-                    onClick={() => { setShowPackages(true); setSelectedPackage(null); }}
-                    className="w-full py-3.5 gradient-primary rounded-xl text-white font-bold text-sm hover:opacity-90 transition-opacity mb-5 flex items-center justify-center gap-2"
-                  >
-                    <CreditCard className="w-4 h-4" />
-                    {locale === "id" ? "Hitung Harga" : "Calculate Price"}
-                  </button>
-
-                  {/* Matching Packages (shown after Hitung Harga) */}
-                  {showPackages && (() => {
-                    const matchingPkgs = catalog.flatMap(cat => cat.packages).filter(pkg =>
-                      pkg.currentRank === form.currentRank && pkg.targetRank === form.targetRank
-                    );
-                    const nearbyPkgs = matchingPkgs.length === 0
-                      ? catalog.flatMap(cat => cat.packages).filter(pkg => {
-                        // Show packages that overlap with selected range
-                        const pkgCi = RANK_ORDER.indexOf(pkg.currentRank);
-                        const pkgTi = RANK_ORDER.indexOf(pkg.targetRank);
-                        const ci = RANK_ORDER.indexOf(form.currentRank);
-                        const ti = RANK_ORDER.indexOf(form.targetRank);
-                        // Package must cover at least part of the customer's requested range
-                        return pkgCi <= ci && pkgTi >= ti;
-                      })
-                      : [];
-                    const pkgsToShow = matchingPkgs.length > 0 ? matchingPkgs : nearbyPkgs;
-
-                    if (pkgsToShow.length === 0) {
-                      return (
-                        <div className="text-center py-8 bg-background rounded-xl border border-white/5">
-                          <Package className="w-8 h-8 text-text-muted mx-auto mb-2" />
-                          <p className="text-text-muted text-sm">
-                            {locale === "id" ? "Tidak ada paket untuk rank yang dipilih." : "No packages for selected ranks."}
-                          </p>
-                          <p className="text-text-muted text-xs mt-1">
-                            {locale === "id" ? "Coba pilih rank lain atau gunakan mode Per Bintang" : "Try other ranks or use Per Star mode"}
-                          </p>
-                        </div>
-                      );
-                    }
-
-                    return (
-                      <>
-                        {matchingPkgs.length === 0 && nearbyPkgs.length > 0 && (
-                          <p className="text-text-muted text-xs mb-3">
-                            {locale === "id" ? "Paket exact tidak ditemukan. Paket terdekat yang mencakup rank pilihanmu:" : "Exact match not found. Nearest packages covering your rank range:"}
-                          </p>
+                  {/* Auto-Calculated Price Card (replaces Hitung Harga button + package cards) */}
+                  {autoCalcResult.totalStars > 0 && (
+                    <div className="mt-2 p-5 bg-gradient-to-br from-accent/10 to-accent/5 border border-accent/30 rounded-xl">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-text text-sm font-medium flex items-center gap-1.5">
+                          <CreditCard className="w-4 h-4 text-accent" />
+                          {locale === "id" ? "Estimasi Harga Paket" : "Package Price Estimate"}
+                        </span>
+                        {autoCalcResult.discountPercent > 0 && (
+                          <span className="bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full text-[10px] font-bold flex items-center gap-1">
+                            <Zap className="w-2.5 h-2.5" /> Hemat {autoCalcResult.discountPercent}%
+                          </span>
                         )}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                          {pkgsToShow.map((pkg) => {
-                            const isSelected = selectedPackage?.id === pkg.id;
-                            return (
-                              <button
-                                key={pkg.id}
-                                onClick={() => handleSelectPackage(pkg)}
-                                className={`relative text-left rounded-xl border-2 transition-all duration-200 hover:scale-[1.02] overflow-hidden flex flex-col ${
-                                  isSelected
-                                    ? "border-yellow-400 shadow-lg shadow-yellow-400/20"
-                                    : "border-white/5 hover:border-white/15"
-                                }`}
-                              >
-                                <div className="p-4 bg-gradient-to-br from-slate-700/80 to-slate-800/80 flex-1">
-                                  <p className="text-white text-sm font-semibold mb-2">{pkg.title}</p>
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <Image src={rankIcons[pkg.currentRank] || rankIcons[pkg.rankKey]} alt={`Rank ${pkg.currentRank}`} width={20} height={20} className="w-5 h-5 object-contain" />
-                                    <ArrowRight className="w-3 h-3 text-text-muted" />
-                                    <Image src={rankIcons[pkg.targetRank] || rankIcons[pkg.rankKey]} alt={`Rank ${pkg.targetRank}`} width={20} height={20} className="w-5 h-5 object-contain" />
-                                  </div>
-                                  <div>
-                                    <p className="text-yellow-400 font-bold text-lg leading-tight">{formatRupiah(pkg.price)}</p>
-                                    {pkg.originalPrice && (
-                                      <p className="text-red-400/70 text-xs line-through">{formatRupiah(pkg.originalPrice)}</p>
-                                    )}
-                                  </div>
-                                </div>
-                                <div className="px-4 py-2 bg-slate-800/60 flex items-center justify-end gap-2">
-                                  {pkg.discountPercent && (
-                                    <span className="bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded text-[10px] font-bold">
-                                      Disc {pkg.discountPercent}%
-                                    </span>
-                                  )}
-                                </div>
-                                {isSelected && (
-                                  <div className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-yellow-400 flex items-center justify-center">
-                                    <Check className="w-3 h-3 text-black" />
-                                  </div>
-                                )}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </>
-                    );
-                  })()}
-
-                  {/* Selected summary */}
-                  {selectedPackage && (
-                    <div className="mt-5 p-4 bg-background rounded-xl border border-accent/30 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-1.5">
-                          <Image src={rankIcons[selectedPackage.currentRank] || rankIcons[selectedPackage.rankKey]} alt={`Rank ${selectedPackage.currentRank}`} width={28} height={28} className="w-7 h-7 object-contain" />
-                          <ArrowRight className="w-3.5 h-3.5 text-accent" />
-                          <Image src={rankIcons[selectedPackage.targetRank] || rankIcons[selectedPackage.rankKey]} alt={`Rank ${selectedPackage.targetRank}`} width={28} height={28} className="w-7 h-7 object-contain" />
-                        </div>
+                      </div>
+                      <div className="flex items-end justify-between">
                         <div>
-                          <p className="text-text font-semibold text-sm">{selectedPackage.title}</p>
-                          <p className="text-yellow-400 font-bold">{formatRupiah(selectedPackage.price)}</p>
+                          {autoCalcResult.originalPrice > autoCalcResult.price && (
+                            <p className="text-text-muted text-sm line-through mb-0.5">{formatRupiah(autoCalcResult.originalPrice)}</p>
+                          )}
+                          <p className="text-yellow-400 font-bold text-3xl leading-none">
+                            {formatRupiah(autoCalcResult.price)}
+                          </p>
+                          <p className="text-text-muted text-xs mt-2">
+                            {autoCalcResult.totalStars} {locale === "id" ? "bintang" : "stars"} • {locale === "id" ? "termasuk diskon bundel" : "includes bundle discount"}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-green-400">
+                          <Check className="w-5 h-5" />
+                          <span className="text-xs font-medium">{locale === "id" ? "Siap Order" : "Ready to Order"}</span>
                         </div>
                       </div>
-                      <Check className="w-5 h-5 text-green-400" />
                     </div>
                   )}
                 </>
