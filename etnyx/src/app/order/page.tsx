@@ -512,8 +512,7 @@ function autoCalcPackagePrice(
   currentDivisionStar: number,
   perStarPrices: PerStarRank[],
   currentMythicStars: number = 0,
-  targetMythicStars: number = 0,
-  bundleDiscount: number = 0.10
+  targetMythicStars: number = 0
 ): { price: number; totalStars: number; originalPrice: number; discountPercent: number } {
   const totalStars = calculateTotalStars(currentRank, currentDiv, targetRank, targetDiv, RANKS_WITH_STARS.includes(currentRank) ? currentDivisionStar : 0, currentMythicStars, targetMythicStars);
   if (totalStars <= 0) return { price: 0, totalStars: 0, originalPrice: 0, discountPercent: 0 };
@@ -590,15 +589,12 @@ function autoCalcPackagePrice(
     // Same rank, division difference only — already covered in segment 1
   }
 
-  // Bundle discount: paket mode is ~10% cheaper than buying per-star individually
-  const BUNDLE_DISCOUNT = bundleDiscount;
-  const bundlePrice = Math.round(originalTotal * (1 - BUNDLE_DISCOUNT));
-
+  // No bundle discount — paket price = same as per-star total
   return {
-    price: bundlePrice,
+    price: originalTotal,
     totalStars,
-    originalPrice: originalTotal,
-    discountPercent: BUNDLE_DISCOUNT * 100,
+    originalPrice: 0,
+    discountPercent: 0,
   };
 }
 
@@ -2158,22 +2154,14 @@ function OrderPageContent() {
                           <CreditCard className="w-4 h-4 text-accent" />
                           {locale === "id" ? "Estimasi Harga Paket" : "Package Price Estimate"}
                         </span>
-                        {autoCalcResult.discountPercent > 0 && (
-                          <span className="bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full text-[10px] font-bold flex items-center gap-1">
-                            <Zap className="w-2.5 h-2.5" /> Hemat {autoCalcResult.discountPercent}%
-                          </span>
-                        )}
                       </div>
                       <div className="flex items-end justify-between">
                         <div>
-                          {autoCalcResult.originalPrice > autoCalcResult.price && (
-                            <p className="text-text-muted text-sm line-through mb-0.5">{formatRupiah(autoCalcResult.originalPrice)}</p>
-                          )}
                           <p className="text-yellow-400 font-bold text-3xl leading-none">
                             {formatRupiah(autoCalcResult.price)}
                           </p>
                           <p className="text-text-muted text-xs mt-2">
-                            {autoCalcResult.totalStars} {locale === "id" ? "bintang" : "stars"} • {locale === "id" ? "termasuk diskon bundel" : "includes bundle discount"}
+                            {autoCalcResult.totalStars} {locale === "id" ? "bintang" : "stars"}
                           </p>
                         </div>
                         <div className="flex items-center gap-1.5 text-green-400">
