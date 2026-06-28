@@ -512,7 +512,8 @@ function autoCalcPackagePrice(
   currentDivisionStar: number,
   perStarPrices: PerStarRank[],
   currentMythicStars: number = 0,
-  targetMythicStars: number = 0
+  targetMythicStars: number = 0,
+  bundleDiscount: number = 0.10
 ): { price: number; totalStars: number; originalPrice: number; discountPercent: number } {
   const totalStars = calculateTotalStars(currentRank, currentDiv, targetRank, targetDiv, RANKS_WITH_STARS.includes(currentRank) ? currentDivisionStar : 0, currentMythicStars, targetMythicStars);
   if (totalStars <= 0) return { price: 0, totalStars: 0, originalPrice: 0, discountPercent: 0 };
@@ -590,7 +591,7 @@ function autoCalcPackagePrice(
   }
 
   // Bundle discount: paket mode is ~10% cheaper than buying per-star individually
-  const BUNDLE_DISCOUNT = 0.10;
+  const BUNDLE_DISCOUNT = bundleDiscount;
   const bundlePrice = Math.round(originalTotal * (1 - BUNDLE_DISCOUNT));
 
   return {
@@ -880,6 +881,8 @@ function OrderPageContent() {
   // Season pricing multiplier
   const [seasonMultiplier, setSeasonMultiplier] = useState(1);
   const [seasonLabel, setSeasonLabel] = useState("");
+  // Bundle discount (editable via admin dashboard)
+  const [bundleDiscount, setBundleDiscount] = useState(0.10);
   // Rank selector for paket mode
   const [currentStar, setCurrentStar] = useState(3); // Division: Warrior default III=3
   const [targetStar, setTargetStar] = useState(3);
@@ -992,7 +995,7 @@ function OrderPageContent() {
 
   // Fetch per-star pricing from CMS
   useEffect(() => {
-    fetch("/api/settings?keys=perstar_pricing,gendong_pricing,season_pricing")
+    fetch("/api/settings?keys=perstar_pricing,gendong_pricing,season_pricing,bundle_discount")
       .then((res) => res.json())
       .then((data) => {
         if (data.perstar_pricing && Array.isArray(data.perstar_pricing) && data.perstar_pricing.length > 0) {
@@ -1005,6 +1008,10 @@ function OrderPageContent() {
           const defaultMaxStars: Record<string, number> = {};
           for (const r of GENDONG_RANKS) defaultMaxStars[r.id] = r.maxStars;
           setGendongRanks(data.gendong_pricing.map((r: PerStarRank) => ({ ...r, maxStars: r.maxStars || defaultMaxStars[r.id] || 100 })));
+        }
+        // Bundle discount (editable via admin dashboard)
+        if (typeof data.bundle_discount === "number" && data.bundle_discount >= 0 && data.bundle_discount <= 0.5) {
+          setBundleDiscount(data.bundle_discount);
         }
         // Determine active season multiplier
         if (data.season_pricing && data.season_pricing.isEnabled && Array.isArray(data.season_pricing.phases)) {
@@ -1104,7 +1111,7 @@ function OrderPageContent() {
 
   // Auto-calculated package price for paket mode (real-time)
   const autoCalcResult = orderMode === "paket"
-    ? autoCalcPackagePrice(form.currentRank, currentStar, form.targetRank, targetStar, currentDivisionStar, perStarRanks, currentMythicStars, targetMythicStars)
+    ? autoCalcPackagePrice(form.currentRank, currentStar, form.targetRank, targetStar, currentDivisionStar, perStarRanks, currentMythicStars, targetMythicStars, bundleDiscount)
     : { price: 0, totalStars: 0, originalPrice: 0, discountPercent: 0 };
 
   // Auto-set selectedPackage when rank changes in paket mode (no manual selection needed)
