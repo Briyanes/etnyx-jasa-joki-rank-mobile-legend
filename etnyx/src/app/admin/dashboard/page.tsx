@@ -287,10 +287,6 @@ export default function AdminDashboard() {
   });
   const [seasonSaving, setSeasonSaving] = useState(false);
   const [seasonSaved, setSeasonSaved] = useState(false);
-  // Bundle discount (paket mode discount %)
-  const [bundleDiscount, setBundleDiscount] = useState(0.10);
-  const [bundleDiscountSaving, setBundleDiscountSaving] = useState(false);
-  const [bundleDiscountSaved, setBundleDiscountSaved] = useState(false);
 
   // Staff state
   interface StaffUser { id: string; email: string; name: string; role: string; phone: string | null; is_active: boolean; last_login_at: string | null; created_at: string; lead_id: string | null }
@@ -411,12 +407,6 @@ export default function AdminDashboard() {
       const d4 = await res4.json();
       if (d4.value && typeof d4.value === "object") {
         setSeasonPricing(d4.value);
-      }
-      // Fetch bundle discount
-      const res5 = await fetch("/api/admin/settings?key=bundle_discount");
-      const d5 = await res5.json();
-      if (typeof d5.value === "number" && d5.value >= 0 && d5.value <= 0.5) {
-        setBundleDiscount(d5.value);
       }
     } catch (e) { console.error(e); }
   }, [activePricingCat]);
@@ -823,19 +813,6 @@ export default function AdminDashboard() {
     setGendongPricing(newTiers);
     setEditingPriceId(null);
     saveGendongPricing(newTiers);
-  };
-
-  const saveBundleDiscount = async (val: number) => {
-    setBundleDiscountSaving(true);
-    try {
-      const res = await fetch("/api/admin/settings", {
-        method: "PUT", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ key: "bundle_discount", value: val }),
-      });
-      if (res.ok) { setBundleDiscountSaved(true); setTimeout(() => setBundleDiscountSaved(false), 2000); toast("Bundle discount tersimpan!"); }
-      else toastError("Gagal menyimpan bundle discount.");
-    } catch { toastError("Gagal menyimpan bundle discount."); }
-    finally { setBundleDiscountSaving(false); }
   };
 
   const saveSeasonPricing = async (data: typeof seasonPricing) => {
@@ -1772,48 +1749,6 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 )}
-              </div>
-
-              {/* Bundle Discount Card */}
-              <div className="bg-surface rounded-xl border border-white/5 p-4 sm:p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-green-500/10 flex items-center justify-center">
-                      <Tag className="w-4 h-4 text-green-400" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-bold text-text">Diskon Paket (Bundle Discount)</h3>
-                      <p className="text-text-muted text-[10px]">Diskon otomatis untuk mode Joki Paket di halaman order</p>
-                    </div>
-                  </div>
-                  <span className="text-2xl font-bold text-green-400">{Math.round(bundleDiscount * 100)}%</span>
-                </div>
-                <div className="flex items-center gap-4">
-                  <input
-                    type="range"
-                    min="0"
-                    max="0.3"
-                    step="0.01"
-                    value={bundleDiscount}
-                    onChange={(e) => setBundleDiscount(parseFloat(e.target.value))}
-                    className="flex-1 accent-green-500 cursor-pointer"
-                  />
-                  <span className="text-text-muted text-xs whitespace-nowrap font-mono w-12 text-right">
-                    {Math.round(bundleDiscount * 100)}%
-                  </span>
-                  <button
-                    onClick={() => saveBundleDiscount(bundleDiscount)}
-                    disabled={bundleDiscountSaving}
-                    className="flex items-center gap-1.5 px-3 py-1.5 gradient-primary rounded-lg text-white text-xs font-medium hover:opacity-90 transition disabled:opacity-50 whitespace-nowrap"
-                  >
-                    {bundleDiscountSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : bundleDiscountSaved ? <CheckCircle className="w-3.5 h-3.5" /> : <Save className="w-3.5 h-3.5" />}
-                    {bundleDiscountSaved ? "Tersimpan!" : "Simpan"}
-                  </button>
-                </div>
-                <p className="text-text-muted text-[10px] mt-2">
-                  <Lightbulb className="w-3 h-3 inline mr-1" />
-                  0% = tidak ada diskon • 10% = harga coret tampil, harga final 10% lebih murah • 30% = maksimal diskon
-                </p>
               </div>
 
               {/* PAKET MODE */}
