@@ -116,6 +116,10 @@ export default function AdminDashboard() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [showModal, setShowModal] = useState<string | null>(null);
   const [editItem, setEditItem] = useState<Testimonial | Portfolio | PromoCode | Booster | null>(null);
+  const [waNumber, setWaNumber] = useState("6281414131321");
+  const [adminEmail, setAdminEmail] = useState("admin@etnyx.com");
+  const [adminPassword, setAdminPassword] = useState("");
+  const [savingSettings, setSavingSettings] = useState(false);
 
   const checkAuth = useCallback(async () => {
     try {
@@ -736,7 +740,8 @@ export default function AdminDashboard() {
                 <label className="block text-sm text-text-muted mb-2">WhatsApp Number</label>
                 <input
                   type="text"
-                  defaultValue="6281414131321"
+                  value={waNumber}
+                  onChange={(e) => setWaNumber(e.target.value)}
                   className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 text-text focus:border-accent focus:outline-none"
                 />
               </div>
@@ -749,7 +754,8 @@ export default function AdminDashboard() {
                   <label className="block text-sm text-text-muted mb-2">Email</label>
                   <input
                     type="email"
-                    defaultValue="admin@etnyx.com"
+                    value={adminEmail}
+                    onChange={(e) => setAdminEmail(e.target.value)}
                     className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 text-text focus:border-accent focus:outline-none"
                   />
                 </div>
@@ -758,6 +764,8 @@ export default function AdminDashboard() {
                   <input
                     type="password"
                     placeholder="••••••••"
+                    value={adminPassword}
+                    onChange={(e) => setAdminPassword(e.target.value)}
                     className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 text-text focus:border-accent focus:outline-none"
                   />
                 </div>
@@ -775,8 +783,25 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            <button className="gradient-primary px-6 py-3 rounded-xl text-white font-semibold hover:opacity-90 transition-opacity">
-              Save Settings
+            <button onClick={async () => {
+              setSavingSettings(true);
+              try {
+                const payload = { whatsapp_number: waNumber, admin_email: adminEmail, admin_password: adminPassword };
+                const res = await fetch('/api/admin/settings', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: 'admin_settings', value: payload }) });
+                if (!res.ok) {
+                  const j = await res.json().catch(() => ({}));
+                  alert('Gagal menyimpan: ' + (j.error || res.statusText));
+                } else {
+                  alert('Pengaturan tersimpan.');
+                  setAdminPassword('');
+                }
+              } catch (e) {
+                alert('Network error saat menyimpan.');
+              } finally {
+                setSavingSettings(false);
+              }
+            }} className={`gradient-primary px-6 py-3 rounded-xl text-white font-semibold hover:opacity-90 transition-opacity ${savingSettings ? 'opacity-60 pointer-events-none' : ''}`}>
+              {savingSettings ? 'Menyimpan...' : 'Save Settings'}
             </button>
           </div>
         )}

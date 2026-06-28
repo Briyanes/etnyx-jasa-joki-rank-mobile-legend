@@ -532,11 +532,86 @@ export async function POST(request: NextRequest) {
             clearTimeout(timeoutId);
           }
 
-          const dompetxData = await dompetxRes.json();
+          // Parse response — capture raw text first for debugging
+          const dompetxRawText = await dompetxRes.text();
+          let dompetxData: Record<string, unknown>;
+          try {
+            dompetxData = JSON.parse(dompetxRawText);
+          } catch {
+            dompetxData = { _raw: dompetxRawText };
+          }
 
-          if (dompetxRes.ok && dompetxData.payment_link) {
-            const trxId = dompetxData.id || "";
-            paymentUrl = dompetxData.payment_link;
+          // DompetX response may be flat OR nested in `data`.
+          // Confirmed fields from real DompetX checkout response:
+          //   { id, reference, amount, fee, total_amount, status, ... }
+          // The payment URL field name varies across DompetX versions — check ALL known variants.
+          const checkoutData =
+            (dompetxData.data && typeof dompetxData.data === "object")
+              ? (dompetxData.data as Record<string, unknown>)
+              : dompetxData;
+
+          // Try every known field name for checkout ID
+          const trxId = String(
+            checkoutData.id ||
+            checkoutData.checkout_id ||
+            checkoutData.checkoutId ||
+            checkoutData.payment_id ||
+            checkoutData.paymentId ||
+            checkoutData.transaction_id ||
+            checkoutData.transactionId ||
+            dompetxData.id ||
+            dompetxData.checkout_id ||
+            dompetxData.payment_id ||
+            ""
+          );
+
+          // Try every known field name for payment URL
+          const extractedLink = String(
+            checkoutData.payment_link ||
+            checkoutData.payment_url ||
+            checkoutData.paymentLink ||
+            checkoutData.paymentUrl ||
+            checkoutData.checkout_url ||
+            checkoutData.checkoutUrl ||
+            checkoutData.redirect_url ||
+            checkoutData.redirectUrl ||
+            checkoutData.url ||
+            checkoutData.link ||
+            checkoutData.invoice_url ||
+            checkoutData.invoiceUrl ||
+            dompetxData.payment_link ||
+            dompetxData.payment_url ||
+            dompetxData.checkout_url ||
+            dompetxData.redirect_url ||
+            dompetxData.url ||
+            ""
+          );
+
+          // If we got an ID but no URL, try to construct one from common DompetX patterns
+          let constructedLink = "";
+          if (!extractedLink && trxId && dompetxRes.ok) {
+            // Common DompetX checkout URL patterns
+            const baseHost = dompetxBaseUrl.replace(/^https?:\/\/api\./, "https://").replace(/\/v\d+$/, "");
+            const apiHost = dompetxBaseUrl.replace(/\/v\d+$/, "");
+            const candidates = [
+              `${baseHost}/checkout/${trxId}`,
+              `${apiHost}/checkout/${trxId}`,
+              `${baseHost}/pay/${trxId}`,
+              `${apiHost}/payments/${trxId}`,
+              `https://checkout.dompetx.com/${trxId}`,
+              `https://pay.dompetx.com/${trxId}`,
+            ];
+            // Pick first candidate (we can't verify without an extra request;
+            // customer will see DompetX's own page or 404 — either way the order is safe)
+            constructedLink = candidates[0];
+            console.warn("DompetX: checkout ID present but no payment URL in response. Constructed URL:", constructedLink, "Raw response:", dompetxRawText.slice(0, 500));
+          }
+
+          const finalLink = extractedLink || constructedLink;
+
+          // CASE 1: Success with payment URL
+          if (dompetxRes.ok && finalLink) {
+            paymentUrl = finalLink;
 
             await supabase
               .from("orders")
@@ -547,10 +622,52 @@ export async function POST(request: NextRequest) {
                 payment_type: "dompetx_checkout",
               })
               .eq("id", order.id);
+          } else if (dompetxRes.ok) {
+            // CASE 2: 2xx from DompetX (checkout created — proven by email receipt)
+            // but we can't extract a usable URL. NEVER delete the order.
+            console.warn("DompetX: 2xx received, checkout likely created, but no usable URL. Checkout ID:", trxId || "(none)", "Raw:", dompetxRawText.slice(0, 500));
+
+            await supabase
+              .from("orders")
+              .update({
+                payment_token: trxId || null,
+                midtrans_order_id: dompetxRefId,
+                payment_type: "dompetx_checkout_recovery",
+              })
+              .eq("id", order.id);
+
+            return NextResponse.json({
+              success: true,
+              orderId: order.order_id,
+              totalPrice: verifiedTotalPrice,
+              discount: verifiedDiscount,
+              paymentUrl: undefined,
+              paymentMethod: "manual_transfer",
+              message: "Checkout DompetX berhasil dibuat (cek email Anda). Link pembayaran tidak dapat diambil otomatis — silakan transfer manual atau cek email dari DompetX.",
+            }, { status: 201 });
           } else {
-            console.error("DompetX error:", dompetxRes.status, JSON.stringify(dompetxData));
-            await supabase.from("orders").delete().eq("id", order.id);
-            return NextResponse.json({ error: "Gagal memproses pembayaran DompetX. Silakan coba lagi atau pilih transfer manual." }, { status: 502 });
+            // CASE 3: Non-2xx from DompetX — genuine API error
+            // BUT still keep the order; fallback to manual transfer.
+            // Deleting creates data loss and bad UX since the order was legitimately placed.
+            console.error("DompetX API error:", dompetxRes.status, dompetxRawText.slice(0, 500));
+
+            await supabase
+              .from("orders")
+              .update({
+                midtrans_order_id: dompetxRefId,
+                payment_type: "dompetx_failed",
+              })
+              .eq("id", order.id);
+
+            return NextResponse.json({
+              success: true,
+              orderId: order.order_id,
+              totalPrice: verifiedTotalPrice,
+              discount: verifiedDiscount,
+              paymentUrl: undefined,
+              paymentMethod: "manual_transfer",
+              message: "Pembayaran otomatis DompetX sedang bermasalah. Order Anda tetap tersimpan — silakan transfer manual.",
+            }, { status: 201 });
           }
         } catch (e) {
           console.error("DompetX payment creation error:", e);

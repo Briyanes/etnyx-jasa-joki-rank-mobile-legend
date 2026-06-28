@@ -1298,6 +1298,11 @@ function OrderPageContent() {
         paymentMethod: data.paymentMethod,
       });
 
+      // Show info message if backend provides one (e.g. recovery fallback)
+      if (data.message) {
+        toast(data.message);
+      }
+
       // Auto-redirect to DompetX payment page
       if (data.paymentUrl && data.paymentMethod !== "manual_transfer") {
         window.location.href = data.paymentUrl;

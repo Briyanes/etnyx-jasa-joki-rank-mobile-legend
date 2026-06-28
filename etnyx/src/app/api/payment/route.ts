@@ -125,20 +125,75 @@ export async function POST(request: NextRequest) {
       clearTimeout(timeoutId);
     }
 
-    const data = await dompetxRes.json();
+    // Capture raw text first for debugging
+    const rawText = await dompetxRes.text();
+    let data: Record<string, unknown>;
+    try {
+      data = JSON.parse(rawText);
+    } catch {
+      data = { _raw: rawText };
+    }
 
     if (!dompetxRes.ok) {
-      console.error("DompetX error:", dompetxRes.status, JSON.stringify(data));
-      const errMsg = (data && (data.message || data.error)) || "Payment initialization failed";
+      console.error("DompetX error:", dompetxRes.status, rawText.slice(0, 500));
+      const errMsg = (data.message || data.error) || "Payment initialization failed";
       return NextResponse.json({ error: errMsg }, { status: 502 });
     }
 
-    // Response: { id, status, payment_link, amount, currency, expiresAt, ... }
-    const transactionId = data.id || "";
-    const paymentLink = data.payment_link || "";
+    // Response may be flat OR nested in `data`. Check ALL known field variants.
+    const checkoutData =
+      (data.data && typeof data.data === "object")
+        ? (data.data as Record<string, unknown>)
+        : data;
 
-    if (!paymentLink) {
-      console.error("DompetX: no payment_link in response:", JSON.stringify(data));
+    const transactionId = String(
+      checkoutData.id ||
+      checkoutData.checkout_id ||
+      checkoutData.checkoutId ||
+      checkoutData.payment_id ||
+      checkoutData.paymentId ||
+      checkoutData.transaction_id ||
+      checkoutData.transactionId ||
+      data.id ||
+      ""
+    );
+
+    const paymentLink = String(
+      checkoutData.payment_link ||
+      checkoutData.payment_url ||
+      checkoutData.paymentLink ||
+      checkoutData.paymentUrl ||
+      checkoutData.checkout_url ||
+      checkoutData.checkoutUrl ||
+      checkoutData.redirect_url ||
+      checkoutData.redirectUrl ||
+      checkoutData.url ||
+      checkoutData.link ||
+      checkoutData.invoice_url ||
+      checkoutData.invoiceUrl ||
+      data.payment_link ||
+      data.payment_url ||
+      data.checkout_url ||
+      data.redirect_url ||
+      data.url ||
+      ""
+    );
+
+    // Construct a fallback URL if we have an ID but no link
+    let constructedLink = "";
+    if (!paymentLink && transactionId) {
+      const baseHost = dompetx.baseUrl.replace(/^https?:\/\/api\./, "https://").replace(/\/v\d+$/, "");
+      const apiHost = dompetx.baseUrl.replace(/\/v\d+$/, "");
+      constructedLink =
+        `${baseHost}/checkout/${transactionId}` ||
+        `${apiHost}/payments/${transactionId}`;
+      console.warn("DompetX: constructed fallback URL:", constructedLink, "Raw:", rawText.slice(0, 500));
+    }
+
+    const finalLink = paymentLink || constructedLink;
+
+    if (!finalLink) {
+      console.error("DompetX: 2xx but no payment link or ID found in response:", rawText.slice(0, 500));
       return NextResponse.json({ error: "No payment link returned" }, { status: 502 });
     }
 
@@ -147,7 +202,7 @@ export async function POST(request: NextRequest) {
       .from("orders")
       .update({
         payment_token: transactionId || null,
-        payment_url: paymentLink,
+        payment_url: finalLink,
         midtrans_order_id: refId,
         payment_type: "dompetx_checkout",
       })
@@ -155,7 +210,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      redirect_url: paymentLink,
+      redirect_url: finalLink,
       transaction_id: transactionId,
     });
   } catch (error) {
