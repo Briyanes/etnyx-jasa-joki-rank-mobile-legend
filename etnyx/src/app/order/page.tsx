@@ -39,6 +39,7 @@ import {
   CalendarClock,
   ChevronDown,
   ShieldCheck,
+  Smartphone,
   MapPin,
   Target,
   Wand2,
@@ -3037,8 +3038,8 @@ function OrderPageContent() {
                           <Check className="w-3 h-3 text-white" />
                         </div>
                       )}
-                      <span className="absolute top-3 right-10 bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full text-[10px] font-bold">
-                        ★ REKOMENDASI
+                      <span className="absolute top-3 right-10 bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full text-[10px] font-bold flex items-center gap-1">
+                        <Star className="w-2.5 h-2.5 fill-current" /> REKOMENDASI
                       </span>
                       <div className="flex items-center gap-3 mb-2">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 flex items-center justify-center">
@@ -3052,9 +3053,9 @@ function OrderPageContent() {
                         </div>
                       </div>
                       <div className="flex flex-wrap gap-2 mt-2">
-                        <span className="bg-white/5 text-text-muted px-2 py-0.5 rounded text-[10px] font-medium">⚡ Auto-confirmed</span>
-                        <span className="bg-white/5 text-text-muted px-2 py-0.5 rounded text-[10px] font-medium">🔒 Aman</span>
-                        <span className="bg-white/5 text-text-muted px-2 py-0.5 rounded text-[10px] font-medium">📱 QRIS Support</span>
+                        <span className="bg-white/5 text-text-muted px-2 py-0.5 rounded text-[10px] font-medium flex items-center gap-1"><Zap className="w-2.5 h-2.5" />Auto-confirmed</span>
+                        <span className="bg-white/5 text-text-muted px-2 py-0.5 rounded text-[10px] font-medium flex items-center gap-1"><ShieldCheck className="w-2.5 h-2.5" />Aman</span>
+                        <span className="bg-white/5 text-text-muted px-2 py-0.5 rounded text-[10px] font-medium flex items-center gap-1"><Smartphone className="w-2.5 h-2.5" />QRIS Support</span>
                       </div>
                     </button>
                   )}

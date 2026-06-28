@@ -9,9 +9,19 @@ import {
   Save, Loader2, CheckCircle, ChevronUp, ChevronDown, Download,
   CreditCard, Mail, MessageCircle, Send, BookOpen, AlertTriangle, Copy, Plug, Upload,
   Landmark, Wallet, QrCode, Smartphone, Building2, Banknote,
-  Swords, CalendarClock, Gamepad2,
+  Swords, CalendarClock, Gamepad2, Shield, Wand2, TreePine, Coins, Target,
   type LucideIcon,
 } from "lucide-react";
+
+// Lucide icon mapping for gendong roles (replaces emoji)
+const ROLE_ICON_MAP: Record<string, LucideIcon> = {
+  Swords,
+  Shield,
+  Wand2,
+  TreePine,
+  Coins,
+  Target,
+};
 
 // Icon mapping for payment methods
 const BANK_ICONS: Record<string, { icon: LucideIcon; color: string }> = {
@@ -123,13 +133,13 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
   const [bankAccounts, setBankAccounts] = useState(DEFAULT_BANK_ACCOUNTS);
   const [qrisUploading, setQrisUploading] = useState(false);
 
-  // Gendong settings
+  // Gendong settings — emoji field stores Lucide icon name for known roles
   const [gendongRoles, setGendongRoles] = useState<{ id: string; name: string; emoji: string; disabled: boolean }[]>([
-    { id: "exp", name: "EXP Laner", emoji: "⚔️", disabled: false },
-    { id: "roam", name: "Roamer", emoji: "🛡️", disabled: false },
-    { id: "mid", name: "Mid Laner", emoji: "🔮", disabled: false },
-    { id: "jungler", name: "Jungler", emoji: "🌿", disabled: true },
-    { id: "gold", name: "Gold Laner", emoji: "💰", disabled: true },
+    { id: "exp", name: "EXP Laner", emoji: "Swords", disabled: false },
+    { id: "roam", name: "Roamer", emoji: "Shield", disabled: false },
+    { id: "mid", name: "Mid Laner", emoji: "Wand2", disabled: false },
+    { id: "jungler", name: "Jungler", emoji: "TreePine", disabled: true },
+    { id: "gold", name: "Gold Laner", emoji: "Coins", disabled: true },
   ]);
   const [gendongSchedules, setGendongSchedules] = useState<{ id: string; label: string }[]>([
     { id: "pagi", label: "Pagi (08:00-12:00)" },
@@ -876,9 +886,11 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
               </div>
             </div>
             <div className="space-y-2">
-              {gendongRoles.map((role, idx) => (
+              {gendongRoles.map((role, idx) => {
+                const RoleIcon = ROLE_ICON_MAP[role.emoji] || ROLE_ICON_MAP[role.id];
+                return (
                 <div key={role.id} className="flex items-center gap-3 bg-background rounded-lg px-3 py-2 border border-white/5">
-                  <span className="text-lg">{role.emoji}</span>
+                  {RoleIcon ? <RoleIcon className="w-5 h-5 text-purple-400" /> : <span className="text-lg">{role.emoji}</span>}
                   <input
                     value={role.emoji}
                     onChange={(e) => {
@@ -918,10 +930,11 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
-              ))}
+                );
+              })}
             </div>
             <button
-              onClick={() => setGendongRoles([...gendongRoles, { id: `role_${Date.now()}`, name: "", emoji: "🎯", disabled: false }])}
+              onClick={() => setGendongRoles([...gendongRoles, { id: `role_${Date.now()}`, name: "", emoji: "Target", disabled: false }])}
               className="mt-2 flex items-center gap-1.5 text-xs text-accent hover:text-accent/80 transition-colors"
             >
               <Plus className="w-3.5 h-3.5" /> Tambah Role
