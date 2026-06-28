@@ -1911,18 +1911,24 @@ function OrderPageContent() {
                         }}
                         className="w-full bg-surface border border-white/10 rounded-xl px-4 py-3 text-text text-sm font-medium appearance-none cursor-pointer focus:border-accent focus:outline-none transition-colors pr-10"
                       >
-                        {getRankDivisionOptions()
-                          .filter((opt) => {
-                            const ci = RANK_ORDER.indexOf(form.currentRank);
-                            const oi = RANK_ORDER.indexOf(opt.rankId);
-                            if (oi > ci) return true;
-                            if (oi === ci && RANKS_WITH_STARS.includes(opt.rankId) && opt.division < currentStar) return true;
-                            if (oi === ci && MYTHIC_STAR_CONFIG[opt.rankId]) return true;
-                            return false;
-                          })
-                          .map((opt) => (
-                            <option key={opt.value} value={opt.value}>{opt.label}</option>
-                          ))}
+                      {getRankDivisionOptions()
+                        .map((opt) => {
+                          const ci = RANK_ORDER.indexOf(form.currentRank);
+                          const oi = RANK_ORDER.indexOf(opt.rankId);
+                          const isValid =
+                            oi > ci ||
+                            (oi === ci && RANKS_WITH_STARS.includes(opt.rankId) && opt.division < currentStar) ||
+                            (oi === ci && MYTHIC_STAR_CONFIG[opt.rankId]);
+                          return (
+                            <option
+                              key={opt.value}
+                              value={opt.value}
+                              disabled={!isValid}
+                            >
+                              {opt.label}{!isValid ? " (tidak tersedia)" : ""}
+                            </option>
+                          );
+                        })}
                       </select>
                       <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
                         <Image src={rankIcons[form.targetRank] || "/icons-tier/warrior.webp"} alt={`Rank ${form.targetRank}`} width={24} height={24} className="w-6 h-6 object-contain" />
