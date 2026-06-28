@@ -14,6 +14,7 @@ import {
   MessageCircle, Send, BookOpen, Copy, Gift, Wallet, CalendarDays,
   Flame, Target, Lightbulb, Menu, FileDown,
   KeyRound, Check, X, ListChecks, History,
+  Calculator,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import SettingsTab from "./SettingsTab";
@@ -1042,6 +1043,13 @@ export default function AdminDashboard() {
 
         {/* Bottom */}
         <div className="p-3 border-t border-white/5 space-y-1">
+          <Link
+            href="/calculator"
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-text-muted hover:text-text hover:bg-white/5 transition-colors w-full ${!sidebarOpen ? "justify-center" : ""}`}
+          >
+            <Calculator className="w-4 h-4 flex-shrink-0" />
+            {sidebarOpen && <span>Calculator</span>}
+          </Link>
           <Link
             href="/admin/finance"
             className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-text-muted hover:text-text hover:bg-white/5 transition-colors w-full ${!sidebarOpen ? "justify-center" : ""}`}

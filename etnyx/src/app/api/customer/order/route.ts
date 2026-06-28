@@ -477,9 +477,8 @@ export async function POST(request: NextRequest) {
       } catch { /* fallback to env */ }
 
       if (dompetxApiKey) {
+        const dompetxRefId = `ETN-${orderId}-${Date.now()}`;
         try {
-          const dompetxRefId = `ETN-${orderId}-${Date.now()}`;
-
           // Build DompetX checkout payload (POST /payments/checkout format)
           const dompetxCheckoutBody = {
             amount: verifiedTotalPrice,
@@ -512,7 +511,7 @@ export async function POST(request: NextRequest) {
             .digest("hex");
 
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 20000);
+          const timeoutId = setTimeout(() => controller.abort(), 30000);
 
           let dompetxRes: Response;
           try {
@@ -659,14 +658,34 @@ export async function POST(request: NextRequest) {
             }, { status: 201 });
           }
         } catch (e) {
-          console.error("DompetX payment creation error:", e);
-          await supabase.from("orders").delete().eq("id", order.id);
+          // CASE 4: Network error / timeout / fetch exception.
+          // The DompetX request MAY have actually succeeded on their server
+          // (proven by real cases where the checkout email was received even
+          // though this fetch threw). NEVER delete the order — that causes
+          // data loss. Instead, keep it and fall back to manual transfer,
+          // consistent with CASE 2 and CASE 3.
           const isTimeout = e instanceof Error && e.name === "AbortError";
+          console.error("DompetX payment creation error:", isTimeout ? "(timeout)" : "", e);
+
+          await supabase
+            .from("orders")
+            .update({
+              midtrans_order_id: dompetxRefId,
+              payment_type: "dompetx_error",
+            })
+            .eq("id", order.id);
+
           return NextResponse.json({
-            error: isTimeout
-              ? "Koneksi ke DompetX timeout. Silakan coba lagi atau pilih transfer manual."
-              : "Gagal menghubungi DompetX. Silakan coba lagi atau pilih transfer manual.",
-          }, { status: 502 });
+            success: true,
+            orderId: order.order_id,
+            totalPrice: verifiedTotalPrice,
+            discount: verifiedDiscount,
+            paymentUrl: undefined,
+            paymentMethod: "manual_transfer",
+            message: isTimeout
+              ? "Koneksi ke DompetX timeout. Order Anda tetap tersimpan — silakan transfer manual atau cek email dari DompetX."
+              : "Pembayaran otomatis DompetX sedang bermasalah. Order Anda tetap tersimpan — silakan transfer manual atau cek email dari DompetX.",
+          }, { status: 201 });
         }
       }
     }
