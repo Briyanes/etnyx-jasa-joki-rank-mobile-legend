@@ -97,7 +97,7 @@ const faqId = {
     },
     {
       q: "Metode pembayaran apa saja yang tersedia?",
-      a: "Kami menerima pembayaran via Transfer Bank (BCA, BRI, BNI, Mandiri, Jago), E-Wallet, QRIS, dan pembayaran otomatis melalui iPaymu (Virtual Account, GoPay, ShopeePay, Kartu Kredit).",
+      a: "Kami menerima pembayaran via Transfer Bank (BCA, BRI, BNI, Mandiri, Jago), E-Wallet, QRIS, dan pembayaran otomatis melalui DompetX (Virtual Account, GoPay, ShopeePay, Kartu Kredit).",
     },
     {
       q: "Berapa lama proses pengerjaan?",
@@ -121,7 +121,7 @@ const faqId = {
     },
     {
       q: "Apakah pembayaran saya aman?",
-      a: "Ya, pembayaran otomatis diproses melalui iPaymu, payment gateway resmi yang terdaftar di Bank Indonesia. Data pembayaran tidak disimpan di server kami.",
+      a: "Ya, pembayaran otomatis diproses melalui DompetX, payment gateway resmi yang terdaftar di Bank Indonesia. Data pembayaran tidak disimpan di server kami.",
     },
     {
       q: "Bagaimana cara menghubungi customer service?",
@@ -155,7 +155,7 @@ const faqEn = {
     },
     {
       q: "What payment methods are available?",
-      a: "We accept payment via Bank Transfer (BCA, BRI, BNI, Mandiri, Jago), E-Wallet, QRIS, and automatic payment through iPaymu (Virtual Account, GoPay, ShopeePay, Credit Card).",
+      a: "We accept payment via Bank Transfer (BCA, BRI, BNI, Mandiri, Jago), E-Wallet, QRIS, and automatic payment through DompetX (Virtual Account, GoPay, ShopeePay, Credit Card).",
     },
     {
       q: "How long does the process take?",
@@ -179,7 +179,7 @@ const faqEn = {
     },
     {
       q: "Is my payment secure?",
-      a: "Yes, automatic payments are processed through iPaymu, an official payment gateway registered with Bank Indonesia. Payment data is not stored on our servers.",
+      a: "Yes, automatic payments are processed through DompetX, an official payment gateway registered with Bank Indonesia. Payment data is not stored on our servers.",
     },
     {
       q: "How do I contact customer service?",

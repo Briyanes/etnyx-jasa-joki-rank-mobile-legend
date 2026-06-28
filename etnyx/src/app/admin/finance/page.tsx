@@ -120,7 +120,7 @@ const COA_DATA: COAAccount[] = [
       { code: "1102", name: "Bank BCA" },
       { code: "1103", name: "Bank BRI" },
       { code: "1104", name: "Dana / OVO / GoPay" },
-      { code: "1105", name: "iPaymu Balance" },
+      { code: "1105", name: "DompetX Balance" },
     ]},
     { code: "1200", name: "Piutang", children: [
       { code: "1201", name: "Piutang Order (Pending Payment)" },
@@ -177,7 +177,7 @@ const COA_DATA: COAAccount[] = [
       { code: "6202", name: "Supabase (Database)" },
       { code: "6203", name: "WhatsApp API (Meta)" },
       { code: "6204", name: "Telegram Bot" },
-      { code: "6205", name: "iPaymu Fee" },
+      { code: "6205", name: "DompetX Fee" },
     ]},
     { code: "6300", name: "Beban Marketing", children: [
       { code: "6301", name: "Meta Ads (Facebook/IG)" },
@@ -1321,7 +1321,7 @@ function COATab() {
             <ol className="space-y-1.5 text-text-muted list-decimal ml-4">
               <li>Cek Dashboard → Overview → catat total revenue hari ini</li>
               <li>Cek order masuk → pastikan payment_status = paid</li>
-              <li>Catat transaksi masuk per metode pembayaran (iPaymu / manual transfer)</li>
+              <li>Catat transaksi masuk per metode pembayaran (DompetX / manual transfer)</li>
               <li>Jika ada payout ke worker → catat sebagai expense (5101 - Komisi Worker)</li>
               <li>Screenshot/export bukti transaksi</li>
             </ol>

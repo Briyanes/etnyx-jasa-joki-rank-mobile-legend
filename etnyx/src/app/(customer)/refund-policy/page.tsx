@@ -86,7 +86,7 @@ const refundId = {
         "Langkah 1: Hubungi tim support kami via WhatsApp atau email dengan menyertakan Order ID dan alasan refund.",
         "Langkah 2: Tim kami akan meninjau permintaan dalam waktu 1x24 jam kerja.",
         "Langkah 3: Jika disetujui, refund akan diproses dalam 3–7 hari kerja ke metode pembayaran asal (rekening bank atau e-wallet).",
-        "Untuk pembayaran melalui iPaymu (VA, QRIS, E-Wallet), refund akan ditransfer ke rekening bank yang didaftarkan pelanggan.",
+        "Untuk pembayaran melalui DompetX (VA, QRIS, E-Wallet), refund akan ditransfer ke rekening bank yang didaftarkan pelanggan.",
       ],
     },
     {
@@ -148,7 +148,7 @@ const refundEn = {
         "Step 1: Contact our support team via WhatsApp or email with your Order ID and reason for refund.",
         "Step 2: Our team will review the request within 1 business day.",
         "Step 3: If approved, the refund will be processed within 3–7 business days to the original payment method (bank account or e-wallet).",
-        "For payments via iPaymu (VA, QRIS, E-Wallet), refunds will be transferred to the customer's registered bank account.",
+        "For payments via DompetX (VA, QRIS, E-Wallet), refunds will be transferred to the customer's registered bank account.",
       ],
     },
     {

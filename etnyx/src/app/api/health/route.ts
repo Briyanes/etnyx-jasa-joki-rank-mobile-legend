@@ -20,26 +20,21 @@ async function checkSupabase(): Promise<ServiceStatus> {
   }
 }
 
-async function checkIpaymu(): Promise<ServiceStatus> {
-  const apiKey = process.env.IPAYMU_API_KEY;
-  const va = process.env.IPAYMU_VA;
-  if (!apiKey || !va) return { status: "error", error: "Not configured" };
+async function checkDompetx(): Promise<ServiceStatus> {
+  const apiKey = process.env.DOMPETX_API_KEY;
+  const baseUrl = process.env.DOMPETX_BASE_URL;
+  if (!apiKey || !baseUrl) return { status: "error", error: "Not configured" };
 
   const start = Date.now();
   try {
-    const isProduction = process.env.IPAYMU_IS_PRODUCTION === "true";
-    const baseUrl = isProduction
-      ? "https://my.ipaymu.com"
-      : "https://sandbox.ipaymu.com";
-
-    const res = await fetch(`${baseUrl}/api/v2/balance`, {
-      method: "POST",
-      headers: { Accept: "application/json", "Content-Type": "application/json" },
+    const res = await fetch(`${baseUrl}/health`, {
+      method: "GET",
+      headers: { Accept: "application/json" },
       signal: AbortSignal.timeout(5000),
     });
     return { status: res.ok ? "ok" : "error", latency_ms: Date.now() - start };
   } catch (e) {
-    console.error("Health check - iPaymu error:", e);
+    console.error("Health check - DompetX error:", e);
     return { status: "error", latency_ms: Date.now() - start, error: "Payment service unreachable" };
   }
 }
@@ -88,13 +83,13 @@ async function checkNotifications(): Promise<Record<string, ServiceStatus>> {
 export async function GET() {
   const start = Date.now();
 
-  const [supabase, ipaymu, notifications] = await Promise.all([
+  const [supabase, dompetx, notifications] = await Promise.all([
     checkSupabase(),
-    checkIpaymu(),
+    checkDompetx(),
     checkNotifications(),
   ]);
 
-  const allOk = supabase.status === "ok" && ipaymu.status === "ok";
+  const allOk = supabase.status === "ok" && dompetx.status === "ok";
   const overallStatus = allOk ? "healthy" : "degraded";
 
   return NextResponse.json(
@@ -106,7 +101,7 @@ export async function GET() {
       uptime_check_ms: Date.now() - start,
       services: {
         supabase,
-        ipaymu,
+        dompetx,
         ...notifications,
       },
     },

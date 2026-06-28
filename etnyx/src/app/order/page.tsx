@@ -1380,7 +1380,7 @@ function OrderPageContent() {
       );
     }
 
-    // No payment URL (iPaymu not configured) — show order success
+    // No payment URL (DompetX not configured) — show order success
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="bg-surface rounded-3xl p-8 max-w-md w-full text-center border border-white/5">
