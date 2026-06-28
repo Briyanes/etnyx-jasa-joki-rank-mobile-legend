@@ -179,15 +179,12 @@ export async function POST(request: NextRequest) {
       ""
     );
 
-    // Construct a fallback URL if we have an ID but no link
+    // CONFIRMED DompetX checkout URL pattern (from production):
+    // https://checkout.dompetx.com/checkoutV2?refId={ID}
     let constructedLink = "";
     if (!paymentLink && transactionId) {
-      const baseHost = dompetx.baseUrl.replace(/^https?:\/\/api\./, "https://").replace(/\/v\d+$/, "");
-      const apiHost = dompetx.baseUrl.replace(/\/v\d+$/, "");
-      constructedLink =
-        `${baseHost}/checkout/${transactionId}` ||
-        `${apiHost}/payments/${transactionId}`;
-      console.warn("DompetX: constructed fallback URL:", constructedLink, "Raw:", rawText.slice(0, 500));
+      constructedLink = `https://checkout.dompetx.com/checkoutV2?refId=${transactionId}`;
+      console.warn("DompetX: constructed checkout URL from ID:", constructedLink);
     }
 
     const finalLink = paymentLink || constructedLink;

@@ -587,24 +587,13 @@ export async function POST(request: NextRequest) {
             ""
           );
 
-          // If we got an ID but no URL, try to construct one from common DompetX patterns
+          // CONFIRMED DompetX checkout URL pattern (from production):
+          // https://checkout.dompetx.com/checkoutV2?refId={ID}
+          // Use this as fallback if API doesn't return a direct link.
           let constructedLink = "";
           if (!extractedLink && trxId && dompetxRes.ok) {
-            // Common DompetX checkout URL patterns
-            const baseHost = dompetxBaseUrl.replace(/^https?:\/\/api\./, "https://").replace(/\/v\d+$/, "");
-            const apiHost = dompetxBaseUrl.replace(/\/v\d+$/, "");
-            const candidates = [
-              `${baseHost}/checkout/${trxId}`,
-              `${apiHost}/checkout/${trxId}`,
-              `${baseHost}/pay/${trxId}`,
-              `${apiHost}/payments/${trxId}`,
-              `https://checkout.dompetx.com/${trxId}`,
-              `https://pay.dompetx.com/${trxId}`,
-            ];
-            // Pick first candidate (we can't verify without an extra request;
-            // customer will see DompetX's own page or 404 — either way the order is safe)
-            constructedLink = candidates[0];
-            console.warn("DompetX: checkout ID present but no payment URL in response. Constructed URL:", constructedLink, "Raw response:", dompetxRawText.slice(0, 500));
+            constructedLink = `https://checkout.dompetx.com/checkoutV2?refId=${trxId}`;
+            console.warn("DompetX: constructed checkout URL from ID:", constructedLink, "Raw response:", dompetxRawText.slice(0, 500));
           }
 
           const finalLink = extractedLink || constructedLink;
