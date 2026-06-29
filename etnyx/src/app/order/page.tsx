@@ -1180,7 +1180,7 @@ function OrderPageContent() {
   const activeCat = visibleCategories.find(c => c.id === activeCategory) || visibleCategories[0];
 
   // Auto-calculated package price for paket mode (real-time)
-  const autoCalcResult = orderMode === "paket"
+  const autoCalcResult = (orderMode === "paket" || orderMode === "perstar")
     ? autoCalcPackagePrice(form.currentRank, currentStar, form.targetRank, targetStar, currentDivisionStar, perStarRanks, currentMythicStars, targetMythicStars)
     : { price: 0, totalStars: 0, originalPrice: 0, discountPercent: 0 };
 
@@ -1212,7 +1212,7 @@ function OrderPageContent() {
   // Raw item price (before season/express/premium)
   const rawItemPrice = (() => {
     if ((orderMode === "paket" || orderMode === "classic") && selectedPackage) return selectedPackage.price;
-    if (orderMode === "perstar" && selectedStarRank) return (selectedStarRank.isFlat ? selectedStarRank.price : selectedStarRank.price * starQuantity);
+    if (orderMode === "perstar" && autoCalcResult.price > 0) return autoCalcResult.price;
     if (orderMode === "gendong" && selectedGendongRank) return selectedGendongRank.price * gendongQuantity;
     return 0;
   })();
@@ -1267,46 +1267,9 @@ function OrderPageContent() {
     }
   }, [form.userId, form.serverId, t.checkAccountHint, t.accountNotFound]);
 
-  // Handle per-star rank selection
-  const handleSelectStarRank = useCallback((rank: PerStarRank) => {
-    setSelectedStarRank(rank);
-    setStarQuantity(rank.id === "grading" ? 1 : 3); // Grading min 1, others min 3
-  }, []);
-
-  // Max stars for current per-star selection
-  const perStarMax = selectedStarRank?.maxStars ?? 100;
+  // Max stars for current gendong selection
   const gendongMax = selectedGendongRank?.maxStars ?? 100;
-
-  // Unit label: "Match" for grading, "Star" for others
-  const perStarUnit = selectedStarRank?.id === "grading" ? "Match" : "Star";
-  const gendongUnit = selectedGendongRank?.id === "grading" ? "Match" : "Star";
-  const perStarMin = selectedStarRank?.id === "grading" ? 1 : 3;
   const gendongMin = selectedGendongRank?.id === "grading" ? 1 : 3;
-
-  // Proceed from per-star selection
-  const handleProceedPerStar = useCallback(() => {
-    if (selectedStarRank && starQuantity >= perStarMin) {
-      const price = (selectedStarRank.isFlat ? selectedStarRank.price : selectedStarRank.price * starQuantity);
-      const unit = selectedStarRank.id === "grading" ? "Match" : "Star";
-      const title = `${selectedStarRank.name} × ${starQuantity} ${unit}`;
-      // Create a virtual package for the order flow
-      setSelectedPackage({
-        id: `perstar-${selectedStarRank.id}-${starQuantity}`,
-        title,
-        price,
-        rankKey: selectedStarRank.id,
-        currentRank: selectedStarRank.id,
-        targetRank: selectedStarRank.id,
-      });
-      // Fire AddToCart conversion event
-      trackAddToCart({ value: price, contentName: title });
-      setTimeout(() => {
-        setSlideDirection("right");
-        setCurrentStep(2);
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }, 400);
-    }
-  }, [selectedStarRank, starQuantity, perStarMin]);
 
   const handleSelectPackage = useCallback(
     (pkg: ProductPackage) => {
@@ -1334,8 +1297,8 @@ function OrderPageContent() {
             const gMin = selectedGendongRank?.id === "grading" ? 1 : 3;
             return !!(selectedGendongRank && gendongQuantity >= gMin);
           } else {
-            const pMin = selectedStarRank?.id === "grading" ? 1 : 3;
-            return !!(selectedStarRank && starQuantity >= pMin);
+            // Perstar mode: rank awal → tujuan with autoCalcResult
+            return autoCalcResult.price > 0 && autoCalcResult.totalStars > 0;
           }
         case 2:
           if (orderMode === "gendong") {
@@ -1382,20 +1345,22 @@ function OrderPageContent() {
 
   const nextStep = useCallback(() => {
     if (canProceedStep(currentStep) && currentStep < 4) {
-      // For per-star mode on step 1, create virtual package first
-      if (currentStep === 1 && orderMode === "perstar" && selectedStarRank) {
-        const price = (selectedStarRank.isFlat ? selectedStarRank.price : selectedStarRank.price * starQuantity);
-        const unit = selectedStarRank.id === "grading" ? "Match" : "Star";
-        const title = `${selectedStarRank.name} × ${starQuantity} ${unit}`;
+      // For per-star mode on step 1, create virtual package from rank selections (like paket)
+      if (currentStep === 1 && orderMode === "perstar" && autoCalcResult.price > 0) {
+        const rankLabel = (id: string) => RANK_LIST.find(r => r.id === id)?.label || id;
+        const divLabel = (div: number) => ["I", "II", "III", "IV", "V"][div - 1] || "";
+        const curLabel = RANKS_WITH_STARS.includes(form.currentRank) ? `${rankLabel(form.currentRank)} ${divLabel(currentStar)}` : rankLabel(form.currentRank);
+        const tgtLabel = RANKS_WITH_STARS.includes(form.targetRank) ? `${rankLabel(form.targetRank)} ${divLabel(targetStar)}` : rankLabel(form.targetRank);
+        const title = `Per Star: ${curLabel} → ${tgtLabel} (${autoCalcResult.totalStars}★)`;
         setSelectedPackage({
-          id: `perstar-${selectedStarRank.id}-${starQuantity}`,
+          id: `perstar-${form.currentRank}-${form.targetRank}-${autoCalcResult.totalStars}`,
           title,
-          price,
-          rankKey: selectedStarRank.id,
-          currentRank: selectedStarRank.id,
-          targetRank: selectedStarRank.id,
+          price: autoCalcResult.price,
+          rankKey: form.targetRank,
+          currentRank: form.currentRank,
+          targetRank: form.targetRank,
         });
-        trackAddToCart({ value: price, contentName: title });
+        trackAddToCart({ value: autoCalcResult.price, contentName: title });
       }
       // For gendong mode on step 1, create virtual package first
       if (currentStep === 1 && orderMode === "gendong" && selectedGendongRank) {
@@ -1505,21 +1470,21 @@ function OrderPageContent() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          currentRank: (orderMode === "paket" || orderMode === "classic") ? (selectedPackage?.currentRank || form.currentRank) : (orderMode === "perstar" ? (selectedStarRank?.id || form.currentRank) : (selectedGendongRank?.id || form.currentRank)),
-          targetRank: (orderMode === "paket" || orderMode === "classic") ? (selectedPackage?.targetRank || form.targetRank) : (orderMode === "perstar" ? (selectedStarRank?.id || form.targetRank) : (selectedGendongRank?.id || form.targetRank)),
-          currentStar: orderMode === "paket" && RANKS_WITH_STARS.includes(selectedPackage?.currentRank || form.currentRank) ? currentStar : null,
-          targetStar: orderMode === "paket" && RANKS_WITH_STARS.includes(selectedPackage?.targetRank || form.targetRank) ? targetStar : null,
-          currentMythicStars: orderMode === "paket" && MYTHIC_STAR_CONFIG[selectedPackage?.currentRank || form.currentRank] ? currentMythicStars : undefined,
-          targetMythicStars: orderMode === "paket" && MYTHIC_STAR_CONFIG[selectedPackage?.targetRank || form.targetRank] ? targetMythicStars : undefined,
-          packageTitle: (orderMode === "paket" || orderMode === "classic") ? selectedPackage?.title : (orderMode === "gendong" ? `Gendong ${selectedGendongRank?.name} x${gendongQuantity} ${selectedGendongRank?.id === "grading" ? "match" : "star"}` : (orderMode === "perstar" && selectedStarRank ? `${selectedStarRank.name} × ${starQuantity} ${selectedStarRank.id === "grading" ? "match" : "star"}` : undefined)),
-          packageId: (orderMode === "paket" || orderMode === "classic") ? selectedPackage?.id : undefined,
-          bonusStars: orderMode === "paket" ? (() => {
+          currentRank: (orderMode === "paket" || orderMode === "classic" || orderMode === "perstar") ? (selectedPackage?.currentRank || form.currentRank) : (selectedGendongRank?.id || form.currentRank),
+          targetRank: (orderMode === "paket" || orderMode === "classic" || orderMode === "perstar") ? (selectedPackage?.targetRank || form.targetRank) : (selectedGendongRank?.id || form.targetRank),
+          currentStar: (orderMode === "paket" || orderMode === "perstar") && RANKS_WITH_STARS.includes(selectedPackage?.currentRank || form.currentRank) ? currentStar : null,
+          targetStar: (orderMode === "paket" || orderMode === "perstar") && RANKS_WITH_STARS.includes(selectedPackage?.targetRank || form.targetRank) ? targetStar : null,
+          currentMythicStars: (orderMode === "paket" || orderMode === "perstar") && MYTHIC_STAR_CONFIG[selectedPackage?.currentRank || form.currentRank] ? currentMythicStars : undefined,
+          targetMythicStars: (orderMode === "paket" || orderMode === "perstar") && MYTHIC_STAR_CONFIG[selectedPackage?.targetRank || form.targetRank] ? targetMythicStars : undefined,
+          packageTitle: (orderMode === "paket" || orderMode === "classic" || orderMode === "perstar") ? selectedPackage?.title : (orderMode === "gendong" ? `Gendong ${selectedGendongRank?.name} x${gendongQuantity} ${selectedGendongRank?.id === "grading" ? "match" : "star"}` : undefined),
+          packageId: (orderMode === "paket" || orderMode === "classic" || orderMode === "perstar") ? selectedPackage?.id : undefined,
+          bonusStars: (orderMode === "paket" || orderMode === "perstar") ? (() => {
             const ts = calculateTotalStars(form.currentRank, currentStar, form.targetRank, targetStar, RANKS_WITH_STARS.includes(form.currentRank) ? currentDivisionStar : 0, currentMythicStars, targetMythicStars);
             const tier = [...BUNDLE_TIERS].reverse().find(t => ts >= t.minStars);
             return tier?.bonusStars || 0;
           })() : 0,
-          perStarRankId: orderMode === "perstar" ? selectedStarRank?.id : (orderMode === "gendong" ? selectedGendongRank?.id : undefined),
-          starQuantity: orderMode === "perstar" ? starQuantity : (orderMode === "gendong" ? gendongQuantity : undefined),
+          perStarRankId: orderMode === "gendong" ? selectedGendongRank?.id : undefined,
+          starQuantity: orderMode === "gendong" ? gendongQuantity : undefined,
           orderType: orderMode,
           loginMethod: orderMode === "gendong" ? undefined : form.loginMethod,
           userId: form.serverId ? `${form.userId}(${form.serverId})` : form.userId,
@@ -1956,8 +1921,8 @@ function OrderPageContent() {
               </div>
               )}
 
-              {/* HIDDEN: Old rank selector (disabled — paket now uses catalog cards) */}
-              {false && orderMode === "paket" && (
+              {/* Rank Awal selector — enabled for perstar mode */}
+              {orderMode === "perstar" && (
               <div className="mb-5 p-4 bg-background rounded-xl border border-white/5">
                 <label className="block text-sm text-text font-bold mb-2">
                   <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-red-400" />{locale === "id" ? "Rank Awalmu Sekarang" : "Your Current Rank"}</span>
@@ -2433,132 +2398,146 @@ function OrderPageContent() {
                 </>
               )}
 
-              {/* PER STAR MODE */}
+              {/* PER STAR MODE — Rank Tujuan + Summary (like paket) */}
               {orderMode === "perstar" && (
                 <>
-                  {/* Rank Selection Grid */}
-                  <div className="mb-5">
-                    <h3 className="text-text font-bold text-base mb-4">{t.selectRank}</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                      {perStarRanks.map((rank) => {
-                        const isSelected = selectedStarRank?.id === rank.id;
-                        return (
-                          <button
-                            key={rank.id}
-                            onClick={() => { setSelectedStarRank(rank); setStarQuantity(rank.id === "grading" ? 1 : 3); }}
-                            className={`relative text-left rounded-xl border-2 transition-all duration-200 hover:scale-[1.02] overflow-hidden flex flex-col ${
-                              isSelected
-                                ? "border-yellow-400 shadow-lg shadow-yellow-400/20"
-                                : "border-white/5 hover:border-white/15"
-                            }`}
-                          >
-                            <div className="p-4 bg-gradient-to-br from-slate-700/80 to-slate-800/80 flex-1">
-                              <p className="text-white text-sm font-semibold mb-2">
-                                {rank.name}
-                              </p>
-                              <div className="flex items-center gap-3">
-                                <Image
-                                  src={rank.icon}
-                                  alt={rank.name}
-                                  width={40}
-                                  height={40}
-                                  className="w-10 h-10 object-contain flex-shrink-0 drop-shadow-lg"
-                                />
-                                <div>
-                                  <p className="text-yellow-400 font-bold text-lg leading-tight">
-                                    {formatRupiah(rank.price)}
-                                    <span className="text-text-muted text-xs font-normal ml-1">{rank.id === "grading" ? "/ Match" : t.perStar}</span>
-                                  </p>
-                                  {rank.originalPrice && (
-                                    <p className="text-red-400/70 text-xs line-through">
-                                      {formatRupiah(rank.originalPrice)}
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                            <div className="px-4 py-2.5 bg-slate-800/60 flex items-center justify-end gap-2">
-                              {rank.discountPercent && (
-                                <span className="bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded text-[10px] font-bold">
-                                  Disc {rank.discountPercent}%
-                                </span>
-                              )}
-                              <span className="bg-teal-600/30 text-teal-300 px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1">
-                                <Zap className="w-2.5 h-2.5" />
-                                Pengiriman INSTAN
-                              </span>
-                            </div>
-                            {isSelected && (
-                              <div className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-yellow-400 flex items-center justify-center">
-                                <Check className="w-3 h-3 text-black" />
-                              </div>
-                            )}
-                          </button>
-                        );
-                      })}
+                  {/* Rank Tujuanmu */}
+                  <div className="mb-5 p-4 bg-background rounded-xl border border-white/5">
+                    <label className="block text-sm text-text font-bold mb-2">
+                      <span className="flex items-center gap-1.5"><Target className="w-4 h-4 text-accent" />{locale === "id" ? "Rank Tujuanmu" : "Your Target Rank"}</span>
+                    </label>
+                    <div className="flex flex-col gap-2">
+                      <div className="relative">
+                        <select
+                          value={form.targetRank}
+                          onChange={(e) => {
+                            const rankId = e.target.value;
+                            updateForm({ targetRank: rankId as RankTier });
+                            const cfg = RANK_DIVISION_CONFIG[rankId];
+                            if (cfg) setTargetStar(1);
+                            const mythicCfg = MYTHIC_STAR_CONFIG[rankId];
+                            if (mythicCfg) setTargetMythicStars(mythicCfg.min);
+                          }}
+                          className="w-full bg-surface border border-white/10 rounded-xl px-4 py-3 text-text text-sm font-medium appearance-none cursor-pointer focus:border-accent focus:outline-none transition-colors pr-10"
+                        >
+                          {RANK_LIST.map((rank) => {
+                            const ci = RANK_ORDER.indexOf(form.currentRank);
+                            const oi = RANK_ORDER.indexOf(rank.id);
+                            const isValid = oi > ci || (oi === ci && MYTHIC_STAR_CONFIG[rank.id]);
+                            return (
+                              <option key={rank.id} value={rank.id} disabled={!isValid}>
+                                {rank.label}{!isValid ? " (di bawah rank awal)" : ""}
+                              </option>
+                            );
+                          })}
+                        </select>
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                          <Image src={rankIcons[form.targetRank] || "/icons-tier/warrior.webp"} alt={`Rank ${form.targetRank}`} width={24} height={24} className="w-6 h-6 object-contain" />
+                        </div>
+                      </div>
+                      {RANKS_WITH_STARS.includes(form.targetRank) && (
+                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                          <span className="text-text-muted text-xs whitespace-nowrap font-medium">{locale === "id" ? "Divisi:" : "Division:"}</span>
+                          <div className="flex gap-1">
+                            {getDivisionOptions(form.targetRank).map((opt) => (
+                              <button key={opt.value} onClick={() => setTargetStar(opt.value)}
+                                className={`px-3 h-8 rounded-lg text-xs font-bold transition-all flex items-center justify-center ${targetStar === opt.value ? "bg-accent/20 border-2 border-accent text-accent" : "bg-surface border border-white/10 text-text-muted hover:border-white/20"}`}>
+                                {opt.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {MYTHIC_STAR_CONFIG[form.targetRank] && (
+                        <div className="flex items-center gap-2 mt-3">
+                          <div className="flex items-center gap-1.5">
+                            <button onClick={() => setTargetMythicStars(s => Math.max(MYTHIC_STAR_CONFIG[form.targetRank].min, s - 1))} disabled={targetMythicStars <= MYTHIC_STAR_CONFIG[form.targetRank].min} className="w-8 h-8 rounded-lg bg-surface border border-white/10 text-white flex items-center justify-center hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed"><Minus className="w-3.5 h-3.5" /></button>
+                            <input type="number" value={targetMythicStars} onChange={(e) => { const v = parseInt(e.target.value) || MYTHIC_STAR_CONFIG[form.targetRank].min; const cfg = MYTHIC_STAR_CONFIG[form.targetRank]; setTargetMythicStars(Math.max(cfg.min, Math.min(cfg.max, v))); }} className="w-16 h-10 text-center bg-surface text-text rounded-lg border border-white/10 focus:outline-none focus:border-accent text-sm font-bold" />
+                            <button onClick={() => setTargetMythicStars(s => Math.min(MYTHIC_STAR_CONFIG[form.targetRank].max, s + 1))} disabled={targetMythicStars >= MYTHIC_STAR_CONFIG[form.targetRank].max} className="w-8 h-8 rounded-lg bg-surface border border-white/10 text-white flex items-center justify-center hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed"><Plus className="w-3.5 h-3.5" /></button>
+                          </div>
+                          <span className="text-text-muted text-xs whitespace-nowrap flex items-center gap-1">{MYTHIC_STAR_CONFIG[form.targetRank].label === "Match" ? "Match" : <><Star className="w-3 h-3 text-yellow-400" /> {locale === "id" ? "Bintang Tujuan" : "Target Stars"}</>}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  {/* Star Quantity Input */}
-                  {selectedStarRank && (
-                    <div className="p-4 bg-background rounded-xl border border-accent/30">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div className="flex items-center gap-3">
-                          <Image
-                            src={selectedStarRank.icon}
-                            alt={selectedStarRank.name}
-                            width={40}
-                            height={40}
-                            className="w-10 h-10 object-contain drop-shadow-lg"
-                          />
-                          <div>
-                            <p className="text-text font-semibold">{selectedStarRank.name}</p>
-                            <p className="text-text-muted text-sm">
-                              {formatRupiah(selectedStarRank.price)} {selectedStarRank.id === "grading" ? "/ Match" : t.perStar}
-                            </p>
-                          </div>
+                  {/* Selected Rank Flow Display */}
+                  <div className="flex items-center justify-center gap-3 mb-4 p-3 bg-background rounded-xl border border-white/5">
+                    <div className="flex items-center gap-2">
+                      <Image src={rankIcons[form.currentRank] || "/icons-tier/warrior.webp"} alt={`Rank ${form.currentRank}`} width={28} height={28} className="w-7 h-7 object-contain" />
+                      <span className="text-text text-sm font-medium">
+                        {RANK_LIST.find(r => r.id === form.currentRank)?.label}
+                        {RANKS_WITH_STARS.includes(form.currentRank) && <span className="text-text-muted ml-1">{getDivisionOptions(form.currentRank).find(s => s.value === currentStar)?.label}</span>}
+                        {MYTHIC_STAR_CONFIG[form.currentRank] && <span className="text-text-muted ml-1">({currentMythicStars}★)</span>}
+                      </span>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-accent flex-shrink-0" />
+                    <div className="flex items-center gap-2">
+                      <Image src={rankIcons[form.targetRank] || "/icons-tier/warrior.webp"} alt={`Rank ${form.targetRank}`} width={28} height={28} className="w-7 h-7 object-contain" />
+                      <span className="text-yellow-400 text-sm font-bold">
+                        {RANK_LIST.find(r => r.id === form.targetRank)?.label}
+                        {RANKS_WITH_STARS.includes(form.targetRank) && <span className="text-yellow-300 ml-1">{getDivisionOptions(form.targetRank).find(s => s.value === targetStar)?.label}</span>}
+                        {MYTHIC_STAR_CONFIG[form.targetRank] && <span className="text-yellow-300 ml-1">({targetMythicStars}★)</span>}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Star Summary + Bonus */}
+                  {autoCalcResult.totalStars > 0 && (() => {
+                    const totalStars = autoCalcResult.totalStars;
+                    const activeTier = [...BUNDLE_TIERS].reverse().find(t => totalStars >= t.minStars) || BUNDLE_TIERS[0];
+                    const bonusStars = activeTier?.bonusStars || 0;
+                    return (
+                      <div className="flex items-center justify-between p-3 mb-3 bg-accent/5 border border-accent/20 rounded-xl">
+                        <span className="text-text text-sm font-medium">{locale === "id" ? "Total Bintang" : "Total Stars"}</span>
+                        <span className="text-yellow-400 font-bold text-lg flex items-center gap-1.5">
+                          {totalStars} <Star className="w-4 h-4" />
+                          {bonusStars > 0 && <span className="text-green-400 text-sm font-semibold ml-1">+{bonusStars} BONUS</span>}
+                        </span>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Bundle Tier Cards */}
+                  {autoCalcResult.totalStars > 0 && (() => {
+                    const totalStars = autoCalcResult.totalStars;
+                    const activeTier = [...BUNDLE_TIERS].reverse().find(t => totalStars >= t.minStars) || BUNDLE_TIERS[0];
+                    return (
+                      <div className="mb-3">
+                        <p className="text-text-muted text-xs font-semibold mb-2 uppercase tracking-wider flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5 text-yellow-400" />{locale === "id" ? "Bonus Bintang Aktif" : "Active Star Bonus"}</p>
+                        <div className="grid grid-cols-3 gap-2">
+                          {BUNDLE_TIERS.map((tier) => {
+                            const isActive = activeTier?.id === tier.id;
+                            const isUnlocked = totalStars >= tier.minStars;
+                            return (
+                              <div key={tier.id} className={`relative p-3 rounded-xl border-2 bg-gradient-to-br ${tier.color} transition-all ${isActive ? `${tier.borderColor} shadow-lg scale-105` : isUnlocked ? "border-white/10 opacity-60" : "border-white/5 opacity-50"}`}>
+                                {isActive && <span className="absolute -top-2 -right-2 bg-green-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5"><Check className="w-2 h-2" /> AKTIF</span>}
+                                <div className="text-center">
+                                  <span className="text-xl block">{tier.icon}</span>
+                                  <p className="text-text text-[11px] font-bold mt-1">{tier.name}</p>
+                                  <p className="text-text-muted text-[9px] mt-0.5">{tier.minStars}★ min</p>
+                                  {tier.bonusStars > 0 ? <p className="text-green-400 text-xs font-bold mt-1 flex items-center justify-center gap-0.5">+{tier.bonusStars}<Star className="w-2.5 h-2.5 fill-current" /></p> : <p className="text-text-muted text-[9px] mt-1">Base</p>}
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
-                        
-                        <div className="flex items-center gap-4">
-                          <div>
-                            <p className="text-text-muted text-xs mb-1">{selectedStarRank.id === "grading" ? "Jumlah Match" : t.starQuantity}</p>
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={() => setStarQuantity(q => Math.max(perStarMin, q - 1))}
-                                disabled={starQuantity <= perStarMin}
-                                className="w-8 h-8 rounded-lg bg-slate-700 text-white flex items-center justify-center hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                              >
-                                <Minus className="w-4 h-4" />
-                              </button>
-                              <input
-                                type="number"
-                                value={starQuantity}
-                                onChange={(e) => {
-                                  const val = parseInt(e.target.value) || perStarMin;
-                                  setStarQuantity(Math.max(perStarMin, Math.min(perStarMax, val)));
-                                }}
-                                min={perStarMin}
-                                max={perStarMax}
-                                className="w-16 h-8 text-center bg-slate-800 text-white rounded-lg border border-white/10 focus:outline-none focus:border-accent"
-                              />
-                              <button
-                                onClick={() => setStarQuantity(q => Math.min(perStarMax, q + 1))}
-                                disabled={starQuantity >= perStarMax}
-                                className="w-8 h-8 rounded-lg bg-slate-700 text-white flex items-center justify-center hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                              >
-                                <Plus className="w-4 h-4" />
-                              </button>
-                            </div>
-                            <p className="text-text-muted text-[10px] mt-1 flex items-center gap-1">Min {perStarMin} &bull; Max {perStarMax} {selectedStarRank.id === "grading" ? "Match" : <Star className="w-3 h-3 text-yellow-400" />}</p>
-                          </div>
-                          
-                          <div className="text-right">
-                            <p className="text-text-muted text-xs">{t.totalPrice}</p>
-                            <p className="text-yellow-400 font-bold text-xl">
-                              {formatRupiah((selectedStarRank.isFlat ? selectedStarRank.price : selectedStarRank.price * starQuantity))}
-                            </p>
-                          </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Auto-Calculated Price Card */}
+                  {autoCalcResult.totalStars > 0 && (
+                    <div className="mt-2 p-5 bg-gradient-to-br from-accent/10 to-accent/5 border border-accent/30 rounded-xl">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-text text-sm font-medium flex items-center gap-1.5"><CreditCard className="w-4 h-4 text-accent" />{locale === "id" ? "Estimasi Harga Per Bintang" : "Per Star Price Estimate"}</span>
+                      </div>
+                      <div className="flex items-end justify-between">
+                        <div>
+                          <p className="text-yellow-400 font-bold text-3xl leading-none">{formatRupiah(autoCalcResult.price)}</p>
+                          <p className="text-text-muted text-xs mt-2">{autoCalcResult.totalStars} {locale === "id" ? "bintang" : "stars"}</p>
                         </div>
+                        <div className="flex items-center gap-1.5 text-green-400"><Check className="w-5 h-5" /><span className="text-xs font-medium">{locale === "id" ? "Siap Order" : "Ready to Order"}</span></div>
                       </div>
                     </div>
                   )}
@@ -3183,14 +3162,9 @@ function OrderPageContent() {
                         <span>Duo Boost {selectedGendongRank.name} × {gendongQuantity} Bintang</span>
                         <span>{formatRupiah(selectedGendongRank.price * gendongQuantity)}</span>
                       </div>
-                    ) : orderMode === "perstar" && selectedStarRank ? (
-                      <div className="flex justify-between text-text-muted">
-                        <span>{selectedStarRank.name} × {starQuantity} Bintang</span>
-                        <span>{formatRupiah((selectedStarRank.isFlat ? selectedStarRank.price : selectedStarRank.price * starQuantity))}</span>
-                      </div>
                     ) : selectedPackage ? (
                       <div className="flex justify-between text-text-muted">
-                        <span>{t.basePrice}</span>
+                        <span>{orderMode === "perstar" ? selectedPackage.title : t.basePrice}</span>
                         <span>{formatRupiah(selectedPackage.price)}</span>
                       </div>
                     ) : null}
@@ -3314,29 +3288,27 @@ function OrderPageContent() {
                   </div>
                 )}
 
-                {/* Per Star Summary - For Per Bintang Mode */}
-                {orderMode === "perstar" && selectedStarRank && (
+                {/* Per Star Summary - For Per Bintang Mode (now uses selectedPackage like paket) */}
+                {orderMode === "perstar" && selectedPackage && (
                   <div className="bg-background rounded-xl p-4">
                     <p className="text-text-muted text-xs mb-2 uppercase tracking-wider">
-                      Tier & Jumlah {selectedStarRank.id === "grading" ? "Match" : "Bintang"}
+                      Paket Per Bintang
                     </p>
                     <div className="flex items-center gap-3">
-                      <Image
-                        src={selectedStarRank.icon}
-                        alt={selectedStarRank.name}
-                        width={40}
-                        height={40}
-                        className="w-10 h-10 object-contain flex-shrink-0 drop-shadow-lg"
-                      />
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                        <Image src={rankIcons[form.currentRank] || "/icons-tier/warrior.webp"} alt={`Rank ${form.currentRank}`} width={36} height={36} className="w-9 h-9 object-contain drop-shadow-lg" />
+                        <ArrowRight className="w-4 h-4 text-accent" />
+                        <Image src={rankIcons[form.targetRank] || "/icons-tier/warrior.webp"} alt={`Rank ${form.targetRank}`} width={36} height={36} className="w-9 h-9 object-contain drop-shadow-lg" />
+                      </div>
                       <div className="flex-1">
                         <p className="text-text font-semibold">
-                          {selectedStarRank.name}
+                          {selectedPackage.title}
                         </p>
                         <p className="text-text-muted text-xs">
-                          {starQuantity} {selectedStarRank.id === "grading" ? "Match" : "Bintang"} × {formatRupiah(selectedStarRank.price)}/{selectedStarRank.id === "grading" ? "match" : "star"}
+                          {RANK_LIST.find(r => r.id === form.currentRank)?.label || form.currentRank} → {RANK_LIST.find(r => r.id === form.targetRank)?.label || form.targetRank}
                         </p>
                         <p className="text-yellow-400 font-bold text-lg">
-                          {formatRupiah((selectedStarRank.isFlat ? selectedStarRank.price : selectedStarRank.price * starQuantity))}
+                          {formatRupiah(selectedPackage.price)}
                         </p>
                       </div>
                     </div>
@@ -3453,7 +3425,7 @@ function OrderPageContent() {
                 </div>
 
                 {/* Price Breakdown */}
-                {(selectedPackage || (orderMode === "perstar" && selectedStarRank) || (orderMode === "gendong" && selectedGendongRank)) && (
+                {(selectedPackage || (orderMode === "gendong" && selectedGendongRank)) && (
                   <div className="bg-background rounded-xl p-4">
                     <p className="text-text-muted text-xs mb-3 uppercase tracking-wider">
                       Rincian Harga
@@ -3464,14 +3436,9 @@ function OrderPageContent() {
                           <span>Duo Boost {selectedGendongRank.name} × {gendongQuantity} Bintang</span>
                           <span>{formatRupiah(selectedGendongRank.price * gendongQuantity)}</span>
                         </div>
-                      ) : orderMode === "perstar" && selectedStarRank ? (
-                        <div className="flex justify-between text-text-muted">
-                          <span>{selectedStarRank.name} × {starQuantity} Bintang</span>
-                          <span>{formatRupiah((selectedStarRank.isFlat ? selectedStarRank.price : selectedStarRank.price * starQuantity))}</span>
-                        </div>
                       ) : selectedPackage ? (
                         <div className="flex justify-between text-text-muted">
-                          <span>Harga Dasar</span>
+                          <span>{orderMode === "perstar" ? selectedPackage.title : "Harga Dasar"}</span>
                           <span>{formatRupiah(selectedPackage.price)}</span>
                         </div>
                       ) : null}
