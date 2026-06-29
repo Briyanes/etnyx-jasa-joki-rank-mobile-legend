@@ -388,12 +388,19 @@ const RANK_DIVISION_CONFIG: Record<string, { divisions: number; starsPerDiv: num
 };
 
 // Mythic+ star ranges
-const MYTHIC_STAR_CONFIG: Record<string, { min: number; max: number; label: string }> = {
-  mythicgrading: { min: 0, max: 10, label: "Match" },
-  mythic: { min: 0, max: 25, label: "Stars" },
-  mythichonor: { min: 25, max: 49, label: "Stars" },
-  mythicglory: { min: 50, max: 99, label: "Stars" },
-  mythicimmortal: { min: 100, max: 999, label: "Stars" },
+// - `min`/`max`: star range shown in the UI selector (inclusive displayable).
+// - `nextMin`: threshold to ADVANCE to the next tier (used for star math).
+//
+// Why nextMin ≠ max: for Honor, the highest displayable star is 49 (`max`),
+// but you actually need 50★ to promote to Glory (`nextMin`). Using `max`
+// for promotion math caused an off-by-one that undercounted total stars
+// across Mythic tiers (e.g. Honor 25 → Immortal 100 returned 73, not 75).
+const MYTHIC_STAR_CONFIG: Record<string, { min: number; max: number; nextMin: number; label: string }> = {
+  mythicgrading: { min: 0, max: 10, nextMin: 10, label: "Match" },
+  mythic: { min: 0, max: 25, nextMin: 25, label: "Stars" },
+  mythichonor: { min: 25, max: 49, nextMin: 50, label: "Stars" },
+  mythicglory: { min: 50, max: 99, nextMin: 100, label: "Stars" },
+  mythicimmortal: { min: 100, max: 999, nextMin: 1000, label: "Stars" },
 };
 
 // Bundle Tiers — volume-based bonus stars to incentivize larger orders
@@ -601,7 +608,8 @@ function autoCalcPackagePrice(
       starsInThisRank = cfg ? cfg.divisions * cfg.starsPerDiv : 0;
     } else {
       const mCfg = MYTHIC_STAR_CONFIG[rank];
-      starsInThisRank = mCfg ? mCfg.max - mCfg.min : 0;
+      // Use nextMin - min (NOT max - min) to count promotion stars.
+      starsInThisRank = mCfg ? mCfg.nextMin - mCfg.min : 0;
     }
     originalTotal += pricePerStar * starsInThisRank;
   }

@@ -45,15 +45,22 @@ export const RANK_DIVISION_CONFIG: Record<
 };
 
 // Mythic+ star ranges
+// - `min`/`max`: star range shown in the UI selector (inclusive displayable).
+// - `nextMin`: threshold to ADVANCE to the next tier (used for star math).
+//
+// Why nextMin ≠ max: for Honor, the highest displayable star is 49 (`max`),
+// but you actually need 50★ to promote to Glory (`nextMin`). Using `max`
+// for promotion math caused an off-by-one that undercounted total stars
+// across Mythic tiers (e.g. Honor 25 → Immortal 100 returned 73, not 75).
 export const MYTHIC_STAR_CONFIG: Record<
   string,
-  { min: number; max: number; label: string }
+  { min: number; max: number; nextMin: number; label: string }
 > = {
-  mythicgrading: { min: 0, max: 10, label: "Match" },
-  mythic: { min: 0, max: 25, label: "Stars" },
-  mythichonor: { min: 25, max: 49, label: "Stars" },
-  mythicglory: { min: 50, max: 99, label: "Stars" },
-  mythicimmortal: { min: 100, max: 999, label: "Stars" },
+  mythicgrading: { min: 0, max: 10, nextMin: 10, label: "Match" },
+  mythic: { min: 0, max: 25, nextMin: 25, label: "Stars" },
+  mythichonor: { min: 25, max: 49, nextMin: 50, label: "Stars" },
+  mythicglory: { min: 50, max: 99, nextMin: 100, label: "Stars" },
+  mythicimmortal: { min: 100, max: 999, nextMin: 1000, label: "Stars" },
 };
 
 // Rank tier icon images
@@ -160,6 +167,9 @@ export function getRankDivisionOptions(): {
 /**
  * Calculate total stars between current rank+division and target rank+division.
  * Uses ML's actual rank system: higher division number = lower tier (V is lowest, I is highest).
+ *
+ * NOTE: For Mythic tiers we use `nextMin` (promotion threshold), NOT `max`.
+ * e.g. to leave Honor (max displayable 49★) you must reach 50★ (nextMin).
  */
 export function calculateTotalStars(
   currentRank: string,
@@ -167,7 +177,8 @@ export function calculateTotalStars(
   targetRank: string,
   targetDiv: number,
   currentDivisionStar: number = 0,
-  targetDivisionStar: number = 0
+  targetDivisionStar: number = 0,
+  currentMythicStars?: number
 ): number {
   const ci = RANK_ORDER.indexOf(currentRank);
   const ti = RANK_ORDER.indexOf(targetRank);
@@ -186,7 +197,7 @@ export function calculateTotalStars(
 
   let stars = 0;
 
-  // Stars remaining in current rank (from current division to I)
+  // Stars remaining in current rank (from current position to top of tier)
   if (RANKS_WITH_STARS.includes(currentRank)) {
     const cfg = RANK_DIVISION_CONFIG[currentRank];
     if (cfg) {
@@ -197,6 +208,11 @@ export function calculateTotalStars(
         stars += (currentDiv - 1) * cfg.starsPerDiv;
       }
     }
+  } else if (MYTHIC_STAR_CONFIG[currentRank]) {
+    // Mythic current: stars to promote out = nextMin - current stars
+    const mCfg = MYTHIC_STAR_CONFIG[currentRank];
+    const cur = currentMythicStars ?? mCfg.min;
+    stars += mCfg.nextMin - cur;
   }
 
   // Full ranks in between
@@ -211,10 +227,11 @@ export function calculateTotalStars(
     if (cfg) {
       stars += cfg.divisions * cfg.starsPerDiv;
     } else {
-      // Mythic tiers: use actual star range from config
+      // Mythic tiers: stars to clear tier = nextMin - min (NOT max - min).
+      // e.g. Glory max=99 but you need 100★ to reach Immortal.
       const mythicCfg = MYTHIC_STAR_CONFIG[rank];
       if (mythicCfg) {
-        stars += mythicCfg.max - mythicCfg.min;
+        stars += mythicCfg.nextMin - mythicCfg.min;
       }
     }
   }
