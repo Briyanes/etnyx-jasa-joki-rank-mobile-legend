@@ -29,10 +29,11 @@ function checkRateLimit(ip: string): boolean {
   return true;
 }
 
-// Server-side pricing for per-star and gendong modes (must match frontend)
+// Server-side pricing for per-star and gendong modes (must match frontend).
+// These are FALLBACK values only — CMS pricing takes precedence.
 const SERVER_PER_STAR_PRICES: Record<string, number> = {
-  grandmaster: 5000, epic: 6500, legend: 7500, grading: 20000,
-  mythic: 18000, honor: 21000, glory: 26000, immortal: 31000,
+  master: 5000, grandmaster: 5500, epic: 7000, legend: 8000,
+  grading: 230000, mythicromawi: 19000, honor: 24000, glory: 29000, immortal: 34000,
 };
 const SERVER_GENDONG_PRICES: Record<string, number> = {
   grandmaster: 9000, epic: 10000, legend: 11000, grading: 23000,
@@ -83,17 +84,19 @@ const RANK_DIVISION_CONFIG_SERVER: Record<string, { divisions: number; starsPerD
   epic: { divisions: 5, starsPerDiv: 5 },
   legend: { divisions: 5, starsPerDiv: 5 },
 };
-const MYTHIC_STAR_CONFIG_SERVER: Record<string, { min: number; max: number }> = {
-  mythicgrading: { min: 0, max: 10 },
-  mythic: { min: 0, max: 25 },
-  mythichonor: { min: 25, max: 49 },
-  mythicglory: { min: 50, max: 99 },
-  mythicimmortal: { min: 100, max: 999 },
+// Must include nextMin (promotion threshold) — see pricing-utils.ts for rationale.
+// Using max instead of nextMin causes off-by-one bugs in star calculations.
+const MYTHIC_STAR_CONFIG_SERVER: Record<string, { min: number; max: number; nextMin: number }> = {
+  mythicgrading: { min: 0, max: 10, nextMin: 10 },
+  mythic: { min: 0, max: 25, nextMin: 25 },
+  mythichonor: { min: 25, max: 49, nextMin: 50 },
+  mythicglory: { min: 50, max: 99, nextMin: 100 },
+  mythicimmortal: { min: 100, max: 999, nextMin: 1000 },
 };
 const RANK_TO_PRICE_KEY: Record<string, string> = {
-  warrior: "grandmaster", elite: "grandmaster", master: "grandmaster",
+  warrior: "master", elite: "master", master: "master",
   grandmaster: "grandmaster", epic: "epic", legend: "legend",
-  mythicgrading: "grading", mythic: "mythic", mythichonor: "honor",
+  mythicgrading: "grading", mythic: "mythicromawi", mythichonor: "honor",
   mythicglory: "glory", mythicimmortal: "immortal",
 };
 
@@ -123,26 +126,29 @@ function calculateAutoPaketPriceServer(
   if (RANKS_WITH_STARS_SERVER.includes(currentRank)) {
     const cfg = RANK_DIVISION_CONFIG_SERVER[currentRank];
     if (cfg) {
+      // Stars to clear current division + remaining divisions in this rank
       const starsInThisRank = currentDiv * cfg.starsPerDiv;
       originalTotal += getPricePerStar(currentRank) * starsInThisRank;
     }
   } else {
-    // Mythic tier current: stars from current position to max of tier
+    // Mythic tier current: stars from current position to nextMin (promotion threshold)
     const mCfg = MYTHIC_STAR_CONFIG_SERVER[currentRank];
     if (mCfg) {
-      originalTotal += getPricePerStar(currentRank) * (mCfg.max - currentMythicStars);
+      originalTotal += getPricePerStar(currentRank) * (mCfg.nextMin - currentMythicStars);
     }
   }
 
   // Segments in between
   for (let i = ci + 1; i < ti; i++) {
     const rank = RANK_ORDER_SERVER[i];
+    if (rank === "mythicgrading") continue; // Not a star tier — skip
     if (RANKS_WITH_STARS_SERVER.includes(rank)) {
       const cfg = RANK_DIVISION_CONFIG_SERVER[rank];
       if (cfg) originalTotal += getPricePerStar(rank) * (cfg.divisions * cfg.starsPerDiv);
     } else {
       const mCfg = MYTHIC_STAR_CONFIG_SERVER[rank];
-      if (mCfg) originalTotal += getPricePerStar(rank) * (mCfg.max - mCfg.min);
+      // Use nextMin - min (NOT max - min) to count promotion stars correctly
+      if (mCfg) originalTotal += getPricePerStar(rank) * (mCfg.nextMin - mCfg.min);
     }
   }
 
@@ -159,30 +165,36 @@ function calculateAutoPaketPriceServer(
     if (mCfg) originalTotal += getPricePerStar(targetRank) * (targetMythicStars - mCfg.min);
   }
 
-  // Bundle discount: 10% cheaper than per-star
-  const BUNDLE_DISCOUNT = 0.10;
-  return Math.round(originalTotal * (1 - BUNDLE_DISCOUNT));
+  // No bundle discount — must match frontend autoCalcPackagePrice exactly
+  return Math.round(originalTotal);
 }
 
 function calculateServerPrice(body: Record<string, unknown>, cmsPricing?: { perstar?: Record<string, number>; gendong?: Record<string, number>; catalog?: Record<string, number> }): number | null {
   const orderType = String(body.orderType || "");
   const isGendong = orderType === "gendong";
 
-  if (orderType === "perstar" || isGendong) {
+  // Gendong mode: simple per-star × quantity (single tier)
+  if (isGendong) {
     const rankId = String(body.perStarRankId || body.currentRank || "").toLowerCase();
     const starQty = Number(body.starQuantity || 0);
-    const hardcoded = isGendong ? SERVER_GENDONG_PRICES : SERVER_PER_STAR_PRICES;
-    const cmsMap = isGendong ? cmsPricing?.gendong : cmsPricing?.perstar;
+    const hardcoded = SERVER_GENDONG_PRICES;
+    const cmsMap = cmsPricing?.gendong;
     const pricePerStar = cmsMap?.[rankId] ?? hardcoded[rankId];
     if (!pricePerStar || starQty < 1 || starQty > 100) return null;
     return pricePerStar * starQty;
+  }
+
+  // Per Star mode: multi-tier calculation (same as frontend autoCalcPackagePrice)
+  // Frontend sends currentRank/targetRank + currentStar/targetStar + mythic stars.
+  // The price is NOT a simple rank × qty — it's a weighted sum across all tiers crossed.
+  if (orderType === "perstar") {
+    return calculateAutoPaketPriceServer(body, cmsPricing);
   }
 
   if (orderType === "paket") {
     const packageId = String(body.packageId || "");
 
     // Auto-calculated packages (new flow): packageId starts with "auto-"
-    // Calculate price server-side from currentRank/targetRank + per-star rates
     if (packageId.startsWith("auto-")) {
       return calculateAutoPaketPriceServer(body, cmsPricing);
     }
