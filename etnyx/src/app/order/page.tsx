@@ -561,11 +561,21 @@ function autoCalcPackagePrice(
   const totalStars = calculateTotalStars(currentRank, currentDiv, targetRank, targetDiv, RANKS_WITH_STARS.includes(currentRank) ? currentDivisionStar : 0, currentMythicStars, targetMythicStars);
   if (totalStars <= 0) return { price: 0, totalStars: 0, originalPrice: 0, discountPercent: 0 };
 
-  // Map rank to per-star price lookup key
+  // Map rank to per-star price lookup key.
+  // Keys must match the `id` field in PER_STAR_RANKS (not RANK_ORDER ids).
+  // Missing keys cause silent fallback to grandmaster (Rp5.500/star), which
+  // massively underprices Mythic (Rp19.000) and Mythic Honor (Rp24.000) segments.
   const rankToPriceKey: Record<string, string> = {
-    warrior: "grandmaster", elite: "grandmaster", master: "grandmaster",
-    grandmaster: "grandmaster", epic: "epic", legend: "legend",
-    mythicglory: "glory", mythicimmortal: "immortal",
+    warrior: "master",
+    elite: "master",
+    master: "master",
+    grandmaster: "grandmaster",
+    epic: "epic",
+    legend: "legend",
+    mythic: "mythicromawi",
+    mythichonor: "honor",
+    mythicglory: "glory",
+    mythicimmortal: "immortal",
   };
 
   // Iterate each rank segment and sum weighted cost
