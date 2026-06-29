@@ -263,8 +263,10 @@ export default function AdminDashboard() {
   const [editPriceValue, setEditPriceValue] = useState("");
   const [editOriginalPrice, setEditOriginalPrice] = useState("");
   const [activePricingCat, setActivePricingCat] = useState("");
-  const [pricingMode, setPricingMode] = useState<"paket" | "perstar" | "gendong">("paket");
+  const [pricingMode, setPricingMode] = useState<"paket" | "perstar" | "gendong" | "classic">("paket");
   const [gendongPricing, setGendongPricing] = useState<PerStarTier[]>([]);
+  const [classicPricing, setClassicPricing] = useState<PricingCategory[]>([]);
+  const [activeClassicCat, setActiveClassicCat] = useState("");
   // Add/Edit package state
   const [showAddPkg, setShowAddPkg] = useState(false);
   const [addPkgForm, setAddPkgForm] = useState({ title: "", price: "", originalPrice: "", currentRank: "warrior", targetRank: "epic" });
@@ -375,14 +377,15 @@ export default function AdminDashboard() {
       } else {
         // Set default if not in DB
         setPerStarPricing([
-          { id: "grandmaster", name: "Grand Master", price: 5000, originalPrice: 6000, discountPercent: 17, icon: "/icons-tier/Grandmaster.webp" },
-          { id: "epic", name: "Epic", price: 7000, originalPrice: 8000, discountPercent: 13, icon: "/icons-tier/Epic.webp" },
-          { id: "legend", name: "Legend", price: 8000, originalPrice: 9000, discountPercent: 11, icon: "/icons-tier/Legend.webp" },
-          { id: "grading", name: "Mythic Grading", price: 20000, originalPrice: 22000, discountPercent: 9, icon: "/icons-tier/Mythic.webp" },
-          { id: "mythic", name: "Mythic", price: 18000, originalPrice: 20000, discountPercent: 10, icon: "/icons-tier/Mythic.webp" },
-          { id: "honor", name: "Mythic Honor", price: 21000, originalPrice: 22000, discountPercent: 5, icon: "/icons-tier/Mythical_Honor.webp" },
-          { id: "glory", name: "Mythic Glory", price: 26000, originalPrice: 28000, discountPercent: 7, icon: "/icons-tier/Mythical_Glory.webp" },
-          { id: "immortal", name: "Mythic Immortal", price: 31000, originalPrice: 33000, discountPercent: 6, icon: "/icons-tier/Mythical_Immortal.webp" },
+          { id: "master", name: "Master", price: 5000, icon: "/icons-tier/Master.webp" },
+          { id: "grandmaster", name: "Grand Master", price: 5500, icon: "/icons-tier/Grandmaster.webp" },
+          { id: "epic", name: "Epic", price: 7000, icon: "/icons-tier/Epic.webp" },
+          { id: "legend", name: "Legend", price: 8000, icon: "/icons-tier/Legend.webp" },
+          { id: "grading", name: "Mythic Grading", price: 230000, icon: "/icons-tier/Mythic.webp" },
+          { id: "mythicroomawi", name: "Mythic Romawi", price: 19000, icon: "/icons-tier/Mythic.webp" },
+          { id: "honor", name: "Mythical Honor", price: 24000, icon: "/icons-tier/Mythical_Honor.webp" },
+          { id: "glory", name: "Mythical Glory", price: 29000, icon: "/icons-tier/Mythical_Glory.webp" },
+          { id: "immortal", name: "Mythical Immortal", price: 34000, icon: "/icons-tier/Mythical_Immortal.webp" },
         ]);
       }
       // Fetch gendong (duo boost) pricing
@@ -401,6 +404,13 @@ export default function AdminDashboard() {
           { id: "glory", name: "Mythic Glory", price: 30000, icon: "/icons-tier/Mythical_Glory.webp" },
           { id: "immortal", name: "Mythic Immortal", price: 35000, icon: "/icons-tier/Mythical_Immortal.webp" },
         ]);
+      }
+      // Fetch classic pricing
+      const resC = await fetch("/api/admin/settings?key=classic_pricing_catalog");
+      const dC = await resC.json();
+      if (dC.value && Array.isArray(dC.value)) {
+        setClassicPricing(dC.value);
+        if (dC.value.length > 0 && !activeClassicCat) setActiveClassicCat(dC.value[0].id);
       }
       // Fetch season pricing
       const res4 = await fetch("/api/admin/settings?key=season_pricing");
@@ -813,6 +823,19 @@ export default function AdminDashboard() {
     setGendongPricing(newTiers);
     setEditingPriceId(null);
     saveGendongPricing(newTiers);
+  };
+
+  const saveClassicPricing = async (catalog: PricingCategory[]) => {
+    setPricingSaving(true);
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "PUT", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: "classic_pricing_catalog", value: catalog }),
+      });
+      if (res.ok) { setPricingSaved(true); setTimeout(() => setPricingSaved(false), 2000); }
+      else toastError("Gagal menyimpan classic pricing.");
+    } catch { toastError("Gagal menyimpan classic pricing."); }
+    finally { setPricingSaving(false); }
   };
 
   const saveSeasonPricing = async (data: typeof seasonPricing) => {
@@ -1651,6 +1674,17 @@ export default function AdminDashboard() {
                 >
                   <Users className="w-4 h-4 inline-block mr-1 sm:mr-2" />
                   Gendong
+                </button>
+                <button
+                  onClick={() => setPricingMode("classic")}
+                  className={`flex-1 min-w-0 py-2 px-2 sm:px-4 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
+                    pricingMode === "classic"
+                      ? "gradient-primary text-white shadow-lg"
+                      : "text-text-muted hover:text-text"
+                  }`}
+                >
+                  <Crown className="w-4 h-4 inline-block mr-1 sm:mr-2" />
+                  Classic
                 </button>
               </div>
 

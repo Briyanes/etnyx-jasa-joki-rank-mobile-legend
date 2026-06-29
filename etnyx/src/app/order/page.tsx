@@ -306,14 +306,15 @@ interface PerStarRank {
 }
 
 const PER_STAR_RANKS: PerStarRank[] = [
-  { id: "grandmaster", name: "Grand Master", price: 5000, originalPrice: 6000, discountPercent: 17, icon: "/icons-tier/Grandmaster.webp", maxStars: 25 },
-  { id: "epic", name: "Epic", price: 6500, originalPrice: 8000, discountPercent: 19, icon: "/icons-tier/Epic.webp", maxStars: 25 },
-  { id: "legend", name: "Legend", price: 7500, originalPrice: 9000, discountPercent: 17, icon: "/icons-tier/Legend.webp", maxStars: 25 },
-  { id: "grading", name: "Mythic Grading", price: 20000, originalPrice: 22000, discountPercent: 9, icon: "/icons-tier/Mythic.webp", maxStars: 10 },
-  { id: "mythic", name: "Mythic", price: 18000, originalPrice: 20000, discountPercent: 10, icon: "/icons-tier/Mythic.webp", maxStars: 25 },
-  { id: "honor", name: "Mythic Honor", price: 21000, originalPrice: 23000, discountPercent: 9, icon: "/icons-tier/Mythical_Honor.webp", maxStars: 25 },
-  { id: "glory", name: "Mythic Glory", price: 26000, originalPrice: 28000, discountPercent: 7, icon: "/icons-tier/Mythical_Glory.webp", maxStars: 50 },
-  { id: "immortal", name: "Mythic Immortal", price: 31000, originalPrice: 33000, discountPercent: 6, icon: "/icons-tier/Mythical_Immortal.webp", maxStars: 100 },
+  { id: "master", name: "Master", price: 5000, icon: "/icons-tier/Master.webp", maxStars: 25 },
+  { id: "grandmaster", name: "Grand Master", price: 5500, icon: "/icons-tier/Grandmaster.webp", maxStars: 25 },
+  { id: "epic", name: "Epic", price: 7000, icon: "/icons-tier/Epic.webp", maxStars: 25 },
+  { id: "legend", name: "Legend", price: 8000, icon: "/icons-tier/Legend.webp", maxStars: 25 },
+  { id: "grading", name: "Mythic Grading", price: 230000, icon: "/icons-tier/Mythic.webp", maxStars: 10 },
+  { id: "mythicromawi", name: "Mythic Romawi", price: 19000, icon: "/icons-tier/Mythic.webp", maxStars: 25 },
+  { id: "honor", name: "Mythical Honor", price: 24000, icon: "/icons-tier/Mythical_Honor.webp", maxStars: 25 },
+  { id: "glory", name: "Mythical Glory", price: 29000, icon: "/icons-tier/Mythical_Glory.webp", maxStars: 50 },
+  { id: "immortal", name: "Mythical Immortal", price: 34000, icon: "/icons-tier/Mythical_Immortal.webp", maxStars: 100 },
 ];
 
 // Gendong (duo boost) per-star pricing
@@ -648,6 +649,8 @@ const translations = {
     modePackage: "Joki Paket",
     modePerStar: "Joki Per Bintang",
     modeGendong: "Joki Gendong",
+    modeClassic: "Joki Classic",
+    priceListTitle: "Daftar Harga",
     selectRank: "Pilih Rank",
     starQuantity: "Jumlah Bintang",
     minStars: "Minimal 3 bintang",
@@ -752,6 +755,8 @@ const translations = {
     modePackage: "Package Boost",
     modePerStar: "Per Star Boost",
     modeGendong: "Duo Boost",
+    modeClassic: "Classic Boost",
+    priceListTitle: "Price List",
     selectRank: "Select Rank",
     starQuantity: "Star Quantity",
     minStars: "Minimum 3 stars",
@@ -881,10 +886,11 @@ function OrderPageContent() {
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   
   // Order mode: "paket", "perstar", or "gendong"
-  const [orderMode, setOrderMode] = useState<"paket" | "perstar" | "gendong">(() => {
+  const [orderMode, setOrderMode] = useState<"paket" | "perstar" | "gendong" | "classic">(() => {
     const modeParam = (typeof window !== "undefined" ? (new URLSearchParams(window.location.search).get("mode")) : null) || searchParams.get("mode");
     if (modeParam === "perstar") return "perstar";
     if (modeParam === "gendong") return "gendong";
+    if (modeParam === "classic") return "classic";
     return "paket";
   });
   const [selectedStarRank, setSelectedStarRank] = useState<PerStarRank | null>(null);
@@ -1123,9 +1129,9 @@ function OrderPageContent() {
     ? autoCalcPackagePrice(form.currentRank, currentStar, form.targetRank, targetStar, currentDivisionStar, perStarRanks, currentMythicStars, targetMythicStars)
     : { price: 0, totalStars: 0, originalPrice: 0, discountPercent: 0 };
 
-  // Auto-set selectedPackage when rank changes in paket mode (no manual selection needed)
+  // Auto-set selectedPackage when rank changes in paket mode (DISABLED — paket now uses catalog cards only)
   useEffect(() => {
-    if (orderMode === "paket" && autoCalcResult.price > 0) {
+    if (false && orderMode === "paket" && autoCalcResult.price > 0) {
       const currentLabel = RANK_LIST.find(r => r.id === form.currentRank)?.label || form.currentRank;
       const targetLabel = RANK_LIST.find(r => r.id === form.targetRank)?.label || form.targetRank;
       const currentDivLabel = RANKS_WITH_STARS.includes(form.currentRank)
@@ -1150,7 +1156,7 @@ function OrderPageContent() {
 
   // Raw item price (before season/express/premium)
   const rawItemPrice = (() => {
-    if (orderMode === "paket" && selectedPackage) return selectedPackage.price;
+    if ((orderMode === "paket" || orderMode === "classic") && selectedPackage) return selectedPackage.price;
     if (orderMode === "perstar" && selectedStarRank) return selectedStarRank.price * starQuantity;
     if (orderMode === "gendong" && selectedGendongRank) return selectedGendongRank.price * gendongQuantity;
     return 0;
@@ -1267,7 +1273,7 @@ function OrderPageContent() {
           // For paket mode, need selected package
           // For perstar mode, need selected rank AND quantity >= min
           // For gendong mode, need selected gendong rank AND quantity >= min
-          if (orderMode === "paket") {
+          if (orderMode === "paket" || orderMode === "classic") {
             return !!selectedPackage;
           } else if (orderMode === "gendong") {
             const gMin = selectedGendongRank?.id === "grading" ? 1 : 3;
@@ -1422,7 +1428,7 @@ function OrderPageContent() {
   }, [updateForm]);
 
   const canSubmit =
-    (selectedPackage || (orderMode === "perstar" && selectedStarRank) || (orderMode === "gendong" && selectedGendongRank)) &&
+    !!selectedPackage &&
     form.userId &&
     form.nickname &&
     (orderMode === "gendong"
@@ -1444,14 +1450,14 @@ function OrderPageContent() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          currentRank: orderMode === "paket" ? (selectedPackage?.currentRank || form.currentRank) : (orderMode === "perstar" ? (selectedStarRank?.id || form.currentRank) : (selectedGendongRank?.id || form.currentRank)),
-          targetRank: orderMode === "paket" ? (selectedPackage?.targetRank || form.targetRank) : (orderMode === "perstar" ? (selectedStarRank?.id || form.targetRank) : (selectedGendongRank?.id || form.targetRank)),
+          currentRank: (orderMode === "paket" || orderMode === "classic") ? (selectedPackage?.currentRank || form.currentRank) : (orderMode === "perstar" ? (selectedStarRank?.id || form.currentRank) : (selectedGendongRank?.id || form.currentRank)),
+          targetRank: (orderMode === "paket" || orderMode === "classic") ? (selectedPackage?.targetRank || form.targetRank) : (orderMode === "perstar" ? (selectedStarRank?.id || form.targetRank) : (selectedGendongRank?.id || form.targetRank)),
           currentStar: orderMode === "paket" && RANKS_WITH_STARS.includes(selectedPackage?.currentRank || form.currentRank) ? currentStar : null,
           targetStar: orderMode === "paket" && RANKS_WITH_STARS.includes(selectedPackage?.targetRank || form.targetRank) ? targetStar : null,
           currentMythicStars: orderMode === "paket" && MYTHIC_STAR_CONFIG[selectedPackage?.currentRank || form.currentRank] ? currentMythicStars : undefined,
           targetMythicStars: orderMode === "paket" && MYTHIC_STAR_CONFIG[selectedPackage?.targetRank || form.targetRank] ? targetMythicStars : undefined,
-          packageTitle: orderMode === "paket" ? selectedPackage?.title : (orderMode === "gendong" ? `Gendong ${selectedGendongRank?.name} x${gendongQuantity} ${selectedGendongRank?.id === "grading" ? "match" : "star"}` : (orderMode === "perstar" && selectedStarRank ? `${selectedStarRank.name} × ${starQuantity} ${selectedStarRank.id === "grading" ? "match" : "star"}` : undefined)),
-          packageId: orderMode === "paket" ? selectedPackage?.id : undefined,
+          packageTitle: (orderMode === "paket" || orderMode === "classic") ? selectedPackage?.title : (orderMode === "gendong" ? `Gendong ${selectedGendongRank?.name} x${gendongQuantity} ${selectedGendongRank?.id === "grading" ? "match" : "star"}` : (orderMode === "perstar" && selectedStarRank ? `${selectedStarRank.name} × ${starQuantity} ${selectedStarRank.id === "grading" ? "match" : "star"}` : undefined)),
+          packageId: (orderMode === "paket" || orderMode === "classic") ? selectedPackage?.id : undefined,
           bonusStars: orderMode === "paket" ? (() => {
             const ts = calculateTotalStars(form.currentRank, currentStar, form.targetRank, targetStar, RANKS_WITH_STARS.includes(form.currentRank) ? currentDivisionStar : 0, currentMythicStars, targetMythicStars);
             const tier = [...BUNDLE_TIERS].reverse().find(t => ts >= t.minStars);
@@ -1784,17 +1790,105 @@ function OrderPageContent() {
                   <Users className="w-5 h-5 inline-block mr-2 align-middle" />
                   {t.modeGendong}
                 </button>
+                <button
+                  onClick={() => {
+                    setOrderMode("classic");
+                    setSelectedPackage(null);
+                    setShowPackages(false);
+                    setSelectedStarRank(null);
+                    setStarQuantity(3);
+                  }}
+                  className={`w-full sm:w-auto py-3 px-4 rounded-lg text-base font-semibold transition-all ${
+                    orderMode === "classic"
+                      ? "gradient-primary text-white shadow-lg"
+                      : "text-text-muted hover:text-text"
+                  }`}
+                  style={{ minWidth: 0 }}
+                >
+                  <Crown className="w-5 h-5 inline-block mr-2 align-middle" />
+                  {t.modeClassic}
+                </button>
               </div>
               <p className="text-text-muted text-xs mb-4 -mt-3 px-1">
                 {orderMode === "paket"
                   ? (locale === "id" ? "Pilih paket rank — booster login ke akunmu dan push rank." : "Choose a rank package — booster logs into your account and pushes rank.")
                   : orderMode === "perstar"
                   ? (locale === "id" ? "Bayar per bintang — fleksibel sesuai kebutuhan." : "Pay per star — flexible according to your needs.")
-                  : (locale === "id" ? "Main bareng booster — tanpa share akun, kamu tetap bermain." : "Play together with booster — no account sharing, you keep playing.")}
+                  : orderMode === "gendong"
+                  ? (locale === "id" ? "Main bareng booster — tanpa share akun, kamu tetap bermain." : "Play together with booster — no account sharing, you keep playing.")
+                  : (locale === "id" ? "Joki Classic — joki per match dengan harga tetap, tanpa pilih rank." : "Classic Boost — fixed-price per match boosting, no rank selection needed.")}
               </p>
 
-              {/* ===== Rank Awalmu (PAKET only) ===== */}
-              {orderMode === "paket" && (
+              {/* ===== Daftar Harga (All Modes) ===== */}
+              <div className="mb-5 p-4 bg-background rounded-xl border border-white/5">
+                <h3 className="text-text font-bold text-sm mb-3 flex items-center gap-2">
+                  <CreditCard className="w-4 h-4 text-accent" />
+                  {t.priceListTitle}
+                </h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {perStarRanks.map((rank) => (
+                    <div key={rank.id} className="flex items-center justify-between px-3 py-2 bg-surface rounded-lg border border-white/5">
+                      <span className="text-text text-xs font-medium">{rank.name}</span>
+                      <span className="text-yellow-400 font-bold text-sm">{formatRupiah(rank.price)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* ===== PAKET & CLASSIC: CATALOG CARDS (no rank selector) ===== */}
+              {(orderMode === "paket" || orderMode === "classic") && (
+              <div className="mb-5">
+                <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
+                  {catalog.map((cat) => (
+                    <button
+                      key={cat.id}
+                      onClick={() => setActiveCategory(cat.id)}
+                      className={`px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
+                        activeCategory === cat.id
+                          ? "gradient-primary text-white"
+                          : "bg-background border border-white/10 text-text-muted hover:border-white/20"
+                      }`}
+                    >
+                      {cat.title} ({cat.packages.length})
+                    </button>
+                  ))}
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {catalog.find(c => c.id === activeCategory)?.packages.map((pkg) => (
+                    <button
+                      key={pkg.id}
+                      onClick={() => handleSelectPackage(pkg)}
+                      className={`relative text-left rounded-xl border-2 transition-all duration-200 hover:scale-[1.02] overflow-hidden flex flex-col ${
+                        selectedPackage?.id === pkg.id
+                          ? "border-yellow-400 shadow-lg shadow-yellow-400/20"
+                          : "border-white/5 hover:border-white/15"
+                      }`}
+                    >
+                      <div className="p-4 bg-gradient-to-br from-slate-700/80 to-slate-800/80 flex-1">
+                        <p className="text-white text-sm font-semibold mb-2">{pkg.title}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-yellow-400 font-bold text-lg leading-tight">{formatRupiah(pkg.price)}</p>
+                          {pkg.originalPrice && <p className="text-red-400/70 text-xs line-through">{formatRupiah(pkg.originalPrice)}</p>}
+                        </div>
+                      </div>
+                      {pkg.discountPercent != null && pkg.discountPercent > 0 && (
+                        <div className="px-4 py-2 bg-slate-800/60">
+                          <span className="bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded text-[10px] font-bold">{t.discount} {pkg.discountPercent}%</span>
+                        </div>
+                      )}
+                      {selectedPackage?.id === pkg.id && (
+                        <div className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-yellow-400 flex items-center justify-center">
+                          <Check className="w-3 h-3 text-black" />
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              )}
+
+              {/* HIDDEN: Old rank selector (disabled — paket now uses catalog cards) */}
+              {false && orderMode === "paket" && (
               <div className="mb-5 p-4 bg-background rounded-xl border border-white/5">
                 <label className="block text-sm text-text font-bold mb-2">
                   <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-red-400" />{locale === "id" ? "Rank Awalmu Sekarang" : "Your Current Rank"}</span>
@@ -1943,8 +2037,8 @@ function OrderPageContent() {
               </div>
               )}
 
-              {/* PAKET MODE */}
-              {orderMode === "paket" && (
+              {/* HIDDEN: Old PAKET MODE rank selectors (disabled — paket now uses catalog cards) */}
+              {false && orderMode === "paket" && (
                 <>
                   {/* Rank Tujuanmu */}
                   <div className="mb-5 p-4 bg-background rounded-xl border border-white/5">
@@ -2149,8 +2243,9 @@ function OrderPageContent() {
                         </div>
                         {/* Upsell hint */}
                         {(() => {
-                          const nextTier = BUNDLE_TIERS.find(t => t.minStars > totalStars);
-                          if (!nextTier) return null;
+                          const nextTierIdx = BUNDLE_TIERS.findIndex(t => t.minStars > totalStars);
+                          if (nextTierIdx < 0) return null;
+                          const nextTier = BUNDLE_TIERS[nextTierIdx];
                           const starsNeeded = nextTier.minStars - totalStars;
                           return (
                             <p className="text-center text-xs text-accent/80 mt-2 flex items-center justify-center gap-1.5">
@@ -3093,8 +3188,8 @@ function OrderPageContent() {
                 {/* Order Type Badge */}
                 <div className="flex items-center gap-2">
                   <span className={`px-3 py-1.5 rounded-lg text-xs font-bold ${
-                    orderMode === "paket" 
-                      ? "bg-primary/20 text-primary" 
+                    orderMode === "paket" || orderMode === "classic"
+                      ? "bg-primary/20 text-primary"
                       : orderMode === "gendong"
                         ? "bg-purple-500/20 text-purple-400"
                         : "bg-yellow-500/20 text-yellow-400"
@@ -3103,6 +3198,11 @@ function OrderPageContent() {
                       <span className="flex items-center gap-1.5">
                         <Package className="w-3.5 h-3.5" />
                         JOKI PAKET
+                      </span>
+                    ) : orderMode === "classic" ? (
+                      <span className="flex items-center gap-1.5">
+                        <Crown className="w-3.5 h-3.5" />
+                        JOKI CLASSIC
                       </span>
                     ) : orderMode === "gendong" ? (
                       <span className="flex items-center gap-1.5">
@@ -3118,8 +3218,8 @@ function OrderPageContent() {
                   </span>
                 </div>
 
-                {/* Package Summary - For Paket Mode */}
-                {orderMode === "paket" && selectedPackage && (
+                {/* Package Summary - For Paket & Classic Mode */}
+                {(orderMode === "paket" || orderMode === "classic") && selectedPackage && (
                   <div className="bg-background rounded-xl p-4">
                     <p className="text-text-muted text-xs mb-2 uppercase tracking-wider">
                       Paket Dipilih
