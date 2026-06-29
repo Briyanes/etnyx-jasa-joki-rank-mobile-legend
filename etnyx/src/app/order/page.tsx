@@ -1003,8 +1003,9 @@ function OrderPageContent() {
         let merged: PackageCategory[] = DEFAULT_CATALOG;
 
         // If DB has pricing_catalog, use it for paket categories
+        // BUT preserve classic categories from DEFAULT_CATALOG (DB only stores paket)
         if (data.pricing_catalog && Array.isArray(data.pricing_catalog) && data.pricing_catalog.length > 0) {
-          merged = data.pricing_catalog.map((cat: PackageCategory) => ({
+          const dbPaketCats = data.pricing_catalog.map((cat: PackageCategory) => ({
             ...cat,
             type: cat.type || defaultTypes[cat.id] || "paket",
             packages: cat.packages.map((pkg: ProductPackage) => ({
@@ -1012,6 +1013,9 @@ function OrderPageContent() {
               rankKey: defaultRankKeys[pkg.id] || pkg.rankKey || pkg.currentRank,
             })),
           }));
+          // Keep classic categories from DEFAULT_CATALOG as fallback
+          const defaultClassicCats = DEFAULT_CATALOG.filter(c => c.type === "classic");
+          merged = [...dbPaketCats, ...defaultClassicCats];
         }
 
         // If DB has classic_pricing_catalog, merge/replace classic categories
