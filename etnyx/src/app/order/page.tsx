@@ -1825,10 +1825,18 @@ function OrderPageContent() {
                   <CreditCard className="w-4 h-4 text-accent" />
                   {t.priceListTitle}
                 </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
                   {perStarRanks.map((rank) => (
-                    <div key={rank.id} className="flex items-center justify-between px-3 py-2 bg-surface rounded-lg border border-white/5">
-                      <span className="text-text text-xs font-medium">{rank.name}</span>
+                    <div key={rank.id} className="flex flex-col items-center justify-center gap-1.5 px-2 py-3 bg-surface rounded-lg border border-white/5 text-center transition-colors hover:border-white/15">
+                      <Image
+                        src={rank.icon}
+                        alt={rank.name}
+                        width={40}
+                        height={40}
+                        className="w-10 h-10 object-contain"
+                        unoptimized
+                      />
+                      <span className="text-text text-xs font-medium leading-tight">{rank.name}</span>
                       <span className="text-yellow-400 font-bold text-sm">{formatRupiah(rank.price)}</span>
                     </div>
                   ))}
