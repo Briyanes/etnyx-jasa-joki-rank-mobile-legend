@@ -126,6 +126,7 @@ interface ProductPackage {
 interface PackageCategory {
   id: string;
   title: string;
+  type?: "paket" | "classic";
   packages: ProductPackage[];
 }
 
@@ -290,6 +291,17 @@ const DEFAULT_CATALOG: PackageCategory[] = [
     title: "Paket Mythic Glory",
     packages: [
       { id: "glory-immortal", title: "Mythic Glory (50) - Mythic Immortal (100)", price: 1170089, rankKey: "mythicimmortal", currentRank: "mythicglory", targetRank: "mythicimmortal" },
+    ],
+  },
+  // ===== CLASSIC MODE CATEGORIES =====
+  {
+    id: "classic-rank-up",
+    title: "Classic Rank Up",
+    type: "classic",
+    packages: [
+      { id: "classic-10", title: "Classic 10 Match", price: 70000, rankKey: "classic", currentRank: "classic", targetRank: "classic" },
+      { id: "classic-20", title: "Classic 20 Match", price: 130000, originalPrice: 140000, discountPercent: 7, rankKey: "classic", currentRank: "classic", targetRank: "classic" },
+      { id: "classic-30", title: "Classic 30 Match", price: 190000, originalPrice: 210000, discountPercent: 10, rankKey: "classic", currentRank: "classic", targetRank: "classic" },
     ],
   },
 ];
@@ -978,6 +990,11 @@ function OrderPageContent() {
         defaultRankKeys[pkg.id] = pkg.rankKey;
       }
     }
+    // Build lookup: category id -> type from DEFAULT_CATALOG
+    const defaultTypes: Record<string, string> = {};
+    for (const cat of DEFAULT_CATALOG) {
+      if (cat.type) defaultTypes[cat.id] = cat.type;
+    }
 
     fetch("/api/settings?keys=pricing_catalog")
       .then((res) => res.json())
@@ -986,6 +1003,7 @@ function OrderPageContent() {
           // Merge: use prices from DB, rankKey from defaults where available, otherwise use pkg.currentRank
           const merged = data.pricing_catalog.map((cat: PackageCategory) => ({
             ...cat,
+            type: cat.type || defaultTypes[cat.id] || "paket",
             packages: cat.packages.map((pkg: ProductPackage) => ({
               ...pkg,
               rankKey: defaultRankKeys[pkg.id] || pkg.rankKey || pkg.currentRank,
@@ -1124,6 +1142,13 @@ function OrderPageContent() {
       }
     }
   }, [searchParams, catalog]);
+
+  // Filter catalog based on order mode (classic shows only classic categories)
+  const visibleCategories = orderMode === "classic"
+    ? catalog.filter(c => c.type === "classic")
+    : catalog.filter(c => c.type !== "classic");
+  // Ensure activeCategory is valid for current mode; fallback to first visible
+  const activeCat = visibleCategories.find(c => c.id === activeCategory) || visibleCategories[0];
 
   // Auto-calculated package price for paket mode (real-time)
   const autoCalcResult = orderMode === "paket"
@@ -1744,6 +1769,8 @@ function OrderPageContent() {
                     setStarQuantity(3);
                     setSelectedPackage(null);
                     setShowPackages(false);
+                    const firstPaket = catalog.find(c => c.type !== "classic");
+                    if (firstPaket) setActiveCategory(firstPaket.id);
                   }}
                   className={`w-full sm:w-auto py-3 px-4 rounded-lg text-base font-semibold transition-all ${
                     orderMode === "paket"
@@ -1798,6 +1825,8 @@ function OrderPageContent() {
                     setShowPackages(false);
                     setSelectedStarRank(null);
                     setStarQuantity(3);
+                    const firstClassic = catalog.find(c => c.type === "classic");
+                    if (firstClassic) setActiveCategory(firstClassic.id);
                   }}
                   className={`w-full sm:w-auto py-3 px-4 rounded-lg text-base font-semibold transition-all ${
                     orderMode === "classic"
@@ -1850,7 +1879,7 @@ function OrderPageContent() {
               {(orderMode === "paket" || orderMode === "classic") && (
               <div className="mb-5">
                 <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
-                  {catalog.map((cat) => (
+                  {visibleCategories.map((cat) => (
                     <button
                       key={cat.id}
                       onClick={() => setActiveCategory(cat.id)}
@@ -1865,7 +1894,7 @@ function OrderPageContent() {
                   ))}
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {catalog.find(c => c.id === activeCategory)?.packages.map((pkg) => (
+                  {activeCat?.packages.map((pkg) => (
                     <button
                       key={pkg.id}
                       onClick={() => handleSelectPackage(pkg)}
