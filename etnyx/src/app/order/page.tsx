@@ -368,7 +368,6 @@ const RANK_LIST = [
   { id: "grandmaster", label: "Grand Master" },
   { id: "epic", label: "Epic" },
   { id: "legend", label: "Legend" },
-  { id: "mythicgrading", label: "Mythic Grading (15★)" },
   { id: "mythic", label: "Mythic" },
   { id: "mythichonor", label: "Mythic Honor" },
   { id: "mythicglory", label: "Mythic Glory" },
@@ -515,10 +514,6 @@ function calculateTotalStars(
   // Full ranks in between
   for (let i = ci + 1; i < ti; i++) {
     const rank = RANK_ORDER[i];
-    // Skip mythicgrading — it's NOT a separate star tier.
-    // Grading is the entry phase of Mythic (10 placement matches).
-    // Counting it as stars causes double-counting with Mythic Romawi.
-    if (rank === "mythicgrading") continue;
 
     const cfg = RANK_DIVISION_CONFIG[rank];
     if (cfg) {
@@ -562,7 +557,6 @@ function autoCalcPackagePrice(
   const rankToPriceKey: Record<string, string> = {
     warrior: "grandmaster", elite: "grandmaster", master: "grandmaster",
     grandmaster: "grandmaster", epic: "epic", legend: "legend",
-    mythicgrading: "grading", mythic: "mythic", mythichonor: "honor",
     mythicglory: "glory", mythicimmortal: "immortal",
   };
 
@@ -599,12 +593,6 @@ function autoCalcPackagePrice(
     const key = rankToPriceKey[rank] || "grandmaster";
     const priceEntry = perStarPrices.find(r => r.id === key);
 
-    // mythicgrading is a FLAT rate (Rp 230.000 for 10 placement matches).
-    // Add the flat price once — do NOT multiply by stars.
-    if (rank === "mythicgrading" && priceEntry) {
-      originalTotal += priceEntry.price;
-      continue;
-    }
 
     const pricePerStar = priceEntry?.price || 5000;
     let starsInThisRank: number;
