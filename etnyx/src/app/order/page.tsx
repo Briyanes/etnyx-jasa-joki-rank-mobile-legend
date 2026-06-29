@@ -60,8 +60,8 @@ interface OrderForm {
   accountPassword: string;
   heroRequest: string;
   notes: string;
-  currentRank: RankTier;
-  targetRank: RankTier;
+  currentRank: RankTier | "";  // Allow empty for placeholder UX in Per Star mode
+  targetRank: RankTier | "";
   isExpress: boolean;
   isPremium: boolean;
   promoCode: string;
@@ -944,24 +944,29 @@ function OrderPageContent() {
 
   const STEPS = t.steps;
 
-  const [form, setForm] = useState<OrderForm>({
-    loginMethod: "moonton",
-    userId: "",
-    serverId: "",
-    nickname: "",
-    accountLogin: "",
-    accountPassword: "",
-    heroRequest: "",
-    notes: "",
-    currentRank: "epic",
-    targetRank: "mythic",
-    isExpress: false,
-    isPremium: false,
-    promoCode: "",
-    whatsapp: "",
-    email: "",
-    preferredRole: "",
-    playSchedule: "",
+  const [form, setForm] = useState<OrderForm>(() => {
+    // If loading directly with ?mode=perstar, start with empty ranks for placeholder UX
+    const modeParam = (typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("mode") : null) || searchParams.get("mode");
+    const isPerstarInit = modeParam === "perstar";
+    return {
+      loginMethod: "moonton",
+      userId: "",
+      serverId: "",
+      nickname: "",
+      accountLogin: "",
+      accountPassword: "",
+      heroRequest: "",
+      notes: "",
+      currentRank: isPerstarInit ? ("" as RankTier) : "epic",
+      targetRank: isPerstarInit ? ("" as RankTier) : "mythic",
+      isExpress: false,
+      isPremium: false,
+      promoCode: "",
+      whatsapp: "",
+      email: "",
+      preferredRole: "",
+      playSchedule: "",
+    };
   });
 
   // Gendong settings from CMS
@@ -1300,7 +1305,7 @@ function OrderPageContent() {
             return !!(selectedGendongRank && gendongQuantity >= gMin);
           } else {
             // Perstar mode: user must actively select ranks first (empty state UX)
-            return perStarTouched && autoCalcResult.price > 0 && autoCalcResult.totalStars > 0;
+            return perStarTouched && form.currentRank !== "" && form.targetRank !== "" && autoCalcResult.price > 0 && autoCalcResult.totalStars > 0;
           }
         case 2:
           if (orderMode === "gendong") {
@@ -1786,8 +1791,13 @@ function OrderPageContent() {
                     setSelectedStarRank(null);
                     setStarQuantity(3);
                     setPerStarTouched(false);
-                    // Reset ranks to force user selection
-                    updateForm({ currentRank: "epic" as RankTier, targetRank: "mythic" as RankTier });
+                    // Reset ranks to empty — force user to explicitly select (placeholder UX)
+                    updateForm({ currentRank: "" as RankTier, targetRank: "" as RankTier });
+                    setCurrentStar(0);
+                    setTargetStar(0);
+                    setCurrentMythicStars(0);
+                    setTargetMythicStars(0);
+                    setCurrentDivisionStar(0);
                   }}
                   className={`w-full sm:w-auto py-3 px-4 rounded-lg text-base font-semibold transition-all ${
                     orderMode === "perstar"
@@ -1936,6 +1946,7 @@ function OrderPageContent() {
                   {/* Tier-only Dropdown */}
                   <div className="relative">
                     <select
+                      data-testid="perstar-current-rank"
                       value={form.currentRank}
                       onChange={(e) => {
                         const rankId = e.target.value;
@@ -1947,27 +1958,35 @@ function OrderPageContent() {
                         // Set default division to lowest (highest number e.g. V)
                         const cfg = RANK_DIVISION_CONFIG[rankId];
                         if (cfg) setCurrentStar(cfg.divisions);
-                        // Auto-reset target if current >= target
+                        // Auto-reset target only if target was already selected and is now invalid
                         const ci = RANK_ORDER.indexOf(rankId);
                         const ti = RANK_ORDER.indexOf(form.targetRank);
-                        if (ci >= ti) {
+                        if (form.targetRank !== "" && ci >= ti) {
                           const nextRank = RANK_ORDER[ci + 1];
                           if (nextRank) updateForm({ currentRank: rankId as RankTier, targetRank: nextRank as RankTier });
+                          else updateForm({ currentRank: rankId as RankTier, targetRank: "" as RankTier });
                         }
                         // Reset mythic stars
                         const mythicCfg = MYTHIC_STAR_CONFIG[rankId];
                         if (mythicCfg) setCurrentMythicStars(mythicCfg.min);
                         else setCurrentMythicStars(0);
                       }}
-                      className="w-full bg-surface border border-white/10 rounded-xl px-4 py-3 text-text text-sm font-medium appearance-none cursor-pointer focus:border-accent focus:outline-none transition-colors pr-10"
+                      className={`w-full bg-surface border rounded-xl px-4 py-3 text-sm font-medium appearance-none cursor-pointer focus:outline-none transition-colors pr-10 ${
+                        form.currentRank === ""
+                          ? "border-white/10 text-text-muted"
+                          : "border-white/10 text-text focus:border-accent"
+                      }`}
                     >
+                      <option value="" disabled>{locale === "id" ? "Pilih Rank Sekarang" : "Select Current Rank"}</option>
                       {RANK_LIST.map((rank) => (
                         <option key={rank.id} value={rank.id}>{rank.label}</option>
                       ))}
                     </select>
+                    {form.currentRank !== "" && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
                       <Image src={rankIcons[form.currentRank] || "/icons-tier/warrior.webp"} alt={`Rank ${form.currentRank}`} width={24} height={24} className="w-6 h-6 object-contain" />
                     </div>
+                    )}
                   </div>
                   {/* Division Selector (for ranks with divisions) */}
                   {RANKS_WITH_STARS.includes(form.currentRank) && (
@@ -2415,7 +2434,9 @@ function OrderPageContent() {
                     <div className="flex flex-col gap-2">
                       <div className="relative">
                         <select
+                          data-testid="perstar-target-rank"
                           value={form.targetRank}
+                          disabled={form.currentRank === ""}
                           onChange={(e) => {
                             const rankId = e.target.value;
                             setPerStarTouched(true);
@@ -2425,12 +2446,17 @@ function OrderPageContent() {
                             const mythicCfg = MYTHIC_STAR_CONFIG[rankId];
                             if (mythicCfg) setTargetMythicStars(mythicCfg.min);
                           }}
-                          className="w-full bg-surface border border-white/10 rounded-xl px-4 py-3 text-text text-sm font-medium appearance-none cursor-pointer focus:border-accent focus:outline-none transition-colors pr-10"
+                          className={`w-full bg-surface border rounded-xl px-4 py-3 text-sm font-medium appearance-none cursor-pointer focus:outline-none transition-colors pr-10 disabled:opacity-50 disabled:cursor-not-allowed ${
+                            form.targetRank === ""
+                              ? "border-white/10 text-text-muted"
+                              : "border-white/10 text-text focus:border-accent"
+                          }`}
                         >
+                          <option value="" disabled>{locale === "id" ? "Pilih Rank Tujuan" : "Select Target Rank"}</option>
                           {RANK_LIST.map((rank) => {
                             const ci = RANK_ORDER.indexOf(form.currentRank);
                             const oi = RANK_ORDER.indexOf(rank.id);
-                            const isValid = oi > ci || (oi === ci && MYTHIC_STAR_CONFIG[rank.id]);
+                            const isValid = ci >= 0 && (oi > ci || (oi === ci && MYTHIC_STAR_CONFIG[rank.id]));
                             return (
                               <option key={rank.id} value={rank.id} disabled={!isValid}>
                                 {rank.label}{!isValid ? " (di bawah rank awal)" : ""}
@@ -2438,9 +2464,11 @@ function OrderPageContent() {
                             );
                           })}
                         </select>
+                        {form.targetRank !== "" && (
                         <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
                           <Image src={rankIcons[form.targetRank] || "/icons-tier/warrior.webp"} alt={`Rank ${form.targetRank}`} width={24} height={24} className="w-6 h-6 object-contain" />
                         </div>
+                        )}
                       </div>
                       {RANKS_WITH_STARS.includes(form.targetRank) && (
                         <div className="flex items-center gap-2 mt-1 flex-wrap">
@@ -2468,18 +2496,20 @@ function OrderPageContent() {
                     </div>
                   </div>
 
-                  {/* Empty State Placeholder (before user selects) */}
-                  {!perStarTouched && (
+                  {/* Empty State Placeholder (before user selects both ranks) */}
+                  {(!perStarTouched || form.currentRank === "" || form.targetRank === "") && (
                     <div className="flex flex-col items-center justify-center gap-2 mb-4 p-6 bg-background rounded-xl border border-dashed border-white/15 text-center">
                       <Target className="w-8 h-8 text-accent/50" />
                       <p className="text-text-muted text-sm font-medium">
-                        {locale === "id" ? "Pilih rank awal & rank tujuan untuk melihat harga" : "Select current rank & target rank to see price"}
+                        {form.currentRank === ""
+                          ? (locale === "id" ? "Pilih rank awal & rank tujuan untuk melihat harga" : "Select current rank & target rank to see price")
+                          : (locale === "id" ? "Pilih rank tujuan untuk melihat harga" : "Select target rank to see price")}
                       </p>
                     </div>
                   )}
 
-                  {/* Selected Rank Flow Display — only after user picks */}
-                  {perStarTouched && (
+                  {/* Selected Rank Flow Display — only after user picks both ranks */}
+                  {perStarTouched && form.currentRank !== "" && form.targetRank !== "" && (
                   <div className="flex items-center justify-center gap-3 mb-4 p-3 bg-background rounded-xl border border-white/5">
                     <div className="flex items-center gap-2">
                       <Image src={rankIcons[form.currentRank] || "/icons-tier/warrior.webp"} alt={`Rank ${form.currentRank}`} width={28} height={28} className="w-7 h-7 object-contain" />
