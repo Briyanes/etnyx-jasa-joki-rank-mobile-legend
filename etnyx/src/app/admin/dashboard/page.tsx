@@ -413,6 +413,22 @@ export default function AdminDashboard() {
       if (dC.value && Array.isArray(dC.value)) {
         setClassicPricing(dC.value);
         if (dC.value.length > 0 && !activeClassicCat) setActiveClassicCat(dC.value[0].id);
+      } else {
+        // Default seed: 1 kategori "Paket 10 WIN" dengan 6 paket
+        const defaultClassic: PricingCategory[] = [{
+          id: "classic-10-win",
+          title: "Paket Classic 10 WIN",
+          packages: [
+            { id: "epic-10win", title: "Epic 10 Win", price: 50000, rankKey: "", currentRank: "", targetRank: "" },
+            { id: "legend-10win", title: "Legend 10 Win", price: 50000, rankKey: "", currentRank: "", targetRank: "" },
+            { id: "mythic-10win", title: "Mythic 10 Win", price: 55000, rankKey: "", currentRank: "", targetRank: "" },
+            { id: "honor-10win", title: "Honor 10 Win", price: 55000, rankKey: "", currentRank: "", targetRank: "" },
+            { id: "glory-10win", title: "Glory 10 Win", price: 60000, rankKey: "", currentRank: "", targetRank: "" },
+            { id: "immortal-10win", title: "Immortal 10 Win", price: 60000, rankKey: "", currentRank: "", targetRank: "" },
+          ],
+        }];
+        setClassicPricing(defaultClassic);
+        setActiveClassicCat("classic-10-win");
       }
       // Fetch season pricing
       const res4 = await fetch("/api/admin/settings?key=season_pricing");
@@ -2312,19 +2328,6 @@ export default function AdminDashboard() {
                         </button>
                       </div>
 
-                      {/* Add Category Modal */}
-                      {showAddCat && (
-                        <div className="bg-surface rounded-xl border border-accent/20 p-4 space-y-3">
-                          <h4 className="text-sm font-semibold text-text">Tambah Kategori Classic Baru</h4>
-                          <input type="text" value={addCatForm.title} onChange={(e) => setAddCatForm({ title: e.target.value })}
-                            placeholder="Nama kategori, mis: Paket Warrior" className="w-full sm:w-80 bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-sm focus:border-accent focus:outline-none" />
-                          <div className="flex gap-2">
-                            <button onClick={addClassicCategory} className="px-4 py-2 gradient-primary rounded-lg text-white text-xs font-medium">Tambah</button>
-                            <button onClick={() => setShowAddCat(false)} className="px-4 py-2 bg-white/5 rounded-lg text-text-muted text-xs">Batal</button>
-                          </div>
-                        </div>
-                      )}
-
                       {/* Package list — card only, no rank columns */}
                       {classicPricing.filter(c => c.id === activeClassicCat).map((cat) => (
                         <div key={cat.id} className="bg-surface rounded-xl border border-white/5 overflow-hidden">
@@ -2464,6 +2467,19 @@ export default function AdminDashboard() {
                     </>
                   )}
                 </>
+              )}
+
+              {/* Add Category Modal — OUTSIDE ternary, renders in both empty & non-empty states */}
+              {showAddCat && pricingMode === "classic" && (
+                <div className="bg-surface rounded-xl border border-accent/20 p-4 space-y-3">
+                  <h4 className="text-sm font-semibold text-text">Tambah Kategori Classic Baru</h4>
+                  <input type="text" value={addCatForm.title} onChange={(e) => setAddCatForm({ title: e.target.value })}
+                    placeholder="Nama kategori, mis: Paket 10 Win" className="w-full sm:w-80 bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-sm focus:border-accent focus:outline-none" />
+                  <div className="flex gap-2">
+                    <button onClick={addClassicCategory} className="px-4 py-2 gradient-primary rounded-lg text-white text-xs font-medium">Tambah</button>
+                    <button onClick={() => setShowAddCat(false)} className="px-4 py-2 bg-white/5 rounded-lg text-text-muted text-xs">Batal</button>
+                  </div>
+                </div>
               )}
             </div>
           )}
