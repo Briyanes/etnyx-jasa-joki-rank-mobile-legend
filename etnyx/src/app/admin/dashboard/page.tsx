@@ -429,6 +429,11 @@ export default function AdminDashboard() {
         }];
         setClassicPricing(defaultClassic);
         setActiveClassicCat("classic-10-win");
+        // Auto-save default seed to DB so order page can fetch it
+        fetch("/api/admin/settings", {
+          method: "PUT", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ key: "classic_pricing_catalog", value: defaultClassic }),
+        }).catch(() => {});
       }
       // Fetch season pricing
       const res4 = await fetch("/api/admin/settings?key=season_pricing");

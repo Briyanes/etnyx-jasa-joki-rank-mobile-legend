@@ -294,14 +294,18 @@ const DEFAULT_CATALOG: PackageCategory[] = [
     ],
   },
   // ===== CLASSIC MODE CATEGORIES =====
+  // Keep in sync with admin dashboard default classic seed
   {
-    id: "classic-rank-up",
-    title: "Classic Rank Up",
+    id: "classic-10-win",
+    title: "Paket Classic 10 WIN",
     type: "classic",
     packages: [
-      { id: "classic-10", title: "Classic 10 Match", price: 70000, rankKey: "classic", currentRank: "classic", targetRank: "classic" },
-      { id: "classic-20", title: "Classic 20 Match", price: 130000, originalPrice: 140000, discountPercent: 7, rankKey: "classic", currentRank: "classic", targetRank: "classic" },
-      { id: "classic-30", title: "Classic 30 Match", price: 190000, originalPrice: 210000, discountPercent: 10, rankKey: "classic", currentRank: "classic", targetRank: "classic" },
+      { id: "epic-10win", title: "Epic 10 Win", price: 50000, rankKey: "classic", currentRank: "classic", targetRank: "classic" },
+      { id: "legend-10win", title: "Legend 10 Win", price: 50000, rankKey: "classic", currentRank: "classic", targetRank: "classic" },
+      { id: "mythic-10win", title: "Mythic 10 Win", price: 55000, rankKey: "classic", currentRank: "classic", targetRank: "classic" },
+      { id: "honor-10win", title: "Honor 10 Win", price: 55000, rankKey: "classic", currentRank: "classic", targetRank: "classic" },
+      { id: "glory-10win", title: "Glory 10 Win", price: 60000, rankKey: "classic", currentRank: "classic", targetRank: "classic" },
+      { id: "immortal-10win", title: "Immortal 10 Win", price: 60000, rankKey: "classic", currentRank: "classic", targetRank: "classic" },
     ],
   },
 ];
