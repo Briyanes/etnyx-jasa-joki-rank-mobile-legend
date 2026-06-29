@@ -996,12 +996,15 @@ function OrderPageContent() {
       if (cat.type) defaultTypes[cat.id] = cat.type;
     }
 
-    fetch("/api/settings?keys=pricing_catalog")
+    fetch("/api/settings?keys=pricing_catalog,classic_pricing_catalog")
       .then((res) => res.json())
       .then((data) => {
+        // Start with default catalog as base (includes both paket & classic defaults)
+        let merged: PackageCategory[] = DEFAULT_CATALOG;
+
+        // If DB has pricing_catalog, use it for paket categories
         if (data.pricing_catalog && Array.isArray(data.pricing_catalog) && data.pricing_catalog.length > 0) {
-          // Merge: use prices from DB, rankKey from defaults where available, otherwise use pkg.currentRank
-          const merged = data.pricing_catalog.map((cat: PackageCategory) => ({
+          merged = data.pricing_catalog.map((cat: PackageCategory) => ({
             ...cat,
             type: cat.type || defaultTypes[cat.id] || "paket",
             packages: cat.packages.map((pkg: ProductPackage) => ({
@@ -1009,8 +1012,26 @@ function OrderPageContent() {
               rankKey: defaultRankKeys[pkg.id] || pkg.rankKey || pkg.currentRank,
             })),
           }));
-          setCatalog(merged);
         }
+
+        // If DB has classic_pricing_catalog, merge/replace classic categories
+        if (data.classic_pricing_catalog && Array.isArray(data.classic_pricing_catalog) && data.classic_pricing_catalog.length > 0) {
+          const classicCats = data.classic_pricing_catalog.map((cat: PackageCategory) => ({
+            ...cat,
+            type: "classic" as const,
+            packages: cat.packages.map((pkg: ProductPackage) => ({
+              ...pkg,
+              rankKey: pkg.rankKey || pkg.currentRank || "classic",
+            })),
+          }));
+          // Remove any existing classic categories from merged, then append DB classic categories
+          merged = [
+            ...merged.filter(c => c.type !== "classic"),
+            ...classicCats,
+          ];
+        }
+
+        setCatalog(merged);
       })
       .catch(() => {/* keep default catalog */});
   }, []);
