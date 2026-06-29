@@ -655,6 +655,148 @@ function autoCalcPackagePrice(
   };
 }
 
+// Calculate per-tier star breakdown for Per Star mode.
+// Returns an array of segments showing how many stars belong to each tier
+// and the cost for that tier. E.g. Mythic → Mythic Glory (35★):
+//   [{ tier: "Mythic (0–25)", stars: 10, pricePerStar: 19000, subtotal: 190000 },
+//    { tier: "Mythic Honor (25–50)", stars: 25, pricePerStar: 24000, subtotal: 600000 }]
+interface StarBreakdownSegment {
+  tierId: string;
+  tierLabel: string;
+  stars: number;
+  pricePerStar: number;
+  subtotal: number;
+}
+
+function calculateStarBreakdown(
+  currentRank: string,
+  currentDiv: number,
+  targetRank: string,
+  targetDiv: number,
+  currentDivisionStar: number,
+  perStarPrices: PerStarRank[],
+  currentMythicStars: number = 0,
+  targetMythicStars: number = 0
+): StarBreakdownSegment[] {
+  const rankToPriceKey: Record<string, string> = {
+    warrior: "master",
+    elite: "master",
+    master: "master",
+    grandmaster: "grandmaster",
+    epic: "epic",
+    legend: "legend",
+    mythic: "mythicromawi",
+    mythichonor: "honor",
+    mythicglory: "glory",
+    mythicimmortal: "immortal",
+  };
+
+  const rankLabels: Record<string, string> = {
+    warrior: "Warrior",
+    elite: "Elite",
+    master: "Master",
+    grandmaster: "Grand Master",
+    epic: "Epic",
+    legend: "Legend",
+    mythic: "Mythic (0–25)",
+    mythichonor: "Mythic Honor (25–50)",
+    mythicglory: "Mythic Glory (50–100)",
+    mythicimmortal: "Mythic Immortal (100+)",
+  };
+
+  const segments: StarBreakdownSegment[] = [];
+  const ci = RANK_ORDER.indexOf(currentRank);
+  const ti = RANK_ORDER.indexOf(targetRank);
+  if (ci < 0 || ti < 0) return segments;
+
+  const getPrice = (key: string) => {
+    const entry = perStarPrices.find(r => r.id === key);
+    return entry?.price || 5000;
+  };
+
+  // Segment 1: current rank remaining stars
+  {
+    const key = rankToPriceKey[currentRank] || "grandmaster";
+    const pricePerStar = getPrice(key);
+    let starsInThisRank: number;
+    if (RANKS_WITH_STARS.includes(currentRank)) {
+      const cfg = RANK_DIVISION_CONFIG[currentRank];
+      starsInThisRank = cfg ? (cfg.starsPerDiv - currentDivisionStar) + (currentDiv - 1) * cfg.starsPerDiv : 0;
+    } else if (MYTHIC_STAR_CONFIG[currentRank]) {
+      const mCfg = MYTHIC_STAR_CONFIG[currentRank];
+      if (currentRank === targetRank) {
+        starsInThisRank = targetMythicStars - currentMythicStars;
+      } else {
+        starsInThisRank = mCfg.nextMin - currentMythicStars;
+      }
+    } else {
+      starsInThisRank = 0;
+    }
+    starsInThisRank = Math.max(0, starsInThisRank);
+    if (starsInThisRank > 0) {
+      segments.push({
+        tierId: currentRank,
+        tierLabel: rankLabels[currentRank] || currentRank,
+        stars: starsInThisRank,
+        pricePerStar,
+        subtotal: pricePerStar * starsInThisRank,
+      });
+    }
+  }
+
+  // Segments in between
+  for (let i = ci + 1; i < ti; i++) {
+    const rank = RANK_ORDER[i];
+    const key = rankToPriceKey[rank] || "grandmaster";
+    const pricePerStar = getPrice(key);
+    let starsInThisRank: number;
+    if (RANKS_WITH_STARS.includes(rank)) {
+      const cfg = RANK_DIVISION_CONFIG[rank];
+      starsInThisRank = cfg ? cfg.divisions * cfg.starsPerDiv : 0;
+    } else {
+      const mCfg = MYTHIC_STAR_CONFIG[rank];
+      starsInThisRank = mCfg ? mCfg.nextMin - mCfg.min : 0;
+    }
+    if (starsInThisRank > 0) {
+      segments.push({
+        tierId: rank,
+        tierLabel: rankLabels[rank] || rank,
+        stars: starsInThisRank,
+        pricePerStar,
+        subtotal: pricePerStar * starsInThisRank,
+      });
+    }
+  }
+
+  // Segment last: target rank stars needed
+  if (ci < ti) {
+    const key = rankToPriceKey[targetRank] || "grandmaster";
+    const pricePerStar = getPrice(key);
+    let starsInThisRank: number;
+    if (RANKS_WITH_STARS.includes(targetRank)) {
+      const cfg = RANK_DIVISION_CONFIG[targetRank];
+      starsInThisRank = cfg ? (cfg.divisions - targetDiv) * cfg.starsPerDiv : 0;
+    } else if (MYTHIC_STAR_CONFIG[targetRank]) {
+      const mCfg = MYTHIC_STAR_CONFIG[targetRank];
+      starsInThisRank = targetMythicStars - mCfg.min;
+    } else {
+      starsInThisRank = 0;
+    }
+    starsInThisRank = Math.max(0, starsInThisRank);
+    if (starsInThisRank > 0) {
+      segments.push({
+        tierId: targetRank,
+        tierLabel: rankLabels[targetRank] || targetRank,
+        stars: starsInThisRank,
+        pricePerStar,
+        subtotal: pricePerStar * starsInThisRank,
+      });
+    }
+  }
+
+  return segments;
+}
+
 // Fallback static options (max 5 divisions) — used if no rank selected yet
 const STAR_OPTIONS = [
   { value: 5, label: "V" },
@@ -3233,10 +3375,29 @@ function OrderPageContent() {
                         <span>{formatRupiah(selectedGendongRank.price * gendongQuantity)}</span>
                       </div>
                     ) : selectedPackage ? (
+                      <>
                       <div className="flex justify-between text-text-muted">
                         <span>{orderMode === "perstar" ? selectedPackage.title : t.basePrice}</span>
                         <span>{formatRupiah(selectedPackage.price)}</span>
                       </div>
+                      {orderMode === "perstar" && perStarTouched && form.currentRank !== "" && form.targetRank !== "" && (() => {
+                        const segments = calculateStarBreakdown(form.currentRank, currentStar, form.targetRank, targetStar, currentDivisionStar, perStarRanks, currentMythicStars, targetMythicStars);
+                        if (segments.length <= 1) return null;
+                        return (
+                          <div className="mt-2 pt-2 border-t border-white/5 space-y-1.5">
+                            {segments.map((seg, idx) => (
+                              <div key={idx} className="flex justify-between items-center text-[11px] text-text-muted pl-2">
+                                <span className="flex items-center gap-1.5">
+                                  <Image src={rankIcons[seg.tierId] || "/icons-tier/Mythic.webp"} alt={seg.tierLabel} width={14} height={14} className="w-3.5 h-3.5 object-contain" />
+                                  {seg.tierLabel}: {seg.stars}★ × {formatRupiah(seg.pricePerStar)}
+                                </span>
+                                <span className="font-medium">{formatRupiah(seg.subtotal)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })()}
+                      </>
                     ) : null}
                     {seasonMultiplier !== 1 && (
                       <div className={`flex justify-between ${seasonMultiplier > 1 ? "text-yellow-400/80" : "text-green-400"}`}>
@@ -3507,10 +3668,29 @@ function OrderPageContent() {
                           <span>{formatRupiah(selectedGendongRank.price * gendongQuantity)}</span>
                         </div>
                       ) : selectedPackage ? (
+                        <>
                         <div className="flex justify-between text-text-muted">
                           <span>{orderMode === "perstar" ? selectedPackage.title : "Harga Dasar"}</span>
                           <span>{formatRupiah(selectedPackage.price)}</span>
                         </div>
+                        {orderMode === "perstar" && perStarTouched && form.currentRank !== "" && form.targetRank !== "" && (() => {
+                          const segments = calculateStarBreakdown(form.currentRank, currentStar, form.targetRank, targetStar, currentDivisionStar, perStarRanks, currentMythicStars, targetMythicStars);
+                          if (segments.length <= 1) return null;
+                          return (
+                            <div className="mt-2 pt-2 border-t border-white/5 space-y-1.5">
+                              {segments.map((seg, idx) => (
+                                <div key={idx} className="flex justify-between items-center text-[11px] text-text-muted pl-2">
+                                  <span className="flex items-center gap-1.5">
+                                    <Image src={rankIcons[seg.tierId] || "/icons-tier/Mythic.webp"} alt={seg.tierLabel} width={14} height={14} className="w-3.5 h-3.5 object-contain" />
+                                    {seg.tierLabel}: {seg.stars}★ × {formatRupiah(seg.pricePerStar)}
+                                  </span>
+                                  <span className="font-medium">{formatRupiah(seg.subtotal)}</span>
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        })()}
+                        </>
                       ) : null}
                       {seasonMultiplier !== 1 && (
                         <div className={`flex justify-between ${seasonMultiplier > 1 ? "text-yellow-400" : "text-green-400"}`}>
