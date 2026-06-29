@@ -14,7 +14,10 @@ const sectionIcons: Record<string, ReactNode> = {
 
 export default function TermsPopup() {
   const { locale } = useLanguage();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return !localStorage.getItem("etnyx_terms_seen");
+  });
   const [canClose, setCanClose] = useState(false);
   const [dontShowAgain, setDontShowAgain] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -53,12 +56,10 @@ export default function TermsPopup() {
   const txt = t[locale];
 
   useEffect(() => {
-    const hasSeenTerms = localStorage.getItem("etnyx_terms_seen");
-    if (!hasSeenTerms) {
-      setIsOpen(true);
+    if (isOpen) {
       document.body.style.overflow = "hidden";
     }
-  }, []);
+  }, [isOpen]);
 
   useEffect(() => {
     const content = contentRef.current;

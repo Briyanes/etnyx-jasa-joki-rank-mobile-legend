@@ -24,7 +24,6 @@ import {
   Tag,
   CreditCard,
   Phone,
-  User,
   Gamepad2,
   Star,
   Package,
@@ -892,8 +891,7 @@ function OrderPageContent() {
   const [paymentMethod, setPaymentMethod] = useState<"dompetx" | "manual_transfer">("dompetx");
   const [dompetxEnabled, setDompetxEnabled] = useState(false);
   const [showManualTransfer, setShowManualTransfer] = useState(false);
-  const [tierDiscount, setTierDiscount] = useState(0);
-  const [customerTier, setCustomerTier] = useState<string | null>(null);
+    const [customerTier, setCustomerTier] = useState<string | null>(null);
   const [selectedPackage, setSelectedPackage] = useState<ProductPackage | null>(
     null
   );

@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { RefreshCw, Home, AlertTriangle } from "lucide-react";
 
 export default function Error({
@@ -24,9 +26,9 @@ export default function Error({
           <button onClick={reset} className="flex items-center gap-2 px-5 py-2.5 gradient-primary rounded-lg text-white text-sm font-medium hover:opacity-90 transition-opacity">
             <RefreshCw className="w-4 h-4" /> Coba Lagi
           </button>
-          <a href="/" className="flex items-center gap-2 px-5 py-2.5 bg-surface border border-white/10 rounded-lg text-text text-sm hover:bg-white/5 transition-colors">
+          <Link href="/" className="flex items-center gap-2 px-5 py-2.5 bg-surface border border-white/10 rounded-lg text-text text-sm hover:bg-white/5 transition-colors">
             <Home className="w-4 h-4" /> Ke Beranda
-          </a>
+          </Link>
         </div>
       </div>
     </div>

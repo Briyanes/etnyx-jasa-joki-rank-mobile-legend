@@ -212,7 +212,7 @@ export default function Testimonials() {
               <div className="flex gap-1 mb-3">{renderStars(testimonial.rating)}</div>
 
               {/* Comment */}
-              <p className="text-muted text-sm leading-relaxed">"{testimonial.comment}"</p>
+              <p className="text-muted text-sm leading-relaxed">&ldquo;{testimonial.comment}&rdquo;</p>
 
               {/* Featured Badge */}
               {testimonial.is_featured && (

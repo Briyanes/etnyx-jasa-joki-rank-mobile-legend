@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
@@ -240,9 +241,9 @@ function AdminLoginContent() {
 
         {/* Back to home */}
         <div className="text-center mt-4">
-          <a href="/" className="text-text-muted hover:text-accent text-sm transition-colors">
+          <Link href="/" className="text-text-muted hover:text-accent text-sm transition-colors">
             ← Kembali ke Website
-          </a>
+          </Link>
         </div>
       </div>
     </div>

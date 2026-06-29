@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Star, AlertTriangle, Send, ExternalLink, CheckCircle, Loader2, MessageCircle, Gift } from "lucide-react";
@@ -282,7 +283,7 @@ function ReviewPageContent() {
             <AlertTriangle className="w-8 h-8 text-red-400" />
           </div>
           <p className="text-text-muted">{error}</p>
-          <a href="/" className="inline-block text-accent text-sm hover:underline">{t.back}</a>
+          <Link href="/" className="inline-block text-accent text-sm hover:underline">{t.back}</Link>
         </div>
       </div>
     );
@@ -318,9 +319,9 @@ function ReviewPageContent() {
             </a>
           </div>
 
-          <a href="/" className="inline-block text-text-muted text-sm hover:text-accent transition-colors">
+          <Link href="/" className="inline-block text-text-muted text-sm hover:text-accent transition-colors">
             {t.back}
-          </a>
+          </Link>
         </div>
       </div>
     );

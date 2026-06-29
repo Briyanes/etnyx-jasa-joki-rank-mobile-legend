@@ -431,7 +431,7 @@ export async function GET(request: NextRequest) {
 
         // Get commissions for these orders
         const orderIds = (orderDetails || []).map(o => o.id);
-        let orderCommissions: Record<string, number> = {};
+        const orderCommissions: Record<string, number> = {};
         if (orderIds.length > 0) {
           const { data: comData } = await supabase
             .from("commissions")

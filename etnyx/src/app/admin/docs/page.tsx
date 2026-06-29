@@ -3095,7 +3095,7 @@ function buildCategories(): DocCategory[] {
                       <li><strong className="text-text">Lead submissions view</strong> &mdash; Panel hasil kerja worker + statistik match/win/star/screenshot</li>
                       <li><strong className="text-text">Worker showAllCompleted</strong> &mdash; Toggle lihat semua order selesai</li>
                       <li><strong className="text-text">Admin assign order_logs</strong> &mdash; Log assignment ke timeline</li>
-                      <li><strong className="text-text">Track page</strong> &mdash; Loading spinner + "assigned" di timeline</li>
+                      <li><strong className="text-text">Track page</strong> &mdash; Loading spinner + &ldquo;assigned&rdquo; di timeline</li>
                       <li><strong className="text-text">Email konfirmasi bayar</strong> &mdash; Dikirim saat payment confirmed</li>
                       <li><strong className="text-text">Pagination</strong> &mdash; Admin customers + testimonials API</li>
                       <li><strong className="text-text">Status transition validation</strong> &mdash; Cegah lompatan status invalid (admin + staff)</li>
