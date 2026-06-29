@@ -516,7 +516,7 @@ function calculateTotalStars(
     if (cfg) stars += currentDiv * cfg.starsPerDiv - divisionStar;
   } else if (MYTHIC_STAR_CONFIG[currentRank]) {
     const mCfg = MYTHIC_STAR_CONFIG[currentRank];
-    stars += mCfg.max - currentMythicStars;
+    stars += mCfg.nextMin - currentMythicStars;
   }
   // Full ranks in between
   for (let i = ci + 1; i < ti; i++) {
@@ -529,7 +529,8 @@ function calculateTotalStars(
       // Mythic tiers: use actual star range from config
       const mythicCfg = MYTHIC_STAR_CONFIG[rank];
       if (mythicCfg) {
-        stars += mythicCfg.max - mythicCfg.min;
+        // Use nextMin - min (NOT max - min) to count promotion stars correctly.
+        stars += mythicCfg.nextMin - mythicCfg.min;
       }
     }
   }
@@ -586,7 +587,8 @@ function autoCalcPackagePrice(
       if (currentRank === targetRank) {
         starsInThisRank = targetMythicStars - currentMythicStars;
       } else {
-        starsInThisRank = mCfg.max - currentMythicStars;
+        // Use nextMin (NOT max) to count stars needed to promote to next tier.
+        starsInThisRank = mCfg.nextMin - currentMythicStars;
       }
     } else {
       starsInThisRank = 0;

@@ -66,4 +66,51 @@ test.describe("Order Page — Per Star Mode", () => {
   test("should show Daftar Harga price list", async ({ page }) => {
     await expect(page.locator("text=Daftar Harga").first()).toBeVisible({ timeout: 5000 });
   });
+
+  // Helper: set a <select> value via React-compatible native setter
+  async function setSelectValue(page: import("@playwright/test").Page, testId: string, value: string) {
+    const select = page.locator(`[data-testid='${testId}']`);
+    await select.evaluate((el, val) => {
+      const s = el as HTMLSelectElement;
+      const setter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, "value")?.set;
+      setter?.call(s, val);
+      s.dispatchEvent(new Event("change", { bubbles: true }));
+    }, value);
+    await page.waitForTimeout(500);
+  }
+
+  test("REGRESSION: Honor 25★ → Immortal 100★ = 75 total stars (not 73)", async ({ page }) => {
+    // Select current rank = Mythic Honor (auto-sets currentMythicStars to min=25)
+    await setSelectValue(page, "perstar-current-rank", "mythichonor");
+
+    // Select target rank = Mythic Immortal (auto-sets targetMythicStars to min=100)
+    await setSelectValue(page, "perstar-target-rank", "mythicimmortal");
+
+    // Wait for price card to appear
+    await expect(page.locator("text=Estimasi Harga Per Bintang")).toBeVisible({ timeout: 5000 });
+
+    // Total Bintang should be 75 — NOT 73 (old off-by-one bug)
+    const totalStarsCard = page.locator("text=Total Bintang").locator("..");
+    await expect(totalStarsCard).toContainText("75", { timeout: 5000 });
+  });
+
+  test("REGRESSION: Mythic 0★ → Glory 50★ = 50 total stars", async ({ page }) => {
+    await setSelectValue(page, "perstar-current-rank", "mythic");
+    await setSelectValue(page, "perstar-target-rank", "mythicglory");
+
+    await expect(page.locator("text=Estimasi Harga Per Bintang")).toBeVisible({ timeout: 5000 });
+
+    const totalStarsCard = page.locator("text=Total Bintang").locator("..");
+    await expect(totalStarsCard).toContainText("50", { timeout: 5000 });
+  });
+
+  test("REGRESSION: Glory 50★ → Immortal 100★ = 50 total stars", async ({ page }) => {
+    await setSelectValue(page, "perstar-current-rank", "mythicglory");
+    await setSelectValue(page, "perstar-target-rank", "mythicimmortal");
+
+    await expect(page.locator("text=Estimasi Harga Per Bintang")).toBeVisible({ timeout: 5000 });
+
+    const totalStarsCard = page.locator("text=Total Bintang").locator("..");
+    await expect(totalStarsCard).toContainText("50", { timeout: 5000 });
+  });
 });
