@@ -828,6 +828,26 @@ function parseClassicRank(title: string): string {
   return "mythic";
 }
 
+// Format rank label WITH star count for Per Star mode displays.
+// Mythic tiers: "Mythic 14★", "Mythical Honor 25★", "Mythical Immortal 100★"
+// Division ranks: "Epic V 3★", "Legend III 2★"
+function formatRankWithStars(
+  rankId: string,
+  division: number,
+  divisionStar: number,
+  mythicStars: number
+): string {
+  const label = RANK_LIST.find(r => r.id === rankId)?.label || rankId;
+  if (RANKS_WITH_STARS.includes(rankId)) {
+    const divLabel = ["I", "II", "III", "IV", "V"][division - 1] || "";
+    return `${label} ${divLabel} ${divisionStar}★`;
+  }
+  if (MYTHIC_STAR_CONFIG[rankId]) {
+    return `${label} ${mythicStars}★`;
+  }
+  return label;
+}
+
 // Fallback static options (max 5 divisions) — used if no rank selected yet
 const STAR_OPTIONS = [
   { value: 5, label: "V" },
@@ -3455,7 +3475,9 @@ function OrderPageContent() {
                     ) : selectedPackage ? (
                       <>
                       <div className="flex justify-between text-text-muted">
-                        <span>{orderMode === "perstar" ? selectedPackage.title : t.basePrice}</span>
+                        <span>{orderMode === "perstar"
+                          ? `${formatRankWithStars(form.currentRank, currentStar, currentDivisionStar, currentMythicStars)} ~ ${formatRankWithStars(form.targetRank, targetStar, 0, targetMythicStars)}`
+                          : t.basePrice}</span>
                         <span>{formatRupiah(selectedPackage.price)}</span>
                       </div>
                       {orderMode === "perstar" && perStarTouched && form.currentRank !== "" && form.targetRank !== "" && (() => {
@@ -3600,9 +3622,6 @@ function OrderPageContent() {
                 {/* Per Star Summary - For Per Bintang Mode (now uses selectedPackage like paket) */}
                 {orderMode === "perstar" && selectedPackage && (
                   <div className="bg-background rounded-xl p-4">
-                    <p className="text-text-muted text-xs mb-2 uppercase tracking-wider">
-                      Paket Per Bintang
-                    </p>
                     <div className="flex items-center gap-3">
                       <div className="flex items-center gap-1.5 flex-shrink-0">
                         <Image src={rankIcons[form.currentRank] || "/icons-tier/warrior.webp"} alt={`Rank ${form.currentRank}`} width={36} height={36} className="w-9 h-9 object-contain drop-shadow-lg" />
@@ -3611,10 +3630,10 @@ function OrderPageContent() {
                       </div>
                       <div className="flex-1">
                         <p className="text-text font-semibold">
-                          {selectedPackage.title}
+                          {formatRankWithStars(form.currentRank, currentStar, currentDivisionStar, currentMythicStars)} ~ {formatRankWithStars(form.targetRank, targetStar, 0, targetMythicStars)}
                         </p>
                         <p className="text-text-muted text-xs">
-                          {RANK_LIST.find(r => r.id === form.currentRank)?.label || form.currentRank} → {RANK_LIST.find(r => r.id === form.targetRank)?.label || form.targetRank}
+                          {autoCalcResult.totalStars}★
                         </p>
                         <p className="text-yellow-400 font-bold text-lg">
                           {formatRupiah(selectedPackage.price)}
@@ -3748,7 +3767,9 @@ function OrderPageContent() {
                       ) : selectedPackage ? (
                         <>
                         <div className="flex justify-between text-text-muted">
-                          <span>{orderMode === "perstar" ? selectedPackage.title : "Harga Dasar"}</span>
+                          <span>{orderMode === "perstar"
+                            ? `${formatRankWithStars(form.currentRank, currentStar, currentDivisionStar, currentMythicStars)} ~ ${formatRankWithStars(form.targetRank, targetStar, 0, targetMythicStars)}`
+                            : "Harga Dasar"}</span>
                           <span>{formatRupiah(selectedPackage.price)}</span>
                         </div>
                         {orderMode === "perstar" && perStarTouched && form.currentRank !== "" && form.targetRank !== "" && (() => {
