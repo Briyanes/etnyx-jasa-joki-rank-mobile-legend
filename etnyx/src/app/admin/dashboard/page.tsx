@@ -380,14 +380,14 @@ export default function AdminDashboard() {
         // Set default if not in DB
         setPerStarPricing([
           { id: "master", name: "Master", price: 5000, icon: "/icons-tier/Master.webp" },
-          { id: "grandmaster", name: "Grand Master", price: 5500, icon: "/icons-tier/Grandmaster.webp" },
+          { id: "grandmaster", name: "Grand Master", price: 6000, icon: "/icons-tier/Grandmaster.webp" },
           { id: "epic", name: "Epic", price: 7000, icon: "/icons-tier/Epic.webp" },
           { id: "legend", name: "Legend", price: 8000, icon: "/icons-tier/Legend.webp" },
           { id: "grading", name: "Mythic Grading", price: 230000, icon: "/icons-tier/Mythic.webp", isFlat: true },
-          { id: "mythicroomawi", name: "Mythic Romawi", price: 19000, icon: "/icons-tier/Mythic.webp" },
+          { id: "mythicromawi", name: "Mythic Romawi", price: 19000, icon: "/icons-tier/Mythic.webp" },
           { id: "honor", name: "Mythical Honor", price: 24000, icon: "/icons-tier/Mythical_Honor.webp" },
-          { id: "glory", name: "Mythical Glory", price: 29000, icon: "/icons-tier/Mythical_Glory.webp" },
-          { id: "immortal", name: "Mythical Immortal", price: 34000, icon: "/icons-tier/Mythical_Immortal.webp" },
+          { id: "glory", name: "Mythical Glory", price: 27000, icon: "/icons-tier/Mythical_Glory.webp" },
+          { id: "immortal", name: "Mythical Immortal", price: 30000, icon: "/icons-tier/Mythical_Immortal.webp" },
         ]);
       }
       // Fetch gendong (duo boost) pricing

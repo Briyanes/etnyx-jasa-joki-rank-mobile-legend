@@ -113,4 +113,48 @@ test.describe("Order Page — Per Star Mode", () => {
     const totalStarsCard = page.locator("text=Total Bintang").locator("..");
     await expect(totalStarsCard).toContainText("50", { timeout: 5000 });
   });
+
+  // Helper: extract the total price number from the estimate card.
+  // The price <p> has class "text-3xl text-yellow-400" and is the only one
+  // visible in perstar mode after rank selection.
+  async function getEstimatePrice(page: import("@playwright/test").Page): Promise<number> {
+    const priceEl = page.locator("p.font-bold.text-3xl.text-yellow-400, p.text-yellow-400.font-bold.text-3xl").first();
+    await expect(priceEl).toBeVisible({ timeout: 5000 });
+    const text = await priceEl.textContent();
+    const match = text?.match(/Rp\s*([\d.]+)/);
+    expect(match).toBeTruthy();
+    return parseInt(match![1].replace(/\./g, ""), 10);
+  }
+
+  // PRICE regression tests — catch the `mythicroomawi` typo bug where the price
+  // silently fell back to grandmaster (Rp 6.000/star) instead of the correct
+  // Mythic tier price. If the ID alias doesn't work, these tests will fail
+  // because the total price will be far too low.
+  test("REGRESSION: Mythic 0★ → Glory 50★ price uses Mythic tier (≥Rp 1.000.000)", async ({ page }) => {
+    await setSelectValue(page, "perstar-current-rank", "mythic");
+    await setSelectValue(page, "perstar-target-rank", "mythicglory");
+
+    await expect(page.locator("text=Estimasi Harga Per Bintang")).toBeVisible({ timeout: 5000 });
+
+    // Mythic 0-25★ = 25 × Rp 19.000 = Rp 475.000
+    // Honor 25-50★ = 25 × Rp 24.000 = Rp 600.000
+    // Total = Rp 1.075.000 (well above Rp 1.000.000)
+    // If typo bug exists, price would be 50 × Rp 6.000 = Rp 300.000
+    const priceNum = await getEstimatePrice(page);
+    expect(priceNum).toBeGreaterThanOrEqual(1000000);
+  });
+
+  test("REGRESSION: Honor 25★ → Immortal 100★ price uses correct tiers (≥Rp 1.900.000)", async ({ page }) => {
+    await setSelectValue(page, "perstar-current-rank", "mythichonor");
+    await setSelectValue(page, "perstar-target-rank", "mythicimmortal");
+
+    await expect(page.locator("text=Estimasi Harga Per Bintang")).toBeVisible({ timeout: 5000 });
+
+    // Honor 25-50★ = 25 × Rp 24.000 = Rp 600.000
+    // Glory 50-100★ = 50 × Rp 27.000 = Rp 1.350.000
+    // Total = Rp 1.950.000 (≥ Rp 1.900.000)
+    // If typo bug exists, price would be 75 × Rp 6.000 = Rp 450.000
+    const priceNum = await getEstimatePrice(page);
+    expect(priceNum).toBeGreaterThanOrEqual(1900000);
+  });
 });

@@ -323,14 +323,14 @@ interface PerStarRank {
 
 const PER_STAR_RANKS: PerStarRank[] = [
   { id: "master", name: "Master", price: 5000, icon: "/icons-tier/Master.webp", maxStars: 25 },
-  { id: "grandmaster", name: "Grand Master", price: 5500, icon: "/icons-tier/Grandmaster.webp", maxStars: 25 },
+  { id: "grandmaster", name: "Grand Master", price: 6000, icon: "/icons-tier/Grandmaster.webp", maxStars: 25 },
   { id: "epic", name: "Epic", price: 7000, icon: "/icons-tier/Epic.webp", maxStars: 25 },
   { id: "legend", name: "Legend", price: 8000, icon: "/icons-tier/Legend.webp", maxStars: 25 },
   { id: "grading", name: "Mythic Grading", price: 230000, icon: "/icons-tier/Mythic.webp", maxStars: 10, isFlat: true },
   { id: "mythicromawi", name: "Mythic Romawi", price: 19000, icon: "/icons-tier/Mythic.webp", maxStars: 25 },
   { id: "honor", name: "Mythical Honor", price: 24000, icon: "/icons-tier/Mythical_Honor.webp", maxStars: 25 },
-  { id: "glory", name: "Mythical Glory", price: 29000, icon: "/icons-tier/Mythical_Glory.webp", maxStars: 50 },
-  { id: "immortal", name: "Mythical Immortal", price: 34000, icon: "/icons-tier/Mythical_Immortal.webp", maxStars: 100 },
+  { id: "glory", name: "Mythical Glory", price: 27000, icon: "/icons-tier/Mythical_Glory.webp", maxStars: 50 },
+  { id: "immortal", name: "Mythical Immortal", price: 30000, icon: "/icons-tier/Mythical_Immortal.webp", maxStars: 100 },
 ];
 
 // Gendong (duo boost) per-star pricing
@@ -1292,7 +1292,19 @@ function OrderPageContent() {
           // Ensure maxStars from defaults if CMS doesn't include it
           const defaultMaxStars: Record<string, number> = {};
           for (const r of PER_STAR_RANKS) defaultMaxStars[r.id] = r.maxStars;
-          setPerStarRanks(data.perstar_pricing.map((r: PerStarRank) => ({ ...r, maxStars: r.maxStars || defaultMaxStars[r.id] || 100 })));
+          // ID NORMALIZATION: Fix common DB typos so price lookups always match.
+          // The `rankToPriceKey` map uses "mythicromawi" (single 'o'), but legacy
+          // DB records may contain "mythicroomawi" (double 'o'). Without this fix,
+          // the price lookup silently falls back to Rp 5.000 (grandmaster price)
+          // and massively undercharges Mythic orders.
+          const idAliases: Record<string, string> = {
+            mythicroomawi: "mythicromawi", // double 'o' typo → correct ID
+          };
+          setPerStarRanks(data.perstar_pricing.map((r: PerStarRank) => ({
+            ...r,
+            id: idAliases[r.id] || r.id,
+            maxStars: r.maxStars || defaultMaxStars[r.id] || defaultMaxStars[idAliases[r.id]] || 100,
+          })));
         }
         if (data.gendong_pricing && Array.isArray(data.gendong_pricing) && data.gendong_pricing.length > 0) {
           const defaultMaxStars: Record<string, number> = {};
