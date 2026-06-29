@@ -799,21 +799,21 @@ function calculateStarBreakdown(
 
 // Render tier icon(s) inside badges. For same-tier → 1 icon.
 // For cross-tier → 2 icons with arrow (e.g. Warrior → Mythic).
-function TierIconsBadge({ currentRank, targetRank, size = 12 }: { currentRank?: string; targetRank?: string; size?: number }) {
+function TierIconsBadge({ currentRank, targetRank, size = 20 }: { currentRank?: string; targetRank?: string; size?: number }) {
   const cur = currentRank && rankIcons[currentRank] ? currentRank : null;
   const tgt = targetRank && rankIcons[targetRank] ? targetRank : null;
   if (!cur && !tgt) return null;
   if (cur && tgt && cur !== tgt) {
     return (
-      <span className="inline-flex items-center gap-0.5">
-        <Image src={rankIcons[cur]} alt={cur} width={size} height={size} className={`w-3 h-3 object-contain`} />
-        <span className="text-[8px] opacity-60">→</span>
-        <Image src={rankIcons[tgt]} alt={tgt} width={size} height={size} className={`w-3 h-3 object-contain`} />
+      <span className="inline-flex items-center gap-1">
+        <Image src={rankIcons[cur]} alt={cur} width={size} height={size} className="w-5 h-5 object-contain drop-shadow-md" />
+        <span className="text-[10px] opacity-60">→</span>
+        <Image src={rankIcons[tgt]} alt={tgt} width={size} height={size} className="w-5 h-5 object-contain drop-shadow-md" />
       </span>
     );
   }
   const rank = tgt || cur!;
-  return <Image src={rankIcons[rank]} alt={rank} width={size} height={size} className="w-3 h-3 object-contain" />;
+  return <Image src={rankIcons[rank]} alt={rank} width={size} height={size} className="w-5 h-5 object-contain drop-shadow-md" />;
 }
 
 // Parse rank from classic package title (e.g. "Epic 10 Win" → "epic")
@@ -2114,18 +2114,23 @@ function OrderPageContent() {
                           {pkg.originalPrice && <p className="text-red-400/70 text-xs line-through">{formatRupiah(pkg.originalPrice)}</p>}
                         </div>
                       </div>
-                      {/* Tier badge row: always show for classic, discount badge for paket */}
+                      {/* Tier badge row: text left, big icon right */}
                       {(pkg.discountPercent != null && pkg.discountPercent > 0 || pkg.currentRank === "classic") && (
-                        <div className="px-4 py-2 bg-slate-800/60">
+                        <div className="px-4 py-2 bg-slate-800/60 flex items-center justify-between">
                           {(() => {
                             const isClassic = pkg.currentRank === "classic";
                             const iconCur = isClassic ? parseClassicRank(pkg.title) : pkg.currentRank;
                             const iconTgt = isClassic ? parseClassicRank(pkg.title) : pkg.targetRank;
+                            const hasDiscount = pkg.discountPercent != null && pkg.discountPercent > 0;
                             return (
-                              <span className="bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded text-[10px] font-bold inline-flex items-center gap-1">
+                              <>
+                                {hasDiscount && (
+                                  <span className="bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded text-[10px] font-bold">
+                                    {t.discount} {pkg.discountPercent}%
+                                  </span>
+                                )}
                                 <TierIconsBadge currentRank={iconCur} targetRank={iconTgt} />
-                                {pkg.discountPercent != null && pkg.discountPercent > 0 ? `${t.discount} ${pkg.discountPercent}%` : ""}
-                              </span>
+                              </>
                             );
                           })()}
                         </div>
@@ -2609,11 +2614,14 @@ function OrderPageContent() {
                             </div>
                             <div className="px-3 py-2 bg-slate-800/60 flex items-center justify-between gap-1">
                               <span className="bg-yellow-500/20 text-yellow-400 px-1.5 py-0.5 rounded text-[9px] font-bold flex items-center gap-0.5">
-                                <TierIconsBadge currentRank={pkg.rankId} targetRank={pkg.rankId} /> <Star className="w-2 h-2 fill-current" /> +{pkg.bonusStars} BONUS
+                                <Star className="w-2 h-2 fill-current" /> +{pkg.bonusStars} BONUS
                               </span>
-                              <span className="bg-teal-600/30 text-teal-300 px-1.5 py-0.5 rounded text-[9px] font-bold">
-                                10★
-                              </span>
+                              <div className="flex items-center gap-1.5">
+                                <TierIconsBadge currentRank={pkg.rankId} targetRank={pkg.rankId} />
+                                <span className="bg-teal-600/30 text-teal-300 px-1.5 py-0.5 rounded text-[9px] font-bold">
+                                  10★
+                                </span>
+                              </div>
                             </div>
                             {isActive && (
                               <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-yellow-400 flex items-center justify-center">
@@ -2842,16 +2850,19 @@ function OrderPageContent() {
                                 </div>
                               </div>
                             </div>
-                            <div className="px-4 py-2.5 bg-slate-800/60 flex items-center justify-end gap-2">
-                              {rank.discountPercent && (
-                                <span className="bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded text-[10px] font-bold inline-flex items-center gap-1">
-                                  <Image src={rank.icon} alt={rank.name} width={12} height={12} className="w-3 h-3 object-contain" /> Disc {rank.discountPercent}%
+                            <div className="px-4 py-2.5 bg-slate-800/60 flex items-center justify-between gap-2">
+                              {rank.discountPercent ? (
+                                <span className="bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded text-[10px] font-bold">
+                                  Disc {rank.discountPercent}%
                                 </span>
-                              )}
-                              <span className="bg-purple-600/30 text-purple-300 px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1">
-                                <Users className="w-2.5 h-2.5" />
-                                Duo Boost
-                              </span>
+                              ) : <span />}
+                              <div className="flex items-center gap-2">
+                                <Image src={rank.icon} alt={rank.name} width={20} height={20} className="w-5 h-5 object-contain drop-shadow-md" />
+                                <span className="bg-purple-600/30 text-purple-300 px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1">
+                                  <Users className="w-2.5 h-2.5" />
+                                  Duo Boost
+                                </span>
+                              </div>
                             </div>
                             {isSelected && (
                               <div className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-yellow-400 flex items-center justify-center">
