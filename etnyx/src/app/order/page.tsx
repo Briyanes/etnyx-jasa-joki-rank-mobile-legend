@@ -515,6 +515,11 @@ function calculateTotalStars(
   // Full ranks in between
   for (let i = ci + 1; i < ti; i++) {
     const rank = RANK_ORDER[i];
+    // Skip mythicgrading — it's NOT a separate star tier.
+    // Grading is the entry phase of Mythic (10 placement matches).
+    // Counting it as stars causes double-counting with Mythic Romawi.
+    if (rank === "mythicgrading") continue;
+
     const cfg = RANK_DIVISION_CONFIG[rank];
     if (cfg) {
       stars += cfg.divisions * cfg.starsPerDiv;
@@ -593,6 +598,14 @@ function autoCalcPackagePrice(
     const rank = RANK_ORDER[i];
     const key = rankToPriceKey[rank] || "grandmaster";
     const priceEntry = perStarPrices.find(r => r.id === key);
+
+    // mythicgrading is a FLAT rate (Rp 230.000 for 10 placement matches).
+    // Add the flat price once — do NOT multiply by stars.
+    if (rank === "mythicgrading" && priceEntry) {
+      originalTotal += priceEntry.price;
+      continue;
+    }
+
     const pricePerStar = priceEntry?.price || 5000;
     let starsInThisRank: number;
     if (RANKS_WITH_STARS.includes(rank)) {
