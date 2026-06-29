@@ -331,8 +331,8 @@ export const MYTHIC_PER_STAR_PRICES: Record<string, number> = {
   mythicgrading: 23000, // Rp 230.000 flat for 10 matches = Rp 23.000/match
   mythic: 19000, // Rp 19.000/star (Mythic Romawi)
   mythichonor: 24000, // Rp 24.000/star
-  mythicglory: 29000, // Rp 29.000/star
-  mythicimmortal: 34000, // Rp 34.000/star
+  mythicglory: 27000, // Rp 27.000/star (synced with CMS)
+  mythicimmortal: 30000, // Rp 30.000/star (synced with CMS)
 };
 
 /**

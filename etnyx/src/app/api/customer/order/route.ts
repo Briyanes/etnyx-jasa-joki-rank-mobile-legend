@@ -32,8 +32,8 @@ function checkRateLimit(ip: string): boolean {
 // Server-side pricing for per-star and gendong modes (must match frontend).
 // These are FALLBACK values only — CMS pricing takes precedence.
 const SERVER_PER_STAR_PRICES: Record<string, number> = {
-  master: 5000, grandmaster: 5500, epic: 7000, legend: 8000,
-  grading: 230000, mythicromawi: 19000, honor: 24000, glory: 29000, immortal: 34000,
+  master: 5000, grandmaster: 6000, epic: 7000, legend: 8000,
+  grading: 230000, mythicromawi: 19000, honor: 24000, glory: 27000, immortal: 30000,
 };
 const SERVER_GENDONG_PRICES: Record<string, number> = {
   grandmaster: 9000, epic: 10000, legend: 11000, grading: 23000,
