@@ -202,6 +202,11 @@ export function calculateTotalStars(
   // Full ranks in between
   for (let i = ci + 1; i < ti; i++) {
     const rank = RANK_ORDER[i];
+    // Skip mythicgrading — it's NOT a separate star tier.
+    // Grading is the entry phase of Mythic (10 placement matches).
+    // Counting it as stars causes double-counting with Mythic Romawi.
+    if (rank === "mythicgrading") continue;
+
     const cfg = RANK_DIVISION_CONFIG[rank];
     if (cfg) {
       stars += cfg.divisions * cfg.starsPerDiv;
@@ -301,6 +306,42 @@ export function findBestPackage(
   }
 
   return null;
+}
+
+// Per-star prices for Mythic tiers (synced with Daftar Harga)
+// These represent the cost per star/match for each Mythic sub-tier.
+export const MYTHIC_PER_STAR_PRICES: Record<string, number> = {
+  mythicgrading: 23000, // Rp 230.000 flat for 10 matches = Rp 23.000/match
+  mythic: 19000, // Rp 19.000/star (Mythic Romawi)
+  mythichonor: 24000, // Rp 24.000/star
+  mythicglory: 29000, // Rp 29.000/star
+  mythicimmortal: 34000, // Rp 34.000/star
+};
+
+/**
+ * Calculate extra cost for additional Mythic stars beyond what a package covers.
+ * Package covers up to "Mythic 0 star" (entry to Mythic).
+ * If buyer wants Mythic 18, the extra 18 stars are charged per-star.
+ */
+export function calculateExtraMythicCost(
+  targetRank: string,
+  targetDivisionStar: number
+): number {
+  const pricePerStar = MYTHIC_PER_STAR_PRICES[targetRank];
+  if (!pricePerStar || targetDivisionStar <= 0) return 0;
+
+  // For mythicgrading: flat rate Rp 230.000 (10 matches)
+  if (targetRank === "mythicgrading") {
+    return 230000;
+  }
+
+  // For mythic (Romawi): star × Rp 19.000
+  // For mythichonor: (star - 25) × Rp 24.000, etc.
+  const cfg = MYTHIC_STAR_CONFIG[targetRank];
+  if (!cfg) return 0;
+
+  const starsInTier = targetDivisionStar - cfg.min;
+  return Math.max(0, starsInTier) * pricePerStar;
 }
 
 /** Format currency as Indonesian Rupiah */

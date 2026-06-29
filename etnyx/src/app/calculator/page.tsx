@@ -27,11 +27,14 @@ import {
   RANK_ORDER,
   RANKS_WITH_STARS,
   RANK_DIVISION_CONFIG,
+  MYTHIC_STAR_CONFIG,
   rankIcons,
   getDivisionOptions,
   getRankDivisionOptions,
   calculateTotalStars,
   findBestPackage,
+  calculateExtraMythicCost,
+  MYTHIC_PER_STAR_PRICES,
   formatRupiah,
   type PackageCategory,
   type ProductPackage,
@@ -196,6 +199,7 @@ export default function CalculatorPage() {
   const [result, setResult] = useState<{
     totalStars: number;
     basePrice: number;
+    extraMythicCost: number;
     matchedPackage: ProductPackage | null;
     isExactMatch: boolean;
     finalPrice: number;
@@ -231,17 +235,20 @@ export default function CalculatorPage() {
   const calculate = useCallback(() => {
     let totalStars = 0;
     let basePrice = 0;
+    let extraMythicCost = 0;
     let matchedPackage: ProductPackage | null = null;
     let isExactMatch = false;
 
     if (mode === "paket") {
+      // For Mythic+ targets, pass actual targetDivisionStar (not 0)
+      const isMythicTarget = MYTHIC_STAR_CONFIG[targetRank] !== undefined;
       totalStars = calculateTotalStars(
         currentRank,
         currentDiv,
         targetRank,
         targetDiv,
         RANKS_WITH_STARS.includes(currentRank) ? currentDivisionStar : 0,
-        RANKS_WITH_STARS.includes(targetRank) ? targetDivisionStar : 0
+        isMythicTarget ? targetDivisionStar : (RANKS_WITH_STARS.includes(targetRank) ? targetDivisionStar : 0)
       );
 
       const match = findBestPackage(catalog, currentRank, currentDiv, targetRank, targetDiv);
@@ -249,6 +256,13 @@ export default function CalculatorPage() {
         matchedPackage = match.pkg;
         isExactMatch = match.exact;
         basePrice = match.pkg.price;
+
+        // BUG FIX: Add extra cost for Mythic+ stars beyond what package covers
+        // Package covers up to "Mythic 0 star" — extra stars are charged per-star
+        if (isMythicTarget && targetDivisionStar > 0) {
+          extraMythicCost = calculateExtraMythicCost(targetRank, targetDivisionStar);
+          basePrice += extraMythicCost;
+        }
       }
     } else if (mode === "perstar") {
       const rank = PER_STAR_RANKS.find((r) => r.id === selectedStarRankId);
@@ -276,7 +290,7 @@ export default function CalculatorPage() {
 
     finalPrice = Math.round(finalPrice);
 
-    setResult({ totalStars, basePrice, matchedPackage, isExactMatch, finalPrice });
+    setResult({ totalStars, basePrice, extraMythicCost, matchedPackage, isExactMatch, finalPrice });
     setCopied(false);
   }, [
     mode,
@@ -326,7 +340,7 @@ export default function CalculatorPage() {
       : GENDONG_RANKS.find((r) => r.id === selectedGendongRankId)?.name || "";
 
     const tgtLabel = mode === "paket"
-      ? `${RANK_LIST.find((r) => r.id === targetRank)?.label || ""}${RANKS_WITH_STARS.includes(targetRank) ? ` ${getDivisionOptions(targetRank).find((d) => d.value === targetDiv)?.label || ""}` : ""}`
+      ? `${RANK_LIST.find((r) => r.id === targetRank)?.label || ""}${RANKS_WITH_STARS.includes(targetRank) ? ` ${getDivisionOptions(targetRank).find((d) => d.value === targetDiv)?.label || ""}` : ""}${MYTHIC_STAR_CONFIG[targetRank] && targetDivisionStar > 0 ? ` (${targetDivisionStar} ${MYTHIC_STAR_CONFIG[targetRank].label})` : ""}`
       : "";
 
     const addons: string[] = [];
@@ -342,12 +356,16 @@ export default function CalculatorPage() {
 
     if (mode === "paket") {
       lines.push(`Rank Awal: ${curLabel} (${currentDivisionStar} bintang)`);
-      lines.push(`Rank Tujuan: ${tgtLabel} (${targetDivisionStar} bintang)`);
+      lines.push(`Rank Tujuan: ${tgtLabel}`);
     } else {
       lines.push(`Rank: ${curLabel}`);
     }
 
     lines.push(`Total Bintang/Match: ${result.totalStars}`);
+
+    if (result.extraMythicCost > 0) {
+      lines.push(`Extra Mythic: +${formatRupiah(result.extraMythicCost)}`);
+    }
 
     if (addons.length > 0) {
       lines.push(`Add-on: ${addons.join(", ")}`);
@@ -557,9 +575,11 @@ export default function CalculatorPage() {
                           const [rankId, div] = raw.split(":");
                           setTargetRank(rankId);
                           setTargetDiv(parseInt(div));
+                          setTargetDivisionStar(0); // Reset star when rank changes
                         } else {
                           setTargetRank(raw);
                           setTargetDiv(0);
+                          setTargetDivisionStar(0);
                         }
                       }}
                       className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 text-text text-sm font-medium appearance-none cursor-pointer focus:border-accent focus:outline-none pr-10"
@@ -605,6 +625,54 @@ export default function CalculatorPage() {
                       </div>
                     );
                   })()}
+
+                  {/* Mythic+ Star Selector */}
+                  {MYTHIC_STAR_CONFIG[targetRank] && targetRank !== "mythicgrading" && (() => {
+                    const cfg = MYTHIC_STAR_CONFIG[targetRank];
+                    const pricePerStar = MYTHIC_PER_STAR_PRICES[targetRank] || 0;
+                    return (
+                      <div className="mt-3 p-3 bg-yellow-400/5 rounded-xl border border-yellow-400/20">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-yellow-400 text-xs font-bold">
+                            {cfg.label === "Match" ? "Jumlah Match" : "Jumlah Bintang"} Tujuan
+                          </span>
+                          <span className="text-text-muted text-[10px]">
+                            Range: {cfg.min}–{cfg.max} • {formatRupiah(pricePerStar)}/{cfg.label === "Match" ? "match" : "star"}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => setTargetDivisionStar(Math.max(cfg.min, targetDivisionStar - 1))}
+                            className="w-9 h-9 rounded-lg bg-background border border-white/10 text-white flex items-center justify-center hover:bg-white/5"
+                          >
+                            <Minus className="w-4 h-4" />
+                          </button>
+                          <input
+                            type="number"
+                            min={cfg.min}
+                            max={cfg.max}
+                            value={targetDivisionStar}
+                            onChange={(e) => {
+                              const val = parseInt(e.target.value) || cfg.min;
+                              setTargetDivisionStar(Math.max(cfg.min, Math.min(cfg.max, val)));
+                            }}
+                            className="w-20 h-9 text-center bg-background text-yellow-400 rounded-lg border border-yellow-400/20 focus:outline-none focus:border-yellow-400 text-sm font-bold"
+                          />
+                          <button
+                            onClick={() => setTargetDivisionStar(Math.min(cfg.max, targetDivisionStar + 1))}
+                            className="w-9 h-9 rounded-lg bg-background border border-white/10 text-white flex items-center justify-center hover:bg-white/5"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
+                          {targetDivisionStar > cfg.min && (
+                            <span className="text-green-400 text-xs font-bold ml-1">
+                              +{formatRupiah(calculateExtraMythicCost(targetRank, targetDivisionStar))}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 {/* Visual flow */}
@@ -620,6 +688,7 @@ export default function CalculatorPage() {
                     <Image src={rankIcons[targetRank] || ""} alt="Target" width={28} height={28} className="w-7 h-7 object-contain" />
                     <span className="text-yellow-400 text-sm font-bold">
                       {getRankLabel(targetRank)} {RANKS_WITH_STARS.includes(targetRank) && getDivLabel(targetRank, targetDiv)}
+                      {MYTHIC_STAR_CONFIG[targetRank] && targetDivisionStar > 0 ? ` (${targetDivisionStar})` : ""}
                     </span>
                   </div>
                 </div>
@@ -829,9 +898,15 @@ export default function CalculatorPage() {
                     {/* Price Breakdown */}
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between text-text-muted">
-                        <span>Harga Dasar</span>
-                        <span>{formatRupiah(result.basePrice)}</span>
+                        <span>Harga Paket</span>
+                        <span>{formatRupiah(result.basePrice - result.extraMythicCost)}</span>
                       </div>
+                      {result.extraMythicCost > 0 && (
+                        <div className="flex justify-between text-green-400">
+                          <span>Extra Mythic Stars</span>
+                          <span>+{formatRupiah(result.extraMythicCost)}</span>
+                        </div>
+                      )}
                       {isExpress && (
                         <div className="flex justify-between text-yellow-400">
                           <span>Express (+20%)</span>
