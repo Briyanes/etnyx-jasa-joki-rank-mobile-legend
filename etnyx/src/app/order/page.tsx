@@ -927,6 +927,9 @@ function OrderPageContent() {
   const [currentMythicStars, setCurrentMythicStars] = useState(0);
   const [targetMythicStars, setTargetMythicStars] = useState(0);
 
+  // Per Star mode: track if user has actively selected ranks (empty state UX)
+  const [perStarTouched, setPerStarTouched] = useState(false);
+
   // Account verification (Cek Akun)
   const [accountCheckLoading, setAccountCheckLoading] = useState(false);
   const [accountCheckResult, setAccountCheckResult] = useState<{ verified: boolean; nickname: string } | null>(null);
@@ -1210,7 +1213,8 @@ function OrderPageContent() {
   // Raw item price (before season/express/premium)
   const rawItemPrice = (() => {
     if ((orderMode === "paket" || orderMode === "classic") && selectedPackage) return selectedPackage.price;
-    if (orderMode === "perstar" && autoCalcResult.price > 0) return autoCalcResult.price;
+    // Per Star: only show price AFTER user actively selects ranks (empty state UX)
+    if (orderMode === "perstar" && perStarTouched && autoCalcResult.price > 0) return autoCalcResult.price;
     if (orderMode === "gendong" && selectedGendongRank) return selectedGendongRank.price * gendongQuantity;
     return 0;
   })();
@@ -1295,8 +1299,8 @@ function OrderPageContent() {
             const gMin = selectedGendongRank?.id === "grading" ? 1 : 3;
             return !!(selectedGendongRank && gendongQuantity >= gMin);
           } else {
-            // Perstar mode: rank awal → tujuan with autoCalcResult
-            return autoCalcResult.price > 0 && autoCalcResult.totalStars > 0;
+            // Perstar mode: user must actively select ranks first (empty state UX)
+            return perStarTouched && autoCalcResult.price > 0 && autoCalcResult.totalStars > 0;
           }
         case 2:
           if (orderMode === "gendong") {
@@ -1328,7 +1332,7 @@ function OrderPageContent() {
           return true;
       }
     },
-    [selectedPackage, selectedStarRank, starQuantity, selectedGendongRank, gendongQuantity, orderMode, form]
+    [selectedPackage, selectedStarRank, starQuantity, selectedGendongRank, gendongQuantity, orderMode, form, perStarTouched, autoCalcResult.price, autoCalcResult.totalStars]
   );
 
   const goToStep = useCallback(
@@ -1781,6 +1785,9 @@ function OrderPageContent() {
                     setShowPackages(false);
                     setSelectedStarRank(null);
                     setStarQuantity(3);
+                    setPerStarTouched(false);
+                    // Reset ranks to force user selection
+                    updateForm({ currentRank: "epic" as RankTier, targetRank: "mythic" as RankTier });
                   }}
                   className={`w-full sm:w-auto py-3 px-4 rounded-lg text-base font-semibold transition-all ${
                     orderMode === "perstar"
@@ -1932,6 +1939,7 @@ function OrderPageContent() {
                       value={form.currentRank}
                       onChange={(e) => {
                         const rankId = e.target.value;
+                        setPerStarTouched(true);
                         updateForm({ currentRank: rankId as RankTier });
                         setSelectedPackage(null);
                         setShowPackages(false);
@@ -2410,6 +2418,7 @@ function OrderPageContent() {
                           value={form.targetRank}
                           onChange={(e) => {
                             const rankId = e.target.value;
+                            setPerStarTouched(true);
                             updateForm({ targetRank: rankId as RankTier });
                             const cfg = RANK_DIVISION_CONFIG[rankId];
                             if (cfg) setTargetStar(1);
@@ -2459,7 +2468,18 @@ function OrderPageContent() {
                     </div>
                   </div>
 
-                  {/* Selected Rank Flow Display */}
+                  {/* Empty State Placeholder (before user selects) */}
+                  {!perStarTouched && (
+                    <div className="flex flex-col items-center justify-center gap-2 mb-4 p-6 bg-background rounded-xl border border-dashed border-white/15 text-center">
+                      <Target className="w-8 h-8 text-accent/50" />
+                      <p className="text-text-muted text-sm font-medium">
+                        {locale === "id" ? "Pilih rank awal & rank tujuan untuk melihat harga" : "Select current rank & target rank to see price"}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Selected Rank Flow Display — only after user picks */}
+                  {perStarTouched && (
                   <div className="flex items-center justify-center gap-3 mb-4 p-3 bg-background rounded-xl border border-white/5">
                     <div className="flex items-center gap-2">
                       <Image src={rankIcons[form.currentRank] || "/icons-tier/warrior.webp"} alt={`Rank ${form.currentRank}`} width={28} height={28} className="w-7 h-7 object-contain" />
@@ -2479,9 +2499,10 @@ function OrderPageContent() {
                       </span>
                     </div>
                   </div>
+                  )}
 
                   {/* Star Summary + Bonus */}
-                  {autoCalcResult.totalStars > 0 && (() => {
+                  {perStarTouched && autoCalcResult.totalStars > 0 && (() => {
                     const totalStars = autoCalcResult.totalStars;
                     const activeTier = [...BUNDLE_TIERS].reverse().find(t => totalStars >= t.minStars) || BUNDLE_TIERS[0];
                     const bonusStars = activeTier?.bonusStars || 0;
@@ -2497,7 +2518,7 @@ function OrderPageContent() {
                   })()}
 
                   {/* Bundle Tier Cards */}
-                  {autoCalcResult.totalStars > 0 && (() => {
+                  {perStarTouched && autoCalcResult.totalStars > 0 && (() => {
                     const totalStars = autoCalcResult.totalStars;
                     const activeTier = [...BUNDLE_TIERS].reverse().find(t => totalStars >= t.minStars) || BUNDLE_TIERS[0];
                     return (
@@ -2525,7 +2546,7 @@ function OrderPageContent() {
                   })()}
 
                   {/* Auto-Calculated Price Card */}
-                  {autoCalcResult.totalStars > 0 && (
+                  {perStarTouched && autoCalcResult.totalStars > 0 && (
                     <div className="mt-2 p-5 bg-gradient-to-br from-accent/10 to-accent/5 border border-accent/30 rounded-xl">
                       <div className="flex items-center justify-between mb-3">
                         <span className="text-text text-sm font-medium flex items-center gap-1.5"><CreditCard className="w-4 h-4 text-accent" />{locale === "id" ? "Estimasi Harga Per Bintang" : "Per Star Price Estimate"}</span>
