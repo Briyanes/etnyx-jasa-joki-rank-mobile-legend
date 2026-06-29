@@ -142,25 +142,27 @@ const DEFAULT_CATALOG: PackageCategory[] = [
   },
 ];
 
-// Per-star pricing
+// Per-star pricing — synced with order page PER_STAR_RANKS
 const PER_STAR_RANKS: PerStarRank[] = [
-  { id: "grandmaster", name: "Grand Master", price: 5000, originalPrice: 6000, discountPercent: 17, icon: "/icons-tier/Grandmaster.webp", maxStars: 25 },
-  { id: "epic", name: "Epic", price: 6500, originalPrice: 8000, discountPercent: 19, icon: "/icons-tier/Epic.webp", maxStars: 25 },
-  { id: "legend", name: "Legend", price: 7500, originalPrice: 9000, discountPercent: 17, icon: "/icons-tier/Legend.webp", maxStars: 25 },
-  { id: "grading", name: "Mythic Grading", price: 20000, originalPrice: 22000, discountPercent: 9, icon: "/icons-tier/Mythic.webp", maxStars: 10 },
-  { id: "mythic", name: "Mythic", price: 18000, originalPrice: 20000, discountPercent: 10, icon: "/icons-tier/Mythic.webp", maxStars: 25 },
-  { id: "honor", name: "Mythic Honor", price: 21000, originalPrice: 23000, discountPercent: 9, icon: "/icons-tier/Mythical_Honor.webp", maxStars: 25 },
-  { id: "glory", name: "Mythic Glory", price: 26000, originalPrice: 28000, discountPercent: 7, icon: "/icons-tier/Mythical_Glory.webp", maxStars: 50 },
-  { id: "immortal", name: "Mythic Immortal", price: 31000, originalPrice: 33000, discountPercent: 6, icon: "/icons-tier/Mythical_Immortal.webp", maxStars: 100 },
+  { id: "master", name: "Master", price: 5000, originalPrice: 6000, discountPercent: 17, icon: "/icons-tier/Master.webp", maxStars: 25 },
+  { id: "grandmaster", name: "Grand Master", price: 5500, originalPrice: 7000, discountPercent: 21, icon: "/icons-tier/Grandmaster.webp", maxStars: 25 },
+  { id: "epic", name: "Epic", price: 7000, originalPrice: 8500, discountPercent: 18, icon: "/icons-tier/Epic.webp", maxStars: 25 },
+  { id: "legend", name: "Legend", price: 8000, originalPrice: 9500, discountPercent: 16, icon: "/icons-tier/Legend.webp", maxStars: 25 },
+  { id: "grading", name: "Mythic Grading", price: 230000, originalPrice: 250000, discountPercent: 8, icon: "/icons-tier/Mythic.webp", maxStars: 10 },
+  { id: "mythicromawi", name: "Mythic", price: 19000, originalPrice: 21000, discountPercent: 10, icon: "/icons-tier/Mythic.webp", maxStars: 25 },
+  { id: "honor", name: "Mythic Honor", price: 24000, originalPrice: 26000, discountPercent: 8, icon: "/icons-tier/Mythical_Honor.webp", maxStars: 25 },
+  { id: "glory", name: "Mythic Glory", price: 29000, originalPrice: 31000, discountPercent: 7, icon: "/icons-tier/Mythical_Glory.webp", maxStars: 50 },
+  { id: "immortal", name: "Mythic Immortal", price: 34000, originalPrice: 36000, discountPercent: 6, icon: "/icons-tier/Mythical_Immortal.webp", maxStars: 100 },
 ];
 
-// Gendong per-star pricing
+// Gendong per-star pricing — synced with order page GENDONG_RANKS
 const GENDONG_RANKS: PerStarRank[] = [
+  { id: "master", name: "Master", price: 8500, originalPrice: 10000, discountPercent: 15, icon: "/icons-tier/Master.webp", maxStars: 25 },
   { id: "grandmaster", name: "Grand Master", price: 9000, originalPrice: 11000, discountPercent: 18, icon: "/icons-tier/Grandmaster.webp", maxStars: 25 },
   { id: "epic", name: "Epic", price: 10000, originalPrice: 12000, discountPercent: 17, icon: "/icons-tier/Epic.webp", maxStars: 25 },
   { id: "legend", name: "Legend", price: 11000, originalPrice: 13000, discountPercent: 15, icon: "/icons-tier/Legend.webp", maxStars: 25 },
   { id: "grading", name: "Mythic Grading", price: 23000, originalPrice: 26000, discountPercent: 12, icon: "/icons-tier/Mythic.webp", maxStars: 10 },
-  { id: "mythic", name: "Mythic", price: 21000, originalPrice: 24000, discountPercent: 13, icon: "/icons-tier/Mythic.webp", maxStars: 25 },
+  { id: "mythicromawi", name: "Mythic", price: 21000, originalPrice: 24000, discountPercent: 13, icon: "/icons-tier/Mythic.webp", maxStars: 25 },
   { id: "honor", name: "Mythic Honor", price: 25000, originalPrice: 28000, discountPercent: 11, icon: "/icons-tier/Mythical_Honor.webp", maxStars: 25 },
   { id: "glory", name: "Mythic Glory", price: 30000, originalPrice: 34000, discountPercent: 12, icon: "/icons-tier/Mythical_Glory.webp", maxStars: 50 },
   { id: "immortal", name: "Mythic Immortal", price: 35000, originalPrice: 40000, discountPercent: 13, icon: "/icons-tier/Mythical_Immortal.webp", maxStars: 100 },
