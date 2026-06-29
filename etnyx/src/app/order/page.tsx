@@ -1820,7 +1820,8 @@ function OrderPageContent() {
                   : (locale === "id" ? "Joki Classic — joki per match dengan harga tetap, tanpa pilih rank." : "Classic Boost — fixed-price per match boosting, no rank selection needed.")}
               </p>
 
-              {/* ===== Daftar Harga (All Modes) ===== */}
+              {/* ===== Daftar Harga (Paket & Per Star only) ===== */}
+              {(orderMode === "paket" || orderMode === "perstar") && (
               <div className="mb-5 p-4 bg-background rounded-xl border border-white/5">
                 <h3 className="text-text font-bold text-sm mb-3 flex items-center gap-2">
                   <CreditCard className="w-4 h-4 text-accent" />
@@ -1843,6 +1844,7 @@ function OrderPageContent() {
                   ))}
                 </div>
               </div>
+              )}
 
               {/* ===== PAKET & CLASSIC: CATALOG CARDS (no rank selector) ===== */}
               {(orderMode === "paket" || orderMode === "classic") && (
