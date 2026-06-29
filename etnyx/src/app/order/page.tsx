@@ -2114,7 +2114,7 @@ function OrderPageContent() {
                           {pkg.originalPrice && <p className="text-red-400/70 text-xs line-through">{formatRupiah(pkg.originalPrice)}</p>}
                         </div>
                       </div>
-                      {/* Tier badge row: text left, big icon right */}
+                      {/* Tier badge row: Rush = icon left + text right; others = text left + icon right */}
                       {(pkg.discountPercent != null && pkg.discountPercent > 0 || pkg.currentRank === "classic") && (
                         <div className="px-4 py-2 bg-slate-800/60 flex items-center justify-between">
                           {(() => {
@@ -2122,6 +2122,28 @@ function OrderPageContent() {
                             const iconCur = isClassic ? parseClassicRank(pkg.title) : pkg.currentRank;
                             const iconTgt = isClassic ? parseClassicRank(pkg.title) : pkg.targetRank;
                             const hasDiscount = pkg.discountPercent != null && pkg.discountPercent > 0;
+                            const isRush = pkg.id.startsWith("rush");
+                            const bonusMatch = pkg.title.match(/\+?\s*Bonus\s*(\d+)/i);
+                            const bonusStars = bonusMatch ? parseInt(bonusMatch[1]) : 0;
+                            if (isRush) {
+                              return (
+                                <>
+                                  <TierIconsBadge currentRank={iconCur} targetRank={iconTgt} />
+                                  <div className="flex items-center gap-1">
+                                    {bonusStars > 0 && (
+                                      <span className="bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded text-[9px] font-bold flex items-center gap-0.5">
+                                        <Star className="w-2 h-2 fill-current" /> +{bonusStars}
+                                      </span>
+                                    )}
+                                    {hasDiscount && (
+                                      <span className="bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded text-[10px] font-bold">
+                                        {t.discount} {pkg.discountPercent}%
+                                      </span>
+                                    )}
+                                  </div>
+                                </>
+                              );
+                            }
                             return (
                               <>
                                 {hasDiscount && (
