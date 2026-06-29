@@ -303,6 +303,7 @@ interface PerStarRank {
   discountPercent?: number;
   icon: string;
   maxStars: number;
+  isFlat?: boolean; // Flat pricing (e.g. Mythic Grading) — price NOT multiplied by quantity
 }
 
 const PER_STAR_RANKS: PerStarRank[] = [
@@ -310,7 +311,7 @@ const PER_STAR_RANKS: PerStarRank[] = [
   { id: "grandmaster", name: "Grand Master", price: 5500, icon: "/icons-tier/Grandmaster.webp", maxStars: 25 },
   { id: "epic", name: "Epic", price: 7000, icon: "/icons-tier/Epic.webp", maxStars: 25 },
   { id: "legend", name: "Legend", price: 8000, icon: "/icons-tier/Legend.webp", maxStars: 25 },
-  { id: "grading", name: "Mythic Grading", price: 230000, icon: "/icons-tier/Mythic.webp", maxStars: 10 },
+  { id: "grading", name: "Mythic Grading", price: 230000, icon: "/icons-tier/Mythic.webp", maxStars: 10, isFlat: true },
   { id: "mythicromawi", name: "Mythic Romawi", price: 19000, icon: "/icons-tier/Mythic.webp", maxStars: 25 },
   { id: "honor", name: "Mythical Honor", price: 24000, icon: "/icons-tier/Mythical_Honor.webp", maxStars: 25 },
   { id: "glory", name: "Mythical Glory", price: 29000, icon: "/icons-tier/Mythical_Glory.webp", maxStars: 50 },
@@ -1157,7 +1158,7 @@ function OrderPageContent() {
   // Raw item price (before season/express/premium)
   const rawItemPrice = (() => {
     if ((orderMode === "paket" || orderMode === "classic") && selectedPackage) return selectedPackage.price;
-    if (orderMode === "perstar" && selectedStarRank) return selectedStarRank.price * starQuantity;
+    if (orderMode === "perstar" && selectedStarRank) return (selectedStarRank.isFlat ? selectedStarRank.price : selectedStarRank.price * starQuantity);
     if (orderMode === "gendong" && selectedGendongRank) return selectedGendongRank.price * gendongQuantity;
     return 0;
   })();
@@ -1231,7 +1232,7 @@ function OrderPageContent() {
   // Proceed from per-star selection
   const handleProceedPerStar = useCallback(() => {
     if (selectedStarRank && starQuantity >= perStarMin) {
-      const price = selectedStarRank.price * starQuantity;
+      const price = (selectedStarRank.isFlat ? selectedStarRank.price : selectedStarRank.price * starQuantity);
       const unit = selectedStarRank.id === "grading" ? "Match" : "Star";
       const title = `${selectedStarRank.name} × ${starQuantity} ${unit}`;
       // Create a virtual package for the order flow
@@ -1329,7 +1330,7 @@ function OrderPageContent() {
     if (canProceedStep(currentStep) && currentStep < 4) {
       // For per-star mode on step 1, create virtual package first
       if (currentStep === 1 && orderMode === "perstar" && selectedStarRank) {
-        const price = selectedStarRank.price * starQuantity;
+        const price = (selectedStarRank.isFlat ? selectedStarRank.price : selectedStarRank.price * starQuantity);
         const unit = selectedStarRank.id === "grading" ? "Match" : "Star";
         const title = `${selectedStarRank.name} × ${starQuantity} ${unit}`;
         setSelectedPackage({
@@ -2494,7 +2495,7 @@ function OrderPageContent() {
                           <div className="text-right">
                             <p className="text-text-muted text-xs">{t.totalPrice}</p>
                             <p className="text-yellow-400 font-bold text-xl">
-                              {formatRupiah(selectedStarRank.price * starQuantity)}
+                              {formatRupiah((selectedStarRank.isFlat ? selectedStarRank.price : selectedStarRank.price * starQuantity))}
                             </p>
                           </div>
                         </div>
@@ -3125,7 +3126,7 @@ function OrderPageContent() {
                     ) : orderMode === "perstar" && selectedStarRank ? (
                       <div className="flex justify-between text-text-muted">
                         <span>{selectedStarRank.name} × {starQuantity} Bintang</span>
-                        <span>{formatRupiah(selectedStarRank.price * starQuantity)}</span>
+                        <span>{formatRupiah((selectedStarRank.isFlat ? selectedStarRank.price : selectedStarRank.price * starQuantity))}</span>
                       </div>
                     ) : selectedPackage ? (
                       <div className="flex justify-between text-text-muted">
@@ -3275,7 +3276,7 @@ function OrderPageContent() {
                           {starQuantity} {selectedStarRank.id === "grading" ? "Match" : "Bintang"} × {formatRupiah(selectedStarRank.price)}/{selectedStarRank.id === "grading" ? "match" : "star"}
                         </p>
                         <p className="text-yellow-400 font-bold text-lg">
-                          {formatRupiah(selectedStarRank.price * starQuantity)}
+                          {formatRupiah((selectedStarRank.isFlat ? selectedStarRank.price : selectedStarRank.price * starQuantity))}
                         </p>
                       </div>
                     </div>
@@ -3406,7 +3407,7 @@ function OrderPageContent() {
                       ) : orderMode === "perstar" && selectedStarRank ? (
                         <div className="flex justify-between text-text-muted">
                           <span>{selectedStarRank.name} × {starQuantity} Bintang</span>
-                          <span>{formatRupiah(selectedStarRank.price * starQuantity)}</span>
+                          <span>{formatRupiah((selectedStarRank.isFlat ? selectedStarRank.price : selectedStarRank.price * starQuantity))}</span>
                         </div>
                       ) : selectedPackage ? (
                         <div className="flex justify-between text-text-muted">

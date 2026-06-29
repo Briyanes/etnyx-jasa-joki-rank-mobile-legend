@@ -141,6 +141,7 @@ interface PricingPackage {
   price: number;
   originalPrice?: number;
   discountPercent?: number;
+  isFlat?: boolean;
   rankKey: string;
   currentRank: string;
   targetRank: string;
@@ -158,6 +159,7 @@ interface PerStarTier {
   price: number;
   originalPrice?: number;
   discountPercent?: number;
+  isFlat?: boolean;
   icon: string;
 }
 
@@ -381,7 +383,7 @@ export default function AdminDashboard() {
           { id: "grandmaster", name: "Grand Master", price: 5500, icon: "/icons-tier/Grandmaster.webp" },
           { id: "epic", name: "Epic", price: 7000, icon: "/icons-tier/Epic.webp" },
           { id: "legend", name: "Legend", price: 8000, icon: "/icons-tier/Legend.webp" },
-          { id: "grading", name: "Mythic Grading", price: 230000, icon: "/icons-tier/Mythic.webp" },
+          { id: "grading", name: "Mythic Grading", price: 230000, icon: "/icons-tier/Mythic.webp", isFlat: true },
           { id: "mythicroomawi", name: "Mythic Romawi", price: 19000, icon: "/icons-tier/Mythic.webp" },
           { id: "honor", name: "Mythical Honor", price: 24000, icon: "/icons-tier/Mythical_Honor.webp" },
           { id: "glory", name: "Mythical Glory", price: 29000, icon: "/icons-tier/Mythical_Glory.webp" },
@@ -398,7 +400,7 @@ export default function AdminDashboard() {
           { id: "grandmaster", name: "Grand Master", price: 9000, icon: "/icons-tier/Grandmaster.webp" },
           { id: "epic", name: "Epic", price: 10000, icon: "/icons-tier/Epic.webp" },
           { id: "legend", name: "Legend", price: 11000, icon: "/icons-tier/Legend.webp" },
-          { id: "grading", name: "Mythic Grading", price: 23000, icon: "/icons-tier/Mythic.webp" },
+          { id: "grading", name: "Mythic Grading", price: 23000, icon: "/icons-tier/Mythic.webp", isFlat: true },
           { id: "mythic", name: "Mythic", price: 21000, icon: "/icons-tier/Mythic.webp" },
           { id: "honor", name: "Mythic Honor", price: 25000, icon: "/icons-tier/Mythical_Honor.webp" },
           { id: "glory", name: "Mythic Glory", price: 30000, icon: "/icons-tier/Mythical_Glory.webp" },
@@ -2027,6 +2029,7 @@ export default function AdminDashboard() {
                         <th className="text-right text-text-muted text-xs font-medium px-4 py-2.5">Harga/Star</th>
                         <th className="text-right text-text-muted text-xs font-medium px-4 py-2.5">Harga Coret</th>
                         <th className="text-right text-text-muted text-xs font-medium px-4 py-2.5">Diskon</th>
+                        <th className="text-center text-text-muted text-xs font-medium px-4 py-2.5">Tipe Harga</th>
                         <th className="text-center text-text-muted text-xs font-medium px-4 py-2.5">Aksi</th>
                       </tr>
                     </thead>
@@ -2069,6 +2072,23 @@ export default function AdminDashboard() {
                             {tier.discountPercent ? (
                               <span className="text-green-400 text-xs font-medium">-{tier.discountPercent}%</span>
                             ) : <span className="text-text-muted text-xs">-</span>}
+                          </td>
+                          <td className="px-4 py-2.5 text-center">
+                            <button
+                              onClick={() => {
+                                const newTiers = perStarPricing.map(t => t.id === tier.id ? { ...t, isFlat: !t.isFlat } : t);
+                                setPerStarPricing(newTiers);
+                                savePerStarPricing(newTiers);
+                              }}
+                              className={`px-2 py-1 rounded-lg text-[10px] font-medium transition-colors ${
+                                tier.isFlat
+                                  ? "bg-purple-500/20 text-purple-400 hover:bg-purple-500/30"
+                                  : "bg-blue-500/10 text-blue-400 hover:bg-blue-500/20"
+                              }`}
+                              title={tier.isFlat ? "Harga flat (tidak dikali quantity)" : "Harga per star (dikali quantity)"}
+                            >
+                              {tier.isFlat ? "FLAT" : "PER STAR"}
+                            </button>
                           </td>
                           <td className="px-4 py-2.5 text-center">
                             {editingPriceId === tier.id ? (
