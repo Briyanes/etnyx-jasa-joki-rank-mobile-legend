@@ -132,7 +132,7 @@ interface PackageCategory {
 const DEFAULT_CATALOG: PackageCategory[] = [
   {
     id: "promo",
-    title: "Post-Holiday Catch Up",
+    title: "Paket Rush 10 Star",
     packages: [
       { id: "rush5-epic", title: "Rush 5 Star Epic", price: 32000, originalPrice: 35000, discountPercent: 9, rankKey: "epic", currentRank: "epic", targetRank: "epic" },
       { id: "rush5-legend", title: "Rush 5 Star Legend", price: 37000, originalPrice: 40000, discountPercent: 8, rankKey: "legend", currentRank: "legend", targetRank: "legend" },
