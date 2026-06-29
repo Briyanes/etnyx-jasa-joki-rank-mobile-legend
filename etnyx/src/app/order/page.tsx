@@ -797,6 +797,37 @@ function calculateStarBreakdown(
   return segments;
 }
 
+// Render tier icon(s) inside badges. For same-tier → 1 icon.
+// For cross-tier → 2 icons with arrow (e.g. Warrior → Mythic).
+function TierIconsBadge({ currentRank, targetRank, size = 12 }: { currentRank?: string; targetRank?: string; size?: number }) {
+  const cur = currentRank && rankIcons[currentRank] ? currentRank : null;
+  const tgt = targetRank && rankIcons[targetRank] ? targetRank : null;
+  if (!cur && !tgt) return null;
+  if (cur && tgt && cur !== tgt) {
+    return (
+      <span className="inline-flex items-center gap-0.5">
+        <Image src={rankIcons[cur]} alt={cur} width={size} height={size} className={`w-3 h-3 object-contain`} />
+        <span className="text-[8px] opacity-60">→</span>
+        <Image src={rankIcons[tgt]} alt={tgt} width={size} height={size} className={`w-3 h-3 object-contain`} />
+      </span>
+    );
+  }
+  const rank = tgt || cur!;
+  return <Image src={rankIcons[rank]} alt={rank} width={size} height={size} className="w-3 h-3 object-contain" />;
+}
+
+// Parse rank from classic package title (e.g. "Epic 10 Win" → "epic")
+function parseClassicRank(title: string): string {
+  const lower = title.toLowerCase();
+  if (lower.includes("immortal")) return "mythicimmortal";
+  if (lower.includes("glory")) return "mythicglory";
+  if (lower.includes("honor")) return "mythichonor";
+  if (lower.includes("mythic")) return "mythic";
+  if (lower.includes("legend")) return "legend";
+  if (lower.includes("epic")) return "epic";
+  return "mythic";
+}
+
 // Fallback static options (max 5 divisions) — used if no rank selected yet
 const STAR_OPTIONS = [
   { value: 5, label: "V" },
@@ -2083,9 +2114,20 @@ function OrderPageContent() {
                           {pkg.originalPrice && <p className="text-red-400/70 text-xs line-through">{formatRupiah(pkg.originalPrice)}</p>}
                         </div>
                       </div>
-                      {pkg.discountPercent != null && pkg.discountPercent > 0 && (
+                      {/* Tier badge row: always show for classic, discount badge for paket */}
+                      {(pkg.discountPercent != null && pkg.discountPercent > 0 || pkg.currentRank === "classic") && (
                         <div className="px-4 py-2 bg-slate-800/60">
-                          <span className="bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded text-[10px] font-bold">{t.discount} {pkg.discountPercent}%</span>
+                          {(() => {
+                            const isClassic = pkg.currentRank === "classic";
+                            const iconCur = isClassic ? parseClassicRank(pkg.title) : pkg.currentRank;
+                            const iconTgt = isClassic ? parseClassicRank(pkg.title) : pkg.targetRank;
+                            return (
+                              <span className="bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded text-[10px] font-bold inline-flex items-center gap-1">
+                                <TierIconsBadge currentRank={iconCur} targetRank={iconTgt} />
+                                {pkg.discountPercent != null && pkg.discountPercent > 0 ? `${t.discount} ${pkg.discountPercent}%` : ""}
+                              </span>
+                            );
+                          })()}
                         </div>
                       )}
                       {selectedPackage?.id === pkg.id && (
@@ -2567,7 +2609,7 @@ function OrderPageContent() {
                             </div>
                             <div className="px-3 py-2 bg-slate-800/60 flex items-center justify-between gap-1">
                               <span className="bg-yellow-500/20 text-yellow-400 px-1.5 py-0.5 rounded text-[9px] font-bold flex items-center gap-0.5">
-                                <Star className="w-2 h-2 fill-current" /> +{pkg.bonusStars} BONUS
+                                <TierIconsBadge currentRank={pkg.rankId} targetRank={pkg.rankId} /> <Star className="w-2 h-2 fill-current" /> +{pkg.bonusStars} BONUS
                               </span>
                               <span className="bg-teal-600/30 text-teal-300 px-1.5 py-0.5 rounded text-[9px] font-bold">
                                 10★
@@ -2802,8 +2844,8 @@ function OrderPageContent() {
                             </div>
                             <div className="px-4 py-2.5 bg-slate-800/60 flex items-center justify-end gap-2">
                               {rank.discountPercent && (
-                                <span className="bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded text-[10px] font-bold">
-                                  Disc {rank.discountPercent}%
+                                <span className="bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded text-[10px] font-bold inline-flex items-center gap-1">
+                                  <Image src={rank.icon} alt={rank.name} width={12} height={12} className="w-3 h-3 object-contain" /> Disc {rank.discountPercent}%
                                 </span>
                               )}
                               <span className="bg-purple-600/30 text-purple-300 px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1">
