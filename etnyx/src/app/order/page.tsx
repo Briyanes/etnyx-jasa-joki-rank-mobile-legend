@@ -1229,7 +1229,10 @@ function OrderPageContent() {
             type: "classic" as const,
             packages: cat.packages.map((pkg: ProductPackage) => ({
               ...pkg,
-              rankKey: pkg.rankKey || pkg.currentRank || "classic",
+              // Force currentRank = "classic" so badge row condition triggers
+              currentRank: "classic",
+              targetRank: "classic",
+              rankKey: pkg.rankKey || "classic",
             })),
           }));
           // Remove any existing classic categories from merged, then append DB classic categories
