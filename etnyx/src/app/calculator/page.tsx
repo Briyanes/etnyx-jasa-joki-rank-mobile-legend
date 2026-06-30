@@ -625,6 +625,10 @@ export default function CalculatorPage() {
     try {
       const userIdCombined = custServerId ? `${custUserId} (${custServerId})` : custUserId;
 
+      // CRITICAL: Field names must match API route expectations exactly.
+      // API uses: orderType (NOT orderMode), totalPrice (NOT total_price),
+      // currentStar/targetStar (NOT currentDiv/targetDiv).
+      // Classic mode is treated as "paket" by the API (price lookup by packageId).
       const payload: Record<string, unknown> = {
         nickname: custNickname,
         accountLogin: custLogin,
@@ -633,8 +637,8 @@ export default function CalculatorPage() {
         heroRequest: custHero || "-",
         notes: custNotes || "-",
         loginMethod: custLoginMethod,
-        orderMode: mode,
-        total_price: finalPrice,
+        orderType: mode === "classic" ? "paket" : mode,
+        totalPrice: finalPrice,
         isExpress,
         isPremium,
         customDiscount,
@@ -645,21 +649,35 @@ export default function CalculatorPage() {
       if (mode === "paket" || mode === "classic") {
         payload.packageId = selectedPackage?.id || "";
         payload.packageTitle = selectedPackage?.title || "";
-        payload.currentRank = selectedPackage?.currentRank || "";
-        payload.targetRank = selectedPackage?.targetRank || "";
+        // For classic mode, currentRank is "classic" which is NOT a valid rank
+        // in RANK_ORDER. Parse actual rank from package title for API validation.
+        if (mode === "classic" && selectedPackage) {
+          const parsedRank = parseClassicRank(selectedPackage.title);
+          payload.currentRank = parsedRank;
+          payload.targetRank = parsedRank;
+        } else {
+          payload.currentRank = selectedPackage?.currentRank || "";
+          payload.targetRank = selectedPackage?.targetRank || "";
+        }
         payload.totalStars = totalStars;
       } else if (mode === "perstar") {
         payload.currentRank = currentRank;
-        payload.currentDiv = currentDiv;
+        payload.currentStar = currentDiv;
         payload.currentDivisionStar = currentDivisionStar;
         payload.targetRank = targetRank;
-        payload.targetDiv = targetDiv;
+        payload.targetStar = targetDiv;
         payload.currentMythicStars = MYTHIC_STAR_CONFIG[currentRank] ? currentMythicStars : 0;
         payload.targetMythicStars = MYTHIC_STAR_CONFIG[targetRank] ? targetMythicStars : 0;
         payload.totalStars = totalStars;
       } else if (mode === "gendong") {
-        payload.gendongRankId = selectedGendongRankId;
-        payload.gendongQty = gendongQty;
+        payload.perStarRankId = selectedGendongRankId;
+        payload.starQuantity = gendongQty;
+        // Gendong needs valid ranks for API validation
+        const gendongRank = gendongRanks.find((r) => r.id === selectedGendongRankId);
+        if (gendongRank) {
+          payload.currentRank = selectedGendongRankId === "grading" ? "mythic" : selectedGendongRankId;
+          payload.targetRank = selectedGendongRankId === "grading" ? "mythic" : selectedGendongRankId;
+        }
       }
 
       const res = await fetch("/api/customer/order", {

@@ -71,6 +71,9 @@ const SERVER_PACKAGE_PRICES: Record<string, number> = {
   "mythic-grading": 180089, "mythic-honor": 342089, "mythic-glory": 815089, "mythic-immortal": 1985089,
   "honor-glory": 473089, "honor-immortal": 1643089,
   "glory-immortal": 1170089,
+  // Classic 10 WIN packages
+  "epic-10win": 50000, "legend-10win": 50000, "mythic-10win": 55000,
+  "honor-10win": 55000, "glory-10win": 60000, "immortal-10win": 60000,
 };
 
 // Server-side auto-calculation for paket mode (mirrors frontend autoCalcPackagePrice)
