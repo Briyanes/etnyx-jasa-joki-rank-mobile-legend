@@ -868,7 +868,7 @@ export default function CalculatorPage() {
           </aside>
 
           {/* ===== MAIN: Selection area ===== */}
-          <div className="space-y-4 xl:space-y-5">
+          <div className="space-y-4 xl:space-y-5 min-w-0">
             {/* Mode Switcher — horizontal (mobile + lg only, hidden in xl) */}
             <div className="xl:hidden bg-surface rounded-2xl border border-white/5 p-4">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -923,8 +923,8 @@ export default function CalculatorPage() {
             {/* ===== PAKET & CLASSIC: CATEGORY TABS + CATALOG CARDS ===== */}
             {(mode === "paket" || mode === "classic") && (
               <div className="bg-surface rounded-2xl border border-white/5 p-5">
-                {/* Category Tabs */}
-                <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
+                {/* Category Tabs — flex-wrap to prevent overflow */}
+                <div className="flex flex-wrap gap-2 mb-4">
                   {visibleCategories.map((cat) => (
                     <button
                       key={cat.id}
