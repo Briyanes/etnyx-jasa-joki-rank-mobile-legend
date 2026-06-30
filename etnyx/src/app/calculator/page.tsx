@@ -279,13 +279,19 @@ export default function CalculatorPage() {
       .then((res) => res.json())
       .then((data) => {
         if (data.pricing_catalog && Array.isArray(data.pricing_catalog) && data.pricing_catalog.length > 0) {
-          const merged = data.pricing_catalog.map((cat: PackageCategory) => ({
-            ...cat,
-            packages: cat.packages.map((pkg: ProductPackage) => ({
-              ...pkg,
-              rankKey: defaultRankKeys[pkg.id] || pkg.rankKey || pkg.currentRank,
+          // Merge: CMS data overrides default, but keep any DEFAULT category missing from CMS
+          // (e.g. classic-10-win recently added but not yet saved in CMS)
+          const cmsIds = new Set(data.pricing_catalog.map((c: PackageCategory) => c.id));
+          const merged = [
+            ...data.pricing_catalog.map((cat: PackageCategory) => ({
+              ...cat,
+              packages: cat.packages.map((pkg: ProductPackage) => ({
+                ...pkg,
+                rankKey: defaultRankKeys[pkg.id] || pkg.rankKey || pkg.currentRank,
+              })),
             })),
-          }));
+            ...DEFAULT_CATALOG.filter((cat) => !cmsIds.has(cat.id)),
+          ];
           setCatalog(merged);
         }
         if (data.perstar_pricing && Array.isArray(data.perstar_pricing) && data.perstar_pricing.length > 0) {
