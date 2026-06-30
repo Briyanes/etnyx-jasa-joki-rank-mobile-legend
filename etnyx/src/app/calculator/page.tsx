@@ -728,7 +728,7 @@ export default function CalculatorPage() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="glass border-b border-white/5 sticky top-0 z-50">
-        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div className="max-w-[1600px] mx-auto px-4 py-3 flex items-center justify-between">
           <Link
             href="/admin/dashboard"
             className="flex items-center gap-2 text-text-muted hover:text-text transition-colors"
@@ -747,23 +747,130 @@ export default function CalculatorPage() {
         </div>
       </header>
 
-      <div className="max-w-5xl mx-auto px-4 py-6">
-        {/* Title */}
-        <div className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-text flex items-center gap-2 mb-1">
-            <CalculatorIcon className="w-7 h-7 text-accent" />
+      <div className="max-w-[1600px] mx-auto px-4 py-6">
+        {/* Title — compact on desktop */}
+        <div className="mb-4 lg:mb-3">
+          <h1 className="text-xl sm:text-2xl xl:text-3xl font-bold text-text flex items-center gap-2 mb-0.5">
+            <CalculatorIcon className="w-6 h-6 xl:w-7 xl:h-7 text-accent" />
             Kalkulator Joki ML
           </h1>
-          <p className="text-text-muted text-sm">
+          <p className="text-text-muted text-xs xl:text-sm">
             Hitung harga joki untuk customer via WhatsApp — sync dengan pricing admin dashboard
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* ===== LEFT: Selection (clone of order page Step 1) ===== */}
-          <div className="lg:col-span-2 space-y-5">
-            {/* Mode Switcher */}
-            <div className="bg-surface rounded-2xl border border-white/5 p-4">
+        {/* 3-column desktop layout: sidebar | main | result */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] xl:grid-cols-[260px_1fr_400px] gap-4 xl:gap-5">
+          {/* ===== SIDEBAR (xl only): Mode Switcher + Add-ons ===== */}
+          <aside className="hidden xl:block space-y-4">
+            <div className="sticky top-20 space-y-4">
+              {/* Mode Switcher — vertical */}
+              <div className="bg-surface rounded-2xl border border-white/5 p-3">
+                <p className="text-text-muted text-[10px] uppercase tracking-wider font-bold mb-2 px-1">Mode Joki</p>
+                <div className="space-y-1.5">
+                  <button
+                    onClick={() => setMode("paket")}
+                    className={`w-full flex items-center gap-2.5 py-2.5 px-3 rounded-xl text-sm font-semibold transition-all ${
+                      mode === "paket" ? "gradient-primary text-white shadow-lg" : "text-text-muted hover:text-text bg-background"
+                    }`}
+                  >
+                    <Package className="w-4 h-4 flex-shrink-0" />
+                    Paket
+                  </button>
+                  <button
+                    onClick={() => setMode("perstar")}
+                    className={`w-full flex items-center gap-2.5 py-2.5 px-3 rounded-xl text-sm font-semibold transition-all ${
+                      mode === "perstar" ? "gradient-primary text-white shadow-lg" : "text-text-muted hover:text-text bg-background"
+                    }`}
+                  >
+                    <Star className="w-4 h-4 flex-shrink-0" />
+                    Per Bintang
+                  </button>
+                  <button
+                    onClick={() => setMode("gendong")}
+                    className={`w-full flex items-center gap-2.5 py-2.5 px-3 rounded-xl text-sm font-semibold transition-all ${
+                      mode === "gendong" ? "gradient-primary text-white shadow-lg" : "text-text-muted hover:text-text bg-background"
+                    }`}
+                  >
+                    <Users className="w-4 h-4 flex-shrink-0" />
+                    Gendong
+                  </button>
+                  <button
+                    onClick={() => setMode("classic")}
+                    className={`w-full flex items-center gap-2.5 py-2.5 px-3 rounded-xl text-sm font-semibold transition-all ${
+                      mode === "classic" ? "gradient-primary text-white shadow-lg" : "text-text-muted hover:text-text bg-background"
+                    }`}
+                  >
+                    <Trophy className="w-4 h-4 flex-shrink-0" />
+                    Classic
+                  </button>
+                </div>
+                <p className="text-text-muted text-[10px] mt-2.5 px-1 leading-relaxed">
+                  {mode === "paket"
+                    ? "Booster login ke akunmu dan push rank."
+                    : mode === "perstar"
+                    ? "Bayar per bintang — fleksibel."
+                    : mode === "gendong"
+                    ? "Main bareng booster — tanpa share akun."
+                    : "Joki per match dengan harga tetap."}
+                </p>
+              </div>
+
+              {/* Add-ons — compact sidebar style */}
+              <div className="bg-surface rounded-2xl border border-white/5 p-3">
+                <p className="text-text-muted text-[10px] uppercase tracking-wider font-bold mb-2 px-1">Add-ons</p>
+                <div className="space-y-2">
+                  <label className="flex items-start gap-2 p-2 bg-background rounded-lg border border-white/5 cursor-pointer hover:border-white/10">
+                    <input type="checkbox" checked={isExpress} onChange={(e) => setIsExpress(e.target.checked)} className="w-4 h-4 accent-yellow-400 mt-0.5 flex-shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-text text-xs font-medium flex items-center gap-1">
+                        <Zap className="w-3 h-3 text-yellow-400" />
+                        Express
+                      </p>
+                      <p className="text-text-muted text-[10px] leading-tight">1-2 Hari (+20%)</p>
+                    </div>
+                  </label>
+                  <label className="flex items-start gap-2 p-2 bg-background rounded-lg border border-white/5 cursor-pointer hover:border-white/10">
+                    <input type="checkbox" checked={isPremium} onChange={(e) => setIsPremium(e.target.checked)} className="w-4 h-4 accent-purple-400 mt-0.5 flex-shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-text text-xs font-medium flex items-center gap-1">
+                        <Crown className="w-3 h-3 text-purple-400" />
+                        Premium Pilot
+                      </p>
+                      <p className="text-text-muted text-[10px] leading-tight">MG Winrate 75%+ (+30%)</p>
+                    </div>
+                  </label>
+                  <div className="flex items-center gap-2 p-2 bg-background rounded-lg border border-white/5">
+                    <TrendingUp className="w-3.5 h-3.5 text-green-400 flex-shrink-0" />
+                    <span className="text-text text-xs font-medium">Diskon</span>
+                    <input
+                      type="number"
+                      min={0}
+                      max={100}
+                      value={customDiscount}
+                      onChange={(e) => setCustomDiscount(Math.max(0, Math.min(100, parseInt(e.target.value) || 0)))}
+                      className="w-12 h-7 text-center bg-surface text-text rounded border border-white/10 focus:outline-none focus:border-accent text-xs font-bold"
+                    />
+                    <span className="text-text-muted text-xs">%</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Reset */}
+              <button
+                onClick={handleReset}
+                className="w-full py-2.5 bg-surface border border-white/10 rounded-xl text-text-muted hover:text-text transition-colors text-xs flex items-center justify-center gap-2"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                Reset Semua
+              </button>
+            </div>
+          </aside>
+
+          {/* ===== MAIN: Selection area ===== */}
+          <div className="space-y-4 xl:space-y-5">
+            {/* Mode Switcher — horizontal (mobile + lg only, hidden in xl) */}
+            <div className="xl:hidden bg-surface rounded-2xl border border-white/5 p-4">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 <button
                   onClick={() => setMode("paket")}
@@ -1299,8 +1406,8 @@ export default function CalculatorPage() {
               </div>
             )}
 
-            {/* ===== ADD-ONS (all modes) ===== */}
-            <div className="bg-surface rounded-2xl border border-white/5 p-5">
+            {/* ===== ADD-ONS (all modes) — hidden in xl (moved to sidebar) ===== */}
+            <div className="xl:hidden bg-surface rounded-2xl border border-white/5 p-5">
               <h3 className="text-text font-bold text-sm mb-3">Add-ons & Diskon</h3>
               <div className="space-y-3">
                 <label className="flex items-center justify-between p-3 bg-background rounded-xl border border-white/5 cursor-pointer hover:border-white/10">
@@ -1349,8 +1456,8 @@ export default function CalculatorPage() {
               </div>
             </div>
 
-            {/* Reset Button */}
-            <div className="flex justify-end">
+            {/* Reset Button — hidden in xl (moved to sidebar) */}
+            <div className="xl:hidden flex justify-end">
               <button
                 onClick={handleReset}
                 className="px-4 py-2.5 bg-surface border border-white/10 rounded-xl text-text-muted hover:text-text transition-colors text-sm flex items-center gap-2"
