@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -22,6 +22,9 @@ import {
   RotateCcw,
   Sparkles,
   Trophy,
+  CreditCard,
+  MapPin,
+  Target,
 } from "lucide-react";
 import {
   RANK_LIST,
@@ -33,7 +36,6 @@ import {
   getDivisionOptions,
   getRankDivisionOptions,
   calculateTotalStars,
-  findBestPackage,
   calculateExtraMythicCost,
   MYTHIC_PER_STAR_PRICES,
   formatRupiah,
@@ -46,51 +48,225 @@ import {
 } from "@/lib/pricing-utils";
 import { WHATSAPP_NUMBER } from "@/lib/constants";
 
+// ===== Helper functions (cloned from order/page.tsx) =====
+
+function getSafePriceForKey(key: string, perStarPrices: PerStarRank[]): number {
+  const entry = perStarPrices.find((r) => r.id === key);
+  if (entry?.price && entry.price > 0) return entry.price;
+  const defaultEntry = DEFAULT_PER_STAR_RANKS.find((r) => r.id === key);
+  if (defaultEntry?.price && defaultEntry.price > 0) return defaultEntry.price;
+  const gm = perStarPrices.find((r) => r.id === "grandmaster");
+  return gm?.price || 6000;
+}
+
+function parseClassicRank(title: string): string {
+  const lower = title.toLowerCase();
+  if (lower.includes("immortal")) return "mythicimmortal";
+  if (lower.includes("glory")) return "mythicglory";
+  if (lower.includes("honor")) return "mythichonor";
+  if (lower.includes("mythic")) return "mythic";
+  if (lower.includes("legend")) return "legend";
+  if (lower.includes("epic")) return "epic";
+  return "mythic";
+}
+
+function TierIconsBadge({
+  currentRank,
+  targetRank,
+  size = 20,
+}: {
+  currentRank?: string;
+  targetRank?: string;
+  size?: number;
+}) {
+  const cur = currentRank && rankIcons[currentRank] ? currentRank : null;
+  const tgt = targetRank && rankIcons[targetRank] ? targetRank : null;
+  if (!cur && !tgt) return null;
+  if (cur && tgt && cur !== tgt) {
+    return (
+      <span className="inline-flex items-center gap-1">
+        <Image src={rankIcons[cur]} alt={cur} width={size} height={size} className="w-5 h-5 object-contain drop-shadow-md" />
+        <span className="text-[10px] opacity-60">→</span>
+        <Image src={rankIcons[tgt]} alt={tgt} width={size} height={size} className="w-5 h-5 object-contain drop-shadow-md" />
+      </span>
+    );
+  }
+  const rank = tgt || cur!;
+  return <Image src={rankIcons[rank]} alt={rank} width={size} height={size} className="w-5 h-5 object-contain drop-shadow-md" />;
+}
+
+// Calculate per-tier star breakdown for Per Star mode
+interface StarBreakdownSegment {
+  tierId: string;
+  tierLabel: string;
+  stars: number;
+  pricePerStar: number;
+  subtotal: number;
+}
+
+function calculateStarBreakdown(
+  currentRank: string,
+  currentDiv: number,
+  targetRank: string,
+  targetDiv: number,
+  currentDivisionStar: number,
+  perStarPrices: PerStarRank[],
+  currentMythicStars: number = 0,
+  targetMythicStars: number = 0
+): StarBreakdownSegment[] {
+  const rankToPriceKey: Record<string, string> = {
+    warrior: "master",
+    elite: "master",
+    master: "master",
+    grandmaster: "grandmaster",
+    epic: "epic",
+    legend: "legend",
+    mythic: "mythicromawi",
+    mythichonor: "honor",
+    mythicglory: "glory",
+    mythicimmortal: "immortal",
+  };
+
+  const rankLabels: Record<string, string> = {
+    warrior: "Warrior",
+    elite: "Elite",
+    master: "Master",
+    grandmaster: "Grand Master",
+    epic: "Epic",
+    legend: "Legend",
+    mythic: "Mythic (0–25)",
+    mythichonor: "Mythic Honor (25–50)",
+    mythicglory: "Mythic Glory (50–100)",
+    mythicimmortal: "Mythic Immortal (100+)",
+  };
+
+  const segments: StarBreakdownSegment[] = [];
+  const ci = RANK_ORDER.indexOf(currentRank);
+  const ti = RANK_ORDER.indexOf(targetRank);
+  if (ci < 0 || ti < 0) return segments;
+
+  const getPrice = (key: string) => getSafePriceForKey(key, perStarPrices);
+
+  // Segment 1: current rank remaining stars
+  {
+    const key = rankToPriceKey[currentRank] || "grandmaster";
+    const pricePerStar = getPrice(key);
+    let starsInThisRank: number;
+    if (RANKS_WITH_STARS.includes(currentRank)) {
+      const cfg = RANK_DIVISION_CONFIG[currentRank];
+      starsInThisRank = cfg ? (cfg.starsPerDiv - currentDivisionStar) + (currentDiv - 1) * cfg.starsPerDiv : 0;
+    } else if (MYTHIC_STAR_CONFIG[currentRank]) {
+      const mCfg = MYTHIC_STAR_CONFIG[currentRank];
+      if (currentRank === targetRank) {
+        starsInThisRank = targetMythicStars - currentMythicStars;
+      } else {
+        starsInThisRank = mCfg.nextMin - currentMythicStars;
+      }
+    } else {
+      starsInThisRank = 0;
+    }
+    starsInThisRank = Math.max(0, starsInThisRank);
+    if (starsInThisRank > 0) {
+      segments.push({
+        tierId: currentRank,
+        tierLabel: rankLabels[currentRank] || currentRank,
+        stars: starsInThisRank,
+        pricePerStar,
+        subtotal: pricePerStar * starsInThisRank,
+      });
+    }
+  }
+
+  // Segments in between
+  for (let i = ci + 1; i < ti; i++) {
+    const rank = RANK_ORDER[i];
+    const key = rankToPriceKey[rank] || "grandmaster";
+    const pricePerStar = getPrice(key);
+    let starsInThisRank: number;
+    if (RANKS_WITH_STARS.includes(rank)) {
+      const cfg = RANK_DIVISION_CONFIG[rank];
+      starsInThisRank = cfg ? cfg.divisions * cfg.starsPerDiv : 0;
+    } else {
+      const mCfg = MYTHIC_STAR_CONFIG[rank];
+      starsInThisRank = mCfg ? mCfg.nextMin - mCfg.min : 0;
+    }
+    if (starsInThisRank > 0) {
+      segments.push({
+        tierId: rank,
+        tierLabel: rankLabels[rank] || rank,
+        stars: starsInThisRank,
+        pricePerStar,
+        subtotal: pricePerStar * starsInThisRank,
+      });
+    }
+  }
+
+  // Segment last: target rank stars needed
+  if (ci < ti) {
+    const key = rankToPriceKey[targetRank] || "grandmaster";
+    const pricePerStar = getPrice(key);
+    let starsInThisRank: number;
+    if (RANKS_WITH_STARS.includes(targetRank)) {
+      const cfg = RANK_DIVISION_CONFIG[targetRank];
+      starsInThisRank = cfg ? (cfg.divisions - targetDiv) * cfg.starsPerDiv : 0;
+    } else if (MYTHIC_STAR_CONFIG[targetRank]) {
+      const mCfg = MYTHIC_STAR_CONFIG[targetRank];
+      starsInThisRank = targetMythicStars - mCfg.min;
+    } else {
+      starsInThisRank = 0;
+    }
+    starsInThisRank = Math.max(0, starsInThisRank);
+    if (starsInThisRank > 0) {
+      segments.push({
+        tierId: targetRank,
+        tierLabel: rankLabels[targetRank] || targetRank,
+        stars: starsInThisRank,
+        pricePerStar,
+        subtotal: pricePerStar * starsInThisRank,
+      });
+    }
+  }
+
+  return segments;
+}
+
+// ===== Main Component =====
+
 export default function CalculatorPage() {
-  // Mode: paket / perstar / gendong / classic
   const [mode, setMode] = useState<"paket" | "perstar" | "gendong" | "classic">("paket");
 
-  // Rank selection (paket mode)
+  // Catalog state
+  const [catalog, setCatalog] = useState<PackageCategory[]>(DEFAULT_CATALOG);
+  const [perStarRanks, setPerStarRanks] = useState<PerStarRank[]>(DEFAULT_PER_STAR_RANKS);
+  const [gendongRanks, setGendongRanks] = useState<PerStarRank[]>(DEFAULT_GENDONG_RANKS);
+
+  // Paket/Classic: selected package
+  const [activeCategory, setActiveCategory] = useState<string>("");
+  const [selectedPackage, setSelectedPackage] = useState<ProductPackage | null>(null);
+
+  // Per Star: rank selections
   const [currentRank, setCurrentRank] = useState("epic");
-  const [currentDiv, setCurrentDiv] = useState(3);
+  const [currentDiv, setCurrentDiv] = useState(5);
   const [currentDivisionStar, setCurrentDivisionStar] = useState(1);
   const [targetRank, setTargetRank] = useState("mythic");
   const [targetDiv, setTargetDiv] = useState(1);
   const [targetDivisionStar, setTargetDivisionStar] = useState(0);
+  const [currentMythicStars, setCurrentMythicStars] = useState(0);
+  const [targetMythicStars, setTargetMythicStars] = useState(0);
 
-  // Per-star mode selection
-  const [selectedStarRankId, setSelectedStarRankId] = useState("epic");
-  const [starQty, setStarQty] = useState(3);
-
-  // Gendong mode selection
+  // Gendong
   const [selectedGendongRankId, setSelectedGendongRankId] = useState("epic");
   const [gendongQty, setGendongQty] = useState(3);
-
-  // Classic mode selection
-  const [selectedClassicPkgId, setSelectedClassicPkgId] = useState("mythic-10win");
 
   // Add-ons
   const [isExpress, setIsExpress] = useState(false);
   const [isPremium, setIsPremium] = useState(false);
   const [customDiscount, setCustomDiscount] = useState(0);
 
-  // Catalog (fetch from CMS)
-  const [catalog, setCatalog] = useState<PackageCategory[]>(DEFAULT_CATALOG);
-  const [perStarRanks, setPerStarRanks] = useState<PerStarRank[]>(DEFAULT_PER_STAR_RANKS);
-  const [gendongRanks, setGendongRanks] = useState<PerStarRank[]>(DEFAULT_GENDONG_RANKS);
-
-  // UI state
+  // UI
   const [copied, setCopied] = useState(false);
-  const [result, setResult] = useState<{
-    totalStars: number;
-    basePrice: number;
-    extraMythicCost: number;
-    matchedPackage: ProductPackage | null;
-    isExactMatch: boolean;
-    finalPrice: number;
-  } | null>(null);
 
-  // Fetch pricing from CMS (all keys at once)
+  // ===== Fetch CMS pricing =====
   useEffect(() => {
     const defaultRankKeys: Record<string, string> = {};
     for (const cat of DEFAULT_CATALOG) {
@@ -102,7 +278,6 @@ export default function CalculatorPage() {
     fetch("/api/settings?keys=pricing_catalog,perstar_pricing,gendong_pricing")
       .then((res) => res.json())
       .then((data) => {
-        // Merge catalog
         if (data.pricing_catalog && Array.isArray(data.pricing_catalog) && data.pricing_catalog.length > 0) {
           const merged = data.pricing_catalog.map((cat: PackageCategory) => ({
             ...cat,
@@ -113,8 +288,6 @@ export default function CalculatorPage() {
           }));
           setCatalog(merged);
         }
-
-        // Merge per-star pricing
         if (data.perstar_pricing && Array.isArray(data.perstar_pricing) && data.perstar_pricing.length > 0) {
           setPerStarRanks((prev) =>
             prev.map((r) => {
@@ -123,8 +296,6 @@ export default function CalculatorPage() {
             })
           );
         }
-
-        // Merge gendong pricing
         if (data.gendong_pricing && Array.isArray(data.gendong_pricing) && data.gendong_pricing.length > 0) {
           setGendongRanks((prev) =>
             prev.map((r) => {
@@ -137,122 +308,122 @@ export default function CalculatorPage() {
       .catch(() => {});
   }, []);
 
-  // ===== Calculation =====
-  const calculate = useCallback(() => {
-    let totalStars = 0;
-    let basePrice = 0;
-    let extraMythicCost = 0;
-    let matchedPackage: ProductPackage | null = null;
-    let isExactMatch = false;
+  // Set default category
+  useEffect(() => {
+    if (!activeCategory && catalog.length > 0) {
+      setActiveCategory(catalog[0].id);
+    }
+  }, [catalog, activeCategory]);
 
+  // Reset selection when mode changes
+  useEffect(() => {
+    setSelectedPackage(null);
+  }, [mode]);
+
+  // ===== Visible categories (filter by mode) =====
+  const visibleCategories = useMemo(() => {
+    if (mode === "classic") {
+      return catalog.filter((c) => c.id === "classic-10-win");
+    }
     if (mode === "paket") {
-      const isMythicTarget = MYTHIC_STAR_CONFIG[targetRank] !== undefined;
-      const isMythicCurrent = MYTHIC_STAR_CONFIG[currentRank] !== undefined;
-      totalStars = calculateTotalStars(
-        currentRank,
-        currentDiv,
-        targetRank,
-        targetDiv,
-        RANKS_WITH_STARS.includes(currentRank) ? currentDivisionStar : 0,
-        isMythicTarget ? targetDivisionStar : (RANKS_WITH_STARS.includes(targetRank) ? targetDivisionStar : 0),
-        isMythicCurrent ? (MYTHIC_STAR_CONFIG[currentRank]?.min || 0) : undefined
-      );
+      return catalog.filter((c) => c.id !== "classic-10-win");
+    }
+    return catalog;
+  }, [catalog, mode]);
 
-      const match = findBestPackage(catalog, currentRank, currentDiv, targetRank, targetDiv);
-      if (match) {
-        matchedPackage = match.pkg;
-        isExactMatch = match.exact;
-        basePrice = match.pkg.price;
+  // Auto-set active category when visible changes
+  useEffect(() => {
+    if (visibleCategories.length > 0 && !visibleCategories.find((c) => c.id === activeCategory)) {
+      setActiveCategory(visibleCategories[0].id);
+    }
+  }, [visibleCategories, activeCategory]);
 
-        if (isMythicTarget && targetDivisionStar > 0) {
-          extraMythicCost = calculateExtraMythicCost(targetRank, targetDivisionStar);
-          basePrice += extraMythicCost;
+  const activeCat = visibleCategories.find((c) => c.id === activeCategory) || visibleCategories[0];
+
+  // ===== Per Star: Star breakdown =====
+  const starBreakdown = useMemo(() => {
+    if (mode !== "perstar") return [];
+    return calculateStarBreakdown(
+      currentRank,
+      currentDiv,
+      targetRank,
+      targetDiv,
+      currentDivisionStar,
+      perStarRanks,
+      MYTHIC_STAR_CONFIG[currentRank] ? currentMythicStars : 0,
+      MYTHIC_STAR_CONFIG[targetRank] ? targetMythicStars : 0
+    );
+  }, [mode, currentRank, currentDiv, targetRank, targetDiv, currentDivisionStar, currentMythicStars, targetMythicStars, perStarRanks]);
+
+  const totalStars = useMemo(() => {
+    if (mode === "perstar") {
+      return starBreakdown.reduce((sum, s) => sum + s.stars, 0);
+    }
+    return 0;
+  }, [mode, starBreakdown]);
+
+  const basePricePerStar = useMemo(() => {
+    if (mode !== "perstar") return 0;
+    return starBreakdown.reduce((sum, s) => sum + s.subtotal, 0);
+  }, [mode, starBreakdown]);
+
+  // ===== Calculate final price =====
+  const { finalPrice, basePrice } = useMemo(() => {
+    let bp = 0;
+
+    if (mode === "paket" || mode === "classic") {
+      if (selectedPackage) {
+        bp = selectedPackage.price;
+        // Extra mythic stars for paket mode
+        if (MYTHIC_STAR_CONFIG[targetRank] && targetDivisionStar > 0) {
+          bp += calculateExtraMythicCost(targetRank, targetDivisionStar);
         }
       }
     } else if (mode === "perstar") {
-      const rank = perStarRanks.find((r) => r.id === selectedStarRankId);
-      if (rank) {
-        totalStars = starQty;
-        // isFlat: Mythic Grading — price is flat, NOT multiplied by qty
-        basePrice = rank.isFlat ? rank.price : rank.price * starQty;
-      }
+      bp = basePricePerStar;
     } else if (mode === "gendong") {
       const rank = gendongRanks.find((r) => r.id === selectedGendongRankId);
       if (rank) {
-        totalStars = gendongQty;
-        basePrice = rank.isFlat ? rank.price : rank.price * gendongQty;
-      }
-    } else if (mode === "classic") {
-      // Find classic package from catalog
-      const classicCat = catalog.find((c) => c.id === "classic-10-win");
-      const pkg = classicCat?.packages.find((p) => p.id === selectedClassicPkgId);
-      if (pkg) {
-        totalStars = 10; // 10 WIN package
-        basePrice = pkg.price;
-        matchedPackage = pkg;
-        isExactMatch = true;
+        bp = rank.isFlat ? rank.price : rank.price * gendongQty;
       }
     }
 
-    // Apply add-ons
-    let finalPrice = basePrice;
-    if (isExpress) finalPrice *= 1.2;
-    if (isPremium) finalPrice *= 1.3;
+    let fp = bp;
+    if (isExpress) fp *= 1.2;
+    if (isPremium) fp *= 1.3;
+    if (customDiscount > 0) fp *= 1 - customDiscount / 100;
+    fp = Math.round(fp);
 
-    // Apply custom discount
-    if (customDiscount > 0) {
-      finalPrice = finalPrice * (1 - customDiscount / 100);
-    }
-
-    finalPrice = Math.round(finalPrice);
-
-    setResult({ totalStars, basePrice, extraMythicCost, matchedPackage, isExactMatch, finalPrice });
-    setCopied(false);
+    return { finalPrice: fp, basePrice: bp };
   }, [
     mode,
-    currentRank,
-    currentDiv,
+    selectedPackage,
     targetRank,
-    targetDiv,
-    currentDivisionStar,
     targetDivisionStar,
-    selectedStarRankId,
-    starQty,
+    basePricePerStar,
     selectedGendongRankId,
     gendongQty,
-    selectedClassicPkgId,
-    isExpress,
-    isPremium,
-    customDiscount,
-    catalog,
-    perStarRanks,
     gendongRanks,
-  ]);
-
-  // Reset result when inputs change
-  useEffect(() => {
-    setResult(null);
-  }, [
-    mode,
-    currentRank,
-    currentDiv,
-    targetRank,
-    targetDiv,
-    currentDivisionStar,
-    targetDivisionStar,
-    selectedStarRankId,
-    starQty,
-    selectedGendongRankId,
-    gendongQty,
-    selectedClassicPkgId,
     isExpress,
     isPremium,
     customDiscount,
   ]);
 
-  // Build WhatsApp message
+  // ===== Handle package selection (paket/classic) =====
+  const handleSelectPackage = useCallback(
+    (pkg: ProductPackage) => {
+      setSelectedPackage((prev) => (prev?.id === pkg.id ? null : pkg));
+      // Auto-set rank from package for per-star calc
+      if (pkg.currentRank && pkg.currentRank !== "classic") {
+        setCurrentRank(pkg.currentRank);
+        if (pkg.targetRank) setTargetRank(pkg.targetRank);
+      }
+    },
+    []
+  );
+
+  // ===== Build WhatsApp message =====
   const buildMessage = useCallback(() => {
-    if (!result) return "";
     const typeLabel =
       mode === "paket"
         ? "Joki Paket"
@@ -262,78 +433,62 @@ export default function CalculatorPage() {
         ? "Joki Gendong"
         : "Joki Classic";
 
-    const curLabel =
-      mode === "paket"
-        ? `${RANK_LIST.find((r) => r.id === currentRank)?.label || ""}${RANKS_WITH_STARS.includes(currentRank) ? ` ${getDivisionOptions(currentRank).find((d) => d.value === currentDiv)?.label || ""}` : ""}`
-        : mode === "perstar"
-        ? perStarRanks.find((r) => r.id === selectedStarRankId)?.name || ""
-        : mode === "gendong"
-        ? gendongRanks.find((r) => r.id === selectedGendongRankId)?.name || ""
-        : "";
-
-    const tgtLabel =
-      mode === "paket"
-        ? `${RANK_LIST.find((r) => r.id === targetRank)?.label || ""}${RANKS_WITH_STARS.includes(targetRank) ? ` ${getDivisionOptions(targetRank).find((d) => d.value === targetDiv)?.label || ""}` : ""}${MYTHIC_STAR_CONFIG[targetRank] && targetDivisionStar > 0 ? ` (${targetDivisionStar} ${MYTHIC_STAR_CONFIG[targetRank].label})` : ""}`
-        : "";
-
-    const addons: string[] = [];
-    if (isExpress) addons.push("Express (+20%)");
-    if (isPremium) addons.push("Premium Pilot (+30%)");
-    if (customDiscount > 0) addons.push(`Diskon ${customDiscount}%`);
-
     const lines = [
       `Halo Kak ETNYX, saya mau order ${typeLabel}`,
       ``,
       `Detail Order:`,
     ];
 
-    if (mode === "paket") {
-      lines.push(`Rank Awal: ${curLabel} (${currentDivisionStar} bintang)`);
+    if (mode === "paket" && selectedPackage) {
+      lines.push(`Paket: ${selectedPackage.title}`);
+      if (selectedPackage.currentRank !== "classic") {
+        const curLabel = RANK_LIST.find((r) => r.id === selectedPackage.currentRank)?.label || "";
+        const tgtLabel = RANK_LIST.find((r) => r.id === selectedPackage.targetRank)?.label || "";
+        lines.push(`Rank: ${curLabel} → ${tgtLabel}`);
+      }
+    } else if (mode === "classic" && selectedPackage) {
+      lines.push(`Paket: ${selectedPackage.title}`);
+    } else if (mode === "perstar") {
+      const curLabel = `${RANK_LIST.find((r) => r.id === currentRank)?.label || ""}${RANKS_WITH_STARS.includes(currentRank) ? ` ${getDivisionOptions(currentRank).find((d) => d.value === currentDiv)?.label || ""}` : ""}${MYTHIC_STAR_CONFIG[currentRank] ? ` (${currentMythicStars}★)` : ""}`;
+      const tgtLabel = `${RANK_LIST.find((r) => r.id === targetRank)?.label || ""}${RANKS_WITH_STARS.includes(targetRank) ? ` ${getDivisionOptions(targetRank).find((d) => d.value === targetDiv)?.label || ""}` : ""}${MYTHIC_STAR_CONFIG[targetRank] ? ` (${targetMythicStars}★)` : ""}`;
+      lines.push(`Rank Awal: ${curLabel}`);
       lines.push(`Rank Tujuan: ${tgtLabel}`);
-    } else if (mode === "classic") {
-      lines.push(`Paket: ${result.matchedPackage?.title || "Classic"}`);
-    } else {
-      lines.push(`Rank: ${curLabel}`);
+      lines.push(`Total Bintang: ${totalStars}`);
+    } else if (mode === "gendong") {
+      const rank = gendongRanks.find((r) => r.id === selectedGendongRankId);
+      lines.push(`Rank: ${rank?.name || ""}`);
+      lines.push(`Jumlah: ${gendongQty} ${rank?.id === "grading" ? "match" : "bintang"}`);
     }
 
-    lines.push(`Total Bintang/Match: ${result.totalStars}`);
-
-    if (result.extraMythicCost > 0) {
-      lines.push(`Extra Mythic: +${formatRupiah(result.extraMythicCost)}`);
-    }
-
-    if (addons.length > 0) {
-      lines.push(`Add-on: ${addons.join(", ")}`);
-    }
+    const addons: string[] = [];
+    if (isExpress) addons.push("Express (+20%)");
+    if (isPremium) addons.push("Premium Pilot (+30%)");
+    if (customDiscount > 0) addons.push(`Diskon ${customDiscount}%`);
+    if (addons.length > 0) lines.push(`Add-on: ${addons.join(", ")}`);
 
     lines.push(``);
-    lines.push(`Harga: ${formatRupiah(result.finalPrice)}`);
-    if (result.matchedPackage && mode === "paket") {
-      lines.push(`Paket: ${result.matchedPackage.title}`);
-      if (!result.isExactMatch) {
-        lines.push(`(Paket terdekat — bukan match exact)`);
-      }
-    }
+    lines.push(`Harga: ${formatRupiah(finalPrice)}`);
     lines.push(``);
     lines.push(`Mohon info lanjutan ya Kak`);
 
     return lines.join("\n");
   }, [
-    result,
     mode,
+    selectedPackage,
     currentRank,
     currentDiv,
+    currentMythicStars,
     targetRank,
     targetDiv,
-    currentDivisionStar,
-    targetDivisionStar,
-    selectedStarRankId,
+    targetMythicStars,
+    totalStars,
     selectedGendongRankId,
+    gendongQty,
+    gendongRanks,
     isExpress,
     isPremium,
     customDiscount,
-    perStarRanks,
-    gendongRanks,
+    finalPrice,
   ]);
 
   const handleCopy = useCallback(() => {
@@ -349,31 +504,44 @@ export default function CalculatorPage() {
 
   const handleReset = useCallback(() => {
     setMode("paket");
+    setSelectedPackage(null);
     setCurrentRank("epic");
-    setCurrentDiv(3);
+    setCurrentDiv(5);
     setCurrentDivisionStar(1);
     setTargetRank("mythic");
     setTargetDiv(1);
     setTargetDivisionStar(0);
+    setCurrentMythicStars(0);
+    setTargetMythicStars(0);
+    setSelectedGendongRankId("epic");
+    setGendongQty(3);
     setIsExpress(false);
     setIsPremium(false);
     setCustomDiscount(0);
-    setResult(null);
   }, []);
 
-  // Label builders
-  const getRankLabel = (rankId: string) => RANK_LIST.find((r) => r.id === rankId)?.label || rankId;
-  const getDivLabel = (rankId: string, div: number) => getDivisionOptions(rankId).find((d) => d.value === div)?.label || "";
+  // Show result?
+  const hasResult = useMemo(() => {
+    if (mode === "paket" || mode === "classic") return selectedPackage !== null;
+    if (mode === "perstar") return totalStars > 0;
+    if (mode === "gendong") return gendongQty > 0;
+    return false;
+  }, [mode, selectedPackage, totalStars, gendongQty]);
 
-  // Classic packages
-  const classicPackages = catalog.find((c) => c.id === "classic-10-win")?.packages || [];
+  // Label helpers
+  const getRankLabel = (rankId: string) => RANK_LIST.find((r) => r.id === rankId)?.label || rankId;
+  const getDivLabel = (rankId: string, div: number) =>
+    getDivisionOptions(rankId).find((d) => d.value === div)?.label || "";
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="glass border-b border-white/5 sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link href="/admin/dashboard" className="flex items-center gap-2 text-text-muted hover:text-text transition-colors">
+          <Link
+            href="/admin/dashboard"
+            className="flex items-center gap-2 text-text-muted hover:text-text transition-colors"
+          >
             <ChevronLeft className="w-5 h-5" />
             <Image src="/logo/circle-landscape.webp" alt="ETNYX" width={100} height={28} className="h-6 w-auto" />
           </Link>
@@ -401,7 +569,7 @@ export default function CalculatorPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* ===== LEFT: Input Form ===== */}
+          {/* ===== LEFT: Selection (clone of order page Step 1) ===== */}
           <div className="lg:col-span-2 space-y-5">
             {/* Mode Switcher */}
             <div className="bg-surface rounded-2xl border border-white/5 p-4">
@@ -409,9 +577,7 @@ export default function CalculatorPage() {
                 <button
                   onClick={() => setMode("paket")}
                   className={`py-3 px-4 rounded-xl text-sm font-semibold transition-all ${
-                    mode === "paket"
-                      ? "gradient-primary text-white shadow-lg"
-                      : "text-text-muted hover:text-text bg-background"
+                    mode === "paket" ? "gradient-primary text-white shadow-lg" : "text-text-muted hover:text-text bg-background"
                   }`}
                 >
                   <Package className="w-5 h-5 inline-block mr-1.5 align-middle" />
@@ -420,9 +586,7 @@ export default function CalculatorPage() {
                 <button
                   onClick={() => setMode("perstar")}
                   className={`py-3 px-4 rounded-xl text-sm font-semibold transition-all ${
-                    mode === "perstar"
-                      ? "gradient-primary text-white shadow-lg"
-                      : "text-text-muted hover:text-text bg-background"
+                    mode === "perstar" ? "gradient-primary text-white shadow-lg" : "text-text-muted hover:text-text bg-background"
                   }`}
                 >
                   <Star className="w-5 h-5 inline-block mr-1.5 align-middle" />
@@ -431,9 +595,7 @@ export default function CalculatorPage() {
                 <button
                   onClick={() => setMode("gendong")}
                   className={`py-3 px-4 rounded-xl text-sm font-semibold transition-all ${
-                    mode === "gendong"
-                      ? "gradient-primary text-white shadow-lg"
-                      : "text-text-muted hover:text-text bg-background"
+                    mode === "gendong" ? "gradient-primary text-white shadow-lg" : "text-text-muted hover:text-text bg-background"
                   }`}
                 >
                   <Users className="w-5 h-5 inline-block mr-1.5 align-middle" />
@@ -442,55 +604,205 @@ export default function CalculatorPage() {
                 <button
                   onClick={() => setMode("classic")}
                   className={`py-3 px-4 rounded-xl text-sm font-semibold transition-all ${
-                    mode === "classic"
-                      ? "gradient-primary text-white shadow-lg"
-                      : "text-text-muted hover:text-text bg-background"
+                    mode === "classic" ? "gradient-primary text-white shadow-lg" : "text-text-muted hover:text-text bg-background"
                   }`}
                 >
                   <Trophy className="w-5 h-5 inline-block mr-1.5 align-middle" />
                   Classic
                 </button>
               </div>
+              <p className="text-text-muted text-xs mt-3 px-1">
+                {mode === "paket"
+                  ? "Pilih paket rank — booster login ke akunmu dan push rank."
+                  : mode === "perstar"
+                  ? "Bayar per bintang — fleksibel sesuai kebutuhan."
+                  : mode === "gendong"
+                  ? "Main bareng booster — tanpa share akun, kamu tetap bermain."
+                  : "Joki Classic — joki per match dengan harga tetap."}
+              </p>
             </div>
 
-            {/* ===== PAKET MODE ===== */}
-            {mode === "paket" && (
-              <div className="bg-surface rounded-2xl border border-white/5 p-5 space-y-5">
+            {/* ===== PAKET & CLASSIC: CATEGORY TABS + CATALOG CARDS ===== */}
+            {(mode === "paket" || mode === "classic") && (
+              <div className="bg-surface rounded-2xl border border-white/5 p-5">
+                {/* Category Tabs */}
+                <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
+                  {visibleCategories.map((cat) => (
+                    <button
+                      key={cat.id}
+                      onClick={() => setActiveCategory(cat.id)}
+                      className={`px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
+                        activeCategory === cat.id
+                          ? "gradient-primary text-white"
+                          : "bg-background border border-white/10 text-text-muted hover:border-white/20"
+                      }`}
+                    >
+                      {cat.title} ({cat.packages.length})
+                    </button>
+                  ))}
+                </div>
+
+                {/* Package Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {activeCat?.packages.map((pkg) => {
+                    const isClassic = pkg.currentRank === "classic";
+                    const iconCur = isClassic ? parseClassicRank(pkg.title) : pkg.currentRank;
+                    const iconTgt = isClassic ? parseClassicRank(pkg.title) : pkg.targetRank;
+                    const hasDiscount = pkg.discountPercent != null && pkg.discountPercent > 0;
+                    const isRush = pkg.id.startsWith("rush");
+                    const bonusMatch = pkg.title.match(/\+?\s*Bonus\s*(\d+)/i);
+                    const bonusStars = bonusMatch ? parseInt(bonusMatch[1]) : 0;
+
+                    return (
+                      <button
+                        key={pkg.id}
+                        onClick={() => handleSelectPackage(pkg)}
+                        className={`relative text-left rounded-xl border-2 transition-all duration-200 hover:scale-[1.02] overflow-hidden flex flex-col ${
+                          selectedPackage?.id === pkg.id
+                            ? "border-yellow-400 shadow-lg shadow-yellow-400/20"
+                            : "border-white/5 hover:border-white/15"
+                        }`}
+                      >
+                        <div className="p-4 bg-gradient-to-br from-slate-700/80 to-slate-800/80 flex-1">
+                          <p className="text-white text-sm font-semibold mb-2">{pkg.title}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="text-yellow-400 font-bold text-lg leading-tight">{formatRupiah(pkg.price)}</p>
+                            {pkg.originalPrice && (
+                              <p className="text-red-400/70 text-xs line-through">{formatRupiah(pkg.originalPrice)}</p>
+                            )}
+                          </div>
+                        </div>
+                        {/* Tier badge row */}
+                        <div className="px-4 py-2 bg-slate-800/60 flex items-center justify-between">
+                          {isRush ? (
+                            <>
+                              <TierIconsBadge currentRank={iconCur} targetRank={iconTgt} />
+                              <div className="flex items-center gap-1">
+                                {bonusStars > 0 && (
+                                  <span className="bg-green-500/20 text-green-400 px-1.5 py-0.5 rounded text-[9px] font-bold flex items-center gap-0.5">
+                                    <Star className="w-2 h-2 fill-current" /> +{bonusStars}
+                                  </span>
+                                )}
+                                {hasDiscount && (
+                                  <span className="bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded text-[10px] font-bold">
+                                    Diskon {pkg.discountPercent}%
+                                  </span>
+                                )}
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              {hasDiscount && (
+                                <span className="bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded text-[10px] font-bold">
+                                  Diskon {pkg.discountPercent}%
+                                </span>
+                              )}
+                              <TierIconsBadge currentRank={iconCur} targetRank={iconTgt} />
+                            </>
+                          )}
+                        </div>
+                        {selectedPackage?.id === pkg.id && (
+                          <div className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-yellow-400 flex items-center justify-center">
+                            <Check className="w-3 h-3 text-black" />
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* ===== PER STAR: DAFTAR HARGA + RANK SELECTOR + BREAKDOWN ===== */}
+            {mode === "perstar" && (
+              <div className="space-y-5">
+                {/* Daftar Harga Grid */}
+                <div className="bg-surface rounded-2xl border border-white/5 p-5">
+                  <h3 className="text-text font-bold text-sm mb-3 flex items-center gap-2">
+                    <CreditCard className="w-4 h-4 text-accent" />
+                    Daftar Harga Per Bintang
+                  </h3>
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+                    {perStarRanks.map((rank) => (
+                      <div
+                        key={rank.id}
+                        className="flex flex-col items-center justify-center gap-1.5 px-2 py-3 bg-background rounded-lg border border-white/5 text-center transition-colors hover:border-white/15"
+                      >
+                        <Image src={rank.icon} alt={rank.name} width={40} height={40} className="w-10 h-10 object-contain" unoptimized />
+                        <span className="text-text text-xs font-medium leading-tight">{rank.name}</span>
+                        <span className="text-yellow-400 font-bold text-sm">{formatRupiah(rank.price)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Rank Awal */}
-                <div>
+                <div className="bg-surface rounded-2xl border border-white/5 p-5">
                   <label className="block text-sm text-text font-bold mb-2">
-                    Rank Awal Customer
+                    <span className="flex items-center gap-1.5">
+                      <MapPin className="w-4 h-4 text-red-400" />
+                      Rank Awal Customer
+                    </span>
                   </label>
                   <div className="relative mb-3">
                     <select
-                      value={RANKS_WITH_STARS.includes(currentRank) ? `${currentRank}:${currentDiv}` : currentRank}
+                      value={currentRank}
                       onChange={(e) => {
-                        const raw = e.target.value;
-                        if (raw.includes(":")) {
-                          const [rankId, div] = raw.split(":");
-                          setCurrentRank(rankId);
-                          setCurrentDiv(parseInt(div));
-                        } else {
-                          setCurrentRank(raw);
-                          setCurrentDiv(0);
-                        }
+                        const rankId = e.target.value;
+                        setCurrentRank(rankId);
+                        const cfg = RANK_DIVISION_CONFIG[rankId];
+                        if (cfg) setCurrentDiv(cfg.divisions);
+                        const mythicCfg = MYTHIC_STAR_CONFIG[rankId];
+                        if (mythicCfg) setCurrentMythicStars(mythicCfg.min);
+                        else setCurrentMythicStars(0);
+                        setCurrentDivisionStar(1);
                       }}
                       className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 text-text text-sm font-medium appearance-none cursor-pointer focus:border-accent focus:outline-none pr-10"
                     >
-                      {getRankDivisionOptions().map((opt) => (
-                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      {RANK_LIST.map((rank) => (
+                        <option key={rank.id} value={rank.id}>
+                          {rank.label}
+                        </option>
                       ))}
                     </select>
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                      <Image src={rankIcons[currentRank] || "/icons-tier/warrior.webp"} alt="Rank" width={24} height={24} className="w-6 h-6 object-contain" />
+                      <Image
+                        src={rankIcons[currentRank] || "/icons-tier/warrior.webp"}
+                        alt="Rank"
+                        width={24}
+                        height={24}
+                        className="w-6 h-6 object-contain"
+                      />
                     </div>
                   </div>
+
+                  {/* Division selector */}
+                  {RANKS_WITH_STARS.includes(currentRank) && (
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="text-text-muted text-xs whitespace-nowrap font-medium">Divisi:</span>
+                      <div className="flex gap-1 flex-wrap">
+                        {getDivisionOptions(currentRank).map((opt) => (
+                          <button
+                            key={opt.value}
+                            onClick={() => setCurrentDiv(opt.value)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                              currentDiv === opt.value
+                                ? "bg-yellow-400/20 border-2 border-yellow-400 text-yellow-400"
+                                : "bg-background border border-white/10 text-text-muted hover:border-white/20"
+                            }`}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Division stars */}
                   {RANKS_WITH_STARS.includes(currentRank) && (() => {
                     const starsPerDiv = RANK_DIVISION_CONFIG[currentRank]?.starsPerDiv ?? 5;
                     return (
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 mb-3">
                         <span className="text-text-muted text-xs whitespace-nowrap">Bintang di divisi:</span>
                         <div className="flex gap-1">
                           {Array.from({ length: starsPerDiv }, (_, i) => i + 1).map((s) => (
@@ -510,90 +822,23 @@ export default function CalculatorPage() {
                       </div>
                     );
                   })()}
-                </div>
 
-                {/* Rank Tujuan */}
-                <div>
-                  <label className="block text-sm text-text font-bold mb-2">
-                    Rank Tujuan Customer
-                  </label>
-                  <div className="relative mb-3">
-                    <select
-                      value={RANKS_WITH_STARS.includes(targetRank) ? `${targetRank}:${targetDiv}` : targetRank}
-                      onChange={(e) => {
-                        const raw = e.target.value;
-                        if (raw.includes(":")) {
-                          const [rankId, div] = raw.split(":");
-                          setTargetRank(rankId);
-                          setTargetDiv(parseInt(div));
-                          setTargetDivisionStar(0);
-                        } else {
-                          setTargetRank(raw);
-                          setTargetDiv(0);
-                          setTargetDivisionStar(0);
-                        }
-                      }}
-                      className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 text-text text-sm font-medium appearance-none cursor-pointer focus:border-accent focus:outline-none pr-10"
-                    >
-                      {getRankDivisionOptions()
-                        .filter((opt) => {
-                          const ci = RANK_ORDER.indexOf(currentRank);
-                          const oi = RANK_ORDER.indexOf(opt.rankId);
-                          if (oi > ci) return true;
-                          if (oi === ci && RANKS_WITH_STARS.includes(opt.rankId) && opt.division < currentDiv) return true;
-                          return false;
-                        })
-                        .map((opt) => (
-                          <option key={opt.value} value={opt.value}>{opt.label}</option>
-                        ))}
-                    </select>
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                      <Image src={rankIcons[targetRank] || "/icons-tier/warrior.webp"} alt="Rank" width={24} height={24} className="w-6 h-6 object-contain" />
-                    </div>
-                  </div>
-
-                  {/* Target division stars */}
-                  {RANKS_WITH_STARS.includes(targetRank) && (() => {
-                    const starsPerDiv = RANK_DIVISION_CONFIG[targetRank]?.starsPerDiv ?? 5;
+                  {/* Mythic star selector for current rank */}
+                  {MYTHIC_STAR_CONFIG[currentRank] && (() => {
+                    const cfg = MYTHIC_STAR_CONFIG[currentRank];
                     return (
-                      <div className="flex items-center gap-3">
-                        <span className="text-text-muted text-xs whitespace-nowrap">Bintang di divisi:</span>
-                        <div className="flex gap-1">
-                          {Array.from({ length: starsPerDiv }, (_, i) => i + 1).map((s) => (
-                            <button
-                              key={s}
-                              onClick={() => setTargetDivisionStar(s)}
-                              className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${
-                                targetDivisionStar === s
-                                  ? "bg-green-400/20 border-2 border-green-400 text-green-400"
-                                  : "bg-background border border-white/10 text-text-muted hover:border-white/20"
-                              }`}
-                            >
-                              {s}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })()}
-
-                  {/* Mythic+ Star Selector */}
-                  {MYTHIC_STAR_CONFIG[targetRank] && targetRank !== "mythicgrading" && (() => {
-                    const cfg = MYTHIC_STAR_CONFIG[targetRank];
-                    const pricePerStar = MYTHIC_PER_STAR_PRICES[targetRank] || 0;
-                    return (
-                      <div className="mt-3 p-3 bg-yellow-400/5 rounded-xl border border-yellow-400/20">
+                      <div className="p-3 bg-yellow-400/5 rounded-xl border border-yellow-400/20">
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-yellow-400 text-xs font-bold">
-                            {cfg.label === "Match" ? "Jumlah Match" : "Jumlah Bintang"} Tujuan
+                            {cfg.label === "Match" ? "Jumlah Match" : "Jumlah Bintang"} Saat Ini
                           </span>
                           <span className="text-text-muted text-[10px]">
-                            Range: {cfg.min}–{cfg.max} • {formatRupiah(pricePerStar)}/{cfg.label === "Match" ? "match" : "star"}
+                            Range: {cfg.min}–{cfg.max}
                           </span>
                         </div>
                         <div className="flex items-center gap-3">
                           <button
-                            onClick={() => setTargetDivisionStar(Math.max(cfg.min, targetDivisionStar - 1))}
+                            onClick={() => setCurrentMythicStars(Math.max(cfg.min, currentMythicStars - 1))}
                             className="w-9 h-9 rounded-lg bg-background border border-white/10 text-white flex items-center justify-center hover:bg-white/5"
                           >
                             <Minus className="w-4 h-4" />
@@ -602,139 +847,236 @@ export default function CalculatorPage() {
                             type="number"
                             min={cfg.min}
                             max={cfg.max}
-                            value={targetDivisionStar}
+                            value={currentMythicStars}
                             onChange={(e) => {
                               const val = parseInt(e.target.value) || cfg.min;
-                              setTargetDivisionStar(Math.max(cfg.min, Math.min(cfg.max, val)));
+                              setCurrentMythicStars(Math.max(cfg.min, Math.min(cfg.max, val)));
                             }}
                             className="w-20 h-9 text-center bg-background text-yellow-400 rounded-lg border border-yellow-400/20 focus:outline-none focus:border-yellow-400 text-sm font-bold"
                           />
                           <button
-                            onClick={() => setTargetDivisionStar(Math.min(cfg.max, targetDivisionStar + 1))}
+                            onClick={() => setCurrentMythicStars(Math.min(cfg.max, currentMythicStars + 1))}
                             className="w-9 h-9 rounded-lg bg-background border border-white/10 text-white flex items-center justify-center hover:bg-white/5"
                           >
                             <Plus className="w-4 h-4" />
                           </button>
-                          {targetDivisionStar > cfg.min && (
-                            <span className="text-green-400 text-xs font-bold ml-1">
-                              +{formatRupiah(calculateExtraMythicCost(targetRank, targetDivisionStar))}
-                            </span>
-                          )}
                         </div>
                       </div>
                     );
                   })()}
                 </div>
 
-                {/* Visual flow */}
-                <div className="flex items-center justify-center gap-3 p-3 bg-background rounded-xl border border-white/5">
-                  <div className="flex items-center gap-2">
-                    <Image src={rankIcons[currentRank] || ""} alt="Current" width={28} height={28} className="w-7 h-7 object-contain" />
-                    <span className="text-text text-sm font-medium">
-                      {getRankLabel(currentRank)} {RANKS_WITH_STARS.includes(currentRank) && getDivLabel(currentRank, currentDiv)}
+                {/* Rank Tujuan */}
+                <div className="bg-surface rounded-2xl border border-white/5 p-5">
+                  <label className="block text-sm text-text font-bold mb-2">
+                    <span className="flex items-center gap-1.5">
+                      <Target className="w-4 h-4 text-green-400" />
+                      Rank Tujuan Customer
                     </span>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-accent flex-shrink-0" />
-                  <div className="flex items-center gap-2">
-                    <Image src={rankIcons[targetRank] || ""} alt="Target" width={28} height={28} className="w-7 h-7 object-contain" />
-                    <span className="text-yellow-400 text-sm font-bold">
-                      {getRankLabel(targetRank)} {RANKS_WITH_STARS.includes(targetRank) && getDivLabel(targetRank, targetDiv)}
-                      {MYTHIC_STAR_CONFIG[targetRank] && targetDivisionStar > 0 ? ` (${targetDivisionStar})` : ""}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* ===== PER STAR MODE ===== */}
-            {mode === "perstar" && (
-              <div className="bg-surface rounded-2xl border border-white/5 p-5 space-y-4">
-                <div>
-                  <label className="block text-sm text-text font-bold mb-3">Pilih Rank</label>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {perStarRanks.map((rank) => (
-                      <button
-                        key={rank.id}
-                        onClick={() => setSelectedStarRankId(rank.id)}
-                        className={`p-3 rounded-xl border-2 transition-all text-left ${
-                          selectedStarRankId === rank.id
-                            ? "border-yellow-400 bg-yellow-400/5"
-                            : "border-white/5 bg-background hover:border-white/15"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 mb-1">
-                          <Image src={rank.icon} alt={rank.name} width={24} height={24} className="w-6 h-6 object-contain" />
-                          <span className="text-text text-xs font-semibold">{rank.name}</span>
-                        </div>
-                        <p className="text-yellow-400 text-sm font-bold">{formatRupiah(rank.price)}</p>
-                        <p className="text-text-muted text-[10px]">/ {rank.id === "grading" ? "Match" : "Star"}{rank.isFlat && " (flat)"}</p>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                {!perStarRanks.find((r) => r.id === selectedStarRankId)?.isFlat && (
-                  <div>
-                    <label className="block text-sm text-text font-bold mb-2">Jumlah Bintang/Match</label>
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={() => setStarQty((q) => Math.max(selectedStarRankId === "grading" ? 1 : 3, q - 1))}
-                        className="w-10 h-10 rounded-lg bg-background border border-white/10 text-white flex items-center justify-center hover:bg-white/5"
-                      >
-                        <Minus className="w-4 h-4" />
-                      </button>
-                      <input
-                        type="number"
-                        value={starQty}
-                        onChange={(e) => setStarQty(Math.max(selectedStarRankId === "grading" ? 1 : 3, parseInt(e.target.value) || 3))}
-                        className="w-20 h-10 text-center bg-background text-text rounded-lg border border-white/10 focus:outline-none focus:border-accent text-sm font-bold"
+                  </label>
+                  <div className="relative mb-3">
+                    <select
+                      value={targetRank}
+                      onChange={(e) => {
+                        const rankId = e.target.value;
+                        setTargetRank(rankId);
+                        const cfg = RANK_DIVISION_CONFIG[rankId];
+                        if (cfg) setTargetDiv(1);
+                        const mythicCfg = MYTHIC_STAR_CONFIG[rankId];
+                        if (mythicCfg) setTargetMythicStars(mythicCfg.min);
+                        else setTargetMythicStars(0);
+                      }}
+                      className="w-full bg-background border border-white/10 rounded-xl px-4 py-3 text-text text-sm font-medium appearance-none cursor-pointer focus:border-accent focus:outline-none pr-10"
+                    >
+                      {RANK_LIST.filter((r) => {
+                        const ci = RANK_ORDER.indexOf(currentRank);
+                        const oi = RANK_ORDER.indexOf(r.id);
+                        return oi > ci;
+                      }).map((rank) => (
+                        <option key={rank.id} value={rank.id}>
+                          {rank.label}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                      <Image
+                        src={rankIcons[targetRank] || "/icons-tier/warrior.webp"}
+                        alt="Rank"
+                        width={24}
+                        height={24}
+                        className="w-6 h-6 object-contain"
                       />
-                      <button
-                        onClick={() => setStarQty((q) => q + 1)}
-                        className="w-10 h-10 rounded-lg bg-background border border-white/10 text-white flex items-center justify-center hover:bg-white/5"
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
-                      <span className="text-text-muted text-xs ml-2">
-                        Min {selectedStarRankId === "grading" ? 1 : 3} {selectedStarRankId === "grading" ? "match" : "stars"}
-                      </span>
+                    </div>
+                  </div>
+
+                  {/* Target division selector */}
+                  {RANKS_WITH_STARS.includes(targetRank) && (
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="text-text-muted text-xs whitespace-nowrap font-medium">Divisi:</span>
+                      <div className="flex gap-1 flex-wrap">
+                        {getDivisionOptions(targetRank).map((opt) => (
+                          <button
+                            key={opt.value}
+                            onClick={() => setTargetDiv(opt.value)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                              targetDiv === opt.value
+                                ? "bg-green-400/20 border-2 border-green-400 text-green-400"
+                                : "bg-background border border-white/10 text-text-muted hover:border-white/20"
+                            }`}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Mythic star selector for target rank */}
+                  {MYTHIC_STAR_CONFIG[targetRank] && (() => {
+                    const cfg = MYTHIC_STAR_CONFIG[targetRank];
+                    const pricePerStar = MYTHIC_PER_STAR_PRICES[targetRank] || 0;
+                    return (
+                      <div className="p-3 bg-green-400/5 rounded-xl border border-green-400/20">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-green-400 text-xs font-bold">
+                            {cfg.label === "Match" ? "Jumlah Match" : "Jumlah Bintang"} Tujuan
+                          </span>
+                          <span className="text-text-muted text-[10px]">
+                            Range: {cfg.min}–{cfg.max}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => setTargetMythicStars(Math.max(cfg.min, targetMythicStars - 1))}
+                            className="w-9 h-9 rounded-lg bg-background border border-white/10 text-white flex items-center justify-center hover:bg-white/5"
+                          >
+                            <Minus className="w-4 h-4" />
+                          </button>
+                          <input
+                            type="number"
+                            min={cfg.min}
+                            max={cfg.max}
+                            value={targetMythicStars}
+                            onChange={(e) => {
+                              const val = parseInt(e.target.value) || cfg.min;
+                              setTargetMythicStars(Math.max(cfg.min, Math.min(cfg.max, val)));
+                            }}
+                            className="w-20 h-9 text-center bg-background text-green-400 rounded-lg border border-green-400/20 focus:outline-none focus:border-green-400 text-sm font-bold"
+                          />
+                          <button
+                            onClick={() => setTargetMythicStars(Math.min(cfg.max, targetMythicStars + 1))}
+                            className="w-9 h-9 rounded-lg bg-background border border-white/10 text-white flex items-center justify-center hover:bg-white/5"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                {/* Star Breakdown */}
+                {starBreakdown.length > 0 && (
+                  <div className="bg-surface rounded-2xl border border-white/5 p-5">
+                    <h3 className="text-text font-bold text-sm mb-3 flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4 text-accent" />
+                      Rincian Per Tier
+                    </h3>
+                    {/* Visual flow */}
+                    <div className="flex items-center justify-center gap-3 p-3 bg-background rounded-xl border border-white/5 mb-4">
+                      <div className="flex items-center gap-2">
+                        <Image
+                          src={rankIcons[currentRank] || ""}
+                          alt="Current"
+                          width={28}
+                          height={28}
+                          className="w-7 h-7 object-contain"
+                        />
+                        <span className="text-text text-sm font-medium">
+                          {getRankLabel(currentRank)} {RANKS_WITH_STARS.includes(currentRank) && getDivLabel(currentRank, currentDiv)}
+                          {MYTHIC_STAR_CONFIG[currentRank] && ` (${currentMythicStars}★)`}
+                        </span>
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-accent flex-shrink-0" />
+                      <div className="flex items-center gap-2">
+                        <Image
+                          src={rankIcons[targetRank] || ""}
+                          alt="Target"
+                          width={28}
+                          height={28}
+                          className="w-7 h-7 object-contain"
+                        />
+                        <span className="text-yellow-400 text-sm font-bold">
+                          {getRankLabel(targetRank)} {RANKS_WITH_STARS.includes(targetRank) && getDivLabel(targetRank, targetDiv)}
+                          {MYTHIC_STAR_CONFIG[targetRank] && ` (${targetMythicStars}★)`}
+                        </span>
+                      </div>
+                    </div>
+                    {/* Breakdown table */}
+                    <div className="space-y-2">
+                      {starBreakdown.map((seg, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-2 bg-background rounded-lg border border-white/5">
+                          <div className="flex items-center gap-2">
+                            <Image
+                              src={rankIcons[seg.tierId] || "/icons-tier/warrior.webp"}
+                              alt={seg.tierLabel}
+                              width={20}
+                              height={20}
+                              className="w-5 h-5 object-contain"
+                            />
+                            <span className="text-text text-xs font-medium">{seg.tierLabel}</span>
+                          </div>
+                          <div className="flex items-center gap-3 text-xs">
+                            <span className="text-text-muted">
+                              {seg.stars} ★ × {formatRupiah(seg.pricePerStar)}
+                            </span>
+                            <span className="text-yellow-400 font-bold">{formatRupiah(seg.subtotal)}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {/* Total */}
+                    <div className="mt-3 pt-3 border-t border-white/10 flex items-center justify-between">
+                      <span className="text-text font-bold text-sm">Total: {totalStars} bintang</span>
+                      <span className="text-yellow-400 font-bold text-lg">{formatRupiah(basePricePerStar)}</span>
                     </div>
                   </div>
                 )}
-                {perStarRanks.find((r) => r.id === selectedStarRankId)?.isFlat && (
-                  <div className="p-3 bg-yellow-400/5 rounded-xl border border-yellow-400/20">
-                    <p className="text-yellow-400 text-xs font-bold">Flat Pricing (10 Match)</p>
-                    <p className="text-text-muted text-[10px]">Harga tidak dikali jumlah match — sudah paket 10 match</p>
-                  </div>
-                )}
               </div>
             )}
 
-            {/* ===== GENDONG MODE ===== */}
+            {/* ===== GENDONG: RANK CARDS + QTY ===== */}
             {mode === "gendong" && (
               <div className="bg-surface rounded-2xl border border-white/5 p-5 space-y-4">
+                {/* Daftar Harga */}
                 <div>
-                  <label className="block text-sm text-text font-bold mb-3">Pilih Rank</label>
+                  <h3 className="text-text font-bold text-sm mb-3 flex items-center gap-2">
+                    <CreditCard className="w-4 h-4 text-accent" />
+                    Daftar Harga Gendong
+                  </h3>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {gendongRanks.map((rank) => (
                       <button
                         key={rank.id}
                         onClick={() => setSelectedGendongRankId(rank.id)}
-                        className={`p-3 rounded-xl border-2 transition-all text-left ${
+                        className={`flex flex-col items-center justify-center gap-1.5 px-2 py-3 rounded-lg border-2 text-center transition-all ${
                           selectedGendongRankId === rank.id
                             ? "border-yellow-400 bg-yellow-400/5"
                             : "border-white/5 bg-background hover:border-white/15"
                         }`}
                       >
-                        <div className="flex items-center gap-2 mb-1">
-                          <Image src={rank.icon} alt={rank.name} width={24} height={24} className="w-6 h-6 object-contain" />
-                          <span className="text-text text-xs font-semibold">{rank.name}</span>
-                        </div>
-                        <p className="text-yellow-400 text-sm font-bold">{formatRupiah(rank.price)}</p>
-                        <p className="text-text-muted text-[10px]">/ {rank.id === "grading" ? "Match" : "Star"}</p>
+                        <Image src={rank.icon} alt={rank.name} width={40} height={40} className="w-10 h-10 object-contain" unoptimized />
+                        <span className="text-text text-xs font-medium leading-tight">{rank.name}</span>
+                        <span className="text-yellow-400 font-bold text-sm">{formatRupiah(rank.price)}</span>
+                        {rank.originalPrice && (
+                          <span className="text-red-400/70 text-[10px] line-through">{formatRupiah(rank.originalPrice)}</span>
+                        )}
                       </button>
                     ))}
                   </div>
                 </div>
+
+                {/* Qty Selector */}
                 <div>
                   <label className="block text-sm text-text font-bold mb-2">Jumlah Bintang/Match</label>
                   <div className="flex items-center gap-3">
@@ -747,7 +1089,9 @@ export default function CalculatorPage() {
                     <input
                       type="number"
                       value={gendongQty}
-                      onChange={(e) => setGendongQty(Math.max(selectedGendongRankId === "grading" ? 1 : 3, parseInt(e.target.value) || 3))}
+                      onChange={(e) =>
+                        setGendongQty(Math.max(selectedGendongRankId === "grading" ? 1 : 3, parseInt(e.target.value) || 3))
+                      }
                       className="w-20 h-10 text-center bg-background text-text rounded-lg border border-white/10 focus:outline-none focus:border-accent text-sm font-bold"
                     />
                     <button
@@ -757,47 +1101,15 @@ export default function CalculatorPage() {
                       <Plus className="w-4 h-4" />
                     </button>
                     <span className="text-text-muted text-xs ml-2">
-                      Min {selectedGendongRankId === "grading" ? 1 : 3} {selectedGendongRankId === "grading" ? "match" : "stars"}
+                      Min {selectedGendongRankId === "grading" ? 1 : 3}{" "}
+                      {selectedGendongRankId === "grading" ? "match" : "stars"}
                     </span>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* ===== CLASSIC MODE ===== */}
-            {mode === "classic" && (
-              <div className="bg-surface rounded-2xl border border-white/5 p-5 space-y-4">
-                <div>
-                  <label className="block text-sm text-text font-bold mb-3">Pilih Paket Classic 10 WIN</label>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    {classicPackages.map((pkg) => (
-                      <button
-                        key={pkg.id}
-                        onClick={() => setSelectedClassicPkgId(pkg.id)}
-                        className={`p-3 rounded-xl border-2 transition-all text-left ${
-                          selectedClassicPkgId === pkg.id
-                            ? "border-yellow-400 bg-yellow-400/5"
-                            : "border-white/5 bg-background hover:border-white/15"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 mb-1">
-                          <Trophy className="w-5 h-5 text-yellow-400" />
-                          <span className="text-text text-xs font-semibold">{pkg.title}</span>
-                        </div>
-                        <p className="text-yellow-400 text-sm font-bold">{formatRupiah(pkg.price)}</p>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="p-3 bg-background rounded-xl border border-white/5">
-                  <p className="text-text-muted text-xs">
-                    Classic 10 WIN = 10 match dengan minimal 70% win rate. Cocok untuk push star cepat di rank Epic–Immortal.
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Add-ons */}
+            {/* ===== ADD-ONS (all modes) ===== */}
             <div className="bg-surface rounded-2xl border border-white/5 p-5">
               <h3 className="text-text font-bold text-sm mb-3">Add-ons & Diskon</h3>
               <div className="space-y-3">
@@ -847,26 +1159,19 @@ export default function CalculatorPage() {
               </div>
             </div>
 
-            {/* Calculate Button */}
-            <div className="flex gap-3">
-              <button
-                onClick={calculate}
-                className="flex-1 py-4 gradient-primary rounded-xl text-white font-bold text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
-              >
-                <CalculatorIcon className="w-5 h-5" />
-                Hitung Harga
-              </button>
+            {/* Reset Button */}
+            <div className="flex justify-end">
               <button
                 onClick={handleReset}
-                className="px-4 py-4 bg-surface border border-white/10 rounded-xl text-text-muted hover:text-text transition-colors"
-                title="Reset"
+                className="px-4 py-2.5 bg-surface border border-white/10 rounded-xl text-text-muted hover:text-text transition-colors text-sm flex items-center gap-2"
               >
-                <RotateCcw className="w-5 h-5" />
+                <RotateCcw className="w-4 h-4" />
+                Reset
               </button>
             </div>
           </div>
 
-          {/* ===== RIGHT: Result Panel ===== */}
+          {/* ===== RIGHT: Result Panel (sticky) ===== */}
           <div className="lg:col-span-1">
             <div className="sticky top-20 bg-surface rounded-2xl border border-white/5 overflow-hidden">
               <div className="px-5 py-4 border-b border-white/5">
@@ -876,45 +1181,61 @@ export default function CalculatorPage() {
                 </h3>
               </div>
               <div className="p-5">
-                {result ? (
+                {hasResult ? (
                   <div className="space-y-4">
-                    {/* Total Stars */}
-                    <div className="bg-background rounded-xl p-4 border border-white/5">
-                      <p className="text-text-muted text-xs mb-1">Total Bintang/Match</p>
-                      <p className="text-yellow-400 font-bold text-2xl flex items-center gap-1.5">
-                        {result.totalStars}
-                        <Star className="w-5 h-5" />
-                      </p>
-                    </div>
+                    {/* Total Stars / Package Info */}
+                    {mode === "perstar" && (
+                      <div className="bg-background rounded-xl p-4 border border-white/5">
+                        <p className="text-text-muted text-xs mb-1">Total Bintang</p>
+                        <p className="text-yellow-400 font-bold text-2xl flex items-center gap-1.5">
+                          {totalStars}
+                          <Star className="w-5 h-5" />
+                        </p>
+                      </div>
+                    )}
+
+                    {selectedPackage && (mode === "paket" || mode === "classic") && (
+                      <div className="bg-background rounded-xl p-4 border border-white/5">
+                        <p className="text-text-muted text-xs mb-1">Paket Terpilih</p>
+                        <p className="text-text font-bold text-sm">{selectedPackage.title}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <TierIconsBadge currentRank={selectedPackage.currentRank === "classic" ? parseClassicRank(selectedPackage.title) : selectedPackage.currentRank} targetRank={selectedPackage.targetRank === "classic" ? parseClassicRank(selectedPackage.title) : selectedPackage.targetRank} />
+                        </div>
+                      </div>
+                    )}
+
+                    {mode === "gendong" && (
+                      <div className="bg-background rounded-xl p-4 border border-white/5">
+                        <p className="text-text-muted text-xs mb-1">Total Match/Bintang</p>
+                        <p className="text-yellow-400 font-bold text-2xl flex items-center gap-1.5">
+                          {gendongQty}
+                          <Star className="w-5 h-5" />
+                        </p>
+                      </div>
+                    )}
 
                     {/* Price Breakdown */}
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between text-text-muted">
-                        <span>Harga Paket</span>
-                        <span>{formatRupiah(result.basePrice - result.extraMythicCost)}</span>
+                        <span>Harga Dasar</span>
+                        <span>{formatRupiah(basePrice)}</span>
                       </div>
-                      {result.extraMythicCost > 0 && (
-                        <div className="flex justify-between text-green-400">
-                          <span>Extra Mythic Stars</span>
-                          <span>+{formatRupiah(result.extraMythicCost)}</span>
-                        </div>
-                      )}
                       {isExpress && (
                         <div className="flex justify-between text-yellow-400">
                           <span>Express (+20%)</span>
-                          <span>+{formatRupiah(Math.round(result.basePrice * 0.2))}</span>
+                          <span>+{formatRupiah(Math.round(basePrice * 0.2))}</span>
                         </div>
                       )}
                       {isPremium && (
                         <div className="flex justify-between text-purple-400">
                           <span>Premium (+30%)</span>
-                          <span>+{formatRupiah(Math.round(result.basePrice * 0.3))}</span>
+                          <span>+{formatRupiah(Math.round(basePrice * 0.3))}</span>
                         </div>
                       )}
                       {customDiscount > 0 && (
                         <div className="flex justify-between text-green-400">
                           <span>Diskon ({customDiscount}%)</span>
-                          <span>-{formatRupiah(Math.round(result.basePrice * customDiscount / 100))}</span>
+                          <span>-{formatRupiah(Math.round(basePrice * customDiscount / 100))}</span>
                         </div>
                       )}
                     </div>
@@ -922,24 +1243,13 @@ export default function CalculatorPage() {
                     {/* Final Price */}
                     <div className="bg-gradient-to-r from-yellow-400/10 to-orange-400/10 rounded-xl p-4 border border-yellow-400/20">
                       <p className="text-text-muted text-xs mb-1">Total Bayar</p>
-                      <p className="text-yellow-400 font-bold text-3xl">{formatRupiah(result.finalPrice)}</p>
+                      <p className="text-yellow-400 font-bold text-3xl">{formatRupiah(finalPrice)}</p>
                     </div>
-
-                    {/* Matched Package */}
-                    {result.matchedPackage && (
-                      <div className="bg-background rounded-xl p-3 border border-white/5">
-                        <p className="text-text-muted text-xs mb-1">Paket Match</p>
-                        <p className="text-text text-sm font-medium">{result.matchedPackage.title}</p>
-                        {!result.isExactMatch && (
-                          <p className="text-orange-400 text-[10px] mt-1">Paket terdekat (bukan exact match)</p>
-                        )}
-                      </div>
-                    )}
 
                     {/* WhatsApp Output */}
                     <div className="bg-background rounded-xl p-3 border border-white/5">
                       <p className="text-text-muted text-xs mb-2">Pesan WhatsApp siap copy:</p>
-                      <pre className="text-text text-xs whitespace-pre-wrap font-mono bg-surface p-3 rounded-lg max-h-32 overflow-y-auto">
+                      <pre className="text-text text-xs whitespace-pre-wrap font-mono bg-surface p-3 rounded-lg max-h-40 overflow-y-auto">
                         {buildMessage()}
                       </pre>
                     </div>
@@ -966,7 +1276,13 @@ export default function CalculatorPage() {
                   <div className="text-center py-8">
                     <CalculatorIcon className="w-12 h-12 text-text-muted mx-auto mb-3 opacity-50" />
                     <p className="text-text-muted text-sm">
-                      Pilih rank dan klik <span className="text-accent font-medium">Hitung Harga</span> untuk melihat hasil
+                      {mode === "paket"
+                        ? "Pilih paket untuk melihat hasil"
+                        : mode === "perstar"
+                        ? "Pilih rank awal & tujuan untuk melihat hasil"
+                        : mode === "gendong"
+                        ? "Pilih rank untuk melihat hasil"
+                        : "Pilih paket classic untuk melihat hasil"}
                     </p>
                   </div>
                 )}
