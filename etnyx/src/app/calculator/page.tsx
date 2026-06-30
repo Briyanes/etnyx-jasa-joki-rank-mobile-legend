@@ -21,6 +21,7 @@ import {
   TrendingUp,
   RotateCcw,
   Sparkles,
+  Trophy,
 } from "lucide-react";
 import {
   RANK_LIST,
@@ -36,141 +37,18 @@ import {
   calculateExtraMythicCost,
   MYTHIC_PER_STAR_PRICES,
   formatRupiah,
+  DEFAULT_PER_STAR_RANKS,
+  DEFAULT_GENDONG_RANKS,
+  DEFAULT_CATALOG,
   type PackageCategory,
   type ProductPackage,
   type PerStarRank,
 } from "@/lib/pricing-utils";
 import { WHATSAPP_NUMBER } from "@/lib/constants";
 
-// ===== Default Catalog (same as order page) =====
-const DEFAULT_CATALOG: PackageCategory[] = [
-  {
-    id: "paket-warrior",
-    title: "Paket Warrior",
-    packages: [
-      { id: "warrior3-elite3", title: "Warrior III - Elite III", price: 25089, rankKey: "warrior", currentRank: "warrior", targetRank: "elite", currentDivision: 3, targetDivision: 3 },
-      { id: "warrior3-master4", title: "Warrior III - Master IV", price: 70089, rankKey: "warrior", currentRank: "warrior", targetRank: "master", currentDivision: 3, targetDivision: 4 },
-      { id: "warrior3-gm5", title: "Warrior III - GM V", price: 149089, rankKey: "warrior", currentRank: "warrior", targetRank: "grandmaster", currentDivision: 3, targetDivision: 5 },
-      { id: "warrior3-epic5", title: "Warrior III - Epic V", price: 282089, rankKey: "warrior", currentRank: "warrior", targetRank: "epic", currentDivision: 3, targetDivision: 5 },
-      { id: "warrior3-legend5", title: "Warrior III - Legend V", price: 459089, rankKey: "warrior", currentRank: "warrior", targetRank: "legend", currentDivision: 3, targetDivision: 5 },
-      { id: "warrior1-mythic", title: "Warrior I - Mythic", price: 645089, rankKey: "warrior", currentRank: "warrior", targetRank: "mythic", currentDivision: 1 },
-      { id: "warrior2-mythic", title: "Warrior II - Mythic", price: 653089, rankKey: "warrior", currentRank: "warrior", targetRank: "mythic", currentDivision: 2 },
-      { id: "warrior3-mythic", title: "Warrior III - Mythic", price: 660089, rankKey: "warrior", currentRank: "warrior", targetRank: "mythic", currentDivision: 3 },
-    ],
-  },
-  {
-    id: "paket-elite",
-    title: "Paket Elite",
-    packages: [
-      { id: "elite3-master4", title: "Elite III - Master IV", price: 45089, rankKey: "elite", currentRank: "elite", targetRank: "master", currentDivision: 3, targetDivision: 4 },
-      { id: "elite3-gm5", title: "Elite III - GM V", price: 123089, rankKey: "elite", currentRank: "elite", targetRank: "grandmaster", currentDivision: 3, targetDivision: 5 },
-      { id: "elite3-epic5", title: "Elite III - Epic V", price: 259089, rankKey: "elite", currentRank: "elite", targetRank: "epic", currentDivision: 3, targetDivision: 5 },
-      { id: "elite3-legend5", title: "Elite III - Legend V", price: 435089, rankKey: "elite", currentRank: "elite", targetRank: "legend", currentDivision: 3, targetDivision: 5 },
-      { id: "elite1-mythic", title: "Elite I - Mythic", price: 605089, rankKey: "elite", currentRank: "elite", targetRank: "mythic", currentDivision: 1 },
-      { id: "elite2-mythic", title: "Elite II - Mythic", price: 620089, rankKey: "elite", currentRank: "elite", targetRank: "mythic", currentDivision: 2 },
-      { id: "elite3-mythic", title: "Elite III - Mythic", price: 635089, rankKey: "elite", currentRank: "elite", targetRank: "mythic", currentDivision: 3 },
-    ],
-  },
-  {
-    id: "paket-master",
-    title: "Paket Master",
-    packages: [
-      { id: "master4-gm5", title: "Master IV - GM V", price: 78089, rankKey: "master", currentRank: "master", targetRank: "grandmaster", currentDivision: 4, targetDivision: 5 },
-      { id: "master4-epic5", title: "Master IV - Epic V", price: 213089, rankKey: "master", currentRank: "master", targetRank: "epic", currentDivision: 4, targetDivision: 5 },
-      { id: "master4-legend5", title: "Master IV - Legend V", price: 389089, rankKey: "master", currentRank: "master", targetRank: "legend", currentDivision: 4, targetDivision: 5 },
-      { id: "master1-mythic", title: "Master I - Mythic", price: 533089, rankKey: "master", currentRank: "master", targetRank: "mythic", currentDivision: 1 },
-      { id: "master2-mythic", title: "Master II - Mythic", price: 550089, rankKey: "master", currentRank: "master", targetRank: "mythic", currentDivision: 2 },
-      { id: "master3-mythic", title: "Master III - Mythic", price: 570089, rankKey: "master", currentRank: "master", targetRank: "mythic", currentDivision: 3 },
-      { id: "master4-mythic", title: "Master IV - Mythic", price: 590089, rankKey: "master", currentRank: "master", targetRank: "mythic", currentDivision: 4 },
-    ],
-  },
-  {
-    id: "paket-gm",
-    title: "Paket Grand Master",
-    packages: [
-      { id: "gm5-epic5", title: "GM V - Epic V", price: 113089, rankKey: "grandmaster", currentRank: "grandmaster", targetRank: "epic", currentDivision: 5, targetDivision: 5 },
-      { id: "gm5-legend5", title: "GM V - Legend V", price: 259089, rankKey: "grandmaster", currentRank: "grandmaster", targetRank: "legend", currentDivision: 5, targetDivision: 5 },
-      { id: "gm1-mythic", title: "GM I - Mythic", price: 338089, rankKey: "grandmaster", currentRank: "grandmaster", targetRank: "mythic", currentDivision: 1 },
-      { id: "gm2-mythic", title: "GM II - Mythic", price: 360089, rankKey: "grandmaster", currentRank: "grandmaster", targetRank: "mythic", currentDivision: 2 },
-      { id: "gm3-mythic", title: "GM III - Mythic", price: 383089, rankKey: "grandmaster", currentRank: "grandmaster", targetRank: "mythic", currentDivision: 3 },
-      { id: "gm4-mythic", title: "GM IV - Mythic", price: 405089, rankKey: "grandmaster", currentRank: "grandmaster", targetRank: "mythic", currentDivision: 4 },
-      { id: "gm5-mythic", title: "GM V - Mythic", price: 428089, rankKey: "grandmaster", currentRank: "grandmaster", targetRank: "mythic", currentDivision: 5 },
-      { id: "gm1-honor", title: "GM I - Mythic Honor", price: 511089, rankKey: "mythichonor", currentRank: "grandmaster", targetRank: "mythichonor", currentDivision: 1 },
-      { id: "gm2-honor", title: "GM II - Mythic Honor", price: 533089, rankKey: "mythichonor", currentRank: "grandmaster", targetRank: "mythichonor", currentDivision: 2 },
-      { id: "gm3-honor", title: "GM III - Mythic Honor", price: 556089, rankKey: "mythichonor", currentRank: "grandmaster", targetRank: "mythichonor", currentDivision: 3 },
-      { id: "gm4-honor", title: "GM IV - Mythic Honor", price: 578089, rankKey: "mythichonor", currentRank: "grandmaster", targetRank: "mythichonor", currentDivision: 4 },
-      { id: "gm5-honor", title: "GM V - Mythic Honor", price: 601089, rankKey: "mythichonor", currentRank: "grandmaster", targetRank: "mythichonor", currentDivision: 5 },
-    ],
-  },
-  {
-    id: "paket-epic",
-    title: "Paket Epic",
-    packages: [
-      { id: "epic5-legend5", title: "Epic V - Legend V", price: 146089, rankKey: "epic", currentRank: "epic", targetRank: "legend", currentDivision: 5, targetDivision: 5 },
-      { id: "epic1-mythic", title: "Epic I - Mythic", price: 198089, rankKey: "epic", currentRank: "epic", targetRank: "mythic", currentDivision: 1 },
-      { id: "epic2-mythic", title: "Epic II - Mythic", price: 227089, rankKey: "epic", currentRank: "epic", targetRank: "mythic", currentDivision: 2 },
-      { id: "epic3-mythic", title: "Epic III - Mythic", price: 257089, rankKey: "epic", currentRank: "epic", targetRank: "mythic", currentDivision: 3 },
-      { id: "epic4-mythic", title: "Epic IV - Mythic", price: 286089, rankKey: "epic", currentRank: "epic", targetRank: "mythic", currentDivision: 4 },
-      { id: "epic5-mythic", title: "Epic V - Mythic", price: 315089, rankKey: "epic", currentRank: "epic", targetRank: "mythic", currentDivision: 5 },
-      { id: "epic1-honor", title: "Epic I - Mythic Honor", price: 371089, rankKey: "mythichonor", currentRank: "epic", targetRank: "mythichonor", currentDivision: 1 },
-      { id: "epic2-honor", title: "Epic II - Mythic Honor", price: 401089, rankKey: "mythichonor", currentRank: "epic", targetRank: "mythichonor", currentDivision: 2 },
-      { id: "epic3-honor", title: "Epic III - Mythic Honor", price: 430089, rankKey: "mythichonor", currentRank: "epic", targetRank: "mythichonor", currentDivision: 3 },
-      { id: "epic4-honor", title: "Epic IV - Mythic Honor", price: 459089, rankKey: "mythichonor", currentRank: "epic", targetRank: "mythichonor", currentDivision: 4 },
-      { id: "epic5-honor", title: "Epic V - Mythic Honor", price: 488089, rankKey: "mythichonor", currentRank: "epic", targetRank: "mythichonor", currentDivision: 5 },
-    ],
-  },
-  {
-    id: "paket-legend",
-    title: "Paket Legend",
-    packages: [
-      { id: "legend1-mythic", title: "Legend I - Mythic", price: 34089, rankKey: "legend", currentRank: "legend", targetRank: "mythic", currentDivision: 1 },
-      { id: "legend2-mythic", title: "Legend II - Mythic", price: 68089, rankKey: "legend", currentRank: "legend", targetRank: "mythic", currentDivision: 2 },
-      { id: "legend3-mythic", title: "Legend III - Mythic", price: 101089, rankKey: "legend", currentRank: "legend", targetRank: "mythic", currentDivision: 3 },
-      { id: "legend4-mythic", title: "Legend IV - Mythic", price: 135089, rankKey: "legend", currentRank: "legend", targetRank: "mythic", currentDivision: 4 },
-      { id: "legend5-mythic", title: "Legend V - Mythic", price: 169089, rankKey: "legend", currentRank: "legend", targetRank: "mythic", currentDivision: 5 },
-    ],
-  },
-  {
-    id: "paket-mythic",
-    title: "Paket Mythic",
-    packages: [
-      { id: "mythic-grading", title: "Open Grading (Auto Star 15)", price: 180089, rankKey: "mythic", currentRank: "mythic", targetRank: "mythic" },
-      { id: "mythic-honor", title: "Mythic Grading - Mythic Honor (25)", price: 342089, rankKey: "mythichonor", currentRank: "mythic", targetRank: "mythichonor" },
-      { id: "mythic-glory", title: "Mythic Grading - Mythic Glory (50)", price: 815089, rankKey: "mythicglory", currentRank: "mythic", targetRank: "mythicglory" },
-      { id: "mythic-immortal", title: "Mythic Grading - Mythic Immortal (100)", price: 1985089, rankKey: "mythicimmortal", currentRank: "mythic", targetRank: "mythicimmortal" },
-    ],
-  },
-];
-
-// Per-star pricing — synced with order page PER_STAR_RANKS
-const PER_STAR_RANKS: PerStarRank[] = [
-  { id: "master", name: "Master", price: 5000, originalPrice: 6000, discountPercent: 17, icon: "/icons-tier/Master.webp", maxStars: 25 },
-  { id: "grandmaster", name: "Grand Master", price: 5500, originalPrice: 7000, discountPercent: 21, icon: "/icons-tier/Grandmaster.webp", maxStars: 25 },
-  { id: "epic", name: "Epic", price: 7000, originalPrice: 8500, discountPercent: 18, icon: "/icons-tier/Epic.webp", maxStars: 25 },
-  { id: "legend", name: "Legend", price: 8000, originalPrice: 9500, discountPercent: 16, icon: "/icons-tier/Legend.webp", maxStars: 25 },
-  { id: "grading", name: "Mythic Grading", price: 230000, originalPrice: 250000, discountPercent: 8, icon: "/icons-tier/Mythic.webp", maxStars: 10 },
-  { id: "mythicromawi", name: "Mythic", price: 19000, originalPrice: 21000, discountPercent: 10, icon: "/icons-tier/Mythic.webp", maxStars: 25 },
-  { id: "honor", name: "Mythic Honor", price: 24000, originalPrice: 26000, discountPercent: 8, icon: "/icons-tier/Mythical_Honor.webp", maxStars: 25 },
-  { id: "glory", name: "Mythic Glory", price: 29000, originalPrice: 31000, discountPercent: 7, icon: "/icons-tier/Mythical_Glory.webp", maxStars: 50 },
-  { id: "immortal", name: "Mythic Immortal", price: 34000, originalPrice: 36000, discountPercent: 6, icon: "/icons-tier/Mythical_Immortal.webp", maxStars: 100 },
-];
-
-// Gendong per-star pricing — synced with order page GENDONG_RANKS
-const GENDONG_RANKS: PerStarRank[] = [
-  { id: "master", name: "Master", price: 8500, originalPrice: 10000, discountPercent: 15, icon: "/icons-tier/Master.webp", maxStars: 25 },
-  { id: "grandmaster", name: "Grand Master", price: 9000, originalPrice: 11000, discountPercent: 18, icon: "/icons-tier/Grandmaster.webp", maxStars: 25 },
-  { id: "epic", name: "Epic", price: 10000, originalPrice: 12000, discountPercent: 17, icon: "/icons-tier/Epic.webp", maxStars: 25 },
-  { id: "legend", name: "Legend", price: 11000, originalPrice: 13000, discountPercent: 15, icon: "/icons-tier/Legend.webp", maxStars: 25 },
-  { id: "grading", name: "Mythic Grading", price: 23000, originalPrice: 26000, discountPercent: 12, icon: "/icons-tier/Mythic.webp", maxStars: 10 },
-  { id: "mythicromawi", name: "Mythic", price: 21000, originalPrice: 24000, discountPercent: 13, icon: "/icons-tier/Mythic.webp", maxStars: 25 },
-  { id: "honor", name: "Mythic Honor", price: 25000, originalPrice: 28000, discountPercent: 11, icon: "/icons-tier/Mythical_Honor.webp", maxStars: 25 },
-  { id: "glory", name: "Mythic Glory", price: 30000, originalPrice: 34000, discountPercent: 12, icon: "/icons-tier/Mythical_Glory.webp", maxStars: 50 },
-  { id: "immortal", name: "Mythic Immortal", price: 35000, originalPrice: 40000, discountPercent: 13, icon: "/icons-tier/Mythical_Immortal.webp", maxStars: 100 },
-];
-
 export default function CalculatorPage() {
-  // Mode: paket / perstar / gendong
-  const [mode, setMode] = useState<"paket" | "perstar" | "gendong">("paket");
+  // Mode: paket / perstar / gendong / classic
+  const [mode, setMode] = useState<"paket" | "perstar" | "gendong" | "classic">("paket");
 
   // Rank selection (paket mode)
   const [currentRank, setCurrentRank] = useState("epic");
@@ -188,6 +66,9 @@ export default function CalculatorPage() {
   const [selectedGendongRankId, setSelectedGendongRankId] = useState("epic");
   const [gendongQty, setGendongQty] = useState(3);
 
+  // Classic mode selection
+  const [selectedClassicPkgId, setSelectedClassicPkgId] = useState("mythic-10win");
+
   // Add-ons
   const [isExpress, setIsExpress] = useState(false);
   const [isPremium, setIsPremium] = useState(false);
@@ -195,6 +76,8 @@ export default function CalculatorPage() {
 
   // Catalog (fetch from CMS)
   const [catalog, setCatalog] = useState<PackageCategory[]>(DEFAULT_CATALOG);
+  const [perStarRanks, setPerStarRanks] = useState<PerStarRank[]>(DEFAULT_PER_STAR_RANKS);
+  const [gendongRanks, setGendongRanks] = useState<PerStarRank[]>(DEFAULT_GENDONG_RANKS);
 
   // UI state
   const [copied, setCopied] = useState(false);
@@ -207,7 +90,7 @@ export default function CalculatorPage() {
     finalPrice: number;
   } | null>(null);
 
-  // Fetch pricing from CMS
+  // Fetch pricing from CMS (all keys at once)
   useEffect(() => {
     const defaultRankKeys: Record<string, string> = {};
     for (const cat of DEFAULT_CATALOG) {
@@ -216,9 +99,10 @@ export default function CalculatorPage() {
       }
     }
 
-    fetch("/api/settings?keys=pricing_catalog")
+    fetch("/api/settings?keys=pricing_catalog,perstar_pricing,gendong_pricing")
       .then((res) => res.json())
       .then((data) => {
+        // Merge catalog
         if (data.pricing_catalog && Array.isArray(data.pricing_catalog) && data.pricing_catalog.length > 0) {
           const merged = data.pricing_catalog.map((cat: PackageCategory) => ({
             ...cat,
@@ -228,6 +112,26 @@ export default function CalculatorPage() {
             })),
           }));
           setCatalog(merged);
+        }
+
+        // Merge per-star pricing
+        if (data.perstar_pricing && Array.isArray(data.perstar_pricing) && data.perstar_pricing.length > 0) {
+          setPerStarRanks((prev) =>
+            prev.map((r) => {
+              const cms = data.perstar_pricing.find((c: PerStarRank) => c.id === r.id);
+              return cms ? { ...r, ...cms } : r;
+            })
+          );
+        }
+
+        // Merge gendong pricing
+        if (data.gendong_pricing && Array.isArray(data.gendong_pricing) && data.gendong_pricing.length > 0) {
+          setGendongRanks((prev) =>
+            prev.map((r) => {
+              const cms = data.gendong_pricing.find((c: PerStarRank) => c.id === r.id);
+              return cms ? { ...r, ...cms } : r;
+            })
+          );
         }
       })
       .catch(() => {});
@@ -242,15 +146,16 @@ export default function CalculatorPage() {
     let isExactMatch = false;
 
     if (mode === "paket") {
-      // For Mythic+ targets, pass actual targetDivisionStar (not 0)
       const isMythicTarget = MYTHIC_STAR_CONFIG[targetRank] !== undefined;
+      const isMythicCurrent = MYTHIC_STAR_CONFIG[currentRank] !== undefined;
       totalStars = calculateTotalStars(
         currentRank,
         currentDiv,
         targetRank,
         targetDiv,
         RANKS_WITH_STARS.includes(currentRank) ? currentDivisionStar : 0,
-        isMythicTarget ? targetDivisionStar : (RANKS_WITH_STARS.includes(targetRank) ? targetDivisionStar : 0)
+        isMythicTarget ? targetDivisionStar : (RANKS_WITH_STARS.includes(targetRank) ? targetDivisionStar : 0),
+        isMythicCurrent ? (MYTHIC_STAR_CONFIG[currentRank]?.min || 0) : undefined
       );
 
       const match = findBestPackage(catalog, currentRank, currentDiv, targetRank, targetDiv);
@@ -259,24 +164,33 @@ export default function CalculatorPage() {
         isExactMatch = match.exact;
         basePrice = match.pkg.price;
 
-        // BUG FIX: Add extra cost for Mythic+ stars beyond what package covers
-        // Package covers up to "Mythic 0 star" — extra stars are charged per-star
         if (isMythicTarget && targetDivisionStar > 0) {
           extraMythicCost = calculateExtraMythicCost(targetRank, targetDivisionStar);
           basePrice += extraMythicCost;
         }
       }
     } else if (mode === "perstar") {
-      const rank = PER_STAR_RANKS.find((r) => r.id === selectedStarRankId);
+      const rank = perStarRanks.find((r) => r.id === selectedStarRankId);
       if (rank) {
         totalStars = starQty;
-        basePrice = rank.price * starQty;
+        // isFlat: Mythic Grading — price is flat, NOT multiplied by qty
+        basePrice = rank.isFlat ? rank.price : rank.price * starQty;
       }
     } else if (mode === "gendong") {
-      const rank = GENDONG_RANKS.find((r) => r.id === selectedGendongRankId);
+      const rank = gendongRanks.find((r) => r.id === selectedGendongRankId);
       if (rank) {
         totalStars = gendongQty;
-        basePrice = rank.price * gendongQty;
+        basePrice = rank.isFlat ? rank.price : rank.price * gendongQty;
+      }
+    } else if (mode === "classic") {
+      // Find classic package from catalog
+      const classicCat = catalog.find((c) => c.id === "classic-10-win");
+      const pkg = classicCat?.packages.find((p) => p.id === selectedClassicPkgId);
+      if (pkg) {
+        totalStars = 10; // 10 WIN package
+        basePrice = pkg.price;
+        matchedPackage = pkg;
+        isExactMatch = true;
       }
     }
 
@@ -306,10 +220,13 @@ export default function CalculatorPage() {
     starQty,
     selectedGendongRankId,
     gendongQty,
+    selectedClassicPkgId,
     isExpress,
     isPremium,
     customDiscount,
     catalog,
+    perStarRanks,
+    gendongRanks,
   ]);
 
   // Reset result when inputs change
@@ -321,10 +238,13 @@ export default function CalculatorPage() {
     currentDiv,
     targetRank,
     targetDiv,
+    currentDivisionStar,
+    targetDivisionStar,
     selectedStarRankId,
     starQty,
     selectedGendongRankId,
     gendongQty,
+    selectedClassicPkgId,
     isExpress,
     isPremium,
     customDiscount,
@@ -333,17 +253,28 @@ export default function CalculatorPage() {
   // Build WhatsApp message
   const buildMessage = useCallback(() => {
     if (!result) return "";
-    const typeLabel = mode === "paket" ? "Joki Paket" : mode === "perstar" ? "Joki Per Bintang" : "Joki Gendong";
+    const typeLabel =
+      mode === "paket"
+        ? "Joki Paket"
+        : mode === "perstar"
+        ? "Joki Per Bintang"
+        : mode === "gendong"
+        ? "Joki Gendong"
+        : "Joki Classic";
 
-    const curLabel = mode === "paket"
-      ? `${RANK_LIST.find((r) => r.id === currentRank)?.label || ""}${RANKS_WITH_STARS.includes(currentRank) ? ` ${getDivisionOptions(currentRank).find((d) => d.value === currentDiv)?.label || ""}` : ""}`
-      : mode === "perstar"
-      ? PER_STAR_RANKS.find((r) => r.id === selectedStarRankId)?.name || ""
-      : GENDONG_RANKS.find((r) => r.id === selectedGendongRankId)?.name || "";
+    const curLabel =
+      mode === "paket"
+        ? `${RANK_LIST.find((r) => r.id === currentRank)?.label || ""}${RANKS_WITH_STARS.includes(currentRank) ? ` ${getDivisionOptions(currentRank).find((d) => d.value === currentDiv)?.label || ""}` : ""}`
+        : mode === "perstar"
+        ? perStarRanks.find((r) => r.id === selectedStarRankId)?.name || ""
+        : mode === "gendong"
+        ? gendongRanks.find((r) => r.id === selectedGendongRankId)?.name || ""
+        : "";
 
-    const tgtLabel = mode === "paket"
-      ? `${RANK_LIST.find((r) => r.id === targetRank)?.label || ""}${RANKS_WITH_STARS.includes(targetRank) ? ` ${getDivisionOptions(targetRank).find((d) => d.value === targetDiv)?.label || ""}` : ""}${MYTHIC_STAR_CONFIG[targetRank] && targetDivisionStar > 0 ? ` (${targetDivisionStar} ${MYTHIC_STAR_CONFIG[targetRank].label})` : ""}`
-      : "";
+    const tgtLabel =
+      mode === "paket"
+        ? `${RANK_LIST.find((r) => r.id === targetRank)?.label || ""}${RANKS_WITH_STARS.includes(targetRank) ? ` ${getDivisionOptions(targetRank).find((d) => d.value === targetDiv)?.label || ""}` : ""}${MYTHIC_STAR_CONFIG[targetRank] && targetDivisionStar > 0 ? ` (${targetDivisionStar} ${MYTHIC_STAR_CONFIG[targetRank].label})` : ""}`
+        : "";
 
     const addons: string[] = [];
     if (isExpress) addons.push("Express (+20%)");
@@ -359,6 +290,8 @@ export default function CalculatorPage() {
     if (mode === "paket") {
       lines.push(`Rank Awal: ${curLabel} (${currentDivisionStar} bintang)`);
       lines.push(`Rank Tujuan: ${tgtLabel}`);
+    } else if (mode === "classic") {
+      lines.push(`Paket: ${result.matchedPackage?.title || "Classic"}`);
     } else {
       lines.push(`Rank: ${curLabel}`);
     }
@@ -399,6 +332,8 @@ export default function CalculatorPage() {
     isExpress,
     isPremium,
     customDiscount,
+    perStarRanks,
+    gendongRanks,
   ]);
 
   const handleCopy = useCallback(() => {
@@ -429,6 +364,9 @@ export default function CalculatorPage() {
   // Label builders
   const getRankLabel = (rankId: string) => RANK_LIST.find((r) => r.id === rankId)?.label || rankId;
   const getDivLabel = (rankId: string, div: number) => getDivisionOptions(rankId).find((d) => d.value === div)?.label || "";
+
+  // Classic packages
+  const classicPackages = catalog.find((c) => c.id === "classic-10-win")?.packages || [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -467,39 +405,50 @@ export default function CalculatorPage() {
           <div className="lg:col-span-2 space-y-5">
             {/* Mode Switcher */}
             <div className="bg-surface rounded-2xl border border-white/5 p-4">
-              <div className="flex flex-col sm:flex-row gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 <button
                   onClick={() => setMode("paket")}
-                  className={`flex-1 py-3 px-4 rounded-xl text-sm font-semibold transition-all ${
+                  className={`py-3 px-4 rounded-xl text-sm font-semibold transition-all ${
                     mode === "paket"
                       ? "gradient-primary text-white shadow-lg"
                       : "text-text-muted hover:text-text bg-background"
                   }`}
                 >
-                  <Package className="w-5 h-5 inline-block mr-2 align-middle" />
-                  Joki Paket
+                  <Package className="w-5 h-5 inline-block mr-1.5 align-middle" />
+                  Paket
                 </button>
                 <button
                   onClick={() => setMode("perstar")}
-                  className={`flex-1 py-3 px-4 rounded-xl text-sm font-semibold transition-all ${
+                  className={`py-3 px-4 rounded-xl text-sm font-semibold transition-all ${
                     mode === "perstar"
                       ? "gradient-primary text-white shadow-lg"
                       : "text-text-muted hover:text-text bg-background"
                   }`}
                 >
-                  <Star className="w-5 h-5 inline-block mr-2 align-middle" />
+                  <Star className="w-5 h-5 inline-block mr-1.5 align-middle" />
                   Per Bintang
                 </button>
                 <button
                   onClick={() => setMode("gendong")}
-                  className={`flex-1 py-3 px-4 rounded-xl text-sm font-semibold transition-all ${
+                  className={`py-3 px-4 rounded-xl text-sm font-semibold transition-all ${
                     mode === "gendong"
                       ? "gradient-primary text-white shadow-lg"
                       : "text-text-muted hover:text-text bg-background"
                   }`}
                 >
-                  <Users className="w-5 h-5 inline-block mr-2 align-middle" />
-                  Joki Gendong
+                  <Users className="w-5 h-5 inline-block mr-1.5 align-middle" />
+                  Gendong
+                </button>
+                <button
+                  onClick={() => setMode("classic")}
+                  className={`py-3 px-4 rounded-xl text-sm font-semibold transition-all ${
+                    mode === "classic"
+                      ? "gradient-primary text-white shadow-lg"
+                      : "text-text-muted hover:text-text bg-background"
+                  }`}
+                >
+                  <Trophy className="w-5 h-5 inline-block mr-1.5 align-middle" />
+                  Classic
                 </button>
               </div>
             </div>
@@ -577,7 +526,7 @@ export default function CalculatorPage() {
                           const [rankId, div] = raw.split(":");
                           setTargetRank(rankId);
                           setTargetDiv(parseInt(div));
-                          setTargetDivisionStar(0); // Reset star when rank changes
+                          setTargetDivisionStar(0);
                         } else {
                           setTargetRank(raw);
                           setTargetDiv(0);
@@ -703,7 +652,7 @@ export default function CalculatorPage() {
                 <div>
                   <label className="block text-sm text-text font-bold mb-3">Pilih Rank</label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {PER_STAR_RANKS.map((rank) => (
+                    {perStarRanks.map((rank) => (
                       <button
                         key={rank.id}
                         onClick={() => setSelectedStarRankId(rank.id)}
@@ -718,37 +667,45 @@ export default function CalculatorPage() {
                           <span className="text-text text-xs font-semibold">{rank.name}</span>
                         </div>
                         <p className="text-yellow-400 text-sm font-bold">{formatRupiah(rank.price)}</p>
-                        <p className="text-text-muted text-[10px]">/ {rank.id === "grading" ? "Match" : "Star"}</p>
+                        <p className="text-text-muted text-[10px]">/ {rank.id === "grading" ? "Match" : "Star"}{rank.isFlat && " (flat)"}</p>
                       </button>
                     ))}
                   </div>
                 </div>
-                <div>
-                  <label className="block text-sm text-text font-bold mb-2">Jumlah Bintang/Match</label>
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => setStarQty((q) => Math.max(selectedStarRankId === "grading" ? 1 : 3, q - 1))}
-                      className="w-10 h-10 rounded-lg bg-background border border-white/10 text-white flex items-center justify-center hover:bg-white/5"
-                    >
-                      <Minus className="w-4 h-4" />
-                    </button>
-                    <input
-                      type="number"
-                      value={starQty}
-                      onChange={(e) => setStarQty(Math.max(selectedStarRankId === "grading" ? 1 : 3, parseInt(e.target.value) || 3))}
-                      className="w-20 h-10 text-center bg-background text-text rounded-lg border border-white/10 focus:outline-none focus:border-accent text-sm font-bold"
-                    />
-                    <button
-                      onClick={() => setStarQty((q) => q + 1)}
-                      className="w-10 h-10 rounded-lg bg-background border border-white/10 text-white flex items-center justify-center hover:bg-white/5"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </button>
-                    <span className="text-text-muted text-xs ml-2">
-                      Min {selectedStarRankId === "grading" ? 1 : 3} {selectedStarRankId === "grading" ? "match" : "stars"}
-                    </span>
+                {!perStarRanks.find((r) => r.id === selectedStarRankId)?.isFlat && (
+                  <div>
+                    <label className="block text-sm text-text font-bold mb-2">Jumlah Bintang/Match</label>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => setStarQty((q) => Math.max(selectedStarRankId === "grading" ? 1 : 3, q - 1))}
+                        className="w-10 h-10 rounded-lg bg-background border border-white/10 text-white flex items-center justify-center hover:bg-white/5"
+                      >
+                        <Minus className="w-4 h-4" />
+                      </button>
+                      <input
+                        type="number"
+                        value={starQty}
+                        onChange={(e) => setStarQty(Math.max(selectedStarRankId === "grading" ? 1 : 3, parseInt(e.target.value) || 3))}
+                        className="w-20 h-10 text-center bg-background text-text rounded-lg border border-white/10 focus:outline-none focus:border-accent text-sm font-bold"
+                      />
+                      <button
+                        onClick={() => setStarQty((q) => q + 1)}
+                        className="w-10 h-10 rounded-lg bg-background border border-white/10 text-white flex items-center justify-center hover:bg-white/5"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </button>
+                      <span className="text-text-muted text-xs ml-2">
+                        Min {selectedStarRankId === "grading" ? 1 : 3} {selectedStarRankId === "grading" ? "match" : "stars"}
+                      </span>
+                    </div>
                   </div>
-                </div>
+                )}
+                {perStarRanks.find((r) => r.id === selectedStarRankId)?.isFlat && (
+                  <div className="p-3 bg-yellow-400/5 rounded-xl border border-yellow-400/20">
+                    <p className="text-yellow-400 text-xs font-bold">Flat Pricing (10 Match)</p>
+                    <p className="text-text-muted text-[10px]">Harga tidak dikali jumlah match — sudah paket 10 match</p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -758,7 +715,7 @@ export default function CalculatorPage() {
                 <div>
                   <label className="block text-sm text-text font-bold mb-3">Pilih Rank</label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {GENDONG_RANKS.map((rank) => (
+                    {gendongRanks.map((rank) => (
                       <button
                         key={rank.id}
                         onClick={() => setSelectedGendongRankId(rank.id)}
@@ -803,6 +760,39 @@ export default function CalculatorPage() {
                       Min {selectedGendongRankId === "grading" ? 1 : 3} {selectedGendongRankId === "grading" ? "match" : "stars"}
                     </span>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* ===== CLASSIC MODE ===== */}
+            {mode === "classic" && (
+              <div className="bg-surface rounded-2xl border border-white/5 p-5 space-y-4">
+                <div>
+                  <label className="block text-sm text-text font-bold mb-3">Pilih Paket Classic 10 WIN</label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {classicPackages.map((pkg) => (
+                      <button
+                        key={pkg.id}
+                        onClick={() => setSelectedClassicPkgId(pkg.id)}
+                        className={`p-3 rounded-xl border-2 transition-all text-left ${
+                          selectedClassicPkgId === pkg.id
+                            ? "border-yellow-400 bg-yellow-400/5"
+                            : "border-white/5 bg-background hover:border-white/15"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 mb-1">
+                          <Trophy className="w-5 h-5 text-yellow-400" />
+                          <span className="text-text text-xs font-semibold">{pkg.title}</span>
+                        </div>
+                        <p className="text-yellow-400 text-sm font-bold">{formatRupiah(pkg.price)}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="p-3 bg-background rounded-xl border border-white/5">
+                  <p className="text-text-muted text-xs">
+                    Classic 10 WIN = 10 match dengan minimal 70% win rate. Cocok untuk push star cepat di rank Epic–Immortal.
+                  </p>
                 </div>
               </div>
             )}
