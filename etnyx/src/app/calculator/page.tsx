@@ -25,6 +25,13 @@ import {
   CreditCard,
   MapPin,
   Target,
+  FileText,
+  User,
+  Send,
+  Loader2,
+  LogIn,
+  Phone,
+  AlertTriangle,
 } from "lucide-react";
 import {
   RANK_LIST,
@@ -34,8 +41,6 @@ import {
   MYTHIC_STAR_CONFIG,
   rankIcons,
   getDivisionOptions,
-  getRankDivisionOptions,
-  calculateTotalStars,
   calculateExtraMythicCost,
   MYTHIC_PER_STAR_PRICES,
   formatRupiah,
@@ -263,7 +268,23 @@ export default function CalculatorPage() {
   const [isPremium, setIsPremium] = useState(false);
   const [customDiscount, setCustomDiscount] = useState(0);
 
-  // UI
+  // UI — 3-stage workflow
+  const [stage, setStage] = useState<"calc" | "form">("calc");
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [orderResult, setOrderResult] = useState<{ orderId: string; paymentUrl?: string; error?: string } | null>(null);
+
+  // Stage 3: Customer data form
+  const [custNickname, setCustNickname] = useState("");
+  const [custUserId, setCustUserId] = useState("");
+  const [custServerId, setCustServerId] = useState("");
+  const [custLoginMethod, setCustLoginMethod] = useState("moonton");
+  const [custLogin, setCustLogin] = useState("");
+  const [custPassword, setCustPassword] = useState("");
+  const [custWhatsapp, setCustWhatsapp] = useState("");
+  const [custHero, setCustHero] = useState("");
+  const [custNotes, setCustNotes] = useState("");
+
   const [copied, setCopied] = useState(false);
 
   // ===== Fetch CMS pricing =====
@@ -507,6 +528,170 @@ export default function CalculatorPage() {
     const msg = encodeURIComponent(buildMessage());
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, "_blank");
   }, [buildMessage]);
+
+  // ===== Stage 2: Build Format Order (field dinamis per mode) =====
+  const buildFormatOrder = useCallback(() => {
+    const typeLabel =
+      mode === "paket"
+        ? "Joki Paket"
+        : mode === "perstar"
+        ? "Joki Per Bintang"
+        : mode === "gendong"
+        ? "Joki Gendong"
+        : "Joki Classic";
+
+    const lines = [
+      `📋 FORMAT ORDER — ETNYX JOCKEY`,
+      ``,
+      `Jenis: ${typeLabel}`,
+    ];
+
+    // Detail produk
+    if (mode === "paket" && selectedPackage) {
+      lines.push(`Paket: ${selectedPackage.title}`);
+    } else if (mode === "classic" && selectedPackage) {
+      lines.push(`Paket: ${selectedPackage.title}`);
+    } else if (mode === "perstar") {
+      const curLabel = `${getRankLabel(currentRank)}${RANKS_WITH_STARS.includes(currentRank) ? ` ${getDivLabel(currentRank, currentDiv)}` : ""}${MYTHIC_STAR_CONFIG[currentRank] ? ` (${currentMythicStars}★)` : ""}`;
+      const tgtLabel = `${getRankLabel(targetRank)}${RANKS_WITH_STARS.includes(targetRank) ? ` ${getDivLabel(targetRank, targetDiv)}` : ""}${MYTHIC_STAR_CONFIG[targetRank] ? ` (${targetMythicStars}★)` : ""}`;
+      lines.push(`Rank: ${curLabel} → ${tgtLabel} (${totalStars}★)`);
+    } else if (mode === "gendong") {
+      const rank = gendongRanks.find((r) => r.id === selectedGendongRankId);
+      lines.push(`Rank: ${rank?.name || ""} — ${gendongQty} ${rank?.id === "grading" ? "match" : "bintang"}`);
+    }
+
+    lines.push(`Harga: ${formatRupiah(finalPrice)}`);
+    lines.push(``);
+    lines.push(`Silakan isi data berikut & kirim balik:`);
+    lines.push(``);
+
+    // Field dinamis per mode
+    if (mode === "gendong") {
+      lines.push(`1. Nickname:`);
+      lines.push(`2. User ID (Server ID):`);
+      lines.push(`3. No. WhatsApp:`);
+      lines.push(`4. Hero Preferred (opsional):`);
+      lines.push(`5. Jadwal Main (opsional):`);
+      lines.push(`6. Catatan (opsional):`);
+    } else if (mode === "classic") {
+      lines.push(`1. Nickname:`);
+      lines.push(`2. User ID (Server ID):`);
+      lines.push(`3. No. WhatsApp:`);
+      lines.push(`4. Hero Request (opsional):`);
+      lines.push(`5. Catatan (opsional):`);
+    } else {
+      // paket & perstar — perlu login akun
+      lines.push(`1. Nickname:`);
+      lines.push(`2. User ID (Server ID):`);
+      lines.push(`3. Login Method (Moonton/Google/FB/VK/Tiktok):`);
+      lines.push(`4. Email/Nomor Login:`);
+      lines.push(`5. Password:`);
+      lines.push(`6. No. WhatsApp:`);
+      lines.push(`7. Hero Request (opsional):`);
+      lines.push(`8. Catatan (opsional):`);
+    }
+
+    lines.push(``);
+    lines.push(`⚠️ Pastikan data benar sebelum kirim ya Kak!`);
+
+    return lines.join("\n");
+  }, [
+    mode, selectedPackage, currentRank, currentDiv, currentMythicStars,
+    targetRank, targetDiv, targetMythicStars, totalStars,
+    selectedGendongRankId, gendongQty, gendongRanks, finalPrice,
+  ]);
+
+  const handleCopyFormat = useCallback(() => {
+    navigator.clipboard.writeText(buildFormatOrder());
+    setCopiedField("format");
+    setTimeout(() => setCopiedField(null), 2000);
+  }, [buildFormatOrder]);
+
+  // ===== Stage 3: Submit order to API =====
+  const handleSubmitOrder = useCallback(async () => {
+    // Basic validation
+    if (!custNickname.trim() || !custWhatsapp.trim()) {
+      setOrderResult({ orderId: "", error: "Nickname dan WhatsApp wajib diisi!" });
+      return;
+    }
+    if (mode !== "gendong" && mode !== "classic" && !custLogin.trim()) {
+      setOrderResult({ orderId: "", error: "Email/Login wajib diisi untuk mode ini!" });
+      return;
+    }
+
+    setIsSubmitting(true);
+    setOrderResult(null);
+
+    try {
+      const userIdCombined = custServerId ? `${custUserId} (${custServerId})` : custUserId;
+
+      const payload: Record<string, unknown> = {
+        nickname: custNickname,
+        accountLogin: custLogin,
+        accountPassword: custPassword || "-",
+        whatsapp: custWhatsapp,
+        heroRequest: custHero || "-",
+        notes: custNotes || "-",
+        loginMethod: custLoginMethod,
+        orderMode: mode,
+        total_price: finalPrice,
+        isExpress,
+        isPremium,
+        customDiscount,
+        paymentMethod: "dompetx",
+        userId: userIdCombined,
+      };
+
+      if (mode === "paket" || mode === "classic") {
+        payload.packageId = selectedPackage?.id || "";
+        payload.packageTitle = selectedPackage?.title || "";
+        payload.currentRank = selectedPackage?.currentRank || "";
+        payload.targetRank = selectedPackage?.targetRank || "";
+        payload.totalStars = totalStars;
+      } else if (mode === "perstar") {
+        payload.currentRank = currentRank;
+        payload.currentDiv = currentDiv;
+        payload.currentDivisionStar = currentDivisionStar;
+        payload.targetRank = targetRank;
+        payload.targetDiv = targetDiv;
+        payload.currentMythicStars = MYTHIC_STAR_CONFIG[currentRank] ? currentMythicStars : 0;
+        payload.targetMythicStars = MYTHIC_STAR_CONFIG[targetRank] ? targetMythicStars : 0;
+        payload.totalStars = totalStars;
+      } else if (mode === "gendong") {
+        payload.gendongRankId = selectedGendongRankId;
+        payload.gendongQty = gendongQty;
+      }
+
+      const res = await fetch("/api/customer/order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setOrderResult({ orderId: "", error: data.error || "Gagal membuat order" });
+        return;
+      }
+
+      setOrderResult({
+        orderId: data.orderId || data.order_id || "",
+        paymentUrl: data.paymentUrl,
+      });
+    } catch {
+      setOrderResult({ orderId: "", error: "Gagal menghubungi server" });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [
+    custNickname, custWhatsapp, custLogin, custUserId, custServerId,
+    custPassword, custHero, custNotes, custLoginMethod,
+    mode, finalPrice, isExpress, isPremium, customDiscount,
+    selectedPackage, totalStars,
+    currentRank, currentDiv, currentDivisionStar, targetRank, targetDiv,
+    currentMythicStars, targetMythicStars,
+    selectedGendongRankId, gendongQty,
+  ]);
 
   const handleReset = useCallback(() => {
     setMode("paket");
@@ -940,7 +1125,6 @@ export default function CalculatorPage() {
                   {/* Mythic star selector for target rank */}
                   {MYTHIC_STAR_CONFIG[targetRank] && (() => {
                     const cfg = MYTHIC_STAR_CONFIG[targetRank];
-                    const pricePerStar = MYTHIC_PER_STAR_PRICES[targetRank] || 0;
                     return (
                       <div className="p-3 bg-green-400/5 rounded-xl border border-green-400/20">
                         <div className="flex items-center justify-between mb-2">
@@ -1252,31 +1436,73 @@ export default function CalculatorPage() {
                       <p className="text-yellow-400 font-bold text-3xl">{formatRupiah(finalPrice)}</p>
                     </div>
 
-                    {/* WhatsApp Output */}
+                    {/* Stage 1: Penawaran */}
                     <div className="bg-background rounded-xl p-3 border border-white/5">
-                      <p className="text-text-muted text-xs mb-2">Pesan WhatsApp siap copy:</p>
+                      <p className="text-text-muted text-xs mb-2 flex items-center gap-1.5">
+                        <MessageCircle className="w-3 h-3 text-green-400" />
+                        1. Pesan Penawaran
+                      </p>
                       <pre className="text-text text-xs whitespace-pre-wrap font-mono bg-surface p-3 rounded-lg max-h-40 overflow-y-auto">
                         {buildMessage()}
                       </pre>
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="space-y-2">
-                      <button
-                        onClick={handleWhatsApp}
-                        className="w-full py-3 bg-green-600 hover:bg-green-700 rounded-xl text-white font-bold text-sm flex items-center justify-center gap-2 transition-colors"
-                      >
-                        <MessageCircle className="w-4 h-4" />
-                        Buka WhatsApp
-                      </button>
-                      <button
-                        onClick={handleCopy}
-                        className="w-full py-3 bg-surface border border-white/10 hover:border-white/20 rounded-xl text-text font-semibold text-sm flex items-center justify-center gap-2 transition-colors"
-                      >
-                        {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
-                        {copied ? "Tersalin!" : "Copy Pesan"}
-                      </button>
+                    <button
+                      onClick={handleWhatsApp}
+                      className="w-full py-3 bg-green-600 hover:bg-green-700 rounded-xl text-white font-bold text-sm flex items-center justify-center gap-2 transition-colors"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                      Kirim via WhatsApp
+                    </button>
+                    <button
+                      onClick={handleCopy}
+                      className="w-full py-3 bg-surface border border-white/10 hover:border-white/20 rounded-xl text-text font-semibold text-sm flex items-center justify-center gap-2 transition-colors"
+                    >
+                      {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                      {copied ? "Tersalin!" : "Copy Penawaran"}
+                    </button>
+
+                    {/* Divider */}
+                    <div className="flex items-center gap-2 py-1">
+                      <div className="h-px bg-white/10 flex-1" />
+                      <span className="text-text-muted text-[10px] uppercase tracking-wider">Setelah buyer setuju</span>
+                      <div className="h-px bg-white/10 flex-1" />
                     </div>
+
+                    {/* Stage 2: Format Order */}
+                    <div className="bg-background rounded-xl p-3 border border-white/5">
+                      <p className="text-text-muted text-xs mb-2 flex items-center gap-1.5">
+                        <FileText className="w-3 h-3 text-blue-400" />
+                        2. Format Order (copas ke buyer)
+                      </p>
+                      <pre className="text-text text-xs whitespace-pre-wrap font-mono bg-surface p-3 rounded-lg max-h-40 overflow-y-auto">
+                        {buildFormatOrder()}
+                      </pre>
+                    </div>
+
+                    <button
+                      onClick={handleCopyFormat}
+                      className="w-full py-3 bg-blue-600 hover:bg-blue-700 rounded-xl text-white font-semibold text-sm flex items-center justify-center gap-2 transition-colors"
+                    >
+                      {copiedField === "format" ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                      {copiedField === "format" ? "Tersalin!" : "Copy Format Order"}
+                    </button>
+
+                    {/* Divider */}
+                    <div className="flex items-center gap-2 py-1">
+                      <div className="h-px bg-white/10 flex-1" />
+                      <span className="text-text-muted text-[10px] uppercase tracking-wider">Setelah data diterima</span>
+                      <div className="h-px bg-white/10 flex-1" />
+                    </div>
+
+                    {/* Stage 3: Create Order */}
+                    <button
+                      onClick={() => setStage("form")}
+                      className="w-full py-3 gradient-primary rounded-xl text-white font-bold text-sm flex items-center justify-center gap-2 transition-opacity hover:opacity-90"
+                    >
+                      <Send className="w-4 h-4" />
+                      3. Buat Order Manual →
+                    </button>
                   </div>
                 ) : (
                   <div className="text-center py-8">
@@ -1297,6 +1523,253 @@ export default function CalculatorPage() {
           </div>
         </div>
       </div>
+
+      {/* ===== STAGE 3: Customer Data Form (modal overlay) ===== */}
+      {stage === "form" && (
+        <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm overflow-y-auto p-4">
+          <div className="max-w-lg mx-auto my-8 bg-surface rounded-2xl border border-white/10 overflow-hidden">
+            {/* Form Header */}
+            <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
+                  <User className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-text text-sm">3. Buat Order</h3>
+                  <p className="text-text-muted text-[10px]">Isi data customer → submit ke DompetX</p>
+                </div>
+              </div>
+              <button
+                onClick={() => { setStage("calc"); setOrderResult(null); }}
+                className="text-text-muted hover:text-text p-1.5 rounded-lg hover:bg-white/5 transition-colors"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Form Body */}
+            <div className="p-5 space-y-4">
+              {/* Order Summary */}
+              <div className="bg-background rounded-xl p-3 border border-white/5 flex items-center justify-between">
+                <div>
+                  <p className="text-text-muted text-[10px] uppercase tracking-wider">Order</p>
+                  <p className="text-text text-sm font-bold">
+                    {mode === "paket" || mode === "classic"
+                      ? selectedPackage?.title
+                      : mode === "perstar"
+                      ? `${getRankLabel(currentRank)} → ${getRankLabel(targetRank)} (${totalStars}★)`
+                      : `Gendong ${gendongRanks.find(r => r.id === selectedGendongRankId)?.name || ""} ×${gendongQty}`}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-text-muted text-[10px] uppercase tracking-wider">Total</p>
+                  <p className="text-yellow-400 font-bold text-lg">{formatRupiah(finalPrice)}</p>
+                </div>
+              </div>
+
+              {orderResult?.error && (
+                <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-red-400 flex-shrink-0" />
+                  <p className="text-red-400 text-xs">{orderResult.error}</p>
+                </div>
+              )}
+
+              {orderResult?.orderId ? (
+                /* Success State */
+                <div className="text-center py-6 space-y-4">
+                  <div className="w-16 h-16 mx-auto rounded-full bg-green-500/20 flex items-center justify-center">
+                    <Check className="w-8 h-8 text-green-400" />
+                  </div>
+                  <div>
+                    <p className="text-text font-bold text-lg">Order Berhasil Dibuat!</p>
+                    <p className="text-text-muted text-xs mt-1">Order ID:</p>
+                    <p className="text-accent font-mono font-bold text-sm">{orderResult.orderId}</p>
+                  </div>
+                  {orderResult.paymentUrl ? (
+                    <>
+                      <a
+                        href={orderResult.paymentUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block w-full py-3 bg-green-600 hover:bg-green-700 rounded-xl text-white font-bold text-sm transition-colors"
+                      >
+                        Buka Link Pembayaran DompetX →
+                      </a>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(orderResult.paymentUrl || "");
+                          setCopiedField("paymentUrl");
+                          setTimeout(() => setCopiedField(null), 2000);
+                        }}
+                        className="w-full py-3 bg-surface border border-white/10 hover:border-white/20 rounded-xl text-text font-semibold text-sm flex items-center justify-center gap-2 transition-colors"
+                      >
+                        {copiedField === "paymentUrl" ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                        {copiedField === "paymentUrl" ? "Link Disalin!" : "Copy Link Pembayaran"}
+                      </button>
+                    </>
+                  ) : (
+                    <Link
+                      href={`/payment/manual?order_id=${orderResult.orderId}`}
+                      className="block w-full py-3 bg-blue-600 hover:bg-blue-700 rounded-xl text-white font-bold text-sm transition-colors"
+                    >
+                      Lanjut ke Pembayaran Manual →
+                    </Link>
+                  )}
+                  <button
+                    onClick={() => {
+                      setStage("calc");
+                      setOrderResult(null);
+                      // Reset form
+                      setCustNickname(""); setCustUserId(""); setCustServerId("");
+                      setCustLogin(""); setCustPassword(""); setCustWhatsapp("");
+                      setCustHero(""); setCustNotes("");
+                    }}
+                    className="w-full py-2 text-text-muted hover:text-text text-sm transition-colors"
+                  >
+                    Tutup
+                  </button>
+                </div>
+              ) : (
+                /* Form Fields */
+                <>
+                  {/* Nickname */}
+                  <div>
+                    <label className="text-text-muted text-xs block mb-1.5 flex items-center gap-1.5">
+                      <User className="w-3 h-3" /> Nickname <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={custNickname}
+                      onChange={(e) => setCustNickname(e.target.value)}
+                      placeholder="In-game nickname"
+                      className="w-full bg-background border border-white/10 rounded-xl px-3 py-2.5 text-text text-sm focus:border-accent outline-none"
+                    />
+                  </div>
+
+                  {/* User ID + Server ID */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-text-muted text-xs block mb-1.5">User ID</label>
+                      <input
+                        type="text"
+                        value={custUserId}
+                        onChange={(e) => setCustUserId(e.target.value)}
+                        placeholder="123456789"
+                        className="w-full bg-background border border-white/10 rounded-xl px-3 py-2.5 text-text text-sm focus:border-accent outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-text-muted text-xs block mb-1.5">Server ID</label>
+                      <input
+                        type="text"
+                        value={custServerId}
+                        onChange={(e) => setCustServerId(e.target.value)}
+                        placeholder="1234"
+                        className="w-full bg-background border border-white/10 rounded-xl px-3 py-2.5 text-text text-sm focus:border-accent outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Login fields (only for paket & perstar) */}
+                  {mode !== "gendong" && mode !== "classic" && (
+                    <>
+                      <div>
+                        <label className="text-text-muted text-xs block mb-1.5 flex items-center gap-1.5">
+                          <LogIn className="w-3 h-3" /> Login Method <span className="text-red-400">*</span>
+                        </label>
+                        <select
+                          value={custLoginMethod}
+                          onChange={(e) => setCustLoginMethod(e.target.value)}
+                          className="w-full bg-background border border-white/10 rounded-xl px-3 py-2.5 text-text text-sm focus:border-accent outline-none appearance-none"
+                        >
+                          <option value="moonton">Moonton</option>
+                          <option value="google">Google</option>
+                          <option value="facebook">Facebook</option>
+                          <option value="vk">VK</option>
+                          <option value="tiktok">Tiktok</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-text-muted text-xs block mb-1.5 flex items-center gap-1.5">
+                          <LogIn className="w-3 h-3" /> Email/Nomor Login <span className="text-red-400">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={custLogin}
+                          onChange={(e) => setCustLogin(e.target.value)}
+                          placeholder="email@contoh.com / 628xxx"
+                          className="w-full bg-background border border-white/10 rounded-xl px-3 py-2.5 text-text text-sm focus:border-accent outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-text-muted text-xs block mb-1.5">Password</label>
+                        <input
+                          type="text"
+                          value={custPassword}
+                          onChange={(e) => setCustPassword(e.target.value)}
+                          placeholder="Password akun"
+                          className="w-full bg-background border border-white/10 rounded-xl px-3 py-2.5 text-text text-sm focus:border-accent outline-none"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {/* WhatsApp */}
+                  <div>
+                    <label className="text-text-muted text-xs block mb-1.5 flex items-center gap-1.5">
+                      <Phone className="w-3 h-3" /> No. WhatsApp <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      value={custWhatsapp}
+                      onChange={(e) => setCustWhatsapp(e.target.value)}
+                      placeholder="628123456789"
+                      className="w-full bg-background border border-white/10 rounded-xl px-3 py-2.5 text-text text-sm focus:border-accent outline-none"
+                    />
+                  </div>
+
+                  {/* Hero Request */}
+                  <div>
+                    <label className="text-text-muted text-xs block mb-1.5">Hero Request (opsional)</label>
+                    <input
+                      type="text"
+                      value={custHero}
+                      onChange={(e) => setCustHero(e.target.value)}
+                      placeholder="Contoh: Lancelot, Hayabusa, Kagura"
+                      className="w-full bg-background border border-white/10 rounded-xl px-3 py-2.5 text-text text-sm focus:border-accent outline-none"
+                    />
+                  </div>
+
+                  {/* Notes */}
+                  <div>
+                    <label className="text-text-muted text-xs block mb-1.5">Catatan (opsional)</label>
+                    <textarea
+                      value={custNotes}
+                      onChange={(e) => setCustNotes(e.target.value)}
+                      placeholder="Catatan tambahan..."
+                      rows={2}
+                      className="w-full bg-background border border-white/10 rounded-xl px-3 py-2.5 text-text text-sm focus:border-accent outline-none resize-none"
+                    />
+                  </div>
+
+                  {/* Submit */}
+                  <button
+                    onClick={handleSubmitOrder}
+                    disabled={isSubmitting}
+                    className="w-full py-3.5 gradient-primary rounded-xl text-white font-bold text-sm flex items-center justify-center gap-2 transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting ? (
+                      <><Loader2 className="w-4 h-4 animate-spin" /> Membuat Order...</>
+                    ) : (
+                      <><CreditCard className="w-4 h-4" /> Submit Order ke DompetX</>
+                    )}
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
