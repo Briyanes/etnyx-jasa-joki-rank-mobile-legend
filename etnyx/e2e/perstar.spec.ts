@@ -157,4 +157,25 @@ test.describe("Order Page — Per Star Mode", () => {
     const priceNum = await getEstimatePrice(page);
     expect(priceNum).toBeGreaterThanOrEqual(1900000);
   });
+
+  test("REGRESSION: Mythic same-tier (1★ → 2★) uses Mythic price (≥Rp 19.000)", async ({ page }) => {
+    // This test catches the "Rp 5.000 fallback" bug where a DB data mismatch
+    // causes the price lookup to fail and silently fall back to Rp 5.000
+    // (grandmaster price) instead of the correct Rp 19.000 (Mythic Romawi).
+    await setSelectValue(page, "perstar-current-rank", "mythic");
+
+    // Target dropdown should become enabled
+    await expect(page.locator("[data-testid='perstar-target-rank']")).toBeEnabled({ timeout: 5000 });
+
+    // Select target = Mythic (same tier, different star count)
+    await setSelectValue(page, "perstar-target-rank", "mythic");
+
+    await expect(page.locator("text=Estimasi Harga Per Bintang")).toBeVisible({ timeout: 5000 });
+
+    // Mythic 1★ → 2★ = 1 star × Rp 19.000 = Rp 19.000
+    // If fallback bug exists, price would be 1 × Rp 5.000 = Rp 5.000
+    const priceNum = await getEstimatePrice(page);
+    // Must be at least Rp 19.000 (not Rp 5.000 fallback)
+    expect(priceNum).toBeGreaterThanOrEqual(19000);
+  });
 });

@@ -333,6 +333,28 @@ const PER_STAR_RANKS: PerStarRank[] = [
   { id: "immortal", name: "Mythical Immortal", price: 30000, icon: "/icons-tier/Mythical_Immortal.webp", maxStars: 100 },
 ];
 
+/**
+ * Safe price lookup: NEVER falls back to Rp 5.000 blindly.
+ * Priority: DB/CMS data → PER_STAR_RANKS hardcoded default → grandmaster (Rp 6.000).
+ *
+ * This prevents the critical bug where a DB data mismatch (e.g. missing
+ * "mythicromawi" entry) caused Mythic tier to silently use Rp 5.000/star
+ * instead of the correct Rp 19.000/star.
+ */
+function getSafePriceForKey(key: string, perStarPrices: PerStarRank[]): number {
+  // 1. Try DB/CMS data (runtime override)
+  const entry = perStarPrices.find((r) => r.id === key);
+  if (entry?.price && entry.price > 0) return entry.price;
+
+  // 2. Fallback to hardcoded PER_STAR_RANKS default
+  const defaultEntry = PER_STAR_RANKS.find((r) => r.id === key);
+  if (defaultEntry?.price && defaultEntry.price > 0) return defaultEntry.price;
+
+  // 3. Last resort: grandmaster price (NOT 5000 blindly)
+  const gm = perStarPrices.find((r) => r.id === "grandmaster");
+  return gm?.price || 6000;
+}
+
 // Gendong (duo boost) per-star pricing
 const GENDONG_RANKS: PerStarRank[] = [
   { id: "grandmaster", name: "Grand Master", price: 9000, originalPrice: 11000, discountPercent: 18, icon: "/icons-tier/Grandmaster.webp", maxStars: 25 },
@@ -586,8 +608,7 @@ function autoCalcPackagePrice(
   // Segment 1: current rank remaining stars
   {
     const key = rankToPriceKey[currentRank] || "grandmaster";
-    const priceEntry = perStarPrices.find(r => r.id === key);
-    const pricePerStar = priceEntry?.price || 5000;
+    const pricePerStar = getSafePriceForKey(key, perStarPrices);
     let starsInThisRank: number;
     if (RANKS_WITH_STARS.includes(currentRank)) {
       const cfg = RANK_DIVISION_CONFIG[currentRank];
@@ -610,10 +631,7 @@ function autoCalcPackagePrice(
   for (let i = ci + 1; i < ti; i++) {
     const rank = RANK_ORDER[i];
     const key = rankToPriceKey[rank] || "grandmaster";
-    const priceEntry = perStarPrices.find(r => r.id === key);
-
-
-    const pricePerStar = priceEntry?.price || 5000;
+    const pricePerStar = getSafePriceForKey(key, perStarPrices);
     let starsInThisRank: number;
     if (RANKS_WITH_STARS.includes(rank)) {
       const cfg = RANK_DIVISION_CONFIG[rank];
@@ -629,8 +647,7 @@ function autoCalcPackagePrice(
   // Segment last: target rank stars needed
   if (ci < ti) {
     const key = rankToPriceKey[targetRank] || "grandmaster";
-    const priceEntry = perStarPrices.find(r => r.id === key);
-    const pricePerStar = priceEntry?.price || 5000;
+    const pricePerStar = getSafePriceForKey(key, perStarPrices);
     let starsInThisRank: number;
     if (RANKS_WITH_STARS.includes(targetRank)) {
       const cfg = RANK_DIVISION_CONFIG[targetRank];
@@ -709,10 +726,7 @@ function calculateStarBreakdown(
   const ti = RANK_ORDER.indexOf(targetRank);
   if (ci < 0 || ti < 0) return segments;
 
-  const getPrice = (key: string) => {
-    const entry = perStarPrices.find(r => r.id === key);
-    return entry?.price || 5000;
-  };
+  const getPrice = (key: string) => getSafePriceForKey(key, perStarPrices);
 
   // Segment 1: current rank remaining stars
   {
@@ -1300,11 +1314,24 @@ function OrderPageContent() {
           const idAliases: Record<string, string> = {
             mythicroomawi: "mythicromawi", // double 'o' typo → correct ID
           };
-          setPerStarRanks(data.perstar_pricing.map((r: PerStarRank) => ({
+          const normalized = data.perstar_pricing.map((r: PerStarRank) => ({
             ...r,
             id: idAliases[r.id] || r.id,
             maxStars: r.maxStars || defaultMaxStars[r.id] || defaultMaxStars[idAliases[r.id]] || 100,
-          })));
+          }));
+          // MERGE: Ensure every default tier exists. If DB is missing a tier
+          // (e.g. "mythicromawi"), use the hardcoded default so price lookups
+          // never silently fall back to Rp 5.000.
+          const dbMap: Record<string, PerStarRank> = {};
+          for (const r of normalized) dbMap[r.id] = r;
+          const merged = PER_STAR_RANKS.map((defaultRank) => {
+            const dbRank = dbMap[defaultRank.id];
+            if (dbRank) {
+              return { ...defaultRank, ...dbRank };
+            }
+            return defaultRank;
+          });
+          setPerStarRanks(merged);
         }
         if (data.gendong_pricing && Array.isArray(data.gendong_pricing) && data.gendong_pricing.length > 0) {
           const defaultMaxStars: Record<string, number> = {};
