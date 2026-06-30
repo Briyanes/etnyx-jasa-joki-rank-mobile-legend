@@ -2176,8 +2176,9 @@ function OrderPageContent() {
                           {pkg.originalPrice && <p className="text-red-400/70 text-xs line-through">{formatRupiah(pkg.originalPrice)}</p>}
                         </div>
                       </div>
-                      {/* Tier badge row: Rush = icon left + text right; others = text left + icon right */}
-                      {(pkg.discountPercent != null && pkg.discountPercent > 0 || pkg.currentRank === "classic") && (
+                      {/* Tier badge row: always show — all packages have rank icons.
+                          Rush = icon left + text right; others = text left + icon right */}
+                      {(
                         <div className="px-4 py-2 bg-slate-800/60 flex items-center justify-between">
                           {(() => {
                             const isClassic = pkg.currentRank === "classic";
