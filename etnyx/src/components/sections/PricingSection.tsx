@@ -51,7 +51,7 @@ const defaultHighlights = [
       "Paket GM → Epic sampai Glory → Immortal",
       "Harga bundling lebih hemat",
       "Request 3 hero favoritmu",
-      "Dedicated booster",
+      "Booster berpengalaman",
       "Priority support",
     ],
     highlighted: true,
@@ -69,7 +69,7 @@ const defaultHighlights = [
       "Rush 5 & 9 star diskon s/d 19%",
       "Epic, Legend, Mythic, Honor, Glory",
       "Bonus star untuk paket 9",
-      "Pengiriman INSTAN",
+      "Mulai cepat dalam 5 menit",
     ],
     highlighted: false,
     cta: "/order?mode=paket",
@@ -289,7 +289,7 @@ export default function PricingSection() {
           </span>
           <span className="flex items-center gap-1.5">
             <Zap className="w-4 h-4 text-yellow-400" />{" "}
-            {locale === "id" ? "Pengiriman Instan" : "Instant Delivery"}
+            {locale === "id" ? "Mulai Cepat 5 Menit" : "Starts in 5 Minutes"}
           </span>
           <span className="flex items-center gap-1.5">
             <Crown className="w-4 h-4 text-purple-400" />{" "}

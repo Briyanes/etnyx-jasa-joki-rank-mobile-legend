@@ -32,12 +32,15 @@ interface SectionVisibility {
   tracking: boolean;
   faq: boolean;
   cta: boolean;
+  trust: boolean;
+  howItWorks: boolean;
 }
 
 const DEFAULT_VISIBILITY: SectionVisibility = {
   hero: true, pricing: true,
   whyChooseUs: true, teamShowcase: true, testimonials: true,
   portfolio: true, tracking: true, faq: true, cta: true,
+  trust: true, howItWorks: true,
 };
 
 async function getSectionVisibility(): Promise<SectionVisibility> {
@@ -94,14 +97,18 @@ export default async function Home() {
         {vis.hero && <HeroSection />}
 
         {/* Trust badges — quick trust builder right after hero */}
-        <ScrollAnimation animation="fadeUp" delay={80}>
-          <TrustSection />
-        </ScrollAnimation>
+        {vis.trust && (
+          <ScrollAnimation animation="fadeUp" delay={80}>
+            <TrustSection />
+          </ScrollAnimation>
+        )}
 
         {/* How to Order — guide users before they see pricing */}
-        <ScrollAnimation animation="fadeUp" delay={80}>
-          <HowItWorksSection />
-        </ScrollAnimation>
+        {vis.howItWorks && (
+          <ScrollAnimation animation="fadeUp" delay={80}>
+            <HowItWorksSection />
+          </ScrollAnimation>
+        )}
 
         {vis.pricing && (
           <ScrollAnimation animation="fadeUp" delay={100}>

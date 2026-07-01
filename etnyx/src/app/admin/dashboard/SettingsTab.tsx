@@ -72,7 +72,7 @@ const DEFAULT_BANK_ACCOUNTS: { bank: string; category: string; account_number: s
 interface HeroSettings { headline: string; subheadline: string; ctaPrimary: string; ctaSecondary: string; isVisible: boolean }
 interface PromoBannerSettings { text: string; link: string; isVisible: boolean }
 interface FAQItem { question: string; answer: string }
-interface SectionVisibility { hero: boolean; pricing: boolean; whyChooseUs: boolean; teamShowcase: boolean; testimonials: boolean; portfolio: boolean; tracking: boolean; faq: boolean; cta: boolean }
+interface SectionVisibility { hero: boolean; pricing: boolean; whyChooseUs: boolean; teamShowcase: boolean; testimonials: boolean; portfolio: boolean; tracking: boolean; faq: boolean; cta: boolean; trust: boolean; howItWorks: boolean }
 interface TrackingPixels { metaPixelId: string; metaAccessToken: string; googleAdsId: string; googleAdsConversionLabel: string; googleAnalyticsId: string; gtmId: string; tiktokPixelId: string; isMetaEnabled: boolean; isGoogleAdsEnabled: boolean; isGoogleAnalyticsEnabled: boolean; isGtmEnabled: boolean; isTiktokEnabled: boolean }
 interface SocialLinks { instagram: string; facebook: string; tiktok: string; youtube: string; whatsapp: string }
 interface SiteInfo { siteName: string; taglineId: string; taglineEn: string; supportEmail: string; companyName: string; address: string; phone: string }
@@ -119,7 +119,7 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
   const [hero, setHero] = useState<HeroSettings>({ headline: "", subheadline: "", ctaPrimary: "", ctaSecondary: "", isVisible: true });
   const [promoBanner, setPromoBanner] = useState<PromoBannerSettings>({ text: "", link: "/order", isVisible: true });
   const [faqItems, setFaqItems] = useState<FAQItem[]>([]);
-  const [sectionVisibility, setSectionVisibility] = useState<SectionVisibility>({ hero: true, pricing: true, whyChooseUs: true, teamShowcase: true, testimonials: true, portfolio: true, tracking: true, faq: true, cta: true });
+  const [sectionVisibility, setSectionVisibility] = useState<SectionVisibility>({ hero: true, pricing: true, whyChooseUs: true, teamShowcase: true, testimonials: true, portfolio: true, tracking: true, faq: true, cta: true, trust: true, howItWorks: true });
   const [trackingPixels, setTrackingPixels] = useState<TrackingPixels>({ metaPixelId: "", metaAccessToken: "", googleAdsId: "", googleAdsConversionLabel: "", googleAnalyticsId: "", gtmId: "", tiktokPixelId: "", isMetaEnabled: false, isGoogleAdsEnabled: false, isGoogleAnalyticsEnabled: false, isGtmEnabled: false, isTiktokEnabled: false });
   const [socialLinks, setSocialLinks] = useState<SocialLinks>({ instagram: "", facebook: "", tiktok: "", youtube: "", whatsapp: "" });
   const [siteInfo, setSiteInfo] = useState<SiteInfo>({ siteName: "", taglineId: "", taglineEn: "", supportEmail: "", companyName: "", address: "", phone: "" });

@@ -12,15 +12,15 @@ const icons: ReactNode[] = [
 ];
 
 const stepsId = [
-  { step: 1, title: "Hitung Harga" },
-  { step: 2, title: "Bayar 50%" },
+  { step: 1, title: "Pilih Paket" },
+  { step: 2, title: "Isi Data & Bayar" },
   { step: 3, title: "Booster Kerja" },
   { step: 4, title: "Selesai!" },
 ];
 
 const stepsEn = [
-  { step: 1, title: "Calculate Price" },
-  { step: 2, title: "Pay 50%" },
+  { step: 1, title: "Choose Package" },
+  { step: 2, title: "Fill Data & Pay" },
   { step: 3, title: "Booster Works" },
   { step: 4, title: "Done!" },
 ];

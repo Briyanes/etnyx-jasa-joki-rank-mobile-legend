@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase-server";
 import { verifyAdmin } from "@/lib/admin-auth";
 import { logAdminAction } from "@/lib/audit-log";
@@ -106,6 +107,19 @@ export async function PUT(request: NextRequest) {
     resource_id: key,
     details: `Updated setting: ${key}`,
   });
+
+  // Revalidate homepage ISR cache so changes appear instantly
+  const REVALIDATE_KEYS = [
+    "section_visibility", "hero", "promo_banner", "faq_items",
+    "social_links", "site_info", "pricing", "pricing_catalog",
+    "express_multiplier", "perstar_pricing", "gendong_pricing",
+    "season_pricing", "gendong_settings", "classic_pricing_catalog",
+  ];
+  if (REVALIDATE_KEYS.includes(key)) {
+    revalidatePath("/", "layout");
+    revalidatePath("/order", "page");
+    revalidatePath("/calculator", "page");
+  }
 
   return NextResponse.json({ success: true, key });
 }
