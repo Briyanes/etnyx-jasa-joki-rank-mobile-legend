@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
   Calculator as CalculatorIcon,
   Copy,
@@ -238,6 +239,7 @@ function calculateStarBreakdown(
 // ===== Main Component =====
 
 export default function CalculatorPage() {
+  const router = useRouter();
   const [mode, setMode] = useState<"paket" | "perstar" | "gendong" | "classic">("paket");
 
   // Catalog state
@@ -1696,10 +1698,27 @@ export default function CalculatorPage() {
                       </>
                     )}
 
-                    {/* Buyer: Direct checkout button */}
+                    {/* Buyer: Redirect to /order with pre-filled params */}
                     {!isAdmin && (
                       <button
-                        onClick={() => setStage("form")}
+                        onClick={() => {
+                          const params = new URLSearchParams();
+                          if (mode === "paket" && selectedPackage) {
+                            params.set("package", selectedPackage.id);
+                          } else if (mode === "perstar") {
+                            params.set("mode", "perstar");
+                            params.set("from", currentRank);
+                            params.set("to", targetRank);
+                          } else if (mode === "gendong") {
+                            params.set("mode", "gendong");
+                          } else if (mode === "classic" && selectedPackage) {
+                            params.set("package", selectedPackage.id);
+                            params.set("mode", "classic");
+                          }
+                          if (isExpress) params.set("express", "1");
+                          if (isPremium) params.set("premium", "1");
+                          router.push(`/order?${params.toString()}`);
+                        }}
                         className="w-full py-4 gradient-primary rounded-xl text-white font-bold text-base flex items-center justify-center gap-2 transition-opacity hover:opacity-90 shadow-lg"
                       >
                         <CreditCard className="w-5 h-5" />
