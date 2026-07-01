@@ -1,7 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
-import { sanitizeInput, isValidRank, isValidPhone } from "@/lib/validation";
+import {
+  sanitizeInput,
+  isValidRank,
+  isValidPhone,
+  sanitizeBonusStars,
+  isValidOrderType,
+  isValidPaymentMethod,
+  isValidLoginMethod,
+} from "@/lib/validation";
 import { encryptField, decryptField } from "@/lib/encryption";
+import { calculateServerPrice, type CMSPricing } from "@/lib/pricing-engine";
 import crypto from "crypto";
 
 // Re-export for backward compatibility
@@ -27,187 +36,6 @@ function checkRateLimit(ip: string): boolean {
   timestamps.push(now);
   orderRateLimit.set(ip, timestamps);
   return true;
-}
-
-// Server-side pricing for per-star and gendong modes (must match frontend).
-// These are FALLBACK values only — CMS pricing takes precedence.
-const SERVER_PER_STAR_PRICES: Record<string, number> = {
-  master: 5000, grandmaster: 6000, epic: 7000, legend: 8000,
-  grading: 230000, mythicromawi: 19000, honor: 24000, glory: 27000, immortal: 30000,
-};
-const SERVER_GENDONG_PRICES: Record<string, number> = {
-  grandmaster: 9000, epic: 10000, legend: 11000, grading: 23000,
-  mythic: 21000, honor: 25000, glory: 30000, immortal: 35000,
-};
-
-// Known package prices (id → price) for paket mode validation
-const SERVER_PACKAGE_PRICES: Record<string, number> = {
-  "rush5-epic": 32000, "rush5-legend": 37000, "rush9-epic": 58000, "rush9-legend": 68000,
-  "rush5-mythic": 95000, "rush5-honor": 105000, "rush5-glory": 130000,
-  "rush9-mythic": 171000, "rush9-honor": 189000, "rush9-glory": 234000,
-  "warrior3-elite3": 25089, "warrior3-master4": 70089, "warrior3-gm5": 149089,
-  "warrior3-epic5": 282089, "warrior3-legend5": 459089,
-  "warrior1-mythic": 645089, "warrior2-mythic": 653089, "warrior3-mythic": 660089,
-  "elite3-master4": 45089, "elite3-gm5": 123089, "elite3-epic5": 259089,
-  "elite3-legend5": 435089, "elite1-mythic": 605089, "elite2-mythic": 620089, "elite3-mythic": 635089,
-  "master4-gm5": 78089, "master4-epic5": 213089, "master4-legend5": 389089,
-  "master1-mythic": 533089, "master2-mythic": 550089, "master3-mythic": 570089, "master4-mythic": 590089,
-  "gm5-epic5": 113089, "gm5-legend5": 259089,
-  "gm1-mythic": 338089, "gm2-mythic": 360089, "gm3-mythic": 383089,
-  "gm4-mythic": 405089, "gm5-mythic": 428089,
-  "gm1-honor": 511089, "gm2-honor": 533089, "gm3-honor": 556089, "gm4-honor": 578089, "gm5-honor": 601089,
-  "gm1-glory": 983089, "gm2-glory": 1006089, "gm3-glory": 1028089, "gm4-glory": 1051089, "gm5-glory": 1073089,
-  "gm1-immortal": 2153089, "gm2-immortal": 2176089, "gm3-immortal": 2198089, "gm4-immortal": 2221089, "gm5-immortal": 2243089,
-  "epic5-legend5": 146089, "epic1-mythic": 198089, "epic2-mythic": 227089,
-  "epic3-mythic": 257089, "epic4-mythic": 286089, "epic5-mythic": 315089,
-  "epic1-honor": 371089, "epic2-honor": 401089, "epic3-honor": 430089, "epic4-honor": 459089, "epic5-honor": 488089,
-  "epic1-glory": 844089, "epic2-glory": 873089, "epic3-glory": 902089, "epic4-glory": 932089, "epic5-glory": 961089,
-  "epic1-immortal": 2014089, "epic2-immortal": 2043089, "epic3-immortal": 2072089, "epic4-immortal": 2102089, "epic5-immortal": 2131089,
-  "legend1-mythic": 34089, "legend2-mythic": 68089, "legend3-mythic": 101089,
-  "legend4-mythic": 135089, "legend5-mythic": 169089,
-  "legend1-honor": 376089, "legend2-honor": 410089, "legend3-honor": 443089, "legend4-honor": 477089, "legend5-honor": 511089,
-  "legend1-glory": 848089, "legend2-glory": 882089, "legend3-glory": 916089, "legend4-glory": 950089, "legend5-glory": 983089,
-  "legend1-immortal": 2018089, "legend2-immortal": 2052089, "legend3-immortal": 2086089, "legend4-immortal": 2120089, "legend5-immortal": 2153089,
-  "mythic-grading": 180089, "mythic-honor": 342089, "mythic-glory": 815089, "mythic-immortal": 1985089,
-  "honor-glory": 473089, "honor-immortal": 1643089,
-  "glory-immortal": 1170089,
-  // Classic 10 WIN packages
-  "epic-10win": 50000, "legend-10win": 50000, "mythic-10win": 55000,
-  "honor-10win": 55000, "glory-10win": 60000, "immortal-10win": 60000,
-};
-
-// Server-side auto-calculation for paket mode (mirrors frontend autoCalcPackagePrice)
-const RANK_ORDER_SERVER = ["warrior","elite","master","grandmaster","epic","legend","mythicgrading","mythic","mythichonor","mythicglory","mythicimmortal"];
-const RANKS_WITH_STARS_SERVER = ["warrior","elite","master","grandmaster","epic","legend"];
-const RANK_DIVISION_CONFIG_SERVER: Record<string, { divisions: number; starsPerDiv: number }> = {
-  warrior: { divisions: 3, starsPerDiv: 3 },
-  elite: { divisions: 3, starsPerDiv: 4 },
-  master: { divisions: 4, starsPerDiv: 4 },
-  grandmaster: { divisions: 5, starsPerDiv: 5 },
-  epic: { divisions: 5, starsPerDiv: 5 },
-  legend: { divisions: 5, starsPerDiv: 5 },
-};
-// Must include nextMin (promotion threshold) — see pricing-utils.ts for rationale.
-// Using max instead of nextMin causes off-by-one bugs in star calculations.
-const MYTHIC_STAR_CONFIG_SERVER: Record<string, { min: number; max: number; nextMin: number }> = {
-  mythicgrading: { min: 0, max: 10, nextMin: 10 },
-  mythic: { min: 0, max: 25, nextMin: 25 },
-  mythichonor: { min: 25, max: 49, nextMin: 50 },
-  mythicglory: { min: 50, max: 99, nextMin: 100 },
-  mythicimmortal: { min: 100, max: 999, nextMin: 1000 },
-};
-const RANK_TO_PRICE_KEY: Record<string, string> = {
-  warrior: "master", elite: "master", master: "master",
-  grandmaster: "grandmaster", epic: "epic", legend: "legend",
-  mythicgrading: "grading", mythic: "mythicromawi", mythichonor: "honor",
-  mythicglory: "glory", mythicimmortal: "immortal",
-};
-
-function calculateAutoPaketPriceServer(
-  body: Record<string, unknown>,
-  cmsPricing?: { perstar?: Record<string, number>; gendong?: Record<string, number>; catalog?: Record<string, number> }
-): number | null {
-  const currentRank = String(body.currentRank || "").toLowerCase();
-  const targetRank = String(body.targetRank || "").toLowerCase();
-  const currentDiv = Number(body.currentStar || 5);
-  const targetDiv = Number(body.targetStar || 5);
-  const currentMythicStars = Number(body.currentMythicStars || 0);
-  const targetMythicStars = Number(body.targetMythicStars || 0);
-
-  const ci = RANK_ORDER_SERVER.indexOf(currentRank);
-  const ti = RANK_ORDER_SERVER.indexOf(targetRank);
-  if (ci < 0 || ti < 0 || ci >= ti) return null;
-
-  const getPricePerStar = (rank: string): number => {
-    const key = RANK_TO_PRICE_KEY[rank] || "grandmaster";
-    return cmsPricing?.perstar?.[key] ?? SERVER_PER_STAR_PRICES[key] ?? 5000;
-  };
-
-  let originalTotal = 0;
-
-  // Segment 1: current rank remaining stars
-  if (RANKS_WITH_STARS_SERVER.includes(currentRank)) {
-    const cfg = RANK_DIVISION_CONFIG_SERVER[currentRank];
-    if (cfg) {
-      // Stars to clear current division + remaining divisions in this rank
-      const starsInThisRank = currentDiv * cfg.starsPerDiv;
-      originalTotal += getPricePerStar(currentRank) * starsInThisRank;
-    }
-  } else {
-    // Mythic tier current: stars from current position to nextMin (promotion threshold)
-    const mCfg = MYTHIC_STAR_CONFIG_SERVER[currentRank];
-    if (mCfg) {
-      originalTotal += getPricePerStar(currentRank) * (mCfg.nextMin - currentMythicStars);
-    }
-  }
-
-  // Segments in between
-  for (let i = ci + 1; i < ti; i++) {
-    const rank = RANK_ORDER_SERVER[i];
-    if (rank === "mythicgrading") continue; // Not a star tier — skip
-    if (RANKS_WITH_STARS_SERVER.includes(rank)) {
-      const cfg = RANK_DIVISION_CONFIG_SERVER[rank];
-      if (cfg) originalTotal += getPricePerStar(rank) * (cfg.divisions * cfg.starsPerDiv);
-    } else {
-      const mCfg = MYTHIC_STAR_CONFIG_SERVER[rank];
-      // Use nextMin - min (NOT max - min) to count promotion stars correctly
-      if (mCfg) originalTotal += getPricePerStar(rank) * (mCfg.nextMin - mCfg.min);
-    }
-  }
-
-  // Segment last: target rank stars needed
-  if (RANKS_WITH_STARS_SERVER.includes(targetRank)) {
-    const cfg = RANK_DIVISION_CONFIG_SERVER[targetRank];
-    if (cfg) {
-      const starsInThisRank = (cfg.divisions - targetDiv) * cfg.starsPerDiv;
-      originalTotal += getPricePerStar(targetRank) * starsInThisRank;
-    }
-  } else {
-    // Mythic tier target: stars from min of tier to target position
-    const mCfg = MYTHIC_STAR_CONFIG_SERVER[targetRank];
-    if (mCfg) originalTotal += getPricePerStar(targetRank) * (targetMythicStars - mCfg.min);
-  }
-
-  // No bundle discount — must match frontend autoCalcPackagePrice exactly
-  return Math.round(originalTotal);
-}
-
-function calculateServerPrice(body: Record<string, unknown>, cmsPricing?: { perstar?: Record<string, number>; gendong?: Record<string, number>; catalog?: Record<string, number> }): number | null {
-  const orderType = String(body.orderType || "");
-  const isGendong = orderType === "gendong";
-
-  // Gendong mode: simple per-star × quantity (single tier)
-  if (isGendong) {
-    const rankId = String(body.perStarRankId || body.currentRank || "").toLowerCase();
-    const starQty = Number(body.starQuantity || 0);
-    const hardcoded = SERVER_GENDONG_PRICES;
-    const cmsMap = cmsPricing?.gendong;
-    const pricePerStar = cmsMap?.[rankId] ?? hardcoded[rankId];
-    if (!pricePerStar || starQty < 1 || starQty > 100) return null;
-    return pricePerStar * starQty;
-  }
-
-  // Per Star mode: multi-tier calculation (same as frontend autoCalcPackagePrice)
-  // Frontend sends currentRank/targetRank + currentStar/targetStar + mythic stars.
-  // The price is NOT a simple rank × qty — it's a weighted sum across all tiers crossed.
-  if (orderType === "perstar") {
-    return calculateAutoPaketPriceServer(body, cmsPricing);
-  }
-
-  if (orderType === "paket") {
-    const packageId = String(body.packageId || "");
-
-    // Auto-calculated packages (new flow): packageId starts with "auto-"
-    if (packageId.startsWith("auto-")) {
-      return calculateAutoPaketPriceServer(body, cmsPricing);
-    }
-
-    // Legacy: static catalog lookup
-    const price = cmsPricing?.catalog?.[packageId] ?? SERVER_PACKAGE_PRICES[packageId];
-    return price ?? null;
-  }
-
-  return null;
 }
 
 export async function POST(request: NextRequest) {
@@ -327,10 +155,34 @@ export async function POST(request: NextRequest) {
     const sanitizedPackageTitle = body.packageTitle
       ? sanitizeInput(body.packageTitle)
       : null;
-    // Append bonus stars info to package title for admin visibility (no DB migration needed)
-    const finalPackageTitle = bonusStars && Number(bonusStars) > 0
-      ? `${sanitizedPackageTitle || ""} (+${Number(bonusStars)} BONUS ★)`.trim()
+    // Sanitize bonusStars — clamp to [0, 10] to prevent manipulation
+    const safeBonusStars = sanitizeBonusStars(bonusStars);
+    const finalPackageTitle = safeBonusStars > 0
+      ? `${sanitizedPackageTitle || ""} (+${safeBonusStars} BONUS ★)`.trim()
       : sanitizedPackageTitle;
+
+    // Validate orderType, paymentMethod, loginMethod against whitelists
+    const orderType = String(body.orderType || "paket");
+    if (!isValidOrderType(orderType)) {
+      return NextResponse.json(
+        { error: "Tipe order tidak valid" },
+        { status: 400 }
+      );
+    }
+    const paymentMethod = String(body.paymentMethod || "dompetx");
+    if (!isValidPaymentMethod(paymentMethod)) {
+      return NextResponse.json(
+        { error: "Metode pembayaran tidak valid" },
+        { status: 400 }
+      );
+    }
+    const loginMethod = String(body.loginMethod || "userid");
+    if (!isGendong && !isValidLoginMethod(loginMethod)) {
+      return NextResponse.json(
+        { error: "Metode login tidak valid" },
+        { status: 400 }
+      );
+    }
 
     // Encrypt sensitive credentials (skip for gendong/mabar - no login needed)
     const encryptedPassword = accountPassword ? encryptField(accountPassword) : null;
@@ -520,7 +372,7 @@ export async function POST(request: NextRequest) {
         account_password: encryptedPassword,
         hero_request: sanitizedHero,
         notes: sanitizedNotes,
-        login_method: isGendong ? null : (body.loginMethod || "userid"),
+        login_method: isGendong ? null : loginMethod,
         customer_email: sanitizedEmail,
         promo_code: verifiedPromoCode,
         promo_discount: verifiedDiscount,
@@ -535,7 +387,7 @@ export async function POST(request: NextRequest) {
         gclid,
         ttclid,
         referrer_url: referrerUrl,
-        payment_method: body.paymentMethod === "manual_transfer" ? "manual_transfer" : "dompetx",
+        payment_method: paymentMethod,
       })
       .select("id, order_id, total_price")
       .single();
@@ -577,7 +429,7 @@ export async function POST(request: NextRequest) {
 
     // Create DompetX payment (only for auto/dompetx payment method)
     let paymentUrl: string | undefined;
-    const isManualTransfer = body.paymentMethod === "manual_transfer";
+    const isManualTransfer = paymentMethod === "manual_transfer";
 
     if (!isManualTransfer) {
       let dompetxApiKey = DOMPETX_API_KEY;

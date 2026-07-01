@@ -1,5 +1,8 @@
 import { RankTier } from "@/types";
 import { WHATSAPP_NUMBER } from "@/lib/constants";
+// Re-export formatRupiah from single source of truth (pricing-utils.ts)
+// This keeps all existing imports working while avoiding implementation drift.
+export { formatRupiah } from "@/lib/pricing-utils";
 
 // Price calculation map (aligned with PACKAGE_CATALOG)
 const priceMap: Record<string, number> = {
@@ -81,15 +84,6 @@ export function calculatePrice(
   if (isPremium) price *= 1.3;
 
   return Math.round(price);
-}
-
-export function formatRupiah(amount: number): string {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
 }
 
 export function isValidRankProgression(

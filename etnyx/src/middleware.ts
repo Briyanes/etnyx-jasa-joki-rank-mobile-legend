@@ -111,7 +111,8 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // Block suspicious patterns
+  // Block suspicious patterns — ONLY check pathname (not query string)
+  // to avoid false positives on legitimate traffic with query params.
   const suspiciousPatterns = [
     /\.\./,  // Path traversal
     /<script/i,  // XSS attempts
@@ -123,12 +124,13 @@ export function middleware(request: NextRequest) {
     /delete\s+from/i,  // SQL injection
     /drop\s+table/i,  // SQL injection
     /%3C.*script/i,  // Encoded XSS
-    /\$\{.*\}/,  // Template injection
   ];
 
-  let url: string;
+  // Only decode and check the pathname (path segments), NOT the full URL with query string.
+  // Query string values may legitimately contain "union", "select", "${...}", etc.
+  let decodedPath: string;
   try {
-    url = decodeURIComponent(request.url);
+    decodedPath = decodeURIComponent(pathname);
   } catch {
     return new NextResponse("Bad Request", {
       status: 400,
@@ -136,8 +138,8 @@ export function middleware(request: NextRequest) {
     });
   }
   for (const pattern of suspiciousPatterns) {
-    if (pattern.test(url)) {
-      console.warn(`Blocked suspicious request: ${url}`);
+    if (pattern.test(decodedPath)) {
+      console.warn(`[SECURITY] Blocked suspicious pathname: ${decodedPath}`);
       return new NextResponse("Bad Request", {
         status: 400,
         headers: { "Content-Type": "text/plain" },
@@ -194,6 +196,27 @@ export function middleware(request: NextRequest) {
 
   // Add security headers to response
   response.headers.set("X-Request-Id", crypto.randomUUID());
+  // Content-Security-Policy: restrict resource loading to trusted sources
+  response.headers.set(
+    "Content-Security-Policy",
+    [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net https://connect.dompetx.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "img-src 'self' data: blob: https: https://*.supabase.co",
+      "font-src 'self' data: https://fonts.gstatic.com",
+      "connect-src 'self' https://*.supabase.co https://api.dompetx.com https://www.google-analytics.com https://connect.facebook.net https://graph.facebook.com",
+      "frame-src 'self' https://checkout.dompetx.com https://www.google.com",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self' https://checkout.dompetx.com",
+      "upgrade-insecure-requests",
+    ].join("; ")
+  );
+  response.headers.set("X-Frame-Options", "SAMEORIGIN");
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), interest-cohort=()");
   
   return response;
 }

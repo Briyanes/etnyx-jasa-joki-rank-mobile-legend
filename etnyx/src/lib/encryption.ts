@@ -36,8 +36,11 @@ export function encryptField(text: string): string {
 export function decryptField(encryptedText: string): string {
   const parts = encryptedText.split(":");
   if (parts.length !== 3 || !parts[0] || !parts[1] || !parts[2]) {
-    console.warn("[SECURITY] decryptField: input not in encrypted format — legacy plaintext or corrupted data");
-    // Return as-is for backward compatibility with legacy unencrypted data
+    // CRITICAL: Non-encrypted data detected. This could be legacy plaintext
+    // OR a security breach where attacker injected raw data. Log loudly.
+    console.error("[SECURITY] decryptField: non-encrypted input detected — possible legacy data or injection. Length:", encryptedText.length);
+    // Return as-is for backward compat (legacy data exists in production)
+    // TODO: After full data migration, replace return with: throw new Error("UNENCRYPTED_DATA_DETECTED")
     return encryptedText;
   }
   const [ivHex, authTagHex, encrypted] = parts;

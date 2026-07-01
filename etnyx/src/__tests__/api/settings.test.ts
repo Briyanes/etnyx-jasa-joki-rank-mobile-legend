@@ -2,7 +2,9 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
 vi.mock("@/lib/supabase-server", () => ({
+  createServiceClient: vi.fn(),
   createServerSupabase: vi.fn(),
+  createAdminClient: vi.fn(),
 }));
 
 describe("GET /api/settings", () => {
@@ -18,8 +20,8 @@ describe("GET /api/settings", () => {
     const mockIn = vi.fn().mockResolvedValue({ data: mockData, error: null });
     const mockSelect = vi.fn().mockReturnValue({ in: mockIn });
     const mockFrom = vi.fn().mockReturnValue({ select: mockSelect });
-    const { createServerSupabase } = await import("@/lib/supabase-server");
-    vi.mocked(createServerSupabase).mockResolvedValue({ from: mockFrom } as never);
+    const { createServiceClient } = await import("@/lib/supabase-server");
+    vi.mocked(createServiceClient).mockReturnValue({ from: mockFrom } as never);
 
     const { GET } = await import("@/app/api/settings/route");
     const req = new NextRequest("http://localhost/api/settings?keys=hero,social_links");
@@ -34,8 +36,8 @@ describe("GET /api/settings", () => {
     const mockIn = vi.fn().mockResolvedValue({ data: [], error: null });
     const mockSelect = vi.fn().mockReturnValue({ in: mockIn });
     const mockFrom = vi.fn().mockReturnValue({ select: mockSelect });
-    const { createServerSupabase } = await import("@/lib/supabase-server");
-    vi.mocked(createServerSupabase).mockResolvedValue({ from: mockFrom } as never);
+    const { createServiceClient } = await import("@/lib/supabase-server");
+    vi.mocked(createServiceClient).mockReturnValue({ from: mockFrom } as never);
 
     const { GET } = await import("@/app/api/settings/route");
     const req = new NextRequest("http://localhost/api/settings?keys=hero,secret_key,integrations");
@@ -47,8 +49,8 @@ describe("GET /api/settings", () => {
     const mockIn = vi.fn().mockResolvedValue({ data: [], error: null });
     const mockSelect = vi.fn().mockReturnValue({ in: mockIn });
     const mockFrom = vi.fn().mockReturnValue({ select: mockSelect });
-    const { createServerSupabase } = await import("@/lib/supabase-server");
-    vi.mocked(createServerSupabase).mockResolvedValue({ from: mockFrom } as never);
+    const { createServiceClient } = await import("@/lib/supabase-server");
+    vi.mocked(createServiceClient).mockReturnValue({ from: mockFrom } as never);
 
     const { GET } = await import("@/app/api/settings/route");
     const req = new NextRequest("http://localhost/api/settings?keys=hero");

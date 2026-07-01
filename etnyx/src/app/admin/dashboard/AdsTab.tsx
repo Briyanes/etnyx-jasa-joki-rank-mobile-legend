@@ -8,7 +8,7 @@ import {
   Calendar, ChevronDown, Lightbulb, Upload, RefreshCw, X, CheckCircle, AlertCircle,
 } from "lucide-react";
 import { formatRupiah } from "@/utils/helpers";
-import { FaFacebook, FaGoogle, FaTiktok } from "react-icons/fa";
+import { FacebookIcon, GoogleIcon, TiktokIcon } from "@/components/BrandIcons";
 
 interface SourceStats {
   orders: number;
@@ -61,10 +61,10 @@ function parseIdrInput(raw: string): number | null {
   return Number.isFinite(n) && n >= 0 ? n : null;
 }
 
-const PLATFORM_CONFIG: Record<string, { label: string; color: string; icon: typeof FaFacebook }> = {
-  meta: { label: "Meta Ads", color: "text-blue-400", icon: FaFacebook },
-  google: { label: "Google Ads", color: "text-yellow-400", icon: FaGoogle },
-  tiktok: { label: "TikTok Ads", color: "text-pink-400", icon: FaTiktok },
+const PLATFORM_CONFIG: Record<string, { label: string; color: string; icon: React.ComponentType<React.SVGProps<SVGSVGElement>> }> = {
+  meta: { label: "Meta Ads", color: "text-blue-400", icon: FacebookIcon },
+  google: { label: "Google Ads", color: "text-yellow-400", icon: GoogleIcon },
+  tiktok: { label: "TikTok Ads", color: "text-pink-400", icon: TiktokIcon },
   direct: { label: "Direct", color: "text-gray-400", icon: Target },
   other: { label: "Lainnya", color: "text-purple-400", icon: BarChart3 },
 };

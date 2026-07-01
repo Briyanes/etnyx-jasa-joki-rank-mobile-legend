@@ -8,7 +8,7 @@ import { useSearchParams } from "next/navigation";
 import { RankTier } from "@/types";
 import {
   formatRupiah,
-} from "@/utils/helpers";
+} from "@/lib/pricing-utils";
 import Footer from "@/components/layout/Footer";
 import TermsPopup from "@/components/TermsPopup";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -45,8 +45,7 @@ import {
   TreePine,
   Coins,
 } from "lucide-react";
-import { FaFacebook, FaGoogle, FaTiktok, FaVk, FaApple, FaGamepad } from "react-icons/fa";
-import type { IconType } from "react-icons";
+import { MoontonIcon, FacebookIcon, GoogleIcon, TiktokIcon, VkIcon, AppleIcon } from "@/components/BrandIcons";
 import { captureUtmParams, getStoredUtmParams, trackAddToCart, trackInitiateCheckout, trackViewContent } from "@/lib/tracking";
 
 type LoginMethod = "moonton" | "facebook" | "google" | "tiktok" | "vk" | "apple";
@@ -72,14 +71,14 @@ interface OrderForm {
   playSchedule: string;
 }
 
-// Login method options with brand icons
-const LOGIN_METHODS: { id: LoginMethod; name: string; Icon: IconType; color: string }[] = [
-  { id: "moonton", name: "Moonton", Icon: FaGamepad, color: "#FF6B35" },
-  { id: "facebook", name: "Facebook", Icon: FaFacebook, color: "#1877F2" },
-  { id: "google", name: "Google", Icon: FaGoogle, color: "#EA4335" },
-  { id: "tiktok", name: "TikTok", Icon: FaTiktok, color: "#000000" },
-  { id: "vk", name: "VK", Icon: FaVk, color: "#4A76A8" },
-  { id: "apple", name: "Apple ID", Icon: FaApple, color: "#A2AAAD" },
+// Login method options with brand icons (inline SVG — no react-icons dependency)
+const LOGIN_METHODS: { id: LoginMethod; name: string; Icon: React.ComponentType<React.SVGProps<SVGSVGElement>>; color: string }[] = [
+  { id: "moonton", name: "Moonton", Icon: MoontonIcon, color: "#FF6B35" },
+  { id: "facebook", name: "Facebook", Icon: FacebookIcon, color: "#1877F2" },
+  { id: "google", name: "Google", Icon: GoogleIcon, color: "#EA4335" },
+  { id: "tiktok", name: "TikTok", Icon: TiktokIcon, color: "#000000" },
+  { id: "vk", name: "VK", Icon: VkIcon, color: "#4A76A8" },
+  { id: "apple", name: "Apple ID", Icon: AppleIcon, color: "#A2AAAD" },
 ];
 
 // ML Roles for Gendong mode (client picks their preferred role)

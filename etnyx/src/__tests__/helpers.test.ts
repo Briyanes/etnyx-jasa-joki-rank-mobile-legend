@@ -64,10 +64,10 @@ describe("calculatePrice", () => {
     expect(price).toBe(175089);
   });
 
-  it("returns fallback for unknown pair", () => {
-    // mythicgrading to mythicimmortal isn't in the map
+  it("returns 0 for unknown pair (no fallback)", () => {
+    // mythicgrading to mythicimmortal isn't in the priceMap
     const price = calculatePrice("mythicgrading", "mythicimmortal");
-    expect(price).toBe(150000); // fallback
+    expect(price).toBe(0); // no fallback — returns 0 for unknown
   });
 });
 
