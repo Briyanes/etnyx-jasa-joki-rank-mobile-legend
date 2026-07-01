@@ -53,7 +53,7 @@ export function buildWhatsAppMessage(params: {
   targetRankLabel: string;
   totalStars: number;
   price: number;
-  orderType: "paket" | "perstar" | "gendong";
+  orderType: "paket" | "perstar" | "gendong" | "classic";
   express?: boolean;
   premium?: boolean;
 }): string {
