@@ -602,6 +602,11 @@ export function calculateAutoPaketPrice(
   const targetDiv = Number(body.targetStar || 5);
   const currentMythicStars = Number(body.currentMythicStars || 0);
   const targetMythicStars = Number(body.targetMythicStars || 0);
+  // ★ FIX: Account for stars already earned within current/target division
+  // Without this, server overcharges vs frontend (e.g. Epic III with 2★:
+  // frontend=13★, backend=15★ — 2★ overcharge)
+  const currentDivisionStar = Number(body.currentDivisionStar || 0);
+  const targetDivisionStar = Number(body.targetDivisionStar || 0);
 
   const ci = RANK_ORDER.indexOf(currentRank);
   const ti = RANK_ORDER.indexOf(targetRank);
@@ -618,7 +623,9 @@ export function calculateAutoPaketPrice(
   if (RANKS_WITH_STARS.includes(currentRank)) {
     const cfg = RANK_DIVISION_CONFIG[currentRank];
     if (cfg) {
-      const starsInThisRank = currentDiv * cfg.starsPerDiv;
+      // ★ FIX: Subtract stars already earned in current division
+      // Matches frontend formula: currentDiv * starsPerDiv - currentDivisionStar
+      const starsInThisRank = currentDiv * cfg.starsPerDiv - currentDivisionStar;
       originalTotal += getPricePerStar(currentRank) * starsInThisRank;
     }
   } else {
@@ -645,7 +652,9 @@ export function calculateAutoPaketPrice(
   if (RANKS_WITH_STARS.includes(targetRank)) {
     const cfg = RANK_DIVISION_CONFIG[targetRank];
     if (cfg) {
-      const starsInThisRank = (cfg.divisions - targetDiv) * cfg.starsPerDiv;
+      // ★ FIX: Add stars already earned in target division
+      // Matches frontend: (divisions - targetDiv) * starsPerDiv + targetDivisionStar
+      const starsInThisRank = (cfg.divisions - targetDiv) * cfg.starsPerDiv + targetDivisionStar;
       originalTotal += getPricePerStar(targetRank) * starsInThisRank;
     }
   } else {

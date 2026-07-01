@@ -33,6 +33,7 @@ import {
   LogIn,
   Phone,
   AlertTriangle,
+  Search,
 } from "lucide-react";
 import {
   RANK_LIST,
@@ -284,8 +285,11 @@ export default function CalculatorPage() {
   const [custLogin, setCustLogin] = useState("");
   const [custPassword, setCustPassword] = useState("");
   const [custWhatsapp, setCustWhatsapp] = useState("");
+  const [custEmail, setCustEmail] = useState("");
   const [custHero, setCustHero] = useState("");
   const [custNotes, setCustNotes] = useState("");
+  const [accountVerified, setAccountVerified] = useState(false);
+  const [verifyingAccount, setVerifyingAccount] = useState(false);
 
   const [copied, setCopied] = useState(false);
 
@@ -691,6 +695,7 @@ export default function CalculatorPage() {
         accountLogin: custLogin,
         accountPassword: custPassword || "-",
         whatsapp: custWhatsapp,
+        email: custEmail || undefined,
         heroRequest: custHero || "-",
         notes: custNotes || "-",
         loginMethod: custLoginMethod,
@@ -1897,7 +1902,8 @@ export default function CalculatorPage() {
                       // Reset form
                       setCustNickname(""); setCustUserId(""); setCustServerId("");
                       setCustLogin(""); setCustPassword(""); setCustWhatsapp("");
-                      setCustHero(""); setCustNotes("");
+                      setCustEmail(""); setCustHero(""); setCustNotes("");
+                      setAccountVerified(false);
                     }}
                     className="w-full py-2 text-text-muted hover:text-text text-sm transition-colors"
                   >
@@ -1905,126 +1911,200 @@ export default function CalculatorPage() {
                   </button>
                 </div>
               ) : (
-                /* Form Fields */
+                /* Form Fields — matches /order page layout */
                 <>
-                  {/* Nickname */}
+                  {/* Section: Data Akun Game */}
+                  {mode !== "gendong" && mode !== "classic" && (
+                    <div className="space-y-3">
+                      <p className="text-text font-bold text-xs uppercase tracking-wider flex items-center gap-1.5">
+                        <LogIn className="w-3.5 h-3.5 text-accent" /> Metode Login
+                      </p>
+                      <div className="grid grid-cols-3 gap-2">
+                        {[
+                          { id: "moonton", label: "Moonton" },
+                          { id: "facebook", label: "Facebook" },
+                          { id: "google", label: "Google" },
+                          { id: "tiktok", label: "TikTok" },
+                          { id: "vk", label: "VK" },
+                          { id: "apple", label: "Apple ID" },
+                        ].map((m) => (
+                          <button
+                            key={m.id}
+                            type="button"
+                            onClick={() => setCustLoginMethod(m.id)}
+                            className={`py-2.5 px-2 rounded-lg text-xs font-semibold border-2 transition-all ${
+                              custLoginMethod === m.id
+                                ? "border-accent bg-accent/10 text-accent"
+                                : "border-white/10 bg-background text-text-muted hover:border-white/20"
+                            }`}
+                          >
+                            {m.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* User ID + Server ID + Cek Akun */}
                   <div>
-                    <label className="text-text-muted text-xs block mb-1.5 flex items-center gap-1.5">
-                      <User className="w-3 h-3" /> Nickname <span className="text-red-400">*</span>
+                    <label className="text-text-muted text-xs block mb-1.5">MASUKKAN ID DAN SERVER</label>
+                    <div className="grid grid-cols-[1fr_auto_1fr_auto] gap-2 items-end">
+                      <div>
+                        <input
+                          type="text"
+                          value={custUserId}
+                          onChange={(e) => { setCustUserId(e.target.value); setAccountVerified(false); }}
+                          placeholder="Contoh: 123456789"
+                          className="w-full bg-background border border-white/10 rounded-xl px-3 py-2.5 text-text text-sm focus:border-accent outline-none"
+                        />
+                      </div>
+                      <div className="w-px h-8 bg-white/10" />
+                      <div>
+                        <input
+                          type="text"
+                          value={custServerId}
+                          onChange={(e) => { setCustServerId(e.target.value); setAccountVerified(false); }}
+                          placeholder="Contoh: 1234"
+                          className="w-full bg-background border border-white/10 rounded-xl px-3 py-2.5 text-text text-sm focus:border-accent outline-none"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (!custUserId.trim() || !custServerId.trim()) return;
+                          setVerifyingAccount(true);
+                          try {
+                            const res = await fetch(`/api/check-account?user_id=${custUserId}&server_id=${custServerId}`);
+                            const data = await res.json();
+                            if (data.nickname) {
+                              setAccountVerified(true);
+                              if (!custNickname) setCustNickname(data.nickname);
+                            }
+                          } catch { /* ignore */ }
+                          setVerifyingAccount(false);
+                        }}
+                        disabled={verifyingAccount || !custUserId || !custServerId}
+                        className="whitespace-nowrap px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-40 rounded-xl text-white text-xs font-bold flex items-center gap-1.5"
+                      >
+                        {verifyingAccount ? <Loader2 className="w-3 h-3 animate-spin" /> : <Search className="w-3 h-3" />}
+                        Cek Akun
+                      </button>
+                    </div>
+                    {accountVerified && (
+                      <p className="text-green-400 text-[10px] mt-1 flex items-center gap-1">
+                        <Check className="w-3 h-3" /> Akun terverifikasi!
+                      </p>
+                    )}
+                    {!accountVerified && (custUserId || custServerId) && (
+                      <p className="text-text-muted text-[10px] mt-1">
+                        Masukkan User ID & Server ID, lalu klik Cek Akun untuk verifikasi
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Nickname / IGN */}
+                  <div>
+                    <label className="text-text-muted text-xs block mb-1.5">
+                      Nickname / IGN <span className="text-red-400">*</span>
                     </label>
                     <input
                       type="text"
                       value={custNickname}
                       onChange={(e) => setCustNickname(e.target.value)}
-                      placeholder="In-game nickname"
+                      placeholder="Nickname dalam game"
                       className="w-full bg-background border border-white/10 rounded-xl px-3 py-2.5 text-text text-sm focus:border-accent outline-none"
                     />
                   </div>
 
-                  {/* User ID + Server ID */}
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="text-text-muted text-xs block mb-1.5">User ID</label>
-                      <input
-                        type="text"
-                        value={custUserId}
-                        onChange={(e) => setCustUserId(e.target.value)}
-                        placeholder="123456789"
-                        className="w-full bg-background border border-white/10 rounded-xl px-3 py-2.5 text-text text-sm focus:border-accent outline-none"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-text-muted text-xs block mb-1.5">Server ID</label>
-                      <input
-                        type="text"
-                        value={custServerId}
-                        onChange={(e) => setCustServerId(e.target.value)}
-                        placeholder="1234"
-                        className="w-full bg-background border border-white/10 rounded-xl px-3 py-2.5 text-text text-sm focus:border-accent outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Login fields (only for paket & perstar) */}
+                  {/* Login credentials (only for paket & perstar) */}
                   {mode !== "gendong" && mode !== "classic" && (
                     <>
                       <div>
-                        <label className="text-text-muted text-xs block mb-1.5 flex items-center gap-1.5">
-                          <LogIn className="w-3 h-3" /> Login Method <span className="text-red-400">*</span>
-                        </label>
-                        <select
-                          value={custLoginMethod}
-                          onChange={(e) => setCustLoginMethod(e.target.value)}
-                          className="w-full bg-background border border-white/10 rounded-xl px-3 py-2.5 text-text text-sm focus:border-accent outline-none appearance-none"
-                        >
-                          <option value="moonton">Moonton</option>
-                          <option value="google">Google</option>
-                          <option value="facebook">Facebook</option>
-                          <option value="vk">VK</option>
-                          <option value="tiktok">Tiktok</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="text-text-muted text-xs block mb-1.5 flex items-center gap-1.5">
-                          <LogIn className="w-3 h-3" /> Email/Nomor Login <span className="text-red-400">*</span>
+                        <label className="text-text-muted text-xs block mb-1.5">
+                          Email / No. HP <span className="text-red-400">*</span>
                         </label>
                         <input
                           type="text"
                           value={custLogin}
                           onChange={(e) => setCustLogin(e.target.value)}
-                          placeholder="email@contoh.com / 628xxx"
+                          placeholder="Email atau No HP terdaftar"
                           className="w-full bg-background border border-white/10 rounded-xl px-3 py-2.5 text-text text-sm focus:border-accent outline-none"
                         />
                       </div>
                       <div>
-                        <label className="text-text-muted text-xs block mb-1.5">Password</label>
+                        <label className="text-text-muted text-xs block mb-1.5">
+                          Password <span className="text-red-400">*</span>
+                        </label>
                         <input
                           type="text"
                           value={custPassword}
                           onChange={(e) => setCustPassword(e.target.value)}
-                          placeholder="Password akun"
+                          placeholder="Password akun ML"
                           className="w-full bg-background border border-white/10 rounded-xl px-3 py-2.5 text-text text-sm focus:border-accent outline-none"
                         />
                       </div>
                     </>
                   )}
 
-                  {/* WhatsApp */}
-                  <div>
-                    <label className="text-text-muted text-xs block mb-1.5 flex items-center gap-1.5">
-                      <Phone className="w-3 h-3" /> No. WhatsApp <span className="text-red-400">*</span>
-                    </label>
-                    <input
-                      type="tel"
-                      value={custWhatsapp}
-                      onChange={(e) => setCustWhatsapp(e.target.value)}
-                      placeholder="628123456789"
-                      className="w-full bg-background border border-white/10 rounded-xl px-3 py-2.5 text-text text-sm focus:border-accent outline-none"
-                    />
-                  </div>
-
                   {/* Hero Request */}
                   <div>
-                    <label className="text-text-muted text-xs block mb-1.5">Hero Request (opsional)</label>
+                    <label className="text-text-muted text-xs block mb-1.5">Request Hero (Min. 3 Hero)</label>
                     <input
                       type="text"
                       value={custHero}
                       onChange={(e) => setCustHero(e.target.value)}
-                      placeholder="Contoh: Lancelot, Hayabusa, Kagura"
+                      placeholder="Contoh: Lancelot, Fanny, Ling"
                       className="w-full bg-background border border-white/10 rounded-xl px-3 py-2.5 text-text text-sm focus:border-accent outline-none"
                     />
                   </div>
 
                   {/* Notes */}
                   <div>
-                    <label className="text-text-muted text-xs block mb-1.5">Catatan (opsional)</label>
+                    <label className="text-text-muted text-xs block mb-1.5">Catatan Untuk Penjoki</label>
                     <textarea
                       value={custNotes}
                       onChange={(e) => setCustNotes(e.target.value)}
-                      placeholder="Catatan tambahan..."
+                      placeholder="Catatan khusus (opsional)"
                       rows={2}
                       className="w-full bg-background border border-white/10 rounded-xl px-3 py-2.5 text-text text-sm focus:border-accent outline-none resize-none"
                     />
+                  </div>
+
+                  {/* Section: Kontak & Pembayaran */}
+                  <div className="pt-2 border-t border-white/5 space-y-3">
+                    <p className="text-text font-bold text-xs uppercase tracking-wider">Kontak & Pembayaran</p>
+
+                    {/* WhatsApp */}
+                    <div>
+                      <label className="text-text-muted text-xs block mb-1.5">
+                        Nomor WhatsApp <span className="text-red-400">*</span>
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <span className="px-3 py-2.5 bg-background border border-white/10 rounded-xl text-text-muted text-sm font-medium">
+                          +62
+                        </span>
+                        <input
+                          type="tel"
+                          value={custWhatsapp}
+                          onChange={(e) => setCustWhatsapp(e.target.value)}
+                          placeholder="8123456789"
+                          className="flex-1 bg-background border border-white/10 rounded-xl px-3 py-2.5 text-text text-sm focus:border-accent outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Email */}
+                    <div>
+                      <label className="text-text-muted text-xs block mb-1.5">Email (Opsional)</label>
+                      <input
+                        type="email"
+                        value={custEmail}
+                        onChange={(e) => setCustEmail(e.target.value)}
+                        placeholder="email@contoh.com"
+                        className="w-full bg-background border border-white/10 rounded-xl px-3 py-2.5 text-text text-sm focus:border-accent outline-none"
+                      />
+                      <p className="text-text-muted text-[10px] mt-1">Untuk menerima invoice & notifikasi</p>
+                    </div>
                   </div>
 
                   {/* Submit */}
