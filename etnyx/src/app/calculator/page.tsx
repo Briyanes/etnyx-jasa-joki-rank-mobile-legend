@@ -187,6 +187,9 @@ function calculateStarBreakdown(
   // Segments in between
   for (let i = ci + 1; i < ti; i++) {
     const rank = RANK_ORDER[i];
+    // ★ CRITICAL FIX: Skip mythicgrading — matches server's calculateAutoPaketPrice
+    // Without this, calculator overcharges ~60K for any path crossing mythicgrading
+    if (rank === "mythicgrading") continue;
     const key = rankToPriceKey[rank] || "grandmaster";
     const pricePerStar = getPrice(key);
     let starsInThisRank: number;

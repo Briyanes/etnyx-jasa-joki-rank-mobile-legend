@@ -255,6 +255,9 @@ export async function POST(request: NextRequest) {
     if (seasonMultiplier !== 1) serverBasePrice *= seasonMultiplier;
     if (isExpress) serverBasePrice *= 1.2;
     if (isPremium) serverBasePrice *= 1.3;
+    // Apply admin custom discount (admin-only, clamp 0-50% for safety)
+    const customDiscountPct = Math.max(0, Math.min(50, Number(body.customDiscount || 0)));
+    if (customDiscountPct > 0) serverBasePrice *= (1 - customDiscountPct / 100);
     serverBasePrice = Math.round(serverBasePrice);
 
     const tolerance = Math.max(serverBasePrice * 0.02, 500);
