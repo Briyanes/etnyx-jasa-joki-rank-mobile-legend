@@ -120,6 +120,8 @@ interface ProductPackage {
   rankKey: string;
   currentRank: string;
   targetRank: string;
+  currentDivision?: number;
+  targetDivision?: number;
 }
 
 interface PackageCategory {
@@ -830,6 +832,21 @@ function TierIconsBadge({ currentRank, targetRank, size = 20 }: { currentRank?: 
   return <Image src={rankIcons[rank]} alt={rank} width={size} height={size} className="w-5 h-5 object-contain drop-shadow-md" />;
 }
 
+// Extract division number from package ID or data.
+// Package IDs follow patterns like "legend5-mythic" (currentDiv=5) or "epic5-legend5" (cur=5, tgt=5).
+// If package has explicit currentDivision/targetDivision fields, use those.
+function extractDivisions(pkg: ProductPackage): { currentDiv?: number; targetDiv?: number } {
+  if (pkg.currentDivision) return { currentDiv: pkg.currentDivision, targetDiv: pkg.targetDivision };
+  // Parse from ID: <rank><digits?>-<rank><digits?>
+  const parts = pkg.id.split("-");
+  const currentDiv = parts[0]?.match(/(\d+)$/)?.[1];
+  const targetDiv = parts[1]?.match(/(\d+)$/)?.[1];
+  return {
+    currentDiv: currentDiv ? parseInt(currentDiv) : undefined,
+    targetDiv: targetDiv ? parseInt(targetDiv) : undefined,
+  };
+}
+
 // Parse rank from classic package title (e.g. "Epic 10 Win" → "epic")
 function parseClassicRank(title: string): string {
   const lower = title.toLowerCase();
@@ -1375,6 +1392,12 @@ function OrderPageContent() {
         if (found) {
           setSelectedPackage(found);
           setActiveCategory(cat.id);
+          // BUGFIX: Sync division stars from package to state.
+          // Without this, stale currentStar=3 (Warrior III default) leaks
+          // to API → Telegram shows "Legend III" instead of "Legend V".
+          const { currentDiv: curD, targetDiv: tgtD } = extractDivisions(found);
+          if (curD) setCurrentStar(curD);
+          if (tgtD) setTargetStar(tgtD);
           setForm((prev) => ({
             ...prev,
             currentRank: found.currentRank as RankTier,
@@ -1537,6 +1560,12 @@ function OrderPageContent() {
   const handleSelectPackage = useCallback(
     (pkg: ProductPackage) => {
       setSelectedPackage(pkg);
+      // BUGFIX: Sync division stars from package to state.
+      // Without this, stale currentStar=3 (Warrior III default) leaks
+      // to API → Telegram shows "Legend III" instead of "Legend V".
+      const { currentDiv: curD, targetDiv: tgtD } = extractDivisions(pkg);
+      if (curD) setCurrentStar(curD);
+      if (tgtD) setTargetStar(tgtD);
       updateForm({
         currentRank: pkg.currentRank as RankTier,
         targetRank: pkg.targetRank as RankTier,
