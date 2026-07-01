@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useRouter } from "next/navigation";
-import { Zap, Crown, Shield, Star, Trophy, Flame, Check, Users } from "lucide-react";
+import { Zap, Crown, Shield, Star, Trophy, Flame, Check, Users, Gamepad2 } from "lucide-react";
 import CardCarousel from "@/components/CardCarousel";
 
 interface CatalogPackage {
@@ -93,6 +93,22 @@ const defaultHighlights = [
     cta: "/order?mode=gendong",
     icon: "users",
   },
+  {
+    id: "classic",
+    name: "Joki Classic",
+    priceLabel: "50K",
+    priceUnit: "/10 win",
+    description: "Push rank mode Classic, pilihan rank Epic sampai Immortal",
+    features: [
+      "Paket 10 WIN — Epic, Legend, Mythic, Honor, Glory, Immortal",
+      "Win rate tinggi dengan booster berpengalaman",
+      "Mulai cepat, proses transparan",
+      "Cocok untuk grind rank harian",
+    ],
+    highlighted: false,
+    cta: "/order?mode=classic",
+    icon: "gamepad",
+  },
 ];
 
 export default function PricingSection() {
@@ -101,7 +117,7 @@ export default function PricingSection() {
   const [seasonLabel, setSeasonLabel] = useState("");
 
   useEffect(() => {
-    fetch("/api/settings?keys=pricing_catalog,perstar_pricing,gendong_pricing,season_pricing")
+    fetch("/api/settings?keys=pricing_catalog,perstar_pricing,gendong_pricing,season_pricing,classic_pricing_catalog")
       .then((res) => res.json())
       .then((data) => {
         // Determine season multiplier
@@ -131,6 +147,14 @@ export default function PricingSection() {
           ? Math.min(...data.gendong_pricing.map((t: { price: number }) => t.price))
           : null;
 
+        // Classic pricing: find min price from classic catalog (CMS override)
+        const classicCatalog: CatalogCategory[] = data.classic_pricing_catalog && Array.isArray(data.classic_pricing_catalog)
+          ? data.classic_pricing_catalog
+          : [];
+        const classicMin = classicCatalog.length > 0 && classicCatalog[0]?.packages?.length
+          ? Math.min(...classicCatalog[0].packages.map((p) => p.price))
+          : null;
+
         setPackageHighlights((prev) =>
           prev.map((h) => {
             if (h.id === "per-star" && perStarMin) {
@@ -146,6 +170,9 @@ export default function PricingSection() {
             }
             if (h.id === "gendong" && gendongMin) {
               return { ...h, priceLabel: formatPriceLabel(applyS(gendongMin)) };
+            }
+            if (h.id === "classic" && classicMin) {
+              return { ...h, priceLabel: formatPriceLabel(applyS(classicMin)) };
             }
             return h;
           })
@@ -230,6 +257,7 @@ export default function PricingSection() {
                     {tier.icon === "trophy" && <Trophy className="w-7 h-7" />}
                     {tier.icon === "zap" && <Zap className="w-7 h-7" />}
                     {tier.icon === "users" && <Users className="w-7 h-7" />}
+                    {tier.icon === "gamepad" && <Gamepad2 className="w-7 h-7" />}
                   </span>
                   <h3 className="text-lg font-bold text-text">{tier.name}</h3>
                 </div>
