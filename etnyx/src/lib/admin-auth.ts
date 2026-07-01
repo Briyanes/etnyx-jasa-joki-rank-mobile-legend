@@ -3,9 +3,15 @@ import { jwtVerify } from "jose";
 import { NextResponse } from "next/server";
 
 function getAdminJwtSecret() {
-  const secret = process.env.ADMIN_JWT_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!secret) {
-    throw new Error("ADMIN_JWT_SECRET or SUPABASE_SERVICE_ROLE_KEY must be set");
+  // SECURITY FIX (K5): ADMIN_JWT_SECRET must be set independently.
+  // Never fall back to SUPABASE_SERVICE_ROLE_KEY — if that key leaks,
+  // an attacker could forge admin JWTs. Each secret must be isolated.
+  const secret = process.env.ADMIN_JWT_SECRET;
+  if (!secret || secret.length < 32) {
+    throw new Error(
+      "ADMIN_JWT_SECRET must be set and at least 32 characters long. " +
+      "Generate with: openssl rand -hex 32"
+    );
   }
   return new TextEncoder().encode(secret);
 }

@@ -216,6 +216,11 @@ export function middleware(request: NextRequest) {
   response.headers.set("X-Frame-Options", "SAMEORIGIN");
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+
+  // QW4: Prevent search engines from indexing admin and API routes
+  if (pathname.startsWith("/admin") || pathname.startsWith("/api/")) {
+    response.headers.set("X-Robots-Tag", "noindex, nofollow");
+  }
   response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), interest-cohort=()");
   
   return response;

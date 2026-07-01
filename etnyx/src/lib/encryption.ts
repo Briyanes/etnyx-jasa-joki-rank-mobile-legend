@@ -36,12 +36,24 @@ export function encryptField(text: string): string {
 export function decryptField(encryptedText: string): string {
   const parts = encryptedText.split(":");
   if (parts.length !== 3 || !parts[0] || !parts[1] || !parts[2]) {
-    // CRITICAL: Non-encrypted data detected. This could be legacy plaintext
-    // OR a security breach where attacker injected raw data. Log loudly.
-    console.error("[SECURITY] decryptField: non-encrypted input detected — possible legacy data or injection. Length:", encryptedText.length);
-    // Return as-is for backward compat (legacy data exists in production)
-    // TODO: After full data migration, replace return with: throw new Error("UNENCRYPTED_DATA_DETECTED")
-    return encryptedText;
+    // SECURITY FIX (K4): Non-encrypted data detected.
+    // This could be legacy plaintext OR a security breach where attacker
+    // injected raw data into the database. We must NOT return it as-is,
+    // because that would allow an attacker to read arbitrary injected content.
+    console.error(
+      "[SECURITY] decryptField: non-encrypted input detected — possible legacy data or injection. Length:",
+      encryptedText.length
+    );
+
+    // If ALLOW_PLAINTEXT_DECRYPT is set (migration period only), return
+    // a masked placeholder so the plaintext is never exposed in the UI.
+    // Otherwise, throw to block the operation entirely.
+    if (process.env.ALLOW_PLAINTEXT_DECRYPT === "true") {
+      console.warn("[SECURITY] decryptField: returning [REDACTED] for legacy plaintext data (ALLOW_PLAINTEXT_DECRYPT=true)");
+      return "[REDACTED — re-encrypt needed]";
+    }
+
+    throw new Error("UNENCRYPTED_DATA_DETECTED: Data does not match expected encrypted format");
   }
   const [ivHex, authTagHex, encrypted] = parts;
   const iv = Buffer.from(ivHex, "hex");

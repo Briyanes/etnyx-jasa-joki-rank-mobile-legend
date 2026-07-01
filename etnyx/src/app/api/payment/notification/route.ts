@@ -9,9 +9,19 @@ import {
   sendTelegramMessage,
 } from "@/lib/notifications";
 import { sendMetaCAPI } from "@/lib/meta-capi";
+import crypto from "crypto";
 
 // ============================================
-// DompetX Webhook Handler
+// DompetX Webhook Handler (SECURITY HARDENED - K2)
+// ============================================
+// SECURITY FIX: Since DompetX does not send webhook signatures,
+// we implement multi-layer verification to prevent fake webhook attacks:
+//
+// Layer 1: Webhook secret header (if DOMPETX_WEBHOOK_SECRET is configured)
+// Layer 2: Server-side payment verification via DompetX API callback
+//          (we re-fetch the payment status from DompetX to confirm)
+// Layer 3: Amount + reference cross-check against our database
+//
 // Payload format (per official docs):
 // {
 //   "data": {
@@ -24,11 +34,70 @@ import { sendMetaCAPI } from "@/lib/meta-capi";
 //   "eventType": "deposit",
 //   "paymentId": "c2489739-..."
 // }
-//
-// No signature verification required by DompetX.
-// Order matching is done via data.reference field.
-// Must respond with HTTP 200 to acknowledge receipt.
 // ============================================
+
+const DOMPETX_API_KEY = process.env.DOMPETX_API_KEY || "";
+const DOMPETX_BASE_URL = process.env.DOMPETX_BASE_URL || "https://api.dompetx.com/v1";
+const WEBHOOK_SECRET = process.env.DOMPETX_WEBHOOK_SECRET || "";
+
+/**
+ * Verify payment by calling DompetX API back to confirm the transaction.
+ * This prevents fake webhook attacks since the attacker would need to
+ * also control the DompetX API response.
+ */
+async function verifyPaymentWithDompetX(
+  trxId: string,
+  reference: string
+): Promise<{ verified: boolean; status?: string; amount?: number }> {
+  if (!DOMPETX_API_KEY || !trxId) return { verified: false };
+
+  try {
+    const timestamp = Math.floor(Date.now() / 1000).toString();
+    const body = JSON.stringify({ reference, transactionId: trxId });
+    const signature = crypto
+      .createHmac("sha256", DOMPETX_API_KEY)
+      .update(timestamp + body)
+      .digest("hex");
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    let res: Response;
+    try {
+      res = await fetch(`${DOMPETX_BASE_URL}/payments/verify`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          "X-DOMPAY-API-Key": DOMPETX_API_KEY,
+          "X-DOMPAY-Signature": signature,
+          "X-DOMPAY-Timestamp": timestamp,
+        },
+        body,
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeoutId);
+    }
+
+    if (!res.ok) {
+      console.error("[WEBHOOK VERIFY] DompetX verify API returned:", res.status);
+      return { verified: false };
+    }
+
+    const data = await res.json();
+    const paymentData = data.data || data;
+
+    return {
+      verified: true,
+      status: String(paymentData.status || "").toLowerCase(),
+      amount: Number(paymentData.amount || 0),
+    };
+  } catch (e) {
+    console.error("[WEBHOOK VERIFY] Failed to verify payment with DompetX:", e);
+    return { verified: false };
+  }
+}
 
 // GET handler for URL verification (DompetX may ping this)
 export async function GET() {
@@ -40,12 +109,26 @@ export async function POST(request: NextRequest) {
     const rawBody = await request.text();
     const body = JSON.parse(rawBody);
 
+    // ===== SECURITY LAYER 1: Webhook secret (if configured) =====
+    // If DOMPETX_WEBHOOK_SECRET is set, requests must include it.
+    // This blocks random attackers from hitting the endpoint.
+    if (WEBHOOK_SECRET) {
+      const providedSecret =
+        request.headers.get("x-webhook-secret") ||
+        request.headers.get("x-dompetx-webhook-secret") ||
+        body.webhookSecret;
+      if (providedSecret !== WEBHOOK_SECRET) {
+        console.error("[WEBHOOK] Unauthorized: missing or invalid webhook secret");
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+    }
+
     // DompetX official payload structure
     const dataObj = body.data || {};
     const refId: string = dataObj.reference || body.reference || "";
     const trxId: string = dataObj.id || body.paymentId || body.id || "";
-    const dompetxStatus: string = String(dataObj.status || body.status || "").toLowerCase();
-    const amount: number = Number(dataObj.amount || body.amount || 0);
+    let dompetxStatus: string = String(dataObj.status || body.status || "").toLowerCase();
+    let amount: number = Number(dataObj.amount || body.amount || 0);
     const eventType: string = body.eventType || "";
 
     if (!refId) {
@@ -73,6 +156,34 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, message: "Already processed" });
     }
 
+    // ===== SECURITY LAYER 2: Server-side payment verification =====
+    // For "paid" status, verify with DompetX API that the payment is real.
+    // This is the critical security layer against fake webhooks.
+    if (
+      dompetxStatus === "paid" ||
+      dompetxStatus === "success" ||
+      dompetxStatus === "settlement" ||
+      dompetxStatus === "completed"
+    ) {
+      const verification = await verifyPaymentWithDompetX(trxId, refId);
+      if (!verification.verified) {
+        // If verification fails, log and refuse to mark as paid.
+        // Fall back to manual confirmation by admin.
+        console.error(
+          `[WEBHOOK SECURITY] Payment verification FAILED for ref=${refId}, trxId=${trxId}. ` +
+            `Webhook claimed status="${dompetxStatus}" but server-side verification could not confirm. ` +
+            `Order remains pending — admin must verify manually.`
+        );
+        dompetxStatus = "pending"; // Downgrade to pending for safety
+        amount = 0;
+      } else {
+        // Use verified data from DompetX API (not from the webhook body)
+        if (verification.status) dompetxStatus = verification.status;
+        if (verification.amount) amount = verification.amount;
+      }
+    }
+
+    // ===== SECURITY LAYER 3: Amount + reference cross-check =====
     // Determine payment status
     // DompetX status values: "paid" (confirmed), others (pending/failed/expired)
     let paymentStatus = "pending";
