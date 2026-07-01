@@ -5,6 +5,8 @@ import {
   PricingSection,
   TrackingSection,
   FAQSection,
+  HowItWorksSection,
+  TrustSection,
 } from "@/components";
 import Testimonials from "@/components/Testimonials";
 import Portfolio from "@/components/Portfolio";
@@ -90,7 +92,17 @@ export default async function Home() {
       
       <main>
         {vis.hero && <HeroSection />}
-        
+
+        {/* Trust badges — quick trust builder right after hero */}
+        <ScrollAnimation animation="fadeUp" delay={80}>
+          <TrustSection />
+        </ScrollAnimation>
+
+        {/* How to Order — guide users before they see pricing */}
+        <ScrollAnimation animation="fadeUp" delay={80}>
+          <HowItWorksSection />
+        </ScrollAnimation>
+
         {vis.pricing && (
           <ScrollAnimation animation="fadeUp" delay={100}>
             <PricingSection />

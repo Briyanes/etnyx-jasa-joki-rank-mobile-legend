@@ -31,6 +31,8 @@ interface NavbarProps {
 export default function Navbar({ hiddenSections }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("");
+  const [scrolled, setScrolled] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
   const { locale } = useLanguage();
 
   const allNavLinks = locale === "id" ? [
@@ -92,8 +94,33 @@ export default function Navbar({ hiddenSections }: NavbarProps) {
     return () => observer.disconnect();
   }, []);
 
+  // Scroll: navbar background + progress bar
+  useEffect(() => {
+    const onScroll = () => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      setScrolled(scrollTop > 20);
+      setScrollProgress(docHeight > 0 ? Math.min(100, (scrollTop / docHeight) * 100) : 0);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
-    <nav className="glass border-b border-white/5" aria-label="Main navigation">
+    <nav
+      className={`border-b transition-all duration-300 ${
+        scrolled
+          ? "glass border-white/10 shadow-lg shadow-black/20"
+          : "border-white/5 bg-transparent"
+      }`}
+      aria-label="Main navigation"
+    >
+      {/* Scroll progress bar */}
+      <div
+        className="absolute top-0 left-0 h-0.5 gradient-primary transition-all duration-150"
+        style={{ width: `${scrollProgress}%` }}
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
