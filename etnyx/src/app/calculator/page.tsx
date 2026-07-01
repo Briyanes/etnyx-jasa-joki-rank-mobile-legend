@@ -498,32 +498,33 @@ export default function CalculatorPage() {
         : "Joki Classic";
 
     const lines = [
-      `🎮 ETNYX JOCKEY — Penawaran Resmi`,
+      `━━━━━━━━━━━━━━━━━━`,
+      `ETNYX — Penawaran Resmi`,
+      `━━━━━━━━━━━━━━━━━━`,
       ``,
-      `Halo Kak! Thanks udah chat ETNYX 🙏`,
+      `Halo Kak, berikut detail joki untuk Kakak:`,
       ``,
-      `Berikut detail joki untuk Kakak:`,
     ];
 
     // Product detail
     if (mode === "paket" && selectedPackage) {
-      lines.push(`📦 Jenis: ${typeLabel} — ${selectedPackage.title}`);
+      lines.push(`Jenis  : ${typeLabel} — ${selectedPackage.title}`);
       if (selectedPackage.currentRank !== "classic") {
         const curLabel = RANK_LIST.find((r) => r.id === selectedPackage.currentRank)?.label || "";
         const tgtLabel = RANK_LIST.find((r) => r.id === selectedPackage.targetRank)?.label || "";
-        lines.push(`🎯 Rank: ${curLabel} → ${tgtLabel}`);
+        lines.push(`Rank   : ${curLabel} → ${tgtLabel}`);
       }
     } else if (mode === "classic" && selectedPackage) {
-      lines.push(`📦 Jenis: ${typeLabel} — ${selectedPackage.title}`);
+      lines.push(`Jenis  : ${typeLabel} — ${selectedPackage.title}`);
     } else if (mode === "perstar") {
       const curLabel = `${getRankLabel(currentRank)}${RANKS_WITH_STARS.includes(currentRank) ? ` ${getDivLabel(currentRank, currentDiv)}` : ""}${MYTHIC_STAR_CONFIG[currentRank] ? ` (${currentMythicStars}★)` : ""}`;
       const tgtLabel = `${getRankLabel(targetRank)}${RANKS_WITH_STARS.includes(targetRank) ? ` ${getDivLabel(targetRank, targetDiv)}` : ""}${MYTHIC_STAR_CONFIG[targetRank] ? ` (${targetMythicStars}★)` : ""}`;
-      lines.push(`📦 Jenis: ${typeLabel}`);
-      lines.push(`🎯 Rank: ${curLabel} → ${tgtLabel} (${totalStars}★)`);
+      lines.push(`Jenis  : ${typeLabel}`);
+      lines.push(`Rank   : ${curLabel} → ${tgtLabel} (${totalStars}★)`);
     } else if (mode === "gendong") {
       const rank = gendongRanks.find((r) => r.id === selectedGendongRankId);
-      lines.push(`📦 Jenis: ${typeLabel} — ${rank?.name || ""}`);
-      lines.push(`🔢 Jumlah: ${gendongQty} ${rank?.id === "grading" ? "match" : "bintang"}`);
+      lines.push(`Jenis  : ${typeLabel} — ${rank?.name || ""}`);
+      lines.push(`Jumlah : ${gendongQty} ${rank?.id === "grading" ? "match" : "bintang"}`);
     }
 
     // Add-ons
@@ -532,20 +533,20 @@ export default function CalculatorPage() {
     if (isPremium) addons.push("Premium Pilot MG 75%+ (+30%)");
     if (customDiscount > 0) addons.push(`Diskon ${customDiscount}%`);
     if (addons.length > 0) {
-      lines.push(``);
-      lines.push(`⚡ Add-on: ${addons.join(" | ")}`);
+      lines.push(`Add-on : ${addons.join(" | ")}`);
     }
 
     lines.push(``);
-    lines.push(`💰 Harga: ${formatRupiah(finalPrice)}`);
-    lines.push(`⏱️ Estimasi: ${isExpress ? "1-2 hari" : "3-5 hari"} kerja`);
+    lines.push(`Harga    : ${formatRupiah(finalPrice)}`);
+    lines.push(`Estimasi : ${isExpress ? "1-2 hari" : "3-5 hari"} kerja`);
     lines.push(``);
-    lines.push(`💳 Pembayaran: BCA / Dana / GoPay / DompetX`);
-    lines.push(``);
-    lines.push(`🔗 Order online: etnyx.id/order`);
+    lines.push(`Pembayaran   : BCA / Dana / GoPay / DompetX`);
+    lines.push(`Order online : etnyx.id/order`);
     lines.push(`   (atau Kakak bisa order via WA ini)`);
     lines.push(``);
-    lines.push(`Berminat? Balas "LANJUT" ya Kak! 😊`);
+    lines.push(`Berminat? Balas "LANJUT" ya Kak.`);
+    lines.push(``);
+    lines.push(`_ETNYX - Push Rank, Tanpa Main_`);
 
     return lines.join("\n");
   }, [
@@ -590,7 +591,9 @@ export default function CalculatorPage() {
         : "Joki Classic";
 
     const lines = [
-      `📋 FORMAT ORDER — ETNYX JOCKEY`,
+      `━━━━━━━━━━━━━━━━━━`,
+      `FORMAT ORDER — ETNYX`,
+      `━━━━━━━━━━━━━━━━━━`,
       ``,
       `Jenis: ${typeLabel}`,
     ];
@@ -610,9 +613,8 @@ export default function CalculatorPage() {
     }
 
     lines.push(`Harga: ${formatRupiah(finalPrice)}`);
-    lines.push(`Pembayaran: BCA / Dana / GoPay / DompetX`);
     lines.push(``);
-    lines.push(`Silakan isi data berikut & kirim balik:`);
+    lines.push(`Silakan isi data berikut dan kirim balik:`);
     lines.push(``);
 
     // Field dinamis per mode
@@ -645,8 +647,8 @@ export default function CalculatorPage() {
     }
 
     lines.push(``);
-    lines.push(`⚠️ Pastikan data benar sebelum kirim ya Kak!`);
-    lines.push(`⏰ Harap kirim dalam 1x24 jam, atau harga bisa berubah`);
+    lines.push(`Pastikan data benar sebelum kirim.`);
+    lines.push(`Harap kirim dalam 1x24 jam, atau harga bisa berubah.`);
 
     return lines.join("\n");
   }, [
@@ -663,7 +665,7 @@ export default function CalculatorPage() {
 
   // ===== Combined message: Quote + Format Order in one =====
   const buildCombinedMessage = useCallback(() => {
-    return buildAdminQuote() + "\n\n" + "─".repeat(35) + "\n\n" + buildFormatOrder();
+    return buildAdminQuote() + "\n\n" + buildFormatOrder();
   }, [buildAdminQuote, buildFormatOrder]);
 
   const handleCopyAll = useCallback(() => {
