@@ -1382,79 +1382,126 @@ function OrderPageContent() {
       .catch(() => {/* keep manual only */});
   }, []);
 
-  // Pre-fill from query params
+  // Pre-fill from query params (supports calculator redirect with full detail params)
   useEffect(() => {
+    const modeParam = searchParams.get("mode");
     const packageId = searchParams.get("package");
-    if (packageId) {
-      for (const cat of catalog) {
-        const found = cat.packages.find((p) => p.id === packageId);
-        if (found) {
-          setSelectedPackage(found);
-          setActiveCategory(cat.id);
-          // BUGFIX: Sync division stars from package to state.
-          // Without this, stale currentStar=3 (Warrior III default) leaks
-          // to API → Telegram shows "Legend III" instead of "Legend V".
-          const { currentDiv: curD, targetDiv: tgtD } = extractDivisions(found);
-          if (curD) setCurrentStar(curD);
-          if (tgtD) setTargetStar(tgtD);
-          setForm((prev) => ({
-            ...prev,
-            currentRank: found.currentRank as RankTier,
-            targetRank: found.targetRank as RankTier,
-            isExpress: searchParams.get("express") === "1",
-            isPremium: searchParams.get("premium") === "1",
-          }));
-          break;
+    const fromRank = searchParams.get("from");
+    const toRank = searchParams.get("to");
+    const express = searchParams.get("express") === "1";
+    const premium = searchParams.get("premium") === "1";
+
+    // === MODE: PERSTAR — auto-fill all rank/div/star details ===
+    if (modeParam === "perstar" && fromRank && toRank) {
+      setOrderMode("perstar");
+      setForm((prev) => ({
+        ...prev,
+        currentRank: fromRank as RankTier,
+        targetRank: toRank as RankTier,
+        isExpress: express,
+        isPremium: premium,
+      }));
+
+      // Current rank details
+      const curD = searchParams.get("curDiv");
+      const curS = searchParams.get("curStar");
+      const curMythic = searchParams.get("curMythic");
+      if (curD) setCurrentStar(parseInt(curD));
+      if (curS) setCurrentDivisionStar(parseInt(curS));
+      if (curMythic) setCurrentMythicStars(parseInt(curMythic));
+
+      // Target rank details
+      const tgtD = searchParams.get("tgtDiv");
+      const tgtMythic = searchParams.get("tgtMythic");
+      if (tgtD) setTargetStar(parseInt(tgtD));
+      if (tgtMythic) setTargetMythicStars(parseInt(tgtMythic));
+
+      setPerStarTouched(true);
+      return;
+    }
+
+    // === MODE: GENDONG — auto-fill rank + qty ===
+    if (modeParam === "gendong") {
+      const rankId = searchParams.get("rank");
+      const qty = searchParams.get("qty");
+      setOrderMode("gendong");
+      if (rankId) {
+        // Find in gendongRanks — use setTimeout to ensure state is loaded
+        const found = gendongRanks.find((r) => r.id === rankId);
+        if (found) setSelectedGendongRank(found);
+      }
+      if (qty) setGendongQuantity(parseInt(qty));
+      setForm((prev) => ({ ...prev, isExpress: express, isPremium: premium }));
+      return;
+    }
+
+    // === MODE: PAKET or CLASSIC (or legacy with package param) ===
+    if (packageId || modeParam === "paket" || modeParam === "classic") {
+      const pkgToFind = packageId || searchParams.get("package");
+      if (pkgToFind) {
+        for (const cat of catalog) {
+          const found = cat.packages.find((p) => p.id === pkgToFind);
+          if (found) {
+            setSelectedPackage(found);
+            setActiveCategory(cat.id);
+            const { currentDiv: curD, targetDiv: tgtD } = extractDivisions(found);
+            if (curD) setCurrentStar(curD);
+            if (tgtD) setTargetStar(tgtD);
+            setForm((prev) => ({
+              ...prev,
+              currentRank: found.currentRank as RankTier,
+              targetRank: found.targetRank as RankTier,
+              isExpress: express,
+              isPremium: premium,
+            }));
+            break;
+          }
         }
       }
-    } else {
-      // Support legacy from/to params from calculator
-      const fromRank = searchParams.get("from");
-      const toRank = searchParams.get("to");
-      if (fromRank && toRank) {
-        // Find best matching package
-        let bestMatch: { pkg: ProductPackage; cat: PackageCategory } | null = null;
-        for (const cat of catalog) {
-          for (const pkg of cat.packages) {
-            if (pkg.currentRank === fromRank && pkg.targetRank === toRank) {
-              // Prefer non-per-star packages
-              if (!bestMatch || (bestMatch.cat.id === "per-star" && cat.id !== "per-star")) {
-                bestMatch = { pkg, cat };
-              }
+      return;
+    }
+
+    // === LEGACY FALLBACK: from/to without mode param ===
+    if (fromRank && toRank) {
+      let bestMatch: { pkg: ProductPackage; cat: PackageCategory } | null = null;
+      for (const cat of catalog) {
+        for (const pkg of cat.packages) {
+          if (pkg.currentRank === fromRank && pkg.targetRank === toRank) {
+            if (!bestMatch || (bestMatch.cat.id === "per-star" && cat.id !== "per-star")) {
+              bestMatch = { pkg, cat };
             }
           }
         }
-        if (bestMatch) {
-          setSelectedPackage(bestMatch.pkg);
-          setActiveCategory(bestMatch.cat.id);
-          setForm((prev) => ({
-            ...prev,
-            currentRank: fromRank as RankTier,
-            targetRank: toRank as RankTier,
-            isExpress: searchParams.get("express") === "1",
-            isPremium: searchParams.get("premium") === "1",
-          }));
-        } else {
-          // If no exact match, navigate to the relevant category
-          const catMap: Record<string, string> = {
-            grandmaster: "paket-gm",
-            epic: "paket-epic",
-            legend: "paket-legend",
-            mythic: "paket-mythic",
-            mythicglory: "paket-honor",
-          };
-          setActiveCategory(catMap[fromRank] || "per-star");
-          setForm((prev) => ({
-            ...prev,
-            currentRank: fromRank as RankTier,
-            targetRank: toRank as RankTier,
-            isExpress: searchParams.get("express") === "1",
-            isPremium: searchParams.get("premium") === "1",
-          }));
-        }
+      }
+      if (bestMatch) {
+        setSelectedPackage(bestMatch.pkg);
+        setActiveCategory(bestMatch.cat.id);
+        setForm((prev) => ({
+          ...prev,
+          currentRank: fromRank as RankTier,
+          targetRank: toRank as RankTier,
+          isExpress: express,
+          isPremium: premium,
+        }));
+      } else {
+        const catMap: Record<string, string> = {
+          grandmaster: "paket-gm",
+          epic: "paket-epic",
+          legend: "paket-legend",
+          mythic: "paket-mythic",
+          mythicglory: "paket-honor",
+        };
+        setActiveCategory(catMap[fromRank] || "per-star");
+        setForm((prev) => ({
+          ...prev,
+          currentRank: fromRank as RankTier,
+          targetRank: toRank as RankTier,
+          isExpress: express,
+          isPremium: premium,
+        }));
       }
     }
-  }, [searchParams, catalog]);
+  }, [searchParams, catalog, gendongRanks]);
 
   // Filter catalog based on order mode (classic shows only classic categories)
   const visibleCategories = orderMode === "classic"

@@ -1704,16 +1704,32 @@ export default function CalculatorPage() {
                         onClick={() => {
                           const params = new URLSearchParams();
                           if (mode === "paket" && selectedPackage) {
+                            params.set("mode", "paket");
                             params.set("package", selectedPackage.id);
                           } else if (mode === "perstar") {
                             params.set("mode", "perstar");
                             params.set("from", currentRank);
                             params.set("to", targetRank);
+                            if (RANKS_WITH_STARS.includes(currentRank)) {
+                              params.set("curDiv", String(currentDiv));
+                              params.set("curStar", String(currentDivisionStar));
+                            }
+                            if (MYTHIC_STAR_CONFIG[currentRank]) {
+                              params.set("curMythic", String(currentMythicStars));
+                            }
+                            if (RANKS_WITH_STARS.includes(targetRank)) {
+                              params.set("tgtDiv", String(targetDiv));
+                            }
+                            if (MYTHIC_STAR_CONFIG[targetRank]) {
+                              params.set("tgtMythic", String(targetMythicStars));
+                            }
                           } else if (mode === "gendong") {
                             params.set("mode", "gendong");
+                            params.set("rank", selectedGendongRankId);
+                            params.set("qty", String(gendongQty));
                           } else if (mode === "classic" && selectedPackage) {
-                            params.set("package", selectedPackage.id);
                             params.set("mode", "classic");
+                            params.set("package", selectedPackage.id);
                           }
                           if (isExpress) params.set("express", "1");
                           if (isPremium) params.set("premium", "1");
