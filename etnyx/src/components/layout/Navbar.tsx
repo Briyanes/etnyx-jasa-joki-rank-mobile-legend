@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Search, MapPin } from "lucide-react";
+import { Search, MapPin, Calculator } from "lucide-react";
 
 // Map section hash to visibility key
 const SECTION_VIS_MAP: Record<string, string> = {
@@ -62,9 +62,11 @@ export default function Navbar({ hiddenSections }: NavbarProps) {
     : allNavLinks;
 
   const mobileExtraLinks = locale === "id" ? [
+    { href: "/calculator", label: "Kalkulator Harga" },
     { href: "/order", label: "Order Joki" },
     { href: "/track", label: "Lacak Order" },
   ] : [
+    { href: "/calculator", label: "Price Calculator" },
     { href: "/order", label: "Order Boost" },
     { href: "/track", label: "Track Order" },
   ];
@@ -109,10 +111,10 @@ export default function Navbar({ hiddenSections }: NavbarProps) {
 
   return (
     <nav
-      className={`border-b transition-all duration-300 ${
+      className={`border-b transition-all duration-300 sticky top-0 z-50 ${
         scrolled
-          ? "glass border-white/10 shadow-lg shadow-black/20"
-          : "border-white/5 bg-transparent"
+          ? "bg-[#0F1419]/97 backdrop-blur-md border-white/10 shadow-lg shadow-black/40"
+          : "bg-[#0F1419]/95 backdrop-blur-md border-white/5"
       }`}
       aria-label="Main navigation"
     >
@@ -136,7 +138,7 @@ export default function Navbar({ hiddenSections }: NavbarProps) {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-6">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -157,6 +159,14 @@ export default function Navbar({ hiddenSections }: NavbarProps) {
 
           {/* Desktop CTA + Language Switcher */}
           <div className="hidden md:flex items-center gap-3">
+            <Link
+              href="/calculator"
+              className="flex items-center gap-1.5 text-text-muted hover:text-accent transition-colors text-sm font-medium px-3 py-2 rounded-lg hover:bg-white/5"
+              title={locale === "id" ? "Kalkulator Harga" : "Price Calculator"}
+            >
+              <Calculator className="w-4 h-4" />
+              <span className="hidden lg:inline">{locale === "id" ? "Kalkulator" : "Calculator"}</span>
+            </Link>
             <LanguageSwitcher />
             <Link
               href="/order"
@@ -221,17 +231,24 @@ export default function Navbar({ hiddenSections }: NavbarProps) {
               ))}
               
               <div className="border-t border-white/5 pt-3 mt-1 flex flex-col gap-3">
-                {mobileExtraLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setIsMenuOpen(false)}
-                    className="text-text-muted hover:text-accent transition-colors duration-200 text-sm font-medium flex items-center gap-2"
-                  >
-                    {link.href === "/order" ? <Search className="w-4 h-4" /> : <MapPin className="w-4 h-4" />}
-                    {link.label}
-                  </Link>
-                ))}
+                {mobileExtraLinks.map((link) => {
+                  const icon = link.href === "/order"
+                    ? <Search className="w-4 h-4" />
+                    : link.href === "/calculator"
+                    ? <Calculator className="w-4 h-4" />
+                    : <MapPin className="w-4 h-4" />;
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setIsMenuOpen(false)}
+                      className="text-text-muted hover:text-accent transition-colors duration-200 text-sm font-medium flex items-center gap-2"
+                    >
+                      {icon}
+                      {link.label}
+                    </Link>
+                  );
+                })}
               </div>
 
               <Link
