@@ -1945,61 +1945,31 @@ export default function CalculatorPage() {
                     </div>
                   )}
 
-                  {/* User ID + Server ID + Cek Akun */}
+                  {/* User ID + Server ID */}
                   <div>
                     <label className="text-text-muted text-xs block mb-1.5">MASUKKAN ID DAN SERVER</label>
-                    <div className="grid grid-cols-[1fr_auto_1fr_auto] gap-2 items-end">
+                    <div className="grid grid-cols-2 gap-2">
                       <div>
                         <input
                           type="text"
                           value={custUserId}
-                          onChange={(e) => { setCustUserId(e.target.value); setAccountVerified(false); }}
+                          onChange={(e) => setCustUserId(e.target.value)}
                           placeholder="Contoh: 123456789"
                           className="w-full bg-background border border-white/10 rounded-xl px-3 py-2.5 text-text text-sm focus:border-accent outline-none"
                         />
+                        <p className="text-text-muted text-[10px] mt-1">User ID</p>
                       </div>
-                      <div className="w-px h-8 bg-white/10" />
                       <div>
                         <input
                           type="text"
                           value={custServerId}
-                          onChange={(e) => { setCustServerId(e.target.value); setAccountVerified(false); }}
+                          onChange={(e) => setCustServerId(e.target.value)}
                           placeholder="Contoh: 1234"
                           className="w-full bg-background border border-white/10 rounded-xl px-3 py-2.5 text-text text-sm focus:border-accent outline-none"
                         />
+                        <p className="text-text-muted text-[10px] mt-1">Server ID (4 digit)</p>
                       </div>
-                      <button
-                        type="button"
-                        onClick={async () => {
-                          if (!custUserId.trim() || !custServerId.trim()) return;
-                          setVerifyingAccount(true);
-                          try {
-                            const res = await fetch(`/api/check-account?user_id=${custUserId}&server_id=${custServerId}`);
-                            const data = await res.json();
-                            if (data.nickname) {
-                              setAccountVerified(true);
-                              if (!custNickname) setCustNickname(data.nickname);
-                            }
-                          } catch { /* ignore */ }
-                          setVerifyingAccount(false);
-                        }}
-                        disabled={verifyingAccount || !custUserId || !custServerId}
-                        className="whitespace-nowrap px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-40 rounded-xl text-white text-xs font-bold flex items-center gap-1.5"
-                      >
-                        {verifyingAccount ? <Loader2 className="w-3 h-3 animate-spin" /> : <Search className="w-3 h-3" />}
-                        Cek Akun
-                      </button>
                     </div>
-                    {accountVerified && (
-                      <p className="text-green-400 text-[10px] mt-1 flex items-center gap-1">
-                        <Check className="w-3 h-3" /> Akun terverifikasi!
-                      </p>
-                    )}
-                    {!accountVerified && (custUserId || custServerId) && (
-                      <p className="text-text-muted text-[10px] mt-1">
-                        Masukkan User ID & Server ID, lalu klik Cek Akun untuk verifikasi
-                      </p>
-                    )}
                   </div>
 
                   {/* Nickname / IGN */}
