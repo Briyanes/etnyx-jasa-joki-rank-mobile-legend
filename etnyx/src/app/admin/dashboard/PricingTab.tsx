@@ -37,6 +37,7 @@ interface PerStarTier {
   originalPrice?: number;
   discountPercent?: number;
   isFlat?: boolean;
+  maxStars?: number;
   icon: string;
 }
 
@@ -46,7 +47,7 @@ interface SeasonPricing { isEnabled: boolean; seasonName: string; phases: Season
 type PricingMode = "paket" | "perstar" | "gendong" | "classic";
 
 // ---- Rank helpers ----
-const RANKS = ["warrior", "elite", "master", "grandmaster", "epic", "legend", "mythic", "mythicglory"];
+const RANKS = ["warrior", "elite", "master", "grandmaster", "epic", "legend", "mythic", "mythicgrading", "mythichonor", "mythicglory", "mythicimmortal"];
 
 const rankLabel = (r: string) => {
   const m: Record<string, string> = { warrior: "Warrior", elite: "Elite", master: "Master", grandmaster: "Grandmaster", epic: "Epic", legend: "Legend", mythic: "Mythic", mythicgrading: "Mythic Grading", mythichonor: "Mythic Honor", mythicglory: "Mythic Glory", mythicimmortal: "Mythic Immortal" };
@@ -457,7 +458,7 @@ export default function PricingTab() {
           className="flex items-center gap-2 px-4 py-2 gradient-primary rounded-lg text-white text-sm font-medium hover:opacity-90 transition disabled:opacity-50"
         >
           {pricingSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : pricingSaved ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-          {pricingSaved ? "Tersimpan!" : "Simpan Semua"}
+          {pricingSaved ? "Tersimpan!" : `Simpan ${pricingMode === "paket" ? "Paket" : pricingMode === "perstar" ? "Per Star" : pricingMode === "gendong" ? "Gendong" : "Classic"}`}
         </button>
       </div>
 
@@ -533,7 +534,7 @@ export default function PricingTab() {
                     <input type="date" value={phase.startDate} onChange={(e) => {
                       const next = { ...seasonPricing, phases: seasonPricing.phases.map((p, i) => i === idx ? { ...p, startDate: e.target.value } : p) };
                       setSeasonPricing(next);
-                    }} className="w-full bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-xs focus:border-accent focus:outline-none" />
+                    }} onBlur={() => saveSeasonPricing(seasonPricing)} className="w-full bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-xs focus:border-accent focus:outline-none" />
                   </div>
                   <div>
                     <label className="block text-[10px] text-text-muted mb-1">Multiplier Harga</label>
@@ -542,7 +543,7 @@ export default function PricingTab() {
                         const val = Math.min(2, Math.max(0.5, parseFloat(e.target.value) || 1));
                         const next = { ...seasonPricing, phases: seasonPricing.phases.map((p, i) => i === idx ? { ...p, multiplier: val } : p) };
                         setSeasonPricing(next);
-                      }} className="w-20 bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-xs focus:border-accent focus:outline-none font-mono" />
+                      }} onBlur={() => saveSeasonPricing(seasonPricing)} className="w-20 bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-xs focus:border-accent focus:outline-none font-mono" />
                       <span className="text-text-muted text-[10px]">
                         {phase.multiplier > 1 ? `+${Math.round((phase.multiplier - 1) * 100)}% dari harga dasar` : phase.multiplier < 1 ? `${Math.round((1 - phase.multiplier) * 100)}% diskon` : "Harga normal"}
                       </span>
@@ -770,6 +771,7 @@ export default function PricingTab() {
                   <th className="text-right text-text-muted text-xs font-medium px-4 py-2.5">Harga/Star</th>
                   <th className="text-right text-text-muted text-xs font-medium px-4 py-2.5">Harga Coret</th>
                   <th className="text-right text-text-muted text-xs font-medium px-4 py-2.5">Diskon</th>
+                  <th className="text-center text-text-muted text-xs font-medium px-4 py-2.5">Max Stars</th>
                   <th className="text-center text-text-muted text-xs font-medium px-4 py-2.5">Tipe Harga</th>
                   <th className="text-center text-text-muted text-xs font-medium px-4 py-2.5">Aksi</th>
                 </tr>
@@ -795,6 +797,9 @@ export default function PricingTab() {
                     </td>
                     <td className="px-4 py-2.5 text-right">
                       {tier.discountPercent ? <span className="text-green-400 text-xs font-medium">-{tier.discountPercent}%</span> : <span className="text-text-muted text-xs">-</span>}
+                    </td>
+                    <td className="px-4 py-2.5 text-center">
+                      <input type="number" min="1" max="100" defaultValue={tier.maxStars ?? 25} onBlur={(e) => { const val = Math.min(100, Math.max(1, parseInt(e.target.value) || 25)); if (val !== (tier.maxStars ?? 25)) { const nt = perStarPricing.map(t => t.id === tier.id ? { ...t, maxStars: val } : t); setPerStarPricing(nt); savePerStarPricing(nt); } }} className="w-16 bg-background border border-white/10 rounded px-2 py-1 text-xs text-text text-center focus:border-accent focus:outline-none" />
                     </td>
                     <td className="px-4 py-2.5 text-center">
                       <button onClick={() => {
