@@ -290,6 +290,7 @@ export default function CalculatorPage() {
   const [custNotes, setCustNotes] = useState("");
   const [accountVerified, setAccountVerified] = useState(false);
   const [verifyingAccount, setVerifyingAccount] = useState(false);
+  const [accountCheckError, setAccountCheckError] = useState("");
 
   const [copied, setCopied] = useState(false);
 
@@ -1945,31 +1946,76 @@ export default function CalculatorPage() {
                     </div>
                   )}
 
-                  {/* User ID + Server ID */}
+                  {/* User ID + Server ID + Cek Akun */}
                   <div>
                     <label className="text-text-muted text-xs block mb-1.5">MASUKKAN ID DAN SERVER</label>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-[1fr_auto_1fr_auto] gap-2 items-end">
                       <div>
                         <input
                           type="text"
                           value={custUserId}
-                          onChange={(e) => setCustUserId(e.target.value)}
+                          onChange={(e) => { setCustUserId(e.target.value); setAccountVerified(false); setAccountCheckError(""); }}
                           placeholder="Contoh: 123456789"
                           className="w-full bg-background border border-white/10 rounded-xl px-3 py-2.5 text-text text-sm focus:border-accent outline-none"
                         />
                         <p className="text-text-muted text-[10px] mt-1">User ID</p>
                       </div>
+                      <div className="w-px h-8 bg-white/10 mb-5" />
                       <div>
                         <input
                           type="text"
                           value={custServerId}
-                          onChange={(e) => setCustServerId(e.target.value)}
+                          onChange={(e) => { setCustServerId(e.target.value); setAccountVerified(false); setAccountCheckError(""); }}
                           placeholder="Contoh: 1234"
                           className="w-full bg-background border border-white/10 rounded-xl px-3 py-2.5 text-text text-sm focus:border-accent outline-none"
                         />
-                        <p className="text-text-muted text-[10px] mt-1">Server ID (4 digit)</p>
+                        <p className="text-text-muted text-[10px] mt-1">Server ID</p>
                       </div>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (!custUserId.trim() || !custServerId.trim()) {
+                            setAccountCheckError("Isi User ID & Server ID dulu");
+                            return;
+                          }
+                          setVerifyingAccount(true);
+                          setAccountCheckError("");
+                          try {
+                            const res = await fetch("/api/check-account", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ userId: custUserId.trim(), zoneId: custServerId.trim() }),
+                            });
+                            const data = await res.json();
+                            if (res.ok && data.success) {
+                              setAccountVerified(true);
+                              if (data.nickname) setCustNickname(data.nickname);
+                            } else {
+                              setAccountCheckError(data.error || "Akun tidak ditemukan");
+                            }
+                          } catch {
+                            setAccountCheckError("Gagal menghubungi server");
+                          } finally {
+                            setVerifyingAccount(false);
+                          }
+                        }}
+                        disabled={verifyingAccount || !custUserId || !custServerId}
+                        className="whitespace-nowrap px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-40 rounded-xl text-white text-xs font-bold flex items-center gap-1.5 mb-5"
+                      >
+                        {verifyingAccount ? <Loader2 className="w-3 h-3 animate-spin" /> : <Search className="w-3 h-3" />}
+                        Cek Akun
+                      </button>
                     </div>
+                    {accountVerified && (
+                      <p className="text-green-400 text-[10px] mt-1 flex items-center gap-1">
+                        <Check className="w-3 h-3" /> Akun terverifikasi! Nickname: {custNickname}
+                      </p>
+                    )}
+                    {accountCheckError && (
+                      <p className="text-red-400 text-[10px] mt-1 flex items-center gap-1">
+                        <AlertTriangle className="w-3 h-3" /> {accountCheckError}
+                      </p>
+                    )}
                   </div>
 
                   {/* Nickname / IGN */}
