@@ -478,8 +478,8 @@ export default function CalculatorPage() {
     []
   );
 
-  // ===== Build WhatsApp message =====
-  const buildMessage = useCallback(() => {
+  // ===== Build Admin Quote (admin → buyer perspective) =====
+  const buildAdminQuote = useCallback(() => {
     const typeLabel =
       mode === "paket"
         ? "Joki Paket"
@@ -490,42 +490,54 @@ export default function CalculatorPage() {
         : "Joki Classic";
 
     const lines = [
-      `Halo Kak ETNYX, saya mau order ${typeLabel}`,
+      `🎮 ETNYX JOCKEY — Penawaran Resmi`,
       ``,
-      `Detail Order:`,
+      `Halo Kak! Thanks udah chat ETNYX 🙏`,
+      ``,
+      `Berikut detail joki untuk Kakak:`,
     ];
 
+    // Product detail
     if (mode === "paket" && selectedPackage) {
-      lines.push(`Paket: ${selectedPackage.title}`);
+      lines.push(`📦 Jenis: ${typeLabel} — ${selectedPackage.title}`);
       if (selectedPackage.currentRank !== "classic") {
         const curLabel = RANK_LIST.find((r) => r.id === selectedPackage.currentRank)?.label || "";
         const tgtLabel = RANK_LIST.find((r) => r.id === selectedPackage.targetRank)?.label || "";
-        lines.push(`Rank: ${curLabel} → ${tgtLabel}`);
+        lines.push(`🎯 Rank: ${curLabel} → ${tgtLabel}`);
       }
     } else if (mode === "classic" && selectedPackage) {
-      lines.push(`Paket: ${selectedPackage.title}`);
+      lines.push(`📦 Jenis: ${typeLabel} — ${selectedPackage.title}`);
     } else if (mode === "perstar") {
-      const curLabel = `${RANK_LIST.find((r) => r.id === currentRank)?.label || ""}${RANKS_WITH_STARS.includes(currentRank) ? ` ${getDivisionOptions(currentRank).find((d) => d.value === currentDiv)?.label || ""}` : ""}${MYTHIC_STAR_CONFIG[currentRank] ? ` (${currentMythicStars}★)` : ""}`;
-      const tgtLabel = `${RANK_LIST.find((r) => r.id === targetRank)?.label || ""}${RANKS_WITH_STARS.includes(targetRank) ? ` ${getDivisionOptions(targetRank).find((d) => d.value === targetDiv)?.label || ""}` : ""}${MYTHIC_STAR_CONFIG[targetRank] ? ` (${targetMythicStars}★)` : ""}`;
-      lines.push(`Rank Awal: ${curLabel}`);
-      lines.push(`Rank Tujuan: ${tgtLabel}`);
-      lines.push(`Total Bintang: ${totalStars}`);
+      const curLabel = `${getRankLabel(currentRank)}${RANKS_WITH_STARS.includes(currentRank) ? ` ${getDivLabel(currentRank, currentDiv)}` : ""}${MYTHIC_STAR_CONFIG[currentRank] ? ` (${currentMythicStars}★)` : ""}`;
+      const tgtLabel = `${getRankLabel(targetRank)}${RANKS_WITH_STARS.includes(targetRank) ? ` ${getDivLabel(targetRank, targetDiv)}` : ""}${MYTHIC_STAR_CONFIG[targetRank] ? ` (${targetMythicStars}★)` : ""}`;
+      lines.push(`📦 Jenis: ${typeLabel}`);
+      lines.push(`🎯 Rank: ${curLabel} → ${tgtLabel} (${totalStars}★)`);
     } else if (mode === "gendong") {
       const rank = gendongRanks.find((r) => r.id === selectedGendongRankId);
-      lines.push(`Rank: ${rank?.name || ""}`);
-      lines.push(`Jumlah: ${gendongQty} ${rank?.id === "grading" ? "match" : "bintang"}`);
+      lines.push(`📦 Jenis: ${typeLabel} — ${rank?.name || ""}`);
+      lines.push(`🔢 Jumlah: ${gendongQty} ${rank?.id === "grading" ? "match" : "bintang"}`);
     }
 
+    // Add-ons
     const addons: string[] = [];
-    if (isExpress) addons.push("Express (+20%)");
-    if (isPremium) addons.push("Premium Pilot (+30%)");
+    if (isExpress) addons.push("Express 1-2 hari (+20%)");
+    if (isPremium) addons.push("Premium Pilot MG 75%+ (+30%)");
     if (customDiscount > 0) addons.push(`Diskon ${customDiscount}%`);
-    if (addons.length > 0) lines.push(`Add-on: ${addons.join(", ")}`);
+    if (addons.length > 0) {
+      lines.push(``);
+      lines.push(`⚡ Add-on: ${addons.join(" | ")}`);
+    }
 
     lines.push(``);
-    lines.push(`Harga: ${formatRupiah(finalPrice)}`);
+    lines.push(`💰 Harga: ${formatRupiah(finalPrice)}`);
+    lines.push(`⏱️ Estimasi: ${isExpress ? "1-2 hari" : "3-5 hari"} kerja`);
     lines.push(``);
-    lines.push(`Mohon info lanjutan ya Kak`);
+    lines.push(`💳 Pembayaran: BCA / Dana / GoPay / DompetX`);
+    lines.push(``);
+    lines.push(`🔗 Order online: etnyx.id/order`);
+    lines.push(`   (atau Kakak bisa order via WA ini)`);
+    lines.push(``);
+    lines.push(`Berminat? Balas "LANJUT" ya Kak! 😊`);
 
     return lines.join("\n");
   }, [
@@ -548,15 +560,15 @@ export default function CalculatorPage() {
   ]);
 
   const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText(buildMessage());
+    navigator.clipboard.writeText(buildAdminQuote());
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  }, [buildMessage]);
+  }, [buildAdminQuote]);
 
   const handleWhatsApp = useCallback(() => {
-    const msg = encodeURIComponent(buildMessage());
+    const msg = encodeURIComponent(buildAdminQuote());
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, "_blank");
-  }, [buildMessage]);
+  }, [buildAdminQuote]);
 
   // ===== Stage 2: Build Format Order (field dinamis per mode) =====
   const buildFormatOrder = useCallback(() => {
@@ -590,6 +602,7 @@ export default function CalculatorPage() {
     }
 
     lines.push(`Harga: ${formatRupiah(finalPrice)}`);
+    lines.push(`Pembayaran: BCA / Dana / GoPay / DompetX`);
     lines.push(``);
     lines.push(`Silakan isi data berikut & kirim balik:`);
     lines.push(``);
@@ -597,31 +610,35 @@ export default function CalculatorPage() {
     // Field dinamis per mode
     if (mode === "gendong") {
       lines.push(`1. Nickname:`);
-      lines.push(`2. User ID (Server ID):`);
-      lines.push(`3. No. WhatsApp:`);
-      lines.push(`4. Hero Preferred (opsional):`);
-      lines.push(`5. Jadwal Main (opsional):`);
-      lines.push(`6. Catatan (opsional):`);
+      lines.push(`2. User ID:`);
+      lines.push(`3. Server ID:`);
+      lines.push(`4. No. WhatsApp:`);
+      lines.push(`5. Hero Preferred (opsional):`);
+      lines.push(`6. Jadwal Main (opsional):`);
+      lines.push(`7. Catatan (opsional):`);
     } else if (mode === "classic") {
       lines.push(`1. Nickname:`);
-      lines.push(`2. User ID (Server ID):`);
-      lines.push(`3. No. WhatsApp:`);
-      lines.push(`4. Hero Request (opsional):`);
-      lines.push(`5. Catatan (opsional):`);
+      lines.push(`2. User ID:`);
+      lines.push(`3. Server ID:`);
+      lines.push(`4. No. WhatsApp:`);
+      lines.push(`5. Hero Request (opsional):`);
+      lines.push(`6. Catatan (opsional):`);
     } else {
       // paket & perstar — perlu login akun
       lines.push(`1. Nickname:`);
-      lines.push(`2. User ID (Server ID):`);
-      lines.push(`3. Login Method (Moonton/Google/FB/VK/Tiktok):`);
-      lines.push(`4. Email/Nomor Login:`);
-      lines.push(`5. Password:`);
-      lines.push(`6. No. WhatsApp:`);
-      lines.push(`7. Hero Request (opsional):`);
-      lines.push(`8. Catatan (opsional):`);
+      lines.push(`2. User ID:`);
+      lines.push(`3. Server ID:`);
+      lines.push(`4. Login Method (Moonton/Google/FB/VK/Tiktok):`);
+      lines.push(`5. Email/Nomor Login:`);
+      lines.push(`6. Password:`);
+      lines.push(`7. No. WhatsApp:`);
+      lines.push(`8. Hero Request (opsional):`);
+      lines.push(`9. Catatan (opsional):`);
     }
 
     lines.push(``);
     lines.push(`⚠️ Pastikan data benar sebelum kirim ya Kak!`);
+    lines.push(`⏰ Harap kirim dalam 1x24 jam, atau harga bisa berubah`);
 
     return lines.join("\n");
   }, [
@@ -635,6 +652,17 @@ export default function CalculatorPage() {
     setCopiedField("format");
     setTimeout(() => setCopiedField(null), 2000);
   }, [buildFormatOrder]);
+
+  // ===== Combined message: Quote + Format Order in one =====
+  const buildCombinedMessage = useCallback(() => {
+    return buildAdminQuote() + "\n\n" + "─".repeat(35) + "\n\n" + buildFormatOrder();
+  }, [buildAdminQuote, buildFormatOrder]);
+
+  const handleCopyAll = useCallback(() => {
+    navigator.clipboard.writeText(buildCombinedMessage());
+    setCopiedField("all");
+    setTimeout(() => setCopiedField(null), 2000);
+  }, [buildCombinedMessage]);
 
   // ===== Stage 3: Submit order to API =====
   const handleSubmitOrder = useCallback(async () => {
@@ -1628,10 +1656,10 @@ export default function CalculatorPage() {
                         <div className="bg-background rounded-xl p-3 border border-white/5">
                           <p className="text-text-muted text-xs mb-2 flex items-center gap-1.5">
                             <MessageCircle className="w-3 h-3 text-green-400" />
-                            1. Pesan Penawaran
+                            💬 Pesan Penawaran (ke Buyer)
                           </p>
                           <pre className="text-text text-xs whitespace-pre-wrap font-mono bg-surface p-3 rounded-lg max-h-40 overflow-y-auto">
-                            {buildMessage()}
+                            {buildAdminQuote()}
                           </pre>
                         </div>
 
@@ -1678,6 +1706,15 @@ export default function CalculatorPage() {
                         >
                           {copiedField === "format" ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
                           {copiedField === "format" ? "Tersalin!" : "Copy Format Order"}
+                        </button>
+
+                        {/* Copy Semua: Quote + Format in one message */}
+                        <button
+                          onClick={handleCopyAll}
+                          className="w-full py-3 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 rounded-xl text-white font-bold text-sm flex items-center justify-center gap-2 transition-colors"
+                        >
+                          {copiedField === "all" ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                          {copiedField === "all" ? "Semua Tersalin!" : "⚡ Copy SEMUA (Penawaran + Format)"}
                         </button>
 
                         {/* Divider */}
