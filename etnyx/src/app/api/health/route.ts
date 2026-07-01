@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import crypto from "crypto";
 import { createAdminClient } from "@/lib/supabase-server";
 
 interface ServiceStatus {
@@ -21,15 +22,44 @@ async function checkSupabase(): Promise<ServiceStatus> {
 }
 
 async function checkDompetx(): Promise<ServiceStatus> {
-  const apiKey = process.env.DOMPETX_API_KEY;
-  const baseUrl = process.env.DOMPETX_BASE_URL;
-  if (!apiKey || !baseUrl) return { status: "error", error: "Not configured" };
-
   const start = Date.now();
+
   try {
-    const res = await fetch(`${baseUrl}/health`, {
+    // Get API key from Supabase settings (Admin Dashboard) with env var fallback
+    let apiKey = process.env.DOMPETX_API_KEY || "";
+    let baseUrl = process.env.DOMPETX_BASE_URL || "https://api.dompetx.com/v1";
+
+    try {
+      const supabase = await createAdminClient();
+      const { data } = await supabase
+        .from("settings")
+        .select("value")
+        .eq("key", "integrations")
+        .single();
+      const settings = data?.value || {};
+      apiKey = settings.dompetxApiKey || apiKey;
+      baseUrl = settings.dompetxBaseUrl || baseUrl;
+    } catch {
+      // Supabase read failed, fall through to env vars
+    }
+
+    if (!apiKey) return { status: "error", error: "Not configured" };
+
+    // Build HMAC auth headers (same as test-connection route)
+    const timestamp = Math.floor(Date.now() / 1000).toString();
+    const signature = crypto
+      .createHmac("sha256", apiKey)
+      .update(timestamp)
+      .digest("hex");
+
+    const res = await fetch(`${baseUrl}/saldo`, {
       method: "GET",
-      headers: { Accept: "application/json" },
+      headers: {
+        Accept: "application/json",
+        "X-DOMPAY-API-Key": apiKey,
+        "X-DOMPAY-Signature": signature,
+        "X-DOMPAY-Timestamp": timestamp,
+      },
       signal: AbortSignal.timeout(5000),
     });
     return { status: res.ok ? "ok" : "error", latency_ms: Date.now() - start };
