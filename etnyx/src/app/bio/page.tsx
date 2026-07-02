@@ -7,9 +7,10 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { WHATSAPP_NUMBER } from "@/lib/constants";
 import { 
   ShoppingCart, Search, MessageCircle,
-  ExternalLink, Gift, User,
-  MapPin, Clock, Star, Shield, Zap, BookOpen,
-  HelpCircle, LogIn
+  ExternalLink, Gift,
+  MapPin, Clock, Star, Shield, Zap,
+  HelpCircle, Calculator, Users, Trophy,
+  PlayCircle, Share2, X, Ticket, Check,
 } from "lucide-react";
 
 const translations = {
@@ -32,12 +33,23 @@ const translations = {
     writeReviewDesc: "Berikan review & dapatkan skin gratis",
     faqTitle: "FAQ",
     faqDesc: "Pertanyaan yang sering ditanyakan",
+    calculatorTitle: "Cek Harga",
+    calculatorDesc: "Hitung estimasi harga joki",
+    gendongTitle: "Joki Gendong",
+    gendongDesc: "Main bareng booster, tanpa share akun",
+    portfolioTitle: "Bukti Kerja",
+    portfolioDesc: "Lihat screenshot hasil joki kami",
+    tutorialTitle: "Cara Order",
+    tutorialDesc: "Panduan order dalam 3 langkah",
     loginTitle: "Login / Daftar",
     loginDesc: "Masuk atau buat akun baru",
     followUs: "Follow Us",
     startFrom: "Mulai dari",
     rating: "Rating",
     safe: "Aman 100%",
+    promoText: "Pakai kode NEWBIE50 — Diskon 50% untuk order pertama!",
+    shareText: "Bagikan ETNYX ke temanmu",
+    shareCopied: "Link disalin!",
     footer: "Jasa joki rank ML terpercaya #1 di Indonesia",
     terms: "Syarat & Ketentuan",
     privacy: "Kebijakan Privasi",
@@ -62,12 +74,23 @@ const translations = {
     writeReviewDesc: "Leave a review & get a free skin",
     faqTitle: "FAQ",
     faqDesc: "Frequently asked questions",
+    calculatorTitle: "Check Price",
+    calculatorDesc: "Calculate your boost estimate",
+    gendongTitle: "Duo Boost",
+    gendongDesc: "Play with booster, no account sharing",
+    portfolioTitle: "Our Work",
+    portfolioDesc: "See our rank-up screenshots",
+    tutorialTitle: "How to Order",
+    tutorialDesc: "Order guide in 3 easy steps",
     loginTitle: "Login / Register",
     loginDesc: "Sign in or create an account",
     followUs: "Follow Us",
     startFrom: "Start from",
     rating: "Rating",
     safe: "100% Safe",
+    promoText: "Use code NEWBIE50 — 50% OFF on your first order!",
+    shareText: "Share ETNYX with your friends",
+    shareCopied: "Link copied!",
     footer: "#1 Trusted ML rank boosting service in Indonesia",
     terms: "Terms of Service",
     privacy: "Privacy Policy",
@@ -118,6 +141,8 @@ export default function BioPage() {
   const { locale, setLocale } = useLanguage();
   const t = translations[locale as keyof typeof translations] || translations.id;
   const [socials, setSocials] = useState(defaultSocials);
+  const [showPromo, setShowPromo] = useState(true);
+  const [shareCopied, setShareCopied] = useState(false);
 
   useEffect(() => {
     fetch("/api/settings?keys=social_links")
@@ -136,16 +161,36 @@ export default function BioPage() {
       .catch(() => {});
   }, []);
 
+  const handleShare = async () => {
+    const shareUrl = typeof window !== "undefined" ? window.location.href : "https://etnyx.com/bio";
+    const shareText = locale === "id"
+      ? "ETNYX - Jasa Joki ML Terpercaya! Cek di sini:"
+      : "ETNYX - Trusted ML Boosting Service! Check it out:";
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: "ETNYX", text: shareText, url: shareUrl });
+      } catch {}
+    } else {
+      navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2000);
+    }
+  };
+
   const links = [
     { href: "/order", icon: ShoppingCart, title: t.orderTitle, desc: t.orderDesc, accent: true },
+    { href: "/calculator", icon: Calculator, title: t.calculatorTitle, desc: t.calculatorDesc },
+    { href: "/order?mode=gendong", icon: Users, title: t.gendongTitle, desc: t.gendongDesc },
     { href: "/track", icon: Search, title: t.trackTitle, desc: t.trackDesc },
     {
       href: `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(locale === "id" ? "Halo kak, mau tanya soal joki ML" : "Hi, I want to ask about ML boosting")}`,
       icon: MessageCircle, title: t.chatTitle, desc: t.chatDesc, external: true,
     },
-    { href: "/login", icon: LogIn, title: t.loginTitle, desc: t.loginDesc },
-    { href: "/login?redirect=/dashboard", icon: Gift, title: t.rewardsTitle, desc: t.rewardsDesc },
-    { href: "/reviews", icon: Star, title: t.reviewsTitle, desc: t.reviewsDesc },
+    { href: "/dashboard", icon: Gift, title: t.rewardsTitle, desc: t.rewardsDesc },
+    { href: "/#portfolio", icon: Trophy, title: t.portfolioTitle, desc: t.portfolioDesc },
+    { href: "/review", icon: Star, title: t.writeReviewTitle, desc: t.writeReviewDesc },
+    { href: "/#how-it-works", icon: PlayCircle, title: t.tutorialTitle, desc: t.tutorialDesc },
     { href: "/faq", icon: HelpCircle, title: t.faqTitle, desc: t.faqDesc },
     { href: "/", icon: ExternalLink, title: t.websiteTitle, desc: t.websiteDesc },
   ];
@@ -159,6 +204,23 @@ export default function BioPage() {
       </div>
 
       <div className="relative z-10 w-full max-w-md mx-auto px-4 py-10">
+        {/* Promo Banner */}
+        {showPromo && (
+          <div className="mb-4 relative gradient-primary rounded-xl p-3 pr-10 flex items-center gap-3">
+            <Ticket className="w-5 h-5 text-white flex-shrink-0" />
+            <p className="text-white text-xs font-medium leading-tight flex-1">
+              {t.promoText}
+            </p>
+            <button
+              onClick={() => setShowPromo(false)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+              aria-label="Close promo"
+            >
+              <X className="w-3.5 h-3.5 text-white" />
+            </button>
+          </div>
+        )}
+
         {/* Language toggle */}
         <div className="flex justify-end mb-4">
           <button
@@ -255,6 +317,26 @@ export default function BioPage() {
               </Link>
             );
           })}
+        </div>
+
+        {/* Share Button */}
+        <div className="text-center mb-6">
+          <button
+            onClick={handleShare}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-text-muted hover:text-accent hover:border-accent/50 text-xs font-medium transition-all"
+          >
+            {shareCopied ? (
+              <>
+                <Check className="w-3.5 h-3.5 text-green-400" />
+                {t.shareCopied}
+              </>
+            ) : (
+              <>
+                <Share2 className="w-3.5 h-3.5" />
+                {t.shareText}
+              </>
+            )}
+          </button>
         </div>
 
         {/* Social Links */}
