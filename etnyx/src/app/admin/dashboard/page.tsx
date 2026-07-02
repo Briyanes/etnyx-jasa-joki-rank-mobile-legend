@@ -2568,9 +2568,9 @@ export default function AdminDashboard() {
                   name: catalogForm.name.trim(),
                   description: catalogForm.description.trim() || null,
                   category: catalogForm.category,
-                  points_cost: catalogForm.pointsCost,
+                  pointsCost: catalogForm.pointsCost,
                   stock: catalogForm.stock ? parseInt(catalogForm.stock) : null,
-                  image_url: catalogForm.imageUrl.trim() || null,
+                  imageUrl: catalogForm.imageUrl.trim() || null,
                   ...(editCatalogItem ? { id: editCatalogItem.id } : {}),
                 };
                 const method = editCatalogItem ? "PUT" : "POST";
