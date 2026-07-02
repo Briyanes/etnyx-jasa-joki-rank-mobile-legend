@@ -108,19 +108,19 @@ export default function CardCarousel({
         <>
           <button
             onClick={() => scroll("left")}
+            aria-label="Previous"
             className={`hidden lg:flex absolute -left-5 top-1/2 -translate-y-1/2 z-10 w-10 h-10 items-center justify-center rounded-full bg-surface/90 border border-white/10 text-text shadow-lg backdrop-blur-sm transition-all hover:bg-accent hover:text-background hover:border-accent ${
               canScrollLeft ? "opacity-100" : "opacity-0 pointer-events-none"
             }`}
-            aria-label="Previous"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <button
             onClick={() => scroll("right")}
+            aria-label="Next"
             className={`hidden lg:flex absolute -right-5 top-1/2 -translate-y-1/2 z-10 w-10 h-10 items-center justify-center rounded-full bg-surface/90 border border-white/10 text-text shadow-lg backdrop-blur-sm transition-all hover:bg-accent hover:text-background hover:border-accent ${
               canScrollRight ? "opacity-100" : "opacity-0 pointer-events-none"
             }`}
-            aria-label="Next"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -134,12 +134,12 @@ export default function CardCarousel({
             <button
               key={i}
               onClick={() => scrollToIndex(i)}
+              aria-label={`Go to slide ${i + 1}`}
               className={`h-2 rounded-full transition-all duration-300 ${
                 i === activeIndex
                   ? "w-6 bg-accent"
                   : "w-2 bg-white/20 hover:bg-white/40"
               }`}
-              aria-label={`Go to slide ${i + 1}`}
             />
           ))}
         </div>

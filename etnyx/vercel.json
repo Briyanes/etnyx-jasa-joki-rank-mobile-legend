@@ -16,16 +16,8 @@
   ],
   "crons": [
     {
-      "path": "/api/admin/sla-check",
-      "schedule": "0 17 * * *"
-    },
-    {
-      "path": "/api/cron",
-      "schedule": "0 9 * * *"
-    },
-    {
-      "path": "/api/cron/sync-meta-ads",
-      "schedule": "0 18 * * *"
+      "path": "/api/cron/dispatcher",
+      "schedule": "0 9,17 * * *"
     }
   ]
 }
