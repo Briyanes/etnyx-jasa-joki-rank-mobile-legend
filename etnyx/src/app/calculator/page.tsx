@@ -1568,7 +1568,7 @@ export default function CalculatorPage() {
                 )}
                 {!isAdmin && (
                   <div className="p-3 bg-background/50 rounded-xl border border-white/5 text-center">
-                    <p className="text-text-muted text-xs">💎 Diskon khusus untuk admin. Hubungi kami untuk promo!</p>
+                    <p className="text-text-muted text-xs flex items-center gap-1"><TrendingUp className="w-3 h-3 inline" /> Diskon khusus untuk admin. Hubungi kami untuk promo!</p>
                   </div>
                 )}
               </div>
@@ -1667,7 +1667,7 @@ export default function CalculatorPage() {
                         <div className="bg-background rounded-xl p-3 border border-white/5">
                           <p className="text-text-muted text-xs mb-2 flex items-center gap-1.5">
                             <MessageCircle className="w-3 h-3 text-green-400" />
-                            💬 Pesan Penawaran (ke Buyer)
+                            Pesan Penawaran (ke Buyer)
                           </p>
                           <pre className="text-text text-xs whitespace-pre-wrap font-mono bg-surface p-3 rounded-lg max-h-40 overflow-y-auto">
                             {buildAdminQuote()}
@@ -1725,7 +1725,7 @@ export default function CalculatorPage() {
                           className="w-full py-3 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 rounded-xl text-white font-bold text-sm flex items-center justify-center gap-2 transition-colors"
                         >
                           {copiedField === "all" ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
-                          {copiedField === "all" ? "Semua Tersalin!" : "⚡ Copy SEMUA (Penawaran + Format)"}
+                          {copiedField === "all" ? "Semua Tersalin!" : "Copy SEMUA (Penawaran + Format)"}
                         </button>
 
                         {/* Divider */}

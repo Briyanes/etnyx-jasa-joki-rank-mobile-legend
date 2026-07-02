@@ -578,7 +578,7 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
                 try {
                   const res = await fetch("/api/payment/test-connection", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ apiKey: integrations.dompetxApiKey, baseUrl: integrations.dompetxBaseUrl }) });
                   const data = await res.json();
-                  toast(data.success ? "✅ Koneksi berhasil! DompetX aktif dan siap menerima pembayaran." : `❌ Gagal: ${data.error}\n\nPastikan API Key benar.`);
+                  toast(data.success ? "Koneksi berhasil! DompetX aktif dan siap menerima pembayaran." : `Gagal: ${data.error}\n\nPastikan API Key benar.`);
                 } catch (e) { toast(`❌ Error koneksi: ${e instanceof Error ? e.message : "Network error"}`); }
               }} className="px-4 py-2.5 rounded-lg border border-white/10 text-text text-sm font-medium hover:bg-white/5 transition-colors flex items-center gap-2">
                 <Plug className="w-4 h-4" /> Test Connection

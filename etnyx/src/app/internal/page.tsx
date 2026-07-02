@@ -105,7 +105,7 @@ export default async function InternalIndexPage() {
             ETNYX
           </div>
           <div style={{ color: "#7FA8A3", fontSize: "13px", marginTop: "6px" }}>
-            Internal Brief Hub 🔒
+            Internal Brief Hub
           </div>
           <div
             style={{

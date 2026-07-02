@@ -524,7 +524,7 @@ export default function AdminDashboard() {
         return;
       }
       if (result._notificationSent === false) {
-        toast(`⚠️ Status berhasil diubah ke ${newStatus}, tapi WA notifikasi GAGAL terkirim ke customer. Cek pengaturan Meta WhatsApp di Settings > Integrations.`);
+        toast(`Status berhasil diubah ke ${newStatus}, tapi WA notifikasi GAGAL terkirim ke customer. Cek pengaturan Meta WhatsApp di Settings > Integrations.`);
       }
       fetchOrders(); fetchStats();
     } catch (e) { console.error(e); }
@@ -709,7 +709,7 @@ export default function AdminDashboard() {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        toast(`✅ Bukti transfer ${action === "approve" ? "diapprove" : "direject"}`);
+        toast(`Bukti transfer ${action === "approve" ? "diapprove" : "direject"}`);
         // Refresh proofs
         setProofs(proofs.map(p => p.id === proofId ? { ...p, status: action === "approve" ? "approved" : "rejected" } : p));
         if (action === "approve") fetchOrders();
@@ -2480,7 +2480,7 @@ export default function AdminDashboard() {
             <p className="text-text-muted text-xs mb-4">Order: <span className="font-mono text-accent">{credentials.order_id}</span></p>
             {credentials.is_gendong ? (
               <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 mb-3">
-                <p className="text-sm text-blue-400 font-medium mb-1">🎮 Order Gendong / Duo Boost</p>
+                <p className="text-sm text-blue-400 font-medium mb-1">Order Gendong / Duo Boost</p>
                 <p className="text-xs text-text-muted">Order ini tidak memerlukan login/password. Kamu bermain bersama customer di akun mereka.</p>
                 {credentials.notes && <p className="text-xs text-text mt-2">Catatan: {credentials.notes}</p>}
               </div>

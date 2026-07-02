@@ -73,7 +73,7 @@ function LoginForm() {
         <div
           style={{ color: "#7FA8A3", fontSize: "12px", marginBottom: "28px" }}
         >
-          Brief Internal — Team Only 🔒
+          Brief Internal — Team Only
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -137,7 +137,7 @@ function LoginForm() {
         <div
           style={{ color: "#7FA8A3", fontSize: "10px", marginTop: "20px" }}
         >
-          🔒 Terbatas untuk tim internal ETNYX
+          Terbatas untuk tim internal ETNYX
         </div>
       </div>
     </div>
