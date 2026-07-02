@@ -1,16 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-
-// In-memory sliding window rate limiter (resets on cold start — acceptable for Edge)
-// For production with strict requirements, use Vercel KV or Upstash Redis.
-const RATE_LIMIT = 100; // requests per window
-const RATE_LIMIT_WINDOW = 60_000; // 60 seconds in ms
-const rateLimitStore = new Map<string, number[]>();
-
-// Stricter limits for sensitive endpoints (auth, payment)
-const STRICT_RATE_LIMIT = 10; // max 10 attempts per window
-const STRICT_RATE_LIMIT_WINDOW = 300_000; // 5 minutes
-const strictRateLimitStore = new Map<string, number[]>();
+import {
+  rateLimit,
+  strictRateLimit,
+  RATE_LIMIT,
+} from "@/lib/rate-limiter";
 
 const STRICT_PATHS = ["/api/admin/auth", "/api/customer/auth", "/api/staff/auth"];
 
@@ -19,58 +13,7 @@ function getRateLimitKey(request: NextRequest): string {
   return forwarded ? forwarded.split(",")[0].trim() : "unknown";
 }
 
-function checkRateLimit(ip: string): { allowed: boolean; remaining: number } {
-  const now = Date.now();
-  const timestamps = (rateLimitStore.get(ip) || []).filter(
-    (t) => now - t < RATE_LIMIT_WINDOW
-  );
-
-  if (timestamps.length >= RATE_LIMIT) {
-    rateLimitStore.set(ip, timestamps);
-    return { allowed: false, remaining: 0 };
-  }
-
-  timestamps.push(now);
-  rateLimitStore.set(ip, timestamps);
-
-  // Periodic cleanup: remove old entries every 200 requests or when store exceeds 500
-  if (rateLimitStore.size > 500 || timestamps.length % 200 === 0) {
-    for (const [key, val] of rateLimitStore) {
-      const fresh = val.filter((t) => now - t < RATE_LIMIT_WINDOW);
-      if (fresh.length === 0) rateLimitStore.delete(key);
-      else rateLimitStore.set(key, fresh);
-    }
-  }
-
-  return { allowed: true, remaining: RATE_LIMIT - timestamps.length };
-}
-
-function checkStrictRateLimit(ip: string): { allowed: boolean; remaining: number } {
-  const now = Date.now();
-  const timestamps = (strictRateLimitStore.get(ip) || []).filter(
-    (t) => now - t < STRICT_RATE_LIMIT_WINDOW
-  );
-
-  if (timestamps.length >= STRICT_RATE_LIMIT) {
-    strictRateLimitStore.set(ip, timestamps);
-    return { allowed: false, remaining: 0 };
-  }
-
-  timestamps.push(now);
-  strictRateLimitStore.set(ip, timestamps);
-
-  if (strictRateLimitStore.size > 500) {
-    for (const [key, val] of strictRateLimitStore) {
-      const fresh = val.filter((t) => now - t < STRICT_RATE_LIMIT_WINDOW);
-      if (fresh.length === 0) strictRateLimitStore.delete(key);
-      else strictRateLimitStore.set(key, fresh);
-    }
-  }
-
-  return { allowed: true, remaining: STRICT_RATE_LIMIT - timestamps.length };
-}
-
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const response = NextResponse.next();
   const { pathname } = request.nextUrl;
 
@@ -79,7 +22,7 @@ export function middleware(request: NextRequest) {
   if (pathname.startsWith("/api/")) {
     // Stricter rate limit for auth endpoints (10 req / 5 min)
     if (STRICT_PATHS.some((p) => pathname.startsWith(p)) && request.method === "POST") {
-      const strict = checkStrictRateLimit(clientIp);
+      const strict = await strictRateLimit(clientIp);
       if (!strict.allowed) {
         return new NextResponse(
           JSON.stringify({ error: "Too many login attempts. Try again in 5 minutes." }),
@@ -94,7 +37,7 @@ export function middleware(request: NextRequest) {
       }
     }
 
-    const { allowed, remaining } = checkRateLimit(clientIp);
+    const { allowed, remaining } = await rateLimit(clientIp);
     response.headers.set("X-RateLimit-Limit", String(RATE_LIMIT));
     response.headers.set("X-RateLimit-Remaining", String(remaining));
 
