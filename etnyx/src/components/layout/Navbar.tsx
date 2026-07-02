@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Search, MapPin, Calculator, User, LogIn } from "lucide-react";
+import { Search, MapPin, Calculator, User } from "lucide-react";
 
 // Map section hash to visibility key
 const SECTION_VIS_MAP: Record<string, string> = {
@@ -125,65 +125,63 @@ export default function Navbar({ hiddenSections }: NavbarProps) {
       />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center">
-            <Image
-              src="/logo/circle-landscape.webp"
-              alt="ETNYX"
-              width={140}
-              height={36}
-              className="h-8 sm:h-9 w-auto"
-              priority
-            />
-          </Link>
+          {/* === LEFT ZONE: Logo + Desktop Nav === */}
+          <div className="flex items-center gap-8">
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/logo/circle-landscape.webp"
+                alt="ETNYX"
+                width={140}
+                height={36}
+                className="h-8 sm:h-9 w-auto"
+                priority
+              />
+            </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-6">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`transition-colors duration-200 text-sm font-medium relative ${
-                  activeSection === link.href.replace("#", "")
-                    ? "text-accent"
-                    : "text-text-muted hover:text-accent"
-                }`}
-              >
-                {link.label}
-                {activeSection === link.href.replace("#", "") && (
-                  <span className="absolute -bottom-1 left-0 right-0 h-0.5 gradient-primary rounded-full" />
-                )}
-              </Link>
-            ))}
+            {/* Desktop Navigation (left-aligned after logo) */}
+            <div className="hidden md:flex items-center gap-6">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`transition-colors duration-200 text-sm font-medium relative ${
+                    activeSection === link.href.replace("#", "")
+                      ? "text-accent"
+                      : "text-text-muted hover:text-accent"
+                  }`}
+                >
+                  {link.label}
+                  {activeSection === link.href.replace("#", "") && (
+                    <span className="absolute -bottom-1 left-0 right-0 h-0.5 gradient-primary rounded-full" />
+                  )}
+                </Link>
+              ))}
+            </div>
           </div>
 
-          {/* Desktop CTA + Language Switcher */}
-          <div className="hidden md:flex items-center gap-3">
+          {/* === CENTER ZONE: Calculator (desktop only) === */}
+          <div className="hidden md:flex absolute left-1/2 -translate-x-1/2">
             <Link
               href="/calculator"
               className="flex items-center gap-1.5 text-text-muted hover:text-accent transition-colors text-sm font-medium px-3 py-2 rounded-lg hover:bg-white/5"
               title={locale === "id" ? "Kalkulator Harga" : "Price Calculator"}
             >
               <Calculator className="w-4 h-4" />
-              <span className="hidden lg:inline">{locale === "id" ? "Kalkulator" : "Calculator"}</span>
+              <span>{locale === "id" ? "Kalkulator" : "Calculator"}</span>
             </Link>
+          </div>
+
+          {/* === RIGHT ZONE: Lang + Member + Order (desktop) === */}
+          <div className="hidden md:flex items-center gap-3">
             <LanguageSwitcher />
-            {/* Member Login/Signup */}
+            {/* Combined Masuk/Daftar button */}
             <Link
               href="/login"
-              className="flex items-center gap-1.5 text-text-muted hover:text-accent transition-colors text-sm font-medium px-3 py-2 rounded-lg hover:bg-white/5"
-              title={locale === "id" ? "Masuk Member" : "Member Login"}
-            >
-              <LogIn className="w-4 h-4" />
-              <span className="hidden lg:inline">{locale === "id" ? "Masuk" : "Login"}</span>
-            </Link>
-            <Link
-              href="/register"
               className="flex items-center gap-1.5 border border-white/15 text-text hover:text-accent hover:border-accent/50 transition-colors text-sm font-medium px-3 py-2 rounded-lg"
-              title={locale === "id" ? "Daftar Member" : "Sign Up"}
+              title={locale === "id" ? "Masuk / Daftar Member" : "Login / Sign Up"}
             >
               <User className="w-4 h-4" />
-              <span className="hidden lg:inline">{locale === "id" ? "Daftar" : "Sign Up"}</span>
+              <span>{locale === "id" ? "Masuk/Daftar" : "Login/Signup"}</span>
             </Link>
             <Link
               href="/order"
@@ -193,24 +191,18 @@ export default function Navbar({ hiddenSections }: NavbarProps) {
             </Link>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* === MOBILE HEADER === */}
+          {/* [Logo] .... [Lang] [Login] [Menu] */}
           <div className="md:hidden flex items-center gap-1">
             <LanguageSwitcher />
-            {/* Member Login icon (mobile header) */}
+            {/* Member Login icon */}
             <Link
               href="/login"
               className="p-2 text-text-muted hover:text-accent transition-colors"
               title={locale === "id" ? "Masuk Member" : "Member Login"}
               aria-label={locale === "id" ? "Masuk Member" : "Member Login"}
             >
-              <LogIn className="w-5 h-5" />
-            </Link>
-            {/* Order CTA (mobile header) */}
-            <Link
-              href="/order"
-              className="gradient-primary px-3 py-1.5 rounded-lg text-white text-xs font-semibold hover:opacity-90 transition-opacity"
-            >
-              {locale === "id" ? "Order" : "Order"}
+              <User className="w-5 h-5" />
             </Link>
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
