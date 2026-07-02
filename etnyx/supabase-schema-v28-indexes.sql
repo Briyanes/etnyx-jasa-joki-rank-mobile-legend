@@ -93,4 +93,3 @@ CREATE INDEX IF NOT EXISTS idx_ad_metrics_date ON ad_metrics (date);
 -- SELECT indexname, tablename FROM pg_indexes
 -- WHERE schemaname = 'public'
 -- ORDER BY tablename, indexname;
-+++++++ REPLACE
