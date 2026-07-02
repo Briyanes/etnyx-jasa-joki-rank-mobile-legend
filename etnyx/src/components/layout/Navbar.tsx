@@ -195,6 +195,7 @@ export default function Navbar({ hiddenSections }: NavbarProps) {
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center gap-1">
+            <LanguageSwitcher />
             {/* Member Login icon (mobile header) */}
             <Link
               href="/login"
@@ -204,16 +205,13 @@ export default function Navbar({ hiddenSections }: NavbarProps) {
             >
               <LogIn className="w-5 h-5" />
             </Link>
-            {/* Member Signup icon (mobile header) */}
+            {/* Order CTA (mobile header) */}
             <Link
-              href="/register"
-              className="p-2 text-text-muted hover:text-accent transition-colors"
-              title={locale === "id" ? "Daftar Member" : "Sign Up"}
-              aria-label={locale === "id" ? "Daftar Member" : "Sign Up"}
+              href="/order"
+              className="gradient-primary px-3 py-1.5 rounded-lg text-white text-xs font-semibold hover:opacity-90 transition-opacity"
             >
-              <User className="w-5 h-5" />
+              {locale === "id" ? "Order" : "Order"}
             </Link>
-            <LanguageSwitcher />
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="p-2 text-text-muted hover:text-text transition-colors"
