@@ -6,19 +6,34 @@ import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { WHATSAPP_NUMBER } from "@/lib/constants";
 import { 
-  ShoppingCart, Search, MessageCircle,
+  Search, MessageCircle,
   ExternalLink, Gift,
   MapPin, Clock, Star, Shield, Zap,
-  HelpCircle, Calculator, Users, Trophy,
-  PlayCircle, Share2, X, Ticket, Check,
+  HelpCircle, Calculator, Users,
+  Package, Gamepad2, Share2, X, Ticket, Check,
 } from "lucide-react";
+
+interface ActivePromo {
+  code: string;
+  discount_type: string;
+  discount_value: number;
+  expires_at: string | null;
+}
 
 const translations = {
   id: {
     subtitle: "Jasa Joki & Gendong Mobile Legends",
     online: "Online 24/7",
-    orderTitle: "Order Joki",
-    orderDesc: "Langsung order push rank",
+    // Joki type buttons
+    jokiPaketTitle: "Joki Paket",
+    jokiPaketDesc: "Paket rank lengkap",
+    jokiPerStarTitle: "Per Bintang",
+    jokiPerStarDesc: "Hitung per bintang",
+    jokiGendongTitle: "Joki Gendong",
+    jokiGendongDesc: "Mabar bareng booster",
+    jokiClassicTitle: "Joki Classic",
+    jokiClassicDesc: "10 WIN pattern",
+    // Other links
     trackTitle: "Lacak Order",
     trackDesc: "Cek progress order kamu",
     chatTitle: "Chat WhatsApp",
@@ -27,27 +42,17 @@ const translations = {
     rewardsDesc: "Kelola pesanan, poin & tukar hadiah",
     websiteTitle: "Website Utama",
     websiteDesc: "etnyx.com",
-    reviewsTitle: "Lihat Review",
-    reviewsDesc: "Baca review dari customer lain",
     writeReviewTitle: "Tulis Review",
     writeReviewDesc: "Berikan review & dapatkan skin gratis",
     faqTitle: "FAQ",
     faqDesc: "Pertanyaan yang sering ditanyakan",
     calculatorTitle: "Cek Harga",
     calculatorDesc: "Hitung estimasi harga joki",
-    gendongTitle: "Joki Gendong",
-    gendongDesc: "Main bareng booster, tanpa share akun",
-    portfolioTitle: "Bukti Kerja",
-    portfolioDesc: "Lihat screenshot hasil joki kami",
-    tutorialTitle: "Cara Order",
-    tutorialDesc: "Panduan order dalam 3 langkah",
-    loginTitle: "Login / Daftar",
-    loginDesc: "Masuk atau buat akun baru",
+    // Misc
     followUs: "Follow Us",
     startFrom: "Mulai dari",
     rating: "Rating",
     safe: "Aman 100%",
-    promoText: "Pakai kode NEWBIE50 — Diskon 50% untuk order pertama!",
     shareText: "Bagikan ETNYX ke temanmu",
     shareCopied: "Link disalin!",
     footer: "Jasa joki rank ML terpercaya #1 di Indonesia",
@@ -58,8 +63,16 @@ const translations = {
   en: {
     subtitle: "Mobile Legends Boosting Service",
     online: "Online 24/7",
-    orderTitle: "Order Boost",
-    orderDesc: "Order rank push instantly",
+    // Joki type buttons
+    jokiPaketTitle: "Boost Package",
+    jokiPaketDesc: "Complete rank packages",
+    jokiPerStarTitle: "Per Star",
+    jokiPerStarDesc: "Pay per star climbed",
+    jokiGendongTitle: "Duo Boost",
+    jokiGendongDesc: "Play with your booster",
+    jokiClassicTitle: "Classic Boost",
+    jokiClassicDesc: "10 WIN pattern",
+    // Other links
     trackTitle: "Track Order",
     trackDesc: "Check your order progress",
     chatTitle: "Chat WhatsApp",
@@ -68,27 +81,17 @@ const translations = {
     rewardsDesc: "Manage orders, points & redeem prizes",
     websiteTitle: "Main Website",
     websiteDesc: "etnyx.com",
-    reviewsTitle: "See Reviews",
-    reviewsDesc: "Read reviews from other customers",
     writeReviewTitle: "Write Review",
     writeReviewDesc: "Leave a review & get a free skin",
     faqTitle: "FAQ",
     faqDesc: "Frequently asked questions",
     calculatorTitle: "Check Price",
     calculatorDesc: "Calculate your boost estimate",
-    gendongTitle: "Duo Boost",
-    gendongDesc: "Play with booster, no account sharing",
-    portfolioTitle: "Our Work",
-    portfolioDesc: "See our rank-up screenshots",
-    tutorialTitle: "How to Order",
-    tutorialDesc: "Order guide in 3 easy steps",
-    loginTitle: "Login / Register",
-    loginDesc: "Sign in or create an account",
+    // Misc
     followUs: "Follow Us",
     startFrom: "Start from",
     rating: "Rating",
     safe: "100% Safe",
-    promoText: "Use code NEWBIE50 — 50% OFF on your first order!",
     shareText: "Share ETNYX with your friends",
     shareCopied: "Link copied!",
     footer: "#1 Trusted ML rank boosting service in Indonesia",
@@ -143,8 +146,10 @@ export default function BioPage() {
   const [socials, setSocials] = useState(defaultSocials);
   const [showPromo, setShowPromo] = useState(true);
   const [shareCopied, setShareCopied] = useState(false);
+  const [activePromo, setActivePromo] = useState<ActivePromo | null>(null);
 
   useEffect(() => {
+    // Fetch social links
     fetch("/api/settings?keys=social_links")
       .then((r) => r.json())
       .then((d) => {
@@ -156,6 +161,16 @@ export default function BioPage() {
             { href: sl.facebook || "https://facebook.com/etnyx_ml", label: "Facebook", icon: FacebookIcon },
             { href: sl.youtube || "https://youtube.com/@etnyx_ml", label: "YouTube", icon: YoutubeIcon },
           ]);
+        }
+      })
+      .catch(() => {});
+
+    // Fetch active promo from database
+    fetch("/api/promo/active")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.promos && d.promos.length > 0) {
+          setActivePromo(d.promos[0]);
         }
       })
       .catch(() => {});
@@ -178,22 +193,39 @@ export default function BioPage() {
     }
   };
 
+  // 4 Joki type buttons
+  const jokiTypes = [
+    { href: "/order", icon: Package, title: t.jokiPaketTitle, desc: t.jokiPaketDesc },
+    { href: "/order?mode=perstar", icon: Star, title: t.jokiPerStarTitle, desc: t.jokiPerStarDesc },
+    { href: "/order?mode=gendong", icon: Users, title: t.jokiGendongTitle, desc: t.jokiGendongDesc },
+    { href: "/order?mode=classic", icon: Gamepad2, title: t.jokiClassicTitle, desc: t.jokiClassicDesc },
+  ];
+
   const links = [
-    { href: "/order", icon: ShoppingCart, title: t.orderTitle, desc: t.orderDesc, accent: true },
     { href: "/calculator", icon: Calculator, title: t.calculatorTitle, desc: t.calculatorDesc },
-    { href: "/order?mode=gendong", icon: Users, title: t.gendongTitle, desc: t.gendongDesc },
     { href: "/track", icon: Search, title: t.trackTitle, desc: t.trackDesc },
     {
       href: `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(locale === "id" ? "Halo kak, mau tanya soal joki ML" : "Hi, I want to ask about ML boosting")}`,
       icon: MessageCircle, title: t.chatTitle, desc: t.chatDesc, external: true,
     },
     { href: "/dashboard", icon: Gift, title: t.rewardsTitle, desc: t.rewardsDesc },
-    { href: "/#portfolio", icon: Trophy, title: t.portfolioTitle, desc: t.portfolioDesc },
     { href: "/review", icon: Star, title: t.writeReviewTitle, desc: t.writeReviewDesc },
-    { href: "/#how-it-works", icon: PlayCircle, title: t.tutorialTitle, desc: t.tutorialDesc },
     { href: "/faq", icon: HelpCircle, title: t.faqTitle, desc: t.faqDesc },
     { href: "/", icon: ExternalLink, title: t.websiteTitle, desc: t.websiteDesc },
   ];
+
+  // Format promo text dynamically
+  const getPromoText = () => {
+    if (!activePromo) return null;
+    const discountText = activePromo.discount_type === "percentage"
+      ? `${activePromo.discount_value}% OFF`
+      : `Diskon Rp ${activePromo.discount_value.toLocaleString("id-ID")}`;
+    return locale === "id"
+      ? `Pakai kode ${activePromo.code} — ${discountText}!`
+      : `Use code ${activePromo.code} — ${discountText}!`;
+  };
+
+  const promoText = getPromoText();
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center relative overflow-hidden">
@@ -204,12 +236,12 @@ export default function BioPage() {
       </div>
 
       <div className="relative z-10 w-full max-w-md mx-auto px-4 py-10">
-        {/* Promo Banner */}
-        {showPromo && (
+        {/* Dynamic Promo Banner */}
+        {showPromo && promoText && (
           <div className="mb-4 relative gradient-primary rounded-xl p-3 pr-10 flex items-center gap-3">
             <Ticket className="w-5 h-5 text-white flex-shrink-0" />
             <p className="text-white text-xs font-medium leading-tight flex-1">
-              {t.promoText}
+              {promoText}
             </p>
             <button
               onClick={() => setShowPromo(false)}
@@ -281,23 +313,36 @@ export default function BioPage() {
           </div>
         </div>
 
-        {/* Links */}
+        {/* 4 Joki Type Buttons (Grid 2x2) */}
+        <div className="grid grid-cols-2 gap-3 mb-3">
+          {jokiTypes.map((joki) => (
+            <Link
+              key={joki.title}
+              href={joki.href}
+              className="group flex flex-col items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] hover:bg-accent/10 hover:border-accent/40 p-4 transition-all duration-200 hover:scale-[1.03] active:scale-[0.97]"
+            >
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-accent/10 text-accent group-hover:bg-accent/20 transition-colors">
+                <joki.icon className="w-5 h-5" />
+              </div>
+              <div className="text-center">
+                <p className="font-semibold text-sm text-text">{joki.title}</p>
+                <p className="text-text-muted text-[10px] leading-tight mt-0.5">{joki.desc}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        {/* Regular Links */}
         <div className="flex flex-col gap-3 mb-8">
           {links.map((link) => {
-            const className = `group relative flex items-center gap-4 rounded-xl border p-4 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] ${
-              link.accent
-                ? "bg-accent/10 border-accent/30 hover:bg-accent/20 hover:border-accent/50 hover:shadow-[0_0_30px_rgba(var(--color-accent-rgb,0,255,200),0.15)]"
-                : "bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/20"
-            }`;
+            const className = `group relative flex items-center gap-4 rounded-xl border p-4 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] bg-white/[0.03] border-white/10 hover:bg-white/[0.06] hover:border-white/20`;
             const content = (
               <>
-                <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${
-                  link.accent ? "bg-accent/20 text-accent" : "bg-white/5 text-text-muted group-hover:text-accent"
-                } transition-colors`}>
+                <div className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center bg-white/5 text-text-muted group-hover:text-accent transition-colors">
                   <link.icon className="w-5 h-5" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className={`font-semibold text-sm ${link.accent ? "text-accent" : "text-text"}`}>
+                  <p className="font-semibold text-sm text-text">
                     {link.title}
                   </p>
                   <p className="text-text-muted text-xs truncate">{link.desc}</p>

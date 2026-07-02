@@ -7,7 +7,7 @@ import { ChevronDown, HelpCircle } from "lucide-react";
 const faqItemsId = [
   {
     question: "Apakah akun saya aman?",
-    answer: "100% aman. Kami menggunakan VPN Indonesia dan tidak mengakses data pribadi apapun selain bermain ranked. Lebih dari 3000 order sukses tanpa ada banned.",
+    answer: "Kami menjamin keamanan akun. Jika terkena banned akibat joki kami dan terbukti dari kami, akan bertanggung jawab penuh dan ganti rugi. Kami menggunakan VPN premium dan tidak mengubah pengaturan akun. Data login dienkripsi AES-256. Tidak menggunakan segala bentuk cheat!",
   },
   {
     question: "Berapa lama proses joki?",
@@ -50,7 +50,7 @@ const faqItemsId = [
 const faqItemsEn = [
   {
     question: "Is my account safe?",
-    answer: "100% safe. We use Indonesian VPN and don't access any personal data except playing ranked games. Over 3000 successful orders without any bans.",
+    answer: "We guarantee account safety. If your account gets banned due to our boosting service and it's proven to be caused by us, we take full responsibility and will compensate you. We use premium VPN and do not modify account settings. Login data is encrypted with AES-256. We do not use any form of cheats!",
   },
   {
     question: "How long does boosting take?",
