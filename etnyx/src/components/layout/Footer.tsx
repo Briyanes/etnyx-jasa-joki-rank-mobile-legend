@@ -233,14 +233,31 @@ export default function Footer() {
             <p className="text-text-muted/50 text-[10px] sm:text-xs uppercase tracking-widest">
               {locale === "id" ? "Metode Pembayaran" : "Payment Methods"}
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              {["BCA", "BRI", "Mandiri", "GoPay", "OVO", "DANA", "ShopeePay", "QRIS"].map((method) => (
-                <span
-                  key={method}
-                  className="px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-text-muted/70 text-[10px] sm:text-xs font-medium"
+            <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
+              {[
+                { name: "BCA", src: "/logo/payment/bank-central-asia(bca)-logo.png" },
+                { name: "BRI", src: "/logo/payment/bank-rakyat-indonesia-(bri)-logo.png" },
+                { name: "BNI", src: "/logo/payment/bank-negara-indonesia-(bni)-logo.png" },
+                { name: "Mandiri", src: "/logo/payment/bank-mandiri.png" },
+                { name: "GoPay", src: "/logo/payment/gopay-logo.png" },
+                { name: "OVO", src: "/logo/payment/ovo-logo.png" },
+                { name: "DANA", src: "/logo/payment/dana-logo.png" },
+                { name: "ShopeePay", src: "/logo/payment/shopeepay-logo.png" },
+                { name: "QRIS", src: "/logo/payment/qris-logo.png" },
+              ].map((method) => (
+                <div
+                  key={method.name}
+                  className="bg-white rounded-md px-2 py-1 flex items-center justify-center h-7 sm:h-8 min-w-[40px]"
+                  title={method.name}
                 >
-                  {method}
-                </span>
+                  <Image
+                    src={method.src}
+                    alt={method.name}
+                    width={50}
+                    height={20}
+                    className="h-4 sm:h-5 w-auto object-contain"
+                  />
+                </div>
               ))}
             </div>
           </div>
