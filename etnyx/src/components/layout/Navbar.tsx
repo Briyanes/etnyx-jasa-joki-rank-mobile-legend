@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { Search, MapPin, Calculator } from "lucide-react";
+import { Search, MapPin, Calculator, User, LogIn } from "lucide-react";
 
 // Map section hash to visibility key
 const SECTION_VIS_MAP: Record<string, string> = {
@@ -168,6 +168,23 @@ export default function Navbar({ hiddenSections }: NavbarProps) {
               <span className="hidden lg:inline">{locale === "id" ? "Kalkulator" : "Calculator"}</span>
             </Link>
             <LanguageSwitcher />
+            {/* Member Login/Signup */}
+            <Link
+              href="/login"
+              className="flex items-center gap-1.5 text-text-muted hover:text-accent transition-colors text-sm font-medium px-3 py-2 rounded-lg hover:bg-white/5"
+              title={locale === "id" ? "Masuk Member" : "Member Login"}
+            >
+              <LogIn className="w-4 h-4" />
+              <span className="hidden lg:inline">{locale === "id" ? "Masuk" : "Login"}</span>
+            </Link>
+            <Link
+              href="/register"
+              className="flex items-center gap-1.5 border border-white/15 text-text hover:text-accent hover:border-accent/50 transition-colors text-sm font-medium px-3 py-2 rounded-lg"
+              title={locale === "id" ? "Daftar Member" : "Sign Up"}
+            >
+              <User className="w-4 h-4" />
+              <span className="hidden lg:inline">{locale === "id" ? "Daftar" : "Sign Up"}</span>
+            </Link>
             <Link
               href="/order"
               className="gradient-primary px-6 py-2.5 rounded-xl text-white text-sm font-semibold hover:opacity-90 transition-opacity duration-200"
@@ -249,6 +266,26 @@ export default function Navbar({ hiddenSections }: NavbarProps) {
                     </Link>
                   );
                 })}
+              </div>
+
+              {/* Member Login/Signup (Mobile) */}
+              <div className="flex gap-2 mt-2">
+                <Link
+                  href="/login"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex-1 flex items-center justify-center gap-1.5 border border-white/15 text-text hover:text-accent hover:border-accent/50 transition-colors text-sm font-medium px-3 py-2.5 rounded-xl"
+                >
+                  <LogIn className="w-4 h-4" />
+                  {locale === "id" ? "Masuk" : "Login"}
+                </Link>
+                <Link
+                  href="/register"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex-1 flex items-center justify-center gap-1.5 border border-white/15 text-text hover:text-accent hover:border-accent/50 transition-colors text-sm font-medium px-3 py-2.5 rounded-xl"
+                >
+                  <User className="w-4 h-4" />
+                  {locale === "id" ? "Daftar" : "Sign Up"}
+                </Link>
               </div>
 
               <Link
