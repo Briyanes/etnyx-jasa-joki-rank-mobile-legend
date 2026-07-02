@@ -47,7 +47,6 @@ class RedisRateLimiter implements RateLimiter {
 
   async check(key: string, limit: number, windowSec: number): Promise<RateLimitResult> {
     const redisKey = `ratelimit:${key}`;
-    const now = Math.floor(Date.now() / 1000);
 
     try {
       // Atomic INCR + EXPIRE via Upstash REST pipeline
