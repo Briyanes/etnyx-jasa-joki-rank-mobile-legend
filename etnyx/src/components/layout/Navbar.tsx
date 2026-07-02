@@ -199,7 +199,7 @@ export default function Navbar({ hiddenSections }: NavbarProps) {
               href="/login"
               className="gradient-primary px-4 py-2 rounded-xl text-white text-xs font-semibold hover:opacity-90 transition-opacity duration-200 whitespace-nowrap"
             >
-              {locale === "id" ? "Login Member" : "Login"}
+              {locale === "id" ? "Login Member" : "Member Login"}
             </Link>
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
