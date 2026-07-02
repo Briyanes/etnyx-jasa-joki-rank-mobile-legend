@@ -67,3 +67,16 @@ Thumbs.db
 secrets/
 .secrets
 .env*.local
+
+# Marketing assets (managed externally, not needed in codebase)
+/ETNYX-*.html
+/ETNYX-*.csv
+/ETNYX-*.md
+/exports-mp4/
+/screenshots/
+/INSTAGRAM-CONTENT-PLAN.md
+/MENTARI-CLUBFOOT-GoogleAds-GSN-Strategy.md
+/VIDEO-SCRIPT-HOW-TO-ORDER.md
+
+# Supabase migration history (tracked via /supabase-schema-v*.sql — keep only latest)
+# Old SQL schemas remain in git history
