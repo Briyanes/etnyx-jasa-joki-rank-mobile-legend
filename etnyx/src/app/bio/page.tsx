@@ -209,7 +209,7 @@ export default function BioPage() {
       icon: MessageCircle, title: t.chatTitle, desc: t.chatDesc, external: true,
     },
     { href: "/dashboard", icon: Gift, title: t.rewardsTitle, desc: t.rewardsDesc },
-    { href: "/review", icon: Star, title: t.writeReviewTitle, desc: t.writeReviewDesc },
+    { href: "/reviews", icon: Star, title: t.writeReviewTitle, desc: t.writeReviewDesc },
     { href: "/faq", icon: HelpCircle, title: t.faqTitle, desc: t.faqDesc },
     { href: "/", icon: ExternalLink, title: t.websiteTitle, desc: t.websiteDesc },
   ];
