@@ -3,7 +3,14 @@
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Link from "next/link";
-import { Flame, X } from "lucide-react";
+import { Flame, X, Ticket } from "lucide-react";
+
+interface ActivePromo {
+  code: string;
+  discount_type: string;
+  discount_value: number;
+  expires_at: string | null;
+}
 
 export default function PromoBanner() {
   const { locale } = useLanguage();
@@ -12,6 +19,7 @@ export default function PromoBanner() {
   const [cmsText, setCmsText] = useState<string | null>(null);
   const [cmsLink, setCmsLink] = useState<string>("/order");
   const [cmsEnabled, setCmsEnabled] = useState(true);
+  const [activePromo, setActivePromo] = useState<ActivePromo | null>(null);
   const [timeLeft, setTimeLeft] = useState({
     hours: 0,
     minutes: 0,
@@ -24,18 +32,25 @@ export default function PromoBanner() {
       discount: "DISKON 25%",
       code: "ETNYX25",
       cta: "Klaim",
+      useCode: "Pakai kode",
+      off: "OFF",
+      discountLabel: "Diskon",
     },
     en: {
       discount: "25% OFF",
       code: "ETNYX25",
       cta: "Claim",
+      useCode: "Use code",
+      off: "OFF",
+      discountLabel: "Discount",
     },
   };
 
   const txt = t[locale];
 
-  // Fetch CMS promo banner settings
+  // Fetch CMS promo banner settings + active promo from database
   useEffect(() => {
+    // Fetch CMS settings
     fetch("/api/settings?keys=promo_banner")
       .then((res) => res.json())
       .then((data) => {
@@ -46,7 +61,29 @@ export default function PromoBanner() {
         }
       })
       .catch(() => {});
+
+    // Fetch active promo from database (same source as bio page)
+    fetch("/api/promo/active")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.promos && data.promos.length > 0) {
+          setActivePromo(data.promos[0]);
+        }
+      })
+      .catch(() => {});
   }, []);
+
+  // Build dynamic promo text from database
+  const getPromoText = (): string | null => {
+    if (!activePromo) return null;
+    const discountText =
+      activePromo.discount_type === "percentage"
+        ? `${activePromo.discount_value}% ${txt.off}`
+        : `${txt.discountLabel} Rp ${activePromo.discount_value.toLocaleString("id-ID")}`;
+    return `${txt.useCode} ${activePromo.code} — ${discountText}!`;
+  };
+
+  const dynamicPromoText = getPromoText();
 
   // Initialize persistent countdown end time
   useEffect(() => {
@@ -99,8 +136,18 @@ export default function PromoBanner() {
         <div className="flex items-center justify-between gap-2">
           {/* Content — left aligned on desktop, centered on mobile */}
           <div className="flex items-center gap-2 sm:gap-3 flex-1 justify-center sm:justify-center">
-            <Flame className="w-3.5 h-3.5 text-background hidden sm:block" />
-            {cmsText ? (
+            {dynamicPromoText ? (
+              <Ticket className="w-3.5 h-3.5 text-background hidden sm:block flex-shrink-0" />
+            ) : (
+              <Flame className="w-3.5 h-3.5 text-background hidden sm:block" />
+            )}
+
+            {/* Priority: Database promo → CMS text → hardcoded fallback */}
+            {dynamicPromoText ? (
+              <span className="text-background font-bold text-[10px] sm:text-xs">
+                {dynamicPromoText}
+              </span>
+            ) : cmsText ? (
               <span className="text-background font-bold text-[10px] sm:text-xs">{cmsText}</span>
             ) : (
               <>
@@ -112,6 +159,8 @@ export default function PromoBanner() {
                 </code>
               </>
             )}
+
+            {/* Countdown timer */}
             <div className="flex items-center gap-0.5 font-mono text-background font-bold text-[10px] sm:text-xs">
               <span className="bg-background/20 px-1 sm:px-1.5 py-0.5 rounded">
                 {String(timeLeft.hours).padStart(2, "0")}
@@ -125,6 +174,8 @@ export default function PromoBanner() {
                 {String(timeLeft.seconds).padStart(2, "0")}
               </span>
             </div>
+
+            {/* CTA button */}
             <Link
               href={cmsLink}
               className="hidden sm:inline-flex bg-background text-primary px-3 py-1 rounded-full font-bold text-xs hover:bg-background/90 transition-colors whitespace-nowrap"
