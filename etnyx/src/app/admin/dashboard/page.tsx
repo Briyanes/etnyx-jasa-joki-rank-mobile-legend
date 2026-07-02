@@ -18,14 +18,13 @@ import {
   Home, Link2,
 } from "lucide-react";
 import dynamic from "next/dynamic";
-import SettingsTab from "./SettingsTab";
-import PayrollTab from "./PayrollTab";
-import ReportsTab from "./ReportsTab";
-import AdsTab from "./AdsTab";
-import AnalyticsTab from "./AnalyticsTab";
-import LeaderboardTab from "./LeaderboardTab";
-
-import PricingTab from "./PricingTab";
+const SettingsTab = dynamic(() => import("./SettingsTab"), { ssr: false });
+const PayrollTab = dynamic(() => import("./PayrollTab"), { ssr: false });
+const ReportsTab = dynamic(() => import("./ReportsTab"), { ssr: false });
+const AdsTab = dynamic(() => import("./AdsTab"), { ssr: false });
+const AnalyticsTab = dynamic(() => import("./AnalyticsTab"), { ssr: false });
+const LeaderboardTab = dynamic(() => import("./LeaderboardTab"), { ssr: false });
+const PricingTab = dynamic(() => import("./PricingTab"), { ssr: false });
 const LineChart = dynamic(() => import("recharts").then((mod) => mod.LineChart), { ssr: false });
 const Line = dynamic(() => import("recharts").then((mod) => mod.Line), { ssr: false });
 const XAxis = dynamic(() => import("recharts").then((mod) => mod.XAxis), { ssr: false });
@@ -487,12 +486,14 @@ export default function AdminDashboard() {
     })();
   }, [checkAuth, fetchStats, fetchOrders, fetchChartData]);
 
-  // Auto-refresh polling every 30 seconds
+  // Auto-refresh polling every 30 seconds (only when tab is visible)
   useEffect(() => {
     if (loading) return;
     const interval = setInterval(() => {
-      fetchStats();
-      fetchOrders();
+      if (document.visibilityState === "visible") {
+        fetchStats();
+        fetchOrders();
+      }
     }, 30000);
     return () => clearInterval(interval);
   }, [loading, fetchStats, fetchOrders]);

@@ -4,19 +4,7 @@ import { cookies } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
 import { logAdminAction } from "@/lib/audit-log";
-
-// Rate limit: 5 attempts per 15 minutes per IP
-const adminLoginRateLimit = new Map<string, number[]>();
-function checkLoginRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const windowMs = 15 * 60_000;
-  const maxAttempts = 5;
-  const timestamps = (adminLoginRateLimit.get(ip) || []).filter((t) => now - t < windowMs);
-  if (timestamps.length >= maxAttempts) return false;
-  timestamps.push(now);
-  adminLoginRateLimit.set(ip, timestamps);
-  return true;
-}
+import { strictRateLimit } from "@/lib/rate-limiter";
 
 function getAdminJwtSecret() {
   const secret = process.env.ADMIN_JWT_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -28,8 +16,9 @@ function getAdminJwtSecret() {
 
 export async function POST(request: NextRequest) {
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-  if (!checkLoginRateLimit(ip)) {
-    return NextResponse.json({ error: "Terlalu banyak percobaan login. Coba lagi dalam 15 menit." }, { status: 429 });
+  const rl = await strictRateLimit(`admin-login:${ip}`);
+  if (!rl.allowed) {
+    return NextResponse.json({ error: "Terlalu banyak percobaan login. Coba lagi dalam 5 menit." }, { status: 429 });
   }
   try {
     const { email, password } = await request.json();

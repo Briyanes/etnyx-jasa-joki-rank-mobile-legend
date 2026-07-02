@@ -91,15 +91,26 @@ export default function PricingTab() {
   // ---- Fetch ----
   const fetchPricing = useCallback(async () => {
     try {
-      const res = await fetch("/api/admin/settings?key=pricing_catalog");
-      const d = await res.json();
+      // Parallel fetch all 5 pricing configs (was 5 sequential → now 1 round-trip)
+      const [res1, res2, res3, resC, res4] = await Promise.all([
+        fetch("/api/admin/settings?key=pricing_catalog"),
+        fetch("/api/admin/settings?key=perstar_pricing"),
+        fetch("/api/admin/settings?key=gendong_pricing"),
+        fetch("/api/admin/settings?key=classic_pricing_catalog"),
+        fetch("/api/admin/settings?key=season_pricing"),
+      ]);
+
+      const [d, d2, d3, dC, d4] = await Promise.all([
+        res1.json(), res2.json(), res3.json(), resC.json(), res4.json(),
+      ]);
+
+      // Process pricing_catalog
       if (d.value && Array.isArray(d.value)) {
         setPricingCatalog(d.value);
         if (d.value.length > 0 && !activePricingCat) setActivePricingCat(d.value[0].id);
       }
 
-      const res2 = await fetch("/api/admin/settings?key=perstar_pricing");
-      const d2 = await res2.json();
+      // Process perstar_pricing
       if (d2.value && Array.isArray(d2.value)) {
         setPerStarPricing(d2.value);
       } else {
@@ -116,8 +127,7 @@ export default function PricingTab() {
         ]);
       }
 
-      const res3 = await fetch("/api/admin/settings?key=gendong_pricing");
-      const d3 = await res3.json();
+      // Process gendong_pricing
       if (d3.value && Array.isArray(d3.value)) {
         setGendongPricing(d3.value);
       } else {
@@ -133,8 +143,7 @@ export default function PricingTab() {
         ]);
       }
 
-      const resC = await fetch("/api/admin/settings?key=classic_pricing_catalog");
-      const dC = await resC.json();
+      // Process classic_pricing_catalog
       if (dC.value && Array.isArray(dC.value)) {
         setClassicPricing(dC.value);
         if (dC.value.length > 0 && !activeClassicCat) setActiveClassicCat(dC.value[0].id);
@@ -159,8 +168,7 @@ export default function PricingTab() {
         }).catch(() => {});
       }
 
-      const res4 = await fetch("/api/admin/settings?key=season_pricing");
-      const d4 = await res4.json();
+      // Process season_pricing
       if (d4.value && typeof d4.value === "object") {
         setSeasonPricing(d4.value);
       }
