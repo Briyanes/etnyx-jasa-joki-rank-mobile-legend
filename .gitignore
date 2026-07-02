@@ -61,3 +61,19 @@ Thumbs.db
 secrets/
 .secrets
 .env*.local
+
+# Stale root-level project files (actual project is in /etnyx/)
+/src/
+/public/
+/package.json
+/package-lock.json
+/next.config.ts
+/tsconfig.json
+/postcss.config.mjs
+/eslint.config.mjs
+/index.html
+/vercel.json
+/vercel-env.txt
+/supabase-schema*.sql
+/.playwright-mcp/
+/etny
