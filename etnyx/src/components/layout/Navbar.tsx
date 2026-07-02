@@ -194,7 +194,25 @@ export default function Navbar({ hiddenSections }: NavbarProps) {
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center gap-2">
+          <div className="md:hidden flex items-center gap-1">
+            {/* Member Login icon (mobile header) */}
+            <Link
+              href="/login"
+              className="p-2 text-text-muted hover:text-accent transition-colors"
+              title={locale === "id" ? "Masuk Member" : "Member Login"}
+              aria-label={locale === "id" ? "Masuk Member" : "Member Login"}
+            >
+              <LogIn className="w-5 h-5" />
+            </Link>
+            {/* Member Signup icon (mobile header) */}
+            <Link
+              href="/register"
+              className="p-2 text-text-muted hover:text-accent transition-colors"
+              title={locale === "id" ? "Daftar Member" : "Sign Up"}
+              aria-label={locale === "id" ? "Daftar Member" : "Sign Up"}
+            >
+              <User className="w-5 h-5" />
+            </Link>
             <LanguageSwitcher />
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -266,26 +284,6 @@ export default function Navbar({ hiddenSections }: NavbarProps) {
                     </Link>
                   );
                 })}
-              </div>
-
-              {/* Member Login/Signup (Mobile) */}
-              <div className="flex gap-2 mt-2">
-                <Link
-                  href="/login"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="flex-1 flex items-center justify-center gap-1.5 border border-white/15 text-text hover:text-accent hover:border-accent/50 transition-colors text-sm font-medium px-3 py-2.5 rounded-xl"
-                >
-                  <LogIn className="w-4 h-4" />
-                  {locale === "id" ? "Masuk" : "Login"}
-                </Link>
-                <Link
-                  href="/register"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="flex-1 flex items-center justify-center gap-1.5 border border-white/15 text-text hover:text-accent hover:border-accent/50 transition-colors text-sm font-medium px-3 py-2.5 rounded-xl"
-                >
-                  <User className="w-4 h-4" />
-                  {locale === "id" ? "Daftar" : "Sign Up"}
-                </Link>
               </div>
 
               <Link
