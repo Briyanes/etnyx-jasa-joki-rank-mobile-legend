@@ -192,17 +192,14 @@ export default function Navbar({ hiddenSections }: NavbarProps) {
           </div>
 
           {/* === MOBILE HEADER === */}
-          {/* [Logo] .... [Lang] [Login] [Menu] */}
-          <div className="md:hidden flex items-center gap-1">
-            <LanguageSwitcher />
-            {/* Member Login icon */}
+          {/* [Logo] .... [Login Member] [Menu] */}
+          <div className="md:hidden flex items-center gap-2">
+            {/* Member Login button — gradient CTA */}
             <Link
               href="/login"
-              className="p-2 text-text-muted hover:text-accent transition-colors"
-              title={locale === "id" ? "Masuk Member" : "Member Login"}
-              aria-label={locale === "id" ? "Masuk Member" : "Member Login"}
+              className="gradient-primary px-4 py-2 rounded-xl text-white text-xs font-semibold hover:opacity-90 transition-opacity duration-200 whitespace-nowrap"
             >
-              <User className="w-5 h-5" />
+              {locale === "id" ? "Login Member" : "Login"}
             </Link>
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}

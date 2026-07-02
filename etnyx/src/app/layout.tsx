@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import ThemeToggle from "@/components/ThemeToggle";
+import FloatingLanguageButton from "@/components/FloatingLanguageButton";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import TrackingPixels from "@/components/TrackingPixels";
 import { LanguageProvider } from "@/contexts/LanguageContext";
@@ -244,6 +245,7 @@ export default function RootLayout({
           <ToastProvider>
             {children}
             <ThemeToggle />
+            <FloatingLanguageButton />
           </ToastProvider>
         </LanguageProvider>
         <TrackingPixels />
