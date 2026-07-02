@@ -15,6 +15,7 @@ import {
   Flame, Target, Lightbulb, Menu, FileDown,
   KeyRound, Check, X, ListChecks, History,
   Calculator,
+  Home, Link2,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import SettingsTab from "./SettingsTab";
@@ -1906,8 +1907,8 @@ export default function AdminDashboard() {
                             {!p.is_active ? "Inactive" : (p.max_uses && p.used_count >= p.max_uses) ? "Habis" : "Active"}
                           </span>
                           <div className="flex gap-0.5 mt-1">
-                            {p.show_on_homepage && <span title="Homepage" className="text-[8px] px-1 rounded bg-accent/10 text-accent">🏠</span>}
-                            {p.show_on_bio && <span title="Bio Page" className="text-[8px] px-1 rounded bg-purple-500/10 text-purple-400">🔗</span>}
+                            {p.show_on_homepage && <span title="Homepage" className="text-[8px] px-1 py-0.5 rounded bg-accent/10 text-accent inline-flex items-center"><Home className="w-2.5 h-2.5" /></span>}
+                            {p.show_on_bio && <span title="Bio Page" className="text-[8px] px-1 py-0.5 rounded bg-purple-500/10 text-purple-400 inline-flex items-center"><Link2 className="w-2.5 h-2.5" /></span>}
                           </div>
                         </td>
                         <td className="px-4 py-3">
@@ -2873,8 +2874,8 @@ function PromoModal({ item, onSave, onClose }: { item: PromoCode | null; onSave:
           <label className="flex items-center gap-2 text-text text-sm"><input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} /> Active</label>
           <div className="border-t border-white/5 pt-3 space-y-2">
             <p className="text-text-muted text-xs font-medium">Tampilkan di:</p>
-            <label className="flex items-center gap-2 text-text text-sm cursor-pointer"><input type="checkbox" checked={form.show_on_homepage} onChange={(e) => setForm({ ...form, show_on_homepage: e.target.checked })} className="accent-accent" /> <span>🏠 Homepage <span className="text-text-muted text-[10px]">(Banner promo)</span></span></label>
-            <label className="flex items-center gap-2 text-text text-sm cursor-pointer"><input type="checkbox" checked={form.show_on_bio} onChange={(e) => setForm({ ...form, show_on_bio: e.target.checked })} className="accent-accent" /> <span>🔗 Bio Page <span className="text-text-muted text-[10px]">(Link-in-bio)</span></span></label>
+            <label className="flex items-center gap-2 text-text text-sm cursor-pointer"><input type="checkbox" checked={form.show_on_homepage} onChange={(e) => setForm({ ...form, show_on_homepage: e.target.checked })} className="accent-accent" /> <span className="inline-flex items-center gap-1"><Home className="w-3.5 h-3.5" /> Homepage <span className="text-text-muted text-[10px]">(Banner promo)</span></span></label>
+            <label className="flex items-center gap-2 text-text text-sm cursor-pointer"><input type="checkbox" checked={form.show_on_bio} onChange={(e) => setForm({ ...form, show_on_bio: e.target.checked })} className="accent-accent" /> <span className="inline-flex items-center gap-1"><Link2 className="w-3.5 h-3.5" /> Bio Page <span className="text-text-muted text-[10px]">(Link-in-bio)</span></span></label>
           </div>
         </div>
         <div className="flex gap-3 mt-5">
