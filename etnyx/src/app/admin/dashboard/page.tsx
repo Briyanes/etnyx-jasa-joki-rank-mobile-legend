@@ -108,6 +108,8 @@ interface PromoCode {
   used_count: number;
   is_active: boolean;
   expires_at: string | null;
+  show_on_homepage: boolean;
+  show_on_bio: boolean;
 }
 
 interface Customer {
@@ -1903,6 +1905,10 @@ export default function AdminDashboard() {
                           <span className={`px-2 py-0.5 rounded text-[10px] ${p.is_active && !(p.max_uses && p.used_count >= p.max_uses) ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}`}>
                             {!p.is_active ? "Inactive" : (p.max_uses && p.used_count >= p.max_uses) ? "Habis" : "Active"}
                           </span>
+                          <div className="flex gap-0.5 mt-1">
+                            {p.show_on_homepage && <span title="Homepage" className="text-[8px] px-1 rounded bg-accent/10 text-accent">🏠</span>}
+                            {p.show_on_bio && <span title="Bio Page" className="text-[8px] px-1 rounded bg-purple-500/10 text-purple-400">🔗</span>}
+                          </div>
                         </td>
                         <td className="px-4 py-3">
                           <button onClick={() => { setEditItem(p); setShowModal("promo"); }} className="text-accent text-xs mr-2 hover:underline">Edit</button>
@@ -2843,6 +2849,8 @@ function PromoModal({ item, onSave, onClose }: { item: PromoCode | null; onSave:
     discount_value: item?.discount_value || 10, max_discount: item?.max_discount || null as number | null,
     max_uses: item?.max_uses || null as number | null, is_active: item?.is_active ?? true,
     expires_at: item?.expires_at ? item.expires_at.split("T")[0] : "",
+    show_on_homepage: item?.show_on_homepage ?? true,
+    show_on_bio: item?.show_on_bio ?? true,
   });
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
@@ -2863,6 +2871,11 @@ function PromoModal({ item, onSave, onClose }: { item: PromoCode | null; onSave:
           <input type="number" placeholder="Max Uses (empty = unlimited)" value={form.max_uses || ""} onChange={(e) => setForm({ ...form, max_uses: parseInt(e.target.value) || null })} className="w-full bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-sm" />
           <input type="date" value={form.expires_at} onChange={(e) => setForm({ ...form, expires_at: e.target.value })} className="w-full bg-background border border-white/10 rounded-lg px-3 py-2 text-text text-sm" />
           <label className="flex items-center gap-2 text-text text-sm"><input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} /> Active</label>
+          <div className="border-t border-white/5 pt-3 space-y-2">
+            <p className="text-text-muted text-xs font-medium">Tampilkan di:</p>
+            <label className="flex items-center gap-2 text-text text-sm cursor-pointer"><input type="checkbox" checked={form.show_on_homepage} onChange={(e) => setForm({ ...form, show_on_homepage: e.target.checked })} className="accent-accent" /> <span>🏠 Homepage <span className="text-text-muted text-[10px]">(Banner promo)</span></span></label>
+            <label className="flex items-center gap-2 text-text text-sm cursor-pointer"><input type="checkbox" checked={form.show_on_bio} onChange={(e) => setForm({ ...form, show_on_bio: e.target.checked })} className="accent-accent" /> <span>🔗 Bio Page <span className="text-text-muted text-[10px]">(Link-in-bio)</span></span></label>
+          </div>
         </div>
         <div className="flex gap-3 mt-5">
           <button onClick={onClose} className="flex-1 px-3 py-2 border border-white/10 rounded-lg text-text-muted text-sm">Cancel</button>

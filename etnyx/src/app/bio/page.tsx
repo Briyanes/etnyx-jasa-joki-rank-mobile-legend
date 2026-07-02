@@ -166,7 +166,7 @@ export default function BioPage() {
       .catch(() => {});
 
     // Fetch active promo from database
-    fetch("/api/promo/active")
+    fetch("/api/promo/active?placement=bio")
       .then((r) => r.json())
       .then((d) => {
         if (d.promos && d.promos.length > 0) {

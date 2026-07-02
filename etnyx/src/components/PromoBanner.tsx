@@ -62,8 +62,8 @@ export default function PromoBanner() {
       })
       .catch(() => {});
 
-    // Fetch active promo from database (same source as bio page)
-    fetch("/api/promo/active")
+    // Fetch active promo from database (filtered for homepage placement)
+    fetch("/api/promo/active?placement=homepage")
       .then((res) => res.json())
       .then((data) => {
         if (data.promos && data.promos.length > 0) {

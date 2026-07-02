@@ -53,6 +53,8 @@ export async function POST(request: NextRequest) {
       max_uses: Number(body.max_uses) || null,
       is_active: body.is_active !== false,
       expires_at: body.expires_at ? new Date(body.expires_at).toISOString() : null,
+      show_on_homepage: body.show_on_homepage !== false,
+      show_on_bio: body.show_on_bio !== false,
     };
 
     const { data, error } = await supabase
@@ -80,7 +82,7 @@ export async function PUT(request: NextRequest) {
     const { id } = body;
 
     // Whitelist allowed fields to prevent mass assignment
-    const allowedFields = ["code", "discount_type", "discount_value", "min_order", "max_uses", "is_active", "expires_at"] as const;
+    const allowedFields = ["code", "discount_type", "discount_value", "min_order", "max_uses", "is_active", "expires_at", "show_on_homepage", "show_on_bio"] as const;
     const updates: Record<string, unknown> = {};
     for (const field of allowedFields) {
       if (field in body) updates[field] = body[field];
