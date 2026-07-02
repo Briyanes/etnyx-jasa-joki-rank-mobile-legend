@@ -2,93 +2,146 @@
 -- ETNYX — DATABASE INDEXES MIGRATION (v28)
 -- ============================================
 -- PURPOSE: Add performance indexes on critical query columns.
---          These are CREATE INDEX IF NOT EXISTS — safe to run multiple times.
+--          Uses DO $$ blocks to safely skip tables that don't exist.
+--          Safe to run multiple times.
 --
--- RUN THIS IN: Supabase Dashboard → SQL Editor → Run
+-- RUN THIS IN: Supabase Dashboard -> SQL Editor -> Run
 -- ============================================
 
 -- ============================================
 -- ORDERS TABLE — most queried table
 -- ============================================
-
--- Lookup by order_id (customer tracking, payment, notifications)
 CREATE INDEX IF NOT EXISTS idx_orders_order_id ON orders (order_id);
-
--- Filter by status (dashboard, cron, stats)
 CREATE INDEX IF NOT EXISTS idx_orders_status ON orders (status);
-
--- Composite: status + created_at (cron queries: pending > 24h, etc.)
 CREATE INDEX IF NOT EXISTS idx_orders_status_created_at ON orders (status, created_at);
-
--- Composite: status + updated_at (stale order detection)
 CREATE INDEX IF NOT EXISTS idx_orders_status_updated_at ON orders (status, updated_at);
+CREATE INDEX IF NOT EXISTS idx_orders_customer_id ON orders (customer_id);
 
--- Filter by assigned_worker_id (worker dashboard)
-CREATE INDEX IF NOT EXISTS idx_orders_assigned_worker ON orders (assigned_worker_id);
-
--- Composite: status + assigned_worker (worker active orders)
-CREATE INDEX IF NOT EXISTS idx_orders_worker_status ON orders (assigned_worker_id, status);
+-- assigned_worker_id / assigned_staff_id column name varies — try both safely
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'orders' AND column_name = 'assigned_worker_id') THEN
+    CREATE INDEX IF NOT EXISTS idx_orders_assigned_worker ON orders (assigned_worker_id);
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'orders' AND column_name = 'assigned_staff_id') THEN
+    CREATE INDEX IF NOT EXISTS idx_orders_assigned_staff ON orders (assigned_staff_id);
+  END IF;
+END $$;
 
 -- ============================================
 -- PAYMENT PROOFS TABLE
 -- ============================================
-
--- Lookup by order_id (payment verification)
-CREATE INDEX IF NOT EXISTS idx_payment_proofs_order_id ON payment_proofs (order_id);
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'payment_proofs') THEN
+    CREATE INDEX IF NOT EXISTS idx_payment_proofs_order_id ON payment_proofs (order_id);
+  END IF;
+END $$;
 
 -- ============================================
--- WORKERS / STAFF TABLE
+-- STAFF USERS TABLE (workers/admins)
 -- ============================================
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'staff_users' AND column_name = 'email') THEN
+    CREATE INDEX IF NOT EXISTS idx_staff_users_email ON staff_users (email);
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'staff_users' AND column_name = 'role') THEN
+    CREATE INDEX IF NOT EXISTS idx_staff_users_role ON staff_users (role);
+  END IF;
+END $$;
 
--- Login lookup by email
-CREATE INDEX IF NOT EXISTS idx_workers_email ON workers (email);
-
--- Filter by role (admin dashboard staff list)
-CREATE INDEX IF NOT EXISTS idx_workers_role ON workers (role);
+-- ============================================
+-- CUSTOMERS TABLE
+-- ============================================
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'customers' AND column_name = 'email') THEN
+    CREATE INDEX IF NOT EXISTS idx_customers_email ON customers (email);
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'customers' AND column_name = 'phone') THEN
+    CREATE INDEX IF NOT EXISTS idx_customers_phone ON customers (phone);
+  END IF;
+END $$;
 
 -- ============================================
 -- REVIEWS TABLE
 -- ============================================
-
--- Lookup by order_id (review check in cron)
-CREATE INDEX IF NOT EXISTS idx_reviews_order_id ON reviews (order_id);
-
--- Filter by is_approved (public testimonials display)
-CREATE INDEX IF NOT EXISTS idx_reviews_is_approved ON reviews (is_approved);
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'reviews') THEN
+    CREATE INDEX IF NOT EXISTS idx_reviews_order_id ON reviews (order_id);
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'reviews' AND column_name = 'is_approved') THEN
+      CREATE INDEX IF NOT EXISTS idx_reviews_is_approved ON reviews (is_approved);
+    END IF;
+  END IF;
+END $$;
 
 -- ============================================
 -- PROMO CODES TABLE
 -- ============================================
-
--- Lookup by code (discount validation)
-CREATE INDEX IF NOT EXISTS idx_promo_codes_code ON promo_codes (code);
-
--- Filter by is_active + expires_at (cron auto-expire)
-CREATE INDEX IF NOT EXISTS idx_promo_codes_active_expires ON promo_codes (is_active, expires_at);
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'promo_codes') THEN
+    CREATE INDEX IF NOT EXISTS idx_promo_codes_code ON promo_codes (code);
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'promo_codes' AND column_name = 'is_active') THEN
+      CREATE INDEX IF NOT EXISTS idx_promo_codes_active ON promo_codes (is_active);
+    END IF;
+  END IF;
+END $$;
 
 -- ============================================
 -- SETTINGS TABLE
 -- ============================================
-
--- Lookup by key (app settings)
-CREATE INDEX IF NOT EXISTS idx_settings_key ON settings (key);
-
--- ============================================
--- WHATSAPP MESSAGES TABLE (if exists)
--- ============================================
-
--- Lookup by order_id (message history)
-CREATE INDEX IF NOT EXISTS idx_wa_messages_order_id ON whatsapp_messages (order_id);
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'settings') THEN
+    CREATE INDEX IF NOT EXISTS idx_settings_key ON settings (key);
+  END IF;
+END $$;
 
 -- ============================================
--- AD METRICS TABLE (if exists)
+-- CHAT MESSAGES TABLE
 -- ============================================
-
--- Lookup by date (ads dashboard)
-CREATE INDEX IF NOT EXISTS idx_ad_metrics_date ON ad_metrics (date);
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'chat_messages' AND column_name = 'order_id') THEN
+    CREATE INDEX IF NOT EXISTS idx_chat_messages_order_id ON chat_messages (order_id);
+  END IF;
+END $$;
 
 -- ============================================
--- VERIFICATION QUERIES (run to confirm)
+-- ORDER ASSIGNMENTS TABLE
+-- ============================================
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'order_assignments') THEN
+    CREATE INDEX IF NOT EXISTS idx_order_assignments_order_id ON order_assignments (order_id);
+  END IF;
+END $$;
+
+-- ============================================
+-- AD SPEND TABLE
+-- ============================================
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'ad_spend') THEN
+    CREATE INDEX IF NOT EXISTS idx_ad_spend_date ON ad_spend (date);
+  END IF;
+END $$;
+
+-- ============================================
+-- NOTIFICATION LOGS TABLE
+-- ============================================
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'notification_logs' AND column_name = 'order_id') THEN
+    CREATE INDEX IF NOT EXISTS idx_notification_logs_order_id ON notification_logs (order_id);
+  END IF;
+END $$;
+
+-- ============================================
+-- VERIFICATION QUERY (uncomment to confirm)
 -- ============================================
 -- SELECT indexname, tablename FROM pg_indexes
 -- WHERE schemaname = 'public'
