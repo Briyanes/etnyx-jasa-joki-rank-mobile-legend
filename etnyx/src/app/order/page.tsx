@@ -44,6 +44,8 @@ import {
   Wand2,
   TreePine,
   Coins,
+  Languages,
+  Award,
 } from "lucide-react";
 import { MoontonIcon, FacebookIcon, GoogleIcon, TiktokIcon, VkIcon, AppleIcon } from "@/components/BrandIcons";
 import { captureUtmParams, getStoredUtmParams, trackAddToCart, trackInitiateCheckout, trackViewContent } from "@/lib/tracking";
@@ -433,7 +435,7 @@ const BUNDLE_TIERS = [
     name: "Starter Pack",
     minStars: 3,
     bonusStars: 0,
-    icon: "🥉",
+    icon: "bronze",
     color: "from-slate-600/20 to-slate-700/10",
     borderColor: "border-slate-500/30",
   },
@@ -442,7 +444,7 @@ const BUNDLE_TIERS = [
     name: "Value Pack",
     minStars: 10,
     bonusStars: 2,
-    icon: "🥈",
+    icon: "silver",
     color: "from-blue-500/20 to-cyan-500/10",
     borderColor: "border-blue-400/40",
   },
@@ -451,7 +453,7 @@ const BUNDLE_TIERS = [
     name: "Mega Pack",
     minStars: 25,
     bonusStars: 5,
-    icon: "🥇",
+    icon: "gold",
     color: "from-yellow-500/20 to-amber-500/10",
     borderColor: "border-yellow-400/50",
   },
@@ -1110,7 +1112,7 @@ function LangToggle() {
       onClick={() => setLocale(locale === "id" ? "en" : "id")}
       className="flex items-center gap-1 px-2 py-1 rounded-lg bg-surface border border-white/10 text-text text-xs hover:bg-white/5 transition-colors"
     >
-      <span>{locale === "id" ? "🇮🇩" : "🇺🇸"}</span>
+      <Languages className="w-3.5 h-3.5" />
       <span className="font-medium">{locale.toUpperCase()}</span>
     </button>
   );
@@ -2653,7 +2655,9 @@ function OrderPageContent() {
                                   </span>
                                 )}
                                 <div className="text-center">
-                                  <span className="text-xl block">{tier.icon}</span>
+                                  <span className="text-xl block flex items-center justify-center">
+                                    {tier.icon === "gold" ? <Award className="w-5 h-5 text-yellow-400" /> : tier.icon === "silver" ? <Award className="w-5 h-5 text-gray-300" /> : <Award className="w-5 h-5 text-amber-700" />}
+                                  </span>
                                   <p className="text-text text-[11px] font-bold mt-1">{tier.name}</p>
                                   <p className="text-text-muted text-[9px] mt-0.5">
                                     {tier.minStars}★ {locale === "id" ? "minimal" : "min"}
@@ -2935,7 +2939,9 @@ function OrderPageContent() {
                               <div key={tier.id} className={`relative p-3 rounded-xl border-2 bg-gradient-to-br ${tier.color} transition-all ${isActive ? `${tier.borderColor} shadow-lg scale-105` : isUnlocked ? "border-white/10 opacity-60" : "border-white/5 opacity-50"}`}>
                                 {isActive && <span className="absolute -top-2 -right-2 bg-green-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5"><Check className="w-2 h-2" /> AKTIF</span>}
                                 <div className="text-center">
-                                  <span className="text-xl block">{tier.icon}</span>
+                                  <span className="text-xl block flex items-center justify-center">
+                                    {tier.icon === "gold" ? <Award className="w-5 h-5 text-yellow-400" /> : tier.icon === "silver" ? <Award className="w-5 h-5 text-gray-300" /> : <Award className="w-5 h-5 text-amber-700" />}
+                                  </span>
                                   <p className="text-text text-[11px] font-bold mt-1">{tier.name}</p>
                                   <p className="text-text-muted text-[9px] mt-0.5">{tier.minStars}★ min</p>
                                   {tier.bonusStars > 0 ? <p className="text-green-400 text-xs font-bold mt-1 flex items-center justify-center gap-0.5">+{tier.bonusStars}<Star className="w-2.5 h-2.5 fill-current" /></p> : <p className="text-text-muted text-[9px] mt-1">Base</p>}

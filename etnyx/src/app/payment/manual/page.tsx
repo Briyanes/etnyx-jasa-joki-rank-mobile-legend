@@ -30,6 +30,7 @@ import {
   Shield,
   Zap,
   type LucideIcon,
+  Languages,
 } from "lucide-react";
 
 interface BankAccount {
@@ -89,7 +90,7 @@ function LangToggle() {
       onClick={() => setLocale(locale === "id" ? "en" : "id")}
       className="flex items-center gap-1 px-2 py-1 rounded-lg bg-surface border border-white/10 text-text text-xs hover:bg-white/5 transition-colors"
     >
-      <span>{locale === "id" ? "🇮🇩" : "🇺🇸"}</span>
+      <Languages className="w-3.5 h-3.5" />
       <span className="font-medium">{locale.toUpperCase()}</span>
     </button>
   );

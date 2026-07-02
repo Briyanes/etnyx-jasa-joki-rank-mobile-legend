@@ -5,12 +5,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { WHATSAPP_NUMBER } from "@/lib/constants";
-import { 
+import {
   Search, MessageCircle,
   ExternalLink, Gift,
   MapPin, Clock, Star, Shield, Zap,
   HelpCircle, Calculator, Users,
-  Package, Gamepad2, Share2, X, Ticket, Check,
+  Package, Gamepad2, Share2, X, Ticket, Check, Languages,
 } from "lucide-react";
 
 interface ActivePromo {
@@ -259,7 +259,7 @@ export default function BioPage() {
             onClick={() => setLocale(locale === "id" ? "en" : "id")}
             className="flex items-center gap-1 px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-text text-xs hover:bg-white/10 transition-colors"
           >
-            <span>{locale === "id" ? "🇮🇩" : "🇺🇸"}</span>
+            <Languages className="w-3.5 h-3.5" />
             <span className="font-medium">{locale.toUpperCase()}</span>
           </button>
         </div>

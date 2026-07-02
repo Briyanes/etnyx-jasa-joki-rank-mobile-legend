@@ -11,8 +11,8 @@ export const translations: Record<Locale, Translations> = {
 export const defaultLocale: Locale = "id";
 
 export const localeNames: Record<Locale, string> = {
-  id: "🇮🇩 Indonesia",
-  en: "🇺🇸 English",
+  id: "Indonesia",
+  en: "English",
 };
 
 export function getTranslations(locale: Locale): Translations {

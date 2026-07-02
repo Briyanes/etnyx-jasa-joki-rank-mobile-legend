@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Clock, CheckCircle, Rocket, XCircle, Check, ChevronLeft, Shield, Zap, MessageCircle, Loader2, Trophy, Star, Swords, Target, Timer, Camera, Crown, ExternalLink } from "lucide-react";
+import { Clock, CheckCircle, Rocket, XCircle, Check, ChevronLeft, Shield, Zap, MessageCircle, Loader2, Trophy, Star, Swords, Target, Timer, Camera, Crown, ExternalLink, Languages } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { WHATSAPP_NUMBER, rankLabels } from "@/lib/constants";
 import { ReactNode } from "react";
@@ -166,7 +166,7 @@ function LangToggle() {
       onClick={() => setLocale(locale === "id" ? "en" : "id")}
       className="flex items-center gap-1 px-2 py-1 rounded-lg bg-surface border border-white/10 text-text text-xs hover:bg-white/5 transition-colors"
     >
-      <span>{locale === "id" ? "🇮🇩" : "🇺🇸"}</span>
+      <Languages className="w-3.5 h-3.5" />
       <span className="font-medium">{locale.toUpperCase()}</span>
     </button>
   );
