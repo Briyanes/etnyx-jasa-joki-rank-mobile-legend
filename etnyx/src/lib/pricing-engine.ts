@@ -349,7 +349,7 @@ const PACKAGE_PRICE_MAP: Record<string, number> = Object.fromEntries(
 );
 
 // Maps canonical Mythic rank IDs to per-star pricing keys
-const RANK_TO_PRICE_KEY: Record<string, string> = {
+export const RANK_TO_PRICE_KEY: Record<string, string> = {
   warrior: "master",
   elite: "master",
   master: "master",
@@ -705,4 +705,169 @@ export function calculateServerPrice(
   }
 
   return null;
+}
+
+// ===== Shared UI / Calculation Helpers =====
+
+/**
+ * Safe price lookup: NEVER falls back to Rp 5.000 blindly.
+ * Priority: DB/CMS data → DEFAULT_PER_STAR_RANKS hardcoded → grandmaster (Rp 6.000).
+ */
+export function getSafePriceForKey(
+  key: string,
+  perStarPrices: PerStarRank[]
+): number {
+  const entry = perStarPrices.find((r) => r.id === key);
+  if (entry?.price && entry.price > 0) return entry.price;
+
+  const defaultEntry = DEFAULT_PER_STAR_RANKS.find((r) => r.id === key);
+  if (defaultEntry?.price && defaultEntry.price > 0) return defaultEntry.price;
+
+  const gm = perStarPrices.find((r) => r.id === "grandmaster");
+  return gm?.price || 6000;
+}
+
+/**
+ * Parse rank from classic package title (e.g. "Epic 10 Win" → "epic")
+ */
+export function parseClassicRank(title: string): string {
+  const lower = title.toLowerCase();
+  if (lower.includes("immortal")) return "mythicimmortal";
+  if (lower.includes("glory")) return "mythicglory";
+  if (lower.includes("honor")) return "mythichonor";
+  if (lower.includes("mythic")) return "mythic";
+  if (lower.includes("legend")) return "legend";
+  if (lower.includes("epic")) return "epic";
+  return "mythic";
+}
+
+/**
+ * Per-tier star breakdown segment for Per Star mode displays.
+ */
+export interface StarBreakdownSegment {
+  tierId: string;
+  tierLabel: string;
+  stars: number;
+  pricePerStar: number;
+  subtotal: number;
+}
+
+/**
+ * Calculate per-tier star breakdown for Per Star mode.
+ * CRITICAL: Skips "mythicgrading" in between-segments to prevent overcharge.
+ */
+export function calculateStarBreakdown(
+  currentRank: string,
+  currentDiv: number,
+  targetRank: string,
+  targetDiv: number,
+  currentDivisionStar: number,
+  perStarPrices: PerStarRank[],
+  currentMythicStars: number = 0,
+  targetMythicStars: number = 0
+): StarBreakdownSegment[] {
+  const rankLabels: Record<string, string> = {
+    warrior: "Warrior",
+    elite: "Elite",
+    master: "Master",
+    grandmaster: "Grand Master",
+    epic: "Epic",
+    legend: "Legend",
+    mythic: "Mythic (0–25)",
+    mythichonor: "Mythic Honor (25–50)",
+    mythicglory: "Mythic Glory (50–100)",
+    mythicimmortal: "Mythic Immortal (100+)",
+  };
+
+  const segments: StarBreakdownSegment[] = [];
+  const ci = RANK_ORDER.indexOf(currentRank);
+  const ti = RANK_ORDER.indexOf(targetRank);
+  if (ci < 0 || ti < 0) return segments;
+
+  const getPrice = (key: string) => getSafePriceForKey(key, perStarPrices);
+
+  // Segment 1: current rank remaining stars
+  {
+    const key = RANK_TO_PRICE_KEY[currentRank] || "grandmaster";
+    const pricePerStar = getPrice(key);
+    let starsInThisRank: number;
+    if (RANKS_WITH_STARS.includes(currentRank)) {
+      const cfg = RANK_DIVISION_CONFIG[currentRank];
+      starsInThisRank = cfg
+        ? cfg.starsPerDiv - currentDivisionStar + (currentDiv - 1) * cfg.starsPerDiv
+        : 0;
+    } else if (MYTHIC_STAR_CONFIG[currentRank]) {
+      const mCfg = MYTHIC_STAR_CONFIG[currentRank];
+      if (currentRank === targetRank) {
+        starsInThisRank = targetMythicStars - currentMythicStars;
+      } else {
+        starsInThisRank = mCfg.nextMin - currentMythicStars;
+      }
+    } else {
+      starsInThisRank = 0;
+    }
+    starsInThisRank = Math.max(0, starsInThisRank);
+    if (starsInThisRank > 0) {
+      segments.push({
+        tierId: currentRank,
+        tierLabel: rankLabels[currentRank] || currentRank,
+        stars: starsInThisRank,
+        pricePerStar,
+        subtotal: pricePerStar * starsInThisRank,
+      });
+    }
+  }
+
+  // Segments in between
+  for (let i = ci + 1; i < ti; i++) {
+    const rank = RANK_ORDER[i];
+    if (rank === "mythicgrading") continue;
+    const key = RANK_TO_PRICE_KEY[rank] || "grandmaster";
+    const pricePerStar = getPrice(key);
+    let starsInThisRank: number;
+    if (RANKS_WITH_STARS.includes(rank)) {
+      const cfg = RANK_DIVISION_CONFIG[rank];
+      starsInThisRank = cfg ? cfg.divisions * cfg.starsPerDiv : 0;
+    } else {
+      const mCfg = MYTHIC_STAR_CONFIG[rank];
+      starsInThisRank = mCfg ? mCfg.nextMin - mCfg.min : 0;
+    }
+    if (starsInThisRank > 0) {
+      segments.push({
+        tierId: rank,
+        tierLabel: rankLabels[rank] || rank,
+        stars: starsInThisRank,
+        pricePerStar,
+        subtotal: pricePerStar * starsInThisRank,
+      });
+    }
+  }
+
+  // Segment last: target rank stars needed
+  if (ci < ti) {
+    const key = RANK_TO_PRICE_KEY[targetRank] || "grandmaster";
+    const pricePerStar = getPrice(key);
+    let starsInThisRank: number;
+    if (RANKS_WITH_STARS.includes(targetRank)) {
+      const cfg = RANK_DIVISION_CONFIG[targetRank];
+      starsInThisRank = cfg ? (cfg.divisions - targetDiv) * cfg.starsPerDiv : 0;
+    } else if (MYTHIC_STAR_CONFIG[targetRank]) {
+      const mCfg = MYTHIC_STAR_CONFIG[targetRank];
+      starsInThisRank = targetMythicStars - mCfg.min;
+    } else {
+      starsInThisRank = 0;
+    }
+    starsInThisRank = Math.max(0, starsInThisRank);
+    if (starsInThisRank > 0) {
+      segments.push({
+        tierId: targetRank,
+        tierLabel: rankLabels[targetRank] || targetRank,
+        stars: starsInThisRank,
+        pricePerStar,
+        subtotal: pricePerStar * starsInThisRank,
+      });
+    }
+  }
+
+  return segments;
 }

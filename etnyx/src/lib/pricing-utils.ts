@@ -29,10 +29,15 @@ export {
   calculateExtraMythicCost,
   calculateAutoPaketPrice,
   calculateServerPrice,
+  RANK_TO_PRICE_KEY,
+  getSafePriceForKey,
+  parseClassicRank,
+  calculateStarBreakdown,
   type CMSPricing,
   type PackageCategory,
   type ProductPackage,
   type PerStarRank,
+  type StarBreakdownSegment,
 } from "./pricing-engine";
 
 // ===== UI-only helpers (not needed by backend) =====
