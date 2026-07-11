@@ -13,12 +13,68 @@ function getRateLimitKey(request: NextRequest): string {
   return forwarded ? forwarded.split(",")[0].trim() : "unknown";
 }
 
+// ===== Banned IP Cache (refreshes every 5 minutes) =====
+let bannedIpCache: Set<string> | null = null;
+let bannedIpCacheTime = 0;
+const BANNED_IP_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+async function getBannedIps(): Promise<Set<string>> {
+  const now = Date.now();
+  if (bannedIpCache && now - bannedIpCacheTime < BANNED_IP_CACHE_TTL) {
+    return bannedIpCache;
+  }
+
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!supabaseUrl || !supabaseKey) return new Set();
+
+    const res = await fetch(`${supabaseUrl}/rest/v1/banned_ips?select=ip_address`, {
+      headers: {
+        apikey: supabaseKey,
+        Authorization: `Bearer ${supabaseKey}`,
+      },
+      // Short timeout to avoid blocking requests
+      signal: AbortSignal.timeout(2000),
+    });
+
+    if (!res.ok) return bannedIpCache || new Set();
+
+    const data = (await res.json()) as Array<{ ip_address: string }>;
+    bannedIpCache = new Set(data.map((r) => r.ip_address));
+    bannedIpCacheTime = now;
+    return bannedIpCache;
+  } catch {
+    // If fetch fails, use stale cache or empty set
+    return bannedIpCache || new Set();
+  }
+}
+
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next();
   const { pathname } = request.nextUrl;
 
-  // Rate limiting — enforce on API routes
+  // ===== Banned IP Check =====
   const clientIp = getRateLimitKey(request);
+
+  // Check banned IPs for all routes (not just API)
+  const bannedIps = await getBannedIps();
+  if (bannedIps.size > 0 && bannedIps.has(clientIp)) {
+    // For API routes, return JSON error
+    if (pathname.startsWith("/api/")) {
+      return new NextResponse(
+        JSON.stringify({ error: "Akses ditolak." }),
+        { status: 403, headers: { "Content-Type": "application/json" } }
+      );
+    }
+    // For page routes, redirect to a blocked page
+    return new NextResponse("Forbidden", {
+      status: 403,
+      headers: { "Content-Type": "text/plain" },
+    });
+  }
+
+  // Rate limiting — enforce on API routes
   if (pathname.startsWith("/api/")) {
     // Stricter rate limit for auth endpoints (10 req / 5 min)
     if (STRICT_PATHS.some((p) => pathname.startsWith(p)) && request.method === "POST") {

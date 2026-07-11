@@ -25,6 +25,14 @@ const RATE_LIMIT_WINDOW = 60; // seconds (was 60_000ms)
 const STRICT_RATE_LIMIT = 10; // max attempts per window
 const STRICT_RATE_LIMIT_WINDOW = 300; // seconds (5 minutes, was 300_000ms)
 
+// Anti-spam: Order creation limits
+const ORDER_RATE_LIMIT_1H = 5; // max 5 orders per 1 hour per IP
+const ORDER_RATE_LIMIT_1H_WINDOW = 3600; // 1 hour in seconds
+const ORDER_RATE_LIMIT_24H = 10; // max 10 orders per 24 hours per IP
+const ORDER_RATE_LIMIT_24H_WINDOW = 86400; // 24 hours in seconds
+const MAX_PENDING_PER_WA = 3; // max 3 pending orders per WhatsApp number
+const AUTO_BAN_THRESHOLD = 10; // auto-ban if >10 orders in 1 hour
+
 // ===== Types =====
 interface RateLimitResult {
   allowed: boolean;
@@ -153,3 +161,81 @@ export async function strictRateLimit(key: string): Promise<RateLimitResult> {
 }
 
 export { RATE_LIMIT, STRICT_RATE_LIMIT };
+
+// ===== Anti-Spam: Order Rate Limiting =====
+
+export interface OrderRateLimitResult {
+  allowed: boolean;
+  reason?: string;
+  remaining1h?: number;
+  remaining24h?: number;
+}
+
+/**
+ * Check order creation rate limit for an IP.
+ * - Max 5 orders per 1 hour
+ * - Max 10 orders per 24 hours
+ */
+export async function checkOrderRateLimit(ip: string): Promise<OrderRateLimitResult> {
+  const limiter = getLimiter();
+
+  const [hourResult, dayResult] = await Promise.all([
+    limiter.check(`order1h:${ip}`, ORDER_RATE_LIMIT_1H, ORDER_RATE_LIMIT_1H_WINDOW),
+    limiter.check(`order24h:${ip}`, ORDER_RATE_LIMIT_24H, ORDER_RATE_LIMIT_24H_WINDOW),
+  ]);
+
+  if (!dayResult.allowed) {
+    return {
+      allowed: false,
+      reason: "Anda telah mencapai batas harian pembuatan order (10/24 jam). Silakan coba besok.",
+      remaining24h: 0,
+    };
+  }
+
+  if (!hourResult.allowed) {
+    return {
+      allowed: false,
+      reason: "Terlalu banyak order dalam 1 jam. Silakan tunggu beberapa jam lagi.",
+      remaining1h: 0,
+    };
+  }
+
+  return {
+    allowed: true,
+    remaining1h: hourResult.remaining,
+    remaining24h: dayResult.remaining,
+  };
+}
+
+/**
+ * Check if an IP should be auto-banned (>10 orders in 1 hour).
+ * Returns true if the IP just crossed the auto-ban threshold.
+ */
+export async function checkAutoBan(ip: string): Promise<boolean> {
+  const limiter = getLimiter();
+  const result = await limiter.check(`order1h:${ip}`, AUTO_BAN_THRESHOLD + 1, ORDER_RATE_LIMIT_1H_WINDOW);
+  // If the count just reached the threshold+1, it means this is the trigger
+  return !result.allowed;
+}
+
+/**
+ * Check if a WhatsApp number has too many pending orders.
+ * This queries Supabase directly — call from the order API route.
+ */
+export async function checkPendingOrderLimit(
+  whatsapp: string,
+  supabaseQuery: (wa: string) => Promise<number>
+): Promise<{ allowed: boolean; pendingCount: number }> {
+  try {
+    const pendingCount = await supabaseQuery(whatsapp);
+    return {
+      allowed: pendingCount < MAX_PENDING_PER_WA,
+      pendingCount,
+    };
+  } catch {
+    // If query fails, allow the order (fail-open)
+    return { allowed: true, pendingCount: 0 };
+  }
+}
+
+export { MAX_PENDING_PER_WA, AUTO_BAN_THRESHOLD, ORDER_RATE_LIMIT_1H, ORDER_RATE_LIMIT_24H };

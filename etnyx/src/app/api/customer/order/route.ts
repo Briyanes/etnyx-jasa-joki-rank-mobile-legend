@@ -11,6 +11,12 @@ import {
 } from "@/lib/validation";
 import { encryptField, decryptField } from "@/lib/encryption";
 import { calculateServerPrice, type CMSPricing } from "@/lib/pricing-engine";
+import {
+  checkOrderRateLimit,
+  checkAutoBan,
+  MAX_PENDING_PER_WA,
+  AUTO_BAN_THRESHOLD,
+} from "@/lib/rate-limiter";
 import crypto from "crypto";
 
 // Re-export for backward compatibility
@@ -20,33 +26,17 @@ const DOMPETX_API_KEY = process.env.DOMPETX_API_KEY || "";
 const DOMPETX_BASE_URL = process.env.DOMPETX_BASE_URL || "https://api.dompetx.com/v1";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://etnyx.com");
 
-// Simple in-memory rate limiter
-const orderRateLimit = new Map<string, number[]>();
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const windowMs = 60_000; // 1 minute
-  const maxRequests = 5;
-
-  const timestamps = (orderRateLimit.get(ip) || []).filter(
-    (t) => now - t < windowMs
-  );
-  if (timestamps.length >= maxRequests) return false;
-
-  timestamps.push(now);
-  orderRateLimit.set(ip, timestamps);
-  return true;
-}
-
 export async function POST(request: NextRequest) {
   try {
-    // Rate limit
     const ip =
       request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
       "unknown";
-    if (!checkRateLimit(ip)) {
+
+    // ===== Anti-Spam Layer 1: Order rate limit (5/hour, 10/day per IP) =====
+    const orderRateResult = await checkOrderRateLimit(ip);
+    if (!orderRateResult.allowed) {
       return NextResponse.json(
-        { error: "Terlalu banyak request. Coba lagi nanti." },
+        { error: orderRateResult.reason || "Terlalu banyak order. Coba lagi nanti." },
         { status: 429 }
       );
     }
@@ -135,6 +125,63 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // ===== Anti-Spam Layer 2: Check banned WhatsApp + pending order limit =====
+    const fullWhatsapp = `+62${cleanWhatsapp}`;
+    const supabase = await createAdminClient();
+
+    const { data: bannedWa } = await supabase
+      .from("banned_whatsapp")
+      .select("id")
+      .eq("whatsapp", fullWhatsapp)
+      .limit(1);
+
+    if (bannedWa && bannedWa.length > 0) {
+      return NextResponse.json(
+        { error: "Nomor Anda diblokir dari layanan kami. Hubungi admin jika merasa ini kesalahan." },
+        { status: 403 }
+      );
+    }
+
+    // Check max pending orders for this WhatsApp number
+    const { count: pendingCount } = await supabase
+      .from("orders")
+      .select("id", { count: "exact", head: true })
+      .eq("whatsapp", fullWhatsapp)
+      .in("status", ["pending", "confirmed", "in_progress"]);
+
+    if (pendingCount && pendingCount >= MAX_PENDING_PER_WA) {
+      return NextResponse.json(
+        { error: `Anda memiliki ${pendingCount} order yang sedang diproses. Selesaikan atau tunggu order tersebut selesai sebelum membuat order baru.` },
+        { status: 429 }
+      );
+    }
+
+    // ===== Anti-Spam Layer 3: Auto-ban if IP exceeds threshold =====
+    const shouldAutoBan = await checkAutoBan(ip);
+    if (shouldAutoBan) {
+      // Auto-ban the IP
+      await supabase.from("banned_ips").upsert({
+        ip_address: ip,
+        reason: `Auto-banned: exceeded ${AUTO_BAN_THRESHOLD} orders in 1 hour`,
+        auto_banned: true,
+        banned_by: "system",
+      }, { onConflict: "ip_address", ignoreDuplicates: true });
+
+      // Also ban the WhatsApp number
+      await supabase.from("banned_whatsapp").upsert({
+        whatsapp: fullWhatsapp,
+        reason: `Auto-banned: spam from IP ${ip}`,
+        auto_banned: true,
+        banned_by: "system",
+      }, { onConflict: "whatsapp", ignoreDuplicates: true });
+
+      console.warn(`[ANTI-SPAM] Auto-banned IP ${ip} and WA ${fullWhatsapp}`);
+      return NextResponse.json(
+        { error: "Aktivitas terdeteksi sebagai spam. Akses diblokir." },
+        { status: 403 }
+      );
+    }
+
     // Validate price is positive
     if (!totalPrice || totalPrice <= 0 || totalPrice > 50_000_000) {
       return NextResponse.json(
@@ -201,7 +248,7 @@ export async function POST(request: NextRequest) {
         ? "Premium"
         : "Standard";
 
-    const supabase = await createAdminClient();
+    // supabase client already created above — reuse it
 
     // ===== SERVER-SIDE PRICE VERIFICATION =====
     let cmsPricing: { perstar?: Record<string, number>; gendong?: Record<string, number>; catalog?: Record<string, number> } | undefined;
