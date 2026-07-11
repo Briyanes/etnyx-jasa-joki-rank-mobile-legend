@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceClient } from "@/lib/supabase-server";
 import { verifyAdmin } from "@/lib/admin-auth";
 import { logAdminAction } from "@/lib/audit-log";
+import { uploadFile } from "@/lib/storage";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
@@ -37,42 +37,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = createServiceClient();
+    const result = await uploadFile(file, bucket, file.type);
 
-    // Generate unique filename
-    const ext = file.name.split(".").pop() || "jpg";
-    const sanitizedName = file.name
-      .replace(/[^a-zA-Z0-9.-]/g, "_")
-      .substring(0, 50);
-    const fileName = `${Date.now()}-${sanitizedName}`;
-    const filePath = `${fileName}.${ext}`;
+    logAdminAction({ admin_email: auth.user!.email, action: "upload", resource_type: "file", details: `Uploaded file: ${result.path} to ${bucket} via ${result.provider}` });
 
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    const { error: uploadError } = await supabase.storage
-      .from(bucket)
-      .upload(filePath, buffer, {
-        contentType: file.type,
-        upsert: false,
-      });
-
-    if (uploadError) {
-      console.error("Upload error:", uploadError);
-      return NextResponse.json(
-        { error: "Failed to upload file" },
-        { status: 500 }
-      );
-    }
-
-    // Get public URL
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from(bucket).getPublicUrl(filePath);
-
-    logAdminAction({ admin_email: auth.user!.email, action: "upload", resource_type: "file", details: `Uploaded file: ${filePath} to ${bucket}` });
-
-    return NextResponse.json({ url: publicUrl, path: filePath });
+    return NextResponse.json({ url: result.url, path: result.path, provider: result.provider });
   } catch (error) {
     console.error("Upload error:", error);
     return NextResponse.json(

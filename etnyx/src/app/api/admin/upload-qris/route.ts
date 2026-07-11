@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceClient } from "@/lib/supabase-server";
 import { verifyAdmin } from "@/lib/admin-auth";
+import { uploadFileUpsert } from "@/lib/storage";
 
 export async function POST(request: NextRequest) {
   const { authenticated, error: authError } = await verifyAdmin();
@@ -24,27 +24,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "File too large (max 5MB)" }, { status: 400 });
   }
 
-  const supabase = createServiceClient();
   const ext = file.name.split(".").pop() || "png";
   const fileName = `qris-${Date.now()}.${ext}`;
 
-  const buffer = Buffer.from(await file.arrayBuffer());
-
-  const { error: uploadError } = await supabase.storage
-    .from("payment-proofs")
-    .upload(fileName, buffer, {
-      contentType: file.type,
-      upsert: true,
-    });
-
-  if (uploadError) {
-    console.error("QRIS upload error:", uploadError);
+  try {
+    const result = await uploadFileUpsert(file, "payment-proofs", fileName, file.type);
+    return NextResponse.json({ url: result.url, provider: result.provider });
+  } catch (error) {
+    console.error("QRIS upload error:", error);
     return NextResponse.json({ error: "Failed to upload image" }, { status: 500 });
   }
-
-  const { data: { publicUrl } } = supabase.storage
-    .from("payment-proofs")
-    .getPublicUrl(fileName);
-
-  return NextResponse.json({ url: publicUrl });
 }

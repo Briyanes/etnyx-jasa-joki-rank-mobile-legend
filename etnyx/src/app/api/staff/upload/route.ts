@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServiceClient } from "@/lib/supabase-server";
 import { verifyStaff } from "@/lib/staff-auth";
+import { uploadFile } from "@/lib/storage";
 
-// POST /api/staff/upload — Upload screenshot to Supabase Storage
+// POST /api/staff/upload — Upload screenshot to storage (R2 or Supabase)
 export async function POST(request: NextRequest) {
   const { authenticated, user, error } = await verifyStaff(["worker", "lead", "admin"]);
   if (!authenticated || !user) return error;
@@ -25,22 +25,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Ukuran file maksimal 5MB" }, { status: 400 });
   }
 
-  const supabase = createServiceClient();
   // Use MIME type for extension (don't trust user filename like "photo.jpg.exe")
   const mimeToExt: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
   const safeExt = mimeToExt[file.type] || "jpg";
-  const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${safeExt}`;
+  const customFilename = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${safeExt}`;
 
-  const { error: uploadError } = await supabase.storage
-    .from("worker-screenshots")
-    .upload(fileName, file, { contentType: file.type, upsert: false });
-
-  if (uploadError) {
-    console.error("Upload error:", uploadError);
+  try {
+    const result = await uploadFile(file, "worker-screenshots", file.type, customFilename);
+    return NextResponse.json({ success: true, url: result.url, provider: result.provider });
+  } catch (error) {
+    console.error("Upload error:", error);
     return NextResponse.json({ error: "Gagal upload file" }, { status: 500 });
   }
-
-  const { data: urlData } = supabase.storage.from("worker-screenshots").getPublicUrl(fileName);
-
-  return NextResponse.json({ success: true, url: urlData.publicUrl });
 }

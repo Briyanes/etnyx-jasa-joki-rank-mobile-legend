@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { createAdminClient } from "@/lib/supabase-server";
+import { isR2Configured } from "@/lib/r2";
 
 interface ServiceStatus {
   status: "ok" | "error";
@@ -132,6 +133,11 @@ export async function GET() {
       services: {
         supabase,
         dompetx,
+        storage: {
+          provider: isR2Configured() ? "r2" : "supabase",
+          r2_configured: isR2Configured(),
+          bucket: process.env.R2_BUCKET_NAME || "etnyx-storage",
+        },
         ...notifications,
       },
     },
