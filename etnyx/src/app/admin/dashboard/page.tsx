@@ -16,6 +16,7 @@ import {
   KeyRound, Check, X, ListChecks, History,
   Calculator,
   Home, Link2,
+  ShieldBan,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 const SettingsTab = dynamic(() => import("./SettingsTab"), { ssr: false });
@@ -25,6 +26,7 @@ const AdsTab = dynamic(() => import("./AdsTab"), { ssr: false });
 const AnalyticsTab = dynamic(() => import("./AnalyticsTab"), { ssr: false });
 const LeaderboardTab = dynamic(() => import("./LeaderboardTab"), { ssr: false });
 const PricingTab = dynamic(() => import("./PricingTab"), { ssr: false });
+const BanTab = dynamic(() => import("./BanTab"), { ssr: false });
 const LineChart = dynamic(() => import("recharts").then((mod) => mod.LineChart), { ssr: false });
 const Line = dynamic(() => import("recharts").then((mod) => mod.Line), { ssr: false });
 const XAxis = dynamic(() => import("recharts").then((mod) => mod.XAxis), { ssr: false });
@@ -166,7 +168,7 @@ interface PerStarTier {
   icon: string;
 }
 
-type TabType = "overview" | "analytics" | "orders" | "boosters" | "testimonials" | "portfolio" | "promo" | "customers" | "rewards" | "pricing" | "staff" | "leaderboard" | "reviews" | "payroll" | "reports" | "ads" | "settings";
+type TabType = "overview" | "analytics" | "orders" | "boosters" | "testimonials" | "portfolio" | "promo" | "customers" | "rewards" | "pricing" | "staff" | "leaderboard" | "reviews" | "payroll" | "reports" | "ads" | "ban" | "settings";
 
 // ---- Tab Config ----
 const TAB_CONFIG: { id: TabType; label: string; icon: typeof BarChart3 }[] = [
@@ -186,6 +188,7 @@ const TAB_CONFIG: { id: TabType; label: string; icon: typeof BarChart3 }[] = [
   { id: "reviews", label: "Reviews", icon: MessageCircle },
   { id: "reports", label: "Reports", icon: BarChart3 },
   { id: "ads", label: "Ads", icon: Flame },
+  { id: "ban", label: "Ban List", icon: ShieldBan },
   { id: "settings", label: "Settings", icon: Settings2 },
 ];
 
@@ -2452,6 +2455,9 @@ export default function AdminDashboard() {
           {activeTab === "leaderboard" && (
             <LeaderboardTab />
           )}
+
+          {/* ===== BAN TAB ===== */}
+          {activeTab === "ban" && <BanTab />}
 
           {/* ===== SETTINGS TAB ===== */}
           {activeTab === "settings" && (
