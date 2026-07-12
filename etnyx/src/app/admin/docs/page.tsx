@@ -118,7 +118,7 @@ function buildCategories(): DocCategory[] {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <StatCard label="Halaman" value="23" sub="Customer + Admin" />
                 <StatCard label="API Routes" value="79" sub="RESTful endpoints" />
-                <StatCard label="Dashboard Tabs" value="17" sub="Admin CMS" />
+                <StatCard label="Dashboard Tabs" value="18" sub="Admin CMS" />
                 <StatCard label="Integrasi" value="8" sub="External services" />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -126,7 +126,8 @@ function buildCategories(): DocCategory[] {
                   <h4 className="text-text font-medium text-sm mb-2">Tech Stack</h4>
                   <ul className="text-text-muted text-xs space-y-1">
                     <li>&#8226; <strong className="text-text">Next.js 16</strong> + React 19 (Turbopack)</li>
-                    <li>&#8226; <strong className="text-text">Supabase</strong> &mdash; Database + Auth + Storage</li>
+                    <li>&#8226; <strong className="text-text">Supabase</strong> &mdash; Database + Auth</li>
+                    <li>&#8226; <strong className="text-text">Cloudflare R2</strong> &mdash; Storage (Zero Egress)</li>
                     <li>&#8226; <strong className="text-text">DompetX</strong> &mdash; Payment Gateway</li>
                     <li>&#8226; <strong className="text-text">Vercel</strong> &mdash; Hosting &amp; Deployment</li>
                     <li>&#8226; <strong className="text-text">Tailwind CSS 4</strong> &mdash; Styling</li>
@@ -196,7 +197,7 @@ function buildCategories(): DocCategory[] {
                   </div>
                   <p className="text-text-muted text-xs mb-2">Akses penuh ke semua fitur.</p>
                   <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
-                    <li>Dashboard 15 tab: Overview, Orders, Pricing, Boosters, Testi, Portfolio, Promo, Customers, Rewards, Staff, Payroll, Reviews, Reports, Ads, Settings</li>
+                    <li>Dashboard 18 tab: Overview, Analytics, Orders, Pricing, Boosters, Testi, Portfolio, Promo, Customers, Rewards, Staff, Leaderboard, Payroll, Reviews, Reports, Ads, Ban List, Settings</li>
                     <li>CRUD semua data + staff management</li>
                     <li>Konfigurasi integrasi (DompetX, Telegram, WhatsApp, Email)</li>
                     <li>Payroll: kelola gaji, komisi, payout</li>
@@ -299,10 +300,10 @@ function buildCategories(): DocCategory[] {
         {
           id: "admin-guide",
           icon: Settings,
-          title: "Dashboard Admin (15 Tab)",
+          title: "Dashboard Admin (18 Tab)",
           content: (
             <div className="space-y-4">
-              <p className="text-text-muted text-sm">Admin Dashboard berisi 15 tab CMS lengkap.</p>
+              <p className="text-text-muted text-sm">Admin Dashboard berisi 18 tab CMS lengkap.</p>
               <div className="space-y-2">
                 {[
                   { tab: "Overview", desc: "KPI metrics: total orders, revenue, pending, completed. Chart trend 7 hari + orders/day bar chart. Refresh 30 detik." },
@@ -310,7 +311,7 @@ function buildCategories(): DocCategory[] {
                   { tab: "Pricing", desc: "3 mode pricing: Paket (bundle rank), Per Star (per bintang), Gendong (duo). Edit harga inline, save all. Season Pricing auto-scheduler: harga otomatis berubah sesuai fase season ML." },
                   { tab: "Boosters", desc: "CRUD booster profiles: nama, WA, specialization, rating, status." },
                   { tab: "Testi", desc: "Kelola testimonial customer. Toggle featured & visibility. Tampil di homepage." },
-                  { tab: "Portfolio", desc: "Upload hasil boosting. Before/After rank, gambar (Supabase Storage)." },
+                  { tab: "Portfolio", desc: "Upload hasil boosting. Before/After rank, gambar (Cloudflare R2)." },
                   { tab: "Promo", desc: "CRUD promo code: percentage/fixed, max uses, expiry, tracking." },
                   { tab: "Customers", desc: "Database customer: email, nama, WA, total orders/spent, referral code, reward tier." },
                   { tab: "Rewards", desc: "2 sub-tab: Catalog (CRUD items: skin, diamond, dll) + Redemptions (process pending, completed/rejected)." },
@@ -2051,7 +2052,7 @@ function buildCategories(): DocCategory[] {
                   ["/api/admin/rewards/catalog", "GET/POST/PUT/DELETE", "CRUD reward catalog"],
                   ["/api/admin/reports", "GET", "P&L, trend, worker performance"],
                   ["/api/admin/export", "GET", "CSV export (8 types)"],
-                  ["/api/admin/upload", "POST", "File upload to Supabase Storage"],
+                  ["/api/admin/upload", "POST", "File upload to R2/Supabase (auto-detect)"],
                   ["/api/admin/ads", "GET/POST/DELETE", "Ad spend CRUD + attribution stats (ROAS, CPA)"],
                   ["/api/admin/test-notifications", "POST", "Test notification channels"],
                   ["/api/admin/analytics", "GET", "Analytics data (trend, funnel)"],
@@ -2201,7 +2202,7 @@ function buildCategories(): DocCategory[] {
                 ]} />
               </div>
               <InfoBox type="info">
-                <strong>Schema Files:</strong> v8 (storage), v9 (order logs), v10 (rewards), v11 (staff), v12 (reviews), v13 (payroll), v14 (payment methods), v15 (UTM attribution &amp; ad spend), v16-v18 (minor fixes), v19 (password_resets: WAJIB run di Supabase SQL Editor). Run sequentially via Supabase SQL Editor.
+                <strong>Schema Files:</strong> v8 (storage), v9 (order logs), v10 (rewards), v11 (staff), v12 (reviews), v13 (payroll), v14 (payment methods), v15 (UTM attribution &amp; ad spend), v16-v18 (minor fixes), v19 (password_resets: WAJIB run di Supabase SQL Editor), v25 (moota), v26 (RLS hardening). Run sequentially via Supabase SQL Editor.
               </InfoBox>
             </div>
           ),
@@ -2362,7 +2363,7 @@ function buildCategories(): DocCategory[] {
                 ["Headers", "CSP, HSTS, X-Frame", "next.config.ts — whitelist tracking domains"],
                 ["Audit", "logAdminAction()", "Admin actions logged to admin_audit_log"],
                 ["Signature", "SHA-256 HMAC", "DompetX payment webhook verification"],
-                ["Storage Client", "createServiceClient()", "Semua operasi Supabase Storage wajib pakai service role key, bukan anon/SSR cookie."],
+                ["Storage Client", "createServiceClient()", "Unified storage: auto-detect R2 (Cloudflare) jika dikonfigurasi, fallback ke Supabase Storage. Lihat lib/storage.ts."],
               ]} />
               <div className="bg-background rounded-lg p-4 border border-white/5">
                 <h4 className="text-text font-medium text-sm mb-3 flex items-center gap-2"><Lock className="w-4 h-4" /> Credential Encryption (AES-256-GCM)</h4>
@@ -3081,7 +3082,7 @@ function buildCategories(): DocCategory[] {
                       <li><strong className="text-text">Reward points</strong> &mdash; Idempotent check sebelum award (cegah double points)</li>
                       <li><strong className="text-text">Promo codes</strong> &mdash; Validasi input + post-increment race condition check</li>
                       <li><strong className="text-text">Worker submissions</strong> &mdash; Validasi numeric fields 0-999</li>
-                      <li><strong className="text-text">Upload bucket</strong> &mdash; Whitelist allowed storage buckets</li>
+                      <li><strong className="text-text">Upload bucket</strong> &mdash; R2 bucket (etnyx) atau Supabase Storage fallback. Konfigurasi via env vars.</li>
                       <li><strong className="text-text">Order ID</strong> &mdash; Random UUID suffix (cegah enumeration)</li>
                       <li><strong className="text-text">JWT Secret</strong> &mdash; Wajib di profile route (cegah empty key bypass)</li>
                       <li><strong className="text-text">Telegram hardcoded ID</strong> &mdash; Pakai DB settings (hapus hardcoded)</li>

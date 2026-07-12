@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminClient, createServiceClient } from "@/lib/supabase-server";
+import { createAdminClient } from "@/lib/supabase-server";
 import { notifyAdminPaymentProof } from "@/lib/notifications";
+import { uploadFile } from "@/lib/storage";
 
 // GET: Fetch order info + bank accounts for manual payment page
 export async function GET(request: NextRequest) {
@@ -138,29 +139,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Pembayaran sudah dikonfirmasi" }, { status: 409 });
     }
 
-    // Upload file to Supabase Storage (use service client — no cookie session dependency)
+    // Upload file via unified storage layer (R2 if configured, falls back to Supabase)
     // Use MIME type for extension (don't trust user filename)
     const mimeToExt: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
     const safeExt = mimeToExt[file.type] || "jpg";
     const fileName = `proof-${orderId}-${Date.now()}.${safeExt}`;
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
 
-    const storageClient = createServiceClient();
-    const { error: uploadError } = await storageClient.storage
-      .from("payment-proofs")
-      .upload(fileName, buffer, {
-        contentType: file.type,
-        upsert: false,
-      });
-
-    if (uploadError) {
+    let publicUrl: string;
+    try {
+      const uploadResult = await uploadFile(file, "payment-proofs", file.type, fileName.replace(/\.[^.]+$/, ""));
+      publicUrl = uploadResult.url;
+    } catch (uploadError) {
       console.error("Upload error:", uploadError);
-      return NextResponse.json({ error: "Failed to upload. Make sure 'payment-proofs' storage bucket exists in Supabase." }, { status: 500 });
+      return NextResponse.json({ error: "Failed to upload payment proof." }, { status: 500 });
     }
-
-    // Get public URL
-    const { data: { publicUrl } } = storageClient.storage.from("payment-proofs").getPublicUrl(fileName);
 
     // Sanitize inputs
     const sanitizedSenderName = senderName ? String(senderName).replace(/<[^>]*>/g, "").slice(0, 100) : null;
