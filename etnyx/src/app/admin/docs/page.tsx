@@ -116,10 +116,10 @@ function buildCategories(): DocCategory[] {
                 Platform full-stack dengan admin dashboard, staff management, payment gateway, dan multi-channel notification.
               </p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <StatCard label="Halaman" value="23" sub="Customer + Admin" />
-                <StatCard label="API Routes" value="79" sub="RESTful endpoints" />
+                <StatCard label="Halaman" value="26" sub="Customer + Admin" />
+                <StatCard label="API Routes" value="90" sub="RESTful endpoints" />
                 <StatCard label="Dashboard Tabs" value="18" sub="Admin CMS" />
-                <StatCard label="Integrasi" value="8" sub="External services" />
+                <StatCard label="Integrasi" value="9" sub="External services" />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="bg-background rounded-lg p-3 border border-white/5">
@@ -2027,10 +2027,10 @@ function buildCategories(): DocCategory[] {
         {
           id: "api",
           icon: Server,
-          title: "API Routes (75+)",
+          title: "API Routes (90)",
           content: (
             <div className="space-y-4">
-              <p className="text-text-muted text-sm">75+ API routes. Auth via JWT cookie (HTTPOnly). Rate limited via middleware.</p>
+              <p className="text-text-muted text-sm">90 API routes. Auth via JWT cookie (HTTPOnly). Rate limited via middleware.</p>
               <div className="bg-background rounded-lg p-3 border border-white/5">
                 <h4 className="text-text font-medium text-sm mb-2">{"Admin API"} <Code>/api/admin/*</Code></h4>
                 <Table headers={["Endpoint", "Methods", "Deskripsi"]} rows={[
@@ -2282,22 +2282,22 @@ function buildCategories(): DocCategory[] {
                 <h4 className="text-blue-400 font-semibold text-sm mb-3">DompetX Auto</h4>
                 <StepFlow steps={[
                   { title: "Frontend POST ke /api/customer/order", desc: "Kirim data order + payment_method: dompetx" },
-                  { title: "Backend generate Payment URL", desc: "Via snap.createTransaction() — return snap_url" },
+                  { title: "Backend create transaction via fetch", desc: "POST ke api.dompetx.com/v1/payment — return payment_url" },
                   { title: "Customer bayar via popup/redirect", desc: "VA, QRIS, GoPay, ShopeePay, Kartu Kredit" },
-                  { title: "Webhook auto-confirm", desc: "DompetX POST ke /api/payment/notification — SHA-256 HMAC signature verification", page: "/api/payment/notification" },
+                  { title: "Webhook auto-confirm", desc: "DompetX POST ke /api/payment/notification — HMAC SHA-256 signature verification", page: "/api/payment/notification" },
                   { title: "Status update + notifikasi", desc: "Order confirmed + paid, WA 'Pembayaran Dikonfirmasi', Telegram Worker Group" },
                 ]} />
                 <InfoBox type="info">
-                  DompetX muncul otomatis jika Server Key diisi di Settings &rarr; Integrations. Bisa toggle Sandbox/Production.
+                  DompetX muncul otomatis jika API Key diisi di Settings &rarr; Integrations (dompetxApiKey). Bisa toggle Sandbox/Production. HMAC signature: <Code>createHmac("sha256", apiKey).update(timestamp)</Code>.
                 </InfoBox>
               </div>
 
               <Table headers={["Setting", "Lokasi"]} rows={[
-                ["Server Key / Client Key", "Dashboard > Settings > Integrations"],
+                ["API Key", "Dashboard > Settings > Integrations (dompetxApiKey)"],
                 ["Rekening Transfer Manual", "Dashboard > Settings > Rekening"],
                 ["Environment", "Toggle Sandbox / Production"],
                 ["Payment Channels", "Enable/disable VA, GoPay, QRIS, dll"],
-                ["Notification URL", "Set di DompetX Dashboard"],
+                ["Webhook URL", "Set di DompetX Dashboard → https://etnyx.com/api/payment/notification"],
               ]} />
             </div>
           ),
@@ -2431,6 +2431,10 @@ function buildCategories(): DocCategory[] {
                 ["DOMPETX_API_KEY", "Opsional", "Bisa set dari Dashboard"],
                 ["RESEND_API_KEY", "Opsional", "Bisa set dari Dashboard"],
                 ["FONNTE_API_TOKEN", "Opsional", "Bisa set dari Dashboard"],
+                ["R2_ACCOUNT_ID", "Opsional", "Cloudflare R2 (storage)"],
+                ["R2_ACCESS_KEY_ID", "Opsional", "Cloudflare R2 (storage)"],
+                ["R2_SECRET_ACCESS_KEY", "Opsional", "Cloudflare R2 (storage)"],
+                ["R2_BUCKET_NAME", "Opsional", "Cloudflare R2 bucket (default: etnyx)"],
                 ["PUBLIC_VAPID_KEY", "Opsional", "Web push"],
                 ["PRIVATE_VAPID_KEY", "Opsional", "Web push"],
               ]} />
@@ -2450,11 +2454,14 @@ function buildCategories(): DocCategory[] {
                 <h4 className="text-text font-medium text-sm mb-2">Deploy Flow</h4>
                 <ol className="text-text-muted text-xs space-y-1 list-decimal ml-4">
                   <li>Push ke branch <Code>main</Code></li>
-                  <li>Vercel auto-build: <Code>{"cd etnyx && npm run build"}</Code></li>
-                  <li>Output deploy ke Vercel Edge</li>
+                  <li>Vercel auto-build: <Code>{"cd etnyx && npm run build"}</Code> (Next.js 16 + Turbopack)</li>
+                  <li>Output deploy ke Vercel Serverless Functions</li>
                   <li>URL: <Code>etnyx.vercel.app</Code> (atau custom domain)</li>
                 </ol>
               </div>
+              <InfoBox type="info">
+                <strong>Next.js 16 + Turbopack:</strong> Build menggunkan Turbopack (bukan Webpack). Vercel deploy sebagai Serverless Functions (bukan Edge). Pastikan environment variables sudah di-set di Vercel Dashboard sebelum deploy.
+              </InfoBox>
               <Table headers={["Command", "Fungsi"]} rows={[
                 [<Code key="1">npm run dev</Code>, "Dev server (Turbopack, port 3000)"],
                 [<Code key="2">npm run build</Code>, "Production build"],
@@ -2489,12 +2496,13 @@ function buildCategories(): DocCategory[] {
 \u2502   \u2502
 \u2502   \u251C\u2500\u2500 order/ track/ review/ payment/  # Public pages
 \u2502   \u2502
-\u2502   \u2514\u2500\u2500 api/                    # 65+ API routes
+\u2502   \u2514\u2500\u2500 api/                    # 90 API routes
 \u2502       \u251C\u2500\u2500 admin/              # 20 admin endpoints
 \u2502       \u2502   \u2514\u2500\u2500 payroll/        # 6 payroll endpoints
 \u2502       \u251C\u2500\u2500 staff/              # 8 staff endpoints
 \u2502       \u251C\u2500\u2500 customer/           # 7 customer endpoints
 \u2502       \u251C\u2500\u2500 telegram/webhook/   # Interactive bot
+│       ├──── storage/[...path]/  # R2/Supabase storage proxy
 \u2502       \u2514\u2500\u2500 payment/ track/ review/ ...  # Public endpoints
 \u2502
 \u251C\u2500\u2500 components/                 # 32+ components
@@ -2512,12 +2520,20 @@ function buildCategories(): DocCategory[] {
 \u2502   \u251C\u2500\u2500 validation.ts           # Input sanitization
 \u2502   \u251C\u2500\u2500 audit-log.ts            # Admin audit logging
 \u2502   \u251C\u2500\u2500 supabase-server.ts      # Server clients
+│   ├── r2.ts                   # Cloudflare R2 client
+│   ├── storage.ts              # Unified storage (R2/Supabase auto-detect)
 \u2502   \u251C\u2500\u2500 constants.ts            # Ranks, tiers, config
 \u2502   \u251C\u2500\u2500 email.ts                # Resend service
 \u2502   \u2514\u2500\u2500 i18n/                   # ID + EN translations
 \u2502
 \u251C\u2500\u2500 types/ utils/ contexts/     # Types, helpers, providers
-\u2514\u2500\u2500 middleware.ts                # Rate limiting + security`}</pre>
+\u2514\u2500\u2500 middleware.ts                # Rate limiting + security
+│
+├── scripts/                    # Utility scripts
+    ├── seed-pricing.js           # Seed pricing catalog to DB
+    ├── migrate-storage-to-r2.mjs # Migrate Supabase Storage → R2
+    ├── update-db-urls.mjs        # Update DB image URLs to R2
+    └── test-r2-connection.mjs     # Test R2 connectivity`}</pre>
             </div>
           ),
         },
@@ -2895,8 +2911,45 @@ function buildCategories(): DocCategory[] {
 
               <div className="bg-background rounded-lg p-4 border border-accent/20">
                 <div className="flex items-center gap-2 mb-3">
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-accent/10 text-accent font-medium">v2.9</span>
+                  <h4 className="text-accent font-semibold text-sm">12 Juli 2026 (Cloudflare R2 Migration & Docs Update)</h4>
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">Cloudflare R2 Storage Migration</h5>
+                    <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
+                      <li><strong className="text-text">R2 client</strong> &mdash; <Code>lib/r2.ts</Code>: S3-compatible API via @aws-sdk/client-s3, zero egress fees</li>
+                      <li><strong className="text-text">Unified storage</strong> &mdash; <Code>lib/storage.ts</Code>: Auto-detect R2 jika env vars ada, fallback ke Supabase Storage</li>
+                      <li><strong className="text-text">Storage proxy</strong> &mdash; <Code>/api/storage/[...path]</Code>: Serve images via Next.js (enable caching, hide bucket URL)</li>
+                      <li><strong className="text-text">Migration scripts</strong> &mdash; <Code>migrate-storage-to-r2.mjs</Code>, <Code>update-db-urls.mjs</Code>, <Code>test-r2-connection.mjs</Code></li>
+                      <li><strong className="text-text">Env vars</strong> &mdash; R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME (opsional, bisa dikelola via Dashboard)</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">RLS Hardening (Schema v26)</h5>
+                    <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
+                      <li><strong className="text-text">supabase-schema-v26-rls-hardening.sql</strong> &mdash; Audit & perbaikan Row Level Security pada tabel kritis</li>
+                      <li>Policy tightening: customer hanya bisa akses data sendiri, worker hanya order yang di-assign</li>
+                      <li>Service role bypass untuk admin operations tetap aman</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h5 className="text-text text-xs font-medium mb-1">Docs Update</h5>
+                    <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
+                      <li>API route count diperbarui: 65+ &rarr; 90 routes</li>
+                      <li>File structure: tambah r2.ts, storage.ts, scripts/, storage/[...path]/</li>
+                      <li>Env vars table: tambah R2 variables</li>
+                      <li>Deployment info: Next.js 16 + Turbopack, Vercel Serverless Functions</li>
+                      <li>Schema InfoBox: lengkap v8-v26</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-background rounded-lg p-4 border border-accent/20">
+                <div className="flex items-center gap-2 mb-3">
                   <span className="text-[10px] px-2 py-0.5 rounded bg-accent/10 text-accent font-medium">v2.8</span>
-                  <h4 className="text-accent font-semibold text-sm">11-14 April 2026 (WA v4, Telegram Audit &amp; Pricing Overhaul)</h4>
+                  <h4 className="text-accent font-semibold text-sm">11-14 April 2026 (WA v4, Telegram Audit & Pricing Overhaul)</h4>
                 </div>
                 <div className="space-y-3">
                   <div>
@@ -3361,7 +3414,7 @@ export default function DocsPage() {
             <div className="flex items-center gap-2">
               <Book className="w-5 h-5 text-accent" />
               <h1 className="text-text font-bold text-sm">ETNYX DOCS</h1>
-              <span className="text-[9px] px-1.5 py-0.5 rounded bg-accent/10 text-accent font-medium">v2.5</span>
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-accent/10 text-accent font-medium">v2.9</span>
             </div>
             <button onClick={() => setSidebarOpen(false)} className="text-text-muted hover:text-text p-1">
               <ChevronDown className="w-4 h-4 rotate-90" />
@@ -3467,7 +3520,7 @@ export default function DocsPage() {
 
         <footer className="px-6 py-4 border-t border-white/5">
           <p className="text-text-muted/40 text-[10px] text-center">
-            ETNYX Documentation v2.5 &mdash; {allSections.length} sections across {categories.length} categories
+            ETNYX Documentation v2.9 &mdash; {allSections.length} sections across {categories.length} categories
           </p>
         </footer>
       </main>
