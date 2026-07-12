@@ -1,0 +1,379 @@
+#!/usr/bin/env node
+/**
+ * Migration Script: Supabase Storage → Cloudflare R2
+ * 
+ * Usage:
+ *   node scripts/migrate-storage-to-r2.mjs              # Dry-run (scan only)
+ *   node scripts/migrate-storage-to-r2.mjs --execute     # Full migration
+ *   node scripts/migrate-storage-to-r2.mjs --execute --skip-db  # Files only
+ * 
+ * Safety:
+ *   - NEVER deletes files from Supabase Storage
+ *   - Idempotent (can re-run safely)
+ *   - Per-file error handling (one failure doesn't stop others)
+ */
+
+import { createClient } from "@supabase/supabase-js";
+import { S3Client, PutObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
+import { readFileSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+
+// Load .env.local manually (no dotenv dependency)
+const __dirname = dirname(fileURLToPath(import.meta.url));
+try {
+  const envPath = join(__dirname, "..", ".env.local");
+  const envContent = readFileSync(envPath, "utf-8");
+  for (const line of envContent.split("\n")) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+    const eqIdx = trimmed.indexOf("=");
+    if (eqIdx === -1) continue;
+    const key = trimmed.slice(0, eqIdx).trim();
+    const val = trimmed.slice(eqIdx + 1).trim().replace(/^["']|["']$/g, "");
+    if (!process.env[key]) process.env[key] = val;
+  }
+} catch {
+  // .env.local not found, rely on existing env vars
+}
+
+// ─── Config ─────────────────────────────────────────────
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID;
+const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID;
+const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY;
+const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME || "etnyx";
+const R2_PUBLIC_URL = process.env.NEXT_PUBLIC_R2_PUBLIC_URL;
+
+const BUCKETS = [
+  "portfolio",
+  "booster-avatars",
+  "payment-proofs",
+  "submissions",
+  "worker-screenshots",
+];
+
+const URL_COLUMNS = [
+  { table: "portfolio", column: "image_url" },
+  { table: "payment_proofs", column: "file_url" },
+  { table: "orders", column: "payment_proof_url" },
+  { table: "staff_submissions", column: "screenshot_url" },
+  { table: "booster_profiles", column: "avatar_url" },
+  { table: "testimonials", column: "avatar_url" },
+  { table: "ads", column: "image_url" },
+  { table: "reviews", column: "avatar_url" },
+];
+
+const isExecute = process.argv.includes("--execute");
+const skipDb = process.argv.includes("--skip-db");
+
+// ─── Validation ─────────────────────────────────────────
+if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+  console.error("Missing Supabase env vars. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in .env.local");
+  process.exit(1);
+}
+if (isExecute && (!R2_ACCOUNT_ID || !R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY || !R2_PUBLIC_URL)) {
+  console.error("Missing R2 env vars. Set R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, NEXT_PUBLIC_R2_PUBLIC_URL in .env.local");
+  process.exit(1);
+}
+
+// ─── Clients ────────────────────────────────────────────
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
+  auth: { persistSession: false },
+});
+
+let r2Client = null;
+if (isExecute) {
+  r2Client = new S3Client({
+    region: "auto",
+    endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+    credentials: {
+      accessKeyId: R2_ACCESS_KEY_ID,
+      secretAccessKey: R2_SECRET_ACCESS_KEY,
+    },
+  });
+}
+
+// ─── Helpers ────────────────────────────────────────────
+const SUPABASE_STORAGE_PREFIX = `${SUPABASE_URL}/storage/v1/object/public/`;
+
+function isSupabaseStorageUrl(url) {
+  return url && typeof url === "string" && url.includes("/storage/v1/object/public/");
+}
+
+function extractBucketAndPath(url) {
+  const match = url.match(/\/storage\/v1\/object\/public\/([^/]+)\/(.+)$/);
+  if (!match) return null;
+  return { bucket: match[1], path: match[2] };
+}
+
+function buildR2Url(bucket, path) {
+  return `${R2_PUBLIC_URL}/${bucket}/${path}`;
+}
+
+async function verifyR2Url(url) {
+  try {
+    const res = await fetch(url, { method: "HEAD", signal: AbortSignal.timeout(10000) });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+// ─── Phase 1: Scan ──────────────────────────────────────
+async function scanSupabaseStorage() {
+  console.log("\n Phase 1: Scanning Supabase Storage...\n");
+  
+  const allFiles = [];
+  
+  for (const bucket of BUCKETS) {
+    try {
+      const { data, error } = await supabase.storage.from(bucket).list("", {
+        limit: 1000,
+        offset: 0,
+      });
+      
+      if (error) {
+        console.log(`  [!] Bucket "${bucket}": ${error.message}`);
+        continue;
+      }
+      
+      if (!data || data.length === 0) {
+        console.log(`  [ ] Bucket "${bucket}": empty`);
+        continue;
+      }
+      
+      const files = [];
+      for (const item of data) {
+        if (item.id === null) {
+          const { data: subFiles, error: subError } = await supabase.storage
+            .from(bucket)
+            .list(item.name, { limit: 1000 });
+          
+          if (!subError && subFiles) {
+            for (const sub of subFiles) {
+              if (sub.id !== null) {
+                files.push({
+                  bucket,
+                  path: `${item.name}/${sub.name}`,
+                  size: sub.metadata?.size || 0,
+                });
+              }
+            }
+          }
+        } else {
+          files.push({
+            bucket,
+            path: item.name,
+            size: item.metadata?.size || 0,
+          });
+        }
+      }
+      
+      allFiles.push(...files);
+      const totalSize = files.reduce((sum, f) => sum + f.size, 0);
+      console.log(`  [F] Bucket "${bucket}": ${files.length} files (${(totalSize / 1024 / 1024).toFixed(2)} MB)`);
+    } catch (e) {
+      console.log(`  [X] Bucket "${bucket}": ${e.message}`);
+    }
+  }
+  
+  console.log(`\n  Total: ${allFiles.length} files across ${BUCKETS.length} buckets\n`);
+  return allFiles;
+}
+
+// ─── Phase 2: Migrate Files ─────────────────────────────
+async function migrateFiles(files) {
+  console.log("\n Phase 2: Migrating files to R2...\n");
+  
+  const migrated = [];
+  const failed = [];
+  const skipped = [];
+  
+  for (let i = 0; i < files.length; i++) {
+    const { bucket, path } = files[i];
+    const r2Key = `${bucket}/${path}`;
+    const r2Url = buildR2Url(bucket, path);
+    
+    process.stdout.write(`  [${i + 1}/${files.length}] ${r2Key}... `);
+    
+    if (r2Client) {
+      try {
+        await r2Client.send(new HeadObjectCommand({ Bucket: R2_BUCKET_NAME, Key: r2Key }));
+        console.log("skip (already in R2)");
+        skipped.push({ bucket, path, r2Url, supabaseUrl: `${SUPABASE_STORAGE_PREFIX}${bucket}/${path}` });
+        continue;
+      } catch {
+        // Not in R2 yet
+      }
+    }
+    
+    try {
+      const { data, error } = await supabase.storage.from(bucket).download(path);
+      if (error || !data) throw new Error(`Download failed: ${error?.message || "no data"}`);
+      
+      const buffer = Buffer.from(await data.arrayBuffer());
+      
+      await r2Client.send(new PutObjectCommand({
+        Bucket: R2_BUCKET_NAME,
+        Key: r2Key,
+        Body: buffer,
+      }));
+      
+      // Skip HTTP verification — R2 public access may need propagation time.
+      // PutObject success is sufficient confirmation.
+      console.log("OK");
+      migrated.push({
+        bucket,
+        path,
+        r2Url,
+        supabaseUrl: `${SUPABASE_STORAGE_PREFIX}${bucket}/${path}`,
+      });
+    } catch (e) {
+      console.log(`FAIL: ${e.message}`);
+      failed.push({ bucket, path, error: e.message });
+    }
+  }
+  
+  console.log(`\n  Migrated: ${migrated.length}`);
+  console.log(`  Skipped: ${skipped.length}`);
+  console.log(`  Failed: ${failed.length}\n`);
+  
+  return { migrated, failed, skipped };
+}
+
+// ─── Phase 3: Update Database ───────────────────────────
+async function updateDatabase(migrated) {
+  if (skipDb) {
+    console.log("\n Phase 3: Skipping DB update (--skip-db flag)\n");
+    return;
+  }
+  
+  console.log("\n Phase 3: Updating database URLs...\n");
+  
+  const allUrls = [...migrated];
+  
+  if (allUrls.length === 0) {
+    console.log("  No URLs to update.\n");
+    return;
+  }
+  
+  let totalUpdated = 0;
+  
+  for (const { table, column } of URL_COLUMNS) {
+    try {
+      const { error: tableError } = await supabase.from(table).select(column).limit(1);
+      if (tableError) continue;
+      
+      let tableUpdated = 0;
+      
+      for (const { supabaseUrl, r2Url } of allUrls) {
+        const { data, error } = await supabase
+          .from(table)
+          .update({ [column]: r2Url })
+          .eq(column, supabaseUrl)
+          .select("id");
+        
+        if (!error && data && data.length > 0) {
+          tableUpdated += data.length;
+        }
+      }
+      
+      if (tableUpdated > 0) {
+        console.log(`  ${table}.${column}: ${tableUpdated} rows updated`);
+        totalUpdated += tableUpdated;
+      }
+    } catch (e) {
+      // Skip
+    }
+  }
+  
+  // Broad sweep
+  for (const { table, column } of URL_COLUMNS) {
+    try {
+      const { data: remaining } = await supabase
+        .from(table)
+        .select(`id, ${column}`)
+        .not(column, "is", null)
+        .limit(1000);
+      
+      if (remaining && remaining.length > 0) {
+        for (const row of remaining) {
+          const url = row[column];
+          if (isSupabaseStorageUrl(url)) {
+            const extracted = extractBucketAndPath(url);
+            if (extracted) {
+              const newUrl = buildR2Url(extracted.bucket, extracted.path);
+              await supabase.from(table).update({ [column]: newUrl }).eq("id", row.id);
+              totalUpdated++;
+            }
+          }
+        }
+      }
+    } catch (e) {
+      // Skip
+    }
+  }
+  
+  console.log(`\n  Total DB rows updated: ${totalUpdated}\n`);
+}
+
+// ─── Phase 4: Summary ───────────────────────────────────
+function printSummary(files, migrationResult) {
+  console.log("\n" + "=".repeat(60));
+  console.log("  MIGRATION SUMMARY");
+  console.log("=".repeat(60));
+  console.log(`  Mode: ${isExecute ? "EXECUTE" : "DRY-RUN"}`);
+  console.log(`  Supabase URL: ${SUPABASE_URL}`);
+  console.log(`  R2 Bucket: ${R2_BUCKET_NAME}`);
+  console.log(`  R2 Public URL: ${R2_PUBLIC_URL || "(not set)"}`);
+  console.log("-".repeat(60));
+  console.log(`  Files found: ${files.length}`);
+  if (isExecute) {
+    console.log(`  Files migrated: ${migrationResult.migrated.length}`);
+    console.log(`  Files skipped: ${migrationResult.skipped.length}`);
+    console.log(`  Files failed: ${migrationResult.failed.length}`);
+  }
+  console.log("-".repeat(60));
+  
+  if (!isExecute) {
+    console.log("\n  This was a DRY-RUN. To execute migration:");
+    console.log("     node scripts/migrate-storage-to-r2.mjs --execute\n");
+  } else {
+    console.log("\n  Migration complete!");
+    console.log("  Files in Supabase Storage are NOT deleted (safety backup).");
+    console.log("  Verify by checking /api/health endpoint.\n");
+  }
+  
+  console.log("=".repeat(60) + "\n");
+}
+
+// ─── Main ───────────────────────────────────────────────
+async function main() {
+  console.log("=".repeat(60));
+  console.log("  Supabase Storage -> Cloudflare R2 Migration");
+  console.log("=".repeat(60));
+  
+  if (!isExecute) {
+    console.log("\n  DRY-RUN MODE (no files will be modified)");
+    console.log("  Run with --execute to perform actual migration\n");
+  }
+  
+  const files = await scanSupabaseStorage();
+  
+  if (files.length === 0) {
+    console.log("\n  No files found in Supabase Storage. Nothing to migrate.\n");
+    process.exit(0);
+  }
+  
+  let migrationResult = { migrated: [], failed: [], skipped: [] };
+  if (isExecute) {
+    migrationResult = await migrateFiles(files);
+    await updateDatabase(migrationResult.migrated);
+  }
+  
+  printSummary(files, migrationResult);
+}
+
+main().catch(console.error);

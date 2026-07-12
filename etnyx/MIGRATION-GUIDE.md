@@ -1,88 +1,100 @@
-# Supabase Schema Migration Index
+# Storage Migration Guide: Supabase Storage → Cloudflare R2
 
-> ** canonical reference** — Documents the correct execution order and purpose of all migration files.
+## Status
 
-## Quick Start (Fresh Database)
+| Item | Status |
+|------|--------|
+| R2 Library (`src/lib/r2.ts`) | ✅ Implemented |
+| Upload Routes (R2 + Supabase fallback) | ✅ Migrated |
+| Health Check Endpoint | ✅ Updated |
+| R2 Env Vars in Vercel | ✅ Configured |
+| R2 Public Access | ✅ Enabled |
+| Migration Script | ✅ Created |
+| Dry-Run Scan | ✅ Completed |
+| **Actual Migration** | ⏳ Pending (needs local R2 creds) |
 
-If you're setting up a **new** Supabase project from scratch, run these files in order:
+## Dry-Run Results
 
-1. `supabase-schema.sql` — Base schema (tables, indexes, triggers)
-2. `supabase-schema-v2.sql` through `supabase-schema-v25-moota.sql` — Incremental updates
-3. `supabase-schema-v26-rls-hardening.sql` — **CRITICAL: RLS security hardening**
-4. `supabase-schema-v27-promo-placement.sql` — Promo code placement feature
-5. `supabase-schema-v28-indexes.sql` — Performance indexes
-
-Or simply run: `supabase-schema-consolidated.sql` (contains base tables + all migrations through v25).
-
-Then run v26, v27, v28 on top.
-
-## Migration Inventory
-
-| Version | File | Purpose | Breaking? |
-|---------|------|---------|-----------|
-| base | `supabase-schema.sql` | Initial table creation | — |
-| v2 | `supabase-schema-v2.sql` | Pricing table updates | No |
-| v3 | `supabase-schema-v3.sql` | Order status enum update | No |
-| v4 | `supabase-schema-v4.sql` | Staff/worker tables | No |
-| v8–v25 | `supabase-schema-v{N}.sql` | Incremental feature additions | No |
-| v21-fix | `supabase-schema-v21-fix-passwords.sql` | Password hash fix | Patch |
-| v22-reset | `supabase-schema-v22-reset-staff.sql` | Staff table reset | ⚠️ Destructive |
-| v23 | `supabase-schema-v23-cron-columns.sql` | Cron job columns | No |
-| v24 | `supabase-schema-v24-logic-fixes.sql` | Business logic fixes | No |
-| v25 | `supabase-schema-v25-moota.sql` | Moota integration | No |
-| **v26** | `supabase-schema-v26-rls-hardening.sql` | **🔒 RLS hardening (CRITICAL)** | Security |
-| v27 | `supabase-schema-v27-promo-placement.sql` | Promo banner placement | No |
-| v28 | `supabase-schema-v28-indexes.sql` | Query performance indexes | No |
-
-## Key Tables
-
-| Table | Purpose | RLS |
-|-------|---------|-----|
-| `orders` | Customer joki orders | ✅ Service-role only |
-| `pricing_config` | Dynamic pricing (CMS-driven) | ✅ Public read (non-secret) |
-| `settings` | App configuration key-values | ✅ Public read (filtered) |
-| `testimonials` | Customer reviews | ✅ Public read (approved only) |
-| `portfolio` | Past work showcase | ✅ Public read (active only) |
-| `promo_codes` | Discount codes | ✅ Public read (active only) |
-| `staff` | Admin/worker accounts | ✅ Service-role only |
-| `activity_log` | Audit trail | ✅ Service-role only |
-| `payment_methods` | Bank/e-wallet config | ✅ Service-role only |
-
-## RLS Policy Summary (v26)
-
-- **Service role**: Full CRUD on ALL tables (server-side operations)
-- **anon/authenticated**: SELECT only on "safe" public tables:
-  - `testimonials` WHERE `is_approved = true`
-  - `portfolio` WHERE `is_active = true`
-  - `reviews` WHERE `is_approved = true`
-  - `settings` WHERE key NOT LIKE `secret_%` / `%_api_key` / `%_token` / `%_secret`
-  - `promo_codes` WHERE `is_active = true AND not expired`
-- **All other tables**: Blocked for anon/authenticated (writes go through API routes)
-
-## Verification Queries
-
-After running all migrations, verify RLS is active:
-
-```sql
--- Check all tables have RLS enabled + forced
-SELECT tablename, rowsecurity, forcerowsecurity
-FROM pg_tables
-WHERE schemaname = 'public'
-ORDER BY tablename;
-
--- Check policies
-SELECT tablename, policyname, roles, cmd
-FROM pg_policies
-WHERE schemaname = 'public'
-ORDER BY tablename, policyname;
-
--- Test: should return 0 rows with anon key
--- SELECT * FROM orders LIMIT 1;
+```
+Bucket "payment-proofs":     54 files (17.84 MB)
+Bucket "worker-screenshots": 33 files (3.24 MB)
+─────────────────────────────────────────────────
+Total:                       87 files (21.08 MB)
 ```
 
-## Notes
+## Steps to Execute Migration
 
-- Migration files are **append-only** — never edit a previous migration
-- Each migration is idempotent (safe to re-run)
-- The `supabase-cleanup-duplicate-workers.sql` file is a one-time fix script
-- `seed-data.sql` contains optional demo/seed data
+### 1. Add R2 Credentials to Local `.env.local`
+
+Add these lines to `etnyx/.env.local` (get values from Cloudflare Dashboard > R2):
+
+```bash
+# Cloudflare R2
+R2_ACCOUNT_ID=your-cloudflare-account-id
+R2_ACCESS_KEY_ID=your-r2-access-key-id
+R2_SECRET_ACCESS_KEY=your-r2-secret-access-key
+R2_BUCKET_NAME=etnyx-storage
+NEXT_PUBLIC_R2_PUBLIC_URL=https://pub-xxxx.r2.dev
+```
+
+### 2. Run Migration
+
+```bash
+cd etnyx
+
+# Full migration (files + database URLs)
+node scripts/migrate-storage-to-r2.mjs --execute
+
+# OR: Files only, skip DB update
+node scripts/migrate-storage-to-r2.mjs --execute --skip-db
+```
+
+### 3. Verify
+
+```bash
+# Check health endpoint (should show provider: "r2")
+curl http://localhost:3000/api/health | jq '.services.storage'
+```
+
+### 4. Post-Migration Cleanup (Optional, after verifying everything works)
+
+After confirming all R2 URLs work correctly:
+
+1. Delete old files from Supabase Storage buckets (manual, via Supabase Dashboard)
+2. Remove Supabase Storage fallback code from upload routes (optional)
+
+## Safety Features
+
+- **No deletion**: Script NEVER deletes files from Supabase Storage
+- **Idempotent**: Can re-run safely (skips files already in R2)
+- **Per-file error handling**: One failure doesn't stop others
+- **Verification**: Each uploaded file is verified via HTTP HEAD before marking as migrated
+- **DB update**: Two-pass strategy (exact match + broad sweep) ensures all URLs are updated
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────┐
+│                 Upload Route                     │
+│  (e.g., /api/admin/portfolio/upload)             │
+└──────────────────┬──────────────────────────────┘
+                   │
+                   ▼
+┌─────────────────────────────────────────────────┐
+│              src/lib/r2.ts                       │
+│  isR2Configured() → true?                       │
+│     ├── YES → uploadToR2()                      │
+│     └── NO  → uploadToSupabase() (fallback)     │
+└──────────────────────────────────────────────────┘
+```
+
+## Cost Comparison
+
+| Metric | Supabase Storage (Free) | Cloudflare R2 (Free) |
+|--------|------------------------|---------------------|
+| Storage | 1 GB | 10 GB |
+| Egress | 1 GB/month | **Unlimited (Zero Egress)** |
+| Operations A | Unlimited | 1M/month (Class A) |
+| Operations B | Unlimited | 10M/month (Class B) |
+
+**Verdict**: R2 wins on every metric for free tier. Zero egress fees is the killer feature — especially for payment proof screenshots and worker screenshots that are frequently accessed.

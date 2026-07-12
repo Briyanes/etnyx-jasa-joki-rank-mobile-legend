@@ -39,7 +39,7 @@ function getR2Client(): S3Client {
 }
 
 export function isR2Configured(): boolean {
-  return !!(R2_ACCOUNT_ID && R2_ACCESS_KEY_ID && R2_SECRET_ACCESS_KEY && R2_PUBLIC_URL);
+  return !!(R2_ACCOUNT_ID && R2_ACCESS_KEY_ID && R2_SECRET_ACCESS_KEY);
 }
 
 export async function uploadToR2(
@@ -59,7 +59,8 @@ export async function uploadToR2(
     })
   );
 
-  return `${R2_PUBLIC_URL}/${key}`;
+  // Use proxy route if public URL not set, otherwise use public URL
+  return getR2PublicUrl(key);
 }
 
 export async function deleteFromR2(key: string): Promise<void> {
@@ -84,4 +85,19 @@ export function generateR2Key(folder: string, filename: string): string {
   const safeName = filename.replace(/[^a-zA-Z0-9.-]/g, "_").toLowerCase();
   const timestamp = Date.now();
   return `${folder}/${timestamp}-${safeName}`;
+}
+
+/**
+ * Get the public URL for an R2 object.
+ * Uses /api/storage/ proxy by default for reliability (works without enabling R2 public access).
+ * Set NEXT_PUBLIC_R2_PUBLIC_URL to use direct CDN access (e.g. custom domain or enabled r2.dev).
+ */
+export function getR2PublicUrl(key: string): string {
+  // If a custom domain or verified r2.dev URL is set, use it directly
+  const publicUrl = R2_PUBLIC_URL;
+  if (publicUrl && !publicUrl.includes("r2.dev")) {
+    return `${publicUrl}/${key}`;
+  }
+  // Default: proxy through Next.js API (works without R2 public access enabled)
+  return `/api/storage/${key}`;
 }
