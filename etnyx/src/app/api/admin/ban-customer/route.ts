@@ -32,11 +32,11 @@ export async function POST(request: NextRequest) {
     const bannedBy = authResult.user?.email || "admin";
     const banReason = reason || `Banned from order ${orderId} by admin`;
 
-    // 1. Fetch the order
+    // 1. Fetch the order — support both UUID `id` and display `order_id` (ETX-xxxxx)
     const { data: order, error: orderErr } = await supabase
       .from("orders")
       .select("id, order_id, whatsapp, customer_email, game_id, customer_ip, username")
-      .eq("order_id", orderId)
+      .or(`id.eq.${orderId},order_id.eq.${orderId}`)
       .single();
 
     if (orderErr || !order) {
