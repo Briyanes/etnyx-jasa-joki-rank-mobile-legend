@@ -125,19 +125,38 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ===== Anti-Spam Layer 2: Check banned WhatsApp + pending order limit =====
+    // ===== Anti-Spam Layer 2: Check banned WA + email + game_id + pending limit =====
     const fullWhatsapp = `+62${cleanWhatsapp}`;
     const supabase = await createAdminClient();
 
-    const { data: bannedWa } = await supabase
-      .from("banned_whatsapp")
-      .select("id")
-      .eq("whatsapp", fullWhatsapp)
-      .limit(1);
+    const rawEmail = body.email ? String(body.email).trim().toLowerCase() : null;
+    const rawGameId = body.userId ? String(body.userId).replace(/\D/g, "") : null;
 
-    if (bannedWa && bannedWa.length > 0) {
+    const [bannedWaRes, bannedEmailRes, bannedGameIdRes] = await Promise.all([
+      supabase.from("banned_whatsapp").select("id").eq("whatsapp", fullWhatsapp).limit(1),
+      rawEmail
+        ? supabase.from("banned_emails").select("id").eq("email", rawEmail).limit(1)
+        : Promise.resolve({ data: null }),
+      rawGameId
+        ? supabase.from("banned_game_ids").select("id").eq("game_id", rawGameId).limit(1)
+        : Promise.resolve({ data: null }),
+    ]);
+
+    if (bannedWaRes.data && bannedWaRes.data.length > 0) {
       return NextResponse.json(
-        { error: "Nomor Anda diblokir dari layanan kami. Hubungi admin jika merasa ini kesalahan." },
+        { error: "Nomor Anda diblokir dari layanan kami. Hubungi admin." },
+        { status: 403 }
+      );
+    }
+    if (bannedEmailRes.data && bannedEmailRes.data.length > 0) {
+      return NextResponse.json(
+        { error: "Email Anda diblokir dari layanan kami. Hubungi admin." },
+        { status: 403 }
+      );
+    }
+    if (bannedGameIdRes.data && bannedGameIdRes.data.length > 0) {
+      return NextResponse.json(
+        { error: "Akun game Anda diblokir dari layanan kami. Hubungi admin." },
         { status: 403 }
       );
     }
@@ -438,6 +457,7 @@ export async function POST(request: NextRequest) {
         ttclid,
         referrer_url: referrerUrl,
         payment_method: paymentMethod,
+        customer_ip: ip,
       })
       .select("id, order_id, total_price")
       .single();

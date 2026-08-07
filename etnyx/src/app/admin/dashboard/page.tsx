@@ -77,6 +77,7 @@ interface Order {
   assigned_worker_id: string | null;
   payment_method: string | null;
   payment_status: string | null;
+  customer_ip?: string | null;
 }
 
 interface Testimonial {
@@ -591,6 +592,22 @@ export default function AdminDashboard() {
       const d = await res.json();
       if (!res.ok) { toast(d.error || "Gagal hapus order"); return; }
       toast(`Order ${orderDisplayId} berhasil dihapus.`);
+      fetchOrders(); fetchStats();
+    } catch { toastError("Network error"); }
+  };
+
+  const banCustomer = async (orderId: string, orderDisplayId: string, username: string) => {
+    const reason = prompt(`Ban customer "${username}"?\n\nIni akan memblokir IP, WhatsApp, Email, dan Game ID secara permanen.\nSemua order pending dari customer ini juga akan dibatalkan.\n\nAlasan (opsional):`);
+    if (reason === null) return; // cancelled
+    try {
+      const res = await fetch("/api/admin/ban-customer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId, reason: reason || undefined }),
+      });
+      const data = await res.json();
+      if (!res.ok) { toastError(data.error || "Gagal ban customer"); return; }
+      toastSuccess(`Customer "${username}" di-ban! ${data.banned?.join(", ") || ""}${data.cancelledOrders ? ` | ${data.cancelledOrders} order dibatalkan` : ""}`);
       fetchOrders(); fetchStats();
     } catch { toastError("Network error"); }
   };
@@ -1513,6 +1530,9 @@ export default function AdminDashboard() {
                             <p className="text-text text-xs font-medium">{o.username}</p>
                             <p className="text-text-muted text-[10px]">{o.login_method === "moonton" ? "Moonton" : o.package_title?.includes("Gendong") || o.package_title?.includes("Duo Boost") ? "Gendong/Mabar" : `ID: ${o.game_id}`}</p>
                             {o.whatsapp && <p className="text-text-muted text-[10px]">{o.whatsapp}</p>}
+                            {o.customer_ip && o.customer_ip !== "unknown" && (
+                              <p className="text-text-muted text-[9px] font-mono" title="Customer IP">🌐 {o.customer_ip}</p>
+                            )}
                           </td>
                           <td className="px-4 py-3">
                             <span className="text-xs text-text">{o.package_title || `${rankWithStar(o.current_rank, o.current_star)} → ${rankWithStar(o.target_rank, o.target_star)}`}</span>
@@ -1680,7 +1700,7 @@ export default function AdminDashboard() {
                                 )}
                               </>)}
 
-                              {/* Universal: WA + Copy + Delete */}
+                              {/* Universal: WA + Copy + Ban + Delete */}
                               <div className="flex gap-1 pt-1 border-t border-white/5">
                                 {o.whatsapp && (
                                   <button onClick={() => openWhatsApp(o.whatsapp!, `Halo kak, ini dari ETNYX terkait order ${o.order_id}. `)}
@@ -1691,6 +1711,10 @@ export default function AdminDashboard() {
                                 <button onClick={() => copyOrderInfo(o)}
                                   className="flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded text-[9px] bg-surface text-text-muted hover:text-text transition-colors" title="Copy Info">
                                   <Copy className="w-2.5 h-2.5" /> Copy
+                                </button>
+                                <button onClick={() => banCustomer(o.id, o.order_id, o.username)}
+                                  className="flex items-center justify-center gap-1 px-2 py-1 rounded text-[9px] bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 transition-colors" title="Ban Customer (IP + WA + Email + Game ID)">
+                                  <ShieldBan className="w-2.5 h-2.5" />
                                 </button>
                                 <button onClick={() => deleteOrder(o.id, o.order_id)}
                                   className="flex items-center justify-center gap-1 px-2 py-1 rounded text-[9px] bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors" title="Hapus Order">

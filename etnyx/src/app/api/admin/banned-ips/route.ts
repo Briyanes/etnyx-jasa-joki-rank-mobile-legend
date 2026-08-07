@@ -12,7 +12,7 @@ export async function GET() {
 
     const supabase = await createAdminClient();
 
-    const [ipsResult, waResult] = await Promise.all([
+    const [ipsResult, waResult, emailResult, gameIdResult] = await Promise.all([
       supabase
         .from("banned_ips")
         .select("*")
@@ -21,11 +21,21 @@ export async function GET() {
         .from("banned_whatsapp")
         .select("*")
         .order("created_at", { ascending: false }),
+      supabase
+        .from("banned_emails")
+        .select("*")
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("banned_game_ids")
+        .select("*")
+        .order("created_at", { ascending: false }),
     ]);
 
     return NextResponse.json({
       bannedIps: ipsResult.data || [],
       bannedWhatsapp: waResult.data || [],
+      bannedEmails: emailResult.data || [],
+      bannedGameIds: gameIdResult.data || [],
     });
   } catch (error) {
     console.error("Error fetching banned list:", error);
@@ -83,9 +93,35 @@ export async function POST(request: NextRequest) {
       if (error) {
         return NextResponse.json({ error: "Gagal ban WhatsApp" }, { status: 500 });
       }
+    } else if (type === "email") {
+      const { error } = await supabase
+        .from("banned_emails")
+        .upsert({
+          email: value.toLowerCase(),
+          reason: reason || "Manual ban by admin",
+          auto_banned: false,
+          banned_by: bannedBy,
+        }, { onConflict: "email", ignoreDuplicates: true });
+
+      if (error) {
+        return NextResponse.json({ error: "Gagal ban Email" }, { status: 500 });
+      }
+    } else if (type === "game_id") {
+      const { error } = await supabase
+        .from("banned_game_ids")
+        .upsert({
+          game_id: value.replace(/\D/g, ""),
+          reason: reason || "Manual ban by admin",
+          auto_banned: false,
+          banned_by: bannedBy,
+        }, { onConflict: "game_id", ignoreDuplicates: true });
+
+      if (error) {
+        return NextResponse.json({ error: "Gagal ban Game ID" }, { status: 500 });
+      }
     } else {
       return NextResponse.json(
-        { error: "Type harus 'ip' atau 'whatsapp'" },
+        { error: "Type harus 'ip', 'whatsapp', 'email', atau 'game_id'" },
         { status: 400 }
       );
     }
@@ -139,9 +175,27 @@ export async function DELETE(request: NextRequest) {
       if (error) {
         return NextResponse.json({ error: "Gagal unban WhatsApp" }, { status: 500 });
       }
+    } else if (type === "email") {
+      const { error } = await supabase
+        .from("banned_emails")
+        .delete()
+        .eq("email", value);
+
+      if (error) {
+        return NextResponse.json({ error: "Gagal unban Email" }, { status: 500 });
+      }
+    } else if (type === "game_id") {
+      const { error } = await supabase
+        .from("banned_game_ids")
+        .delete()
+        .eq("game_id", value);
+
+      if (error) {
+        return NextResponse.json({ error: "Gagal unban Game ID" }, { status: 500 });
+      }
     } else {
       return NextResponse.json(
-        { error: "Type harus 'ip' atau 'whatsapp'" },
+        { error: "Type harus 'ip', 'whatsapp', 'email', atau 'game_id'" },
         { status: 400 }
       );
     }

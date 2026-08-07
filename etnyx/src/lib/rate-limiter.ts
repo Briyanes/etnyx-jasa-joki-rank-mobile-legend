@@ -30,7 +30,7 @@ const ORDER_RATE_LIMIT_1H = 5; // max 5 orders per 1 hour per IP
 const ORDER_RATE_LIMIT_1H_WINDOW = 3600; // 1 hour in seconds
 const ORDER_RATE_LIMIT_24H = 10; // max 10 orders per 24 hours per IP
 const ORDER_RATE_LIMIT_24H_WINDOW = 86400; // 24 hours in seconds
-const MAX_PENDING_PER_WA = 3; // max 3 pending orders per WhatsApp number
+const MAX_PENDING_PER_WA = 1; // max 1 pending order per WhatsApp number (lowered from 3 to fight spam)
 const AUTO_BAN_THRESHOLD = 10; // auto-ban if >10 orders in 1 hour
 
 // ===== Types =====
