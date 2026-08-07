@@ -130,7 +130,10 @@ export async function POST(request: NextRequest) {
     const supabase = await createAdminClient();
 
     const rawEmail = body.email ? String(body.email).trim().toLowerCase() : null;
-    const rawGameId = body.userId ? String(body.userId).replace(/\D/g, "") : null;
+    // Extract userId only (before parentheses) — game_id stored as "userId(serverId)"
+    const rawGameId = body.userId
+      ? String(body.userId).split("(")[0].replace(/\D/g, "")
+      : null;
 
     const [bannedWaRes, bannedEmailRes, bannedGameIdRes] = await Promise.all([
       supabase.from("banned_whatsapp").select("id").eq("whatsapp", fullWhatsapp).limit(1),

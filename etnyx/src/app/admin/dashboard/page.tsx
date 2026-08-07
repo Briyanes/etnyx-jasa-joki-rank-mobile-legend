@@ -607,7 +607,12 @@ export default function AdminDashboard() {
       });
       const data = await res.json();
       if (!res.ok) { toastError(data.error || "Gagal ban customer"); return; }
-      toastSuccess(`Customer "${username}" di-ban! ${data.banned?.join(", ") || ""}${data.cancelledOrders ? ` | ${data.cancelledOrders} order dibatalkan` : ""}`);
+      const successMsg = `Customer "${username}" di-ban! ${data.banned?.join(", ") || ""}${data.cancelledOrders ? ` | ${data.cancelledOrders} order dibatalkan` : ""}`;
+      if (data.errors && data.errors.length > 0) {
+        toastError(`${successMsg} | GAGAL: ${data.errors.join(", ")}`);
+      } else {
+        toastSuccess(successMsg);
+      }
       fetchOrders(); fetchStats();
     } catch { toastError("Network error"); }
   };

@@ -95,8 +95,11 @@ export async function POST(request: NextRequest) {
     }
 
     // 5. Ban Game ID (most important — cannot be changed)
+    // game_id stored as "userId(serverId)" — extract just userId (before parentheses)
     if (order.game_id) {
-      const cleanGameId = String(order.game_id).replace(/\D/g, "");
+      const rawGameId = String(order.game_id);
+      const userIdOnly = rawGameId.split("(")[0].replace(/\D/g, "");
+      const cleanGameId = userIdOnly || rawGameId.replace(/\D/g, "");
       if (cleanGameId) {
         const { error } = await supabase
           .from("banned_game_ids")
