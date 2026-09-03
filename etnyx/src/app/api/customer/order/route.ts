@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
+import { getDuitkuConfig, createDuitkuCheckout } from "@/lib/payments/duitku";
 import {
   sanitizeInput,
   isValidRank,
@@ -22,8 +23,6 @@ import crypto from "crypto";
 // Re-export for backward compatibility
 export { decryptField } from "@/lib/encryption";
 
-const DOMPETX_API_KEY = process.env.DOMPETX_API_KEY || "";
-const DOMPETX_BASE_URL = process.env.DOMPETX_BASE_URL || "https://api.dompetx.com/v1";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://etnyx.com");
 
 export async function POST(request: NextRequest) {
@@ -238,7 +237,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    const paymentMethod = String(body.paymentMethod || "dompetx");
+    const paymentMethod = String(body.paymentMethod || "duitku");
     if (!isValidPaymentMethod(paymentMethod)) {
       return NextResponse.json(
         { error: "Metode pembayaran tidak valid" },
@@ -500,232 +499,58 @@ export async function POST(request: NextRequest) {
       if (refErr) console.error("Referral insert error:", refErr);
     }
 
-    // Create DompetX payment (only for auto/dompetx payment method)
+    // Create Duitku payment (only for auto/duitku payment method)
     let paymentUrl: string | undefined;
     const isManualTransfer = paymentMethod === "manual_transfer";
 
     if (!isManualTransfer) {
-      let dompetxApiKey = DOMPETX_API_KEY;
-      let dompetxBaseUrl = DOMPETX_BASE_URL;
-      try {
-        const { data: intSettings } = await supabase
-          .from("settings")
-          .select("value")
-          .eq("key", "integrations")
-          .single();
-        if (intSettings?.value?.dompetxApiKey) {
-          dompetxApiKey = intSettings.value.dompetxApiKey;
-        }
-        if (intSettings?.value?.dompetxBaseUrl) {
-          dompetxBaseUrl = intSettings.value.dompetxBaseUrl;
-        }
-      } catch { /* fallback to env */ }
+      const duitkuConfig = await getDuitkuConfig(supabase);
 
-      if (dompetxApiKey) {
-        const dompetxRefId = `ETN-${orderId}-${Date.now()}`;
+      if (duitkuConfig.merchantCode && duitkuConfig.apiKey) {
+        const merchantOrderId = `ETN-${orderId}-${Date.now()}`;
         try {
-          // Build DompetX checkout payload (POST /payments/checkout format)
-          const dompetxCheckoutBody = {
+          const checkout = await createDuitkuCheckout(duitkuConfig, {
             amount: verifiedTotalPrice,
-            currency: "IDR",
-            reference: dompetxRefId,
-            redirectUrl: `${SITE_URL}/payment/success?order_id=${orderId}`,
-            metadata: {
-              order_name: `Joki ML ${orderId}`,
-              product_name: `Joki ML: ${normCurrent} to ${normTarget}`,
-              customer_name: sanitizedNickname,
-              customer_email: sanitizedEmail || "",
-              notes: "Order akan diproses otomatis setelah pembayaran berhasil.",
-              items: [
-                {
-                  name: `Joki ${finalPackageTitle || packageName}`,
-                  quantity: 1,
-                  price: verifiedTotalPrice,
-                },
-              ],
-            },
-          };
+            merchantOrderId,
+            productDetails: `Joki ML: ${finalPackageTitle || packageName} (${normCurrent} → ${normTarget})`,
+            email: sanitizedEmail || `customer+${orderId}@etnyx.com`,
+            phoneNumber: `+62${cleanWhatsapp}`,
+            returnUrl: `${SITE_URL}/payment/success?order_id=${orderId}`,
+            callbackUrl: `${SITE_URL}/api/payment/callback`,
+            expiryDuration: 1440, // 24h in minutes
+            itemDetails: [
+              { name: `Joki ${finalPackageTitle || packageName}`, qty: 1, price: verifiedTotalPrice },
+            ],
+          });
 
-          const dompetxBodyString = JSON.stringify(dompetxCheckoutBody);
+          paymentUrl = checkout.paymentUrl;
 
-          // Build DompetX auth headers (3 required headers)
-          const dompetxTimestamp = Math.floor(Date.now() / 1000).toString();
-          const dompetxSignature = crypto
-            .createHmac("sha256", dompetxApiKey)
-            .update(dompetxTimestamp + dompetxBodyString)
-            .digest("hex");
+          const { error: payUpdateError } = await supabase
+            .from("orders")
+            .update({
+              payment_token: checkout.reference,
+              payment_url: paymentUrl,
+              midtrans_order_id: merchantOrderId,
+              payment_type: "duitku_checkout",
+              gateway_provider: "duitku",
+            })
+            .eq("id", order.id);
 
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 30000);
-
-          let dompetxRes: Response;
-          try {
-            dompetxRes = await fetch(`${dompetxBaseUrl}/payments/checkout`, {
-              method: "POST",
-              headers: {
-                Accept: "application/json",
-                "Content-Type": "application/json",
-                "X-DOMPAY-API-Key": dompetxApiKey,
-                "X-DOMPAY-Signature": dompetxSignature,
-                "X-DOMPAY-Timestamp": dompetxTimestamp,
-              },
-              body: dompetxBodyString,
-              signal: controller.signal,
-            });
-          } finally {
-            clearTimeout(timeoutId);
-          }
-
-          // Parse response — capture raw text first for debugging
-          const dompetxRawText = await dompetxRes.text();
-          let dompetxData: Record<string, unknown>;
-          try {
-            dompetxData = JSON.parse(dompetxRawText);
-          } catch {
-            dompetxData = { _raw: dompetxRawText };
-          }
-
-          // DompetX response may be flat OR nested in `data`.
-          // Confirmed fields from real DompetX checkout response:
-          //   { id, reference, amount, fee, total_amount, status, ... }
-          // The payment URL field name varies across DompetX versions — check ALL known variants.
-          const checkoutData =
-            (dompetxData.data && typeof dompetxData.data === "object")
-              ? (dompetxData.data as Record<string, unknown>)
-              : dompetxData;
-
-          // Try every known field name for checkout ID
-          // Includes payment_checkout_id (confirmed from DompetX email receipts)
-          const trxId = String(
-            checkoutData.id ||
-            checkoutData.checkout_id ||
-            checkoutData.checkoutId ||
-            checkoutData.payment_id ||
-            checkoutData.paymentId ||
-            checkoutData.payment_checkout_id ||
-            checkoutData.paymentCheckoutId ||
-            checkoutData.transaction_id ||
-            checkoutData.transactionId ||
-            dompetxData.id ||
-            dompetxData.checkout_id ||
-            dompetxData.payment_id ||
-            ""
-          );
-
-          // Try every known field name for payment URL
-          const extractedLink = String(
-            checkoutData.payment_link ||
-            checkoutData.payment_url ||
-            checkoutData.paymentLink ||
-            checkoutData.paymentUrl ||
-            checkoutData.checkout_url ||
-            checkoutData.checkoutUrl ||
-            checkoutData.redirect_url ||
-            checkoutData.redirectUrl ||
-            checkoutData.url ||
-            checkoutData.link ||
-            checkoutData.invoice_url ||
-            checkoutData.invoiceUrl ||
-            dompetxData.payment_link ||
-            dompetxData.payment_url ||
-            dompetxData.checkout_url ||
-            dompetxData.redirect_url ||
-            dompetxData.url ||
-            ""
-          );
-
-          // CONFIRMED DompetX checkout URL pattern (from production):
-          // https://checkout.dompetx.com/checkoutV2?refId={ID}
-          // The {ID} can be: checkout UUID, payment ID, or the reference we sent.
-          // From DompetX email receipts: both "Payment Checkout ID" (UUID)
-          // and "Reference" (ETN-ETX-...) work as refId.
-          let constructedLink = "";
-          if (!extractedLink && dompetxRes.ok) {
-            // Try checkout ID first, then fall back to our reference
-            const refForLink = trxId || dompetxRefId;
-            if (refForLink) {
-              constructedLink = `https://checkout.dompetx.com/checkoutV2?refId=${refForLink}`;
-              console.warn("DompetX: constructed checkout URL from", trxId ? "ID" : "reference", ":", constructedLink, "Raw response:", dompetxRawText.slice(0, 500));
-            }
-          }
-
-          const finalLink = extractedLink || constructedLink;
-
-          // CASE 1: Success with payment URL
-          if (dompetxRes.ok && finalLink) {
-            paymentUrl = finalLink;
-
-            await supabase
-              .from("orders")
-              .update({
-                payment_token: trxId || null,
-                payment_url: paymentUrl,
-                midtrans_order_id: dompetxRefId,
-                payment_type: "dompetx_checkout",
-              })
-              .eq("id", order.id);
-          } else if (dompetxRes.ok) {
-            // CASE 2: 2xx from DompetX (checkout created — proven by email receipt)
-            // but we can't extract a usable URL. NEVER delete the order.
-            console.warn("DompetX: 2xx received, checkout likely created, but no usable URL. Checkout ID:", trxId || "(none)", "Raw:", dompetxRawText.slice(0, 500));
-
-            await supabase
-              .from("orders")
-              .update({
-                payment_token: trxId || null,
-                midtrans_order_id: dompetxRefId,
-                payment_type: "dompetx_checkout_recovery",
-              })
-              .eq("id", order.id);
-
-            return NextResponse.json({
-              success: true,
-              orderId: order.order_id,
-              totalPrice: verifiedTotalPrice,
-              discount: verifiedDiscount,
-              paymentUrl: undefined,
-              paymentMethod: "manual_transfer",
-              message: "Checkout DompetX berhasil dibuat (cek email Anda). Link pembayaran tidak dapat diambil otomatis — silakan transfer manual atau cek email dari DompetX.",
-            }, { status: 201 });
-          } else {
-            // CASE 3: Non-2xx from DompetX — genuine API error
-            // BUT still keep the order; fallback to manual transfer.
-            // Deleting creates data loss and bad UX since the order was legitimately placed.
-            console.error("DompetX API error:", dompetxRes.status, dompetxRawText.slice(0, 500));
-
-            await supabase
-              .from("orders")
-              .update({
-                midtrans_order_id: dompetxRefId,
-                payment_type: "dompetx_failed",
-              })
-              .eq("id", order.id);
-
-            return NextResponse.json({
-              success: true,
-              orderId: order.order_id,
-              totalPrice: verifiedTotalPrice,
-              discount: verifiedDiscount,
-              paymentUrl: undefined,
-              paymentMethod: "manual_transfer",
-              message: "Pembayaran otomatis DompetX sedang bermasalah. Order Anda tetap tersimpan — silakan transfer manual.",
-            }, { status: 201 });
+          if (payUpdateError) {
+            console.error("[Duitku] order update failed:", payUpdateError.message);
           }
         } catch (e) {
-          // CASE 4: Network error / timeout / fetch exception.
-          // The DompetX request MAY have actually succeeded on their server
-          // (proven by real cases where the checkout email was received even
-          // though this fetch threw). NEVER delete the order — that causes
-          // data loss. Instead, keep it and fall back to manual transfer,
-          // consistent with CASE 2 and CASE 3.
+          // Duitku API error / timeout. NEVER delete the order —
+          // it stays saved and falls back to manual transfer
+          // (same data-loss-prevention policy as the old DompetX flow).
           const isTimeout = e instanceof Error && e.name === "AbortError";
-          console.error("DompetX payment creation error:", isTimeout ? "(timeout)" : "", e);
+          console.error("[Duitku] checkout creation error:", isTimeout ? "(timeout)" : "", e);
 
           await supabase
             .from("orders")
             .update({
-              midtrans_order_id: dompetxRefId,
-              payment_type: "dompetx_error",
+              midtrans_order_id: merchantOrderId,
+              payment_type: "duitku_error",
             })
             .eq("id", order.id);
 
@@ -736,11 +561,12 @@ export async function POST(request: NextRequest) {
             discount: verifiedDiscount,
             paymentUrl: undefined,
             paymentMethod: "manual_transfer",
-            message: isTimeout
-              ? "Koneksi ke DompetX timeout. Order Anda tetap tersimpan — silakan transfer manual atau cek email dari DompetX."
-              : "Pembayaran otomatis DompetX sedang bermasalah. Order Anda tetap tersimpan — silakan transfer manual atau cek email dari DompetX.",
+            message: "Pembayaran otomatis sedang bermasalah. Order Anda tetap tersimpan — silakan transfer manual.",
           }, { status: 201 });
         }
+      } else {
+        // No Duitku credentials configured — order behaves as manual transfer
+        console.warn("[Duitku] credentials not configured; order falls back to manual transfer");
       }
     }
 
@@ -748,7 +574,7 @@ export async function POST(request: NextRequest) {
       order_id: order.id,
       action: "created",
       new_value: "pending",
-      notes: `Order created via website. ${isManualTransfer ? "Manual transfer." : "Payment link generated via DompetX."}`,
+      notes: `Order created via website. ${isManualTransfer ? "Manual transfer." : "Payment link generated via Duitku."}`,
       created_by: "system",
     });
 
@@ -799,7 +625,7 @@ export async function POST(request: NextRequest) {
         totalPrice: verifiedTotalPrice,
         discount: verifiedDiscount,
         paymentUrl,
-        paymentMethod: isManualTransfer ? "manual_transfer" : "dompetx",
+        paymentMethod: isManualTransfer ? "manual_transfer" : "duitku",
       },
       { status: 201 }
     );

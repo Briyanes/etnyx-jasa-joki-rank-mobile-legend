@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import crypto from "crypto";
 import { createAdminClient } from "@/lib/supabase-server";
 import { isR2Configured } from "@/lib/r2";
+import { getDuitkuConfig, testDuitkuConnection } from "@/lib/payments/duitku";
 
 interface ServiceStatus {
   status: "ok" | "error";
@@ -22,50 +22,25 @@ async function checkSupabase(): Promise<ServiceStatus> {
   }
 }
 
-async function checkDompetx(): Promise<ServiceStatus> {
+async function checkDuitku(): Promise<ServiceStatus> {
   const start = Date.now();
 
   try {
-    // Get API key from Supabase settings (Admin Dashboard) with env var fallback
-    let apiKey = process.env.DOMPETX_API_KEY || "";
-    let baseUrl = process.env.DOMPETX_BASE_URL || "https://api.dompetx.com/v1";
+    const supabase = await createAdminClient();
+    const config = await getDuitkuConfig(supabase);
 
-    try {
-      const supabase = await createAdminClient();
-      const { data } = await supabase
-        .from("settings")
-        .select("value")
-        .eq("key", "integrations")
-        .single();
-      const settings = data?.value || {};
-      apiKey = settings.dompetxApiKey || apiKey;
-      baseUrl = settings.dompetxBaseUrl || baseUrl;
-    } catch {
-      // Supabase read failed, fall through to env vars
+    if (!config.merchantCode || !config.apiKey) {
+      return { status: "error", error: "Not configured" };
     }
 
-    if (!apiKey) return { status: "error", error: "Not configured" };
-
-    // Build HMAC auth headers (same as test-connection route)
-    const timestamp = Math.floor(Date.now() / 1000).toString();
-    const signature = crypto
-      .createHmac("sha256", apiKey)
-      .update(timestamp)
-      .digest("hex");
-
-    const res = await fetch(`${baseUrl}/saldo`, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-        "X-DOMPAY-API-Key": apiKey,
-        "X-DOMPAY-Signature": signature,
-        "X-DOMPAY-Timestamp": timestamp,
-      },
-      signal: AbortSignal.timeout(5000),
-    });
-    return { status: res.ok ? "ok" : "error", latency_ms: Date.now() - start };
+    const result = await testDuitkuConnection(config);
+    return {
+      status: result.success ? "ok" : "error",
+      latency_ms: Date.now() - start,
+      ...(result.success ? {} : { error: result.message || "Duitku unreachable" }),
+    };
   } catch (e) {
-    console.error("Health check - DompetX error:", e);
+    console.error("Health check - Duitku error:", e);
     return { status: "error", latency_ms: Date.now() - start, error: "Payment service unreachable" };
   }
 }
@@ -114,13 +89,13 @@ async function checkNotifications(): Promise<Record<string, ServiceStatus>> {
 export async function GET() {
   const start = Date.now();
 
-  const [supabase, dompetx, notifications] = await Promise.all([
+  const [supabase, duitku, notifications] = await Promise.all([
     checkSupabase(),
-    checkDompetx(),
+    checkDuitku(),
     checkNotifications(),
   ]);
 
-  const allOk = supabase.status === "ok" && dompetx.status === "ok";
+  const allOk = supabase.status === "ok" && duitku.status === "ok";
   const overallStatus = allOk ? "healthy" : "degraded";
 
   return NextResponse.json(
@@ -132,7 +107,7 @@ export async function GET() {
       uptime_check_ms: Date.now() - start,
       services: {
         supabase,
-        dompetx,
+        duitku,
         storage: {
           provider: isR2Configured() ? "r2" : "supabase",
           r2_configured: isR2Configured(),

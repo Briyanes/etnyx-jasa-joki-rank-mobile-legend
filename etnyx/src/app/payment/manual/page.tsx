@@ -118,7 +118,7 @@ function ManualPaymentContent() {
   const [recoveryMsg, setRecoveryMsg] = useState("");
   const trackedRef = useRef(false);
 
-  const handleRetryDompetX = async () => {
+  const handleRetryAutoPay = async () => {
     if (!orderId || recovering) return;
     setRecovering(true);
     setRecoveryMsg("");
@@ -420,23 +420,23 @@ function ManualPaymentContent() {
             <p className="gradient-text text-3xl font-bold tracking-tight">{formatRupiah(order.total_price)}</p>
           </div>
 
-          {/* Retry DompetX Payment — for cases where auto-payment failed but checkout was created */}
-          {order.payment_method === "dompetx" && (
+          {/* Retry Duitku Payment — for cases where auto-payment failed but checkout was created */}
+          {["dompetx", "duitku"].includes(order.payment_method) && (
             <div className="mt-3 pt-3 border-t border-white/5">
               <p className="text-text-muted text-[11px] mb-2 leading-relaxed">
                 {locale === "id"
-                  ? "Pembayaran otomatis DompetX bermasalah? Coba ambil link pembayaran lagi:"
-                  : "DompetX auto-payment issue? Try retrieving the payment link again:"}
+                  ? "Pembayaran otomatis Duitku bermasalah? Coba ambil link pembayaran lagi:"
+                  : "Duitku auto-payment issue? Try retrieving the payment link again:"}
               </p>
               <button
-                onClick={handleRetryDompetX}
+                onClick={handleRetryAutoPay}
                 disabled={recovering}
                 className="w-full flex items-center justify-center gap-2 bg-accent/10 hover:bg-accent/20 text-accent font-semibold text-sm px-4 py-2.5 rounded-xl border border-accent/20 transition-colors disabled:opacity-50"
               >
                 {recovering ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /> {locale === "id" ? "Mengambil..." : "Retrieving..."}</>
                 ) : (
-                  <><CreditCard className="w-4 h-4" /> {locale === "id" ? "Coba Bayar dengan DompetX" : "Retry DompetX Payment"}</>
+                  <><CreditCard className="w-4 h-4" /> {locale === "id" ? "Coba Bayar dengan Duitku" : "Retry Duitku Payment"}</>
                 )}
               </button>
               {recoveryMsg && (

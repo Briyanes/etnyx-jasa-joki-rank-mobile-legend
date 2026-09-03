@@ -77,7 +77,7 @@ interface TrackingPixels { metaPixelId: string; metaAccessToken: string; googleA
 interface SocialLinks { instagram: string; facebook: string; tiktok: string; youtube: string; whatsapp: string }
 interface SiteInfo { siteName: string; taglineId: string; taglineEn: string; supportEmail: string; companyName: string; address: string; phone: string }
 interface IntegrationSettings {
-  dompetxApiKey: string; dompetxBaseUrl: string;
+  duitkuMerchantCode: string; duitkuApiKey: string; duitkuMode: string;
   resendApiKey: string; resendFromEmail: string;
   metaWaPhoneNumberId: string; metaWaAccessToken: string; metaWaVerifyToken: string; metaWaEnabled: boolean;
   telegramBotToken: string; telegramAdminGroupId: string; telegramWorkerGroupId: string; telegramReviewGroupId: string; telegramReportGroupId: string; telegramAlertGroupId: string;
@@ -124,7 +124,7 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
   const [socialLinks, setSocialLinks] = useState<SocialLinks>({ instagram: "", facebook: "", tiktok: "", youtube: "", whatsapp: "" });
   const [siteInfo, setSiteInfo] = useState<SiteInfo>({ siteName: "", taglineId: "", taglineEn: "", supportEmail: "", companyName: "", address: "", phone: "" });
   const [integrations, setIntegrations] = useState<IntegrationSettings>({
-    dompetxApiKey: "", dompetxBaseUrl: "https://api.dompetx.com/v1",
+    duitkuMerchantCode: "", duitkuApiKey: "", duitkuMode: "sandbox",
     resendApiKey: "", resendFromEmail: "noreply@etnyx.com",
     metaWaPhoneNumberId: "", metaWaAccessToken: "", metaWaVerifyToken: "", metaWaEnabled: false,
     telegramBotToken: "", telegramAdminGroupId: "", telegramWorkerGroupId: "", telegramReviewGroupId: "", telegramReportGroupId: "", telegramAlertGroupId: "",
@@ -538,17 +538,17 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
             <CmsSaveButton settingKey="integrations" value={integrations} />
           </div>
 
-          {/* DompetX */}
+          {/* Duitku */}
           <div className="bg-surface rounded-xl border border-white/5 p-6 space-y-5">
             <div>
-              <h3 className="text-text font-bold text-sm flex items-center gap-2"><CreditCard className="w-4 h-4 text-accent" /> DompetX Payment Gateway</h3>
-              <p className="text-text-muted text-xs mt-0.5">Konfigurasi dan monitoring payment gateway (Basic Merchant)</p>
+              <h3 className="text-text font-bold text-sm flex items-center gap-2"><CreditCard className="w-4 h-4 text-accent" /> Duitku Payment Gateway</h3>
+              <p className="text-text-muted text-xs mt-0.5">Konfigurasi payment gateway (QRIS, VA, e-wallet, gerai retail)</p>
             </div>
             <div className="bg-background rounded-lg p-4 border border-white/5 space-y-3">
               <p className="text-text-muted text-xs font-semibold uppercase tracking-wider">API Credentials</p>
               {[
-                { label: "API Key", value: integrations.dompetxApiKey, key: "dompetxApiKey", type: "password", placeholder: "dompk_xxxxxxxxxxxx" },
-                { label: "Base URL", value: integrations.dompetxBaseUrl, key: "dompetxBaseUrl", type: "text", placeholder: "https://api.dompetx.com/v1" },
+                { label: "Merchant Code", value: integrations.duitkuMerchantCode, key: "duitkuMerchantCode", type: "text", placeholder: "DXXXX" },
+                { label: "API Key", value: integrations.duitkuApiKey, key: "duitkuApiKey", type: "password", placeholder: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" },
               ].map((f) => (
                 <div key={f.key}>
                   <label className="block text-sm text-text-muted mb-1.5">{f.label}</label>
@@ -556,35 +556,43 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
                     placeholder={f.placeholder} className="w-full bg-surface border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none font-mono" />
                 </div>
               ))}
+              <div>
+                <label className="block text-sm text-text-muted mb-1.5">Mode</label>
+                <select value={integrations.duitkuMode} onChange={(e) => setIntegrations({ ...integrations, duitkuMode: e.target.value })}
+                  className="w-full bg-surface border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm focus:border-accent focus:outline-none">
+                  <option value="sandbox">Sandbox (uji coba)</option>
+                  <option value="live">Live (produksi)</option>
+                </select>
+              </div>
             </div>
             <div className="bg-background rounded-lg p-4 border border-white/5 space-y-2">
-              <p className="text-text-muted text-xs font-semibold uppercase tracking-wider">Webhook / Callback URL</p>
-              <p className="text-text-muted text-xs">Daftarkan URL ini di DompetX Dashboard → Settings → Webhook/Callback URL</p>
+              <p className="text-text-muted text-xs font-semibold uppercase tracking-wider">Callback URL</p>
+              <p className="text-text-muted text-xs">Daftarkan URL ini di Duitku Dashboard → Pengaturan → Callback URL (jika diminta)</p>
               <div className="flex gap-2">
-                <input type="text" readOnly value={`${typeof window !== "undefined" ? window.location.origin : ""}/api/payment/notification`}
+                <input type="text" readOnly value={`${typeof window !== "undefined" ? window.location.origin : ""}/api/payment/callback`}
                   className="flex-1 bg-surface border border-white/10 rounded-lg px-4 py-2.5 text-text text-sm font-mono focus:outline-none" />
-                <button onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/api/payment/notification`); toastSuccess("URL berhasil disalin!"); }}
+                <button onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/api/payment/callback`); toastSuccess("URL berhasil disalin!"); }}
                   className="px-4 py-2.5 rounded-lg bg-accent/20 text-accent text-sm font-semibold hover:bg-accent/30 transition-colors whitespace-nowrap flex items-center gap-1.5">
                   <Copy className="w-4 h-4" /> Salin
                 </button>
               </div>
               <p className="text-yellow-400/80 text-xs mt-1">
-                <AlertTriangle className="w-3.5 h-3.5 inline shrink-0" /> <strong>Penting:</strong> Setelah deploy ke production, copy URL di atas dan paste ke DompetX Dashboard agar status pembayaran otomatis terupdate.
+                <AlertTriangle className="w-3.5 h-3.5 inline shrink-0" /> <strong>Penting:</strong> Callback Duitku dikirim server-side (IP Duitku), jadi URL produksi harus bisa diakses publik. Sandbox tidak perlu didaftarkan.
               </p>
             </div>
             <div className="flex items-center gap-3">
               <button onClick={async () => {
-                if (!integrations.dompetxApiKey) { toast("API Key belum diisi!"); return; }
+                if (!integrations.duitkuMerchantCode || !integrations.duitkuApiKey) { toast("Merchant Code & API Key belum diisi!"); return; }
                 try {
-                  const res = await fetch("/api/payment/test-connection", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ apiKey: integrations.dompetxApiKey, baseUrl: integrations.dompetxBaseUrl }) });
+                  const res = await fetch("/api/payment/test-connection", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ merchantCode: integrations.duitkuMerchantCode, apiKey: integrations.duitkuApiKey, mode: integrations.duitkuMode }) });
                   const data = await res.json();
-                  toast(data.success ? "Koneksi berhasil! DompetX aktif dan siap menerima pembayaran." : `Gagal: ${data.error}\n\nPastikan API Key benar.`);
+                  toast(data.success ? "Koneksi berhasil! Duitku aktif dan siap menerima pembayaran." : `Gagal: ${data.error || data.message}\n\nPastikan Merchant Code & API Key benar.`);
                 } catch (e) { toast(`❌ Error koneksi: ${e instanceof Error ? e.message : "Network error"}`); }
               }} className="px-4 py-2.5 rounded-lg border border-white/10 text-text text-sm font-medium hover:bg-white/5 transition-colors flex items-center gap-2">
                 <Plug className="w-4 h-4" /> Test Connection
               </button>
               <p className="text-text-muted text-xs">
-                <BookOpen className="w-3 h-3 inline mr-1" /> Dapatkan credentials di <a href="https://dompetx.com" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">dompetx.com Dashboard</a>
+                <BookOpen className="w-3 h-3 inline mr-1" /> Dapatkan credentials di <a href="https://www.duitku.com" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">Duitku Dashboard</a>
               </p>
             </div>
           </div>
@@ -999,7 +1007,7 @@ export default function SettingsTab({ onSwitchTab }: SettingsTabProps) {
                 </div>
               ))}
             </div>
-            <p className="text-text-muted text-[10px] mt-3">API keys lainnya (DompetX, WA, Telegram, Meta Ads) dikelola di tab <strong className="text-accent">Integrasi</strong>.</p>
+            <p className="text-text-muted text-[10px] mt-3">API keys lainnya (Duitku, WA, Telegram, Meta Ads) dikelola di tab <strong className="text-accent">Integrasi</strong>.</p>
           </div>
           <div className="bg-surface rounded-xl p-5 border border-white/5">
             <h3 className="text-sm font-semibold text-text mb-3 flex items-center gap-2"><Download className="w-4 h-4" /> Export Data (CSV)</h3>

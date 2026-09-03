@@ -540,7 +540,7 @@ export default function CalculatorPage() {
     lines.push(`Harga    : ${formatRupiah(finalPrice)}`);
     lines.push(`Estimasi : ${isExpress ? "1-2 hari" : "3-5 hari"} kerja`);
     lines.push(``);
-    lines.push(`Pembayaran   : BCA / Dana / GoPay / DompetX`);
+    lines.push(`Pembayaran   : BCA / Dana / GoPay / Duitku`);
     lines.push(`Order online : etnyx.id/order`);
     lines.push(`   (atau Kakak bisa order via WA ini)`);
     lines.push(``);
@@ -710,7 +710,7 @@ export default function CalculatorPage() {
         isExpress,
         isPremium,
         customDiscount,
-        paymentMethod: "dompetx",
+        paymentMethod: "duitku",
         userId: userIdCombined,
       };
 
@@ -1822,7 +1822,7 @@ export default function CalculatorPage() {
                 </div>
                 <div>
                   <h3 className="font-bold text-text text-sm">3. Buat Order</h3>
-                  <p className="text-text-muted text-[10px]">Isi data customer → submit ke DompetX</p>
+                  <p className="text-text-muted text-[10px]">Isi data customer → submit ke Duitku</p>
                 </div>
               </div>
               <button
@@ -1879,7 +1879,7 @@ export default function CalculatorPage() {
                         rel="noopener noreferrer"
                         className="block w-full py-3 bg-green-600 hover:bg-green-700 rounded-xl text-white font-bold text-sm transition-colors"
                       >
-                        Buka Link Pembayaran DompetX →
+                        Buka Link Pembayaran Duitku →
                       </a>
                       <button
                         onClick={() => {
@@ -2137,7 +2137,7 @@ export default function CalculatorPage() {
                     {isSubmitting ? (
                       <><Loader2 className="w-4 h-4 animate-spin" /> Membuat Order...</>
                     ) : (
-                      <><CreditCard className="w-4 h-4" /> Submit Order ke DompetX</>
+                      <><CreditCard className="w-4 h-4" /> Submit Order ke Duitku</>
                     )}
                   </button>
                 </>

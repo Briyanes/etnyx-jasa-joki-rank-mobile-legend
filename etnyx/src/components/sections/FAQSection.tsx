@@ -15,7 +15,7 @@ const faqItemsId = [
   },
   {
     question: "Bagaimana cara pembayaran?",
-    answer: "Kami menerima transfer bank (BCA, Mandiri, BNI, BRI), e-wallet (OVO, GoPay, DANA), dan QRIS. Pembayaran dilakukan lunas di awal melalui payment gateway DompetX yang aman dan terenkripsi.",
+    answer: "Kami menerima transfer bank (BCA, Mandiri, BNI, BRI), e-wallet (OVO, GoPay, DANA), dan QRIS. Pembayaran dilakukan lunas di awal melalui payment gateway Duitku yang aman dan terenkripsi.",
   },
   {
     question: "Apakah bisa request hero tertentu?",
@@ -58,7 +58,7 @@ const faqItemsEn = [
   },
   {
     question: "What are the payment options?",
-    answer: "We accept bank transfers (BCA, Mandiri, BNI, BRI), e-wallets (OVO, GoPay, DANA), and QRIS. Full payment is made upfront via the DompetX payment gateway, which is secure and encrypted.",
+    answer: "We accept bank transfers (BCA, Mandiri, BNI, BRI), e-wallets (OVO, GoPay, DANA), and QRIS. Full payment is made upfront via the Duitku payment gateway, which is secure and encrypted.",
   },
   {
     question: "Can I request specific heroes?",

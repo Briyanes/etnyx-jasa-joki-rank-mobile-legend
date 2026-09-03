@@ -128,7 +128,7 @@ function buildCategories(): DocCategory[] {
                     <li>&#8226; <strong className="text-text">Next.js 16</strong> + React 19 (Turbopack)</li>
                     <li>&#8226; <strong className="text-text">Supabase</strong> &mdash; Database + Auth</li>
                     <li>&#8226; <strong className="text-text">Cloudflare R2</strong> &mdash; Storage (Zero Egress)</li>
-                    <li>&#8226; <strong className="text-text">DompetX</strong> &mdash; Payment Gateway</li>
+                    <li>&#8226; <strong className="text-text">Duitku</strong> &mdash; Payment Gateway</li>
                     <li>&#8226; <strong className="text-text">Vercel</strong> &mdash; Hosting &amp; Deployment</li>
                     <li>&#8226; <strong className="text-text">Tailwind CSS 4</strong> &mdash; Styling</li>
                     <li>&#8226; <strong className="text-text">TypeScript</strong> &mdash; Type Safety</li>
@@ -199,7 +199,7 @@ function buildCategories(): DocCategory[] {
                   <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
                     <li>Dashboard 18 tab: Overview, Analytics, Orders, Pricing, Boosters, Testi, Portfolio, Promo, Customers, Rewards, Staff, Leaderboard, Payroll, Reviews, Reports, Ads, Ban List, Settings</li>
                     <li>CRUD semua data + staff management</li>
-                    <li>Konfigurasi integrasi (DompetX, Telegram, WhatsApp, Email)</li>
+                    <li>Konfigurasi integrasi (Duitku, Telegram, WhatsApp, Email)</li>
                     <li>Payroll: kelola gaji, komisi, payout</li>
                     <li>Reports: P&amp;L, worker performance, export CSV</li>
                     <li>Telegram Bot: confirm/reject order langsung dari chat</li>
@@ -243,7 +243,7 @@ function buildCategories(): DocCategory[] {
                   </div>
                   <p className="text-text-muted text-xs mb-2">Pelanggan yang memesan jasa.</p>
                   <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
-                    <li>Order jasa, bayar via DompetX</li>
+                    <li>Order jasa, bayar via Duitku</li>
                     <li>Track progress order + lihat hasil boosting (MVP, Savage, screenshot)</li>
                     <li>Submit review &amp; report worker</li>
                     <li>Reward points, redeem katalog</li>
@@ -262,10 +262,10 @@ function buildCategories(): DocCategory[] {
             <div className="space-y-4">
               <StepFlow steps={[
                 { title: "Customer Isi Form Order", desc: "Pilih rank awal ke tujuan, package (Paket/Per-Star/Gendong). Mode Paket/Per Star: isi credentials akun ML. Mode Gendong: pilih Preferred Role + Jadwal Main (tanpa login). Apply promo/referral code.", badge: "customer", page: "/order" },
-                { title: "Pilih Metode Bayar", desc: "2 opsi: Transfer Manual (BCA, BRI, BNI, Mandiri, Jago, DANA, GoPay, OVO, ShopeePay, LinkAja, QRIS) atau DompetX Auto (VA, QRIS, GoPay, ShopeePay, CC).", badge: "customer", page: "/order (step 3)" },
+                { title: "Pilih Metode Bayar", desc: "2 opsi: Transfer Manual (BCA, BRI, BNI, Mandiri, Jago, DANA, GoPay, OVO, ShopeePay, LinkAja, QRIS) atau Duitku Auto (VA, QRIS, GoPay, ShopeePay, CC).", badge: "customer", page: "/order (step 3)" },
                 { title: "A) Transfer Manual", desc: "Auto-redirect ke /payment/manual — lihat daftar rekening + upload bukti transfer. Admin approve/reject bukti.", badge: "customer", page: "/payment/manual" },
-                { title: "B) DompetX Auto", desc: "Payment URL di-generate, customer bayar via popup/redirect. Webhook otomatis confirm. Jika DompetX gagal/trouble, otomatis fallback ke manual transfer + WA dikirim ke customer dengan info rekening & link upload bukti.", badge: "customer", page: "DompetX" },
-                { title: "Pembayaran Dikonfirmasi", desc: "Manual: admin klik '1. Lihat Bukti' → cek transfer masuk → klik '2. Konfirmasi Bayar'. DompetX: webhook auto-confirm. Status: confirmed, payment: paid. WA 'Pembayaran Dikonfirmasi' + Telegram ke Worker Group.", badge: "auto", page: "/api/payment/notification" },
+                { title: "B) Duitku Auto", desc: "Payment URL di-generate, customer bayar via popup/redirect. Webhook otomatis confirm. Jika Duitku gagal/trouble, otomatis fallback ke manual transfer + WA dikirim ke customer dengan info rekening & link upload bukti.", badge: "customer", page: "Duitku" },
+                { title: "Pembayaran Dikonfirmasi", desc: "Manual: admin klik '1. Lihat Bukti' → cek transfer masuk → klik '2. Konfirmasi Bayar'. Duitku: webhook auto-confirm. Status: confirmed, payment: paid. WA 'Pembayaran Dikonfirmasi' + Telegram ke Worker Group.", badge: "auto", page: "/api/payment/callback" },
                 { title: "Multi-Channel Notifikasi", desc: "Telegram ke Admin Group (dengan tombol Konfirmasi/Tolak), WhatsApp 'Pembayaran Dikonfirmasi' ke customer, Telegram ke Worker Group.", badge: "auto" },
                 { title: "Admin Cek Credential & Mulai Kerjakan", desc: "Mode Paket/Per Star: Admin klik '3. Cek Credentials' → login akun ML client → pastikan bisa login. Jika gagal: follow up via WA. Berhasil → logout → klik '4. Mulai Kerjakan'. Mode Gendong: Tombol credentials di-hidden, langsung klik '3. Mulai Kerjakan'. Status: in_progress.", badge: "admin", page: "/admin/dashboard" },
                 { title: "Lead Assign Order ke Worker", desc: "Lead: buka Lead Dashboard → order yang status in_progress muncul → pilih worker → Assign. PENTING: Lead hanya bisa assign order yang sudah 'Mulai Kerjakan' oleh admin (status in_progress). Order confirmed TIDAK muncul tombol assign di Lead Dashboard.", badge: "lead", page: "/admin/lead" },
@@ -276,7 +276,7 @@ function buildCategories(): DocCategory[] {
                 { title: "Customer Review", desc: "Customer dapat link review via WA/Email, rating service & worker, bisa report. Auto-create testimonial jika rating 4-5 bintang.", badge: "customer", page: "/review" },
               ]} />
               <InfoBox type="info">
-                <strong>Dual Payment:</strong> Transfer Manual muncul di /payment/manual setelah order dibuat. DompetX Auto muncul jika API Key dikonfigurasi di Settings &rarr; Integrations. Jika DompetX gagal/trouble saat order dibuat, otomatis fallback ke manual transfer dan WA follow-up dikirim ke customer.
+                <strong>Dual Payment:</strong> Transfer Manual muncul di /payment/manual setelah order dibuat. Duitku Auto muncul jika API Key dikonfigurasi di Settings &rarr; Integrations. Jika Duitku gagal/trouble saat order dibuat, otomatis fallback ke manual transfer dan WA follow-up dikirim ke customer.
               </InfoBox>
               <InfoBox type="warning">
                 <strong>Status Flow:</strong> pending &rarr; confirmed (bayar dikonfirmasi) &rarr; in_progress (dikerjakan) &rarr; completed (selesai). Admin bisa cancel kapan saja.
@@ -320,7 +320,7 @@ function buildCategories(): DocCategory[] {
                   { tab: "Reviews", desc: "Kelola review customer: approve/hide, worker reports (cheating/rude/etc), set report status (resolved/dismissed)." },
                   { tab: "Reports", desc: "3 sub-tab: P&L per bulan (revenue vs expenses, trend 6 bulan), Worker Performance (winrate, earnings, rating), Export CSV (8 jenis data)." },
                   { tab: "Ads", desc: "Ad Performance dashboard: Total Spend, Revenue, Profit/Loss, ROAS, CPA. Per-platform breakdown, campaign drill-down, ad spend log." },
-                  { tab: "Settings", desc: "10 sub-tab: Visibilitas, Hero, Banner, FAQ, Tim, Sosial, Info Situs, Pixels, Integrasi (DompetX/Telegram/WA/Email), General." },
+                  { tab: "Settings", desc: "10 sub-tab: Visibilitas, Hero, Banner, FAQ, Tim, Sosial, Info Situs, Pixels, Integrasi (Duitku/Telegram/WA/Email), General." },
                 ].map((item, i) => (
                   <div key={i} className="bg-background rounded-lg p-3 border border-white/5 flex gap-3 items-start">
                     <span className="text-accent font-bold text-xs w-5 text-center shrink-0">{i + 1}</span>
@@ -441,13 +441,13 @@ function buildCategories(): DocCategory[] {
                 <p className="text-text-muted text-xs mb-2">Semua API keys disimpan ke <Code>integrations</Code>. Bisa diubah tanpa redeploy.</p>
                 <div className="space-y-3">
                   <div>
-                    <h5 className="text-text text-xs font-medium mb-1">A. DompetX (Payment Gateway)</h5>
+                    <h5 className="text-text text-xs font-medium mb-1">A. Duitku (Payment Gateway)</h5>
                     <ul className="text-text-muted text-[11px] space-y-0.5 ml-3 list-disc">
                       <li>Toggle Sandbox ↔ Production (uang asli!)</li>
                       <li>Merchant ID, Server Key, Client Key</li>
                       <li>Pilih channel: BCA, BNI, Mandiri, Permata, GoPay, ShopeePay, DANA, OVO, CC, QRIS, Alfamart/Indomaret</li>
                       <li>Tombol &ldquo;Test Connection&rdquo; untuk validasi credential</li>
-                      <li>Auto-display webhook URL untuk di-set di DompetX Dashboard</li>
+                      <li>Auto-display webhook URL untuk di-set di Duitku Dashboard</li>
                     </ul>
                   </div>
                   <div>
@@ -592,8 +592,8 @@ function buildCategories(): DocCategory[] {
                 <h4 className="text-yellow-400 font-semibold text-sm mb-3">{"PENDING"} &mdash; Menunggu Bayar</h4>
                 <Table headers={["Tombol", "Warna", "Aksi", "WA ke Customer"]} rows={[
                   ["1. Lihat Bukti", "Kuning", "Buka modal bukti transfer (hanya muncul untuk transfer manual)", "—"],
-                  ["2. Konfirmasi Bayar", "Hijau", "Status → confirmed, payment → paid. Hanya muncul untuk order MANUAL TRANSFER. Order DompetX otomatis di-confirm via webhook.", "\"Pembayaran Dikonfirmasi\" + link track"],
-                  ["Menunggu DompetX", "Biru", "Label status untuk order DompetX yang belum dibayar. Tidak bisa diklik — menunggu webhook otomatis.", "—"],
+                  ["2. Konfirmasi Bayar", "Hijau", "Status → confirmed, payment → paid. Hanya muncul untuk order MANUAL TRANSFER. Order Duitku otomatis di-confirm via webhook.", "\"Pembayaran Dikonfirmasi\" + link track"],
+                  ["Menunggu Duitku", "Biru", "Label status untuk order Duitku yang belum dibayar. Tidak bisa diklik — menunggu webhook otomatis.", "—"],
                   ["Follow Up Bayar", "Biru", "Kirim WA reminder bayar", "\"Reminder pembayaran\" + rekening + link upload bukti"],
                   ["Cancel", "Merah", "Status → cancelled", "\"Order Dibatalkan\" + info hubungi kami"],
                 ]} />
@@ -643,7 +643,7 @@ function buildCategories(): DocCategory[] {
               </div>
 
               <InfoBox type="warning">
-                <strong>Urutan penting!</strong> Untuk order Paket/Per Star (manual transfer): 1. Lihat Bukti → 2. Konfirmasi Bayar → 3. Cek Credentials → 4. Mulai Kerjakan. Untuk DompetX: langsung dari 3. Cek Credentials → 4. Mulai Kerjakan (step 1-2 otomatis). <strong>Untuk order Gendong:</strong> Tombol credentials di-hidden, langsung 1. Lihat Bukti → 2. Konfirmasi Bayar → 3. Mulai Kerjakan. Lead baru bisa assign worker setelah admin klik &quot;Mulai Kerjakan&quot;.
+                <strong>Urutan penting!</strong> Untuk order Paket/Per Star (manual transfer): 1. Lihat Bukti → 2. Konfirmasi Bayar → 3. Cek Credentials → 4. Mulai Kerjakan. Untuk Duitku: langsung dari 3. Cek Credentials → 4. Mulai Kerjakan (step 1-2 otomatis). <strong>Untuk order Gendong:</strong> Tombol credentials di-hidden, langsung 1. Lihat Bukti → 2. Konfirmasi Bayar → 3. Mulai Kerjakan. Lead baru bisa assign worker setelah admin klik &quot;Mulai Kerjakan&quot;.
               </InfoBox>
               <InfoBox type="info">
                 <strong>Assign Worker:</strong> Lead hanya bisa assign order yang sudah status <Code>in_progress</Code> (admin sudah klik &quot;4. Mulai Kerjakan&quot;). Order <Code>confirmed</Code> TIDAK bisa di-assign oleh Lead — harus tunggu admin cek credentials &amp; klik Mulai Kerjakan dulu. Admin tetap bisa assign dari confirmed.
@@ -923,7 +923,7 @@ function buildCategories(): DocCategory[] {
                   { title: "ViewContent", desc: "Customer buka halaman /order", page: "/order" },
                   { title: "AddToCart", desc: "Customer pilih paket atau klik Lanjut dari step 1", page: "/order (step 1 → 2)" },
                   { title: "InitiateCheckout", desc: "Customer submit order (step 4 Konfirmasi)", page: "/order (step 4)" },
-                  { title: "Purchase", desc: "Setelah bayar via DompetX, redirect ke success page", page: "/payment/success" },
+                  { title: "Purchase", desc: "Setelah bayar via Duitku, redirect ke success page", page: "/payment/success" },
                 ]} />
               </div>
               <div className="bg-background rounded-lg p-3 border border-white/5">
@@ -1189,7 +1189,7 @@ function buildCategories(): DocCategory[] {
                   <span className="px-2 py-1 rounded bg-green-500/10 text-green-400 border border-green-500/20">completed</span>
                 </div>
                 <Table headers={["Transisi", "Trigger", "Aksi Otomatis"]} rows={[
-                  [<span key="t1" className="whitespace-nowrap"><strong className="text-yellow-400">pending</strong> → <strong className="text-blue-400">confirmed</strong></span>, "Bayar via DompetX / Admin konfirmasi", <ul key="a1" className="list-disc ml-3 space-y-0.5"><li>Telegram ke Admin Group (+ tombol Assign)</li><li>WhatsApp ke customer (konfirmasi bayar)</li><li>Email ke customer (invoice)</li><li>Reward points dicatat (pending)</li></ul>],
+                  [<span key="t1" className="whitespace-nowrap"><strong className="text-yellow-400">pending</strong> → <strong className="text-blue-400">confirmed</strong></span>, "Bayar via Duitku / Admin konfirmasi", <ul key="a1" className="list-disc ml-3 space-y-0.5"><li>Telegram ke Admin Group (+ tombol Assign)</li><li>WhatsApp ke customer (konfirmasi bayar)</li><li>Email ke customer (invoice)</li><li>Reward points dicatat (pending)</li></ul>],
                   [<span key="t2" className="whitespace-nowrap"><strong className="text-blue-400">confirmed</strong> → <strong className="text-accent">in_progress</strong></span>, "Lead assign worker (auto) / Admin assign (auto jika confirmed) / Worker klik Mulai", <ul key="a2" className="list-disc ml-3 space-y-0.5"><li>WhatsApp ke customer (order mulai dikerjakan)</li><li>Customer bisa track via /track</li><li><em>Note: Telegram ke Worker Group dikirim saat ASSIGN, bukan saat status in_progress</em></li></ul>],
                   [<span key="t3" className="whitespace-nowrap"><strong className="text-accent">in_progress</strong> → <strong className="text-green-400">completed</strong></span>, "Worker klik Selesai / Admin set", <ul key="a3" className="list-disc ml-3 space-y-0.5"><li>WhatsApp ke customer (selesai + link review)</li><li>Telegram ke Admin Group</li><li><strong>Auto-generate commission</strong> (60% × total_price)</li><li><strong>Award reward points</strong> ke customer (1 poin/Rp10K)</li><li><strong>Referral bonus</strong> jika ada referrer (poin ke referrer)</li><li>Commission period: bi-weekly (tgl 1-15 atau 16-akhir)</li></ul>],
                   [<span key="t4" className="whitespace-nowrap">Semua → <strong className="text-red-400">cancelled</strong></span>, "Admin cancel", <ul key="a4" className="list-disc ml-3 space-y-0.5"><li>WhatsApp ke customer (order dibatalkan)</li><li>Telegram ke Admin Group</li></ul>],
@@ -1364,7 +1364,7 @@ function buildCategories(): DocCategory[] {
                   <li><strong>Premium Pilot (+30%):</strong> Pilot MG dengan winrate 75%+</li>
                   <li><strong>Kode Promo:</strong> Input kode → klik Terapkan → validasi via API → tampilkan diskon</li>
                   <li><strong>Kode Referral:</strong> Input kode teman → diskon 10% (cek anti-self-referral)</li>
-                  <li><strong>Metode Bayar:</strong> Transfer Manual atau DompetX (jika dikonfigurasi)</li>
+                  <li><strong>Metode Bayar:</strong> Transfer Manual atau Duitku (jika dikonfigurasi)</li>
                 </ul>
               </div>
               <div className="bg-background rounded-lg p-4 border border-white/5">
@@ -1372,7 +1372,7 @@ function buildCategories(): DocCategory[] {
                 <ul className="text-text-muted text-xs space-y-1 ml-4 list-disc">
                   <li>Review lengkap: paket, info akun, add-ons, breakdown harga</li>
                   <li>Input: nomor WhatsApp (wajib) + email (opsional)</li>
-                  <li>Klik &ldquo;Bayar Sekarang&rdquo; → create order + generate Payment URL (DompetX) atau redirect ke /payment/manual</li>
+                  <li>Klik &ldquo;Bayar Sekarang&rdquo; → create order + generate Payment URL (Duitku) atau redirect ke /payment/manual</li>
                   <li>Sukses: tampil Order ID + instruksi lanjut</li>
                 </ul>
               </div>
@@ -1535,7 +1535,7 @@ function buildCategories(): DocCategory[] {
                 <h4 className="text-green-400 font-semibold text-sm mb-3">Kenapa Bisa Sedikit?</h4>
                 <p className="text-text-muted text-xs mb-2">Sistem sudah otomasi banyak hal:</p>
                 <ul className="text-text-muted text-xs space-y-1 ml-4 list-disc">
-                  <li><strong className="text-text">Pembayaran</strong> &rarr; auto-confirm via DompetX webhook</li>
+                  <li><strong className="text-text">Pembayaran</strong> &rarr; auto-confirm via Duitku webhook</li>
                   <li><strong className="text-text">Notifikasi</strong> &rarr; auto WA + Telegram + Email</li>
                   <li><strong className="text-text">Assign order</strong> &rarr; bisa langsung dari Telegram (tidak perlu buka dashboard)</li>
                   <li><strong className="text-text">Komisi</strong> &rarr; auto-generate saat order selesai</li>
@@ -1641,12 +1641,12 @@ function buildCategories(): DocCategory[] {
                 { q: "Customer bilang belum terima WA notifikasi?", a: "Cek Fonnte API token di Settings > Integrations. Cek nomor WA customer sudah benar (format 628xxx). Test via POST /api/admin/test-notifications." },
                 { q: "Telegram bot tidak merespon command?", a: "Cek bot token di Settings > Integrations. Pastikan webhook terdaftar: buka /api/telegram/webhook?action=register. Cek bot sudah ditambahkan ke grup." },
                 { q: "Link di WA tidak bisa diklik (tidak biru)?", a: "Pastikan URL ada di baris sendiri (tidak nempel emoji/teks lain). URL harus punya trailing slash sebelum query params, contoh: /track/?id=xxx bukan /track?id=xxx." },
-                { q: "DompetX payment tidak auto-confirm?", a: "Cek API Key & VA di Settings > Integrations. Pastikan Notification URL di DompetX Dashboard → Integrasi → Notify URL mengarah ke https://etnyx.com/api/payment/notification. Cek environment (Sandbox vs Production) — key sandbox BERBEDA dengan production. Jika DompetX down saat order dibuat, sistem otomatis fallback ke manual transfer + kirim WA ke customer." },
+                { q: "Duitku payment tidak auto-confirm?", a: "Cek API Key & VA di Settings > Integrations. Pastikan Notification URL di Duitku Dashboard → Integrasi → Notify URL mengarah ke https://etnyx.com/api/payment/callback. Cek environment (Sandbox vs Production) — key sandbox BERBEDA dengan production. Jika Duitku down saat order dibuat, sistem otomatis fallback ke manual transfer + kirim WA ke customer." },
                 { q: "Worker tidak bisa lihat order?", a: "Worker hanya bisa lihat order yang memiliki record di tabel order_assignments (assigned_to = worker ID). Pastikan order sudah di-assign via Lead Dashboard atau Admin Dashboard. Tanpa record assignment, order tidak muncul di dashboard worker." },
                 { q: "Tidak bisa assign worker?", a: "Worker hanya bisa di-assign setelah pembayaran dikonfirmasi (payment_status = paid). Pastikan order sudah dibayar dan dikonfirmasi terlebih dahulu." },
-                { q: "Tombol Konfirmasi Bayar tidak muncul?", a: "Tombol Konfirmasi Bayar hanya muncul untuk order dengan metode manual transfer. Order DompetX dikonfirmasi otomatis via webhook — tidak perlu konfirmasi manual." },
+                { q: "Tombol Konfirmasi Bayar tidak muncul?", a: "Tombol Konfirmasi Bayar hanya muncul untuk order dengan metode manual transfer. Order Duitku dikonfirmasi otomatis via webhook — tidak perlu konfirmasi manual." },
                 { q: "Commission tidak muncul setelah order selesai?", a: "Komisi auto-generate saat status diubah ke completed DAN ada assigned_worker_id. Cek di Payroll > Commissions." },
-                { q: "Customer tidak bisa bayar via DompetX?", a: "Cek DompetX API Key & Client Key sudah benar dan aktif. Toggle Sandbox/Production sesuai environment." },
+                { q: "Customer tidak bisa bayar via Duitku?", a: "Cek Duitku API Key & Client Key sudah benar dan aktif. Toggle Sandbox/Production sesuai environment." },
                 { q: "Bagaimana reset password staff?", a: "Admin bisa reset lewat Staff tab > Edit > isi password baru. Atau staff bisa via halaman login > Lupa Password (email reset link via Resend)." },
                 { q: "Order stuck di pending lama?", a: "Kirim follow-up WA via Dashboard > Orders > Follow-up Payment. Template include daftar rekening + link upload bukti." },
                 { q: "Review tidak muncul di homepage?", a: "Review otomatis hidden saat dibuat. Admin harus approve/show di Reviews tab > toggle visibility. Hanya rating 4-5 yang auto-create testimonial." },
@@ -2091,7 +2091,7 @@ function buildCategories(): DocCategory[] {
                 <h4 className="text-text font-medium text-sm mb-2">{"Customer API"} <Code>/api/customer/*</Code></h4>
                 <Table headers={["Endpoint", "Methods", "Deskripsi"]} rows={[
                   ["/api/customer/auth", "POST/GET/DELETE", "Register/Login/Check/Logout"],
-                  ["/api/customer/order", "POST", "Create order + DompetX payment URL"],
+                  ["/api/customer/order", "POST", "Create order + Duitku payment URL"],
                   ["/api/customer/orders", "GET", "My order history"],
                   ["/api/customer/verify", "GET", "Email verification link"],
                   ["/api/customer/resend-verify", "POST", "Resend verification email"],
@@ -2107,10 +2107,10 @@ function buildCategories(): DocCategory[] {
               <div className="bg-background rounded-lg p-3 border border-white/5">
                 <h4 className="text-text font-medium text-sm mb-2">{"Public API & Webhooks"}</h4>
                 <Table headers={["Endpoint", "Methods", "Deskripsi"]} rows={[
-                  ["/api/payment", "POST", "Create DompetX transaction"],
+                  ["/api/payment", "POST", "Create Duitku transaction"],
                   ["/api/payment/manual", "POST", "Upload bukti transfer manual"],
-                  ["/api/payment/notification", "POST", "DompetX webhook (signature verify)"],
-                  ["/api/payment/test-connection", "POST", "Test DompetX keys"],
+                  ["/api/payment/callback", "POST", "Duitku webhook (signature verify)"],
+                  ["/api/payment/test-connection", "POST", "Test Duitku keys"],
                   ["/api/telegram/webhook", "POST/GET", "Telegram bot webhook + register"],
                   ["/api/track", "GET", "Public order tracking"],
                   ["/api/review", "GET/POST", "Customer review submission"],
@@ -2125,7 +2125,7 @@ function buildCategories(): DocCategory[] {
                   ["/api/push/subscribe", "POST", "Save push subscription"],
                   ["/api/push/send", "POST", "Send push notification (admin)"],
                   ["/api/check-account", "POST", "Cek akun ML (User ID + Server ID → Nickname)"],
-                  ["/api/payment-methods", "GET", "Available payment methods (DompetX channels)"],
+                  ["/api/payment-methods", "GET", "Available payment methods (Duitku channels)"],
                   ["/api/boosters", "GET", "Public booster list (for order form)"],
                 ]} />
               </div>
@@ -2260,7 +2260,7 @@ function buildCategories(): DocCategory[] {
           title: "Payment Gateway",
           content: (
             <div className="space-y-4">
-              <p className="text-text-muted text-sm">Dual payment system: Transfer Manual + DompetX Auto. Toggle dari Settings &rarr; Integrations.</p>
+              <p className="text-text-muted text-sm">Dual payment system: Transfer Manual + Duitku Auto. Toggle dari Settings &rarr; Integrations.</p>
 
               <div className="bg-background rounded-lg p-4 border border-green-500/20">
                 <h4 className="text-green-400 font-semibold text-sm mb-3">Transfer Manual</h4>
@@ -2279,25 +2279,25 @@ function buildCategories(): DocCategory[] {
               </div>
 
               <div className="bg-background rounded-lg p-4 border border-blue-500/20">
-                <h4 className="text-blue-400 font-semibold text-sm mb-3">DompetX Auto</h4>
+                <h4 className="text-blue-400 font-semibold text-sm mb-3">Duitku Auto</h4>
                 <StepFlow steps={[
-                  { title: "Frontend POST ke /api/customer/order", desc: "Kirim data order + payment_method: dompetx" },
-                  { title: "Backend create transaction via fetch", desc: "POST ke api.dompetx.com/v1/payment — return payment_url" },
+                  { title: "Frontend POST ke /api/customer/order", desc: "Kirim data order + payment_method: duitku" },
+                  { title: "Backend create transaction via fetch", desc: "POST ke passport.duitku.com/webapi/api/merchant/v2/inquiry — return payment_url" },
                   { title: "Customer bayar via popup/redirect", desc: "VA, QRIS, GoPay, ShopeePay, Kartu Kredit" },
-                  { title: "Webhook auto-confirm", desc: "DompetX POST ke /api/payment/notification — HMAC SHA-256 signature verification", page: "/api/payment/notification" },
+                  { title: "Webhook auto-confirm", desc: "Duitku POST ke /api/payment/callback — HMAC SHA-256 signature verification", page: "/api/payment/callback" },
                   { title: "Status update + notifikasi", desc: "Order confirmed + paid, WA 'Pembayaran Dikonfirmasi', Telegram Worker Group" },
                 ]} />
                 <InfoBox type="info">
-                  DompetX muncul otomatis jika API Key diisi di Settings &rarr; Integrations (dompetxApiKey). Bisa toggle Sandbox/Production. HMAC signature: <Code>createHmac("sha256", apiKey).update(timestamp)</Code>.
+                  Duitku muncul otomatis jika API Key diisi di Settings &rarr; Integrations (duitkuApiKey). Bisa toggle Sandbox/Production. HMAC signature: <Code>createHmac("sha256", apiKey).update(timestamp)</Code>.
                 </InfoBox>
               </div>
 
               <Table headers={["Setting", "Lokasi"]} rows={[
-                ["API Key", "Dashboard > Settings > Integrations (dompetxApiKey)"],
+                ["API Key", "Dashboard > Settings > Integrations (duitkuApiKey)"],
                 ["Rekening Transfer Manual", "Dashboard > Settings > Rekening"],
                 ["Environment", "Toggle Sandbox / Production"],
                 ["Payment Channels", "Enable/disable VA, GoPay, QRIS, dll"],
-                ["Webhook URL", "Set di DompetX Dashboard → https://etnyx.com/api/payment/notification"],
+                ["Webhook URL", "Set di Duitku Dashboard → https://etnyx.com/api/payment/callback"],
               ]} />
             </div>
           ),
@@ -2362,7 +2362,7 @@ function buildCategories(): DocCategory[] {
                 ["RLS", "Supabase", "Row Level Security on all tables"],
                 ["Headers", "CSP, HSTS, X-Frame", "next.config.ts — whitelist tracking domains"],
                 ["Audit", "logAdminAction()", "Admin actions logged to admin_audit_log"],
-                ["Signature", "SHA-256 HMAC", "DompetX payment webhook verification"],
+                ["Signature", "SHA-256 HMAC", "Duitku payment webhook verification"],
                 ["Storage Client", "createServiceClient()", "Unified storage: auto-detect R2 (Cloudflare) jika dikonfigurasi, fallback ke Supabase Storage. Lihat lib/storage.ts."],
               ]} />
               <div className="bg-background rounded-lg p-4 border border-white/5">
@@ -2428,7 +2428,7 @@ function buildCategories(): DocCategory[] {
                 ["ADMIN_PASSWORD_HASH", "Ya", "Bcrypt hash"],
                 ["ENCRYPTION_KEY", "Ya", "AES-256 key (32 char)"],
                 ["NEXT_PUBLIC_SITE_URL", "Ya", "Production URL"],
-                ["DOMPETX_API_KEY", "Opsional", "Bisa set dari Dashboard"],
+                ["DUITKU_API_KEY", "Opsional", "Bisa set dari Dashboard"],
                 ["RESEND_API_KEY", "Opsional", "Bisa set dari Dashboard"],
                 ["FONNTE_API_TOKEN", "Opsional", "Bisa set dari Dashboard"],
                 ["R2_ACCOUNT_ID", "Opsional", "Cloudflare R2 (storage)"],
@@ -2439,7 +2439,7 @@ function buildCategories(): DocCategory[] {
                 ["PRIVATE_VAPID_KEY", "Opsional", "Web push"],
               ]} />
               <InfoBox type="success">
-                <strong>Tip:</strong> DompetX, Telegram, Fonnte, Resend keys bisa dikelola dari Dashboard Integrations tanpa redeploy.
+                <strong>Tip:</strong> Duitku, Telegram, Fonnte, Resend keys bisa dikelola dari Dashboard Integrations tanpa redeploy.
               </InfoBox>
             </div>
           ),
@@ -2557,7 +2557,7 @@ function buildCategories(): DocCategory[] {
               <StepFlow steps={[
                 { title: "Buka Website & Pilih Layanan", desc: "Customer buka etnyx.com → scroll ke section layanan atau langsung klik 'Order Sekarang'. Pilih mode: Paket, Per-Star, atau Gendong.", badge: "customer", page: "/" },
                 { title: "Isi Form Order", desc: "Pilih rank awal → rank tujuan. Mode Paket/Per Star: Isi credentials akun ML (User ID, Server ID, Password). Mode Gendong: Pilih Preferred Role + Jadwal Main (tanpa login akun). Cek akun via 'Cek Akun'. Apply promo/referral code.", badge: "customer", page: "/order" },
-                { title: "Pilih & Bayar", desc: "Transfer Manual (11 rekening) atau DompetX Auto. Manual → upload bukti. DompetX → popup otomatis.", badge: "customer", page: "/payment/manual" },
+                { title: "Pilih & Bayar", desc: "Transfer Manual (11 rekening) atau Duitku Auto. Manual → upload bukti. Duitku → popup otomatis.", badge: "customer", page: "/payment/manual" },
                 { title: "Upload Bukti (Manual)", desc: "Upload foto bukti transfer + nama pengirim. Tunggu admin approve.", badge: "customer" },
                 { title: "Pembayaran Dikonfirmasi", desc: "Notif WA 'Pembayaran Dikonfirmasi ✅'. Order masuk antrian. Bisa track di /track.", badge: "auto" },
                 { title: "Order Dikerjakan", desc: "Notif WA 'Sedang Dikerjakan 🎮'. Worker push rank. Pantau progress real-time di tracking.", badge: "auto", page: "/track?id=xxx" },
@@ -2792,7 +2792,7 @@ function buildCategories(): DocCategory[] {
                 <ul className="text-text-muted text-xs space-y-1.5 ml-4">
                   {[
                     "Full ordering system: 3 mode (Paket, Per Star, Gendong) + promo code + referral",
-                    "Dual payment: Transfer Manual (11 rekening) + DompetX Auto (VA, QRIS, e-wallet)",
+                    "Dual payment: Transfer Manual (11 rekening) + Duitku Auto (VA, QRIS, e-wallet)",
                     "Staff management RBAC: Admin, Lead, Worker + tim hierarchy via lead_id",
                     "15-tab admin dashboard + Lead dashboard + Worker dashboard",
                     "Multi-channel notification: Telegram 4 grup, WhatsApp (Fonnte), Email (Resend), Web Push",
@@ -2822,7 +2822,7 @@ function buildCategories(): DocCategory[] {
                     "Customer order detail page + timeline + screenshot gallery",
                     "Notification preferences (email/WA/push toggle per customer)",
                     "Customer activity log (login, orders, profile changes)",
-                    "Enhanced health check endpoint (Supabase, DompetX, Telegram, Email)",
+                    "Enhanced health check endpoint (Supabase, Duitku, Telegram, Email)",
                     "Worker slider horizontal di Lead dashboard",
                     "Automated testing: 38 unit tests (Vitest) + Playwright E2E setup",
                     "404 custom pages, skeleton loading, theme consistency",
@@ -3178,7 +3178,7 @@ function buildCategories(): DocCategory[] {
                       <li><strong className="text-text">SOP Harian Worker</strong> &mdash; Step-by-step sebelum, selama, dan setelah pengerjaan</li>
                       <li><strong className="text-text">Aturan &amp; Sanksi Worker</strong> &mdash; 8 aturan wajib + 4 tingkatan sanksi bertingkat</li>
                       <li><strong className="text-text">Komisi &amp; Penghasilan Worker</strong> &mdash; Cara hitung komisi, contoh perhitungan, payment methods</li>
-                      <li><strong className="text-text">FAQ &amp; Troubleshooting</strong> &mdash; 12 pertanyaan umum + solusi (WA, Telegram, DompetX, dll)</li>
+                      <li><strong className="text-text">FAQ &amp; Troubleshooting</strong> &mdash; 12 pertanyaan umum + solusi (WA, Telegram, Duitku, dll)</li>
                       <li><strong className="text-text">Development Roadmap</strong> &mdash; 3 phase: Done, Planning, Future</li>
                     </ul>
                   </div>
@@ -3253,7 +3253,7 @@ function buildCategories(): DocCategory[] {
                   <div>
                     <h5 className="text-text text-xs font-medium mb-1">Perbaikan Alur Notifikasi</h5>
                     <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
-                      <li><strong className="text-text">WA baru: Pembayaran Dikonfirmasi</strong> &mdash; Dikirim setelah admin approve bukti / DompetX auto-confirm. Berisi detail order, link tracking, reminder keamanan</li>
+                      <li><strong className="text-text">WA baru: Pembayaran Dikonfirmasi</strong> &mdash; Dikirim setelah admin approve bukti / Duitku auto-confirm. Berisi detail order, link tracking, reminder keamanan</li>
                       <li><strong className="text-text">WA Sedang Dikerjakan</strong> &mdash; Sekarang hanya dikirim saat worker mulai kerja (bukan saat bayar)</li>
                       <li>Fix: Telegram &quot;ORDER BARU!&quot; hanya dikirim 1x saat order dibuat (tidak lagi double saat bayar)</li>
                       <li>Fix: Telegram confirm dari bot sekarang kirim WA &quot;Pembayaran Dikonfirmasi&quot; (bukan &quot;Sedang Dikerjakan&quot;)</li>
@@ -3265,7 +3265,7 @@ function buildCategories(): DocCategory[] {
                     <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
                       <li>Fix: <Code>confirmed_at</Code> dan <Code>completed_at</Code> timestamp sekarang otomatis diisi saat status berubah</li>
                       <li>Fix: Field <Code>price</Code> dan <Code>email</Code> di notifikasi tidak lagi undefined (mapping ke kolom DB yang benar)</li>
-                      <li>Fix: DompetX webhook sekarang set <Code>confirmed_at</Code> + kirim notifikasi yang benar</li>
+                      <li>Fix: Duitku webhook sekarang set <Code>confirmed_at</Code> + kirim notifikasi yang benar</li>
                       <li>Mobile UI payment page diperbaiki &mdash; steps compact, cards lebih rapi</li>
                     </ul>
                   </div>
@@ -3287,7 +3287,7 @@ function buildCategories(): DocCategory[] {
                   <h4 className="text-text-muted font-semibold text-sm">Release Awal</h4>
                 </div>
                 <ul className="text-text-muted text-xs space-y-0.5 ml-4 list-disc">
-                  <li>Full platform: order, payment (DompetX), staff management (RBAC), reward system</li>
+                  <li>Full platform: order, payment (Duitku), staff management (RBAC), reward system</li>
                   <li>15-tab admin dashboard, lead &amp; worker dashboards</li>
                   <li>Multi-channel notification: Telegram 4 grup, WhatsApp, Email, Push</li>
                   <li>Conversion tracking: Meta Pixel, GA4, GTM, TikTok, Google Ads, Meta CAPI</li>
@@ -3314,7 +3314,7 @@ function buildCategories(): DocCategory[] {
                 <StepFlow steps={[
                   { title: "Buka /order", desc: "Pilih rank, package, isi credentials, pilih metode bayar" },
                   { title: "Transfer Manual", desc: "Auto-redirect ke /payment/manual — lihat rekening — transfer — upload bukti" },
-                  { title: "Atau DompetX Auto", desc: "Bayar via VA/QRIS/GoPay/ShopeePay langsung dari popup" },
+                  { title: "Atau Duitku Auto", desc: "Bayar via VA/QRIS/GoPay/ShopeePay langsung dari popup" },
                   { title: "Terima WA 'Pembayaran Dikonfirmasi'", desc: "Setelah admin approve / auto-confirm. Berisi link tracking." },
                   { title: "Track progress di /track", desc: "Lihat status, progress %, achievement worker, screenshot" },
                   { title: "Terima WA 'Order Selesai'", desc: "Ganti password, submit review di link yang dikirim" },

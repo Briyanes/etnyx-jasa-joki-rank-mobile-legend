@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import { sendWhatsAppMessage, sendOrderCancelledWA, sendTelegramMessage, waDisclaimer, getNotificationPreferences } from "@/lib/notifications";
+import { getDuitkuConfig, getDuitkuTransactionStatus } from "@/lib/payments/duitku";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.com";
 
@@ -232,6 +233,40 @@ _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
   } catch (error) {
     console.error("Stale in_progress cron error:", error);
     results.staleInProgress = { error: String(error) };
+  }
+
+  // 6. Duitku reconciliation: pending duitku orders > 1h — check status langsung ke Duitku
+  // (jaringan-safety: kalau callback hilang, cron tetap konfirmasi pembayaran)
+  try {
+    const config = await getDuitkuConfig(supabase);
+    if (config.merchantCode && config.apiKey) {
+      const cutoff1h = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+      const { data: pendingDuitku } = await supabase
+        .from("orders")
+        .select("order_id, midtrans_order_id, total_price")
+        .eq("status", "pending")
+        .eq("gateway_provider", "duitku")
+        .not("midtrans_order_id", "is", null)
+        .lt("created_at", cutoff1h);
+
+      let reconciled = 0;
+      for (const order of pendingDuitku || []) {
+        try {
+          const tx = await getDuitkuTransactionStatus(config, order.midtrans_order_id);
+          if (tx && tx.statusCode === "00" && tx.amount === order.total_price) {
+            await supabase
+              .from("orders")
+              .update({ status: "confirmed", payment_status: "paid", paid_at: new Date().toISOString() })
+              .eq("order_id", order.order_id);
+            reconciled++;
+          }
+        } catch { /* skip individual failures */ }
+      }
+      results.duitkuReconciliation = { checked: pendingDuitku?.length || 0, reconciled };
+    }
+  } catch (error) {
+    console.error("Duitku reconciliation cron error:", error);
+    results.duitkuReconciliation = { error: String(error) };
   }
 
   return NextResponse.json({ ok: true, results });

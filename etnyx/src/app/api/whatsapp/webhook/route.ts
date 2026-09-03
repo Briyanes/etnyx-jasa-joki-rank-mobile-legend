@@ -414,7 +414,7 @@ async function sendPaymentHelp(
       return sendTextMessage(from, message, settings);
     }
 
-    const message = `Halo kak!\n\nUntuk melakukan pembayaran, kamu perlu membuat order terlebih dahulu.\n\n📱 *Order & pilih paket di sini:*\n${SITE_URL}/order\n\nSetelah order dibuat, kamu akan mendapat link untuk upload bukti transfer atau bayar via DompetX.\n\n📞 *Butuh bantuan?* Hubungi CS ETNYX:\n${csLink}\n\n_ETNYX - Push Rank, Tanpa Main_\n\n[ Ini adalah pesan otomatis ]\n💬 _Balas *menu* untuk bantuan otomatis_`;
+    const message = `Halo kak!\n\nUntuk melakukan pembayaran, kamu perlu membuat order terlebih dahulu.\n\n📱 *Order & pilih paket di sini:*\n${SITE_URL}/order\n\nSetelah order dibuat, kamu akan mendapat link untuk upload bukti transfer atau bayar otomatis (Duitku).\n\n📞 *Butuh bantuan?* Hubungi CS ETNYX:\n${csLink}\n\n_ETNYX - Push Rank, Tanpa Main_\n\n[ Ini adalah pesan otomatis ]\n💬 _Balas *menu* untuk bantuan otomatis_`;
     return sendTextMessage(from, message, settings);
   } catch {
     return sendTextMessage(from, "Maaf, tidak bisa mengecek info pembayaran saat ini. Coba lagi nanti ya!", settings);

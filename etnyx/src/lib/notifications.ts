@@ -838,7 +838,7 @@ export async function sendOrderConfirmationWA(order: OrderData): Promise<boolean
 
   const manualPaymentLink = `${SITE_URL}/payment/manual/?order_id=${order.order_id}`;
   const paymentLink = order.payment_url || manualPaymentLink;
-  const isDompetx = !!order.payment_url;
+  const isAutoPay = !!order.payment_url;
 
   const message = `
 ━━━━━━━━━━━━━━━━━━
@@ -852,7 +852,7 @@ ${formatOrderDetails(order, { showStatus: "Menunggu Pembayaran" })}
 
 Silakan selesaikan pembayaran untuk memproses order kamu.
 
-${isDompetx ? `💳 Bayar via DompetX (QRIS/Transfer/E-Wallet):
+${isAutoPay ? `💳 Bayar via Duitku (QRIS/Transfer/E-Wallet):
 ${paymentLink}
 
 Atau bayar manual (transfer bank):

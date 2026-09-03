@@ -1134,8 +1134,8 @@ function OrderPageContent() {
   const [promoMessage, setPromoMessage] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
   const [promoLoading, setPromoLoading] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<"dompetx" | "manual_transfer">("dompetx");
-  const [dompetxEnabled, setDompetxEnabled] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"duitku" | "manual_transfer">("duitku");
+  const [duitkuEnabled, setDuitkuEnabled] = useState(false);
   const [showManualTransfer, setShowManualTransfer] = useState(false);
     const [customerTier, setCustomerTier] = useState<string | null>(null);
   const [selectedPackage, setSelectedPackage] = useState<ProductPackage | null>(
@@ -1376,9 +1376,9 @@ function OrderPageContent() {
     fetch("/api/payment-methods")
       .then((res) => res.json())
       .then((data) => {
-        if (data.dompetxEnabled) {
-          setDompetxEnabled(true);
-          setPaymentMethod("dompetx");
+        if (data.duitkuEnabled) {
+          setDuitkuEnabled(true);
+          setPaymentMethod("duitku");
         }
       })
       .catch(() => {/* keep manual only */});
@@ -1871,7 +1871,7 @@ function OrderPageContent() {
         toast(data.message);
       }
 
-      // Auto-redirect to DompetX payment page
+      // Auto-redirect to Duitku payment page
       if (data.paymentUrl && data.paymentMethod !== "manual_transfer") {
         window.location.href = data.paymentUrl;
         return;
@@ -1941,7 +1941,7 @@ function OrderPageContent() {
       );
     }
 
-    // No payment URL (DompetX not configured) — show order success
+    // No payment URL (Duitku not configured) — show order success
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="bg-surface rounded-3xl p-8 max-w-md w-full text-center border border-white/5">
@@ -3661,7 +3661,7 @@ function OrderPageContent() {
                 <div className="flex items-start gap-2 bg-accent/5 border border-accent/20 rounded-xl px-4 py-3">
                   <CreditCard className="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
                   <p className="text-xs text-text-muted">
-                    Pembayaran dilakukan setelah konfirmasi order. Kami mendukung QRIS, Virtual Account, dan Bank Transfer melalui DompetX.
+                    Pembayaran dilakukan setelah konfirmasi order. Kami mendukung QRIS, Virtual Account, dan Bank Transfer melalui Duitku.
                   </p>
                 </div>
               </div>
@@ -3964,18 +3964,18 @@ function OrderPageContent() {
                     Metode Pembayaran
                   </p>
 
-                  {/* Primary: DompetX Auto-Payment (default & recommended) */}
-                  {dompetxEnabled && (
+                  {/* Primary: Duitku Auto-Payment (default & recommended) */}
+                  {duitkuEnabled && (
                     <button
                       type="button"
-                      onClick={() => setPaymentMethod("dompetx")}
+                      onClick={() => setPaymentMethod("duitku")}
                       className={`relative w-full p-4 rounded-xl border-2 text-left transition-all mb-3 ${
-                        paymentMethod === "dompetx"
+                        paymentMethod === "duitku"
                           ? "border-green-500 bg-green-500/10"
                           : "border-white/10 hover:border-white/20"
                       }`}
                     >
-                      {paymentMethod === "dompetx" && (
+                      {paymentMethod === "duitku" && (
                         <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
                           <Check className="w-3 h-3 text-white" />
                         </div>
@@ -3988,7 +3988,7 @@ function OrderPageContent() {
                           <Zap className="w-5 h-5 text-green-400" />
                         </div>
                         <div>
-                          <p className="text-text font-bold text-sm">Bayar Otomatis (DompetX)</p>
+                          <p className="text-text font-bold text-sm">Bayar Otomatis (Duitku)</p>
                           <p className="text-text-muted text-xs mt-0.5">
                             QRIS • Virtual Account • Bank Transfer — Instan & Otomatis
                           </p>
@@ -4010,7 +4010,7 @@ function OrderPageContent() {
                   >
                     <span className="flex items-center gap-1.5">
                       <CreditCard className="w-3.5 h-3.5" />
-                      {dompetxEnabled ? "Pembayaran Lainnya (Transfer Manual)" : "Pilih Metode Pembayaran"}
+                      {duitkuEnabled ? "Pembayaran Lainnya (Transfer Manual)" : "Pilih Metode Pembayaran"}
                     </span>
                     <ChevronDown className={`w-4 h-4 transition-transform ${showManualTransfer ? "rotate-180" : ""}`} />
                   </button>
@@ -4040,7 +4040,7 @@ function OrderPageContent() {
                     </div>
                   )}
 
-                  {!dompetxEnabled && !showManualTransfer && (
+                  {!duitkuEnabled && !showManualTransfer && (
                     <p className="text-text-muted text-xs mt-2 text-center">
                       Klik tombol di atas untuk memilih metode pembayaran
                     </p>

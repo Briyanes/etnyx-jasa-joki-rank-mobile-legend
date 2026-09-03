@@ -99,7 +99,7 @@ export function isValidOrderType(type: string): boolean {
 }
 
 /** Validate payment method against known methods */
-const VALID_PAYMENT_METHODS = ["dompetx", "manual_transfer"] as const;
+const VALID_PAYMENT_METHODS = ["duitku", "manual_transfer"] as const;
 export function isValidPaymentMethod(method: string): boolean {
   return (VALID_PAYMENT_METHODS as readonly string[]).includes(method);
 }

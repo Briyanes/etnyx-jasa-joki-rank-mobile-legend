@@ -200,15 +200,15 @@ export async function middleware(request: NextRequest) {
     "Content-Security-Policy",
     [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net https://connect.dompetx.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: blob: https: https://*.supabase.co",
       "font-src 'self' data: https://fonts.gstatic.com",
-      "connect-src 'self' https://*.supabase.co https://api.dompetx.com https://www.google-analytics.com https://connect.facebook.net https://graph.facebook.com",
-      "frame-src 'self' https://checkout.dompetx.com https://www.google.com",
+      "connect-src 'self' https://*.supabase.co https://sandbox.duitku.com https://passport.duitku.com https://www.google-analytics.com https://connect.facebook.net https://graph.facebook.com",
+      "frame-src 'self' https://sandbox.duitku.com https://passport.duitku.com https://www.duitku.com https://www.google.com",
       "object-src 'none'",
       "base-uri 'self'",
-      "form-action 'self' https://checkout.dompetx.com",
+      "form-action 'self' https://sandbox.duitku.com https://passport.duitku.com https://www.duitku.com",
       "upgrade-insecure-requests",
     ].join("; ")
   );
