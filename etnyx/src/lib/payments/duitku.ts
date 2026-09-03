@@ -240,7 +240,7 @@ export async function getDuitkuTransactionStatus(
     .update(`${config.merchantCode}${merchantOrderId}${config.apiKey}`)
     .digest("hex");
 
-  const { ok, data, raw } = await duitkuFetch(
+  const { ok, status, data, raw } = await duitkuFetch(
     `${getBaseUrl(config)}/transactionStatus`,
     {
       merchantCode: config.merchantCode,
@@ -250,8 +250,11 @@ export async function getDuitkuTransactionStatus(
     10000
   );
 
-  if (!ok) {
-    console.error("[Duitku] transactionStatus failed:", raw.slice(0, 300));
+  // Duitku returns non-2xx WITH valid JSON body for known states,
+  // e.g. HTTP 404 + {"Message":"Transaction not found"} for unknown orders.
+  // Only treat as failure when the body is NOT structured JSON (network/gateway error).
+  if (!ok && data._raw !== undefined) {
+    console.error("[Duitku] transactionStatus failed:", status, raw.slice(0, 300));
     return null;
   }
 
@@ -274,11 +277,12 @@ export async function testDuitkuConnection(
       config,
       `TEST-${Date.now()}`
     );
-    // Any structured response (even "transaction not found") proves auth works
-    if (probe && typeof probe.statusMessage === "string") {
-      return { success: true, message: `Koneksi ${config.mode.toUpperCase()} berhasil` };
+    // Any structured JSON response (even "Transaction not found") proves
+    // the endpoint is reachable and Duitku processed our signed request.
+    if (probe && (typeof probe.statusMessage === "string" || typeof probe.Message === "string")) {
+      return { success: true, message: `Koneksi ${config.mode.toUpperCase()} berhasil — API Duitku merespons` };
     }
-    return { success: false, message: "Respons tidak dikenal dari Duitku" };
+    return { success: false, message: "Tidak ada respons dari Duitku (cek jaringan / URL)" };
   } catch (e) {
     return {
       success: false,
