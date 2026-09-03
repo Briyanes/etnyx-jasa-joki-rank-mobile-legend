@@ -80,3 +80,4 @@ secrets/
 
 # Supabase migration history (tracked via /supabase-schema-v*.sql — keep only latest)
 # Old SQL schemas remain in git history
+.env.dompetx-vercel.txt

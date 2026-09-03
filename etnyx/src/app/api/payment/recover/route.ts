@@ -5,6 +5,7 @@ import {
   createDuitkuCheckout,
   getDuitkuTransactionStatus,
 } from "@/lib/payments/duitku";
+import { notifyOrderPaid } from "@/lib/payments/confirm-paid";
 
 // ============================================
 // Duitku Payment Recovery Endpoint
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .select(
-        "id, order_id, total_price, status, payment_token, payment_url, midtrans_order_id, payment_type, gateway_provider, username, customer_email, package_title"
+        "id, order_id, total_price, status, payment_token, payment_url, midtrans_order_id, payment_type, gateway_provider, username, whatsapp, customer_email, current_rank, target_rank, current_star, target_star, package, package_title, is_express, is_premium, notes"
       )
       .eq("order_id", orderId)
       .single();
@@ -79,8 +80,21 @@ export async function POST(request: NextRequest) {
         // Invoice paid/expired/failed — fall through to regeneration,
         // but first check if it was actually PAID (missed callback).
         if (status && status.statusCode === "00") {
-          // Payment succeeded but callback was missed → confirm order now
-          await supabase
+          // Defense-in-depth: verify amount matches DB before confirming
+          // (status.amount is a STRING from Duitku)
+          if (Number(status.amount) !== order.total_price) {
+            console.error(
+              `[Recovery] Amount mismatch for ${order.order_id}: gateway=${status.amount}, db=${order.total_price} — NOT confirming`
+            );
+            return NextResponse.json(
+              { error: "Nominal tidak cocok. Hubungi CS dengan bukti pembayaran." },
+              { status: 409 }
+            );
+          }
+
+          // Payment succeeded but callback was missed → confirm order now.
+          // Atomic guard: only flip while still pending (callback/cron may race).
+          const { data: updated } = await supabase
             .from("orders")
             .update({
               payment_status: "paid",
@@ -89,7 +103,17 @@ export async function POST(request: NextRequest) {
               confirmed_at: new Date().toISOString(),
               updated_at: new Date().toISOString(),
             })
-            .eq("id", order.id);
+            .eq("id", order.id)
+            .eq("status", "pending")
+            .select("id")
+            .single();
+
+          if (updated) {
+            // Fire the same notification suite as the webhook path (audit
+            // finding: recovery used to confirm silently)
+            await notifyOrderPaid(supabase, order);
+          }
+
           return NextResponse.json({
             success: true,
             already_paid: true,

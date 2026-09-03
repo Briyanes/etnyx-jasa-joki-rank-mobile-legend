@@ -8,8 +8,8 @@ import {
   sendWhatsAppMessage,
   sendTelegramMessage,
 } from "@/lib/notifications";
-import { sendMetaCAPI } from "@/lib/meta-capi";
 import { getDuitkuConfig, verifyDuitkuCallback } from "@/lib/payments/duitku";
+import { notifyOrderPaid } from "@/lib/payments/confirm-paid";
 
 // ============================================
 // Duitku Callback Handler (Webhook)
@@ -120,9 +120,9 @@ export async function POST(request: NextRequest) {
       paymentStatus = "failed";
     }
 
-    // Update order (check for DB errors — audit finding F4: old code
-    // silently ignored update failures)
-    const { error: updateError } = await supabase
+    // Update order — ATOMIC: only when still unpaid/pending (guards against
+    // duplicate/concurrent callbacks racing each other)
+    const { data: updatedOrder, error: updateError } = await supabase
       .from("orders")
       .update({
         payment_status: paymentStatus,
@@ -133,16 +133,41 @@ export async function POST(request: NextRequest) {
         confirmed_at: paymentStatus === "paid" ? new Date().toISOString() : undefined,
         updated_at: new Date().toISOString(),
       })
-      .eq("id", order.id);
+      .eq("id", order.id)
+      .in("payment_status", ["unpaid", "pending", "underpaid", "failed", "expired"])
+      .neq("status", "confirmed")
+      .select("id")
+      .single();
 
     if (updateError) {
+      // PGRST116 = no row matched the guard → already processed by a
+      // concurrent callback; treat as success (idempotent).
+      if ((updateError as { code?: string }).code === "PGRST116") {
+        return NextResponse.json({ success: true, message: "Already processed" });
+      }
       console.error(
         `[Duitku Callback] DB UPDATE FAILED for ${order.order_id}:`,
         updateError.message
       );
-      // Return 500 so Duitku retries the callback (fixes audit finding F8:
-      // old code always returned 200, losing failed updates)
+      // Return 500 so Duitku retries the callback
       return NextResponse.json({ error: "Update failed" }, { status: 500 });
+    }
+
+    // Audit log every gateway callback (best-effort; table created in SQL v33)
+    try {
+      await supabase.from("payment_callbacks").insert({
+        order_id: order.id,
+        gateway_provider: "duitku",
+        merchant_order_id: merchantOrderId,
+        reference,
+        result_code: resultCode,
+        payment_code: paymentCode,
+        amount,
+        signature,
+        raw_payload: body,
+      });
+    } catch {
+      /* non-blocking: audit log must never break payment processing */
     }
 
     // Notify customer and admin for underpaid payments
@@ -176,63 +201,13 @@ export async function POST(request: NextRequest) {
       sendWhatsAppMessage(waNumber, failedMsg, manualUrl).catch(console.error);
     }
 
-    // Send notifications when payment is confirmed
-    if (paymentStatus === "paid" && order.status !== "confirmed") {
-      const orderData = {
-        order_id: order.order_id,
-        username: order.username,
-        current_rank: order.current_rank,
-        target_rank: order.target_rank,
-        current_star: order.current_star ?? null,
-        target_star: order.target_star ?? null,
-        package: order.package,
-        package_title: order.package_title ?? null,
-        price: order.total_price,
-        whatsapp: order.whatsapp,
-        email: order.customer_email,
-        status: orderStatus,
-        is_express: order.is_express,
-        is_premium: order.is_premium,
-        notes: order.notes,
-        db_id: order.id,
-      };
-
-      // Payment confirmed notifications (WA + Telegram worker + admin + email)
-      Promise.allSettled([
-        sendPaymentConfirmedWA(orderData),
-        notifyWorkerConfirmedOrder(orderData),
-        notifyAdminPaymentConfirmed(orderData),
-        sendPaymentConfirmedEmail(orderData),
-      ]).catch(console.error);
-
-      // Fire Meta Conversions API (server-side dedup with client pixel)
-      try {
-        const { data: pixelSettings } = await supabase
-          .from("settings")
-          .select("value")
-          .eq("key", "tracking_pixels")
-          .single();
-
-        if (pixelSettings?.value) {
-          sendMetaCAPI(
-            {
-              eventName: "Purchase",
-              eventId: `purchase_${order.order_id}`,
-              value: order.total_price || 0,
-              currency: "IDR",
-              email: order.customer_email,
-              phone: order.whatsapp,
-              orderId: order.order_id,
-              ipAddress:
-                request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || undefined,
-              userAgent: request.headers.get("user-agent") || undefined,
-            },
-            pixelSettings.value
-          ).catch(console.error);
-        }
-      } catch {
-        /* pixel settings not configured */
-      }
+    // Send notifications when payment is confirmed (shared helper also used
+    // by recover & reconciliation cron — fixes silent-confirm audit finding)
+    if (paymentStatus === "paid") {
+      await notifyOrderPaid(supabase, order, {
+        ipAddress: request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || undefined,
+        userAgent: request.headers.get("user-agent") || undefined,
+      });
     }
 
     return NextResponse.json({ success: true });

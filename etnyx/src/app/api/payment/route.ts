@@ -37,6 +37,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Order already processed" }, { status: 400 });
     }
 
+    // ===== Double-click / retry guard (audit finding) =====
+    // If this pending order already has a live Duitku invoice, re-use it.
+    // Creating a second invoice would orphan the first one: its callback
+    // looks up midtrans_order_id which gets overwritten -> customer paid but
+    // the order stays "pending" forever.
+    if (order.midtrans_order_id && order.payment_url) {
+      return NextResponse.json({
+        success: true,
+        redirect_url: order.payment_url,
+        transaction_id: order.payment_token,
+        reused: true,
+      });
+    }
+
     const config = await getDuitkuConfig(supabase);
     if (!config.merchantCode || !config.apiKey) {
       return NextResponse.json({ error: "Duitku belum dikonfigurasi" }, { status: 500 });
@@ -64,8 +78,11 @@ export async function POST(request: NextRequest) {
       ],
     });
 
-    // Save payment info to order
-    await supabase
+    // Save payment info to order. Guard: only write when midtrans_order_id is
+    // still NULL — if a concurrent request won the race in the same instant,
+    // ITS invoice stays authoritative (first writer wins; the loser's unused
+    // invoice expires harmlessly on Duitku's side).
+    const { data: winner } = await supabase
       .from("orders")
       .update({
         payment_token: checkout.reference,
@@ -74,7 +91,27 @@ export async function POST(request: NextRequest) {
         payment_type: "duitku_checkout",
         gateway_provider: "duitku",
       })
-      .eq("id", order.id);
+      .eq("id", order.id)
+      .is("midtrans_order_id", null)
+      .select("midtrans_order_id")
+      .single();
+
+    if (!winner) {
+      // A concurrent request won the race — return ITS invoice URL instead
+      const { data: fresh } = await supabase
+        .from("orders")
+        .select("payment_url, payment_token")
+        .eq("id", order.id)
+        .single();
+      if (fresh?.payment_url) {
+        return NextResponse.json({
+          success: true,
+          redirect_url: fresh.payment_url,
+          transaction_id: fresh.payment_token,
+          reused: true,
+        });
+      }
+    }
 
     return NextResponse.json({
       success: true,

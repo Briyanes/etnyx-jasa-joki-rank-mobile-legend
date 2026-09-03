@@ -254,8 +254,12 @@ describe("isValidOrderType", () => {
 
 describe("isValidPaymentMethod", () => {
   it("accepts valid methods", () => {
-    expect(isValidPaymentMethod("dompetx")).toBe(true);
+    expect(isValidPaymentMethod("duitku")).toBe(true);
     expect(isValidPaymentMethod("manual_transfer")).toBe(true);
+  });
+
+  it("rejects the retired dompetx gateway", () => {
+    expect(isValidPaymentMethod("dompetx")).toBe(false);
   });
 
   it("rejects invalid methods", () => {

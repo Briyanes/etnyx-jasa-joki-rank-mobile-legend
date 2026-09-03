@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase-server";
 import { sendWhatsAppMessage, sendOrderCancelledWA, sendTelegramMessage, waDisclaimer, getNotificationPreferences } from "@/lib/notifications";
 import { getDuitkuConfig, getDuitkuTransactionStatus } from "@/lib/payments/duitku";
+import { notifyOrderPaid } from "@/lib/payments/confirm-paid";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://etnyx.com";
 
@@ -136,7 +137,7 @@ _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
     const cutoff72h = new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString();
     const { data: staleOrders } = await supabase
       .from("orders")
-      .select("id, order_id, username, whatsapp, total_price, current_rank, target_rank, current_star, target_star, package, package_title, price:total_price, email, status")
+      .select("id, order_id, username, whatsapp, total_price, current_rank, target_rank, current_star, target_star, package, package_title, price:total_price, email, status, gateway_provider")
       .eq("status", "pending")
       .lt("created_at", cutoff72h);
 
@@ -149,6 +150,17 @@ _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
         .eq("order_id", order.id);
 
       if ((proofCount || 0) > 0) continue;
+
+      // Never auto-cancel an order Duitku already marked paid (missed-callback
+      // scenario is handled by step 6 reconciliation — audit finding)
+      if (order.gateway_provider === "duitku" && order.status === "pending") {
+        const { data: fresh } = await supabase
+          .from("orders")
+          .select("payment_status")
+          .eq("id", order.id)
+          .single();
+        if (fresh?.payment_status === "paid") continue;
+      }
 
       // Atomic: only cancel if still pending
       const { data: updated } = await supabase
@@ -243,7 +255,7 @@ _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
       const cutoff1h = new Date(Date.now() - 60 * 60 * 1000).toISOString();
       const { data: pendingDuitku } = await supabase
         .from("orders")
-        .select("order_id, midtrans_order_id, total_price")
+        .select("id, order_id, midtrans_order_id, total_price, username, whatsapp, customer_email, current_rank, target_rank, current_star, target_star, package, package_title, is_express, is_premium, notes")
         .eq("status", "pending")
         .eq("gateway_provider", "duitku")
         .not("midtrans_order_id", "is", null)
@@ -253,12 +265,30 @@ _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
       for (const order of pendingDuitku || []) {
         try {
           const tx = await getDuitkuTransactionStatus(config, order.midtrans_order_id);
-          if (tx && tx.statusCode === "00" && tx.amount === order.total_price) {
-            await supabase
+          // tx.amount is a STRING from Duitku ("150000"); total_price is a
+          // number in DB — old code compared with === which never matched.
+          if (tx && tx.statusCode === "00" && Number(tx.amount) === order.total_price) {
+            // Atomic: only flip if still pending (callback may have raced us)
+            const { data: updated } = await supabase
               .from("orders")
-              .update({ status: "confirmed", payment_status: "paid", paid_at: new Date().toISOString() })
-              .eq("order_id", order.order_id);
-            reconciled++;
+              .update({
+                status: "confirmed",
+                payment_status: "paid",
+                paid_at: new Date().toISOString(),
+                confirmed_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              })
+              .eq("order_id", order.order_id)
+              .eq("status", "pending")
+              .select("id")
+              .single();
+
+            if (updated) {
+              // Notify customer/worker/admin — reconciliation used to
+              // confirm silently (audit finding).
+              await notifyOrderPaid(supabase, order);
+              reconciled++;
+            }
           }
         } catch { /* skip individual failures */ }
       }
