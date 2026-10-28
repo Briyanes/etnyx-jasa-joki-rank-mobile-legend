@@ -258,6 +258,33 @@ describe("calculateAutoPaketPrice — division-star parity & server-side hardeni
   it("same-rank order returns null (unsupported by server verifier)", () => {
     expect(calculateAutoPaketPrice({ ...baseBody, targetRank: "epic", targetStar: 1 }, CMS)).toBeNull();
   });
+
+  it("SAME-RANK FIX: Mythic 1★ → 2★ = 1 star × CMS price (was rejected → \"Paket/tipe order tidak valid\")", () => {
+    expect(
+      calculateAutoPaketPrice(
+        { currentRank: "mythic", targetRank: "mythic", currentMythicStars: 1, targetMythicStars: 2 },
+        { perstar: { mythicromawi: 17000 } },
+      ),
+    ).toBe(17000);
+  });
+
+  it("SAME-RANK FIX: Mythic 10★ → 25★ = 15 stars × price", () => {
+    expect(
+      calculateAutoPaketPrice(
+        { currentRank: "mythic", targetRank: "mythic", currentMythicStars: 10, targetMythicStars: 25 },
+        { perstar: { mythicromawi: 15000 } },
+      ),
+    ).toBe(15 * 15000);
+  });
+
+  it("SAME-RANK FIX: target stars ≤ current returns null (no free/negative orders)", () => {
+    expect(
+      calculateAutoPaketPrice(
+        { currentRank: "mythic", targetRank: "mythic", currentMythicStars: 5, targetMythicStars: 2 },
+        { perstar: { mythicromawi: 15000 } },
+      ),
+    ).toBeNull();
+  });
 });
 
 describe("normalizePerStarId — per-star pricing id aliases", () => {

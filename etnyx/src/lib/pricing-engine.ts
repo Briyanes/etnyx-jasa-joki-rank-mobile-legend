@@ -620,7 +620,7 @@ export function calculateAutoPaketPrice(
 
   const ci = RANK_ORDER.indexOf(currentRank);
   const ti = RANK_ORDER.indexOf(targetRank);
-  if (ci < 0 || ti < 0 || ci >= ti) return null;
+  if (ci < 0 || ti < 0) return null;
 
   // ★ HARDENING (server-side price verifier): clamp ALL client-supplied rank
   // params to valid ranges so a crafted payload cannot collapse the verified
@@ -668,6 +668,17 @@ export function calculateAutoPaketPrice(
     const key = RANK_TO_PRICE_KEY[rank] || "grandmaster";
     return cmsPricing?.perstar?.[key] ?? PER_STAR_PRICE_MAP[key] ?? 5000;
   };
+
+  // ★ FIX: same-rank Mythic orders (e.g. Mythic 1★ → 2★) were rejected here
+  // (ci >= ti → null) even though the /order UI allows same-rank Mythic
+  // targets — submits then failed with "Paket/tipe order tidak valid".
+  // Price the star difference directly (parity with the FE same-rank segment).
+  if (ci === ti) {
+    if (!curMCfg) return null; // same-rank division targets are unreachable in the UI
+    const stars = targetMythicStars - currentMythicStars;
+    if (stars <= 0) return null;
+    return Math.round(getPricePerStar(currentRank) * stars);
+  }
 
   let originalTotal = 0;
 
