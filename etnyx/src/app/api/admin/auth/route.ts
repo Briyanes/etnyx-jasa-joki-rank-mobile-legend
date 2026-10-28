@@ -7,9 +7,13 @@ import { logAdminAction } from "@/lib/audit-log";
 import { strictRateLimit } from "@/lib/rate-limiter";
 
 function getAdminJwtSecret() {
-  const secret = process.env.ADMIN_JWT_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!secret) {
-    throw new Error("ADMIN_JWT_SECRET or SUPABASE_SERVICE_ROLE_KEY must be set");
+  // SECURITY (K5 alignment): ADMIN_JWT_SECRET must be set independently —
+  // never fall back to SUPABASE_SERVICE_ROLE_KEY. admin-auth.ts enforces the
+  // same rule for verification; signing with the service key would couple the
+  // secrets and produce tokens verifyAdmin() rejects anyway.
+  const secret = process.env.ADMIN_JWT_SECRET;
+  if (!secret || secret.length < 32) {
+    throw new Error("ADMIN_JWT_SECRET must be set and at least 32 characters long.");
   }
   return new TextEncoder().encode(secret);
 }
