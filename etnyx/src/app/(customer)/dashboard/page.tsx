@@ -246,7 +246,11 @@ export default function CustomerDashboard() {
 
   const handleLogout = async () => {
     await fetch("/api/customer/auth", { method: "DELETE" });
-    router.push("/");
+    // Go to the login page (NOT the public landing "/") — in the installed
+    // PWA, redirecting to "/" after logout showed the marketing page inside
+    // the app window (same bug theshine had). /login also matches the
+    // session-expired guard behavior and defaults back to /dashboard.
+    router.push("/login");
   };
 
   const copyReferralCode = () => {
