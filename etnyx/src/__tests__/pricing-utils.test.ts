@@ -8,6 +8,7 @@
 import { describe, it, expect } from "vitest";
 import {
   calculateTotalStars,
+  calculateAutoPaketPrice,
   MYTHIC_STAR_CONFIG,
 } from "@/lib/pricing-utils";
 
@@ -173,5 +174,87 @@ describe("calculateTotalStars — non-Mythic ranks (sanity check)", () => {
       0, 0,
     );
     expect(result).toBe(45);
+  });
+});
+
+describe("calculateTotalStars — target division stars (Warrior–Legend targets)", () => {
+  it("Epic V 1★ → Legend I 3★ = 47 stars (24 Epic + 23 Legend)", () => {
+    const result = calculateTotalStars(
+      "epic", 5,
+      "legend", 1,
+      1, // currentDivisionStar
+      3, // targetDivisionStar
+    );
+    expect(result).toBe(47);
+  });
+
+  it("Epic V 1★ → Legend V 0★ = 24 stars (0★ in target division = just promoted)", () => {
+    const result = calculateTotalStars(
+      "epic", 5,
+      "legend", 5,
+      1, 0,
+    );
+    expect(result).toBe(24);
+  });
+
+  it("same-rank division order: Epic III 1★ → Epic I 2★ = 11 stars", () => {
+    // (3-1)*5 - 1 + 2 = 11
+    const result = calculateTotalStars(
+      "epic", 3,
+      "epic", 1,
+      1, 2,
+    );
+    expect(result).toBe(11);
+  });
+});
+
+describe("calculateAutoPaketPrice — division-star parity & server-side hardening", () => {
+  const CMS = {
+    perstar: { master: 5000, grandmaster: 6000, epic: 7000, legend: 8000, mythicromawi: 19000, honor: 24000, glory: 27000, immortal: 30000 },
+  };
+
+  const baseBody = {
+    currentRank: "epic", currentStar: 3, currentDivisionStar: 2,
+    targetRank: "legend", targetStar: 4, targetDivisionStar: 0,
+    currentMythicStars: 0, targetMythicStars: 0,
+  };
+
+  it("Epic III 2★ → Legend IV 0★ = 13×7.000 + 5×8.000 = Rp 131.000 (FE/BE parity incl. currentDivisionStar)", () => {
+    expect(calculateAutoPaketPrice(baseBody, CMS)).toBe(131000);
+  });
+
+  it("Epic III 2★ → Legend IV 3★ adds 3 target-division stars → Rp 155.000", () => {
+    expect(calculateAutoPaketPrice({ ...baseBody, targetDivisionStar: 3 }, CMS)).toBe(155000);
+  });
+
+  it("HARDENING: targetDivisionStar = -999 falls back to 0 (no undercharge via crafted payload)", () => {
+    expect(calculateAutoPaketPrice({ ...baseBody, targetDivisionStar: -999 }, CMS)).toBe(131000);
+  });
+
+  it("HARDENING: targetDivisionStar = 99 (above starsPerDiv-1) falls back to 0", () => {
+    expect(calculateAutoPaketPrice({ ...baseBody, targetDivisionStar: 99 }, CMS)).toBe(131000);
+  });
+
+  it("HARDENING: currentStar = -50 falls back to lowest division V (conservative, max stars)", () => {
+    // Epic V 2★ remaining = (5-2) + (5-1)*5 = 23 → 23×7.000 = 161.000; Legend IV 0★ = 40.000
+    expect(calculateAutoPaketPrice({ ...baseBody, currentStar: -50 }, CMS)).toBe(201000);
+  });
+
+  it("HARDENING: currentDivisionStar = -50 falls back to 0 (more remaining stars, not fewer)", () => {
+    // Epic III 0★ remaining = 15 → 15×7.000 = 105.000; Legend IV 0★ = 40.000
+    expect(calculateAutoPaketPrice({ ...baseBody, currentDivisionStar: -50 }, CMS)).toBe(145000);
+  });
+
+  it("HARDENING: missing targetMythicStars for Mythic target falls back to tier max (no negative segment)", () => {
+    // Legend I 0★ → Mythic (fallback targetMythicStars = max 25):
+    // Legend remaining = 1×5 - 0 = 5 → 5×8.000; Mythic target = 25×19.000
+    expect(calculateAutoPaketPrice(
+      { currentRank: "legend", currentStar: 1, currentDivisionStar: 0, targetRank: "mythic" },
+      CMS,
+    )).toBe(5 * 8000 + 25 * 19000);
+  });
+
+  it("same-rank order returns null (unsupported by server verifier)", () => {
+    expect(calculateAutoPaketPrice({ ...baseBody, targetRank: "epic", targetStar: 1 }, CMS)).toBeNull();
   });
 });

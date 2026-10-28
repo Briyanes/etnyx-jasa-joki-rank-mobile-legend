@@ -524,7 +524,7 @@ function calculateTotalStars(
       const cfg = RANK_DIVISION_CONFIG[currentRank];
       if (cfg && currentDiv > targetDiv) {
         // Higher div number = lower tier (V is lowest, I is highest)
-        return (currentDiv - targetDiv) * cfg.starsPerDiv - divisionStar;
+        return (currentDiv - targetDiv) * cfg.starsPerDiv - divisionStar + targetDivisionStar;
       }
     }
     // Same mythic tier: difference in stars
@@ -563,7 +563,7 @@ function calculateTotalStars(
   if (RANKS_WITH_STARS.includes(targetRank)) {
     const cfg = RANK_DIVISION_CONFIG[targetRank];
     if (cfg) {
-      stars += (cfg.divisions - targetDiv) * cfg.starsPerDiv;
+      stars += (cfg.divisions - targetDiv) * cfg.starsPerDiv + targetDivisionStar;
     }
   } else if (MYTHIC_STAR_CONFIG[targetRank]) {
     const mCfg = MYTHIC_STAR_CONFIG[targetRank];
@@ -581,9 +581,10 @@ function autoCalcPackagePrice(
   currentDivisionStar: number,
   perStarPrices: PerStarRank[],
   currentMythicStars: number = 0,
-  targetMythicStars: number = 0
+  targetMythicStars: number = 0,
+  targetDivisionStar: number = 0
 ): { price: number; totalStars: number; originalPrice: number; discountPercent: number } {
-  const totalStars = calculateTotalStars(currentRank, currentDiv, targetRank, targetDiv, RANKS_WITH_STARS.includes(currentRank) ? currentDivisionStar : 0, currentMythicStars, targetMythicStars);
+  const totalStars = calculateTotalStars(currentRank, currentDiv, targetRank, targetDiv, RANKS_WITH_STARS.includes(currentRank) ? currentDivisionStar : 0, currentMythicStars, targetMythicStars, RANKS_WITH_STARS.includes(targetRank) ? targetDivisionStar : 0);
   if (totalStars <= 0) return { price: 0, totalStars: 0, originalPrice: 0, discountPercent: 0 };
 
   // Map rank to per-star price lookup key.
@@ -654,7 +655,7 @@ function autoCalcPackagePrice(
     let starsInThisRank: number;
     if (RANKS_WITH_STARS.includes(targetRank)) {
       const cfg = RANK_DIVISION_CONFIG[targetRank];
-      starsInThisRank = cfg ? (cfg.divisions - targetDiv) * cfg.starsPerDiv : 0;
+      starsInThisRank = cfg ? (cfg.divisions - targetDiv) * cfg.starsPerDiv + targetDivisionStar : 0;
     } else if (MYTHIC_STAR_CONFIG[targetRank]) {
       const mCfg = MYTHIC_STAR_CONFIG[targetRank];
       starsInThisRank = targetMythicStars - mCfg.min;
@@ -696,7 +697,8 @@ function calculateStarBreakdown(
   currentDivisionStar: number,
   perStarPrices: PerStarRank[],
   currentMythicStars: number = 0,
-  targetMythicStars: number = 0
+  targetMythicStars: number = 0,
+  targetDivisionStar: number = 0
 ): StarBreakdownSegment[] {
   const rankToPriceKey: Record<string, string> = {
     warrior: "master",
@@ -792,7 +794,7 @@ function calculateStarBreakdown(
     let starsInThisRank: number;
     if (RANKS_WITH_STARS.includes(targetRank)) {
       const cfg = RANK_DIVISION_CONFIG[targetRank];
-      starsInThisRank = cfg ? (cfg.divisions - targetDiv) * cfg.starsPerDiv : 0;
+      starsInThisRank = cfg ? (cfg.divisions - targetDiv) * cfg.starsPerDiv + targetDivisionStar : 0;
     } else if (MYTHIC_STAR_CONFIG[targetRank]) {
       const mCfg = MYTHIC_STAR_CONFIG[targetRank];
       starsInThisRank = targetMythicStars - mCfg.min;
@@ -1169,6 +1171,8 @@ function OrderPageContent() {
   const [showPackages, setShowPackages] = useState(false);
   // Star within current division (e.g. Epic II star 3/5)
   const [currentDivisionStar, setCurrentDivisionStar] = useState(1);
+  // Star within target division (e.g. target Legend I with 3★; 0 = just promoted into the division)
+  const [targetDivisionStar, setTargetDivisionStar] = useState(0);
   // Mythic+ star count for current rank
   const [currentMythicStars, setCurrentMythicStars] = useState(0);
   const [targetMythicStars, setTargetMythicStars] = useState(0);
@@ -1514,7 +1518,7 @@ function OrderPageContent() {
 
   // Auto-calculated package price for paket mode (real-time)
   const autoCalcResult = (orderMode === "paket" || orderMode === "perstar")
-    ? autoCalcPackagePrice(form.currentRank, currentStar, form.targetRank, targetStar, currentDivisionStar, perStarRanks, currentMythicStars, targetMythicStars)
+    ? autoCalcPackagePrice(form.currentRank, currentStar, form.targetRank, targetStar, currentDivisionStar, perStarRanks, currentMythicStars, targetMythicStars, RANKS_WITH_STARS.includes(form.targetRank) ? targetDivisionStar : 0)
     : { price: 0, totalStars: 0, originalPrice: 0, discountPercent: 0 };
 
   // Auto-set selectedPackage when rank changes in paket mode (DISABLED — paket now uses catalog cards only)
@@ -1540,7 +1544,7 @@ function OrderPageContent() {
       };
       setSelectedPackage(virtualPkg);
     }
-  }, [orderMode, autoCalcResult.price, autoCalcResult.originalPrice, autoCalcResult.discountPercent, form.currentRank, form.targetRank, currentStar, targetStar, currentDivisionStar, currentMythicStars, targetMythicStars]);
+  }, [orderMode, autoCalcResult.price, autoCalcResult.originalPrice, autoCalcResult.discountPercent, form.currentRank, form.targetRank, currentStar, targetStar, currentDivisionStar, currentMythicStars, targetMythicStars, targetDivisionStar]);
 
   // Raw item price (before season/express/premium)
   const rawItemPrice = (() => {
@@ -1814,12 +1818,14 @@ function OrderPageContent() {
           targetRank: (orderMode === "paket" || orderMode === "classic" || orderMode === "perstar") ? (selectedPackage?.targetRank || form.targetRank) : (selectedGendongRank?.id || form.targetRank),
           currentStar: (orderMode === "paket" || orderMode === "perstar") && RANKS_WITH_STARS.includes(selectedPackage?.currentRank || form.currentRank) ? currentStar : null,
           targetStar: (orderMode === "paket" || orderMode === "perstar") && RANKS_WITH_STARS.includes(selectedPackage?.targetRank || form.targetRank) ? targetStar : null,
+          currentDivisionStar: (orderMode === "paket" || orderMode === "perstar") && RANKS_WITH_STARS.includes(selectedPackage?.currentRank || form.currentRank) ? currentDivisionStar : 0,
+          targetDivisionStar: (orderMode === "paket" || orderMode === "perstar") && RANKS_WITH_STARS.includes(selectedPackage?.targetRank || form.targetRank) ? targetDivisionStar : 0,
           currentMythicStars: (orderMode === "paket" || orderMode === "perstar") && MYTHIC_STAR_CONFIG[selectedPackage?.currentRank || form.currentRank] ? currentMythicStars : undefined,
           targetMythicStars: (orderMode === "paket" || orderMode === "perstar") && MYTHIC_STAR_CONFIG[selectedPackage?.targetRank || form.targetRank] ? targetMythicStars : undefined,
           packageTitle: (orderMode === "paket" || orderMode === "classic" || orderMode === "perstar") ? selectedPackage?.title : (orderMode === "gendong" ? `Gendong ${selectedGendongRank?.name} x${gendongQuantity} ${selectedGendongRank?.id === "grading" ? "match" : "star"}` : undefined),
           packageId: (orderMode === "paket" || orderMode === "classic" || orderMode === "perstar") ? selectedPackage?.id : undefined,
           bonusStars: (orderMode === "paket" || orderMode === "perstar") ? (() => {
-            const ts = calculateTotalStars(form.currentRank, currentStar, form.targetRank, targetStar, RANKS_WITH_STARS.includes(form.currentRank) ? currentDivisionStar : 0, currentMythicStars, targetMythicStars);
+            const ts = calculateTotalStars(form.currentRank, currentStar, form.targetRank, targetStar, RANKS_WITH_STARS.includes(form.currentRank) ? currentDivisionStar : 0, currentMythicStars, targetMythicStars, RANKS_WITH_STARS.includes(form.targetRank) ? targetDivisionStar : 0);
             const tier = [...BUNDLE_TIERS].reverse().find(t => ts >= t.minStars);
             return tier?.bonusStars || 0;
           })() : 0,
@@ -1887,7 +1893,7 @@ function OrderPageContent() {
     } finally {
       setIsSubmitting(false);
     }
-  }, [form, selectedPackage, canSubmit, promoApplied, promoDiscount, finalPrice, paymentMethod, orderMode, selectedStarRank, starQuantity, selectedGendongRank, gendongQuantity, gendongRoles, scheduleOptions, tierDiscountAmount, currentStar, targetStar]);
+  }, [form, selectedPackage, canSubmit, promoApplied, promoDiscount, finalPrice, paymentMethod, orderMode, selectedStarRank, starQuantity, selectedGendongRank, gendongQuantity, gendongRoles, scheduleOptions, tierDiscountAmount, currentStar, targetStar, currentDivisionStar, targetDivisionStar, currentMythicStars, targetMythicStars]);
 
   // === REDIRECTING TO PAYMENT / FALLBACK SUCCESS ===
   if (orderResult) {
@@ -2818,6 +2824,7 @@ function OrderPageContent() {
                             const rankId = e.target.value;
                             setPerStarTouched(true);
                             updateForm({ targetRank: rankId as RankTier });
+                            setTargetDivisionStar(0);
                             const cfg = RANK_DIVISION_CONFIG[rankId];
                             if (cfg) setTargetStar(1);
                             const mythicCfg = MYTHIC_STAR_CONFIG[rankId];
@@ -2860,6 +2867,36 @@ function OrderPageContent() {
                           </div>
                         </div>
                       )}
+                      {/* Star within target division (for Warrior-Legend) — 0 = just promoted into the division */}
+                      {RANKS_WITH_STARS.includes(form.targetRank) && (() => {
+                        const starsPerDiv = RANK_DIVISION_CONFIG[form.targetRank]?.starsPerDiv ?? 5;
+                        return (
+                          <div className="mt-3 flex items-center gap-3 flex-wrap">
+                            <span className="text-text-muted text-xs whitespace-nowrap">
+                              {locale === "id" ? "Bintang di divisi tujuan:" : "Stars in target division:"}
+                            </span>
+                            <div className="flex gap-1">
+                              {Array.from({ length: starsPerDiv }, (_, i) => i).map((s) => (
+                                <button
+                                  key={s}
+                                  data-testid={`perstar-target-divstar-${s}`}
+                                  onClick={() => setTargetDivisionStar(s)}
+                                  className={`w-8 h-8 rounded-lg text-xs font-bold transition-all flex items-center justify-center ${
+                                    targetDivisionStar === s
+                                      ? "bg-yellow-400/20 border-2 border-yellow-400 text-yellow-400"
+                                      : "bg-surface border border-white/10 text-text-muted hover:border-white/20"
+                                  }`}
+                                >
+                                  {s}
+                                </button>
+                              ))}
+                            </div>
+                            <span className="text-text-muted text-[10px]">
+                              {locale === "id" ? "0 = sampai masuk divisi ini" : "0 = just entered this division"}
+                            </span>
+                          </div>
+                        );
+                      })()}
                       {MYTHIC_STAR_CONFIG[form.targetRank] && (
                         <div className="flex items-center gap-2 mt-3">
                           <div className="flex items-center gap-1.5">
@@ -2892,7 +2929,7 @@ function OrderPageContent() {
                       <Image src={rankIcons[form.currentRank] || "/icons-tier/warrior.webp"} alt={`Rank ${form.currentRank}`} width={28} height={28} className="w-7 h-7 object-contain" />
                       <span className="text-text text-sm font-medium">
                         {RANK_LIST.find(r => r.id === form.currentRank)?.label}
-                        {RANKS_WITH_STARS.includes(form.currentRank) && <span className="text-text-muted ml-1">{getDivisionOptions(form.currentRank).find(s => s.value === currentStar)?.label}</span>}
+                        {RANKS_WITH_STARS.includes(form.currentRank) && <span className="text-text-muted ml-1">{getDivisionOptions(form.currentRank).find(s => s.value === currentStar)?.label} {currentDivisionStar}★</span>}
                         {MYTHIC_STAR_CONFIG[form.currentRank] && <span className="text-text-muted ml-1">({currentMythicStars}★)</span>}
                       </span>
                     </div>
@@ -2901,7 +2938,7 @@ function OrderPageContent() {
                       <Image src={rankIcons[form.targetRank] || "/icons-tier/warrior.webp"} alt={`Rank ${form.targetRank}`} width={28} height={28} className="w-7 h-7 object-contain" />
                       <span className="text-yellow-400 text-sm font-bold">
                         {RANK_LIST.find(r => r.id === form.targetRank)?.label}
-                        {RANKS_WITH_STARS.includes(form.targetRank) && <span className="text-yellow-300 ml-1">{getDivisionOptions(form.targetRank).find(s => s.value === targetStar)?.label}</span>}
+                        {RANKS_WITH_STARS.includes(form.targetRank) && <span className="text-yellow-300 ml-1">{getDivisionOptions(form.targetRank).find(s => s.value === targetStar)?.label} {targetDivisionStar}★</span>}
                         {MYTHIC_STAR_CONFIG[form.targetRank] && <span className="text-yellow-300 ml-1">({targetMythicStars}★)</span>}
                       </span>
                     </div>
@@ -3597,12 +3634,12 @@ function OrderPageContent() {
                       <>
                       <div className="flex justify-between text-text-muted">
                         <span>{orderMode === "perstar"
-                          ? `${formatRankWithStars(form.currentRank, currentStar, currentDivisionStar, currentMythicStars)} ~ ${formatRankWithStars(form.targetRank, targetStar, 0, targetMythicStars)}`
+                          ? `${formatRankWithStars(form.currentRank, currentStar, currentDivisionStar, currentMythicStars)} ~ ${formatRankWithStars(form.targetRank, targetStar, RANKS_WITH_STARS.includes(form.targetRank) ? targetDivisionStar : 0, targetMythicStars)}`
                           : t.basePrice}</span>
                         <span>{formatRupiah(selectedPackage.price)}</span>
                       </div>
                       {orderMode === "perstar" && perStarTouched && form.currentRank !== "" && form.targetRank !== "" && (() => {
-                        const segments = calculateStarBreakdown(form.currentRank, currentStar, form.targetRank, targetStar, currentDivisionStar, perStarRanks, currentMythicStars, targetMythicStars);
+                        const segments = calculateStarBreakdown(form.currentRank, currentStar, form.targetRank, targetStar, currentDivisionStar, perStarRanks, currentMythicStars, targetMythicStars, RANKS_WITH_STARS.includes(form.targetRank) ? targetDivisionStar : 0);
                         if (segments.length <= 1) return null;
                         return (
                           <div className="mt-2 pt-2 border-t border-white/5 space-y-1.5">
@@ -3751,7 +3788,7 @@ function OrderPageContent() {
                       </div>
                       <div className="flex-1">
                         <p className="text-text font-semibold">
-                          {formatRankWithStars(form.currentRank, currentStar, currentDivisionStar, currentMythicStars)} ~ {formatRankWithStars(form.targetRank, targetStar, 0, targetMythicStars)}
+                          {formatRankWithStars(form.currentRank, currentStar, currentDivisionStar, currentMythicStars)} ~ {formatRankWithStars(form.targetRank, targetStar, RANKS_WITH_STARS.includes(form.targetRank) ? targetDivisionStar : 0, targetMythicStars)}
                         </p>
                         <p className="text-text-muted text-xs">
                           {autoCalcResult.totalStars}★
@@ -3889,12 +3926,12 @@ function OrderPageContent() {
                         <>
                         <div className="flex justify-between text-text-muted">
                           <span>{orderMode === "perstar"
-                            ? `${formatRankWithStars(form.currentRank, currentStar, currentDivisionStar, currentMythicStars)} ~ ${formatRankWithStars(form.targetRank, targetStar, 0, targetMythicStars)}`
+                            ? `${formatRankWithStars(form.currentRank, currentStar, currentDivisionStar, currentMythicStars)} ~ ${formatRankWithStars(form.targetRank, targetStar, RANKS_WITH_STARS.includes(form.targetRank) ? targetDivisionStar : 0, targetMythicStars)}`
                             : "Harga Dasar"}</span>
                           <span>{formatRupiah(selectedPackage.price)}</span>
                         </div>
                         {orderMode === "perstar" && perStarTouched && form.currentRank !== "" && form.targetRank !== "" && (() => {
-                          const segments = calculateStarBreakdown(form.currentRank, currentStar, form.targetRank, targetStar, currentDivisionStar, perStarRanks, currentMythicStars, targetMythicStars);
+                          const segments = calculateStarBreakdown(form.currentRank, currentStar, form.targetRank, targetStar, currentDivisionStar, perStarRanks, currentMythicStars, targetMythicStars, RANKS_WITH_STARS.includes(form.targetRank) ? targetDivisionStar : 0);
                           if (segments.length <= 1) return null;
                           return (
                             <div className="mt-2 pt-2 border-t border-white/5 space-y-1.5">

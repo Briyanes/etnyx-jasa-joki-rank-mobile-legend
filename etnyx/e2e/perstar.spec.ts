@@ -178,4 +178,32 @@ test.describe("Order Page — Per Star Mode", () => {
     // Must be at least Rp 19.000 (not Rp 5.000 fallback)
     expect(priceNum).toBeGreaterThanOrEqual(19000);
   });
+
+  test("FEATURE: target division star selector — Legend I 3★ adds 3 stars (44 → 47)", async ({ page }) => {
+    // Current = Epic (defaults: division V, 1★ in division)
+    await setSelectValue(page, "perstar-current-rank", "epic");
+    // Target = Legend (defaults: division I, 0★ in division)
+    await setSelectValue(page, "perstar-target-rank", "legend");
+
+    await expect(page.locator("text=Estimasi Harga Per Bintang")).toBeVisible({ timeout: 5000 });
+
+    // Star picker for the target division must render 0–4 (Legend: starsPerDiv=5)
+    await expect(page.locator("[data-testid='perstar-target-divstar-0']")).toBeVisible({ timeout: 5000 });
+    await expect(page.locator("[data-testid='perstar-target-divstar-4']")).toBeVisible();
+    await expect(page.locator("[data-testid='perstar-target-divstar-5']")).toHaveCount(0);
+
+    // Default estimate: Epic V 1★ → Legend I 0★ = 24 + 20 = 44 stars
+    const totalStarsCard = page.locator("text=Total Bintang").locator("..");
+    await expect(totalStarsCard).toContainText("44", { timeout: 5000 });
+
+    // Pick 3★ within the target division → 24 + 23 = 47 stars
+    await page.locator("[data-testid='perstar-target-divstar-3']").click();
+    await expect(totalStarsCard).toContainText("47", { timeout: 5000 });
+
+    // Estimate price must increase when target division stars are added
+    const priceWith3Stars = await getEstimatePrice(page);
+    await page.locator("[data-testid='perstar-target-divstar-0']").click();
+    const priceWith0Stars = await getEstimatePrice(page);
+    expect(priceWith3Stars).toBeGreaterThan(priceWith0Stars);
+  });
 });

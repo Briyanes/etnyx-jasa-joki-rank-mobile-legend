@@ -598,19 +598,52 @@ export function calculateAutoPaketPrice(
 ): number | null {
   const currentRank = String(body.currentRank || "").toLowerCase();
   const targetRank = String(body.targetRank || "").toLowerCase();
-  const currentDiv = Number(body.currentStar || 5);
-  const targetDiv = Number(body.targetStar || 5);
-  const currentMythicStars = Number(body.currentMythicStars || 0);
-  const targetMythicStars = Number(body.targetMythicStars || 0);
-  // ★ FIX: Account for stars already earned within current/target division
-  // Without this, server overcharges vs frontend (e.g. Epic III with 2★:
-  // frontend=13★, backend=15★ — 2★ overcharge)
-  const currentDivisionStar = Number(body.currentDivisionStar || 0);
-  const targetDivisionStar = Number(body.targetDivisionStar || 0);
 
   const ci = RANK_ORDER.indexOf(currentRank);
   const ti = RANK_ORDER.indexOf(targetRank);
   if (ci < 0 || ti < 0 || ci >= ti) return null;
+
+  // ★ HARDENING (server-side price verifier): clamp ALL client-supplied rank
+  // params to valid ranges so a crafted payload cannot collapse the verified
+  // price (e.g. targetDivisionStar: -999 or currentStar: -50 used to shrink
+  // the star count → undercharge). Out-of-range or missing values fall back
+  // to CONSERVATIVE defaults that maximize remaining stars, matching the
+  // order page defaults (current division = lowest "V", target division =
+  // highest "I").
+  const curCfg = RANK_DIVISION_CONFIG[currentRank];
+  const tgtCfg = RANK_DIVISION_CONFIG[targetRank];
+  const curMCfg = MYTHIC_STAR_CONFIG[currentRank];
+  const tgtMCfg = MYTHIC_STAR_CONFIG[targetRank];
+  const sanitizeInt = (v: unknown, min: number, max: number, fallback: number): number => {
+    if (v === null || v === undefined || v === "") return fallback;
+    const n = Math.round(Number(v));
+    if (!Number.isFinite(n) || n < min || n > max) return fallback;
+    return n;
+  };
+
+  // Division number (1 = highest "I", divisions = lowest "V")
+  const currentDiv = curCfg
+    ? sanitizeInt(body.currentStar, 1, curCfg.divisions, curCfg.divisions)
+    : 5;
+  const targetDiv = tgtCfg
+    ? sanitizeInt(body.targetStar, 1, tgtCfg.divisions, 1)
+    : 5;
+  // ★ FIX: Account for stars already earned within current/target division
+  // Without this, server overcharges vs frontend (e.g. Epic III with 2★:
+  // frontend=13★, backend=15★ — 2★ overcharge)
+  const currentDivisionStar = curCfg
+    ? sanitizeInt(body.currentDivisionStar, 0, curCfg.starsPerDiv, 0)
+    : 0;
+  const targetDivisionStar = tgtCfg
+    ? sanitizeInt(body.targetDivisionStar, 0, tgtCfg.starsPerDiv - 1, 0)
+    : 0;
+  // Mythic+ star counts — clamp to the tier's displayable range
+  const currentMythicStars = curMCfg
+    ? sanitizeInt(body.currentMythicStars, curMCfg.min, curMCfg.max, curMCfg.min)
+    : 0;
+  const targetMythicStars = tgtMCfg
+    ? sanitizeInt(body.targetMythicStars, tgtMCfg.min, tgtMCfg.max, tgtMCfg.max)
+    : 0;
 
   const getPricePerStar = (rank: string): number => {
     const key = RANK_TO_PRICE_KEY[rank] || "grandmaster";
