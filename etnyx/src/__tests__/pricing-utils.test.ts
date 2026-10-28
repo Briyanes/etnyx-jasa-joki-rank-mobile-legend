@@ -9,6 +9,7 @@ import { describe, it, expect } from "vitest";
 import {
   calculateTotalStars,
   calculateAutoPaketPrice,
+  normalizePerStarId,
   MYTHIC_STAR_CONFIG,
 } from "@/lib/pricing-utils";
 
@@ -256,5 +257,41 @@ describe("calculateAutoPaketPrice — division-star parity & server-side hardeni
 
   it("same-rank order returns null (unsupported by server verifier)", () => {
     expect(calculateAutoPaketPrice({ ...baseBody, targetRank: "epic", targetStar: 1 }, CMS)).toBeNull();
+  });
+});
+
+describe("normalizePerStarId — per-star pricing id aliases", () => {
+  it('maps gendong-style "mythic" → "mythicromawi" (the "admin can\'t change Mythic price" bug)', () => {
+    expect(normalizePerStarId("mythic")).toBe("mythicromawi");
+  });
+
+  it('maps legacy typo "mythicroomawi" → "mythicromawi"', () => {
+    expect(normalizePerStarId("mythicroomawi")).toBe("mythicromawi");
+  });
+
+  it("passes canonical ids through unchanged", () => {
+    expect(normalizePerStarId("legend")).toBe("legend");
+    expect(normalizePerStarId("mythicromawi")).toBe("mythicromawi");
+    expect(normalizePerStarId("honor")).toBe("honor");
+  });
+});
+
+describe("calculateAutoPaketPrice — CMS id normalization parity (server verifier)", () => {
+  it("REGRESSION: WITHOUT normalization a DB row id 'mythic' is ignored → falls back to the hardcoded 19.000", () => {
+    // Documents the production bug: the settings row stores id "mythic"
+    // (gendong-style), the price dict gets key "mythic", but the engine's
+    // lookup key is "mythicromawi" → admin price silently ignored.
+    const body = { currentRank: "mythic", targetRank: "mythichonor", currentMythicStars: 0, targetMythicStars: 25 };
+    // 25 stars to promote out of Mythic × fallback 19.000 = 475.000 (NOT 15.000)
+    expect(calculateAutoPaketPrice(body, { perstar: { mythic: 15000 } })).toBe(25 * 19000);
+  });
+
+  it("WITH normalizePerStarId (as route.ts now applies) the admin price 15.000 is used", () => {
+    // route.ts builds: cmsPricing.perstar[normalizePerStarId(r.id)] = r.price
+    const dbRows = [{ id: "mythic", price: 15000 }];
+    const normalized: Record<string, number> = {};
+    for (const r of dbRows) normalized[normalizePerStarId(r.id)] = r.price;
+    const body = { currentRank: "mythic", targetRank: "mythichonor", currentMythicStars: 0, targetMythicStars: 25 };
+    expect(calculateAutoPaketPrice(body, { perstar: normalized })).toBe(25 * 15000);
   });
 });

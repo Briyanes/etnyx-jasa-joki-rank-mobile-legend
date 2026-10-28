@@ -126,42 +126,66 @@ test.describe("Order Page — Per Star Mode", () => {
     return parseInt(match![1].replace(/\./g, ""), 10);
   }
 
+  // Helper: fetch live CMS per-star prices (from /api/settings) and return a
+  // lookup that accepts multiple candidate ids (raw DB id or canonical id).
+  // Keeps price assertions CMS-aware instead of hardcoding amounts that rot
+  // whenever admins change prices in the dashboard.
+  async function getCmsPerStarPrices(page: import("@playwright/test").Page): Promise<(...ids: string[]) => number> {
+    const res = await page.request.get("/api/settings?keys=perstar_pricing");
+    const data = await res.json();
+    const tiers: { id: string; price: number }[] = data.perstar_pricing || [];
+    return (...ids: string[]) => {
+      for (const id of ids) {
+        const t = tiers.find((x) => x.id === id);
+        if (t?.price && t.price > 0) return t.price;
+      }
+      throw new Error(`CMS perstar price not found for ids: ${ids.join(", ")}`);
+    };
+  }
+
   // PRICE regression tests — catch the `mythicroomawi` typo bug where the price
   // silently fell back to grandmaster (Rp 6.000/star) instead of the correct
   // Mythic tier price. If the ID alias doesn't work, these tests will fail
   // because the total price will be far too low.
-  test("REGRESSION: Mythic 0★ → Glory 50★ price uses Mythic tier (≥Rp 1.000.000)", async ({ page }) => {
+  test("REGRESSION: Mythic 0★ → Glory 50★ price uses CMS Mythic tier prices", async ({ page }) => {
+    const cms = await getCmsPerStarPrices(page);
+    const mythicPrice = cms("mythicromawi", "mythic");
+    const honorPrice = cms("honor");
+
     await setSelectValue(page, "perstar-current-rank", "mythic");
     await setSelectValue(page, "perstar-target-rank", "mythicglory");
 
     await expect(page.locator("text=Estimasi Harga Per Bintang")).toBeVisible({ timeout: 5000 });
 
-    // Mythic 0-25★ = 25 × Rp 19.000 = Rp 475.000
-    // Honor 25-50★ = 25 × Rp 24.000 = Rp 600.000
-    // Total = Rp 1.075.000 (well above Rp 1.000.000)
-    // If typo bug exists, price would be 50 × Rp 6.000 = Rp 300.000
+    // Mythic 0-25★ = 25 × mythicPrice; Honor 25-50★ = 25 × honorPrice.
+    // CMS-aware: the expected value comes from the live perstar_pricing
+    // settings — if the "mythic" id-mismatch bug exists, the Mythic segment
+    // silently uses the hardcoded default instead of the admin's price.
+    const expected = 25 * mythicPrice + 25 * honorPrice;
     const priceNum = await getEstimatePrice(page);
-    expect(priceNum).toBeGreaterThanOrEqual(1000000);
+    expect(priceNum).toBe(expected);
   });
 
-  test("REGRESSION: Honor 25★ → Immortal 100★ price uses correct tiers (≥Rp 1.900.000)", async ({ page }) => {
+  test("REGRESSION: Honor 25★ → Immortal 100★ price uses CMS tier prices", async ({ page }) => {
+    const cms = await getCmsPerStarPrices(page);
+    const honorPrice = cms("honor");
+    const gloryPrice = cms("glory");
+
     await setSelectValue(page, "perstar-current-rank", "mythichonor");
     await setSelectValue(page, "perstar-target-rank", "mythicimmortal");
 
     await expect(page.locator("text=Estimasi Harga Per Bintang")).toBeVisible({ timeout: 5000 });
 
-    // Honor 25-50★ = 25 × Rp 24.000 = Rp 600.000
-    // Glory 50-100★ = 50 × Rp 27.000 = Rp 1.350.000
-    // Total = Rp 1.950.000 (≥ Rp 1.900.000)
-    // If typo bug exists, price would be 75 × Rp 6.000 = Rp 450.000
+    // Honor 25-50★ = 25 × honorPrice; Glory 50-100★ = 50 × gloryPrice
+    const expected = 25 * honorPrice + 50 * gloryPrice;
     const priceNum = await getEstimatePrice(page);
-    expect(priceNum).toBeGreaterThanOrEqual(1900000);
+    expect(priceNum).toBe(expected);
   });
 
-  test("REGRESSION: Mythic same-tier (1★ → 2★) uses Mythic price (≥Rp 19.000)", async ({ page }) => {
-    // This test catches the "Rp 5.000 fallback" bug where a DB data mismatch
-    // causes the price lookup to fail and silently fall back to Rp 5.000
-    // (grandmaster price) instead of the correct Rp 19.000 (Mythic Romawi).
+  test("REGRESSION: Mythic same-tier (1★ → 2★) uses CMS Mythic price (not the Rp 5.000 fallback)", async ({ page }) => {
+    const cms = await getCmsPerStarPrices(page);
+    const mythicPrice = cms("mythicromawi", "mythic");
+
     await setSelectValue(page, "perstar-current-rank", "mythic");
 
     // Target dropdown should become enabled
@@ -170,13 +194,17 @@ test.describe("Order Page — Per Star Mode", () => {
     // Select target = Mythic (same tier, different star count)
     await setSelectValue(page, "perstar-target-rank", "mythic");
 
+    // Same-tier defaults to 0★ → 0★ (no estimate). Drive the star inputs:
+    // current 1★ → target 2★ = 1 star.
+    await page.locator("[data-testid='perstar-current-mythic-stars']").fill("1");
+    await page.locator("[data-testid='perstar-target-mythic-stars']").fill("2");
+
     await expect(page.locator("text=Estimasi Harga Per Bintang")).toBeVisible({ timeout: 5000 });
 
-    // Mythic 1★ → 2★ = 1 star × Rp 19.000 = Rp 19.000
-    // If fallback bug exists, price would be 1 × Rp 5.000 = Rp 5.000
+    // 1 star × CMS Mythic price — if the id-mismatch fallback bug exists,
+    // this would be 1 × Rp 5.000/6.000 (grandmaster fallback).
     const priceNum = await getEstimatePrice(page);
-    // Must be at least Rp 19.000 (not Rp 5.000 fallback)
-    expect(priceNum).toBeGreaterThanOrEqual(19000);
+    expect(priceNum).toBe(mythicPrice);
   });
 
   test("FEATURE: target division star selector — Legend I 3★ adds 3 stars (44 → 47)", async ({ page }) => {

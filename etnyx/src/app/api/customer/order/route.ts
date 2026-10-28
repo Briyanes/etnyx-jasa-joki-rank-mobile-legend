@@ -11,7 +11,7 @@ import {
   isValidLoginMethod,
 } from "@/lib/validation";
 import { encryptField, decryptField } from "@/lib/encryption";
-import { calculateServerPrice, type CMSPricing } from "@/lib/pricing-engine";
+import { calculateServerPrice, normalizePerStarId, type CMSPricing } from "@/lib/pricing-engine";
 import {
   checkOrderRateLimit,
   checkAutoBan,
@@ -284,7 +284,10 @@ export async function POST(request: NextRequest) {
         for (const s of pricingSettings) {
           if (s.key === "perstar_pricing" && Array.isArray(s.value)) {
             cmsPricing.perstar = {};
-            for (const r of s.value) { if (r.id && r.price) cmsPricing.perstar[r.id] = r.price; }
+            // Normalize non-canonical ids (e.g. "mythic", "mythicroomawi") to
+            // "mythicromawi" so getPricePerStar() hits the admin-configured
+            // price instead of silently falling back to the hardcoded default.
+            for (const r of s.value) { if (r.id && r.price) cmsPricing.perstar[normalizePerStarId(r.id)] = r.price; }
           }
           if (s.key === "gendong_pricing" && Array.isArray(s.value)) {
             cmsPricing.gendong = {};

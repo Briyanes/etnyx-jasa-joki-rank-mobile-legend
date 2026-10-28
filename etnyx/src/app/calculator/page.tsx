@@ -43,6 +43,7 @@ import {
   MYTHIC_STAR_CONFIG,
   rankIcons,
   getDivisionOptions,
+  normalizePerStarId,
   calculateExtraMythicCost,
   MYTHIC_PER_STAR_PRICES,
   formatRupiah,
@@ -349,9 +350,15 @@ export default function CalculatorPage() {
           setCatalog(merged);
         }
         if (data.perstar_pricing && Array.isArray(data.perstar_pricing) && data.perstar_pricing.length > 0) {
+          // Normalize non-canonical ids ("mythic", "mythicroomawi") → "mythicromawi"
+          // so CMS prices actually match the default tier ids below.
+          const normalizedCms = data.perstar_pricing.map((c: PerStarRank) => ({
+            ...c,
+            id: normalizePerStarId(c.id),
+          }));
           setPerStarRanks((prev) =>
             prev.map((r) => {
-              const cms = data.perstar_pricing.find((c: PerStarRank) => c.id === r.id);
+              const cms = normalizedCms.find((c: PerStarRank) => c.id === r.id);
               return cms ? { ...r, ...cms } : r;
             })
           );

@@ -29,6 +29,8 @@ export {
   calculateExtraMythicCost,
   calculateAutoPaketPrice,
   calculateServerPrice,
+  PERSTAR_ID_ALIASES,
+  normalizePerStarId,
   RANK_TO_PRICE_KEY,
   getSafePriceForKey,
   parseClassicRank,

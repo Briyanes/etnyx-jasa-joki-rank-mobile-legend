@@ -363,6 +363,25 @@ export const RANK_TO_PRICE_KEY: Record<string, string> = {
   mythicimmortal: "immortal",
 };
 
+// Per-star pricing ID aliases — normalize non-canonical ids stored in the
+// `perstar_pricing` settings row (DB) to the canonical PER_STAR_RANKS ids:
+// - `mythicroomawi`: legacy double-'o' typo
+// - `mythic`: seeded with gendong-style ids (gendong's canonical Mythic id IS
+//   "mythic"; per-star's is "mythicromawi")
+// WITHOUT this normalization, price lookups miss the admin-configured price
+// and silently fall back to the hardcoded default (Rp 19.000) — the admin
+// panel then appears to "not save" Mythic price changes.
+// NOTE: per-star ONLY. Do NOT apply to gendong pricing ("mythic" is canonical there).
+export const PERSTAR_ID_ALIASES: Record<string, string> = {
+  mythicroomawi: "mythicromawi",
+  mythic: "mythicromawi",
+};
+
+/** Normalize a per-star pricing tier id to its canonical form. */
+export function normalizePerStarId(id: string): string {
+  return PERSTAR_ID_ALIASES[id] || id;
+}
+
 // ===== Core Calculation Functions =====
 
 /**

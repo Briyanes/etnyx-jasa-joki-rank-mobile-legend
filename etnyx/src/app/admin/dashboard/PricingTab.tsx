@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { toast, toastError } from "@/components/ToastProvider";
 import { formatRupiah } from "@/utils/helpers";
+import { normalizePerStarId } from "@/lib/pricing-utils";
 
 // ---- Types ----
 interface PricingPackage {
@@ -112,7 +113,15 @@ export default function PricingTab() {
 
       // Process perstar_pricing
       if (d2.value && Array.isArray(d2.value)) {
-        setPerStarPricing(d2.value);
+        // Normalize non-canonical ids ("mythic", "mythicroomawi") → "mythicromawi"
+        // so this form always shows and saves canonical per-star ids (self-heals
+        // the DB row on the next save). Gendong ids are NOT normalized — "mythic"
+        // is the canonical id there.
+        const normalizedPerStar = new Map<string, PerStarTier>();
+        for (const t of d2.value as PerStarTier[]) {
+          normalizedPerStar.set(normalizePerStarId(t.id), { ...t, id: normalizePerStarId(t.id) });
+        }
+        setPerStarPricing([...normalizedPerStar.values()]);
       } else {
         setPerStarPricing([
           { id: "master", name: "Master", price: 5000, icon: "/icons-tier/Master.webp" },

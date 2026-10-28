@@ -81,3 +81,6 @@ secrets/
 # Supabase migration history (tracked via /supabase-schema-v*.sql — keep only latest)
 # Old SQL schemas remain in git history
 .env.dompetx-vercel.txt
+
+# One-off perstar id migration backups (local safety copies)
+scripts/perstar-backup-*.json

@@ -1335,6 +1335,7 @@ function OrderPageContent() {
           // and massively undercharges Mythic orders.
           const idAliases: Record<string, string> = {
             mythicroomawi: "mythicromawi", // double 'o' typo → correct ID
+            mythic: "mythicromawi",        // gendong-style id seeded in DB → per-star canonical ID
           };
           const normalized = data.perstar_pricing.map((r: PerStarRank) => ({
             ...r,
@@ -2413,6 +2414,7 @@ function OrderPageContent() {
                           <Minus className="w-3.5 h-3.5" />
                         </button>
                         <input
+                          data-testid="perstar-current-mythic-stars"
                           type="number"
                           value={currentMythicStars}
                           onChange={(e) => {
@@ -2901,7 +2903,7 @@ function OrderPageContent() {
                         <div className="flex items-center gap-2 mt-3">
                           <div className="flex items-center gap-1.5">
                             <button onClick={() => setTargetMythicStars(s => Math.max(MYTHIC_STAR_CONFIG[form.targetRank].min, s - 1))} disabled={targetMythicStars <= MYTHIC_STAR_CONFIG[form.targetRank].min} className="w-8 h-8 rounded-lg bg-surface border border-white/10 text-white flex items-center justify-center hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed"><Minus className="w-3.5 h-3.5" /></button>
-                            <input type="number" value={targetMythicStars} onChange={(e) => { const v = parseInt(e.target.value) || MYTHIC_STAR_CONFIG[form.targetRank].min; const cfg = MYTHIC_STAR_CONFIG[form.targetRank]; setTargetMythicStars(Math.max(cfg.min, Math.min(cfg.max, v))); }} className="w-16 h-10 text-center bg-surface text-text rounded-lg border border-white/10 focus:outline-none focus:border-accent text-sm font-bold" />
+                            <input type="number" data-testid="perstar-target-mythic-stars" value={targetMythicStars} onChange={(e) => { const v = parseInt(e.target.value) || MYTHIC_STAR_CONFIG[form.targetRank].min; const cfg = MYTHIC_STAR_CONFIG[form.targetRank]; setTargetMythicStars(Math.max(cfg.min, Math.min(cfg.max, v))); }} className="w-16 h-10 text-center bg-surface text-text rounded-lg border border-white/10 focus:outline-none focus:border-accent text-sm font-bold" />
                             <button onClick={() => setTargetMythicStars(s => Math.min(MYTHIC_STAR_CONFIG[form.targetRank].max, s + 1))} disabled={targetMythicStars >= MYTHIC_STAR_CONFIG[form.targetRank].max} className="w-8 h-8 rounded-lg bg-surface border border-white/10 text-white flex items-center justify-center hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed"><Plus className="w-3.5 h-3.5" /></button>
                           </div>
                           <span className="text-text-muted text-xs whitespace-nowrap flex items-center gap-1">{MYTHIC_STAR_CONFIG[form.targetRank].label === "Match" ? "Match" : <><Star className="w-3 h-3 text-yellow-400" /> {locale === "id" ? "Bintang Tujuan" : "Target Stars"}</>}</span>
