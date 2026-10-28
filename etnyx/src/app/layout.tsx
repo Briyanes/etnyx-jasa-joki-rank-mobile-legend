@@ -4,6 +4,7 @@ import "./globals.css";
 import ThemeToggle from "@/components/ThemeToggle";
 import FloatingLanguageButton from "@/components/FloatingLanguageButton";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+import InstallPWAButton from "@/components/InstallPWAButton";
 import TrackingPixels from "@/components/TrackingPixels";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ToastProvider } from "@/components/ToastProvider";
@@ -250,6 +251,7 @@ export default function RootLayout({
         </LanguageProvider>
         <TrackingPixels />
         <ServiceWorkerRegister />
+        <InstallPWAButton />
       </body>
     </html>
   );

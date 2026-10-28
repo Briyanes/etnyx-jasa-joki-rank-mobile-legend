@@ -1,9 +1,10 @@
-const CACHE_NAME = 'etnyx-v1';
+const CACHE_NAME = 'etnyx-v2';
 const urlsToCache = [
   '/',
   '/track',
   '/login',
   '/register',
+  '/offline',
 ];
 
 // Install event
@@ -54,7 +55,20 @@ self.addEventListener('fetch', (event) => {
       .catch(() => {
         // Fallback to cache — must return a valid Response, not undefined
         return caches.match(event.request).then((cached) => {
-          return cached || new Response('', { status: 408, statusText: 'Offline' });
+          if (cached) return cached;
+          // Friendly offline page for navigations (page loads without cache);
+          // plain 408 for assets (images, CSS, JS chunks)
+          if (event.request.mode === 'navigate') {
+            return caches.match('/offline').then(
+              (offline) =>
+                offline ||
+                new Response('Offline', {
+                  status: 503,
+                  headers: { 'Content-Type': 'text/html' },
+                })
+            );
+          }
+          return new Response('', { status: 408, statusText: 'Offline' });
         });
       })
   );
