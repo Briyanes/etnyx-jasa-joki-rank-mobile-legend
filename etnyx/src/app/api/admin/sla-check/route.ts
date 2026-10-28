@@ -19,23 +19,10 @@ const SLA_HOURS: Record<string, number> = {
   default: 72,
 };
 
-// POST - Check SLA deadlines and send reminders
-// Can be called by Vercel Cron or manually by admin
-export async function POST(request: NextRequest) {
+// SLA check job — shared by POST and by GET when called with the cron secret.
+// (Vercel Cron only sends GET requests, so GET must be able to run the job.)
+async function runSlaCheckJob(): Promise<NextResponse> {
   try {
-    // Verify cron secret or admin auth
-    const authHeader = request.headers.get("authorization") || "";
-    const cronSecret = process.env.CRON_SECRET;
-
-    if (!cronSecret || !safeCompare(authHeader, `Bearer ${cronSecret}`)) {
-      // Check admin auth as fallback
-      const { verifyAdmin } = await import("@/lib/admin-auth");
-      const admin = await verifyAdmin();
-      if (!admin.authenticated) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
-    }
-
     const supabase = await createAdminClient();
     const now = new Date();
 
@@ -133,8 +120,36 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET - View SLA status of active orders (admin only)
-export async function GET() {
+// POST - Check SLA deadlines and send reminders
+// Can be called manually by admin or with the cron secret
+export async function POST(request: NextRequest) {
+  // Verify cron secret or admin auth
+  const authHeader = request.headers.get("authorization") || "";
+  const cronSecret = process.env.CRON_SECRET;
+
+  if (!cronSecret || !safeCompare(authHeader, `Bearer ${cronSecret}`)) {
+    // Check admin auth as fallback
+    const { verifyAdmin } = await import("@/lib/admin-auth");
+    const admin = await verifyAdmin();
+    if (!admin.authenticated) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+  }
+
+  return runSlaCheckJob();
+}
+
+// GET - Vercel Cron entrypoint: GET with the cron secret runs the SLA job;
+// admin auth (without cron secret) gets the SLA status view instead.
+export async function GET(request: NextRequest) {
+  const authHeader = request.headers.get("authorization") || "";
+  const cronSecret = process.env.CRON_SECRET;
+
+  if (cronSecret && safeCompare(authHeader, `Bearer ${cronSecret}`)) {
+    // Vercel Cron sends GET requests — run the actual SLA check job
+    return runSlaCheckJob();
+  }
+
   try {
     const { verifyAdmin } = await import("@/lib/admin-auth");
     const admin = await verifyAdmin();

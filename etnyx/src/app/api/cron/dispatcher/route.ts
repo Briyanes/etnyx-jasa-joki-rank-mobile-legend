@@ -1,6 +1,21 @@
-// Consolidated cron dispatcher for Vercel Free Tier (max 2 cron jobs)
-// This route replaces 3 separate cron entries with a single unified dispatcher.
-// Schedule: runs once daily at 09:00 UTC+7, then runs sub-tasks at appropriate times.
+/**
+ * ⚠️ DEPRECATED — no longer scheduled (see vercel.json crons).
+ *
+ * This dispatcher was built for the Vercel Free Tier (max 2 cron jobs) and
+ * gated sub-tasks by Jakarta-hour windows. The windows assumed `0 9 * * *`
+ * fires at 09:00 UTC+7 — but Vercel Cron runs on UTC, so it fired at 16:00
+ * WIB: task 1 (/api/cron) and task 3 (sync-meta-ads) never matched their
+ * windows, and task 2 (sla-check) was called via GET while the route only
+ * exported POST (405). Net effect: NO scheduled task actually ran from
+ * ~2026-05-25 to 2026-10-28 (confirmed via orders.payment_reminder_sent).
+ *
+ * On Vercel Pro, vercel.json now schedules the routes directly:
+ *   - /api/cron               every 30 min
+ *   - /api/admin/sla-check    daily 10:00 UTC (17:00 WIB)
+ *   - /api/cron/sync-meta-ads daily 11:00 UTC (18:00 WIB)
+ *
+ * Kept only as a manual trigger utility.
+ */
 
 import { NextResponse } from "next/server";
 

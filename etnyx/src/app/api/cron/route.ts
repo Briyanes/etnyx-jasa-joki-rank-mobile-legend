@@ -65,11 +65,16 @@ _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
   // 2. Review request: completed orders > 24h without a review
   try {
     const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    // ★ MAX-AGE CAP: skip orders completed > 14 days ago — review requests for
+    // months-old orders (backlog from the dead-cron era, 2026-05→10) would
+    // look like spam to customers.
+    const reviewMaxAge = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
     const { data: completedOrders } = await supabase
       .from("orders")
       .select("order_id, username, whatsapp, completed_at")
       .eq("status", "completed")
       .lt("completed_at", cutoff)
+      .gt("completed_at", reviewMaxAge)
       .is("review_request_sent", null);
 
     let sent = 0;
@@ -219,7 +224,11 @@ _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
       .eq("status", "in_progress")
       .lt("updated_at", cutoff14d);
 
-    if (staleInProgress && staleInProgress.length > 0) {
+    // ★ HOUR-GATE: /api/cron now runs every 30 min (Vercel Pro cron), but this
+    // task is NOT idempotent — it re-sends the Telegram alert on every run
+    // while a stale order exists. Only alert during the 08–10 WIB window.
+    const alertHour = (new Date().getUTCHours() + 7) % 24;
+    if (staleInProgress && staleInProgress.length > 0 && alertHour >= 8 && alertHour <= 10) {
       const { data: settings } = await supabase
         .from("settings")
         .select("value")
@@ -241,7 +250,7 @@ _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
         await Promise.allSettled(sends);
       }
     }
-    results.staleInProgress = { count: staleInProgress?.length || 0 };
+    results.staleInProgress = { count: staleInProgress?.length || 0, alertWindow: alertHour >= 8 && alertHour <= 10 };
   } catch (error) {
     console.error("Stale in_progress cron error:", error);
     results.staleInProgress = { error: String(error) };
