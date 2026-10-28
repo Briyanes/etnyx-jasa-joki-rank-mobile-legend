@@ -87,3 +87,8 @@ scripts/perstar-backup-*.json
 
 # Manual DB backups (may contain customer PII — never commit)
 backups/
+
+# Native app icon design sources — only public/app-icons/pwa/ ships to production
+public/app-icons/android/
+public/app-icons/ios/
+public/app-icons/macos/
