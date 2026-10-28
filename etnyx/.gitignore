@@ -84,3 +84,6 @@ secrets/
 
 # One-off perstar id migration backups (local safety copies)
 scripts/perstar-backup-*.json
+
+# Manual DB backups (may contain customer PII — never commit)
+backups/

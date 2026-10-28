@@ -308,5 +308,17 @@ _ETNYX - Push Rank, Tanpa Main_${waDisclaimer(order.order_id)}
     results.duitkuReconciliation = { error: String(error) };
   }
 
+  // Heartbeat: record the last run (with per-task results) in settings so cron
+  // health is verifiable from the DB — the 2026-05→10 dead-cron era went
+  // unnoticed for 5 months precisely because nothing recorded executions.
+  try {
+    await supabase
+      .from("settings")
+      .upsert(
+        { key: "cron_last_run", value: { at: new Date().toISOString(), results }, updated_at: new Date().toISOString() },
+        { onConflict: "key" },
+      );
+  } catch { /* non-blocking */ }
+
   return NextResponse.json({ ok: true, results });
 }
